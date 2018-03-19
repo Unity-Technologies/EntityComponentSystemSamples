@@ -6,7 +6,7 @@ When making games with __GameObject__/__MonoBehaviour__, it is easy to write cod
 
 ## Entity-component-system to the rescue
 
-[ECS](https://en.wikipedia.org/wiki/Entity%E2%80%93component%E2%80%93system) is a way of writing code that focuses on the actual problems you are solving: the data and behavior that make up your game.
+An [Entity-component-system](https://en.wikipedia.org/wiki/Entity%E2%80%93component%E2%80%93system) (ECS) is a way of writing code that focuses on the actual problems you are solving: the data and behavior that make up your game.
 
 In addition to being a better way of approaching game programming for design reasons, using ECS puts you in an ideal position to leverage Unity's job system and Burst compiler, letting you take full advantage of today's multicore processors.
 
@@ -86,7 +86,7 @@ There is a lot of existing code based on MonoBehaviour, GameObject and friends. 
 
 In the example above you can see that we simply iterate over all components that contain both Rotator and Transform components.
 
-### How does ECS know about Rotator and Transform?
+### How does the Component System know about Rotator and Transform?
 
 In order to iterate over components like in the Rotator example, those entities have to be known to the __EntityManager__.
 
@@ -123,81 +123,48 @@ So using ComponentSystem, GameObject and MonoBehaviour is a great first step to 
 
 One motivation to use ECS is because you want your game to have optimal performance. By optimal performance we mean that if you were to hand write all of your code using SIMD intrinsics (custom data layouts for each loop) then you would end up with similar performance to what you get when writing simple ECS code.
 
-The C# job system TODO LINK does not support managed class types; only structs and __NativeContainers__. So only __IComponentData__ can be safely accessed in a C# Job.
+The C# job system does not support managed class types; only structs and __NativeContainers__. So only __IComponentData__ can be safely accessed in a C# Job.
 
 The EntityManager makes hard guarantees about [linear memory layout](https://en.wikipedia.org/wiki/Flat_memory_model) of the component data. This is an important part of the great performance you can achieve with C# jobs using IComponentData.
 
-We have selected below a simple foreach style iteration example and a optimal jobified code example.
-
-In this fish boid simulation we represent the boids' simulation state as BoidData. The renderer however needs a matrix to render the instances, the sample code shows how you can express this data transformation using ECS.
-
 ```cs
-// BoidData is the actual per fish simulation state.
-public struct BoidData : IComponentData
+// The rotation speed component simply stores the Speed value
+[Serializable]
+public struct RotationSpeed : IComponentData
 {
-    public float3  position;
-    public float3  forward;
+    public float Value;
 }
 
-// This component data is provided by the instance renderer. The instance renderer expects the matrix to be up-to-date when it begins rendering.
-public struct TransformMatrix : IComponentData
-{
-    public float4x4 matrix;
-}
-```
-
-
-```cs
-// Uses GetEntities<Group> to foreach iterate over all entities
-// and produce a matrix from the BoidData state. Running all on the main thread.
-class BoidToInstanceRendererTransform_GetEntities : ComponentSystem
-{
-    unsafe struct Group
-    {
-        [ReadOnly] 
-        public BoidData*        Boid;
-        public TransformMatrix* Transform;
-    }
-
-    unsafe protected override void OnUpdate()
-    {
-        // GetEntities<Group> lets us iterate over all entities
-        // that have both BoidData and TransformMatrix components attached.
-        foreach (var e in GetEntities<Group>())
-        {
-            var boid = e.Boid;
-            e.Transform->matrix = matrix_math_util.LookRotationToMatrix(boid->position, boid->forward, new float3(0, 1, 0));
-        }
-    }
-}
+// This wrapper component is currently necessary to add ComponentData to GameObjects.
+// In the future we want to make this wrapper component automatic.
+public class RotationSpeedComponent : ComponentDataWrapper<RotationSpeed> { } 
 ```
 
 ```cs
 // Using IJobProcessComponentData to iterate over all entities matching the required component types.
 // Processing of entities happens in parallel. The main thread only schedules jobs.
-class BoidToInstanceRendererTransform_IJobProcessComponentData : JobComponentSystem
+public class RotationSpeedSystem : JobComponentSystem
 {
-    // Instead of IJobParallelFor, we use IJobProcessComponentData
-    // It is more efficient than IJobParallelFor and more convenient
-    // * ComponentDataArray has one early out branch per index lookup
-    // * IJobProcessComponentData innerloop itself does straight linear iteration 
-    //   over two tightly packed arrays of BoidData and TransformMatrix,
-    //   resulting in essentially zero overhead iteration compared to working with straight arrays or unsafe pointers.
-    struct TransformJob : IJobProcessComponentData<BoidData, TransformMatrix>
+    // IJobProcessComponentData is a simple way of iterating over all entities given the set of required compoenent types.
+    // It is also more efficient than IJobParallelFor and more convenient.
+    [ComputeJobOptimization]
+    struct RotationSpeedRotation : IJobProcessComponentData<Rotation, RotationSpeed>
     {
-        public void Execute([ReadOnly]ref BoidData boid, ref TransformMatrix transformMatrix)
+        public float dt;
+
+        public void Execute(ref Rotation rotation, [ReadOnly]ref RotationSpeed speed)
         {
-            transformMatrix.matrix = matrix_math_util.LookRotationToMatrix(boid.position, boid.forward, new float3(0, 1, 0));
+            rotation.Value = math.mul(math.normalize(rotation.Value), math.axisAngle(math.up(), speed.Value * dt));
         }
     }
 
     // We derive from JobComponentSystem, as a result the system proviides us 
     // the required dependencies for our jobs automatically.
     //
-    // IJobProcessComponentData declares that it will read BoidData and write to TransformMatrix.
+    // IJobProcessComponentData declares that it will read RotationSpeed and write to Rotation.
     //
     // Because it is declared the JobComponentSystem can give us a Job dependency, which contains all previously scheduled
-    // jobs that write to any BoidData or RendererTransforms.
+    // jobs that write to any Rotation or RotationSpeed.
     // We also have to return the dependency so that any job we schedule 
     // will get registered against the types for the next System that might run.
     // This approach means:
@@ -205,7 +172,8 @@ class BoidToInstanceRendererTransform_IJobProcessComponentData : JobComponentSys
     // * Dependencies are figured out automatically for us, so we can write modular multithreaded code
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        return new TransformJob().Schedule(this, 16, inputDeps);
-    }
+        var job = new RotationSpeedRotation() { dt = Time.deltaTime };
+        return job.Schedule(this, 64, inputDeps);
+    } 
 }
 ```

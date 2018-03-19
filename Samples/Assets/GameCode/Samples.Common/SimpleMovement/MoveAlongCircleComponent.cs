@@ -5,7 +5,7 @@ using Unity.Mathematics;
 namespace Samples.Common
 {
     /// <summary>
-    /// This component will update the corresponding TransformPositionComponent associated with this component at the
+    /// This component will update the corresponding PositionComponent associated with this component at the
     /// rate specified by the MoveSpeedComponent, also associated with this component in radians per second.
     /// </summary>
     [Serializable]

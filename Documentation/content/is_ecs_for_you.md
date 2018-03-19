@@ -1,12 +1,19 @@
-# Is ECS for you?
+# Is the Entity Component System for you?
 
-If you're considering Unity's ECS, you probably fall into one of two camps:
+The Entity Componetn System is in preview. It is not recommended for production.
 
-## You already have a game, but it's slow
+At the moment there are two good reasons to use it. 
 
-You've heard about the massive performance boosts you can get from using ECS and the C# job system, and you're wondering if they apply to your game. Improving performance always starts with profiling to find the slowest parts of your game. If there are __Update()__ calls taking a lot of time in the profiler, then these are probably good candidates for optimization using ECS. If your game spends most of its time in physics or rendering, then you should consider reducing those costs separately first. 
+### You want to experiment
 
-## You want to try ECS in your new game
+This is exciting new technology and the promise of massive performance boosts is seducing. Try it out. Give us your feedback. We would love to talk to you on the forums.
+
+### You are trying to build a game that simply can't be done without the Entity Component system
+
+We'd love to know more about your game. Please do feel free to post on the forum about your game what you are trying to achieve and what you think the Entity Component System gives you that can't be achieved otherwise.
+
+
+## Trying the Entity Component System
 
 You've heard that ECS not only improves performance, but helps you write cleaner, clearer, and more maintainable code. You'd like to see how it works for you in practice.
 This is a fun scenario, because you get to write straightforward code from the beginning. There are a few things to keep in mind:

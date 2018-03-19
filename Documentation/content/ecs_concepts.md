@@ -1,6 +1,6 @@
 # ECS concepts
 
-If you are familiar with [Entity-component-system](https://en.wikipedia.org/wiki/Entity%E2%80%93component%E2%80%93system) concepts, you might see the potential for naming conflicts with Unity's existing __GameObject__/__Component__ setup. Below is a list comparing how ECS concepts map to Unity's implementation:
+If you are familiar with [Entity-component-system](https://en.wikipedia.org/wiki/Entity%E2%80%93component%E2%80%93system) (ECS) concepts, you might see the potential for naming conflicts with Unity's existing __GameObject__/__Component__ setup. Below is a list comparing how ECS concepts map to Unity's implementation:
 
 ### Entity → Entity
 

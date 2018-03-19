@@ -45,9 +45,9 @@ Spawn entities 25m from the center of the circle.
 3. __Count__: 100.
 Spawn 100 entities.
 
-The TransformPositionComponent specifies that the entity that is created from the RotatingCubeSpawner GameObject has a position in the ECS. That position is used as the center of the circle for spawning. (Required)
+The PositionComponent specifies that the entity that is created from the RotatingCubeSpawner GameObject has a position in the ECS. That position is used as the center of the circle for spawning. (Required)
 
-The CopyInitialTransformPositionFromGameObjectComponent specifies that **only** the initial value for TransformPositionComponent in ECS will be copied from the GameObject's Transform. 
+The CopyInitialTransformFromGameObjectComponent specifies that **only** the initial value for PositionComponent in ECS will be copied from the GameObject's Transform. 
 
 ## Move sphere about same circle and reset rotations when intersecting cubes
 
@@ -67,11 +67,11 @@ Add these components to TestResetRotationSphere:
 6. [__UnityEngine.ECS.SimpleMovement/MoveAlongCircleComponent__](../../ECSJobDemos/Assets/GameCode/SimpleMovement/MoveAlongCircleComponent.cs)
 7. [__UnityEngine.ECS.SimpleRotation/RotationSpeedResetSphereComponent__](../../ECSJobDemos/Assets/GameCode/SimpleRotation/RotationSpeedResetSphereComponent.cs)
 
-Like the RotatingCubeSpawner, the TransformPositionComponent specifies that the Entity that is created from the TestResetRotationSphere GameObject has a position in ECS and the CopyInitialTransformPositionFromGameObjectComponent specifies that **only** the initial value for TransformPositionComponent in ECS will be copied from the GameObject's Transform. 
+Like the RotatingCubeSpawner, the PositionComponent specifies that the Entity that is created from the TestResetRotationSphere GameObject has a position in ECS and the CopyInitialTransformFromGameObjectComponent specifies that **only** the initial value for PositionComponent in ECS will be copied from the GameObject's Transform. 
 
-The TransformMatrixComponent specifies that a 4x4 matrix should be stored. That matrix is updated automatically based on changes to the TransformPositionComponent.
+The TransformMatrixComponent specifies that a 4x4 matrix should be stored. That matrix is updated automatically based on changes to the PositionComponent.
 
-Set the properties of the InstanceRendererComponent:
+Set the properties of the MeshInstanceRendererComponent:
 
 1. __Mesh__: Sphere
 2. __Material__: InstanceMat
@@ -84,7 +84,7 @@ Set the properties of the MoveSpeedComponent:
 
 1. __Speed__: 1
 
-This component requests that if another component is moving the TransformPositionComponent it should respect this value and move the position at the constant speed specified.
+This component requests that if another component is moving the PositionComponent it should respect this value and move the position at the constant speed specified.
 
 Set the properties of the MoveAlongCircleComponent:
 
@@ -93,14 +93,14 @@ Set the properties of the MoveAlongCircleComponent:
 
 The center and radius correspond to the circle of Entities that is being spawned by RotatingCubeSpawner.
 
-This component will update the corresponding TransformPositionComponent at the rate specified by MoveSpeedComponent in radians per second.
+This component will update the corresponding PositionComponent at the rate specified by MoveSpeedComponent in radians per second.
 
 Set the properties of the RotationSpeedResetSphereComponent:
 
 1. __Speed__: 4 (radians per second)
 2. __Radius__: 2 (meters)
 
-This component specifies that if any other TransformPositionComponent is within the sphere defined by the TransformPositionComponent on this Entity and the radius, the TransformRotationComponent on that Entity should be set to speed, if it exists.
+This component specifies that if any other PositionComponent is within the sphere defined by the PositionComponent on this Entity and the radius, the TransformRotationComponent on that Entity should be set to speed, if it exists.
 
 
 

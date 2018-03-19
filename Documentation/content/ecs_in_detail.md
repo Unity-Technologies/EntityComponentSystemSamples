@@ -174,11 +174,11 @@ See [ExclusiveEntityTransaction](#exclusiveentitytransaction) for more on avoidi
 
 ## Shared ComponentData
 
-IComponentData is appropriate for data that varies between Entities, such as storing a world position. __ISharedComponentData__ is useful when many Entities have something in common, for example in the boid demo we instantiate many Entities from the same Prefab and thus the __InstanceRenderer__ between many boid Entities is exactly the same. 
+IComponentData is appropriate for data that varies between Entities, such as storing a world position. __ISharedComponentData__ is useful when many Entities have something in common, for example in the boid demo we instantiate many Entities from the same Prefab and thus the __MeshInstanceRenderer__ between many boid Entities is exactly the same. 
 
 ```cs
 [System.Serializable]
-public struct InstanceRenderer : ISharedComponentData
+public struct MeshInstanceRenderer : ISharedComponentData
 {
     public Mesh                 mesh;
     public Material             material;
@@ -188,7 +188,7 @@ public struct InstanceRenderer : ISharedComponentData
 }
 ```
 
-In the boid demo we never change the InstanceRenderer component, but we do move all the Entities __TransformMatrix__ every frame.
+In the boid demo we never change the MeshInstanceRenderer component, but we do move all the Entities __TransformMatrix__ every frame.
 
 The great thing about ISharedComponentData is that there is literally zero memory cost on a per Entity basis.
 

@@ -26,7 +26,7 @@ If each job is self contained this is all you need. However in more complex syst
 
 To make this easier, jobs support [dependencies](http://tutorials.jenkov.com/ood/understanding-dependencies.html). If Job A is scheduled with a dependency on Job B the system will guarantee that Job B has completed before Job A starts executing.
 
-An important aspect of the Unity job system, and one of the reasons it is a custom API and not one of the existing thread models from C# is that the job system integrates with what the Unity engine uses internally. This means that user written code and the engine will share worker threads to avoid creating more threads than CPU cores - which would cause contention for CPU resources.
+An important aspect of the C# job system, and one of the reasons it is a custom API and not one of the existing thread models from C#, is that the job system integrates with what the Unity engine uses internally. This means that user written code and the engine will share worker threads to avoid creating more threads than CPU cores - which would cause contention for CPU resources.
 
 ## Race conditions & safety system
 
@@ -42,7 +42,7 @@ The main way this is achieved is by making sure jobs only operate on a copy of a
 
 To make it possible to write code to solve real world scenarios there is one exception to the rule of copying data. That exception is __NativeContainers__.
 
-Unity ships with a set of NativeContainers: __NativeArray__, __NativeList__, __NativeHashMap__, and __NativeQueue__.
+Unity ships with a set of NativeContainers: [__NativeArray__](https://docs.unity3d.com/2018.1/Documentation/ScriptReference/Unity.Collections.NativeArray_1.html), __NativeList__, __NativeHashMap__, and __NativeQueue__.
 
 All native containers are instrumented with the safety system. Unity tracks all containers and who is reading and writing to it.
 
@@ -58,7 +58,7 @@ Some containers also have special rules for allowing safe and deterministic writ
 
 ## Scheduling jobs
 
-As mentioned in the previous section, the job system relies on blittable data and NativeContainers. To schedule a job you need to implement the __IJob__ interface, create an instance of your struct, fill it with data and call __Schedule__ on it. When you schedule it you will get back a job handle which can be used as a dependency for other jobs, or you can wait for it when you need to access the NativeContainers passed to the job on the main thread again.
+As mentioned in the previous section, the job system relies on blittable data and NativeContainers. To schedule a job you need to implement the [__IJob__](https://docs.unity3d.com/2018.1/Documentation/ScriptReference/Unity.Jobs.IJob.html) interface, create an instance of your struct, fill it with data and call __Schedule__ on it. When you schedule it you will get back a job handle which can be used as a dependency for other jobs, or you can wait for it when you need to access the NativeContainers passed to the job on the main thread again.
 
 Jobs will actually not start executing immediately when you schedule them. We create a batch of jobs to schedule which needs to be flushed. In ECS the batch is implicitly flushed, outside ECS you need to explicitly flush it by calling the static function __JobHandle.ScheduleBatchedJobs()__.
 ```C#
@@ -124,7 +124,7 @@ result.Dispose();
 
 ## ParallelFor jobs
 
-Scheduling jobs, as in the previous section, means there can only be one job doing one thing. In a game it very common to want to perform the same operation on a large number of things. For this scenario there is a separate job type: IJobParallelFor.
+Scheduling jobs, as in the previous section, means there can only be one job doing one thing. In a game it very common to want to perform the same operation on a large number of things. For this scenario there is a separate job type: [IJobParallelFor](https://docs.unity3d.com/2018.1/Documentation/ScriptReference/Unity.Jobs.IJobParallelFor.html).
 IJobParallelFor behaves similarly to IJob, but instead of getting a single __Execute__ callback you get one Execute callback per item in an array. The system will not actually schedule one job per item, it will schedule up to one job per CPU core and redistribute the work load, but that is dealt with internally in the system.
 When scheduling ParallelForJobs you must specify the length of the array you are splitting, since the system cannot know which array you want to use as primary if there are several in the struct. You also need to specify a batch count. The batch count controls how many jobs you will get, and how fine grained the redistribution of work between threads is.
 Having a low batch count, such as 1, will give you a more even distribution of work between threads. It does however come with some overhead so in some cases it is better to increase the batch count slightly. Starting at 1 and increasing the batch count until there are negligible performance gains is a valid strategy.

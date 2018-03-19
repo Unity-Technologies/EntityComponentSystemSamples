@@ -1,25 +1,24 @@
 ![Unity](https://unity3d.com/files/images/ogimg.jpg?1)
 # Entity-component-system user manual
 
-* [How ECS works](content/getting_started.md)
-    * [Naming conventions](content/ecs_concepts.md)
-    * [ECS principles](content/ecs_principles_and_vision.md)
+* [ECS principles](content/ecs_principles_and_vision.md)
 * [Is ECS for you?](content/is_ecs_for_you.md)
+* [ECS concepts](content/ecs_concepts.md)
+* [How ECS works](content/getting_started.md)
 * [ECS features in detail](content/ecs_in_detail.md)
-* [ECS and Asset Store compatibility]
+* [Further information](#further-information)
+* [Status of ECS](#status-of-ecs)
 
 ## Job system overview
 
 * [How the job system works](content/job_system.md)
-* [Low-level overview - Creating containers & custom job types](content/custom_job_types.md)
+* [Low-level overview - creating containers & custom job types](content/custom_job_types.md)
 * [How to optimize for the Burst compiler](content/burst_optimization.md)
 * [Scheduling a job from a job - why not?](content/scheduling_a_job_from_a_job.md)
 
 ## Tutorials
 
-* [Tutorial walk through #1: MonoBehaviour vs hybrid ECS](content/tutorial_1.md)
-* [Tutorial walk through #2: MonoBehaviour vs pure ECS](content/tutorial_2.md)
-* [Tutorial walk through #3: A two-stick shooter in ECS](content/tutorial_3.md)
+* [Tutorial walk through: A two-stick shooter in ECS](content/two_stick_shooter.md)
 
 ## Simple examples
 
@@ -27,11 +26,13 @@
 
 ## Further information
 
-*Unite Austin 2017 - Writing high performance C# scripts*
-[![Unite Austin 2017 - Writing high performance C# scripts](http://img.youtube.com/vi/tGmnZdY5Y-E/0.jpg)](http://www.youtube.com/watch?v=tGmnZdY5Y-E)
+* [*MCV 2018 - Exclusive: Unity takes a principled step into triple-A performance at GDC*](https://www.mcvuk.com/development/exclusive-unity-takes-a-principled-step-into-triple-a-performance-at-gdc)
 
 *Unite Austin 2017 keynote - Performance demo ft. Nordeus*
 [![Unite Austin 2017 keynote - Performance demo ft. Nordeus](http://img.youtube.com/vi/0969LalB7vw/0.jpg)](http://www.youtube.com/watch?v=0969LalB7vw)
+
+*Unite Austin 2017 - Writing high performance C# scripts*
+[![Unite Austin 2017 - Writing high performance C# scripts](http://img.youtube.com/vi/tGmnZdY5Y-E/0.jpg)](http://www.youtube.com/watch?v=tGmnZdY5Y-E)
 
 ---
 
