@@ -11,7 +11,7 @@ We measure ourselves against the performance that can be achieved in C++ with ha
 We are using a combination of compiler technology (Burst), containers (Unity.Collections), data layout of components (ECS) to make it easy to write efficient code by default.
 
 * Data layout & iteration - The Entity Component System gurantees linear data layout when iterating entities in chunks by default. This is a critical part of the performance gains provided by the Entity Component System.
-* The C# job system lets you write multithreaded code in a simple way. It also safe. The C# Job Debugger detects any race conditions.
+* The C# job system lets you write multithreaded code in a simple way. It is also safe. The C# Job Debugger detects any race conditions.
 * Burst is our compiler specifically for C# jobs. C# job code follows certain patterns that we can use to produce more efficient machine code. Code is compiled & optimized for each target platforms taking advantage of SIMD instructions.
 
 An example of this is the performance of Instantiation. Comparing to the theoretical limit, of instantiating 100.000 entities with 320 bytes of a memcpy takes 9ms. Instantiating those entities via the Entity Component System takes 10ms. So we are very close to the theoretical lmit.
