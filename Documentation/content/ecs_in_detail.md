@@ -27,7 +27,7 @@ IComponentData structs may not contain references to managed objects. Since the 
 
 An __EntityArchetype__ is a unique array of __ComponentType__. __EntityManager__ uses EntityArchetypes to group all Entities using the same ComponentTypes in chunks.
 
-```
+```C#
 // Using typeof to create an EntityArchetype from a set of components
 EntityArchetype archetype = EntityManager.CreateArchetype(typeof(MyComponentData), typeof(MySharedComponent));
 
