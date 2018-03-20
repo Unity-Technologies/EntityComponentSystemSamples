@@ -18,7 +18,7 @@ Offers a better approach to game design  that allows you to concentrate on the a
 The Entity Component System ships as an experimental package in 2018.1, and we’ll continue to develop and release new versions of the package in the 2018.x cycle. It is important to stress that the Entity Component System is not production ready 
 
 ## C# Job System
-The new C# Job System takes advantage of multiple cores in a safe and easy way. Easy, as it’s designed to open this approach up to user scripts and to allow users to write fast, jobified code providing, and safe because it provides protection from some of the pitfalls of multi-threading such as race conditions. 
+The new C# Job System takes advantage of multiple cores in a safe and easy way. Easy, as it’s designed to open this approach up to user scripts and allows users to write safe, fast, jobified code while providing protection from some of the pitfalls of multi-threading such as race conditions.
 
 The C# Job System ships in 2018.1.
 
