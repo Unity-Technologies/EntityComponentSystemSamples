@@ -56,11 +56,11 @@ class RotatorSystem : ComponentSystem
     {
         // Define what components are required for this 
         // ComponentSystem to handle them.
-        Transform Transform;
-        Rotator   Rotator;
+        public Transform Transform;
+        public Rotator   Rotator;
     }
     
-    override protected OnUpdate()
+    override protected void OnUpdate()
     {
         // We can immediately see a first optimization.
         // We know delta time is the same between all rotators,
@@ -74,7 +74,7 @@ class RotatorSystem : ComponentSystem
         // (as defined above in Group struct).
         foreach (var e in GetEntities<Group>())
         {
-            e.Transform.rotation *= Quaternion.AxisAngle(e.Rotator.Speed * deltaTime, Vector3.up);
+            e.Transform.rotation *= Quaternion.AngleAxis(e.Rotator.Speed * deltaTime, Vector3.up);
         }
     }
 }
