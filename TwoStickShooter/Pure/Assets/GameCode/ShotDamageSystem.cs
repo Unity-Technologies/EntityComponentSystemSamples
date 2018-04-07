@@ -42,7 +42,7 @@ namespace TwoStickPureExample
             public int Length;
             public ComponentDataArray<Shot> Shot;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
-            [ReadOnly] public ComponentDataArray<PlayerShot> PlayerShotMarker;
+            [ReadOnly] public ComponentDataArray<Player> PlayerMarker;
         }
         [Inject] PlayerShotData m_PlayerShots;
 
@@ -54,7 +54,7 @@ namespace TwoStickPureExample
             public int Length;
             public ComponentDataArray<Shot> Shot;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
-            [ReadOnly] public ComponentDataArray<EnemyShot> EnemyShotMarker;
+            [ReadOnly] public ComponentDataArray<Enemy> EnemyMarker;
         }
         [Inject] EnemyShotData m_EnemyShots;
 

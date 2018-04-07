@@ -39,10 +39,9 @@ namespace TwoStickPureExample
         public float Value;
     }
 
-    // Pure marker types
+    // Pure marker types.
     public struct Enemy : IComponentData { }
-    public struct EnemyShot : IComponentData { }
-    public struct PlayerShot : IComponentData { }
+    public struct Player : IComponentData { }
 
     public struct EnemyShootState : IComponentData
     {

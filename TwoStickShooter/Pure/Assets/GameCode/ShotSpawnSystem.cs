@@ -35,13 +35,13 @@ namespace TwoStickPureExample
                 em.AddComponent(shotEntity, default(TransformMatrix));
                 if (sd.Faction == Factions.kPlayer)
                 {
-                    em.AddComponent(shotEntity, new PlayerShot());
+                    em.AddComponent(shotEntity, new Player()); // Mark as player shot.
                     em.AddComponent(shotEntity, new MoveSpeed {speed = TwoStickBootstrap.Settings.bulletMoveSpeed});
                     em.AddSharedComponent(shotEntity, TwoStickBootstrap.PlayerShotLook);
                 }
                 else
                 {
-                    em.AddComponent(shotEntity, new EnemyShot());
+                    em.AddComponent(shotEntity, new Enemy()); // Mark as enemy shot.
                     em.AddComponent(shotEntity, new MoveSpeed {speed = TwoStickBootstrap.Settings.enemyShotSpeed});
                     em.AddSharedComponent(shotEntity, TwoStickBootstrap.EnemyShotLook);
                 }
