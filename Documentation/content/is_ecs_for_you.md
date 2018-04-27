@@ -1,6 +1,6 @@
 # Is the Entity Component System for you?
 
-The Entity Componetn System is in preview. It is not recommended for production.
+The Entity Component System is in preview. It is not recommended for production.
 
 At the moment there are two good reasons to use it. 
 
