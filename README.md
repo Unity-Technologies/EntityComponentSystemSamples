@@ -10,12 +10,12 @@ We have also provided a new forum where you can find more information and share 
 ## What is in the build
 We have been working on a new high performance multithreaded system, that will make it possible for games to fully utilise the multicore processors available today without heavy programming headache. This is possible thanks to the new Entity Component System which provides a way to write performant code by default. Paired with the C# Job System and a new math-aware backend compiler technology named Burst. Unity can produce highly optimised code for the particular capabilities of the platform you’re compiling for. 
 
-[Download the beta build required here](https://beta.unity3d.com/download/ed1bf90b40e6/public_download.html)
+[Download the beta build required here](https://unity3d.com/unity/beta-download)
 
 ## Entity Component System
 Offers a better approach to game design  that allows you to concentrate on the actual problems you are solving: the data and behavior that make up your game. It leverages the C# Job System and Burst Compiler enabling you to take full advantage of today's multicore processors. By moving from object-oriented to data-oriented design it will be easier for you to reuse the code and easier for others to understand and work on it
 
-The Entity Component System ships as an experimental package in 2018.1, and we’ll continue to develop and release new versions of the package in the 2018.x cycle. It is important to stress that the Entity Component System is not production ready 
+The Entity Component System ships as an experimental package in 2018.1 and later, and we’ll continue to develop and release new versions of the package in the 2018.x cycle. It is important to stress that the Entity Component System is not production ready 
 
 ## C# Job System
 The new C# Job System takes advantage of multiple cores in a safe and easy way. Easy, as it’s designed to open this approach up to user scripts and allows users to write safe, fast, jobified code while providing protection from some of the pitfalls of multi-threading such as race conditions.
@@ -41,8 +41,8 @@ This is a set of projects that demonstrates different approaches with the MonoBe
 
 > Note: If you want to have multiple versions of Unity on one machine then you need to follow [these instructions](https://docs.unity3d.com/462/Documentation/Manual/InstallingMultipleVersionsofUnity.html). The manual page is a bit old, in terms of which versions of Unity it describes, but the instructions are otherwise correct.
 
-* Make sure you have installed the required beta version of [Unity](#what-is-in-the-build).
-* Open the 2018.1.b version of Unity on your computer.
+* Make sure you have installed the required version of [Unity](#what-is-in-the-build).
+* Open Unity on your computer.
 * Create a new Unity project and name it whatever you like. 
 
 > Note: In Unity 2018.1 the new Project window is a little different because it offers you more than just 2D and 3D options.
