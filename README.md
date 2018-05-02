@@ -22,6 +22,8 @@ The new C# Job System takes advantage of multiple cores in a safe and easy way. 
 
 The C# Job System ships in 2018.1.
 
+[Further sample projects on the C# Job System can be found here](https://github.com/stella3d/job-system-cookbook)
+
 ## Burst
 Burst is a new LLVM based math-aware backend Compiler Technology makes things easier for you. It takes the C# jobs and produces highly-optimized code taking advantage of the particular capabilities of the platform you’re compiling for.
 
@@ -35,9 +37,22 @@ To help you get started, we have provided this repository of examples for learni
 ### The TwoStickShooter project
 This is a set of projects that demonstrates different approaches with the MonoBehaviour, Hybrid Entity Component System and Pure Entity Component System. This is a good starting point to understand how the Entity Component System paradigm works. 
 
-[Further sample projects on the C# Job System can be found here](https://github.com/stella3d/job-system-cookbook)
+## Installation guide for blank ECS project
+
+> Note: If you want to have multiple versions of Unity on one machine then you need to follow [these instructions](https://docs.unity3d.com/462/Documentation/Manual/InstallingMultipleVersionsofUnity.html). The manual page is a bit old, in terms of which versions of Unity it describes, but the instructions are otherwise correct.
+
+* Make sure you have installed the required beta version of [Unity](#what-is-in-the-build).
+* Open the 2018.1.b version of Unity on your computer.
+* Create a new Unity project and name it whatever you like. 
+
+> Note: In Unity 2018.1 the new Project window is a little different because it offers you more than just 2D and 3D options.
+
+* Once the project is created then navigate in the Editor menu to: __Edit__ > __Project Settings__ > __Player__ > __Other Settings__ then set __Scripting Runtime Version__ to: __4.x equivalent__. This will cause Unity to restart.
+* Go to your project location in your computer's file manager.
+* Open the file _<project-name>/Packages/manifest.json_ in any text editor.
+* Copy and paste the [package manifest](Samples/Packages/manifest.json) into Packages/manifest.json file of your project.
 
 ## Documentation
 Looking for information on how to get started or have specific questions? Visit our ECS & Job system documentation 
 
-[Go to documentation](https://github.com/Unity-Technologies/EntityComponentSystemSamples/blob/master/Documentation/index.md)
+[Go to documentation](Documentation/index.md)

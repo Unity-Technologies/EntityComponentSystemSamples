@@ -17,10 +17,9 @@ namespace TwoStickClassicExample
 
         private void Update()
         {
-            var player = FindObjectOfType<Player>();
-            if (player != null)
+            if (Player.Current != null)
             {
-                UpdateAlive(player);
+                UpdateAlive(Player.Current);
             }
             else
             {
@@ -30,14 +29,8 @@ namespace TwoStickClassicExample
 
         private void UpdateDead()
         {
-            if (HealthText != null)
-            {
-                HealthText.gameObject.SetActive(false);
-            }
-            if (NewGameButton != null)
-            {
-                NewGameButton.gameObject.SetActive(true);
-            }
+            HealthText.gameObject.SetActive(false);
+            NewGameButton.gameObject.SetActive(true);
         }
 
         private void UpdateAlive(Player player)
@@ -45,18 +38,11 @@ namespace TwoStickClassicExample
             HealthText.gameObject.SetActive(true);
             NewGameButton.gameObject.SetActive(false);
             
-            var displayedHealth = 0;
-            if (player != null)
-            {
-                displayedHealth = (int) player.GetComponent<Health>().Value;
-            }
+            var displayedHealth = (int) player.GetComponent<Health>().Value;
 
             if (m_CachedHealth != displayedHealth)
             {
-                if (displayedHealth > 0)
-                    HealthText.text = $"HEALTH: {displayedHealth}";
-                else
-                    HealthText.text = "GAME OVER";
+                HealthText.text = displayedHealth > 0 ? $"HEALTH: {displayedHealth}" : "GAME OVER";
                 m_CachedHealth = displayedHealth;
             }
         }

@@ -21,13 +21,13 @@ GameObject:
   - component: {fileID: 4069661776806122}
   - component: {fileID: 114569172725802478}
   - component: {fileID: 114080190520665040}
+  - component: {fileID: 114846138717908042}
+  - component: {fileID: 114268253541214898}
+  - component: {fileID: 114640073232692476}
   - component: {fileID: 114878148870236606}
   - component: {fileID: 114071165412582634}
-  - component: {fileID: 114846138717908042}
-  - component: {fileID: 114017445485928864}
+  - component: {fileID: 114800422694471510}
   - component: {fileID: 114577371648038814}
-  - component: {fileID: 114151331784951154}
-  - component: {fileID: 114640073232692476}
   m_Layer: 0
   m_Name: TestBoidFish
   m_TagString: Untagged
@@ -48,22 +48,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114017445485928864
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1501737747371270}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 206d9b88d9fd4c4c9e5a1a976224e421, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedData:
-    Value:
-      x: 0
-      y: 0
-      z: 0
 --- !u!114 &114071165412582634
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -91,7 +75,7 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: a775bbb190ee2594d99a10542e99e940, type: 2}
     castShadows: 0
     receiveShadows: 0
---- !u!114 &114151331784951154
+--- !u!114 &114268253541214898
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -99,15 +83,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1501737747371270}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bff616740c8144f7b1e8ebad7fe8ed58, type: 3}
+  m_Script: {fileID: 11500000, guid: 206d9b88d9fd4c4c9e5a1a976224e421, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    cellRadius: 4
-    separationWeight: 2
-    alignmentWeight: 1
-    targetWeight: 2
-    obstacleAversionDistance: 20
+    Value:
+      x: 0
+      y: 0
+      z: 0
 --- !u!114 &114569172725802478
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -141,6 +124,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2caacf465eeae43f39a6a13e442d1dc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114800422694471510
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1501737747371270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bff616740c8144f7b1e8ebad7fe8ed58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedData:
+    cellRadius: 8
+    separationWeight: 1
+    alignmentWeight: 1
+    targetWeight: 2
+    obstacleAversionDistance: 20
 --- !u!114 &114846138717908042
 MonoBehaviour:
   m_ObjectHideFlags: 1

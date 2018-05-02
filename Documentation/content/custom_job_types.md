@@ -30,11 +30,11 @@ The final parameter is the schedule mode. There are two scheduling modes to choo
 Once the schedule parameters are created we actually schedule the job. There are three ways to schedule jobs depending on their type:
 ```C#
 JobHandle Schedule(ref JobScheduleParameters parameters);
-JobHandle ScheduleParallelFor(ref JobScheduleParameters parameters, int arrayLength, int innerloopBatchCount);
-JobHandle ScheduleParallelForTransform(ref JobScheduleParameters parameters, IntPtr transfromAccesssArray);
+JobHandle ScheduleParallelFor(ref JobScheduleParameters parameters, int arrayLength, int innerLoopBatchCount);
+JobHandle ScheduleParallelForTransform(ref JobScheduleParameters parameters, IntPtr transfromAccessArray);
 ```
 Schedule can only be used if the __ScheduleParameters__ are created with __JobType.Single__, the other two schedule functions require __JobType.ParallelFor__.
-The __arrayLength__ and __innerloopBatchCount__ parameter passed to __ScheduleParallelFor__ are used to determine how many indices the jobs should process and how many indices it should handle in the inner loop (see the section on [__Execution__ and __JobRanges__](#execution-and-jobranges) for more information on the inner loop count).
+The __arrayLength__ and __innerLoopBatchCount__ parameter passed to __ScheduleParallelFor__ are used to determine how many indices the jobs should process and how many indices it should handle in the inner loop (see the section on [__Execution__ and __JobRanges__](#execution-and-jobranges) for more information on the inner loop count).
 __ScheduleParallelForTransform__ is similar to ScheduleParallelFor, but it also has access to a __TransformAccessArray__ that allows you to modify __Transform__ components on __GameObjects__. The number of indices and batch size is inferred from the TransformAccessArray.
 
 ## Execution and JobRanges
@@ -51,7 +51,7 @@ The JobRanges contain the batches and indices a ParallelFor job is supposed to p
 ```C#
 JobsUtility.GetWorkStealingRange(ref ranges, jobIndex, out begin, out end)
 ```
-This continues until it returns `false`, and after calling it process all items with index between begin and end.
+This continues until it returns `false`, and after calling it process all items with index between __begin__ and __end__.
 The reason you get batches of items, rather than the full set of items the job should process, is that Unity will apply [work stealing](https://en.wikipedia.org/wiki/Work_stealing) if one job completes before the others. Work stealing in this context means that when one job is done it will look at the other jobs running and see if any of them still have a lot of work left. If it finds a job which is not complete it will steal some of the batches that it has not yet started; to dynamically redistribute the work.
 
 Before a ParallelFor job starts processing items it also needs to limit the write access to NativeContainers on the range of items which the job is processing. If it does not do this several jobs can potentially write to the same index which leads to race conditions. The NativeContainers that need to be limited is passed to the job and there is a function to patch them; so they cannot access items outside the correct range. The code to do it looks like this:

@@ -6,6 +6,7 @@ using Unity.Transforms;
 
 namespace Samples.Common
 {
+    [UpdateAfter(typeof(TransformSystem))]
     public class PositionConstraintSystem : JobComponentSystem
     {
         struct PositionConstraintsGroup

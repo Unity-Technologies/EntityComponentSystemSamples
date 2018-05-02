@@ -18,8 +18,8 @@ namespace TwoStickClassicExample
             // Collision
             var settings = TwoStickBootstrap.Settings;
 
-            var receivers = FindObjectsOfType(typeof(Health));
-            if (receivers.Length == 0)
+            var receivers = Health.All;
+            if (receivers.Count == 0)
             {
                 Destroy(gameObject);
                 return;
@@ -27,26 +27,25 @@ namespace TwoStickClassicExample
 
             var faction = GetComponent<Faction>().Value;
             
-            foreach (Health health in receivers)
+            foreach (var health in receivers)
             {
                 var receiverFaction = health.GetComponent<Faction>().Value;
-                float collisionRadius = GetCollisionRadius(settings, receiverFaction);
-                float collisionRadiusSquared = collisionRadius * collisionRadius;
+                var collisionRadius = GetCollisionRadius(settings, receiverFaction);
+                var collisionRadiusSquared = collisionRadius * collisionRadius;
 
                 var xform = health.GetComponent<Transform2D>();
-                float2 receiverPos = xform.Position;
+                var receiverPos = xform.Position;
 
                 if (faction != receiverFaction)
                 {
-                    float2 shotPos = transform2D.Position;
-                    float2 delta = shotPos - receiverPos;
-                    float distSquared = math.dot(delta, delta);
+                    var shotPos = transform2D.Position;
+                    var delta = shotPos - receiverPos;
+                    var distSquared = math.dot(delta, delta);
                     if (distSquared <= collisionRadiusSquared)
                     {
 
                         health.Value = health.Value - Energy;
 
-                        // Set the shot's time to live to zero, so it will be collected by the shot destroy system 
                         Destroy(gameObject);
                         break;
                     }

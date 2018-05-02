@@ -27,7 +27,7 @@ IComponentData structs may not contain references to managed objects. Since the 
 
 An __EntityArchetype__ is a unique array of __ComponentType__. __EntityManager__ uses EntityArchetypes to group all Entities using the same ComponentTypes in chunks.
 
-```
+```C#
 // Using typeof to create an EntityArchetype from a set of components
 EntityArchetype archetype = EntityManager.CreateArchetype(typeof(MyComponentData), typeof(MySharedComponent));
 
@@ -98,7 +98,8 @@ The ComponentData for each Entity is stored in what we internally refer to as a 
 
 A chunk is always linked to a specific EntityArchetype. Thus all Entities in one chunk follow the exact same memory layout. When iterating over components, memory access of components within a chunk is always completely linear, with no waste loaded into cache lines. This is a hard guarantee.
 
-__ComponentDataArray__ is essentially an iterator over all EntityArchetypes compatible with the set of required components; for each EntityArchetype iterating over all chunks compatible with it and for each chunk iterating over all Entities in that chunk.
+__ComponentDataArray__ is essentially a convenience index based iterator for a single component type;
+First we iterate over all EntityArchetypes compatible with the ComponentGroup; for each EntityArchetype iterating over all chunks compatible with it and for each chunk iterating over all Entities in that chunk.
 
 Once all Entities of a chunk have been visited, we find the next matching chunk and iterate through those Entities.
 
@@ -114,6 +115,22 @@ By default we create a single World when entering Play Mode and populate it with
 * [Automatic bootstrap entry point](../../ECSJobDemos/Packages/com.unity.entities/Unity.Entities.Hybrid/Injection/AutomaticWorldBootstrap.cs) 
 
 > Note: We are currently working on multiplayer demos, that will show how to work in a setup with separate simulation & presentation Worlds. This is a work in progress, so right now have no clear guidelines and are likely missing features in ECS to enable it. 
+
+## System update order
+
+In ECS all systems are updated on the main thread. The order in which the are updated is based on a set of constraints and an optimization pass which tries to order the system in a way so that the time between scheduling a job and waiting for it is as long as possible.
+The attributes to specify update order of systems are ```[UpdateBefore(typeof(OtherSystem))]``` and ```[UpdateAfter(typeof(OtherSystem))]```. In addition to update before or after other ECS systems it is possible to update before or after different phases of the Unity PlayerLoop by using typeof([UnityEngine.Experimental.PlayerLoop.FixedUpdate](https://docs.unity3d.com/2018.1/Documentation/ScriptReference/Experimental.PlayerLoop.FixedUpdate.html)) or one of the other phases in the same namespace.
+
+The UpdateInGroup attribute will put the system in a group and the same __UpdateBefore__ and __UpdateAfter__ attributes can be specified on a group or with a group as the target of the before/after dependency.
+
+To use __UpdateInGroup__ you need to create and empty class and pass the type of that to the __UpdateInGroup__ attribute
+```cs
+public class UpdateGroup
+{}
+
+[UpdateInGroup(typeof(UpdateGroup))]
+class MySystem : ComponentSystem
+```
 
 ## Automatic job dependency management (JobComponentSystem)
 
@@ -294,7 +311,7 @@ Lastly you can also inject a reference to another system. This will populate the
 
 ## ComponentGroup
 
-The ComponentGroup is foundation class on top of which all iteration methods are built (Injection, foreach, IJobProcessComponetnData etc)
+The ComponentGroup is foundation class on top of which all iteration methods are built (Injection, foreach, IJobProcessComponentData etc)
 
 Essentially a ComponentGroup is constructed with a set of required components, subtractive components. 
 
@@ -348,7 +365,9 @@ class PositionToRigidbodySystem : ComponentSystem
 The Entity struct identifies an Entity. If you need to access component data on another Entity, the only stable way of referencing that component data is via the Entity ID. EntityManager provides a simple get & set component data API for it.
 ```cs
 Entity myEntity = ...;
-var position = EntityManager.SetComponentData<LocalPosition>(entity);
+var position = EntityManager.GetComponentData<LocalPosition>(entity);
+...
+EntityManager.SetComponentData(entity, position);
 ```
 
 However EntityManager can't be used on a C# job. __ComponentDataFromEntity__ gives you a simple API that can also be safely used in a job.
@@ -364,9 +383,77 @@ var position = m_LocalPositions[myEntity];
 
 ## ExclusiveEntityTransaction
 
-EntityTransaction is an API to create & destroy entities from a job. The purpose is to enable procedural generation scenarios where construction of massive scale instantiation must happen on jobs. This API is very much a work in progress.
+EntityTransaction is an API to create & destroy entities from a job. The purpose is to enable procedural generation scenarios where instantiation on big scale must happen on jobs. As the name implies it is exclusive to any other access to the EntityManager.
+
+ExclusiveEntityTransaction should be used on manually created world that acts as a staging area to construct & setup entities.
+After the job has completed you can end the EntityTransaction and use ```EntityManager.MoveEntitiesFrom(EntityManager srcEntities);``` to move the entities to an active world.
+
 
 ## EntityCommandBuffer
+
+The command buffer class solves two important problems:
+
+1. When you're in a job, you can't access the entity manager
+2. When you access the entity manager (to say, create an entity) you invalidate all injected arrays and component groups
+
+The command buffer abstraction allows you to queue up changes to be performed (from either a job or from the main thread) so that they can take effect later on the main thread. There are two ways to use a command buffer:
+
+1. `ComponentSystem` subclasses which update on the main thread have one available automatically called `PostUpdateCommands`. To use it, simply reference the attribute and queue up your changes. They will be automatically applied to the world immediately after you return from your system's `Update` function.
+
+Here's an example from the two stick shooter sample:
+
+```cs
+PostUpdateCommands.CreateEntity(TwoStickBootstrap.BasicEnemyArchetype);
+PostUpdateCommands.SetComponent(new Position2D { Value = spawnPosition });
+PostUpdateCommands.SetComponent(new Heading2D { Value = new float2(0.0f, -1.0f) });
+PostUpdateCommands.SetComponent(default(Enemy));
+PostUpdateCommands.SetComponent(new Health { Value = TwoStickBootstrap.Settings.enemyInitialHealth });
+PostUpdateCommands.SetComponent(new EnemyShootState { Cooldown = 0.5f });
+PostUpdateCommands.SetComponent(new MoveSpeed { speed = TwoStickBootstrap.Settings.enemySpeed });
+PostUpdateCommands.AddSharedComponent(TwoStickBootstrap.EnemyLook);
+```
+
+As you can see, the API is very similar to the entity manager API. In this mode, it is helpful to think of the automatic command buffer as a convenience that allows you to prevent array invalidation inside your system while still making changes to the world.
+
+2. For jobs, you must request command buffers from a `Barrier` on the main thread, and pass them to jobs. The barriers will play back in the created order on the main thread when the barrier system updates. This extra step is required so that memory management can be centralized and determinism of the generated entities and components can be guaranteed.
+
+Again let's look at the two stick shooter sample to see how this works in practice.
+
+First, a barrier system is declared:
+
+```cs
+public class ShotSpawnBarrier : BarrierSystem
+{}
+```
+
+There's no code in a barrier system, it just serves as a synchronization point.
+
+Next, we inject this barrier into the system that will request command buffers from it:
+
+```cs
+[Inject] private ShotSpawnBarrier m_ShotSpawnBarrier;
+```
+
+Now we can access the barrier when we're scheduling jobs and ask for command
+buffers from it via `CreateCommandBuffer()`:
+
+```cs
+return new SpawnEnemyShots
+{
+    // ...
+    CommandBuffer = m_ShotSpawnBarrier.CreateCommandBuffer(),
+    // ...
+}.Schedule(inputDeps);
+```
+
+In the job, we can use the command buffer normally:
+
+```cs
+CommandBuffer.CreateEntity(ShotArchetype);
+CommandBuffer.SetComponent(spawn);
+```
+
+When the barrier system updates, it will automatically play back the command buffers. It's worth noting that the barrier system will take a dependency on any jobs spawned by systems that access it (so that it can now that the command buffers have been filled in fully). If you see bubbles in the frame, it may make sense to try moving the barrier later in the frame, if your game logic allows for this.
 
 ## GameObjectEntity
 

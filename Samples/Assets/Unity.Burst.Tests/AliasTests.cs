@@ -7,10 +7,12 @@ namespace Unity.Jobs.Tests
     public struct AliasTest1 : IJob
     {
         private int field1;
+#pragma warning disable 0169 // "never used" warning
         private int pad0;
         private int pad1;
         private int pad2;
         private int pad3;
+#pragma warning restore 0169
         private int field2;
 
         public void DoTheThing(ref int x)

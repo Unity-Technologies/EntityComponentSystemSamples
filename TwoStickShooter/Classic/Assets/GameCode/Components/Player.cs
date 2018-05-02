@@ -6,11 +6,18 @@ namespace TwoStickClassicExample
 
     public class Player : MonoBehaviour
     {
+        public static Player Current { get; private set; }
+        
         [HideInInspector] public float2 Move;
         [HideInInspector] public float2 Shoot;
         [HideInInspector] public float FireCooldown;
 
         public bool Fire => FireCooldown <= 0.0 && math.length(Shoot) > 0.5f;
+
+        private void Start()
+        {
+            Current = this;
+        }
 
         private void Update()
         {

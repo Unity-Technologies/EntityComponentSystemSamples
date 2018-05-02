@@ -3,16 +3,15 @@ using UnityEngine;
 
 namespace TwoStickClassicExample
 {
-    public sealed class TwoStickBootstrap
+    public sealed class TwoStickBootstrap : MonoBehaviour
     {
-        public static TwoStickExampleSettings Settings;
+        public static TwoStickExampleSettings Settings { get; private set; }
 
+        [SerializeField] private TwoStickExampleSettings settings;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        public static void InitializeWithScene()
+        public void Awake()
         {
-            var settingsGO = GameObject.Find("Settings");
-            Settings = settingsGO?.GetComponent<TwoStickExampleSettings>();
+            Settings = settings;
         }
 
         public static void NewGame()

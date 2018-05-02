@@ -138,11 +138,15 @@ namespace Samples.Boids
                 var nearestTargetPosition             = targetPositions[nearestTargetPositionIndex].Value;
                 
                 var obstacleSteering                  = position - nearestObstaclePosition;
-                var avoidObstacleHeading              = (nearestObstaclePosition + math_experimental.normalizeSafe(obstacleSteering) * settings.obstacleAversionDistance)-position;
-                var targetHeading                     = settings.targetWeight * math_experimental.normalizeSafe(nearestTargetPosition - position);
+                var avoidObstacleHeading              = (nearestObstaclePosition + math_experimental.normalizeSafe(obstacleSteering)
+                                                        * settings.obstacleAversionDistance)-position;
+                var targetHeading                     = settings.targetWeight 
+                                                        * math_experimental.normalizeSafe(nearestTargetPosition - position);
                 var nearestObstacleDistanceFromRadius = nearestObstacleDistance - settings.obstacleAversionDistance;
-                var alignmentResult                   = settings.alignmentWeight * math_experimental.normalizeSafe((alignment/neighborCount)-forward);
-                var separationResult                  = settings.separationWeight * math_experimental.normalizeSafe((position * neighborCount) - separation);
+                var alignmentResult                   = settings.alignmentWeight 
+                                                        * math_experimental.normalizeSafe((alignment/neighborCount)-forward);
+                var separationResult                  = settings.separationWeight 
+                                                        * math_experimental.normalizeSafe((position * neighborCount) - separation);
                 var normalHeading                     = math_experimental.normalizeSafe(alignmentResult + separationResult + targetHeading);
                 var targetForward                     = math.select(normalHeading, avoidObstacleHeading, nearestObstacleDistanceFromRadius < 0);
                 var nextHeading                       = math_experimental.normalizeSafe(forward + dt*(targetForward-forward));
