@@ -7,10 +7,10 @@ We have also provided a new forum where you can find more information and share 
 
 [Click here to visit the forum](https://unity3d.com/performance-by-default)
 
-## What is in the build
+## What is available today
 We have been working on a new high performance multithreaded system, that will make it possible for games to fully utilise the multicore processors available today without heavy programming headache. This is possible thanks to the new Entity Component System which provides a way to write performant code by default. Paired with the C# Job System and a new math-aware backend compiler technology named Burst. Unity can produce highly optimised code for the particular capabilities of the platform you’re compiling for. 
 
-[Download the beta build required here](https://unity3d.com/unity/beta-download)
+These new systems are compatible with Unity 2018.1 and onwards
 
 ## Entity Component System
 Offers a better approach to game design  that allows you to concentrate on the actual problems you are solving: the data and behavior that make up your game. It leverages the C# Job System and Burst Compiler enabling you to take full advantage of today's multicore processors. By moving from object-oriented to data-oriented design it will be easier for you to reuse the code and easier for others to understand and work on it
