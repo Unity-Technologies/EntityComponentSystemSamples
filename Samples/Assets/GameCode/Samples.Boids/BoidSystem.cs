@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -153,6 +151,24 @@ namespace Samples.Boids
                 
                 headings[index]                       = new Heading {Value = nextHeading};
             }
+        }
+
+        protected override void OnStopRunning()
+        {
+            for (var i = 0; i < m_PrevCells.Count; i++)
+            {
+                m_PrevCells[i].hashMap.Dispose();
+                m_PrevCells[i].cellIndices.Dispose();
+                m_PrevCells[i].copyTargetPositions.Dispose();
+                m_PrevCells[i].copyObstaclePositions.Dispose();
+                m_PrevCells[i].cellAlignment.Dispose();
+                m_PrevCells[i].cellSeparation.Dispose();
+                m_PrevCells[i].cellObstacleDistance.Dispose();
+                m_PrevCells[i].cellObstaclePositionIndex.Dispose();
+                m_PrevCells[i].cellTargetPistionIndex.Dispose();
+                m_PrevCells[i].cellCount.Dispose();
+            }
+            m_PrevCells.Clear();
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -316,23 +332,6 @@ namespace Samples.Boids
             m_ObstacleGroup = GetComponentGroup(    
                 ComponentType.ReadOnly(typeof(BoidObstacle)),
                 ComponentType.ReadOnly(typeof(Position)));
-        }
-
-        protected override void OnDestroyManager()
-        {
-            for (int i = 0; i < m_PrevCells.Count; i++)
-            {
-                m_PrevCells[i].hashMap.Dispose();
-                m_PrevCells[i].cellIndices.Dispose();
-                m_PrevCells[i].copyTargetPositions.Dispose();
-                m_PrevCells[i].copyObstaclePositions.Dispose();
-                m_PrevCells[i].cellAlignment.Dispose();
-                m_PrevCells[i].cellSeparation.Dispose();
-                m_PrevCells[i].cellObstacleDistance.Dispose();
-                m_PrevCells[i].cellObstaclePositionIndex.Dispose();
-                m_PrevCells[i].cellTargetPistionIndex.Dispose();
-                m_PrevCells[i].cellCount.Dispose();
-            }
         }
     }
 }

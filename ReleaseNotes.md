@@ -1,7 +1,32 @@
+# 0.0.6
+## New Features
+* OnStartRunning() and OnStopRunning() added to ComponentSystem and JobComponentSystem
+    - OnStartRunning is called when a system's Enabled or ShouldStartRunning() becomes true
+    - OnStopRunning is called when a system's Enabled or ShouldStartRunning() becomes false. Also when the system will get destroyed.
+    - It will only send one of each in succession
+        - Example: Two OnStartRunning() cannot be triggered for a given system without an OnStopRunning() call in between
+* Experimental SOA containers updated, now split into two different types:
+    - NativeArrayFullSOA internally lays everything out in sub-arrays
+    - NativeArrayChunked8 internally lays data out in chunks of 32 bytes
+* Component type versions in Chunks (for broadphase change tracking)
+* Query Archetype and Chunk iteration (query archetypes matching all/any/none component filter, and e.g. allow component existence checks on chunk level.)
+* Add SystemStateComponentData (answer to Reactive system for add/delete components)
+* IComponentSystemPatch to auto run ComponentSystem[Job] after every ComponentSystem.
+
+## Changes
+* Make it possible to create EntityArray in addition to ComponentDataArray with the new ForEachFilter
+
 # 0.0.5
+## New Features
+* New API for faster filtering when going through all unique shared component values.
+	- var filter = group.CreateForEachFilter(uniqueTypes);
+	- var array = group.GetComponentDataArray<Type>(filter, i); // in a loop
+	- filter.Dispose();
+
 ## Changes
 * Throw ArgumentException when creating an entity with component data exceeding chunk size (64kb)
 * EntityManager.CreateComponentGroup is no longer public, use ComponentSystem.GetComponentGroup instead
+* Fix an incorrect hash calculation when resizing a HashMap
 
 # 0.0.4
 

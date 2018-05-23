@@ -1,5 +1,4 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -27,18 +26,14 @@ public class SceneSwitcher : MonoBehaviour
             return;
         }
 
-        bool firstTime = CurrentSceneIndex == -1;
         TimeUntilNextSwitch = SceneSwitchInterval;
         CurrentSceneIndex = nextIndex;
 
-        if (!firstTime)
-        {
-            var entityManager = World.Active.GetExistingManager<EntityManager>();
-            var entities = entityManager.GetAllEntities();
-            entityManager.DestroyEntity(entities);
-            entities.Dispose();
-        }
-        
+        var entityManager = World.Active.GetExistingManager<EntityManager>();
+        var entities = entityManager.GetAllEntities();
+        entityManager.DestroyEntity(entities);
+        entities.Dispose();
+
         SceneManager.LoadScene(nextIndex);
         
         
