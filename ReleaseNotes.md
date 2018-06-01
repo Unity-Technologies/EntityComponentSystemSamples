@@ -1,3 +1,18 @@
+# 0.0.7
+## New Features
+* New system for frustum culling meshes processed by MeshInstanceRendererSystem. Add a MeshCullingComponent to the entity and it will only be rendered when it is in view. The culling system does not take shadows into account.
+* New system for LOD of meshes rendered with MeshInstanceRendererSystem.
+    - MeshLODGroupComponent defines the lod sizes and active lod.
+	- MeshLODComponent references an Entity with a MeshLODGroupComponent and enables / disables itself based on the specified active lod. Transforms between mesh and group must match.
+* Entity worlds can now be serialized and deserialized to/from a binary format using SerializeUtility
+    - Use SerializeUtilityHybrid to support shared components
+		
+## Changes
+* EntityDebugger's display of ComponentGroups is improved:
+    - They will now wrap to multiple lines if there isn't enough space
+    - Generic types are displayed nicely
+    - Sort order is stable
+
 # 0.0.6
 ## New Features
 * OnStartRunning() and OnStopRunning() added to ComponentSystem and JobComponentSystem
