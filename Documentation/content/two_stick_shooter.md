@@ -22,7 +22,7 @@ How do you bootstrap your game when using ECS? After all, you need something to 
 those initial Entities into the system before anything can update.
 
 One simple answer is to just run some code when the project starts playing. In this project,
-there's a class __TwoStickBootsrap__ that comes with two methods. The first method initializes
+there's a class __TwoStickBootstrap__ that comes with two methods. The first method initializes
 early and creates the core __EntityManager__ we're going to use to interact with ECS.
 
 Overall, here's what the bootstrapping code achieves:
