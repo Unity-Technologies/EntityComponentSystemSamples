@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -7,7 +8,7 @@ namespace Samples.Common
 {
     public class GravitySystem : JobComponentSystem
     {
-        [ComputeJobOptimization]
+        [BurstCompile]
         [RequireComponentTag(typeof(Gravity))]
         struct GravityPosition : IJobProcessComponentData<Position>
         {

@@ -3,12 +3,13 @@ using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Burst;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 public class BurstSafetyTests
 {
-    [ComputeJobOptimization(CompileSynchronously = true)]
+    [BurstCompile(CompileSynchronously = true)]
     struct ThrowExceptionJob : IJobParallelFor
     {
         public void Execute(int index)
@@ -27,7 +28,7 @@ public class BurstSafetyTests
         jobData.Schedule(100, 1).Complete();
     }
     
-    [ComputeJobOptimization(CompileSynchronously = true)]
+    [BurstCompile(CompileSynchronously = true)]
     struct WriteToReadOnlyArrayJob : IJob
     {
         [ReadOnly]
@@ -52,7 +53,7 @@ public class BurstSafetyTests
         jobData.test.Dispose();
     }
     
-    [ComputeJobOptimization(CompileSynchronously = true)]
+    [BurstCompile(CompileSynchronously = true)]
     struct ParallelForIndexChecksJob : IJobParallelFor
     {
         public NativeArray<int> test;
@@ -77,7 +78,7 @@ public class BurstSafetyTests
         jobData.test.Dispose();
     }
 
-    [ComputeJobOptimization(CompileSynchronously = true)]
+    [BurstCompile(CompileSynchronously = true)]
     struct AccessNullNativeArrayJob : IJobParallelFor
     {
         public void Execute(int index)
@@ -96,7 +97,7 @@ public class BurstSafetyTests
         new AccessNullNativeArrayJob().Schedule(100, 1).Complete();
     }
 
-    [ComputeJobOptimization(CompileSynchronously = true)]
+    [BurstCompile(CompileSynchronously = true)]
     unsafe struct AccessNullUnsafePtrJob : IJob
     {
         [NativeDisableUnsafePtrRestriction] float* myArray;

@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 
 namespace TwoStickPureExample
 {
@@ -28,7 +29,7 @@ namespace TwoStickPureExample
         [Inject] private PlayerCheck m_PlayerCheck;
         [Inject] private RemoveDeadBarrier m_RemoveDeadBarrier;
 
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct RemoveReadJob : IJob
         {
             public bool playerDead;

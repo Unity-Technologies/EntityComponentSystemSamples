@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace Samples.Common
 {
     public class RotationSpeedSystem : JobComponentSystem
     {
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct RotationSpeedRotation : IJobProcessComponentData<Rotation, RotationSpeed>
         {
             public float dt;

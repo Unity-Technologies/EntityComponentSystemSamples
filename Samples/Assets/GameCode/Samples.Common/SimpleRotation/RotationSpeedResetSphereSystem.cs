@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Samples.Common;
 using Unity.Transforms;
@@ -29,7 +30,7 @@ namespace Samples.Common
 
         [Inject] RotationSpeedGroup m_RotationSpeedGroup;
 
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct RotationSpeedResetSphereRotation : IJobParallelFor
         {
             public ComponentDataArray<RotationSpeed> rotationSpeeds;

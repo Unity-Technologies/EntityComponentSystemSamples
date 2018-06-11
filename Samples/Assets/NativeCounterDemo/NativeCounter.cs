@@ -40,7 +40,11 @@ unsafe public struct NativeCounter
 
         // Create a dispose sentinel to track memory leaks. This also creates the AtomicSafetyHandle
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0, label);
+#else
         DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0);
+#endif
 #endif
         // Initialize the count to 0 to avoid uninitialized data
         Count = 0;
@@ -86,7 +90,11 @@ unsafe public struct NativeCounter
     {
         // Let the dispose sentinel know that the data has been freed so it does not report any memory leaks
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Dispose(ref m_Safety, ref m_DisposeSentinel);
+#else
         DisposeSentinel.Dispose(m_Safety, ref m_DisposeSentinel);
+#endif
 #endif
 
         UnsafeUtility.Free(m_Counter, m_AllocatorLabel);
@@ -170,7 +178,11 @@ unsafe public struct NativePerThreadCounter
 
         // Create a dispose sentinel to track memory leaks. This also creates the AtomicSafetyHandle
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0, label);
+#else
         DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0);
+#endif
 #endif
         // Initialize the count to 0 to avoid uninitialized data
         Count = 0;
@@ -224,7 +236,11 @@ unsafe public struct NativePerThreadCounter
     {
         // Let the dispose sentinel know that the data has been freed so it does not report any memory leaks
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Dispose(ref m_Safety, ref m_DisposeSentinel);
+#else
         DisposeSentinel.Dispose(m_Safety, ref m_DisposeSentinel);
+#endif
 #endif
 
         UnsafeUtility.Free(m_Counter, m_AllocatorLabel);

@@ -2,6 +2,7 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Mathematics.Experimental;
 using Unity.Transforms;
@@ -34,7 +35,7 @@ namespace Samples.Boids
             public NativeArray<int>             cellCount;
         }
 
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct HashPositions : IJobParallelFor
         {
             [ReadOnly] public ComponentDataArray<Position> positions;
@@ -48,7 +49,7 @@ namespace Samples.Boids
             }
         }
 
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct MergeCells : IJobNativeMultiHashMapMergedSharedKeyIndices
         {
             public NativeArray<int>                 cellIndices;
@@ -104,7 +105,7 @@ namespace Samples.Boids
             }
         }
 
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct Steer : IJobParallelFor
         {
             [ReadOnly] public NativeArray<int>             cellIndices;

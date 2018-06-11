@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace Samples.Common
 
         [Inject] private MoveAlongCircleGroup m_MoveAlongCircleGroup;
     
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct MoveAlongCirclePosition : IJobParallelFor
         {
             public ComponentDataArray<Position> positions;

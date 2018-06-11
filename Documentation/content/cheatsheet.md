@@ -76,4 +76,4 @@ Here is a quick reference of the common classes, interfaces, structs, and attrib
 ### Attributes
 
 * [[BurstDiscard]](https://docs.unity3d.com/2018.1/Documentation/ScriptReference/Unity.Burst.BurstDiscardAttribute.html)
-* [ComputeJobOptimization]
+* [BurstCompile]

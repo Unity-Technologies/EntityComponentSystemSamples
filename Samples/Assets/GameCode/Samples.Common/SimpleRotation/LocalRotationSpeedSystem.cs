@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace Samples.Common
 
         [Inject] private LocalRotationSpeedGroup m_LocalRotationSpeedGroup;
     
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct LocalRotationSpeedLocalRotation : IJobParallelFor
         {
             public ComponentDataArray<LocalRotation> rotations;

@@ -155,6 +155,7 @@ public class RotationSpeedComponent : ComponentDataWrapper<RotationSpeed> { }
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -165,7 +166,7 @@ public class RotationSpeedSystem : JobComponentSystem
 {
     // IJobProcessComponentData is a simple way of iterating over all entities given the set of required compoenent types.
     // It is also more efficient than IJobParallelFor and more convenient.
-    [ComputeJobOptimization]
+    [BurstCompile]
     struct RotationSpeedRotation : IJobProcessComponentData<Rotation, RotationSpeed>
     {
         public float dt;

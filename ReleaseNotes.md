@@ -1,3 +1,14 @@
+# 0.0.8
+## New Features
+
+* EntityCommandBuffer.Concurrent added to support command buffer recording in parallel for-type jobs
+
+## Changes
+
+* Fixed the check for blittable types in NativeHashMap and NativeMultiHashMap values
+* Change deprecated attribute `[ComputeJobOptimization]` to `[BurstCompile]` (from namespace `Unity.Burst`)
+* Fixed bug with entity batch deletes (#149)
+
 # 0.0.7
 ## New Features
 * New system for frustum culling meshes processed by MeshInstanceRendererSystem. Add a MeshCullingComponent to the entity and it will only be rendered when it is in view. The culling system does not take shadows into account.

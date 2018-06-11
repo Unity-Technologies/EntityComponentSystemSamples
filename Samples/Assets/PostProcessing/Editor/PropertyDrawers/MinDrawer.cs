@@ -1,5 +1,9 @@
 using UnityEngine;
-using UnityEngine.PostProcessing;
+#if UNITY_2018_3_OR_NEWER
+using MinAttribute = UnityEngine.PostProcessing.MinAttribute;
+#else
+using MinAttribute = UnityEngine.PostProcessing.MinAttribute;
+#endif
 
 namespace UnityEditor.PostProcessing
 {

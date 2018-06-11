@@ -1,9 +1,10 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Mathematics;
 
 namespace Unity.Jobs.Tests
 {
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct AliasTest1 : IJob
     {
         private int field1;
@@ -29,7 +30,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct AliasTest2 : IJob
     {
         [ReadOnly]
@@ -46,7 +47,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct AliasTest3 : IJob
     {
         [ReadOnly]
@@ -64,7 +65,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct AliasTest4 : IJob
     {
         public NativeArray<int> a;
@@ -79,7 +80,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct AliasTest5 : IJob
     {
         [ReadOnly]
@@ -116,7 +117,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low)]
+    [BurstCompile(Accuracy = Accuracy.Low)]
     public struct AliasTest6 : IJob
     {
         public struct Sphere
@@ -156,7 +157,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct AliasTest7 : IJob
     {
         [ReadOnly] public NativeArray<float> a;
@@ -172,7 +173,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct PartialWrite : IJob
     {
         [ReadOnly]
@@ -194,7 +195,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization]
+    [BurstCompile]
     public struct PartialWriteWorkaround : IJob
     {
         [ReadOnly]
@@ -220,7 +221,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct IntToFloatPenalty : IJob
     {
         [ReadOnly]
@@ -237,7 +238,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct IntToFloatPenaltyWorkaround : IJob
     {
         [ReadOnly]
@@ -254,7 +255,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct IntToFloatPenaltyWorkaroundUnroll : IJob
     {
         [ReadOnly]
@@ -280,7 +281,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct SquareRootRecip : IJob
     {
         [ReadOnly]
@@ -296,7 +297,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct SquareRoot : IJob
     {
         [ReadOnly]
@@ -312,7 +313,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct DivisionByConstantPowerOfTwo : IJob
     {
         [ReadOnly]
@@ -328,7 +329,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct DivisionByConstant : IJob
     {
         [ReadOnly]
@@ -344,7 +345,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct DivisionByScalar : IJob
     {
         public float divisor;
@@ -361,7 +362,7 @@ namespace Unity.Jobs.Tests
         }
     }
 
-    [ComputeJobOptimization(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
+    [BurstCompile(Accuracy = Accuracy.Low, Support = Support.Relaxed)]
     public struct DivisionByVariable : IJob
     {
         [ReadOnly]

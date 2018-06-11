@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms2D;
 
@@ -58,7 +59,7 @@ namespace TwoStickPureExample
         }
         [Inject] EnemyShotData m_EnemyShots;
 
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct CollisionJob : IJobParallelFor
         {
             public float CollisionRadiusSquared;

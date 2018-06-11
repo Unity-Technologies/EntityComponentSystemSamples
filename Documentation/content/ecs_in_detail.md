@@ -139,7 +139,7 @@ Managing dependencies is hard. This is why in __JobComponentSystem__ we are doin
 ```cs
 public class RotationSpeedSystem : JobComponentSystem
 {
-    [ComputeJobOptimization]
+    [BurstCompile]
     struct RotationSpeedRotation : IJobProcessComponentData<Rotation, RotationSpeed>
     {
         public float dt;

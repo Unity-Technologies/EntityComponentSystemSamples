@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace Samples.Common
 
         [Inject] private BounceGroup m_BounceGroup;
     
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct BouncePosition : IJobParallelFor
         {
             public ComponentDataArray<Position> positions;
