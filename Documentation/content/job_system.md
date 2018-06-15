@@ -209,16 +209,32 @@ public struct MyParallelJob : IJobParallelFor
 **Main thread code**:
 
 ```C#
+const int itemCount = 1000;
+var a = new NativeArray<float>(itemCount, Allocator.Temp);
+var b = new NativeArray<float>(itemCount, Allocator.Temp);
+var result = new NativeArray<float>(itemCount, Allocator.Temp);
+
+for (int i = 0; i < itemCount; i++)
+{
+	a[i] = 10;
+	b[i] = 42;
+}
+
 var jobData = new MyParallelJob();
-jobData.a = 10;  
-jobData.b = 10;
+jobData.a = a;
+jobData.b = b;
 jobData.result = result;
 
-// Schedule the job with one Execute per index in the results array and only 1 item per processing batch
-JobHandle handle = jobData.Schedule(result.Length, 1);
+// Schedule the job with one Execute per index in the results array and 64 items per processing batch
+JobHandle handle = jobData.Schedule(result.Length, 64);
 
 // Wait for the job to complete
 handle.Complete();
+
+// Free memory of the allocated arrays
+a.Dispose();
+b.Dispose();
+result.Dispose();
 ```
 
 ## Job System tips and troubleshooting
