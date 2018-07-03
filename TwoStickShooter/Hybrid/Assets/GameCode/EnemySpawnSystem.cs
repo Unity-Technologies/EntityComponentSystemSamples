@@ -11,7 +11,7 @@ namespace TwoStickHybridExample
 
         public struct State
         {
-            public int Length;
+            public readonly int Length;
             public ComponentArray<EnemySpawnSystemState> S;
         }
 
@@ -19,18 +19,18 @@ namespace TwoStickHybridExample
 
         public static void SetupComponentData()
         {
-            
+
             var oldState = Random.state;
             Random.InitState(0xaf77);
-            
+
             var state = TwoStickBootstrap.Settings.EnemySpawnState;
             state.Cooldown = 0.0f;
             state.SpawnedEnemyCount = 0;
             state.RandomState = Random.state;
-            
+
             Random.state = oldState;
         }
-        
+
         protected override void OnUpdate()
         {
             var state = m_State.S[0];

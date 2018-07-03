@@ -13,7 +13,7 @@ namespace Samples.Common
             [ReadOnly] public ComponentDataArray<RandomInitialHeading> RandomInitialHeadiings;
             [ReadOnly] public EntityArray Entities;
             public ComponentDataArray<Heading> Headings;
-            public int Length;
+            public readonly int Length;
         }
 
         [Inject] RandomInitialHeadingGroup m_Group;

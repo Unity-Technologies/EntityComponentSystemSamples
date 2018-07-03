@@ -231,7 +231,7 @@ namespace Samples.Dungeon
             public ComponentDataArray<Board> Boards;
             public ComponentDataArray<Position> Positions;
             public EntityArray Entities;
-            public int Length;
+            public readonly int Length;
         }
         [Inject] private BoardGroupData BoardGroup;
 
@@ -539,7 +539,7 @@ namespace Samples.Dungeon
             var entity = EntityManager.Instantiate(prefabs[randomIndex]);
             var matrix = new TransformMatrix
             {
-                Value = math.translate(parentPosition.Value + new float3(xCoord,0.0f,yCoord))
+                Value = float4x4.translate(parentPosition.Value + new float3(xCoord,0.0f,yCoord))
             };
             EntityManager.SetComponentData(entity, matrix);
         } 

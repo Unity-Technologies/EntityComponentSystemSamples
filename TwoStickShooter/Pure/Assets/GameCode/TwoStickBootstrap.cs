@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Rendering;
 using Unity.Transforms;
 using Unity.Transforms2D;
+using UnityEngine.SceneManagement;
 
 namespace TwoStickPureExample
 {
@@ -64,9 +65,26 @@ namespace TwoStickPureExample
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        public static void InitializeAfterSceneLoad()
+        {
+            var settingsGO = GameObject.Find("Settings");
+            if (settingsGO == null)
+            {
+                SceneManager.sceneLoaded += OnSceneLoaded;
+                return;
+            }
+            
+            InitializeWithScene();
+        }
+        
         public static void InitializeWithScene()
         {
             var settingsGO = GameObject.Find("Settings");
+            if (settingsGO == null)
+            {
+                SceneManager.sceneLoaded += OnSceneLoaded;
+                return;
+            }
             Settings = settingsGO?.GetComponent<TwoStickSettings>();
             if (!Settings)
                 return;
@@ -79,6 +97,11 @@ namespace TwoStickPureExample
             EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
 
             World.Active.GetOrCreateManager<UpdatePlayerHUD>().SetupGameObjects();
+        }
+
+        private static void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+        {
+            InitializeWithScene();
         }
 
         private static MeshInstanceRenderer GetLookFromPrototype(string protoName)

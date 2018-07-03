@@ -230,7 +230,7 @@ namespace Samples.Dungeon.First
         {
             public ComponentDataArray<Board> Boards;
             public EntityArray Entities;
-            public int Length;
+            public readonly int Length;
         }
         [Inject] private BoardGroupData BoardGroup;
 

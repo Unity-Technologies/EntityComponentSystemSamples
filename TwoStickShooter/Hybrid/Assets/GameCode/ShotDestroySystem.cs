@@ -17,7 +17,7 @@ namespace TwoStickHybridExample
 
         struct PlayerCheck
         {
-            public int Length;
+            public readonly int Length;
             [ReadOnly] public ComponentArray<PlayerInput> PlayerInput;
         }
 

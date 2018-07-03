@@ -48,9 +48,7 @@ This is a set of projects that demonstrates different approaches with the MonoBe
 > Note: In Unity 2018.1 the new Project window is a little different because it offers you more than just 2D and 3D options.
 
 * Once the project is created then navigate in the Editor menu to: __Edit__ > __Project Settings__ > __Player__ > __Other Settings__ then set __Scripting Runtime Version__ to: __4.x equivalent__. This will cause Unity to restart.
-* Go to your project location in your computer's file manager.
-* Open the file _<project-name>/Packages/manifest.json_ in any text editor.
-* Copy and paste the [package manifest](Samples/Packages/manifest.json) into Packages/manifest.json file of your project.
+* Then navigate to __Window__ > __Package Manager__ and select the __Entities__ package and install it. This is also where you update the package to a newer version.
 
 ## Documentation
 Looking for information on how to get started or have specific questions? Visit our ECS & Job system documentation 

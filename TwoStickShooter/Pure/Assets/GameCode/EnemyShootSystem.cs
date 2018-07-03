@@ -12,7 +12,7 @@ namespace TwoStickPureExample
     {
         public struct Data
         {
-            public int Length;
+            public readonly int Length;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
             public ComponentDataArray<EnemyShootState> ShootState;
         }
@@ -21,7 +21,7 @@ namespace TwoStickPureExample
 
         public struct PlayerData
         {
-            public int Length;
+            public readonly int Length;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
             [ReadOnly] public ComponentDataArray<PlayerInput> PlayerInput;
         }

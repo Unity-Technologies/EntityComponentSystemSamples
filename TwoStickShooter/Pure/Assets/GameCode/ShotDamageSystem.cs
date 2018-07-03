@@ -17,7 +17,7 @@ namespace TwoStickPureExample
     {
         struct Players
         {
-            public int Length;
+            public readonly int Length;
             public ComponentDataArray<Health> Health;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
             [ReadOnly] public ComponentDataArray<PlayerInput> PlayerMarker;
@@ -27,7 +27,7 @@ namespace TwoStickPureExample
 
         struct Enemies
         {
-            public int Length;
+            public readonly int Length;
             public ComponentDataArray<Health> Health;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
             [ReadOnly] public ComponentDataArray<Enemy> EnemyMarker;
@@ -40,7 +40,7 @@ namespace TwoStickPureExample
         /// </summary>
         struct PlayerShotData
         {
-            public int Length;
+            public readonly int Length;
             public ComponentDataArray<Shot> Shot;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
             [ReadOnly] public ComponentDataArray<PlayerShot> PlayerShotMarker;
@@ -52,7 +52,7 @@ namespace TwoStickPureExample
         /// </summary>
         struct EnemyShotData
         {
-            public int Length;
+            public readonly int Length;
             public ComponentDataArray<Shot> Shot;
             [ReadOnly] public ComponentDataArray<Position2D> Position;
             [ReadOnly] public ComponentDataArray<EnemyShot> EnemyShotMarker;

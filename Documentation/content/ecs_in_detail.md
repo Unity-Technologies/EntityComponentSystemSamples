@@ -419,6 +419,8 @@ As you can see, the API is very similar to the entity manager API. In this mode,
 
 Again let's look at the two stick shooter sample to see how this works in practice.
 
+### Barrier
+
 First, a barrier system is declared:
 
 ```cs
@@ -462,3 +464,5 @@ ECS ships with the __GameObjectEntity__ component. It is a MonoBehaviour. In __O
 TODO: what do you mean by "the GameObjectEntity component creates an Entity with all components on the GameObject" in the sentence above? do you mean all required components that this GameObject should have in that particular case? or is there a pre-defined set of components that will always be added? It's a little unclear.
 
 > Note: for the time being, you must add a GameObjectEntity component on each GameObject that you want to be visible / iterable from the ComponentSystem.
+
+## SystemStateComponentData

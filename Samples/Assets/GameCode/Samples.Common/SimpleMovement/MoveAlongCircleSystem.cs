@@ -16,7 +16,7 @@ namespace Samples.Common
             public ComponentDataArray<MoveAlongCircle> moveAlongCircles;
             [ReadOnly]
             public ComponentDataArray<MoveSpeed> moveSpeeds;
-            public int Length;
+            public readonly int Length;
         }
 
         [Inject] private MoveAlongCircleGroup m_MoveAlongCircleGroup;

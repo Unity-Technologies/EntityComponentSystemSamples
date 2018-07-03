@@ -1,3 +1,14 @@
+# 0.0.9
+## New Features
+* Galactic Conquest sample added
+    - Left click to select planets of the same color
+    - Right click to send ships from the selected planets to the planet under the mouse
+    - Can be set to play by itself if running the SceneSwitcher scene
+* GravityDemo sample added
+    - Press 1-7 on the keyboard while it's running to change to different simulations
+    - Left click to spawn new asteroids from the camera
+    - While holding right click, move the mouse and use AWSD buttons to control the camera
+
 # 0.0.8
 ## New Features
 

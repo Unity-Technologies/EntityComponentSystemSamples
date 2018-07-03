@@ -15,7 +15,7 @@ namespace Samples.Common
             public SharedComponentDataArray<SpawnRandomCircle> Spawner;
             public ComponentDataArray<Position>                Position;
             public EntityArray                                 Entity;
-            public int                                         Length;
+            public readonly int                                Length;
         }
 
         [Inject] Group m_Group;

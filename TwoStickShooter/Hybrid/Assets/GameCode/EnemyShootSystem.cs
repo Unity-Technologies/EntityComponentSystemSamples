@@ -10,7 +10,7 @@ namespace TwoStickHybridExample
     {
         public struct Data
         {
-            public int Length;
+            public readonly int Length;
             public ComponentArray<Position2D> Position;
             public ComponentArray<EnemyShootState> ShootState;
         }
@@ -19,7 +19,7 @@ namespace TwoStickHybridExample
 
         public struct PlayerData
         {
-            public int Length;
+            public readonly int Length;
             public ComponentArray<Position2D> Position;
             public ComponentArray<PlayerInput> PlayerInput;
         }

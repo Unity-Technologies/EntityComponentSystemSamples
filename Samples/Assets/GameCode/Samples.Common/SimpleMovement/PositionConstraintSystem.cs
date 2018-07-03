@@ -14,7 +14,7 @@ namespace Samples.Common
         {
             [ReadOnly] public ComponentDataArray<PositionConstraint> positionConstraints;
             [ReadOnly] public EntityArray                            entities;
-            public int                                               Length;
+            public readonly int                                      Length;
         }
 
         [Inject] private PositionConstraintsGroup  m_PositionContraintsGroup;

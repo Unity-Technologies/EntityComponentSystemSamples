@@ -13,7 +13,7 @@ namespace Samples.Common
         {
             public ComponentDataArray<Position> positions;
             public ComponentDataArray<Bounce> bounce;
-            public int Length;
+            public readonly int Length;
         }
         
 

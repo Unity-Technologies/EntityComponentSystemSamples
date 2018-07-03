@@ -10,7 +10,7 @@ namespace TwoStickPureExample
     {
         struct State
         {
-            public int Length;
+            public readonly int Length;
             public ComponentDataArray<EnemySpawnCooldown> Cooldown;
             public ComponentDataArray<EnemySpawnSystemState> S;
         }

@@ -10,7 +10,7 @@ namespace TwoStickHybridExample
     {
         public struct PlayerData
         {
-            public int Length;
+            public readonly int Length;
             public EntityArray Entity;
             public ComponentArray<PlayerInput> Input;
             public ComponentArray<Health> Health;

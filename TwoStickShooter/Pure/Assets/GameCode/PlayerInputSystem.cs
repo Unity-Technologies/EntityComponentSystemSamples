@@ -7,7 +7,7 @@ namespace TwoStickPureExample
     {
         struct PlayerData
         {
-            public int Length;
+            public readonly int Length;
 
             public ComponentDataArray<PlayerInput> Input;
         }

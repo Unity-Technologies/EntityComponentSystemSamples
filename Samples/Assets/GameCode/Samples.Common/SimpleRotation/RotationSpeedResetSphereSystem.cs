@@ -16,7 +16,7 @@ namespace Samples.Common
             [ReadOnly] public ComponentDataArray<RotationSpeedResetSphere> rotationSpeedResetSpheres;
             [ReadOnly] public ComponentDataArray<Radius> spheres;
             [ReadOnly] public ComponentDataArray<Position> positions;
-            public int Length;
+            public readonly int Length;
         }
 
         [Inject] RotationSpeedResetSphereGroup m_RotationSpeedResetSphereGroup;
@@ -25,7 +25,7 @@ namespace Samples.Common
         {
             public ComponentDataArray<RotationSpeed> rotationSpeeds;
             [ReadOnly] public ComponentDataArray<Position> positions;
-            public int Length;
+            public readonly int Length;
         }
 
         [Inject] RotationSpeedGroup m_RotationSpeedGroup;

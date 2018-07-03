@@ -11,7 +11,7 @@ namespace TwoStickPureExample
     {
         public struct PlayerData
         {
-            public int Length;
+            public readonly int Length;
             [ReadOnly] public EntityArray Entity;
             [ReadOnly] public ComponentDataArray<PlayerInput> Input;
             [ReadOnly] public ComponentDataArray<Health> Health;

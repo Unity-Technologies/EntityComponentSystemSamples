@@ -1,26 +1,112 @@
 # ECS concepts
 
-If you are familiar with [Entity-component-system](https://en.wikipedia.org/wiki/Entity%E2%80%93component%E2%80%93system) (ECS) concepts, you might see the potential for naming conflicts with Unity's existing __GameObject__/__Component__ setup. Below is a list comparing how ECS concepts map to Unity's implementation:
+If you are familiar with [Entity-component-system](https://en.wikipedia.org/wiki/Entity%E2%80%93component%E2%80%93system) (ECS) concepts, you might see the potential for naming conflicts with Unity's existing __GameObject__/__Component__ setup. 
 
-### Entity → Entity
+The purpose of this page is:
+1. Clarify and disambiguate the concepts as used in the ECS.
+2. Provide a brief introduction to each concept as an entry point to a new user.
 
-Unity did not have an __Entity__ to begin with, so the structure is simply named after the concept. Entities are like super lightweight GameObjects, in that they don't do much on their own, and they don't store any data (not even a name!).
+### EntityManager
+Manages memory and structural changes.
 
-You can add Components to Entities; similar to how you add Components to GameObjects.
+### ComponentData
+Parallel streams of concrete, [blittable](https://docs.microsoft.com/en-us/dotnet/framework/interop/blittable-and-non-blittable-types) data. 
 
-### Component → ComponentData
+e.g.
 
-We are introducing a new high-performance ComponentType. 
+| Position | HitPoints |
+| ---------- | -----------|
+| 64,30     | 69          |
+| 58,55     | 70          |
+| 95,81     | 81          |
+| 10,50     | 19          |
+| 36,24     | 38          |
+| 67,33     | 40          |
 
-```
-struct MyComponent: IComponentData
-{} 
-```
+See: [IComponentData in detail](ecs_in_detail.md#icomponentdata)
 
-The __EntityManager__ manages the memory and makes hard guarantees about linear memory access when iterating over a set of Components. It also has zero overhead on a per Entity basis beyond the size of the struct itself.
 
-In order to differentiate it from the existing component types (such as __MonoBehaviours__), the name refers directly to the fact that it only stores data. __ComponentData__ can be added and removed from Entities.
+### Entity
+An ID which can be used for indirect component lookups for the purposes of graph traversal.
 
-### System → ComponentSystem
+e.g.
 
-There are a lot of "systems" in Unity, so the name includes the umbrella term, "component" as well. __ComponentSystems__ define your game's behavior, and can operate on several types of data: traditional GameObjects and Components, or pure ECS ComponentData and Entity structs.
+| Entity | Position | HitPoints |
+|--- | ---------- | -----------|
+|0 | 64,30     | 69          |
+|1 | 58,55     | 70          |
+|2 | 95,81     | 81          |
+|3 | 10,50     | 19          |
+|4 | 36,24     | 38          |
+|5 | 67,33     | 40          |
+
+See: [Entity in detail](ecs_in_detail.md#entity)
+
+### SharedComponentData
+Type of ComponentData where each unique value is only stored once. ComponentData streams are divided into subsets by each value of all SharedComponentData.
+
+e.g. (Mesh SharedComponentData)
+
+__Mesh = RocketShip__
+
+| Position | HitPoints |
+| ---------- | -----------|
+| 64,30     | 69          |
+| 58,55     | 70          |
+| 95,81     | 81          |
+
+__Mesh = Bullet__
+
+| Position | HitPoints |
+| ---------- | -----------|
+| 10,50     | 19          |
+| 36,24     | 38          |
+| 67,33     | 40          |
+
+See: [SharedComponentData in detail](ecs_in_detail.md#shared-componentdata)
+
+### EntityArchetype
+Specific set of ComponentData types and SharedComponentData values which define the subsets of ComponentData streams stored in the EntityManager.
+
+e.g. In the above, there are two EntityArchetypes:
+1. Position, HitPoints, Mesh = RocketShip
+2. Position, HitPoints, Mesh = Bullet
+
+See: [EntityArchetype in detail](ecs_in_detail.md#entityarchetype)
+
+### ComponentSystem
+Where gameplay/system logic/behavior occurs.
+
+See: [ComponentSystem in detail](ecs_in_detail.md#componentsystem)
+
+### World
+A unique EntityManager with specific instances of defined ComponenetSystems. Multiple Worlds may exist and work on independent data sets.
+
+See: [World in detail](ecs_in_detail.md#world)
+
+### SystemStateComponentData
+A specific type of ComponentData which is not serialized or removed by default when an Entity ID is deleted. Used for internal state and resource management inside a system. Allows you to manage construction and destruction of resources.
+
+See: [SystemStateComponentData in detail](ecs_in_detail.md#systemstatecomponentdata)
+
+### JobComponentSystem
+A type of ComponentSystem where jobs are queued independently of the JobComponentSystem's update, in the background. Those jobs are guaranteed to be completed in the same order as the systems. 
+
+See: [JobComponentSystem in detail](ecs_in_detail.md#jobcomponentsystem)
+
+### EntityCommandBuffer
+A list of structural changes to the data in an EntityManager for later completion. Structural changes are:
+1. Adding Component
+2. Removing Component
+3. Changing SharedComponent value
+
+See: [EntityCommandBuffer in detail](ecs_in_detail.md#entitycommandbuffer)
+
+### Barrier
+A type of ComponentSystem, which provides an EntityCommandBuffer. i.e. A specific (synchronization) point in the frame where that EntityCommandBuffer will be resolved.
+
+See: [Barrier in detail](ecs_in_detail.md#barrier)
+
+
+
+

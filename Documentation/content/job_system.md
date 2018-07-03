@@ -210,15 +210,19 @@ public struct MyParallelJob : IJobParallelFor
 
 ```C#
 var jobData = new MyParallelJob();
-jobData.a = 10;  
-jobData.b = 10;
-jobData.result = result;
+jobData.a = new NativeArray<float>(new float[] { 1, 2, 3 }, Allocator.TempJob);
+jobData.b = new NativeArray<float>(new float[] { 6, 7, 8 }, Allocator.TempJob);
+jobData.result = new NativeArray<float>(3, Allocator.TempJob);
 
 // Schedule the job with one Execute per index in the results array and only 1 item per processing batch
-JobHandle handle = jobData.Schedule(result.Length, 1);
+JobHandle handle = jobData.Schedule(jobData.result.Length, 1);
 
 // Wait for the job to complete
 handle.Complete();
+
+jobData.a.Dispose();
+jobData.b.Dispose();
+jobData.result.Dispose();
 ```
 
 ## Job System tips and troubleshooting
