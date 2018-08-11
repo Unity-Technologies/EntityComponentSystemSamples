@@ -32,14 +32,14 @@ Select __Create Empty__ GameObject in the Scene and name it "RotatingCubeSpawner
 
 Add these components to RotatingCubeSpawner:
 
-1. __Unity.Entities.Hybrid/GameObjectEntity__ (located in `Packages/com.unity.entities/Unity.Entities.Hybrid/GameObjectEntity.cs` )
+1. __Unity.Entities.Hybrid/GameObjectEntity__ (located in `Packages/com.unity.entities/Unity.Entities.Hybrid/GameObjectEntity.cs` when you install `Entities` package from Window -> Package Manager)
 1. [__UnityEngine.ECS.SpawnerShim/SpawnRandomCircleComponent__](../../Samples/Assets/GameCode/Samples.Common/SpawnerShim/SpawnRandomCircleComponent.cs)
-1. __Unity.Transforms/PositionComponent__(located in `Packages/com.unity.entities/Unity.Transforms/PositionComponent.cs` when you install Entities package from Window -> Package Manager)
-1. __Unity.Transforms/CopyInitialTransformFromGameObjectComponent__(located in `Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs` when you install Entities package from Window -> Package Manager)
+1. __Unity.Transforms/PositionComponent__(located in `Packages/com.unity.entities/Unity.Transforms/PositionComponent.cs` when you install `Entities` package from Window -> Package Manager)
+1. __Unity.Transforms/CopyInitialTransformFromGameObjectComponent__(located in `Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs` when you install `Entities` package from Window -> Package Manager)
 
 Set the properties of __SpawnRandomCircleComponent__ to:
 
-1. __Prefab__: [*Assets/SampleAssets/TestRotatingCube.prefab*](../../ECSJobDemos/Assets/SampleAssets/TestRotatingCube.prefab) 
+1. __Prefab__: [*Assets/SampleAssets/TestRotatingCube.prefab*](../../Samples/Assets/SampleAssets/TestRotatingCube.prefab) 
 This is a prefab container which contains the components for the each Entity that will be spawned. 
 2. __Radius__: 25. 
 Spawn entities 25m from the center of the circle.
