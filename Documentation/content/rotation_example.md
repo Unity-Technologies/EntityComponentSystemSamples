@@ -36,8 +36,8 @@ Add these components to RotatingCubeSpawner:
 
 1. __Unity.Entities.Hybrid/GameObjectEntity__ (located in `Packages/com.unity.entities/Unity.Entities.Hybrid/GameObjectEntity.cs` when you install `Entities` package from Window -> Package Manager)
 1. [__UnityEngine.ECS.SpawnerShim/SpawnRandomCircleComponent__](../../Samples/Assets/GameCode/Samples.Common/SpawnerShim/SpawnRandomCircleComponent.cs)
-1. __Unity.Transforms/PositionComponent__(located in `Packages/com.unity.entities/Unity.Transforms/PositionComponent.cs` when you install `Entities` package from Window -> Package Manager)
-1. __Unity.Transforms/CopyInitialTransformFromGameObjectComponent__(located in `Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs` when you install `Entities` package from Window -> Package Manager)
+1. __Unity.Transforms/PositionComponent__ (located in `Packages/com.unity.entities/Unity.Transforms/PositionComponent.cs` when you install `Entities` package from Window -> Package Manager)
+1. __Unity.Transforms/CopyInitialTransformFromGameObjectComponent__ (located in `Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs` when you install `Entities` package from Window -> Package Manager)
 
 Set the properties of __SpawnRandomCircleComponent__ to:
 
@@ -62,11 +62,11 @@ Select __Create Empty__ GameObject in the scene and name it "TestResetRotationSp
 
 Add these components to TestResetRotationSphere:
 
-1. [__Unity.Transforms/PositionComponent__](located in `Packages/com.unity.entities/Unity.Transforms/PositionComponent.cs` when you install `Entities` package from Window -> Package Manager)
-2. [__Unity.Transforms/CopyInitialTransformFromGameObjectComponent__](located in `Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs` when you install `Entities` package from Window -> Package Manager)
-3. [__Unity.Transforms/TransformMatrixComponent__](located in `Packages/com.unity.entities/Unity.Transforms/TransformMatrixComponent.cs` when you install `Entities` package from Window -> Package Manager)
-4. [__Unity.Rendering.Hybrid/MeshInstanceRendererComponent__](located in `Packages/com.unity.entities/Unity.Rendering.Hybrid/MeshInstanceRendererComponent.cs` when you install `Entities` package from Window -> Package Manager)
-5. [__UnityEngine.ECS.SimpleMovement/MoveSpeedComponent__](located in `Packages/com.unity.entities/Unity.Transforms/MoveSpeedComponent.cs` when you install `Entities` package from Window -> Package Manager)
+1. __Unity.Transforms/PositionComponent__ (located in `Packages/com.unity.entities/Unity.Transforms/PositionComponent.cs` when you install `Entities` package from Window -> Package Manager)
+2. __Unity.Transforms/CopyInitialTransformFromGameObjectComponent__ (located in `Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs` when you install `Entities` package from Window -> Package Manager)
+3. __Unity.Transforms/TransformMatrixComponent__ (located in `Packages/com.unity.entities/Unity.Transforms/TransformMatrixComponent.cs` when you install `Entities` package from Window -> Package Manager)
+4. __Unity.Rendering.Hybrid/MeshInstanceRendererComponent__ (located in `Packages/com.unity.entities/Unity.Rendering.Hybrid/MeshInstanceRendererComponent.cs` when you install `Entities` package from Window -> Package Manager)
+5. __UnityEngine.ECS.SimpleMovement/MoveSpeedComponent__ (located in `Packages/com.unity.entities/Unity.Transforms/MoveSpeedComponent.cs` when you install `Entities` package from Window -> Package Manager)
 6. [__UnityEngine.ECS.SimpleMovement/MoveAlongCircleComponent__](../../Samples/Assets/GameCode/Samples.Common/SimpleMovement/MoveAlongCircleComponent.cs)
 7. [__UnityEngine.ECS.SimpleRotation/RotationSpeedResetSphereComponent__](../../Samples/Assets/GameCode/Samples.Common/SimpleRotation/RotationSpeedResetSphereComponent.cs)
 
