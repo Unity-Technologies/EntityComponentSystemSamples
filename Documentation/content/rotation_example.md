@@ -1,3 +1,5 @@
+**Note**: this document is effective for Entities package v0.0.12-preview8. It may be outdated for other versions.
+
 # RotationExample.unity
 
 ![](https://media.giphy.com/media/3o7WIPjJUcuIEze5Ww/giphy.gif)
@@ -64,9 +66,9 @@ Add these components to TestResetRotationSphere:
 2. [__Unity.Transforms/CopyInitialTransformFromGameObjectComponent__](located in `Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs` when you install `Entities` package from Window -> Package Manager)
 3. [__Unity.Transforms/TransformMatrixComponent__](located in `Packages/com.unity.entities/Unity.Transforms/TransformMatrixComponent.cs` when you install `Entities` package from Window -> Package Manager)
 4. [__Unity.Rendering.Hybrid/MeshInstanceRendererComponent__](located in `Packages/com.unity.entities/Unity.Rendering.Hybrid/MeshInstanceRendererComponent.cs` when you install `Entities` package from Window -> Package Manager)
-5. [__UnityEngine.ECS.SimpleMovement/MoveSpeedComponent__](../../Samples/Assets/GameCode/Samples.Common/SimpleMovement/MoveSpeedComponent.cs)
-6. [__UnityEngine.ECS.SimpleMovement/MoveAlongCircleComponent__](../../ECSJobDemos/Assets/GameCode/SimpleMovement/MoveAlongCircleComponent.cs)
-7. [__UnityEngine.ECS.SimpleRotation/RotationSpeedResetSphereComponent__](../../ECSJobDemos/Assets/GameCode/SimpleRotation/RotationSpeedResetSphereComponent.cs)
+5. [__UnityEngine.ECS.SimpleMovement/MoveSpeedComponent__](located in `Packages/com.unity.entities/Unity.Transforms/MoveSpeedComponent.cs` when you install `Entities` package from Window -> Package Manager)
+6. [__UnityEngine.ECS.SimpleMovement/MoveAlongCircleComponent__](../../Samples/Assets/GameCode/Samples.Common/SimpleMovement/MoveAlongCircleComponent.cs)
+7. [__UnityEngine.ECS.SimpleRotation/RotationSpeedResetSphereComponent__](../../Samples/Assets/GameCode/Samples.Common/SimpleRotation/RotationSpeedResetSphereComponent.cs)
 
 Like the RotatingCubeSpawner, the PositionComponent specifies that the Entity that is created from the TestResetRotationSphere GameObject has a position in ECS and the CopyInitialTransformFromGameObjectComponent specifies that **only** the initial value for PositionComponent in ECS will be copied from the GameObject's Transform. 
 
@@ -102,21 +104,3 @@ Set the properties of the RotationSpeedResetSphereComponent:
 2. __Radius__: 2 (meters)
 
 This component specifies that if any other PositionComponent is within the sphere defined by the PositionComponent on this Entity and the radius, the TransformRotationComponent on that Entity should be set to speed, if it exists.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
