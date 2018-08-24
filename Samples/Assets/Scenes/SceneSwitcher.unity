@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.1273173, g: 0.13414751, b: 0.121078596, a: 1}
+  m_IndirectSpecularColor: {r: 0.1273174, g: 0.13414761, b: 0.12107885, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -116,9 +116,9 @@ NavMeshSettings:
 --- !u!1 &1841332243
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 1841332245}
   - component: {fileID: 1841332244}
@@ -132,7 +132,7 @@ GameObject:
 --- !u!114 &1841332244
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1841332243}
   m_Enabled: 1
@@ -143,10 +143,30 @@ MonoBehaviour:
   SceneSwitchInterval: 60
   TimeUntilNextSwitch: 5
   CurrentSceneIndex: 0
+  EntitiesDestroyed: 0
+  SceneConfigs:
+  - SceneName: Dungeon
+    CustomDuration: 5
+  - SceneName: HierarchyExample
+    CustomDuration: 10
+  - SceneName: RotationExample
+    CustomDuration: 10
+  - SceneName: TransformSystemExamples_00_Position
+    CustomDuration: 5
+  - SceneName: TransformSystemExamples_01_Scale
+    CustomDuration: 5
+  - SceneName: TwoStickClassic
+    CustomDuration: 5
+  - SceneName: TwoStickHybrid
+    CustomDuration: 5
+  - SceneName: TwoStickPure
+    CustomDuration: 5
+  - SceneName: ChainExample
+    CustomDuration: 10
 --- !u!4 &1841332245
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1841332243}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}

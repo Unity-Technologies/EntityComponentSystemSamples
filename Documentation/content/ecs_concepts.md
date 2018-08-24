@@ -65,6 +65,15 @@ __Mesh = Bullet__
 
 See: [SharedComponentData in detail](ecs_in_detail.md#shared-componentdata)
 
+### Dynamic Buffers
+
+This is a type of component data that allows a variable-sized, "stretchy"
+buffer to be associated with an entity. Behaves as a component type that
+carries an internal capacity of a certain number of elements, but can allocate
+a heap memory block if the internal capacity is exhausted.
+
+See: [Dynamic Buffers](dynamic_buffers.md)
+
 ### EntityArchetype
 Specific set of ComponentData types and SharedComponentData values which define the subsets of ComponentData streams stored in the EntityManager.
 
@@ -80,7 +89,7 @@ Where gameplay/system logic/behavior occurs.
 See: [ComponentSystem in detail](ecs_in_detail.md#componentsystem)
 
 ### World
-A unique EntityManager with specific instances of defined ComponenetSystems. Multiple Worlds may exist and work on independent data sets.
+A unique EntityManager with specific instances of defined ComponentSystems. Multiple Worlds may exist and work on independent data sets.
 
 See: [World in detail](ecs_in_detail.md#world)
 

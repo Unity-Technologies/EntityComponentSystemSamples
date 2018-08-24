@@ -7,7 +7,6 @@ using Unity.Transforms;
 
 namespace Samples.Common
 {
-    [UpdateAfter(typeof(TransformSystem))]
     public class PositionConstraintSystem : JobComponentSystem
     {
         struct PositionConstraintsGroup
@@ -31,18 +30,21 @@ namespace Samples.Common
             {
                 for (int i = 0; i < positionConstraints.Length; i++)
                 {
-                    var childEntity    = positionConstraintEntities[i];
-                    var parentEntity   = positionConstraints[i].parentEntity;
-                    var childPosition  = positions[childEntity].Value;
+                    var childEntity = positionConstraintEntities[i];
+                    var parentEntity = positionConstraints[i].parentEntity;
+                    var childPosition = positions[childEntity].Value;
                     var parentPosition = positions[parentEntity].Value;
-                    var d              = childPosition - parentPosition;
-                    var len            = math.length(d);
-                    var nl             = math.min(len,positionConstraints[i].maxDistance);
-                    
-                    positions[childEntity] = new Position
+                    var d = childPosition - parentPosition;
+                    var len = math.length(d);
+                    if (len >= 0.0001f) // TODO- find out why parent/child position are identical
                     {
-                        Value = parentPosition + ((d * nl) / len)
-                    };
+                        var nl = math.min(len, positionConstraints[i].maxDistance);
+
+                        positions[childEntity] = new Position
+                        {
+                            Value = parentPosition + ((d * nl) / len)
+                        };
+                    }
                 }
             }
         }

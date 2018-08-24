@@ -146,7 +146,7 @@ public class RotationSpeedSystem : JobComponentSystem
 
         public void Execute(ref Rotation rotation, [ReadOnly]ref RotationSpeed speed)
         {
-            rotation.value = math.mul(math.normalize(rotation.value), math.axisAngle(math.up(), speed.speed * dt));
+            rotation.value = math.mul(math.normalize(rotation.value), quaternion.axisAngle(math.up(), speed.speed * dt));
         }
     }
 
@@ -415,7 +415,7 @@ PostUpdateCommands.AddSharedComponent(TwoStickBootstrap.EnemyLook);
 
 As you can see, the API is very similar to the entity manager API. In this mode, it is helpful to think of the automatic command buffer as a convenience that allows you to prevent array invalidation inside your system while still making changes to the world.
 
-2. For jobs, you must request command buffers from a `Barrier` on the main thread, and pass them to jobs. The barriers will play back in the created order on the main thread when the barrier system updates. This extra step is required so that memory management can be centralized and determinism of the generated entities and components can be guaranteed.
+2. For jobs, you must request command buffers from a `Barrier` on the main thread, and pass them to jobs. When the barrier system updates, the command buffers will play back on the main thread in the order they were created. This extra step is required so that memory management can be centralized and determinism of the generated entities and components can be guaranteed.
 
 Again let's look at the two stick shooter sample to see how this works in practice.
 
@@ -466,3 +466,16 @@ TODO: what do you mean by "the GameObjectEntity component creates an Entity with
 > Note: for the time being, you must add a GameObjectEntity component on each GameObject that you want to be visible / iterable from the ComponentSystem.
 
 ## SystemStateComponentData
+
+The purpose of SystemStateComponentData is to allow you to track resources internal to a system and have the opportunity to appropriately create and destroy those resources as needed without relying on individual callbacks.
+
+SystemStateComponentData and SystemStateSharedComponentData are exactly like ComponentData and SharedComponentData, respectively, except in one important respect:
+1. SystemState components are not deleted when an entity is destroyed.
+
+DestroyEntity is shorthand for
+1. Find all Components which reference this particular Entity ID
+2. Delete those Components
+3. Recycle the Entity id for reuse.
+
+However, if SystemState components are present, they are not removed. This gives a system the opportunity to cleanup any resources or state associated with an Entity ID. The Entity id will only be reused once all SystemState components have been removed.
+

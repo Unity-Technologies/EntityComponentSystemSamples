@@ -1,3 +1,23 @@
+# 0.0.10
+## New Features
+* [Dynamic Buffers](Documentation/content/dynamic_buffers.md) (FixedArray functionality has been removed.)
+* [Chunk Iteration](Documentation/content/chunk_iteration.md)
+* [TransformSystem](Documentation/content/transform_system.md) 
+  * Note: Completely incompatible with previous version.
+  * Some Components "downgraded" to Samples.Common (not part of Unity.Transforms) - MoveForward, MoveSpeed, Heading, RotationSpeed
+  * Transform2D Removed.
+* [SystemStateComponents](Documentation/content/system_state_components.md)
+* EntityCommandBuffer.Concurrent added to support command buffer recording in parallel for-type jobs
+* EntityManager.MoveEntitiesFrom optimizations (Moving real world scene with 50k entities takes less than 1ms now)
+* Unity.Entities.Serialization API for writing binary scene format (No backwards compatibility, but incredibly fast load speed)
+
+## Changes
+* **Unity 2018.1 is no longer supported. The Entities package now requires a minimum version of 2018.2f1**
+* EntityDebugger is now much faster when structural changes affect the list of entities being viewed.
+* Moved EntityDebugger to Window/Analysis submenu
+* EntityDebugger shows EntityArchetypeQuery fields in addition to ComponentGroups, in order to show useful contents for systems that use chunk iteration.
+* EntityDebugger shows systems in the order they appear in the player loop
+
 # 0.0.9
 ## New Features
 * Galactic Conquest sample added

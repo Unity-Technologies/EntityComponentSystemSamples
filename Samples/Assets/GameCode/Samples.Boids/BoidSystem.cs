@@ -11,7 +11,6 @@ using Samples.Common;
 
 namespace Samples.Boids
 {
-    [UpdateBefore(typeof(TransformInputBarrier))]
     public class BoidSystem : JobComponentSystem
     {
         private ComponentGroup  m_BoidGroup;
@@ -149,8 +148,8 @@ namespace Samples.Boids
                 var normalHeading                     = math_experimental.normalizeSafe(alignmentResult + separationResult + targetHeading);
                 var targetForward                     = math.select(normalHeading, avoidObstacleHeading, nearestObstacleDistanceFromRadius < 0);
                 var nextHeading                       = math_experimental.normalizeSafe(forward + dt*(targetForward-forward));
-                
-                headings[index]                       = new Heading {Value = nextHeading};
+
+                headings[index]     = new Heading {Value = nextHeading};
             }
         }
 
@@ -174,7 +173,7 @@ namespace Samples.Boids
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            EntityManager.GetAllUniqueSharedComponentDatas(m_UniqueTypes);
+            EntityManager.GetAllUniqueSharedComponentData(m_UniqueTypes);
             
             var obstaclePositions = m_ObstacleGroup.GetComponentDataArray<Position>();
             var targetPositions   = m_TargetGroup.GetComponentDataArray<Position>();

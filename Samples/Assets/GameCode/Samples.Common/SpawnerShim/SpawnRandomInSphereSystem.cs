@@ -2,7 +2,6 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Samples.Common;
 using Unity.Transforms;
 
 namespace Samples.Common
@@ -28,7 +27,7 @@ namespace Samples.Common
         {
             var uniqueTypes = new List<SpawnRandomInSphere>(10);
 
-            EntityManager.GetAllUniqueSharedComponentDatas(uniqueTypes);
+            EntityManager.GetAllUniqueSharedComponentData(uniqueTypes);
 
             int spawnInstanceCount = 0;
             for (int sharedIndex = 0; sharedIndex != uniqueTypes.Count; sharedIndex++)

@@ -25,6 +25,6 @@ namespace Samples.Common
         {
             var job = new RotationSpeedRotation() { dt = Time.deltaTime };
             return job.Schedule(this, 64, inputDeps);
-        } 
+        }
     }
 }
