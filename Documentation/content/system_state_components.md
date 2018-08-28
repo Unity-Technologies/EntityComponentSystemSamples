@@ -35,7 +35,7 @@ However, SystemStateComponents are not removed on DestroyEntity and the Entity I
 
 A `SystemStateComponentData` is analogous to a `ComponentData` and used similarly.
 
-```
+```c#
 struct FooStateComponent : ISystemStateComponentData
 {
 }
@@ -47,7 +47,7 @@ Visibility of a SystemStateComponent is also controlled in the same way as a Com
 
 A `SystemStateSharedComponentData` is analogous to a `SharedComponentData` and used similarly.
 
-```
+```c#
 struct FooStateSharedComponent : ISystemStateSharedComponentData
 {
   public int Value;
