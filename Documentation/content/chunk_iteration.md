@@ -4,7 +4,7 @@
 
 If, for example, there are three components Position, Rotation, and Scale and the output of any combination of these three components should write to a LocalToWorld component. The approach using component group injection might look something like:
 
-```
+```C#
 struct PositionToLocalToWorld
 {
   ComponentDataArray<Position> Position;
@@ -74,7 +74,7 @@ ComponentGroup is a utility which simplifies iteration over same component type 
 Direct chunk iteration allows for "optional" components or managing component combinations more directly.
 
 Another alternative might be to use ComponentDataFromEntity and check for the existence of the components on a per-entity basis, as in:
-```
+```C#
 [Inject] [ReadOnly] ComponentDataFromEntity<Position> positions;
 [Inject] [ReadOnly] ComponentDataFromEntity<Rotation> rotations;
 [Inject] [ReadOnly] ComponentDataFromEntity<Scale> scales;
@@ -93,7 +93,7 @@ An advantage of direct chunk iteration is that any branching that needs to be do
 
 Each Chunk belongs to a specific Archetype. In order to iterate Chunks, a set of archetypes must be selected. This is an `EntityArchetypeQuery`.
 
-```
+```C#
 public class EntityArchetypeQuery
 {
   public ComponentType[] Any;
@@ -103,7 +103,7 @@ public class EntityArchetypeQuery
 ```
 
 An example might look like:
-```
+```C#
 var RootLocalToWorldQuery = new EntityArchetypeQuery
 {
   Any = new ComponentType[] {typeof(Rotation), typeof(Position), typeof(Scale)}, 
@@ -142,16 +142,16 @@ However the arrays of component data within those chunks can be retrieved as eit
 To access data within a chunk, a `ChunkComponentType` is required which represents the specific component type and read-only attribute requested. From within a ComponentSystem or JobComponentSystem, this is retrieved by a call to `GetArchetypeChunkComponentType<T>(bool isReadOnly = false)` which returns a `ArchetypeChunkComponentType<T>`.
 
 For instance, in order to gain read-only access to the Position component data in the Chunks matching the archetypes above: 
-```
+```C#
 var RotationTypeRO = GetArchetypeChunkComponentType<Rotation>(true);
 ```
 Or read-write access to the LocalToWorld component data:
-```
+```C#
 var LocalToWorldTypeRW = GetArchetypeChunkComponentType<LocalToWorld>(false);
 ```
 
 When used in a Job, the \[ReadOnly\] attribute must match the type. e.g.
-```
+```C#
   [ReadOnly] public ArchetypeChunkComponentType<Rotation> rotationType;
   public ArchetypeChunkComponentType<LocalToWorld> localToWorldType;
 ```
@@ -159,20 +159,20 @@ When used in a Job, the \[ReadOnly\] attribute must match the type. e.g.
 To retrieve the actual component data for reading or editing, `ArchetypeChunk.GetNativeSlice<T>(ArchetypeChunkComponentType<T> chunkComponentType)` is used, which returns `NativeSlice<T>`
 
 e.g. For a given ArchetypeChunk (chunk), the Position and LocalToWorld data can be retrieved as:
-```
+```C#
 var chunkPositions = chunk.GetNativeSlice(positionType);
 var chunkLocalToWorlds = chunk.GetNativeSlice(localToWorldType);
 ```
 
 Implicit to an `EntityArchetypeQuery` is that every chunk may not have the same components available. In this case, for instance, chunks coming from different archetypes may or may not have Position components. In that case, the length of the returned array will be zero. e.g. Existance of Position component data in a chunk can be confirmed by:
-```
+```C#
 var chunkPositionsExist = chunkPositions.Length > 0;
 ```
 
 For iteration, the number of instances in a chunk can be retrieved with `ArchetypeChunk.Count`.
 
 After confirming existance of the component data for the chunk, the data can be read/written as expected. e.g.
-```
+```C#
 for (int i = 0; i < chunk.Count; i++)
 {
   chunkLocalToWorlds[i] = new LocalToWorld
@@ -189,17 +189,17 @@ Iterating Entity values in chunks is very similar to Components.
 The Entity type is requested from within a ComponentSystem or JobComponentSystem by `GetArchetypeChunkEntityType()` with returns a `ArchetypeChunkEntityType`. Entity type is always read-only.
 
 e.g.
-```
+```C#
 var EntityTypeRO = GetArchetypeChunkEntityType();
 ```
 
 Similarly ArchetypeChunkEntityType should always include the \[ReadOnly\] attribute when used in a Job. e.g.
-```
+```C#
 [ReadOnly] public ArchetypeChunkEntityType entityType;
 ```
 
 To retrieve the Entity values given a specific ArchetypeChunk, GetNativeSlice is used as with component data: 
-```
+```C#
 var chunkEntities = chunk.GetNativeSlice(entityType);
 ```
 
@@ -214,12 +214,12 @@ Like `ArchetypeChunkEntityType`, `ArchetypeChunkSharedComponentType` is always r
 The index of the shared component is returned by `ArchetypeChunk.GetSharedComponentIndex<T>(ArchetypeChunkSharedComponentType<T> chunkSharedComponentData)`
 
 e.g.
-```
+```C#
 var chunkDepthSharedIndex = chunk.GetSharedComponentIndex(depthType);
 ```
 
 Where depthType is:
-```
+```C#
 [ReadOnly] public ArchetypeChunkSharedComponentType<Depth> depthType;
 ```
 
@@ -236,7 +236,7 @@ Both the shared component values and the remapping can be retrieved from EntityM
 For each `sharedComponentValue[i]`, the `sharedComponentIndices[i]` stores the global index of the shared component value.
 
 e.g.
-```
+```C#
 var sharedDepths = new List<Depth>();
 var sharedDepthIndices = new List<int>();
 EntityManager.GetAllUniqueSharedComponentData(sharedDepths, sharedDepthIndices);
@@ -260,7 +260,7 @@ Additionally:
 - Each ArchetypeChunk contains a StartIndex value which is the entity count offset within the NativeArray<ArchetypeChunk>.
 
 e.g.
-```
+```C#
 struct CollectValues : IJobParallelFor
 {
     [ReadOnly] public NativeArray<ArchetypeChunk> chunks;
@@ -325,7 +325,7 @@ Utilities are provided to compare version numbers and determine change:
 `ChangeVersionUtility.DidAddOrChange(uint changeVersion, uint requiredVersion)` given the chunk type version number and the expected system version, respectively, will return whether or not the specified type in the chunk has been changed or is new.
 
 By way of example, in this case a chunk is skipped if no change was made to the specified types since the last iteration:
-```
+```C#
 var chunkRotationsChanged = ChangeVersionUtility.DidAddOrChange(chunk.GetComponentVersion(rotationType), lastSystemVersion);
 var chunkPositionsChanged = ChangeVersionUtility.DidAddOrChange(chunk.GetComponentVersion(positionType), lastSystemVersion);
 var chunkScalesChanged = ChangeVersionUtility.DidAddOrChange(chunk.GetComponentVersion(scaleType), lastSystemVersion);
