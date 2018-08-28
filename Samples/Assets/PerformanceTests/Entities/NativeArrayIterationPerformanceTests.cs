@@ -102,7 +102,7 @@ namespace Unity.Entities.PerformanceTests
                 Source = source,
                 ResetThreshold = resetThreshold
             };
-            var resetJobHandle = addDeltaJob.Schedule(source.Length, batchSize, addDeltaJobHandle);
+            var resetJobHandle = resetJob.Schedule(source.Length, batchSize, addDeltaJobHandle);
             resetJobHandle.Complete();
         }
 
