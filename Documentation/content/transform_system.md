@@ -12,7 +12,7 @@ In cases where transform data is required to be updated at additional points in 
 
 For example:
 
-```
+```c#
     [UpdateBefore(typeof(EndFrameBarrier))]
     public class EndFrameTransformSystem : TransformSystem<EndFrameBarrier>
     {
@@ -22,7 +22,7 @@ For example:
 
 For example:
 
-```
+```c#
     [ComponentSystemPatch]
     public class PatchTransformSystem : TransformSystem<UserSystem>
     {
@@ -35,7 +35,7 @@ For example:
 
 The only requirement for TransfromSystem is that *one of* the following components is associated with an Entity:
 
-```
+```c#
     public struct Position : IComponentData
     {
         public float3 Value;
@@ -54,7 +54,7 @@ The only requirement for TransfromSystem is that *one of* the following componen
 
 TransformSystem will add the `LocalToWorld` component and update the matrix based on the values in your selected associated components (Position, Rotation, and Scale). LocalToWorld does not need to be added by the user or other systems.
 
-```
+```c#
     public struct LocalToWorld : ISystemStateComponentData
     {
         public float4x4 Value;
@@ -88,7 +88,7 @@ If necessary, users can detect if LocalToWorld matrix is frozen by existence of 
 
 In cases where user systems require custom transformation matrices and updates, the TransformSystem will ignore components associated with a `CustomLocalToWorld` component.
 
-```
+```c#
     public struct CustomLocalToWorld : IComponentData
     {
         public float4x4 Value;
@@ -101,7 +101,7 @@ If a `CustomLocalToWorld` component exists, it is expected that a user system wi
 
 Attaching transformations (transformation hierarchies) is controlled by separate "event" or "side-channel" entities associated with an `Attach` component.
 
-```
+```c#
     public struct Attach : IComponentData
     {
         public Entity Parent;
@@ -113,7 +113,7 @@ To attach a Child Entity to a Parent Entity, create a new Entity with an associa
 
 For example:
 
-```
+```c#
     var parent = m_Manager.CreateEntity(typeof(Position), typeof(Rotation));
     var child = m_Manager.CreateEntity(typeof(Position));
     var attach = m_Manager.CreateEntity(typeof(Attach));
@@ -128,7 +128,7 @@ For example:
 2. Values in Position, Rotation, and Scale components will be interpreted as relative to parent space.
 3. Attached, Parent, and LocalToParent components will be associated with the Child Entity.
 
-```
+```c#
     public struct Attached : IComponentData
     {
     }
@@ -153,6 +153,6 @@ To detach a child from a parent, remove the `Attached` component from the child.
 The LocalToWorld matrix can be used to retrieve world positions.
 For example:
 
-```
+```c#
 var childWorldPosition = m_Manager.GetComponentData<LocalToWorld>(child).Value.c3
 ```
