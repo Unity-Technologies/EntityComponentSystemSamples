@@ -14,7 +14,7 @@ public class RotationSpeedSystem : ComponentSystem
         {
             dt = Time.deltaTime
         };
-        job.Schedule(this, 64).Complete();
+        job.Schedule(this).Complete();
     }
 
     [BurstCompile]

@@ -24,7 +24,7 @@ namespace Samples.Common
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var job = new RotationSpeedRotation() { dt = Time.deltaTime };
-            return job.Schedule(this, 64, inputDeps);
-        }
+            return job.Schedule(this, inputDeps);
+        } 
     }
 }

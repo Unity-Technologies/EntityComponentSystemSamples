@@ -32,7 +32,7 @@ public class SineSystemOnAxis : JobComponentSystem
             Const = Bootstrap.Settings.lerpFact
         };
         temp = temp + Time.deltaTime;
-        return job.Schedule(this, 64, inputDeps);
+        return job.Schedule(this, inputDeps);
     }
 
     [BurstCompile]

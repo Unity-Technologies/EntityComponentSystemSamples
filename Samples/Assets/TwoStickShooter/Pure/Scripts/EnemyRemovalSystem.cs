@@ -34,7 +34,7 @@ namespace TwoStickPureExample
                 MaxZ = TwoStickBootstrap.Settings.playfield.yMax,
             };
 
-            return boundaryKillJob.Schedule(this, 64, inputDeps);
+            return boundaryKillJob.Schedule(this, inputDeps);
         }
     }
 }

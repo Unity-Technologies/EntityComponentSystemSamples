@@ -1,3 +1,27 @@
+# 0.0.11
+## New Features
+* Global `Disabled` component. Any component data associated with same entity referenced by `Disabled` component will be ignored by all system updates.
+* Global `Prefab` component. Same behavior as `Disabled` component, except when an Entity associated with a `Prefab` component is Instantiated, the `Prefab` component is not present in the created archetype.
+* EntityCommandBuffer.Instantiate API has been added
+* Added custom editor for `ComponentDataWrapper<T>` and `SharedComponentDataWrapper<T>`, which will display an error in the Inspector if the encapsulated data type is not marked as serializable
+* new IJobProcessComponentDataWithEntity job type extends IJobProcessComponentData and passes Entity & int foreachIndex. This makes it possible to use it in jobs using EntityCommandBuffer.
+* BufferDataFromEntity renamed to BufferFromEntity. ComponentSystem.GetBufferArrayFromEntity has been renamed to ComponentSystem.GetBufferFromEntity.
+
+## Changes
+* Serialized component data for `ComponentDataWrapper<T>` and `SharedComponentDataWrapper<T>` classes now appears in the Inspector without a foldout group
+* IJobProcessComponentData supports up to 4 components now.
+* IJobProcessComponentData.Schedule function no longers takes the number of batch iteration count. Batch iteration count is now always implicit to be the size of a whole chunk. This requires changing all code using IJobProcessComponentData.
+* IJobProcessComponentData.ScheduleSingle can be used to execute IJobProcessComponentData in a single job. IJobProcessComponentData.Schedule on the other hand by default schedules parallel for jobs.
+* ForEachComponentGroupFilter has been removed. We recommend ArchetypeChunk API as a replacement (Documentation/content/chunk_iteration.md)
+* `TransformSystem` is now an abstract class and no longer have a generic `<T>` parameter
+* Removed MeshCulledComponent & MeshCullingComponent. They were accidentally still left after the rewrite of the InstanceRendererSystem in preview 11.
+
+## Fixes
+* Fixed bug where `Value` setter on `ComponentDataWrapper<T>` or `SharedComponentDataWrapper<T>` did not push changes back to `EntityManager` (fixes the inability to flush changes via `Value` setter + `Undo.RecordObject()` while Inspector was drawing)
+* Removed sync point in GetComponentGroup resulting in two IJobProcessComponentData in the same system to fail on first exectuion.
+* Added more robust checks for what defines a valid IComponentData (must be blittable / must be a struct etc)
+* Fixed a bug with `TransformSystem` jobs (e.g `RootLocalToWorld`) not being compiled by burst for standalone players
+
 # 0.0.10
 ## New Features
 * [Dynamic Buffers](Documentation/content/dynamic_buffers.md) (FixedArray functionality has been removed.)

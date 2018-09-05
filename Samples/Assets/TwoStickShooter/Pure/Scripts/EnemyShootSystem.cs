@@ -11,15 +11,6 @@ namespace TwoStickPureExample
     [UpdateBefore(typeof(MoveForwardSystem))]
     class EnemyShootSystem : JobComponentSystem
     {
-        public struct Data
-        {
-            public readonly int Length;
-            [ReadOnly] public ComponentDataArray<Position> Position;
-            public ComponentDataArray<EnemyShootState> ShootState;
-        }
-
-        [Inject] private Data m_Data;
-
         public struct PlayerData
         {
             public readonly int Length;
@@ -32,7 +23,7 @@ namespace TwoStickPureExample
 
         // [BurstCompile]
         // This cannot currently be burst compiled because CommandBuffer.SetComponent() accesses a static field.
-        struct SpawnEnemyShots : IJob
+        struct SpawnEnemyShots : IJobProcessComponentData<Position, EnemyShootState>
         {
             public float3 PlayerPos;
             public float DeltaTime;
@@ -41,46 +32,36 @@ namespace TwoStickPureExample
             public float ShotEnergy;
             public EntityArchetype ShotArchetype;
 
-            [ReadOnly] public ComponentDataArray<Position> Position;
-            public ComponentDataArray<EnemyShootState> ShootState;
-
             public EntityCommandBuffer CommandBuffer;
 
-            public void Execute()
+            public void Execute([ReadOnly] ref Position position, ref EnemyShootState state)
             {
-                for (int i = 0; i < ShootState.Length; ++i)
+                state.Cooldown -= DeltaTime;
+                if (state.Cooldown <= 0.0)
                 {
-                    var state = ShootState[i];
+                    state.Cooldown = ShootRate;
 
-                    state.Cooldown -= DeltaTime;
-                    if (state.Cooldown <= 0.0)
+                    ShotSpawnData spawn;
+                    spawn.Shot.TimeToLive = ShotTtl;
+                    spawn.Shot.Energy = ShotEnergy;
+                    spawn.Position = position;
+                    spawn.Rotation = new Rotation
                     {
-                        state.Cooldown = ShootRate;
+                        Value = quaternion.lookRotation(math.normalize(PlayerPos - position.Value), math.up())
+                    };
+                    spawn.Faction = Factions.kEnemy;
 
-                        ShotSpawnData spawn;
-                        spawn.Shot.TimeToLive = ShotTtl;
-                        spawn.Shot.Energy = ShotEnergy;
-                        spawn.Position = Position[i];
-                        spawn.Rotation = new Rotation
-                        {
-                            Value = quaternion.lookRotation(math.normalize(PlayerPos - Position[i].Value), math.up())
-                        };
-                        spawn.Faction = Factions.kEnemy;
-
-                        CommandBuffer.CreateEntity(ShotArchetype);
-                        CommandBuffer.SetComponent(spawn);
-                    }
-
-                    ShootState[i] = state;
+                    CommandBuffer.CreateEntity(ShotArchetype);
+                    CommandBuffer.SetComponent(spawn);
                 }
             }
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_Data.Length == 0 || m_Player.Length == 0)
+            if (m_Player.Length == 0)
                 return inputDeps;
-
+            
             return new SpawnEnemyShots
             {
                 PlayerPos = m_Player.Position[0].Value,
@@ -88,11 +69,9 @@ namespace TwoStickPureExample
                 ShootRate = TwoStickBootstrap.Settings.enemyShootRate,
                 ShotTtl = TwoStickBootstrap.Settings.enemyShotTimeToLive,
                 ShotEnergy = TwoStickBootstrap.Settings.enemyShotEnergy,
-                Position = m_Data.Position,
-                ShootState = m_Data.ShootState,
                 CommandBuffer = m_ShotSpawnBarrier.CreateCommandBuffer(),
                 ShotArchetype = TwoStickBootstrap.ShotSpawnArchetype,
-            }.Schedule(inputDeps);
+            }.ScheduleSingle(this, inputDeps);
         }
     }
 }

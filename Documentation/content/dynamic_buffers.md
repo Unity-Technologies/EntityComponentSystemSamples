@@ -26,7 +26,7 @@ putting into the buffer:
         // These implicit conversions are optional, but can help reduce typing.
         public static implicit operator int(MyBufferElement e) { return e.Value; }
         public static implicit operator MyBufferElement(int e) { return new MyBufferElement { Value = e }; }
-
+        
         // Actual value each buffer element will store.
         public int Value;
     }
@@ -77,19 +77,19 @@ provides a system that appends a value to every buffer in an injected set:
             public readonly int Length;
             public BufferArray<EcsIntElement> Buffers;
         }
-
+    
         [Inject] Data m_Data;
-
+    
         public struct MyJob : IJobParallelFor
         {
             public BufferArray<EcsIntElement> Buffers;
-
+    
             public void Execute(int i)
             {
                 Buffers[i].Append(i * 3);
             }
         }
-
+    
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             return new MyJob { Buffers = m_Data.Buffers }.Schedule(m_Data.Length, 32, inputDeps);
@@ -101,7 +101,7 @@ provides a system that appends a value to every buffer in an injected set:
 You can also look up buffers on a per-entity basis:
 
         var lookup = GetBufferArrayFromEntity<EcsIntElement>();
-        var buffer = intLookup[myEntity];
+        var buffer = lookup[myEntity];
         buffer.Append(17);
         buffer.RemoveAt(0);
 

@@ -11,7 +11,7 @@ public class RotationSystemParents : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new RotationSpeedParent {dt = Time.deltaTime};
-        return job.Schedule(this, 64, inputDeps);
+        return job.Schedule(this, inputDeps);
     }
 
     // Use this for initialization

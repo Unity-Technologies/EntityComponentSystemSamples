@@ -23,7 +23,7 @@ namespace Samples.Common
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var rotationSpeedAccelerationJob = new RotationSpeedAcceleration { dt = Time.deltaTime };
-            return rotationSpeedAccelerationJob.Schedule(this, 64, inputDeps);
+            return rotationSpeedAccelerationJob.Schedule(this, inputDeps);
         } 
     }
 }

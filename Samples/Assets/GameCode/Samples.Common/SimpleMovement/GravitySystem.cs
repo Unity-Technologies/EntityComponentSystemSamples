@@ -20,7 +20,7 @@ namespace Samples.Common
         
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            return new GravityPosition().Schedule(this, 64, inputDeps);
+            return new GravityPosition().Schedule(this, inputDeps);
         }
     }
 }
