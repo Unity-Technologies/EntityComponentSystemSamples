@@ -19,7 +19,7 @@ namespace Samples.Common
                     y = UnityEngine.Random.Range(-radius, radius),
                     z = UnityEngine.Random.Range(-radius, radius)
                 };
-                if (math.lengthSquared(p) < radiusSquared)
+                if (math.lengthsq(p) < radiusSquared)
                 {
                     points[pointsFound] = center + p;
                     pointsFound++;

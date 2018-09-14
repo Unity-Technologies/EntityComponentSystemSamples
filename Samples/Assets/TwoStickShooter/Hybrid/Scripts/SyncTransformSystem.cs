@@ -25,7 +25,7 @@ namespace TwoStickHybridExample
                 float2 h = entity.Heading.Value;
                 entity.Output.position = new float3(p.x, 0, p.y);
                 if (!h.Equals(new float2(0f, 0f)))
-                    entity.Output.rotation = quaternion.lookRotation(new float3(h.x, 0f, h.y), new float3(0f, 1f, 0f));
+                    entity.Output.rotation = quaternion.LookRotation(new float3(h.x, 0f, h.y), new float3(0f, 1f, 0f));
             }
         }
     }

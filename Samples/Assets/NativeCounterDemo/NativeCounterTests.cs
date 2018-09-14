@@ -42,7 +42,7 @@ public class NativeCounterTests
     public void ConcurrentIncrement()
     {
         var counter = new NativeCounter(Allocator.Temp);
-        NativeCounter.Concurrent concurrentCounter = counter;
+        var concurrentCounter = counter.ToConcurrent();
         Assert.AreEqual(0, counter.Count);
         concurrentCounter.Increment();
         Assert.AreEqual(1, counter.Count);
@@ -69,7 +69,7 @@ public class NativeCounterTests
     public void SetCountConcurrentIncrement()
     {
         var counter = new NativeCounter(Allocator.Temp);
-        NativeCounter.Concurrent concurrentCounter = counter;
+        var concurrentCounter = counter.ToConcurrent();
         Assert.AreEqual(0, counter.Count);
         concurrentCounter.Increment();
         Assert.AreEqual(1, counter.Count);
@@ -85,7 +85,7 @@ public class NativeCounterTests
     {
         var counter = new NativeCounter(Allocator.Temp);
         var jobData = new ParallelCountTo();
-        jobData.counter = counter;
+        jobData.counter = counter.ToConcurrent();
         // Count every second item
         jobData.countMask = 1;
         jobData.Schedule(1000000, 1).Complete();
@@ -97,7 +97,7 @@ public class NativeCounterTests
     {
         var counter = new NativeCounter(Allocator.Temp);
         var jobData = new ParallelCountTo();
-        jobData.counter = counter;
+        jobData.counter = counter.ToConcurrent();
         counter.Count = 42;
         // Count every second item
         jobData.countMask = 1;
@@ -147,7 +147,7 @@ public class NativePerThreadCounterTests
     public void ConcurrentIncrement()
     {
         var counter = new NativePerThreadCounter(Allocator.Temp);
-        NativePerThreadCounter.Concurrent concurrentCounter = counter;
+        var concurrentCounter = counter.ToConcurrent();
         Assert.AreEqual(0, counter.Count);
         concurrentCounter.Increment();
         Assert.AreEqual(1, counter.Count);
@@ -174,7 +174,7 @@ public class NativePerThreadCounterTests
     public void SetCountConcurrentIncrement()
     {
         var counter = new NativePerThreadCounter(Allocator.Temp);
-        NativePerThreadCounter.Concurrent concurrentCounter = counter;
+        var concurrentCounter = counter.ToConcurrent();
         Assert.AreEqual(0, counter.Count);
         concurrentCounter.Increment();
         Assert.AreEqual(1, counter.Count);
@@ -190,7 +190,7 @@ public class NativePerThreadCounterTests
     {
         var counter = new NativePerThreadCounter(Allocator.Temp);
         var jobData = new ParallelCountTo();
-        jobData.counter = counter;
+        jobData.counter = counter.ToConcurrent();
         // Count every second item
         jobData.countMask = 1;
         jobData.Schedule(1000000, 1).Complete();
@@ -202,7 +202,7 @@ public class NativePerThreadCounterTests
     {
         var counter = new NativePerThreadCounter(Allocator.Temp);
         var jobData = new ParallelCountTo();
-        jobData.counter = counter;
+        jobData.counter = counter.ToConcurrent();
         counter.Count = 42;
         // Count every second item
         jobData.countMask = 1;

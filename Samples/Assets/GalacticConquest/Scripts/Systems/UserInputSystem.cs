@@ -15,6 +15,14 @@ namespace Systems
     /// </summary>
     public class UserInputSystem : ComponentSystem
     {
+        // This exists only to cause the system to be inactive, unless there exist PlanetData components.
+        struct Planets
+        {
+            public readonly int Length;
+            public ComponentDataArray<PlanetData> Data;
+        }
+        [Inject] Planets planets;      
+        
         Dictionary<GameObject, PlanetData?> FromTargets = new Dictionary<GameObject, PlanetData?>();
         GameObject ToTarget = null;
 

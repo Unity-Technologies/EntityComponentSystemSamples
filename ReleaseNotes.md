@@ -1,3 +1,20 @@
+# 0.0.12
+## New Features
+
+## Upgrade guide
+* OnCreateManager(int capacity) -> OnCreateManager(). All your own systems have to be changed to follow the new signature.
+
+## Changes
+* Removed capacity parameter from from ScriptBehaviourManager.OnCreateManager.
+* EntityDebugger now displays the declaring type for nested types
+* IncrementalCompiler is no longer a dependency on the entities package. If you want to continue to use it you need to manually include it from the package manager UI for your project.
+* `EntityCommandBuffer.Concurrent` playback is now deterministic. Playback order is determined by the new `jobIndex` parameter accepted by all public API methods, which must be a unique ID per job (such as the index passed to `Execute()` in an IJobParallelFor).
+
+## Fixes
+* Fixed bug where ComponentDataWrapper fields spilled out of their area in the Inspector.
+* ComponentDataWrapper for empty data types (i.e. tags) no longer displays error in Inspector if wrapped type is not serializable.
+* Fixed an issue where EntityDebugger was slow if you scrolled down past 3 million entities
+
 # 0.0.11
 ## New Features
 * Global `Disabled` component. Any component data associated with same entity referenced by `Disabled` component will be ignored by all system updates.

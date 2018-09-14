@@ -1,7 +1,9 @@
-﻿using Unity.Entities;
+﻿using System;
+using Unity.Entities;
 
 namespace Samples.Dungeon.First
 {
+    [Serializable]
     public struct FloorTile : IComponentData
     {
     }

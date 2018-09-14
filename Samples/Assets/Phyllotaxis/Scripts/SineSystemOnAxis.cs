@@ -13,7 +13,7 @@ public class SineSystemOnAxis : JobComponentSystem
     private int sign = -1;
     private float temp;
 
-    protected override void OnCreateManager(int capacity)
+    protected override void OnCreateManager()
     {
         ssoa = this;
         Enabled = false;

@@ -8,11 +8,11 @@
 
 ## Concept
 
-The general use of a SystemStateComponent is expected to mirror a user component, providing the internal state.
+The general use of a [SystemStateComponent](system_state_components.md) is expected to mirror a user component, providing the internal state.
 
 For instance, given:
-- FooComponent (ComponentData, user assigned)
-- FooStateComponent (SystemComponentData, system assigned)
+- FooComponent (`ComponentData`, user assigned)
+- FooStateComponent (`SystemComponentData`, system assigned)
 
 ### Detecting Component Add
 
@@ -24,12 +24,12 @@ When user removes FooComponent, FooStateComponent still exists. The FooSystem up
 
 ### Detecting Destroy Entity
 
-DestroyEntity is actually a shorthand utility for:
+`DestroyEntity` is actually a shorthand utility for:
 - Find Components which reference given Entity ID.
 - Delete Components found
 - Recycle Entity ID
 
-However, SystemStateComponents are not removed on DestroyEntity and the Entity ID is not recycled until the last component is deleted. This gives the System the opportunity to clean up the internal state in the exact same way as with component removal.
+However, `SystemStateComponents` are not removed on `DestroyEntity` and the Entity ID is not recycled until the last component is deleted. This gives the System the opportunity to clean up the internal state in the exact same way as with component removal.
 
 ## SystemStateComponent
 
@@ -41,7 +41,7 @@ struct FooStateComponent : ISystemStateComponentData
 }
 ```
 
-Visibility of a SystemStateComponent is also controlled in the same way as a Component (using `private`, `public`, `internal`) However, it's expected, as a general rule, that a SystemStateComponent will be ReadOnly outside the system that creates it.
+Visibility of a `SystemStateComponent` is also controlled in the same way as a `Component` (using `private`, `public`, `internal`) However, it's expected, as a general rule, that a `SystemStateComponent` will be `ReadOnly` outside the system that creates it.
 
 ## SystemStateSharedComponent
 

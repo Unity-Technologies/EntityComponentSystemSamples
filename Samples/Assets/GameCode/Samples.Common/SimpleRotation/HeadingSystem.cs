@@ -27,7 +27,7 @@ namespace Samples.Common
             public void Execute(int i)
             {
                 var heading = headings[i].Value;
-                var rotation = quaternion.lookRotation(heading, math.up());
+                var rotation = quaternion.LookRotation(heading, math.up());
                 rotations[i] = new Rotation { Value = rotation };
             }
         }

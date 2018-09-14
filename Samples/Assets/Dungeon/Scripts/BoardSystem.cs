@@ -286,7 +286,7 @@ namespace Samples.Dungeon.First
             boardEntities.Dispose();
         }
 
-        protected override void OnCreateManager(int capacity)
+        protected override void OnCreateManager()
         {
             OuterWallTileGroup = GetComponentGroup(
                 ComponentType.ReadOnly(typeof(BoardReference)),

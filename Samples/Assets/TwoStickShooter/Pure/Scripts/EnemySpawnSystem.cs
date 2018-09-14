@@ -65,7 +65,7 @@ namespace TwoStickPureExample
             PostUpdateCommands.SetComponent(new Position { Value = spawnPosition });
             PostUpdateCommands.SetComponent(new Rotation
             {
-                Value = quaternion.lookRotation(new float3(0.0f, 0.0f, -1.0f), math.up())
+                Value = quaternion.LookRotation(new float3(0.0f, 0.0f, -1.0f), math.up())
             });
             PostUpdateCommands.SetComponent(default(Enemy));
             PostUpdateCommands.SetComponent(new Health { Value = TwoStickBootstrap.Settings.enemyInitialHealth });

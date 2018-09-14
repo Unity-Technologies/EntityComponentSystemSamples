@@ -29,7 +29,7 @@ namespace TwoStickPureExample
 
         ComponentGroup m_MoveForwardGroup;
 
-        protected override void OnCreateManager(int capacity)
+        protected override void OnCreateManager()
         {
             m_MoveForwardGroup = GetComponentGroup(
                 ComponentType.ReadOnly(typeof(MoveForward)),

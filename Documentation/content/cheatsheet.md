@@ -11,11 +11,13 @@ Here is a quick reference of the most useful classes, interfaces, structs, and a
 | Unity.Collections | [NativeHashMap](../../Samples/Packages/com.unity.collections/Unity.Collections/NativeHashMap.cs) | Unsafe Struct |
 | Unity.Collections | [NativeList](../../Samples/Packages/com.unity.collections/Unity.Collections/NativeList.cs) | Unsafe Struct |
 | Unity.Collections | [NativeQueue](../../Samples/Packages/com.unity.collections/Unity.Collections/NativeQueue.cs) | Unsafe Struct |
+| Unity.Entities | [Chunk](../../Samples/Packages/com.unity.entities/Unity.Entities/ArchetypeManager.cs) | Unsafe Struct |
 | Unity.Entities | [ComponentDataArray](../../Samples/Packages/com.unity.entities/Unity.Entities/Iterators/ComponentDataArray.cs) | Unsafe Struct |
 | Unity.Entities | [ComponentDataFromEntity](../../Samples/Packages/com.unity.entities/Unity.Entities/Iterators/ComponentDataFromEntity.cs) | Unsafe Struct |
 | Unity.Entities | [ComponentGroup](../../Samples/Packages/com.unity.entities/Unity.Entities/Iterators/ComponentGroup.cs) | Unsafe Class |
 | Unity.Entities | [ComponentSystem](../../Samples/Packages/com.unity.entities/Unity.Entities/ComponentSystem.cs) | Abstract Class |
 | Unity.Entities | [ComponentType](../../Samples/Packages/com.unity.entities/Unity.Entities/Types/ComponentType.cs) | Struct |
+| Unity.Entities | [DynamicBuffer](../../Samples/Packages/com.unity.entities/Unity.Entities/Iterators/DynamicBuffer.cs) | Unsafe Struct |
 | Unity.Entities | [Entity](../../Samples/Packages/com.unity.entities/Unity.Entities/EntityManager.cs) | Struct |
 | Unity.Entities | [EntityArchetype](../../Samples/Packages/com.unity.entities/Unity.Entities/EntityManager.cs) | Unsafe Struct |
 | Unity.Entities | [EntityCommandBuffer](../../Samples/Packages/com.unity.entities/Unity.Entities/EntityCommandBuffer.cs) | Unsafe Struct |

@@ -1,20 +1,20 @@
 # Dynamic Buffers
 
-A dynamic buffer is a type of component data that allows a variable-sized, "stretchy"
-buffer to be associated with an Entity. It behaves as a component type that
+A `DynamicBuffer` is a type of component data that allows a variable-sized, "stretchy"
+buffer to be associated with an `Entity`. It behaves as a component type that
 carries an internal capacity of a certain number of elements, but can allocate
 a heap memory block if the internal capacity is exhausted.
 
 Memory management is fully automatic when using this approach. Memory associated with
-dynamic buffers is managed by the Entity Manager so that when a dynamic buffer
+`DynamicBuffers` is managed by the `EntityManager` so that when a `DynamicBuffer`
 component is removed, any associated heap memory is automatically freed as well.
 
-Dynamic buffers supersede fixed array support which has been removed.
+`DynamicBuffers` supersede fixed array support which has been removed.
 
 ## Declaring Buffer Element Types
 
-To declare a buffer, you declare it with the type of element that you will be
-putting into the buffer:
+To declare a `Buffer`, you declare it with the type of element that you will be
+putting into the `Buffer`:
 
     // This describes the number of buffer elements that should be reserved
     // in chunk data for each instance of a buffer. In this case, 8 integers
@@ -31,21 +31,21 @@ putting into the buffer:
         public int Value;
     }
 
-While it seem strange to describe the element type and not the buffer itself,
+While it seem strange to describe the element type and not the `Buffer` itself,
 this design enables two key benefits in the ECS: 
 
-1. It supports having more than one dynamic buffer of type `float3`, or any
-   other common value type. You can add any number of buffers that leverage the
+1. It supports having more than one `DynamicBuffer` of type `float3`, or any
+   other common value type. You can add any number of `Buffers` that leverage the
    same value types, as long as the elements are uniquely wrapped in a top-level
    struct.
 
-2. We can include buffer element types in Entity archetypes, and it generally
+2. We can include `Buffer` element types in `EntityArchetypes`, and it generally
    will behave like having a component.
 
 ## Adding Buffer Types To Entities
 
-To add a buffer to an Entity, you can use the normal methods of adding a
-component type onto an Entity:
+To add a buffer to an `Entity`, you can use the normal methods of adding a
+component type onto an `Entity`:
 
 ### Using AddBuffer()
 
@@ -57,7 +57,7 @@ component type onto an Entity:
 
 ## Accessing Buffers
 
-There are several ways to access dynamic buffers, which parallel access methods
+There are several ways to access `DynamicBuffers`, which parallel access methods
 to regular component data.
 
 ### Direct, main-thread only access 
@@ -67,8 +67,8 @@ to regular component data.
 ### Injection based access
 
 Similar to `ComponentDataArray` you can inject a `BufferArray` which provides
-the dynamic buffers in a parallel array to the other injections. This example
-provides a system that appends a value to every buffer in an injected set:
+the `DynamicBuffers` in a parallel array to the other injections. This example
+provides a system that appends a value to every `Buffer` in an injected set:
 
     public class InjectionDemo : JobComponentSystem
     {
@@ -98,7 +98,7 @@ provides a system that appends a value to every buffer in an injected set:
 
 ## Entity based access
 
-You can also look up buffers on a per-entity basis:
+You can also look up `Buffers` on a per-`Entity` basis:
 
         var lookup = GetBufferArrayFromEntity<EcsIntElement>();
         var buffer = lookup[myEntity];
@@ -108,19 +108,19 @@ You can also look up buffers on a per-entity basis:
 ## Entity based injection access
 
 Similarly to injecting `ComponentDataFromEntity` you can inject
-`BufferDataFromEntity` and look up buffers indirectly. 
+`BufferDataFromEntity` and look up `Buffers` indirectly. 
 
 ## Reinterpreting Buffers (experimental)
 
-Buffers can be reinterpreted as a type of the same size. The intention is to
+`Buffers` can be reinterpreted as a type of the same size. The intention is to
 allow controlled type-punning and to get rid of the wrapper element types when
 they get in the way. To reinterpret, simply call `Reinterpret<T>`:
 
     var intBuffer = entityManager.GetBuffer<EcsIntElement>().Reinterpret<int>();
 
-The reinterpreted buffer carries with it the safety handle of the original
-buffer, and is safe to use. They use the same underlying buffer header, so
-modifications to one reinterpreted buffer will be immediately reflected in
+The reinterpreted `Buffer` carries with it the safety handle of the original
+`Buffer`, and is safe to use. They use the same underlying `BufferHeader`, so
+modifications to one reinterpreted `Buffer` will be immediately reflected in
 others.
 
 Note that there are no type checks involved, so it is entirely possible to

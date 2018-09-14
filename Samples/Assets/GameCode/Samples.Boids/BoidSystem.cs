@@ -4,7 +4,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Burst;
 using Unity.Mathematics;
-using Unity.Mathematics.Experimental;
 using Unity.Transforms;
 using UnityEngine;
 using Samples.Common;
@@ -16,7 +15,7 @@ namespace Samples.Boids
         private ComponentGroup  m_BoidGroup;
         private ComponentGroup  m_TargetGroup;
         private ComponentGroup  m_ObstacleGroup;
-        
+
         private List<Boid>      m_UniqueTypes = new List<Boid>(10);
         private List<PrevCells> m_PrevCells   = new List<PrevCells>();
 
@@ -60,15 +59,15 @@ namespace Samples.Boids
             public NativeArray<int>                 cellCount;
             [ReadOnly] public NativeArray<Position> targetPositions;
             [ReadOnly] public NativeArray<Position> obstaclePositions;
-            
+
             void NearestPosition(NativeArray<Position> targets, float3 position, out int nearestPositionIndex, out float nearestDistance )
             {
                 nearestPositionIndex = 0;
-                nearestDistance      = math.lengthSquared(position-targets[0].Value);
+                nearestDistance      = math.lengthsq(position-targets[0].Value);
                 for (int i = 1; i < targets.Length; i++)
                 {
                     var targetPosition = targets[i].Value;
-                    var distance       = math.lengthSquared(position-targetPosition);
+                    var distance       = math.lengthsq(position-targetPosition);
                     var nearest        = distance < nearestDistance;
 
                     nearestDistance      = math.select(nearestDistance, distance, nearest);
@@ -91,7 +90,7 @@ namespace Samples.Boids
                 float targetDistance;
                 NearestPosition(targetPositions, position, out targetPositionIndex, out targetDistance);
                 cellTargetPistionIndex[index] = targetPositionIndex;
-                
+
                 cellIndices[index] = index;
             }
 
@@ -120,7 +119,7 @@ namespace Samples.Boids
             [ReadOnly] public ComponentDataArray<Position> positions;
             public float                                   dt;
             public ComponentDataArray<Heading>             headings;
-            
+
             public void Execute(int index)
             {
                 var forward                           = headings[index].Value;
@@ -134,20 +133,20 @@ namespace Samples.Boids
                 var nearestTargetPositionIndex        = cellTargetPistionIndex[cellIndex];
                 var nearestObstaclePosition           = obstaclePositions[nearestObstaclePositionIndex].Value;
                 var nearestTargetPosition             = targetPositions[nearestTargetPositionIndex].Value;
-                
+
                 var obstacleSteering                  = position - nearestObstaclePosition;
-                var avoidObstacleHeading              = (nearestObstaclePosition + math_experimental.normalizeSafe(obstacleSteering)
+                var avoidObstacleHeading              = (nearestObstaclePosition + math.normalizesafe(obstacleSteering)
                                                         * settings.obstacleAversionDistance)-position;
-                var targetHeading                     = settings.targetWeight 
-                                                        * math_experimental.normalizeSafe(nearestTargetPosition - position);
+                var targetHeading                     = settings.targetWeight
+                                                        * math.normalizesafe(nearestTargetPosition - position);
                 var nearestObstacleDistanceFromRadius = nearestObstacleDistance - settings.obstacleAversionDistance;
-                var alignmentResult                   = settings.alignmentWeight 
-                                                        * math_experimental.normalizeSafe((alignment/neighborCount)-forward);
-                var separationResult                  = settings.separationWeight 
-                                                        * math_experimental.normalizeSafe((position * neighborCount) - separation);
-                var normalHeading                     = math_experimental.normalizeSafe(alignmentResult + separationResult + targetHeading);
+                var alignmentResult                   = settings.alignmentWeight
+                                                        * math.normalizesafe((alignment/neighborCount)-forward);
+                var separationResult                  = settings.separationWeight
+                                                        * math.normalizesafe((position * neighborCount) - separation);
+                var normalHeading                     = math.normalizesafe(alignmentResult + separationResult + targetHeading);
                 var targetForward                     = math.select(normalHeading, avoidObstacleHeading, nearestObstacleDistanceFromRadius < 0);
-                var nextHeading                       = math_experimental.normalizeSafe(forward + dt*(targetForward-forward));
+                var nextHeading                       = math.normalizesafe(forward + dt*(targetForward-forward));
 
                 headings[index]     = new Heading {Value = nextHeading};
             }
@@ -174,16 +173,16 @@ namespace Samples.Boids
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             EntityManager.GetAllUniqueSharedComponentData(m_UniqueTypes);
-            
+
             var obstaclePositions = m_ObstacleGroup.GetComponentDataArray<Position>();
             var targetPositions   = m_TargetGroup.GetComponentDataArray<Position>();
-            
+
             // Ingore typeIndex 0, can't use the default for anything meaningful.
             for (int typeIndex = 1; typeIndex < m_UniqueTypes.Count; typeIndex++)
             {
                 var settings = m_UniqueTypes[typeIndex];
                 m_BoidGroup.SetFilter(settings);
-                
+
                 var positions                 = m_BoidGroup.GetComponentDataArray<Position>();
                 var headings                  = m_BoidGroup.GetComponentDataArray<Heading>();
                 var cacheIndex                = typeIndex - 1;
@@ -212,7 +211,7 @@ namespace Samples.Boids
                     cellTargetPistionIndex    = cellTargetPositionIndex,
                     cellCount                 = cellCount
                 };
-                
+
                 if (cacheIndex > (m_PrevCells.Count - 1))
                 {
                     m_PrevCells.Add(nextCells);
@@ -235,7 +234,7 @@ namespace Samples.Boids
                 var hashPositionsJob = new HashPositions
                 {
                     positions      = positions,
-                    hashMap        = hashMap,
+                    hashMap        = hashMap.ToConcurrent(),
                     cellRadius     = settings.cellRadius
                 };
                 var hashPositionsJobHandle = hashPositionsJob.Schedule(boidCount, 64, inputDeps);
@@ -246,14 +245,14 @@ namespace Samples.Boids
                     Results = cellAlignment
                 };
                 var initialCellAlignmentJobHandle = initialCellAlignmentJob.Schedule(boidCount, 64, inputDeps);
-                
+
                 var initialCellSeparationJob = new CopyComponentData<Position>
                 {
                     Source  = positions,
                     Results = cellSeparation
                 };
                 var initialCellSeparationJobHandle = initialCellSeparationJob.Schedule(boidCount, 64, inputDeps);
-                
+
                 var initialCellCountJob = new MemsetNativeArray<int>
                 {
                     Source = cellCount,
@@ -269,7 +268,7 @@ namespace Samples.Boids
                     Results = copyTargetPositions
                 };
                 var copyTargetPositionsJobHandle = copyTargetPositionsJob.Schedule(targetPositions.Length, 2, inputDeps);
-                
+
                 var copyObstaclePositionsJob = new CopyComponentData<Position>
                 {
                     Source  = obstaclePositions,
@@ -312,24 +311,24 @@ namespace Samples.Boids
                     headings                  = headings,
                 };
                 var steerJobHandle = steerJob.Schedule(boidCount, 64, mergeCellsJobHandle);
-                    
+
                 inputDeps = steerJobHandle;
             }
             m_UniqueTypes.Clear();
-            
+
             return inputDeps;
         }
 
-        protected override void OnCreateManager(int capacity)
+        protected override void OnCreateManager()
         {
             m_BoidGroup = GetComponentGroup(
                 ComponentType.ReadOnly(typeof(Boid)),
                 ComponentType.ReadOnly(typeof(Position)),
                 typeof(Heading));
-            m_TargetGroup = GetComponentGroup(    
+            m_TargetGroup = GetComponentGroup(
                 ComponentType.ReadOnly(typeof(BoidTarget)),
                 ComponentType.ReadOnly(typeof(Position)));
-            m_ObstacleGroup = GetComponentGroup(    
+            m_ObstacleGroup = GetComponentGroup(
                 ComponentType.ReadOnly(typeof(BoidObstacle)),
                 ComponentType.ReadOnly(typeof(Position)));
         }

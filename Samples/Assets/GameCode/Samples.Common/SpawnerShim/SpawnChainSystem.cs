@@ -17,7 +17,7 @@ namespace Samples.Common
 
         ComponentGroup m_MainGroup;
 
-        protected override void OnCreateManager(int capacity)
+        protected override void OnCreateManager()
         {
             m_MainGroup  = GetComponentGroup(typeof(SpawnChain),typeof(Position));
         }

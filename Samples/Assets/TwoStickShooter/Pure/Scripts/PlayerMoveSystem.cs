@@ -33,7 +33,7 @@ namespace TwoStickPureExample
 
                 if (playerInput.Fire)
                 {
-                    rotation = quaternion.lookRotation(math.normalize(playerInput.Shoot),math.up());
+                    rotation = quaternion.LookRotation(math.normalize(playerInput.Shoot),math.up());
 
                     playerInput.FireCooldown = settings.playerFireCoolDown;
 
