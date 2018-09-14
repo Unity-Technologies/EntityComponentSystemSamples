@@ -177,7 +177,7 @@ public class RotationSpeedSystem : JobComponentSystem
         }
     }
 
-    // We derive from JobComponentSystem, as a result the system proviides us 
+    // We derive from JobComponentSystem, as a result the system provides us 
     // the required dependencies for our jobs automatically.
     //
     // IJobProcessComponentData declares that it will read RotationSpeed and write to Rotation.
