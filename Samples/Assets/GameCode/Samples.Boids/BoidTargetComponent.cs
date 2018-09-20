@@ -4,7 +4,8 @@ using Unity.Entities;
 namespace Samples.Boids
 {
     [Serializable]
-	public struct BoidTarget : IComponentData { }
+    public struct BoidTarget : IComponentData { }
 
-	public class BoidTargetComponent : ComponentDataWrapper<BoidTarget> { }
+    [UnityEngine.DisallowMultipleComponent]
+    public class BoidTargetComponent : ComponentDataWrapper<BoidTarget> { }
 }

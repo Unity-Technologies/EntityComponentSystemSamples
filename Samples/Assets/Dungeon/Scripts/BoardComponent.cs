@@ -36,6 +36,7 @@ namespace Samples.Dungeon.First
         }
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class BoardComponent : ComponentDataWrapper<Board> { }
     
 }

@@ -1,3 +1,20 @@
+# 0.0.13
+## New Features
+* Added additional warnings to the Inspector for ComponentDataWrapper and SharedComponentDataWrapper types related to multiple instances of the same wrapper type.
+
+## Upgrade guide
+* All ComponentDataWrapper types shipped in this package are now marked with `DisallowMultipleComponent` in order to prevent unexpected behavior, since an Entity may only have a single component of a given type. If you have any GameObjects with multiples of a given ComponentDataWrapper type, you must remove the duplicates. (Due to an implentation detail in the current hybrid serialization utility, SharedComponentDataWrapper types cannot be marked as such. This issue will be addressed in a future release.)
+
+## Changes
+* ComponentDataWrapperBase now implements `protected virtual OnEnable()` and `protected virtual OnDisable()`. You must override these methods and call the base implementation if you had defined them in a subclass.
+* GameObjectEntity `OnEnable()` and `OnDisable()` are now `protected virtual`, instead of `public`.
+
+## Fixes
+* Fixed bug where component data was not immediately registered with EntityManager when adding a ComponentDataWrapper to a GameObject whose GameObjectEntity had already been enabled.
+* Fixed a bug where EntityManager.AddComponentData would throw an exception when adding a zero sized / tag component.
+* Fixed an issue where closing the EntityDebugger's Filter window would throw an exception
+* Fixed hard crash in `SerializeUtilityHybrid.SerializeSharedComponents()` when the SharedComponentDataWrapper for the SharedComponentData type was marked with `DisallowMultipleComponent`. It now throws an exception instead.
+
 # 0.0.12
 ## New Features
 

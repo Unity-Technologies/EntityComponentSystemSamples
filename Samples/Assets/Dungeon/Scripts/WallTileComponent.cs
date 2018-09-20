@@ -8,5 +8,6 @@ namespace Samples.Dungeon.First
     {
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class WallTileComponent : ComponentDataWrapper<WallTile> { }
 }

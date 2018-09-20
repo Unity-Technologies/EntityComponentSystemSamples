@@ -457,6 +457,10 @@ CommandBuffer.SetComponent(spawn);
 
 When the barrier system updates, it will automatically play back the command buffers. It's worth noting that the barrier system will take a dependency on any jobs spawned by systems that access it (so that it can now that the command buffers have been filled in fully). If you see bubbles in the frame, it may make sense to try moving the barrier later in the frame, if your game logic allows for this.
 
+### Using command buffers from parallel for-style jobs
+
+To record entity command buffers from parallel for jobs, you must use the `EntityCommandBuffer.Concurrent` type.
+
 ## GameObjectEntity
 
 ECS ships with the __GameObjectEntity__ component. It is a MonoBehaviour. In __OnEnable__, the GameObjectEntity component creates an Entity with all components on the GameObject. As a result the full GameObject and all its components are now iterable by ComponentSystems.

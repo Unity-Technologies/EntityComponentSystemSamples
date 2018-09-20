@@ -15,7 +15,6 @@ public class CubeSpawnSystem : ComponentSystem
         CubeAttach = Bootstrap.CubeAttach;
 
         var count = Bootstrap.Settings.nbOfCubes;
-        var Radius = Bootstrap.Settings.radius; 
         float radius = 0;
         var mir = Bootstrap.Settings.getMSI();
 

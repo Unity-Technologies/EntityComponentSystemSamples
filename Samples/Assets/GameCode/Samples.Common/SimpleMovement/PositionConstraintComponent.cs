@@ -10,5 +10,6 @@ namespace Samples.Common
         public float maxDistance;
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class PositionConstraintComponent : ComponentDataWrapper<PositionConstraint> { } 
 }

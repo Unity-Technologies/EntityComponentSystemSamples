@@ -15,5 +15,6 @@ namespace Samples.Common
         }
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class HeadingComponent : ComponentDataWrapper<Heading> { } 
 }

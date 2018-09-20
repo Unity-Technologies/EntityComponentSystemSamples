@@ -80,7 +80,7 @@ namespace Unity.Entities.Properties.Tests
                 // @NOTE This json string will also be used to debug the size for a single entity
                 var container = new EntityContainer(m_Manager, entities[0]);
 
-                var json = JsonSerializer.Serialize(ref container);
+                JsonSerializer.Serialize(ref container);
 
                 Measure.Method(() =>
                 {
@@ -246,7 +246,7 @@ namespace Unity.Entities.Properties.Tests
 
                 var container = new EntityContainer(m_Manager, entities[0]);
 
-                var json = JsonSerializer.Serialize(ref container);
+                JsonSerializer.Serialize(ref container);
 
                 var job = new SerializationJob
                 {

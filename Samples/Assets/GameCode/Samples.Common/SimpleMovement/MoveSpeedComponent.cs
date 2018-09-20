@@ -13,5 +13,6 @@ namespace Samples.Common
         public float speed;
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class MoveSpeedComponent : ComponentDataWrapper<MoveSpeed> { } 
 }
