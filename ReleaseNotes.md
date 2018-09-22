@@ -1,3 +1,8 @@
+# 0.0.14
+## Fixes
+* Fixed a bug which was causing some of the samples to not work correctly
+
+
 # 0.0.13
 ## New Features
 * Added additional warnings to the Inspector for ComponentDataWrapper and SharedComponentDataWrapper types related to multiple instances of the same wrapper type.
@@ -8,6 +13,7 @@
 ## Changes
 * ComponentDataWrapperBase now implements `protected virtual OnEnable()` and `protected virtual OnDisable()`. You must override these methods and call the base implementation if you had defined them in a subclass.
 * GameObjectEntity `OnEnable()` and `OnDisable()` are now `protected virtual`, instead of `public`.
+* By default, EntityDebugger doesn't show inactive systems (systems which have never run). You can choose to show them in the World dropdown.
 
 ## Fixes
 * Fixed bug where component data was not immediately registered with EntityManager when adding a ComponentDataWrapper to a GameObject whose GameObjectEntity had already been enabled.
