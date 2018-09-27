@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Data;
-using Unity.Entities;
+﻿using Unity.Entities;
 using UnityEngine;
 
 namespace Other

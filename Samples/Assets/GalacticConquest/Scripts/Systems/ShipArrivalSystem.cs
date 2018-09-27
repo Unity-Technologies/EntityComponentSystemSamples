@@ -1,7 +1,6 @@
 ﻿using Data;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Rendering;
 
 namespace Systems
 {

@@ -1,3 +1,18 @@
+# 0.0.15
+## New Features
+
+## Upgrade guide
+
+## Changes
+* By default, EntityDebugger doesn't show inactive systems (systems which have never run). You can choose to show them in the World dropdown.
+* Fixed an issue where closing the EntityDebugger's Filter window would throw an exception
+* The Unity.Entities assembly no longer references the UnityEngine.Component type directly. If you create a build that strips the Unity.Entities.Hybrid assembly, but you need to create a ComponentType instance from a UnityEngine.Component-derived type, you must first manually call `TypeManager.RegisterUnityEngineComponentType(typeof(UnityEngine.Component))` somewhere in your initialization code.
+* EntityCommandBuffer now records which system the commandbuffer was recorded in and which barrier it is played back and it includes it when an exception is thrown on playback of the command buffer.
+
+## Fixes
+* Fixed memory corruption where EntityCommandBuffer.AddComponent with zero sized components overwriting memory of other components. (This is a regression that was introduced in 0.0.13_
+
+
 # 0.0.14
 ## Fixes
 * Fixed a bug which was causing some of the samples to not work correctly
@@ -13,12 +28,10 @@
 ## Changes
 * ComponentDataWrapperBase now implements `protected virtual OnEnable()` and `protected virtual OnDisable()`. You must override these methods and call the base implementation if you had defined them in a subclass.
 * GameObjectEntity `OnEnable()` and `OnDisable()` are now `protected virtual`, instead of `public`.
-* By default, EntityDebugger doesn't show inactive systems (systems which have never run). You can choose to show them in the World dropdown.
 
 ## Fixes
 * Fixed bug where component data was not immediately registered with EntityManager when adding a ComponentDataWrapper to a GameObject whose GameObjectEntity had already been enabled.
 * Fixed a bug where EntityManager.AddComponentData would throw an exception when adding a zero sized / tag component.
-* Fixed an issue where closing the EntityDebugger's Filter window would throw an exception
 * Fixed hard crash in `SerializeUtilityHybrid.SerializeSharedComponents()` when the SharedComponentDataWrapper for the SharedComponentData type was marked with `DisallowMultipleComponent`. It now throws an exception instead.
 
 # 0.0.12

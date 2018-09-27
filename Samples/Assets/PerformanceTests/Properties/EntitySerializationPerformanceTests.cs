@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 using Unity.Properties.Serialization;
 using UnityEngine;
-using Unity.Properties;
-using UnityEngine.Profiling;
-using Debug = UnityEngine.Debug;
-using Unity.Entities.Properties.Tests;
 using Unity.PerformanceTesting;
 
 namespace Unity.Entities.Properties.Tests

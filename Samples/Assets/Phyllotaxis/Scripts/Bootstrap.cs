@@ -31,6 +31,7 @@ public sealed class Bootstrap
         entityManager.CreateEntity(CubeSpawner);
 
         transform = entityManager.CreateEntity(rotationFocus);
+        entityManager.SetComponentData(transform, new Rotation {Value = quaternion.identity});
         entityManager.SetComponentData(transform, new Position {Value = new float3(0, 0, 0)});
         entityManager.SetComponentData(transform, new RotationSpeed {Value = 5});
         

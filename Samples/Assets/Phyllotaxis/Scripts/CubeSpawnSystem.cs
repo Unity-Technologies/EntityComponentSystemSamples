@@ -25,6 +25,7 @@ public class CubeSpawnSystem : ComponentSystem
             radius = 1.3f * math.sqrt(i);
             
             var cubeEntity = EntityManager.CreateEntity(Cube);
+            EntityManager.SetComponentData(cubeEntity, new Rotation {Value = quaternion.identity});
             EntityManager.SetSharedComponentData(cubeEntity, mir);
             EntityManager.SetComponentData(cubeEntity, new Position
             {

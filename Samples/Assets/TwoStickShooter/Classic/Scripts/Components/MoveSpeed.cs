@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TwoStickClassicExample;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace TwoStickClassicExample
 {
