@@ -7,6 +7,7 @@ namespace TwoStickHybridExample
 {
     public class RemoveDeadSystem : ComponentSystem
     {
+#pragma warning disable 649
         public struct Entities
         {
             public readonly int Length;
@@ -22,6 +23,7 @@ namespace TwoStickHybridExample
 
         [Inject] private PlayerCheck m_PlayerCheck;
         [Inject] private Entities entities;
+#pragma warning restore 649
 
         protected override void OnUpdate()
         {

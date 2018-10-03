@@ -9,15 +9,19 @@ namespace Samples.Common
 {
     public class HeadingSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct HeadingsGroup
         {
+
             public ComponentDataArray<Rotation> rotations;
+
             [ReadOnly] public ComponentDataArray<Heading> headings;
             public readonly int Length;
         }
 
         [Inject] private HeadingsGroup m_HeadingsGroup;
-
+#pragma warning restore 649
+        
         [BurstCompile]
         struct RotationFromHeading : IJobParallelFor
         {
@@ -27,7 +31,7 @@ namespace Samples.Common
             public void Execute(int i)
             {
                 var heading = headings[i].Value;
-                var rotation = quaternion.LookRotation(heading, math.up());
+                var rotation = quaternion.LookRotationSafe(heading, math.up());
                 rotations[i] = new Rotation { Value = rotation };
             }
         }

@@ -11,7 +11,9 @@ using UnityEngine;
 public class PlanetSpawner : MonoBehaviour
 {
     [SerializeField]
+#pragma warning disable 649
     GameObject _planetPrefab;
+#pragma warning restore 649
     [SerializeField]
     int _initialCount = 20;
     [SerializeField] readonly float radius = 100.0f;

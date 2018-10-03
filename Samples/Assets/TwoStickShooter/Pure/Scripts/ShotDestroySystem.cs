@@ -7,6 +7,7 @@ namespace TwoStickPureExample
     [UpdateAfter(typeof(ShotSpawnSystem))]
     public class ShotDestroySystem : ComponentSystem
     {
+#pragma warning disable 649
         public struct Data
         {
             public readonly int Length;
@@ -23,7 +24,8 @@ namespace TwoStickPureExample
         }
 
         [Inject] private PlayerCheck m_PlayerCheck;
-
+#pragma warning restore 649
+        
         protected override void OnUpdate()
         {
             bool playerDead = m_PlayerCheck.Length == 0;

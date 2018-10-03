@@ -7,7 +7,9 @@ namespace TwoStickPureExample
     {
         struct PlayerData
         {
+#pragma warning disable 649
             public readonly int Length;
+#pragma warning restore 649
 
             public ComponentDataArray<PlayerInput> Input;
         }

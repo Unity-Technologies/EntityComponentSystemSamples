@@ -9,7 +9,9 @@ namespace TwoStickPureExample
     {
         struct State
         {
+#pragma warning disable 649
             public readonly int Length;
+#pragma warning restore 649
             public ComponentDataArray<EnemySpawnCooldown> Cooldown;
             public ComponentDataArray<EnemySpawnSystemState> S;
         }

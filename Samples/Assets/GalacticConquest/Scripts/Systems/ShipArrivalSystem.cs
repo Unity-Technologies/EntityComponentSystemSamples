@@ -18,16 +18,20 @@ namespace Systems
         {
             _entityManager = World.Active.GetOrCreateManager<EntityManager>();
         }
-
+        
+#pragma warning disable 649
         struct Ships
         {
+
             public readonly int Length;
+
             public ComponentDataArray<ShipData> Data;
             public EntityArray Entities;
             public ComponentDataArray<ShipArrivedTag> Tag;
         }
         [Inject]
         Ships _ships;
+#pragma warning restore 649
 
         protected override void OnUpdate()
         {

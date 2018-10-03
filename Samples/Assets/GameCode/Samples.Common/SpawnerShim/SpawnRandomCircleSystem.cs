@@ -7,17 +7,20 @@ namespace Samples.Common
 {
     public class SpawnRandomCircleSystem : ComponentSystem
     {
+#pragma warning disable 649
         struct Group
         {
             [ReadOnly]
+
             public SharedComponentDataArray<SpawnRandomCircle> Spawner;
+
             public ComponentDataArray<Position>                Position;
             public EntityArray                                 Entity;
             public readonly int                                Length;
         }
 
         [Inject] Group m_Group;
-
+#pragma warning restore 649
 
         protected override void OnUpdate()
         {

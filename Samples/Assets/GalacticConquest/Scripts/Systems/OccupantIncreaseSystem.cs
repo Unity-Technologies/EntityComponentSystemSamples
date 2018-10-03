@@ -18,8 +18,11 @@ namespace Systems
 
         struct Planets
         {
+#pragma warning disable 649
             public readonly int Length;
+
             public ComponentDataArray<PlanetData> Data;
+#pragma warning restore 649        
         }
 
         struct PlanetsOccupantsJob : IJobParallelFor
@@ -39,7 +42,9 @@ namespace Systems
         }
 
         [Inject]
+#pragma warning disable 649
         Planets planets;
+#pragma warning restore 649
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {

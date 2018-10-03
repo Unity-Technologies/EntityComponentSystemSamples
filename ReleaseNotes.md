@@ -1,3 +1,19 @@
+# 0.0.16
+## New Features
+* Added virtual `ValidateSerializedData()` method to `ComponentDataWrapper<T>`and `SharedComponentDataWrapper<T>`, which allows you to sanitize the wrapper's serialized data.
+
+## Upgrade guide
+
+## Changes
+* Reverted hotfix in 0.0.14 that made `ComponentDataWrapperBase.OnValidate()` public and `ComponentDataWrapper<T>.m_SerializedData` protected; both are private again.
+* CopyTransformToGameObjectSystem and CopyTransformFromGameObjectSystem now execute in edit mode.
+
+## Fixes
+* Fixed selection not working in Galactic Conquest sample.
+* Fixed errors in HierarchyBrokenExample, HierarchyExample, and RotationExample.
+* Fixed regression introduced in 0.0.14 that caused typing values for a RotationComponent in the Inspector to re-normalize with every (xyzw) component entry.
+* Fixed all warnings in samples and packages.
+
 # 0.0.15
 ## New Features
 

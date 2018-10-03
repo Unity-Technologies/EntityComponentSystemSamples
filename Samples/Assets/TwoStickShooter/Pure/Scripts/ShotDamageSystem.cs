@@ -13,12 +13,14 @@ namespace TwoStickPureExample
     /// </summary>
     class ShotDamageSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct Players
         {
             public readonly int Length;
             public ComponentDataArray<Health> Health;
             [ReadOnly] public ComponentDataArray<Position> Position;
             [ReadOnly] public ComponentDataArray<PlayerInput> PlayerMarker;
+
         }
 
         [Inject] Players m_Players;
@@ -56,7 +58,7 @@ namespace TwoStickPureExample
             [ReadOnly] public ComponentDataArray<EnemyShot> EnemyShotMarker;
         }
         [Inject] EnemyShotData m_EnemyShots;
-
+#pragma warning restore 649
         [BurstCompile]
         struct CollisionJob : IJobParallelFor
         {

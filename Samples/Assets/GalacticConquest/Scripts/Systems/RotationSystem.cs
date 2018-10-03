@@ -12,13 +12,17 @@ namespace Systems
     /// </summary>
     public class RotationSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct Planets
         {
+
             public readonly int Length;
+
             public ComponentDataArray<RotationData> Data;
             public TransformAccessArray Transforms;
         }
-
+#pragma warning restore 649
+        
         struct RotationJob : IJobParallelForTransform
         {
             public ComponentDataArray<RotationData> Rotations;
@@ -29,7 +33,9 @@ namespace Systems
         }
 
         [Inject]
+#pragma warning disable 649
         Planets _planets;
+#pragma warning restore 649
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var job = new RotationJob

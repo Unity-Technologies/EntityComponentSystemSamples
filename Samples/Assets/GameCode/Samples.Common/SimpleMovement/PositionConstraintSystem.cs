@@ -11,14 +11,16 @@ namespace Samples.Common
     {
         struct PositionConstraintsGroup
         {
+#pragma warning disable 649
             [ReadOnly] public ComponentDataArray<PositionConstraint> positionConstraints;
             [ReadOnly] public EntityArray                            entities;
             public readonly int                                      Length;
+
         }
 
         [Inject] private PositionConstraintsGroup  m_PositionContraintsGroup;
         [Inject] ComponentDataFromEntity<Position> m_TransformPositions;
-
+#pragma warning restore 649
         [BurstCompile]
         struct ContrainPositions : IJob
         {

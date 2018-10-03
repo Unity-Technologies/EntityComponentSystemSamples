@@ -8,6 +8,7 @@ namespace TwoStickHybridExample
     [UpdateAfter(typeof(ShotSpawnSystem))]
     public class ShotDestroySystem : ComponentSystem
     {
+#pragma warning disable 649
         struct Data
         {
             public Shot Shot;
@@ -20,6 +21,7 @@ namespace TwoStickHybridExample
         }
 
         [Inject] private PlayerCheck m_PlayerCheck;
+#pragma warning restore 649
 
         protected override void OnUpdate()
         {

@@ -8,7 +8,9 @@ namespace TwoStickHybridExample
         struct PlayerData
         {
 
+#pragma warning disable 649
             public PlayerInput Input;
+#pragma warning restore 649
         }
 
         protected override void OnUpdate()

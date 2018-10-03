@@ -7,7 +7,9 @@ namespace TwoStickClassicExample
     {
         public static TwoStickExampleSettings Settings { get; private set; }
 
+#pragma warning disable 649
         [SerializeField] private TwoStickExampleSettings settings;
+#pragma warning restore 649
 
         public void Awake()
         {

@@ -13,7 +13,9 @@ namespace Samples.Common
             public int spawnerIndex;
             public Entity sourceEntity;
             public float3 position;
+#pragma warning disable 649
             public float radius;
+#pragma warning restore 649
         }
 
         ComponentGroup m_MainGroup;

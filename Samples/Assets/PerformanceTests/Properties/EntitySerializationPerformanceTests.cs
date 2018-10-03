@@ -121,7 +121,9 @@ namespace Unity.Entities.Properties.Tests
             public NativeArray<Entity> Entities;
             public int StartIndex;
             public int EndIndex;
+#pragma warning disable 649
             public string Output;
+#pragma warning restore 649
         }
 
         /// <summary>

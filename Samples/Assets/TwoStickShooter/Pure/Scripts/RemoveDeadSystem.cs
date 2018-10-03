@@ -14,6 +14,7 @@ namespace TwoStickPureExample
     /// </summary>
     public class RemoveDeadSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct PlayerCheck
         {
             [ReadOnly] public ComponentDataArray<PlayerInput> PlayerInput;
@@ -21,6 +22,7 @@ namespace TwoStickPureExample
 
         [Inject] private PlayerCheck m_PlayerCheck;
         [Inject] private RemoveDeadBarrier m_RemoveDeadBarrier;
+#pragma warning restore 649
 
         [BurstCompile]
         struct RemoveReadJob : IJobProcessComponentDataWithEntity<Health>

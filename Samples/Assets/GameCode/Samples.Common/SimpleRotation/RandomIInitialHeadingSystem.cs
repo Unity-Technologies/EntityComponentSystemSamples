@@ -8,10 +8,12 @@ namespace Samples.Common
     {
         struct RandomInitialHeadingGroup
         {
+#pragma warning disable 649
             [ReadOnly] public ComponentDataArray<RandomInitialHeading> RandomInitialHeadiings;
             [ReadOnly] public EntityArray Entities;
             public ComponentDataArray<Heading> Headings;
             public readonly int Length;
+#pragma warning restore 649
         }
 
         [Inject] RandomInitialHeadingGroup m_Group;

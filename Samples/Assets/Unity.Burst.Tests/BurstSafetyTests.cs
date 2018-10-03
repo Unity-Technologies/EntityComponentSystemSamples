@@ -100,7 +100,9 @@ public class BurstSafetyTests
     [BurstCompile(CompileSynchronously = true)]
     unsafe struct AccessNullUnsafePtrJob : IJob
     {
+#pragma warning disable 649
         [NativeDisableUnsafePtrRestriction] float* myArray;
+#pragma warning restore 649
 
         public void Execute()
         {

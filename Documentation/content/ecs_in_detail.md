@@ -19,8 +19,6 @@ transform.position += deltaTime * playerInput.move * settings.playerMoveSpeed;
 group.transform[index] = transform; // Write
 ```
 
-> Note: ECS will soon use a C#7 based compiler, using [ref returns](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/ref-returns) it makes the extra assignment unnecessary.
-
 IComponentData structs may not contain references to managed objects. Since the all component data lives in simple non-garbage-collected tracked [chunk memory](https://en.wikipedia.org/wiki/Chunking_(computing)).
 
 ## EntityArchetype

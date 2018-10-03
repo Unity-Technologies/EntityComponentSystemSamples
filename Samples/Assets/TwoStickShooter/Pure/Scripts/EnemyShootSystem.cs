@@ -10,6 +10,7 @@ namespace TwoStickPureExample
     [UpdateBefore(typeof(MoveForwardSystem))]
     class EnemyShootSystem : JobComponentSystem
     {
+#pragma warning disable 649
         public struct PlayerData
         {
             public readonly int Length;
@@ -19,6 +20,7 @@ namespace TwoStickPureExample
 
         [Inject] private PlayerData m_Player;
         [Inject] private ShotSpawnBarrier m_ShotSpawnBarrier;
+#pragma warning restore 649
 
         // [BurstCompile]
         // This cannot currently be burst compiled because CommandBuffer.SetComponent() accesses a static field.

@@ -17,9 +17,12 @@ namespace Systems
     [UpdateAfter(typeof(ShipArrivalSystem))]
     public class ShipMovementSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct Ships
         {
+
             public readonly int Length;
+
             public ComponentDataArray<Position> Positions;
             public ComponentDataArray<Rotation> Rotations;
             public ComponentDataArray<ShipData> Data;
@@ -31,7 +34,7 @@ namespace Systems
             public readonly int Length;
             public ComponentDataArray<PlanetData> Data;
         }
-
+#pragma warning restore 649
         [BurstCompile]
         struct CalculatePositionsJob : IJobParallelFor
         {
@@ -97,12 +100,15 @@ namespace Systems
             }
         }
 
+#pragma warning disable 649
         [Inject]
         EndFrameBarrier m_EndFrameBarrier;
+
         [Inject]
         Ships m_Ships;
         [Inject]
         Planets m_Planets;
+#pragma warning restore 649
 
         NativeQueue<Entity> m_ShipArrivedQueue;
 

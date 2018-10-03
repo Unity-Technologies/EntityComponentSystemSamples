@@ -9,16 +9,17 @@ namespace Samples.Common
 {
     public class BounceSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct BounceGroup
         {
             public ComponentDataArray<Position> positions;
             public ComponentDataArray<Bounce> bounce;
             public readonly int Length;
-        }
-        
+        } 
 
         [Inject] private BounceGroup m_BounceGroup;
-    
+#pragma warning restore 649    
+        
         [BurstCompile]
         struct BouncePosition : IJobParallelFor
         {
