@@ -1,3 +1,17 @@
+# 0.0.17
+## New Features
+* Entity Debugger now has an option to show chunk info for any given query. Click "Chunk Info" in the upper right to see chunk usage data for each archetype.
+
+## Upgrade guide
+
+## Changes
+* Updated burst to 0.2.4-preview.33
+
+## Fixes
+* Fixed bug when instantiating prototype with DynamicBuffer where data would be written out of bounds and could cause a crash.
+* Fixed NotSupportedException when DefaultWorldInitialization fails to load a type from a dynamic assembly.
+* Fixed an issue where EntityDebugger caused a stack overflow when determining the name of types nested in generic types
+
 # 0.0.16
 ## New Features
 * Added virtual `ValidateSerializedData()` method to `ComponentDataWrapper<T>`and `SharedComponentDataWrapper<T>`, which allows you to sanitize the wrapper's serialized data.
@@ -13,6 +27,7 @@
 * Fixed errors in HierarchyBrokenExample, HierarchyExample, and RotationExample.
 * Fixed regression introduced in 0.0.14 that caused typing values for a RotationComponent in the Inspector to re-normalize with every (xyzw) component entry.
 * Fixed all warnings in samples and packages.
+* Fixed bug that prevented entering Prefab isolation mode while in play mode in 2018.3, if the Prefab contained BaseComponentDataWrapper components.
 
 # 0.0.15
 ## New Features
