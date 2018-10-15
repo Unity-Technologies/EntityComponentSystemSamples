@@ -17,14 +17,14 @@ namespace Samples.Common
 
             public void Execute(ref Rotation rotation, [ReadOnly]ref RotationSpeed speed)
             {
-                rotation.Value = math.mul(math.normalize(rotation.Value), quaternion.axisAngle(math.up(), speed.Value * dt));
+                rotation.Value = math.mul(math.normalize(rotation.Value), quaternion.AxisAngle(math.up(), speed.Value * dt));
             }
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var job = new RotationSpeedRotation() { dt = Time.deltaTime };
-            return job.Schedule(this, 64, inputDeps);
-        } 
+            return job.Schedule(this, inputDeps);
+        }
     }
 }

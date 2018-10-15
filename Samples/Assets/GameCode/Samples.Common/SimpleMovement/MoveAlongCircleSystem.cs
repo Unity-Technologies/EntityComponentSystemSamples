@@ -10,9 +10,12 @@ namespace Samples.Common
 {
     public class MoveAlongCircleSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct MoveAlongCircleGroup
         {
+
             public ComponentDataArray<Position> positions;
+
             public ComponentDataArray<MoveAlongCircle> moveAlongCircles;
             [ReadOnly]
             public ComponentDataArray<MoveSpeed> moveSpeeds;
@@ -20,7 +23,8 @@ namespace Samples.Common
         }
 
         [Inject] private MoveAlongCircleGroup m_MoveAlongCircleGroup;
-    
+#pragma warning restore 649  
+        
         [BurstCompile]
         struct MoveAlongCirclePosition : IJobParallelFor
         {

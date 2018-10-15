@@ -9,5 +9,6 @@ namespace Samples.Common
         public float radius;
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class RadiusComponent : ComponentDataWrapper<Radius> { } 
 }

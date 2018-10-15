@@ -15,11 +15,11 @@ namespace Samples.Common
             {
                 var p = new float3
                 {
-                    x = Random.Range(-radius, radius),
-                    y = Random.Range(-radius, radius),
-                    z = Random.Range(-radius, radius)
+                    x = UnityEngine.Random.Range(-radius, radius),
+                    y = UnityEngine.Random.Range(-radius, radius),
+                    z = UnityEngine.Random.Range(-radius, radius)
                 };
-                if (math.lengthSquared(p) < radiusSquared)
+                if (math.lengthsq(p) < radiusSquared)
                 {
                     points[pointsFound] = center + p;
                     pointsFound++;
@@ -32,7 +32,7 @@ namespace Samples.Common
             var count = points.Length;
             for (int i = 0; i < count; i++)
             {
-                float angle = Random.Range(0.0f, Mathf.PI * 2.0f);
+                float angle = UnityEngine.Random.Range(0.0f, Mathf.PI * 2.0f);
                 points[i] = center + new float3
                 {
                     x = math.sin(angle) * radius,

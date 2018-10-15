@@ -19,8 +19,6 @@ transform.position += deltaTime * playerInput.move * settings.playerMoveSpeed;
 group.transform[index] = transform; // Write
 ```
 
-> Note: ECS will soon use a C#7 based compiler, using [ref returns](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/ref-returns) it makes the extra assignment unnecessary.
-
 IComponentData structs may not contain references to managed objects. Since the all component data lives in simple non-garbage-collected tracked [chunk memory](https://en.wikipedia.org/wiki/Chunking_(computing)).
 
 ## EntityArchetype
@@ -146,7 +144,7 @@ public class RotationSpeedSystem : JobComponentSystem
 
         public void Execute(ref Rotation rotation, [ReadOnly]ref RotationSpeed speed)
         {
-            rotation.value = math.mul(math.normalize(rotation.value), math.axisAngle(math.up(), speed.speed * dt));
+            rotation.value = math.mul(math.normalize(rotation.value), quaternion.axisAngle(math.up(), speed.speed * dt));
         }
     }
 
@@ -415,7 +413,7 @@ PostUpdateCommands.AddSharedComponent(TwoStickBootstrap.EnemyLook);
 
 As you can see, the API is very similar to the entity manager API. In this mode, it is helpful to think of the automatic command buffer as a convenience that allows you to prevent array invalidation inside your system while still making changes to the world.
 
-2. For jobs, you must request command buffers from a `Barrier` on the main thread, and pass them to jobs. The barriers will play back in the created order on the main thread when the barrier system updates. This extra step is required so that memory management can be centralized and determinism of the generated entities and components can be guaranteed.
+2. For jobs, you must request command buffers from a `Barrier` on the main thread, and pass them to jobs. When the barrier system updates, the command buffers will play back on the main thread in the order they were created. This extra step is required so that memory management can be centralized and determinism of the generated entities and components can be guaranteed.
 
 Again let's look at the two stick shooter sample to see how this works in practice.
 
@@ -457,6 +455,10 @@ CommandBuffer.SetComponent(spawn);
 
 When the barrier system updates, it will automatically play back the command buffers. It's worth noting that the barrier system will take a dependency on any jobs spawned by systems that access it (so that it can now that the command buffers have been filled in fully). If you see bubbles in the frame, it may make sense to try moving the barrier later in the frame, if your game logic allows for this.
 
+### Using command buffers from parallel for-style jobs
+
+To record entity command buffers from parallel for jobs, you must use the `EntityCommandBuffer.Concurrent` type.
+
 ## GameObjectEntity
 
 ECS ships with the __GameObjectEntity__ component. It is a MonoBehaviour. In __OnEnable__, the GameObjectEntity component creates an Entity with all components on the GameObject. As a result the full GameObject and all its components are now iterable by ComponentSystems.
@@ -466,3 +468,16 @@ TODO: what do you mean by "the GameObjectEntity component creates an Entity with
 > Note: for the time being, you must add a GameObjectEntity component on each GameObject that you want to be visible / iterable from the ComponentSystem.
 
 ## SystemStateComponentData
+
+The purpose of SystemStateComponentData is to allow you to track resources internal to a system and have the opportunity to appropriately create and destroy those resources as needed without relying on individual callbacks.
+
+SystemStateComponentData and SystemStateSharedComponentData are exactly like ComponentData and SharedComponentData, respectively, except in one important respect:
+1. SystemState components are not deleted when an entity is destroyed.
+
+DestroyEntity is shorthand for
+1. Find all Components which reference this particular Entity ID
+2. Delete those Components
+3. Recycle the Entity id for reuse.
+
+However, if SystemState components are present, they are not removed. This gives a system the opportunity to cleanup any resources or state associated with an Entity ID. The Entity id will only be reused once all SystemState components have been removed.
+

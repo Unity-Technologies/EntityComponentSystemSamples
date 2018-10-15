@@ -7,19 +7,20 @@ using Unity.Transforms;
 
 namespace Samples.Common
 {
-    [UpdateAfter(typeof(TransformSystem))]
     public class PositionConstraintSystem : JobComponentSystem
     {
         struct PositionConstraintsGroup
         {
+#pragma warning disable 649
             [ReadOnly] public ComponentDataArray<PositionConstraint> positionConstraints;
             [ReadOnly] public EntityArray                            entities;
             public readonly int                                      Length;
+
         }
 
         [Inject] private PositionConstraintsGroup  m_PositionContraintsGroup;
         [Inject] ComponentDataFromEntity<Position> m_TransformPositions;
-
+#pragma warning restore 649
         [BurstCompile]
         struct ContrainPositions : IJob
         {
@@ -31,18 +32,21 @@ namespace Samples.Common
             {
                 for (int i = 0; i < positionConstraints.Length; i++)
                 {
-                    var childEntity    = positionConstraintEntities[i];
-                    var parentEntity   = positionConstraints[i].parentEntity;
-                    var childPosition  = positions[childEntity].Value;
+                    var childEntity = positionConstraintEntities[i];
+                    var parentEntity = positionConstraints[i].parentEntity;
+                    var childPosition = positions[childEntity].Value;
                     var parentPosition = positions[parentEntity].Value;
-                    var d              = childPosition - parentPosition;
-                    var len            = math.length(d);
-                    var nl             = math.min(len,positionConstraints[i].maxDistance);
-                    
-                    positions[childEntity] = new Position
+                    var d = childPosition - parentPosition;
+                    var len = math.length(d);
+                    if (len >= 0.0001f) // TODO- find out why parent/child position are identical
                     {
-                        Value = parentPosition + ((d * nl) / len)
-                    };
+                        var nl = math.min(len, positionConstraints[i].maxDistance);
+
+                        positions[childEntity] = new Position
+                        {
+                            Value = parentPosition + ((d * nl) / len)
+                        };
+                    }
                 }
             }
         }

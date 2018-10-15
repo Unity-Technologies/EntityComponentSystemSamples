@@ -1,3 +1,131 @@
+# 0.0.17
+## New Features
+* Entity Debugger now has an option to show chunk info for any given query. Click "Chunk Info" in the upper right to see chunk usage data for each archetype.
+
+## Upgrade guide
+
+## Changes
+* Updated burst to 0.2.4-preview.33
+
+## Fixes
+* Fixed bug when instantiating prototype with DynamicBuffer where data would be written out of bounds and could cause a crash.
+* Fixed NotSupportedException when DefaultWorldInitialization fails to load a type from a dynamic assembly.
+* Fixed an issue where EntityDebugger caused a stack overflow when determining the name of types nested in generic types
+
+# 0.0.16
+## New Features
+* Added virtual `ValidateSerializedData()` method to `ComponentDataWrapper<T>`and `SharedComponentDataWrapper<T>`, which allows you to sanitize the wrapper's serialized data.
+
+## Upgrade guide
+
+## Changes
+* Reverted hotfix in 0.0.14 that made `ComponentDataWrapperBase.OnValidate()` public and `ComponentDataWrapper<T>.m_SerializedData` protected; both are private again.
+* CopyTransformToGameObjectSystem and CopyTransformFromGameObjectSystem now execute in edit mode.
+
+## Fixes
+* Fixed selection not working in Galactic Conquest sample.
+* Fixed errors in HierarchyBrokenExample, HierarchyExample, and RotationExample.
+* Fixed regression introduced in 0.0.14 that caused typing values for a RotationComponent in the Inspector to re-normalize with every (xyzw) component entry.
+* Fixed all warnings in samples and packages.
+* Fixed bug that prevented entering Prefab isolation mode while in play mode in 2018.3, if the Prefab contained BaseComponentDataWrapper components.
+
+# 0.0.15
+## New Features
+
+## Upgrade guide
+
+## Changes
+* By default, EntityDebugger doesn't show inactive systems (systems which have never run). You can choose to show them in the World dropdown.
+* Fixed an issue where closing the EntityDebugger's Filter window would throw an exception
+* The Unity.Entities assembly no longer references the UnityEngine.Component type directly. If you create a build that strips the Unity.Entities.Hybrid assembly, but you need to create a ComponentType instance from a UnityEngine.Component-derived type, you must first manually call `TypeManager.RegisterUnityEngineComponentType(typeof(UnityEngine.Component))` somewhere in your initialization code.
+* EntityCommandBuffer now records which system the commandbuffer was recorded in and which barrier it is played back and it includes it when an exception is thrown on playback of the command buffer.
+
+## Fixes
+* Fixed memory corruption where EntityCommandBuffer.AddComponent with zero sized components overwriting memory of other components. (This is a regression that was introduced in 0.0.13_
+
+
+# 0.0.14
+## Fixes
+* Fixed a bug which was causing some of the samples to not work correctly
+
+
+# 0.0.13
+## New Features
+* Added additional warnings to the Inspector for ComponentDataWrapper and SharedComponentDataWrapper types related to multiple instances of the same wrapper type.
+
+## Upgrade guide
+* All ComponentDataWrapper types shipped in this package are now marked with `DisallowMultipleComponent` in order to prevent unexpected behavior, since an Entity may only have a single component of a given type. If you have any GameObjects with multiples of a given ComponentDataWrapper type, you must remove the duplicates. (Due to an implentation detail in the current hybrid serialization utility, SharedComponentDataWrapper types cannot be marked as such. This issue will be addressed in a future release.)
+
+## Changes
+* ComponentDataWrapperBase now implements `protected virtual OnEnable()` and `protected virtual OnDisable()`. You must override these methods and call the base implementation if you had defined them in a subclass.
+* GameObjectEntity `OnEnable()` and `OnDisable()` are now `protected virtual`, instead of `public`.
+
+## Fixes
+* Fixed bug where component data was not immediately registered with EntityManager when adding a ComponentDataWrapper to a GameObject whose GameObjectEntity had already been enabled.
+* Fixed a bug where EntityManager.AddComponentData would throw an exception when adding a zero sized / tag component.
+* Fixed hard crash in `SerializeUtilityHybrid.SerializeSharedComponents()` when the SharedComponentDataWrapper for the SharedComponentData type was marked with `DisallowMultipleComponent`. It now throws an exception instead.
+
+# 0.0.12
+## New Features
+
+## Upgrade guide
+* OnCreateManager(int capacity) -> OnCreateManager(). All your own systems have to be changed to follow the new signature.
+
+## Changes
+* Removed capacity parameter from from ScriptBehaviourManager.OnCreateManager.
+* EntityDebugger now displays the declaring type for nested types
+* IncrementalCompiler is no longer a dependency on the entities package. If you want to continue to use it you need to manually include it from the package manager UI for your project.
+* `EntityCommandBuffer.Concurrent` playback is now deterministic. Playback order is determined by the new `jobIndex` parameter accepted by all public API methods, which must be a unique ID per job (such as the index passed to `Execute()` in an IJobParallelFor).
+
+## Fixes
+* Fixed bug where ComponentDataWrapper fields spilled out of their area in the Inspector.
+* ComponentDataWrapper for empty data types (i.e. tags) no longer displays error in Inspector if wrapped type is not serializable.
+* Fixed an issue where EntityDebugger was slow if you scrolled down past 3 million entities
+
+# 0.0.11
+## New Features
+* Global `Disabled` component. Any component data associated with same entity referenced by `Disabled` component will be ignored by all system updates.
+* Global `Prefab` component. Same behavior as `Disabled` component, except when an Entity associated with a `Prefab` component is Instantiated, the `Prefab` component is not present in the created archetype.
+* EntityCommandBuffer.Instantiate API has been added
+* Added custom editor for `ComponentDataWrapper<T>` and `SharedComponentDataWrapper<T>`, which will display an error in the Inspector if the encapsulated data type is not marked as serializable
+* new IJobProcessComponentDataWithEntity job type extends IJobProcessComponentData and passes Entity & int foreachIndex. This makes it possible to use it in jobs using EntityCommandBuffer.
+* BufferDataFromEntity renamed to BufferFromEntity. ComponentSystem.GetBufferArrayFromEntity has been renamed to ComponentSystem.GetBufferFromEntity.
+
+## Changes
+* Serialized component data for `ComponentDataWrapper<T>` and `SharedComponentDataWrapper<T>` classes now appears in the Inspector without a foldout group
+* IJobProcessComponentData supports up to 4 components now.
+* IJobProcessComponentData.Schedule function no longers takes the number of batch iteration count. Batch iteration count is now always implicit to be the size of a whole chunk. This requires changing all code using IJobProcessComponentData.
+* IJobProcessComponentData.ScheduleSingle can be used to execute IJobProcessComponentData in a single job. IJobProcessComponentData.Schedule on the other hand by default schedules parallel for jobs.
+* ForEachComponentGroupFilter has been removed. We recommend ArchetypeChunk API as a replacement (Documentation/content/chunk_iteration.md)
+* `TransformSystem` is now an abstract class and no longer have a generic `<T>` parameter
+* Removed MeshCulledComponent & MeshCullingComponent. They were accidentally still left after the rewrite of the InstanceRendererSystem in preview 11.
+
+## Fixes
+* Fixed bug where `Value` setter on `ComponentDataWrapper<T>` or `SharedComponentDataWrapper<T>` did not push changes back to `EntityManager` (fixes the inability to flush changes via `Value` setter + `Undo.RecordObject()` while Inspector was drawing)
+* Removed sync point in GetComponentGroup resulting in two IJobProcessComponentData in the same system to fail on first exectuion.
+* Added more robust checks for what defines a valid IComponentData (must be blittable / must be a struct etc)
+* Fixed a bug with `TransformSystem` jobs (e.g `RootLocalToWorld`) not being compiled by burst for standalone players
+
+# 0.0.10
+## New Features
+* [Dynamic Buffers](Documentation/content/dynamic_buffers.md) (FixedArray functionality has been removed.)
+* [Chunk Iteration](Documentation/content/chunk_iteration.md)
+* [TransformSystem](Documentation/content/transform_system.md) 
+  * Note: Completely incompatible with previous version.
+  * Some Components "downgraded" to Samples.Common (not part of Unity.Transforms) - MoveForward, MoveSpeed, Heading, RotationSpeed
+  * Transform2D Removed.
+* [SystemStateComponents](Documentation/content/system_state_components.md)
+* EntityCommandBuffer.Concurrent added to support command buffer recording in parallel for-type jobs
+* EntityManager.MoveEntitiesFrom optimizations (Moving real world scene with 50k entities takes less than 1ms now)
+* Unity.Entities.Serialization API for writing binary scene format (No backwards compatibility, but incredibly fast load speed)
+
+## Changes
+* **Unity 2018.1 is no longer supported. The Entities package now requires a minimum version of 2018.2f1**
+* EntityDebugger is now much faster when structural changes affect the list of entities being viewed.
+* Moved EntityDebugger to Window/Analysis submenu
+* EntityDebugger shows EntityArchetypeQuery fields in addition to ComponentGroups, in order to show useful contents for systems that use chunk iteration.
+* EntityDebugger shows systems in the order they appear in the player loop
+
 # 0.0.9
 ## New Features
 * Galactic Conquest sample added

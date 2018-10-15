@@ -2,7 +2,6 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Samples.Common;
 using Unity.Transforms;
 
 namespace Samples.Common
@@ -14,12 +13,14 @@ namespace Samples.Common
             public int spawnerIndex;
             public Entity sourceEntity;
             public float3 position;
+#pragma warning disable 649
             public float radius;
+#pragma warning restore 649
         }
 
         ComponentGroup m_MainGroup;
 
-        protected override void OnCreateManager(int capacity)
+        protected override void OnCreateManager()
         {
             m_MainGroup = GetComponentGroup(typeof(SpawnRandomInSphere), typeof(Position));
         }
@@ -28,7 +29,7 @@ namespace Samples.Common
         {
             var uniqueTypes = new List<SpawnRandomInSphere>(10);
 
-            EntityManager.GetAllUniqueSharedComponentDatas(uniqueTypes);
+            EntityManager.GetAllUniqueSharedComponentData(uniqueTypes);
 
             int spawnInstanceCount = 0;
             for (int sharedIndex = 0; sharedIndex != uniqueTypes.Count; sharedIndex++)

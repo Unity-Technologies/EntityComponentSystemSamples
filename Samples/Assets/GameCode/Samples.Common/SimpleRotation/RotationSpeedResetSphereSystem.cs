@@ -3,7 +3,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Burst;
 using Unity.Mathematics;
-using Samples.Common;
 using Unity.Transforms;
 
 namespace Samples.Common
@@ -11,9 +10,12 @@ namespace Samples.Common
     [UpdateBefore(typeof(RotationSpeedSystem))]
     public class RotationSpeedResetSphereSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct RotationSpeedResetSphereGroup
         {
+
             [ReadOnly] public ComponentDataArray<RotationSpeedResetSphere> rotationSpeedResetSpheres;
+
             [ReadOnly] public ComponentDataArray<Radius> spheres;
             [ReadOnly] public ComponentDataArray<Position> positions;
             public readonly int Length;
@@ -29,7 +31,7 @@ namespace Samples.Common
         }
 
         [Inject] RotationSpeedGroup m_RotationSpeedGroup;
-
+#pragma warning restore 649
         [BurstCompile]
         struct RotationSpeedResetSphereRotation : IJobParallelFor
         {
