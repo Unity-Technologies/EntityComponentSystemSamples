@@ -1,3 +1,15 @@
+# 0.0.18
+## New Features
+
+## Upgrade guide
+
+## Changes
+* Restructured documentation and revised a lot of content. New reference page contains an index of topics. Some pages still contain stubs to be filled in, and other pages moved to under_review section if they will be subject to further, more drastic revisions.
+
+## Fixes
+* Fixed a race condition in NativeQueue causing memory corruption leading to editor crashes
+
+
 # 0.0.17
 ## New Features
 * Entity Debugger now has an option to show chunk info for any given query. Click "Chunk Info" in the upper right to see chunk usage data for each archetype.

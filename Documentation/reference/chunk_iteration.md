@@ -1,5 +1,18 @@
 # Chunk Iteration
 
+## Chunk implementation detail
+
+The [ComponentData](component_data.md) for each [Entity](entity.md) is stored in what we internally refer to as a [chunk](https://en.wikipedia.org/wiki/Chunking_(computing)). `ComponentData` is laid out by stream. Meaning all components of type `A`, are tightly packed in an array. Followed by all components of type `B` etc.
+
+A chunk is always linked to a specific [EntityArchetype](entity_archetype.md). Thus all Entities in one chunk follow the exact same memory layout. When iterating over components, memory access of components within a chunk is always completely linear, with no waste loaded into cache lines. This is a hard guarantee.
+
+__ComponentDataArray__ is essentially a convenience index based iterator for a single component type;
+First we iterate over all `EntityArchetype` structs compatible with the `ComponentGroup`; for each `EntityArchetype` iterating over all chunks compatible with it and for each chunk iterating over all entities in that chunk.
+
+Once all entities of a chunk have been visited, we find the next matching chunk and iterate through those entities.
+
+When entities are destroyed, we move up other entities into its place and then update the `Entity` table accordingly. This is required to make a hard guarantee on linear iteration of entities. The code moving the ComponentData into memory is highly optimized.
+
 ## Motivation
 
 If, for example, there are three components, being `Position`, `Rotation`, and `Scale`, and the output of any combination of these three components should write to a `LocalToWorld` component. The approach using component group injection might look something like:
@@ -332,3 +345,5 @@ var chunkAnyChanged = chunkRotationsChanged || chunkPositionsChanged || chunkSca
 if (!chunkAnyChanged)
   return;
 ```
+
+[Back to Capsicum reference](index.md)

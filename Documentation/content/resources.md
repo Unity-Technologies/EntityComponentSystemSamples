@@ -2,7 +2,7 @@
 
 Below are some Capsicum resources, either by Unity or external sources that we have verified. We will include external sources that we feel display a good understanding of Capsicum and contain high-quality information (at the time of contribution).
 
-> **Note**: Due to the changing nature of Capsicum, links can become obsolete. The page will be checked to make sure it contains the best resources, but if you spot something that is out-of-date or broken links then make sure to let us know in the [forums](http://unity3d.com/performance-by-default) or as an [issue](https://github.com/Unity-Technologies/EntityComponentSystemSamples/issues/new) in the repository.
+> **Note**: Due to the changing nature of Capsicum, links can become obsolete. The page will be checked to make sure it contains the best resources, but if you spot something that is out-of-date or broken links, then make sure to let us know in the [forums](http://unity3d.com/performance-by-default) or as an [issue](https://github.com/Unity-Technologies/EntityComponentSystemSamples/issues/new) in the repository.
 
 ## Tutorials
 

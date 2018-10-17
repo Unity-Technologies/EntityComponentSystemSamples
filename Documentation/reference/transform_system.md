@@ -1,6 +1,6 @@
 # TransformSystem
 
-[TransformSystem](transform_system.md) is responsible for updating the `LocalToWorld` transformation matrices used by other systems (including rendering).
+`TransformSystem` is responsible for updating the `LocalToWorld` transformation matrices used by other systems (including rendering).
 
 ## Updating a TransformSystem
 
@@ -18,7 +18,7 @@ For example:
     {
     }
 ```
-- Create additional instance of `TransformSystem` and update after *every* `ComponentSystem` (includes `Barriers`, excludes `JobComponentSystem`) by using \[ComponentSystemPatch\] attribute. Be aware that the overhead for updating the `TransformSystem` after every `ComponentSystem` can be very high when the number of `ComponentSystems` is large.
+- Create additional instance of `TransformSystem` and update after **every** `ComponentSystem` (includes barriers, excludes `JobComponentSystem`) by using `[ComponentSystemPatch]` attribute. Be aware that the overhead for updating the `TransformSystem` after every `ComponentSystem` can be very high when the number of `ComponentSystem`classes is large.
 
 For example:
 
@@ -29,11 +29,11 @@ For example:
     }
 ```
 
-- Manually update your systems. This is the expected method for more complex applciations.
+- Manually update your systems. This is the expected method for more complex applications.
 
 ## Updating Position, Rotation, Scale
 
-The only requirement for `TransfromSystem` is that *one of* the following components is associated with an `Entity`:
+The only requirement for `TransfromSystem` is that **one of** the following components is associated with an `Entity`:
 
 ```
     public struct Position : IComponentData
@@ -52,7 +52,7 @@ The only requirement for `TransfromSystem` is that *one of* the following compon
     }
 ```
 
-`TransformSystem` will add the `LocalToWorld` component and update the matrix based on the values in your selected associated components (`Position`, `Rotation`, and `Scale`). `LocalToWorld` does not need to be added by the user or other systems.
+`TransformSystem` will add the `LocalToWorld` component and update the matrix based on the values in your selected associated components (__Position__, __Rotation__, and __Scale__). `LocalToWorld` does not need to be added by the user or other systems.
 
 ```
     public struct LocalToWorld : ISystemStateComponentData
@@ -61,7 +61,7 @@ The only requirement for `TransfromSystem` is that *one of* the following compon
     }
 ```
 
-`LocalToWorld` is expected to be `ReadOnly` by other systems. Be aware that anything written to this component will be overwritten and its behavior during update is undefined if written to.
+`LocalToWorld` is expected to be `[ReadOnly]` by other systems. Be aware that anything written to this component will be overwritten and its behavior during update is undefined if written to.
 
 ## Freezing transforms
 
@@ -73,16 +73,16 @@ In many cases, individual transforms are *never* expected to change at runtime. 
     }
 ```
 
-They will cease to be updated after the `LocalToWorld` matrix has been created and updated for the first time. Any changes to associated `Position`, `Rotation`, or `Scale` components will be ignored. Marking `Static` transforms can substantially reduce the amount of work a `TransformSystem` needs to do which will improve performance.
+They will cease to be updated after the `LocalToWorld` matrix has been created and updated for the first time. Any changes to associated Position, Rotation, or Scale components will be ignored. Marking `Static` transforms can substantially reduce the amount of work a `TransformSystem` needs to do which will improve performance.
 
 The process of freezing is:
 1. `TransformSystem` update queries for `Static` components.
 2. `TransformSystem` adds `FrozenPending` component.
 3. `TransformSystem` updates the `LocalToWorld` component normally.
-4. On the next `TransformSystem` update, queries for `FrozenPending` components and adds Frozen component.
-5. `TransformSystem` ignores `Position`, `Rotation`, or `Scale` components if there is an associated Frozen component.
+4. On the next `TransformSystem` update, queries for `FrozenPending` components and adds `Frozen` component.
+5. `TransformSystem` ignores Position, Rotation, or Scale components if there is an associated `Frozen` component.
 
-If necessary, users can detect if LocalToWorld matrix is frozen by existence of a `Frozen` component. Generally however, identifying static objects by the existence of the `Static` component is sufficient.
+If necessary, users can detect if `LocalToWorld` matrix is frozen by existence of a `Frozen` component. Generally however, identifying static objects by the existence of the `Static` component is sufficient.
 
 ## Custom transforms
 
@@ -95,7 +95,7 @@ In cases where user systems require custom transformation matrices and updates, 
     }
 ```
 
-If a `CustomLocalToWorld` component exists, it is expected that a user system will write the appropriate data. Position, Rotation, Scale, Static, and any other TransformSystem components are ignored.
+If a `CustomLocalToWorld` component exists, it is expected that a user system will write the appropriate data. Position, Rotation, Scale, `Static`, and any other `TransformSystem` components are ignored.
 
 ## Attaching transformations
 
@@ -109,7 +109,7 @@ Attaching transformations (transformation hierarchies) is controlled by separate
     }
 ```
 
-To attach a Child `Entity` to a Parent `Entity`, create a new `Entity` with an associated `Attach` component, assigning the respective values.
+To attach a Child `Entity` to a Parent `Entity`, create a new `Entity` with an associated Attach component, assigning the respective values.
 
 For example:
 
@@ -125,8 +125,8 @@ For example:
 ```
 
 1. The `Attach` component, and associated `Entity`, will be destroyed by the `TransformSystem` on update.
-2. Values in `Position`, `Rotation`, and `Scale` components will be interpreted as relative to parent space.
-3. `Attached`, `Parent`, and `LocalToParent` components will be associated with the Child `Entity`.
+2. Values in Position, Rotation, and Scale components will be interpreted as relative to parent space.`
+3. Attached, Parent, and LocalToParent components will be associated with the Child `Entity`.
 
 ```
     public struct Attached : IComponentData
@@ -146,13 +146,15 @@ For example:
 
 ## Detaching transformations
 
-To detach a child from a parent, remove the `Attached` component from the child. When the `TransformSystem` is updated, the Parent component will be removed. Values in `Position`, `Rotation`, and `Scale` components will be interpreted as relative to world space.
+To detach a child from a parent, remove the `Attached` component from the child. When the `TransformSystem` is updated, the Parent component will be removed. Values in Position, Rotation, and Scale components will be interpreted as relative to `World` space.
 
 ## Reading World values
 
-The `LocalToWorld` matrix can be used to retrieve world positions.
+The `LocalToWorld` matrix can be used to retrieve `World` positions.
 For example:
 
 ```
 var childWorldPosition = m_Manager.GetComponentData<LocalToWorld>(child).Value.c3
 ```
+
+[Back to Capsicum reference](index.md)
