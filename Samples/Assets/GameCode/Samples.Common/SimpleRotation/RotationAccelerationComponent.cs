@@ -9,5 +9,6 @@ namespace Samples.Common
         public float speed;
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class RotationAccelerationComponent : ComponentDataWrapper<RotationAcceleration> { } 
 }

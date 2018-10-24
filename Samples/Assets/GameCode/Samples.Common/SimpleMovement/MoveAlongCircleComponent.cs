@@ -17,6 +17,7 @@ namespace Samples.Common
         public float t;
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class MoveAlongCircleComponent : ComponentDataWrapper<MoveAlongCircle> { } 
 }
 

@@ -12,9 +12,11 @@ namespace Samples.Common
 	{
 		struct Group
 		{
-			public Transform 				transform;
+#pragma warning disable 649
+		    public Transform 				transform;
 			public RotationSpeedHybridECS   rotation;
-		}
+#pragma warning restore 649
+	    }
 
 		protected override void OnUpdate()
 		{

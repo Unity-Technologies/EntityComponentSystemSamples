@@ -40,7 +40,11 @@ unsafe public struct NativeCounter
 
         // Create a dispose sentinel to track memory leaks. This also creates the AtomicSafetyHandle
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0, label);
+#else
         DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0);
+#endif
 #endif
         // Initialize the count to 0 to avoid uninitialized data
         Count = 0;
@@ -86,11 +90,29 @@ unsafe public struct NativeCounter
     {
         // Let the dispose sentinel know that the data has been freed so it does not report any memory leaks
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Dispose(ref m_Safety, ref m_DisposeSentinel);
+#else
         DisposeSentinel.Dispose(m_Safety, ref m_DisposeSentinel);
+#endif
 #endif
 
         UnsafeUtility.Free(m_Counter, m_AllocatorLabel);
         m_Counter = null;
+    }
+
+    public Concurrent ToConcurrent()
+    {
+        Concurrent concurrent;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+        AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
+        concurrent.m_Safety = m_Safety;
+        AtomicSafetyHandle.UseSecondaryVersion(ref concurrent.m_Safety);
+#endif
+
+        concurrent.m_Counter = m_Counter;
+        return concurrent;
     }
 
     [NativeContainer]
@@ -100,26 +122,12 @@ unsafe public struct NativeCounter
     {
         // Copy of the pointer from the full NativeCounter
         [NativeDisableUnsafePtrRestriction]
-        int* 	m_Counter;
+        internal int* 	m_Counter;
 
         // Copy of the AtomicSafetyHandle from the full NativeCounter. The dispose sentinel is not copied since this inner struct does not own the memory and is not responsible for freeing it
     #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        AtomicSafetyHandle m_Safety;
+        internal AtomicSafetyHandle m_Safety;
     #endif
-
-        // This is what makes it possible to assign to NativeCounter.Concurrent from NativeCounter
-        public static implicit operator Concurrent (NativeCounter cnt)
-        {
-            Concurrent concurrent;
-    #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndThrow(cnt.m_Safety);
-            concurrent.m_Safety = cnt.m_Safety;
-            AtomicSafetyHandle.UseSecondaryVersion(ref concurrent.m_Safety);
-    #endif
-
-            concurrent.m_Counter = cnt.m_Counter;
-            return concurrent;
-        }
 
         public void Increment()
         {
@@ -170,7 +178,11 @@ unsafe public struct NativePerThreadCounter
 
         // Create a dispose sentinel to track memory leaks. This also creates the AtomicSafetyHandle
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0, label);
+#else
         DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 0);
+#endif
 #endif
         // Initialize the count to 0 to avoid uninitialized data
         Count = 0;
@@ -224,11 +236,29 @@ unsafe public struct NativePerThreadCounter
     {
         // Let the dispose sentinel know that the data has been freed so it does not report any memory leaks
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_2018_3_OR_NEWER
+        DisposeSentinel.Dispose(ref m_Safety, ref m_DisposeSentinel);
+#else
         DisposeSentinel.Dispose(m_Safety, ref m_DisposeSentinel);
+#endif
 #endif
 
         UnsafeUtility.Free(m_Counter, m_AllocatorLabel);
         m_Counter = null;
+    }
+
+    public Concurrent ToConcurrent()
+    {
+        Concurrent concurrent;
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+        AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
+        concurrent.m_Safety = m_Safety;
+        AtomicSafetyHandle.UseSecondaryVersion(ref concurrent.m_Safety);
+#endif
+
+        concurrent.m_Counter = m_Counter;
+        concurrent.m_ThreadIndex = 0;
+        return concurrent;
     }
 
     [NativeContainer]
@@ -237,29 +267,15 @@ unsafe public struct NativePerThreadCounter
     unsafe public struct Concurrent
     {
         [NativeDisableUnsafePtrRestriction]
-        int* 	m_Counter;
+        internal int* 	m_Counter;
 
     #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        AtomicSafetyHandle m_Safety;
+        internal AtomicSafetyHandle m_Safety;
     #endif
 
         // The current worker thread index, it must use this exact name since it is injected
         [NativeSetThreadIndex]
-        int m_ThreadIndex;
-
-        public static implicit operator Concurrent (NativePerThreadCounter cnt)
-        {
-            Concurrent concurrent;
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndThrow(cnt.m_Safety);
-            concurrent.m_Safety = cnt.m_Safety;
-            AtomicSafetyHandle.UseSecondaryVersion(ref concurrent.m_Safety);
-#endif
-
-            concurrent.m_Counter = cnt.m_Counter;
-            concurrent.m_ThreadIndex = 0;
-            return concurrent;
-        }
+        internal int m_ThreadIndex;
 
         public void Increment()
         {

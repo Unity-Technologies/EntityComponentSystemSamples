@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -9,18 +10,22 @@ namespace Samples.Common
 {
     public class MoveAlongCircleSystem : JobComponentSystem
     {
+#pragma warning disable 649
         struct MoveAlongCircleGroup
         {
+
             public ComponentDataArray<Position> positions;
+
             public ComponentDataArray<MoveAlongCircle> moveAlongCircles;
             [ReadOnly]
             public ComponentDataArray<MoveSpeed> moveSpeeds;
-            public int Length;
+            public readonly int Length;
         }
 
         [Inject] private MoveAlongCircleGroup m_MoveAlongCircleGroup;
-    
-        [ComputeJobOptimization]
+#pragma warning restore 649  
+        
+        [BurstCompile]
         struct MoveAlongCirclePosition : IJobParallelFor
         {
             public ComponentDataArray<Position> positions;

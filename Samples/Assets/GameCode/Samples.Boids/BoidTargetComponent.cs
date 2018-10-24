@@ -1,8 +1,11 @@
+using System;
 using Unity.Entities;
 
 namespace Samples.Boids
 {
-	public struct BoidTarget : IComponentData { }
+    [Serializable]
+    public struct BoidTarget : IComponentData { }
 
-	public class BoidTargetComponent : ComponentDataWrapper<BoidTarget> { }
+    [UnityEngine.DisallowMultipleComponent]
+    public class BoidTargetComponent : ComponentDataWrapper<BoidTarget> { }
 }

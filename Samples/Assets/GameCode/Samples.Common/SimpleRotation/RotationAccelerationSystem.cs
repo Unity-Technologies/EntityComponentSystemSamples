@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Samples.Common
 {
     public class RotationAccelerationSystem : JobComponentSystem
     {
-        [ComputeJobOptimization]
+        [BurstCompile]
         struct RotationSpeedAcceleration : IJobProcessComponentData<RotationSpeed, RotationAcceleration>
         {
             public float dt;
@@ -22,7 +23,7 @@ namespace Samples.Common
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var rotationSpeedAccelerationJob = new RotationSpeedAcceleration { dt = Time.deltaTime };
-            return rotationSpeedAccelerationJob.Schedule(this, 64, inputDeps);
+            return rotationSpeedAccelerationJob.Schedule(this, inputDeps);
         } 
     }
 }

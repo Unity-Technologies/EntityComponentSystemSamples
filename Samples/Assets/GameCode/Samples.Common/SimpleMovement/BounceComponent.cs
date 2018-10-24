@@ -12,5 +12,6 @@ namespace Samples.Common
         public float3 height;
     }
 
+    [UnityEngine.DisallowMultipleComponent]
     public class BounceComponent : ComponentDataWrapper<Bounce> { } 
 }

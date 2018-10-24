@@ -1,8 +1,6 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
-using UnityEngine;
 
 namespace Samples.Common
 {
@@ -10,10 +8,12 @@ namespace Samples.Common
     {
         struct RandomInitialHeadingGroup
         {
+#pragma warning disable 649
             [ReadOnly] public ComponentDataArray<RandomInitialHeading> RandomInitialHeadiings;
             [ReadOnly] public EntityArray Entities;
             public ComponentDataArray<Heading> Headings;
-            public int Length;
+            public readonly int Length;
+#pragma warning restore 649
         }
 
         [Inject] RandomInitialHeadingGroup m_Group;
@@ -24,7 +24,7 @@ namespace Samples.Common
             {
                 m_Group.Headings[i] = new Heading
                 {
-                    Value = math.normalize(new float3(Random.Range(-1, 1), Random.Range(-1,1), Random.Range(-1, 1)))
+                    Value = math.normalize(new float3(UnityEngine.Random.Range(-1, 1), UnityEngine.Random.Range(-1,1), UnityEngine.Random.Range(-1, 1)))
                 };
                 
                 PostUpdateCommands.RemoveComponent<RandomInitialHeading>(m_Group.Entities[i]);

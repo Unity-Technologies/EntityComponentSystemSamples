@@ -4,6 +4,7 @@
 * Entity Component System is based on some [principles](Documentation/content/ecs_principles_and_vision.md). Read and apply them to your contributions  
 * Follow naming & style conventions in the project
 * Everything must have test coverage. (PRs with insufficient test coverage will be rejected)
+* Please add appropriate release notes in the (Next Version) section of ReleaseNotes.md
 * Pull requests must be made against master (Not stable, which is the default)
 
 ## All contributions are subject to the [Unity Contribution Agreement(UCA)](https://unity3d.com/legal/licenses/Unity_Contribution_Agreement)

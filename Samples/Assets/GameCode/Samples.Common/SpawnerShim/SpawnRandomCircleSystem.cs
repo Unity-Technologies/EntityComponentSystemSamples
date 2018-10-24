@@ -1,25 +1,26 @@
-﻿using System.Collections.Generic;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Samples.Common;
 using Unity.Transforms;
 
 namespace Samples.Common
 {
     public class SpawnRandomCircleSystem : ComponentSystem
     {
+#pragma warning disable 649
         struct Group
         {
             [ReadOnly]
+
             public SharedComponentDataArray<SpawnRandomCircle> Spawner;
+
             public ComponentDataArray<Position>                Position;
             public EntityArray                                 Entity;
-            public int                                         Length;
+            public readonly int                                Length;
         }
 
         [Inject] Group m_Group;
-
+#pragma warning restore 649
 
         protected override void OnUpdate()
         {
@@ -39,12 +40,19 @@ namespace Samples.Common
                     GeneratePoints.RandomPointsOnCircle(new float3(), spawner.radius, ref positions);
                     for (int i = 0; i < spawner.count; i++)
                     {
-                        var position = new LocalPosition
+                        var position = new Position
                         {
                             Value = positions[i]
                         };
                         EntityManager.SetComponentData(entities[i],position);
-                        EntityManager.AddComponentData(entities[i], new TransformParent { Value = sourceEntity});
+                        
+                        // Spawn Attach
+                        var attach = EntityManager.CreateEntity();
+                        EntityManager.AddComponentData(attach, new Attach
+                        {
+                            Parent = sourceEntity,
+                            Child = entities[i]
+                        });
                     }
                 }
                 else

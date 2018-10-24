@@ -2,11 +2,12 @@
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Burst;
 using NUnit.Framework;
 
 public class BurstTests
 {
-	[ComputeJobOptimization(CompileSynchronously = true)]
+	[BurstCompile(CompileSynchronously = true)]
 	public struct SimpleArrayAssignJob : IJob
 	{
 		public float value;
@@ -41,7 +42,7 @@ public class BurstTests
         job.output.Dispose();
     }
 
-	[ComputeJobOptimization(CompileSynchronously = true)]
+	[BurstCompile(CompileSynchronously = true)]
 	public struct SimpleArrayAssignForJob : IJobParallelFor
 	{
 		public float value;
@@ -75,7 +76,7 @@ public class BurstTests
     }
 
 
-	[ComputeJobOptimization(CompileSynchronously = true)]
+	[BurstCompile(CompileSynchronously = true)]
 	struct MallocTestJob : IJob
 	{
 		unsafe public void Execute()
@@ -94,7 +95,7 @@ public class BurstTests
 	}
 
 
-	[ComputeJobOptimization(CompileSynchronously = true)]
+	[BurstCompile(CompileSynchronously = true)]
 	struct ListCapacityJob : IJob
 	{
         public NativeList<int> list;
@@ -118,7 +119,7 @@ public class BurstTests
 	}
 
 
-	[ComputeJobOptimization(CompileSynchronously = true)]
+	[BurstCompile(CompileSynchronously = true)]
 	struct NativeListAssignValue : IJob
 	{
 		public NativeList<int> list;
@@ -142,7 +143,7 @@ public class BurstTests
 		jobData.list.Dispose();
 	}
 
-	[ComputeJobOptimization(CompileSynchronously = true)]
+	[BurstCompile(CompileSynchronously = true)]
 	struct NativeListAddValue : IJob
 	{
 		public NativeList<int> list;
@@ -177,7 +178,7 @@ public class BurstTests
 	    public void* b;
     }
 
-    [ComputeJobOptimization(CompileSynchronously = true)]
+    [BurstCompile(CompileSynchronously = true)]
 	unsafe struct PointerConditional : IJob
 	{
 	    [NativeDisableUnsafePtrRestriction]
