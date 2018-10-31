@@ -167,12 +167,12 @@ When used in a `Job`, the \[ReadOnly\] attribute must match the type. For exampl
   public ArchetypeChunkComponentType<LocalToWorld> localToWorldType;
 ```
 
-To retrieve the actual component data for reading or editing, `ArchetypeChunk.GetNativeSlice<T>(ArchetypeChunkComponentType<T> chunkComponentType)` is used, which returns `NativeSlice<T>`
+To retrieve the actual component data for reading or editing, `ArchetypeChunk.GetNativeArray<T>(ArchetypeChunkComponentType<T> chunkComponentType)` is used, which returns `NativeArray<T>`
 
 For example, for a given `ArchetypeChunk` (`Chunk`), you can retrieve the `Position` and `LocalToWorld` data as:
 ```
-var chunkPositions = chunk.GetNativeSlice(positionType);
-var chunkLocalToWorlds = chunk.GetNativeSlice(localToWorldType);
+var chunkPositions = chunk.GetNativeArray(positionType);
+var chunkLocalToWorlds = chunk.GetNativeArray(localToWorldType);
 ```
 
 Implicit to an `EntityArchetypeQuery` is that every `Chunk` may not have the same components available. In this case, for instance, `Chunks` coming from different `archetypes` may or may not have `Position` components. In that case, the length of the returned array will be zero. For example, you can confirm the existence of a `Position` component data in a `Chunk` by:
@@ -209,9 +209,9 @@ Similarly `ArchetypeChunkEntityType` should always include the \[ReadOnly\] attr
 [ReadOnly] public ArchetypeChunkEntityType entityType;
 ```
 
-To retrieve the `Entity` values given a specific `ArchetypeChunk`, `GetNativeSlice` is used as with component data: 
+To retrieve the `Entity` values given a specific `ArchetypeChunk`, `GetNativeArray` is used as with component data: 
 ```
-var chunkEntities = chunk.GetNativeSlice(entityType);
+var chunkEntities = chunk.GetNativeArray(entityType);
 ```
 
 ## Accessing SharedComponent (index) data in chunks
@@ -284,7 +284,7 @@ struct CollectValues : IJobParallelFor
         var chunk = chunks[chunkIndex];
         var chunkStartIndex = chunk.StartIndex;
         var chunkCount = chunk.Count;
-        var chunkEcsTestData = chunk.GetNativeSlice(ecsTestData);
+        var chunkEcsTestData = chunk.GetNativeArray(ecsTestData);
 
         for (int i = 0; i < chunkCount; i++)
         {
