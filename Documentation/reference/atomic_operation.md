@@ -6,4 +6,4 @@ General computing term. Also known as linearizable or uninterruptible.
 
 > [Preshing on Programming](http://preshing.com/20130618/atomic-vs-non-atomic-operations/): "An operation acting on shared memory is atomic if it completes in a single step relative to other threads. When an atomic store is performed on a shared variable, no other thread can observe the modification half-complete. When an atomic load is performed on a shared variable, it reads the entire value as it appeared at a single moment in time… Any time two threads operate on a shared variable concurrently, and one of those operations performs a write, both threads must use atomic operations."
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

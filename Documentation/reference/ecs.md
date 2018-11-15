@@ -8,4 +8,4 @@ An [entity-component-system](https://en.wikipedia.org/wiki/Entity%E2%80%93compon
 
 See also: [Entity](entity.md), [ComponentData](component_data.md), and [ComponentSystem](component_system.md). 
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

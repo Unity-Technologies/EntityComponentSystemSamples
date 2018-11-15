@@ -6,4 +6,4 @@ General computing term. SIMD stands for "Single Instruction Multiple Data".
 
 See also: [ParallelFor jobs](https://docs.unity3d.com/Manual/JobSystemParallelForJobs.html).
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

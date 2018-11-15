@@ -126,4 +126,4 @@ others.
 Note that there are no type checks involved, so it is entirely possible to
 alias a `uint` and `float` buffer.
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

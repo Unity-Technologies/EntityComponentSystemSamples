@@ -2,7 +2,7 @@
 
 ComponentData in Unity (also known as a Component in standard ECS terms) is a struct that contains only the instance data for an [Entity](entity.md). ComponentData cannot contain methods. To put this in terms of the old Unity system, this is somewhat similar to an old Component class, but one that **only contains variables**.
 
-Unity ECS provides an interface called [IComponentData](../../Samples/Packages/com.unity.entities/Unity.Entities/IComponentData.cs) that you can implement in your code.
+Unity ECS provides an interface called `IComponentData` that you can implement in your code. 
 
 ## IComponentData
 
@@ -19,4 +19,6 @@ group.transform[index] = transform; // Write
 
 `IComponentData` structs may not contain references to managed objects. Since the all `ComponentData` lives in simple non-garbage-collected tracked [chunk memory](chunk_iteration.md).
 
-[Back to Capsicum reference](index.md)
+See file: _/Packages/com.unity.entities/Unity.Entities/IComponentData.cs_.
+
+[Back to Unity Data-Oriented reference](index.md)

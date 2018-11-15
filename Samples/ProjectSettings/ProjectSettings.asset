@@ -409,6 +409,7 @@ PlayerSettings:
   switchAllowsVideoCapturing: 1
   switchAllowsRuntimeAddOnContentInstall: 0
   switchDataLossConfirmation: 0
+  switchUserAccountLockEnabled: 0
   switchSupportedNpadStyles: 3
   switchNativeFsCacheSize: 32
   switchIsHoldTypeHorizontal: 0
@@ -490,7 +491,19 @@ PlayerSettings:
   ps4videoRecordingFeaturesUsed: 0
   ps4contentSearchFeaturesUsed: 0
   ps4attribEyeToEyeDistanceSettingVR: 0
-  ps4IncludedModules: []
+  ps4IncludedModules:
+  - libc.prx
+  - libSceAudioLatencyEstimation.prx
+  - libSceFace.prx
+  - libSceFaceTracker.prx
+  - libSceFios2.prx
+  - libSceHand.prx
+  - libSceHandTracker.prx
+  - libSceHeadTracker.prx
+  - libSceJobManager.prx
+  - libSceNpToolkit2.prx
+  - libSceS3DConversion.prx
+  - libSceSmart.prx
   monoEnv: 
   psp2Splashimage: {fileID: 0}
   psp2NPTrophyPackPath: 
@@ -557,10 +570,11 @@ PlayerSettings:
   scriptingDefineSymbols:
     1: 
   platformArchitecture: {}
-  scriptingBackend: {}
+  scriptingBackend:
+    PS4: 1
   il2cppCompilerConfiguration: {}
   incrementalIl2cppBuild: {}
-  allowUnsafeCode: 0
+  allowUnsafeCode: 1
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
   apiCompatibilityLevelPerPlatform:

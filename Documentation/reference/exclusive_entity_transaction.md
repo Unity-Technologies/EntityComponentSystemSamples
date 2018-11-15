@@ -6,4 +6,4 @@
 
 After the job has completed you can end the `ExclusiveEntityTransaction` and use ```EntityManager.MoveEntitiesFrom(EntityManager srcEntities);``` to move the entities to an active `World`.
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

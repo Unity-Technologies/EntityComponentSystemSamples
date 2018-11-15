@@ -4,7 +4,7 @@ On the lowest level of the job system, jobs are scheduled by calling one of the 
 
 These APIs use unsafe code and have to be crafted carefully, since they can easily introduce unwanted race conditions. If you add your own job types, we strongly recommend to aim for full test coverage.
 
-As an example we have a custom job type [IJobParallelForBatch](../../Samples/Packages/com.unity.jobs/Unity.Jobs/IJobParallelForBatch.cs).
+As an example we have a custom job type `IJobParallelForBatch` (see file: _/Packages/com.unity.jobs/Unity.Jobs/IJobParallelForBatch.cs_).
 
 It works like __IJobParallelFor__, but instead of calling a single execute function per index it calls one execute function per batch being executed. This is useful if you need to do something on more than one item at a time, but still want to do it in parallel. A common scenario for this job type is if you need to create a temporary array and you want to avoid creating each item in the array one at a time. By using IJobParallelFor you can instead create one temporary array per batch.
 
@@ -355,4 +355,4 @@ In addition to these attributes on the native container struct itself there are 
 * [NativeDisableUnsafePtrRestriction](https://docs.unity3d.com/2018.1/Documentation/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestrictionAttribute.html) - allows the NativeContainer to be passed to a job even though it contains a pointer, which is usually not allowed.
 * [NativeSetClassTypeToNullOnSchedule](https://docs.unity3d.com/2018.1/Documentation/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeSetClassTypeToNullOnScheduleAttribute.html) - allows the NativeContainer to be passed to a job even though it contains a managed object. The managed object will be set to `null` on the copy passed to the job.
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

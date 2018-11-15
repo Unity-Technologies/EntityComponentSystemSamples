@@ -1,3 +1,19 @@
+# 0.0.19
+## New Features
+
+## Upgrade guide
+
+## Changes
+
+* Updated burst to 0.2.4-preview.37 (fixes a crash in the editor when trying to load burst-llvm (mac + linux)
+* Reduced redundant repaints of the EntityDebugger and inspectors.
+* Documentation cleanup (broken links, additional resources, etc.)
+* Internal project name "Capsicum" removed from documentation and replaced by "Data Oriented Tech Stack".
+
+## Fixes
+
+* Fixed Instantiate and Delete on concurrent entity command buffers.
+
 # 0.0.18
 ## New Features
 
