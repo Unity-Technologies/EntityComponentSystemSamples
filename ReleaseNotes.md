@@ -1,3 +1,20 @@
+# 0.0.20
+## New Features
+
+## Upgrade guide
+
+## Changes
+* ComponentGroup.Types was made internal, since it will likely be refactored
+* Renamed DynamicBuffer.GetBasePointer() to DynamicBuffer.GetUnsafePtr() for consistency with NativeArray API.
+
+## Fixes
+* Component types no longer show up multiple times in archetypes and queries in the EntityDebugger
+* Attempting to rename an entity in the EntityDebugger no longer causes an exception (naming is not yet supported)
+* Component filter editor now shows types in consistent alphabetical order when filtering
+* The Show button in the GameObjectEntity inspector works again
+* Fixed [ReadOnly] DynamicBuffer incorrectly throwing exceptions when getting the NativeArray inside of a job.
+* Fixed DynamicBuffer not throwing the right exceptions when writing to buffers while NativeArrays are being used in jobs
+
 # 0.0.19
 ## New Features
 
