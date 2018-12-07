@@ -69,4 +69,4 @@ struct FooStateSharedComponent : ISystemStateSharedComponentData
 }
 ```
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

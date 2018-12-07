@@ -10,4 +10,4 @@ You can add and remove components from entities at runtime in much the same way 
 
 Iterating over all entities that have a matching set of components, is at the center of the ECS architecture.
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

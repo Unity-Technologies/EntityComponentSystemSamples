@@ -6,5 +6,5 @@ General computing term.
 
 See also: [DisposeSentinel](https://docs.unity3d.com/Manual/JobSystemNativeContainer.html) - see "NativeContainer and the safety system."
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)
 

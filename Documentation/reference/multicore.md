@@ -6,4 +6,4 @@ General computing term.
 
 See also: [logical CPU](logical_cpu.md).
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

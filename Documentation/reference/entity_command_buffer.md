@@ -70,4 +70,4 @@ When the `BarrierSystem` updates, it will automatically play back the command bu
 
 When using an `EntityCommandBuffer` to issue `EntityManager` commands from [ParallelFor jobs](https://docs.unity3d.com/Manual/JobSystemParallelForJobs.html), the `EntityCommandBuffer.Concurrent` interface is used to guarantee thread safety and deterministic playback. The public methods in this interface take an extra `jobIndex` parameter, which is used to playback the recorded commands in a deterministic order. The `jobIndex` must be a unique ID for each job. For performance reasons, `jobIndex` should be the (increasing) `index` values passed to `IJobParallelFor.Execute()`. Unless you *really* know what you're doing, using the `index` as `jobIndex` is the safest choice. Using other `jobIndex` values will produce the correct output, but can have severe performance implications in some cases.
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

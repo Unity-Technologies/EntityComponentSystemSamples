@@ -20,7 +20,7 @@ The great thing about `ISharedComponentData` is that there is literally zero mem
 
 We use `ISharedComponentData` to group all entities using the same `InstanceRenderer` data together and then efficiently extract all matrices for rendering. The resulting code is simple & efficient because the data is laid out exactly as it is accessed.
 
-- [MeshInstanceRendererSystem.cs](../../Samples/Packages/com.unity.entities/Unity.Rendering.Hybrid/MeshInstanceRendererSystems.cs)
+- `MeshInstanceRendererSystem` (see file:  _Packages/com.unity.entities/Unity.Rendering.Hybrid/MeshInstanceRendererSystems.cs_)
 
 ## Some important notes about SharedComponentData:
 
@@ -31,4 +31,4 @@ We use `ISharedComponentData` to group all entities using the same `InstanceRend
 - `SharedComponentData` are automatically [reference counted](https://en.wikipedia.org/wiki/Reference_counting).
 - `SharedComponentData` should change rarely. Changing a `SharedComponentData` involves using [memcpy](https://msdn.microsoft.com/en-us/library/aa246468(v=vs.60).aspx) to copy all `ComponentData` for that `Entity` into a different `Chunk`.
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

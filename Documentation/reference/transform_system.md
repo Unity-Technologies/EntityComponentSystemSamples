@@ -157,4 +157,4 @@ For example:
 var childWorldPosition = m_Manager.GetComponentData<LocalToWorld>(child).Value.c3
 ```
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

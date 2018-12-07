@@ -1,16 +1,16 @@
-# Capsicum reference
+# Unity Data-Oriented reference
 
-Here is a quick reference of the features and concepts that have been introduced in this documentation by ECS, the C# Job System, and Burst. There is also a list of general computing terms that are useful to know when learning Unity Capsicum. 
+Here is a quick reference of the features and concepts that have been introduced in this documentation by ECS, the C# Job System, and Burst. There is also a list of general computing terms that are useful to know when learning the Unity Data-Oriented Tech Stack. 
 
-> **Note**: This is not an exhaustive list and can be added to over time as Capsicum, and its related documentation, expands. Some documentation is located in the [Unity Manual](https://docs.unity3d.com/Manual/index.html) or [Script Reference](https://docs.unity3d.com/ScriptReference/index.html), as some Capsicum features are part of the Unity Engine and some features are available in related packages. Some definitions below are not completed or are a "work in progress" marked with WIP. 
+> **Note**: This is not an exhaustive list and can be added to over time as the Unity Data-Oriented Tech Stack, and its related documentation, expands. Some documentation is located in the [Unity Manual](https://docs.unity3d.com/Manual/index.html) or [Script Reference](https://docs.unity3d.com/ScriptReference/index.html), as some Unity Data-Oriented features are part of the Unity Engine and some features are available in related packages. Some definitions below are not completed or are a "work in progress" marked with WIP. 
 
 ## Table of contents
 
-* [Capsicum terms](#capsicum-terms)
+* [Unity Data-Oriented terms](#unity-data-oriented-terms)
 * [General computing terms](#general-computing-terms)
 * [Further information](#further-information)
 
-## Capsicum terms
+## Unity Data-Oriented terms
 
 * Archetype
 * Allocator: [Reference](https://docs.unity3d.com/ScriptReference/Unity.Collections.Allocator.html)|[Manual](https://docs.unity3d.com/Manual/JobSystemNativeContainer.html) - see "NativeContainer Allocator".
@@ -102,4 +102,4 @@ Here is a quick reference of the features and concepts that have been introduced
 
 ## Further information
 
-Check the [Capsicum manual](../index.md) for more examples on usage, or the [Capsicum cheat sheet](../content/cheatsheet.md) for quick links to the code. 
+Check the [Unity Data-Oriented manual](../index.md) for more examples on usage, or the [Unity Data-Oriented cheat sheet](../content/cheatsheet.md) for quick links to the code. 

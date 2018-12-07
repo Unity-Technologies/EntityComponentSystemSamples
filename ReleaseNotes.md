@@ -1,3 +1,36 @@
+# 0.0.20
+## New Features
+
+## Upgrade guide
+
+## Changes
+* ComponentGroup.Types was made internal, since it will likely be refactored
+* Renamed DynamicBuffer.GetBasePointer() to DynamicBuffer.GetUnsafePtr() for consistency with NativeArray API.
+
+## Fixes
+* Component types no longer show up multiple times in archetypes and queries in the EntityDebugger
+* Attempting to rename an entity in the EntityDebugger no longer causes an exception (naming is not yet supported)
+* Component filter editor now shows types in consistent alphabetical order when filtering
+* The Show button in the GameObjectEntity inspector works again
+* Fixed [ReadOnly] DynamicBuffer incorrectly throwing exceptions when getting the NativeArray inside of a job.
+* Fixed DynamicBuffer not throwing the right exceptions when writing to buffers while NativeArrays are being used in jobs
+
+# 0.0.19
+## New Features
+
+## Upgrade guide
+
+## Changes
+
+* Updated burst to 0.2.4-preview.37 (fixes a crash in the editor when trying to load burst-llvm (mac + linux)
+* Reduced redundant repaints of the EntityDebugger and inspectors.
+* Documentation cleanup (broken links, additional resources, etc.)
+* Internal project name "Capsicum" removed from documentation and replaced by "Data Oriented Tech Stack".
+
+## Fixes
+
+* Fixed Instantiate and Delete on concurrent entity command buffers.
+
 # 0.0.18
 ## New Features
 

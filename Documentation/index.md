@@ -1,7 +1,7 @@
 ![Unity](https://unity3d.com/files/images/ogimg.jpg?1)
-# Capsicum manual
+# Unity Data-Oriented Tech Stack Manual
 
-This manual covers the three main aspects of Unity Capsicum: Entity-Component-System (ECS), C# Job System, and Burst.
+This manual covers the three main aspects of Unity's Data-Oriented Tech Stack: Entity-Component-System (ECS), C# Job System, and Burst.
 
 ## Table of contents
 
@@ -12,8 +12,8 @@ This manual covers the three main aspects of Unity Capsicum: Entity-Component-Sy
 * [Examples](#examples)
 * [Community](#community)
 * [Further information](#further-information), including:
-  * [Capsicum cheat sheet](content/cheatsheet.md)
-  * [Capsicum reference](reference/index.md)
+  * [Data-Oriented cheat sheet](content/cheatsheet.md)
+  * [Data-Oriented reference](reference/index.md)
 
 ## Entity-Component-System overview
 
@@ -46,7 +46,7 @@ This manual covers the three main aspects of Unity Capsicum: Entity-Component-Sy
 
 ## Further information
 
-- [Capsicum cheat sheet](content/cheatsheet.md)
-- [Capsicum reference](reference/index.md)
-- [Capsicum status](content/status.md)
-- [Capsicum resources](content/resources.md)
+- [Unity Data-Oriented cheat sheet](content/cheatsheet.md)
+- [Unity Data-Oriented reference](reference/index.md)
+- [Unity Data-Oriented status](content/status.md)
+- [Unity Data-Oriented resources](content/resources.md)

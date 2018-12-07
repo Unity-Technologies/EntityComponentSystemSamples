@@ -10,4 +10,4 @@ General computing term. Also known as logical processors.
 
 See also: [multithreading](https://docs.unity3d.com/Manual/JobSystemMultithreading.html) and [multicore](multicore.md).
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

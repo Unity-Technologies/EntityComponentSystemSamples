@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 [TestFixture]
-[UnityPlatform(RuntimePlatform.OSXEditor, RuntimePlatform.LinuxEditor, RuntimePlatform.WindowsEditor)]
 public class SceneLoadingTests
 {
     private GameObject sceneSwitcherDummy;

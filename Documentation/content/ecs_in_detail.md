@@ -1,6 +1,6 @@
 # ECS features in detail
 
-> **Note**: The main content of this page has migrated to the [Capsicum reference](../reference/index.md). ECS related features are listed below in alphabetical order, with a short description and links to further information about it. This page is not an exhaustive list and can be added to over time as ECS, and its related documentation expands. If you spot something that is out-of-date or broken links, then make sure to let us know in the [forums](http://unity3d.com/performance-by-default) or as an [issue](https://github.com/Unity-Technologies/EntityComponentSystemSamples/issues/new) in the repository.
+> **Note**: The main content of this page has migrated to the [Unity Data-Oriented reference](../reference/index.md). ECS related features are listed below in alphabetical order, with a short description and links to further information about it. This page is not an exhaustive list and can be added to over time as ECS, and its related documentation expands. If you spot something that is out-of-date or broken links, then make sure to let us know in the [forums](http://unity3d.com/performance-by-default) or as an [issue](https://github.com/Unity-Technologies/EntityComponentSystemSamples/issues/new) in the repository.
 
 ## Barrier
 
@@ -108,4 +108,4 @@ For more information, see the [World](../reference/world.md) reference page.
 
 ## Further information
 
-For more information on ECS features, see the [Capsicum reference](../reference/index.md) section.
+For more information on ECS features, see the [Unity Data-Oriented reference](../reference/index.md) section.

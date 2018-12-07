@@ -8,5 +8,5 @@ It has special rules for allowing safe and deterministic write access from [Para
 
 See also: [Wikipedia - Hash table](https://en.wikipedia.org/wiki/Hash_table).
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)
 

@@ -4,4 +4,4 @@ ECS ships with the `GameObjectEntity` component. It is a [MonoBehaviour](https:/
 
 > Note: for the time being, you must add a `GameObjectEntity` component on each `GameObject` that you want to be visible / iterable from the `ComponentSystem`.
 
-[Back to Capsicum reference](index.md)
+[Back to Unity Data-Oriented reference](index.md)

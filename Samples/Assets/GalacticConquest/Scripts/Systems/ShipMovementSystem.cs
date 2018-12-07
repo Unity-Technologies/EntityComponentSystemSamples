@@ -76,12 +76,17 @@ namespace Systems
                     }
                 }
 
-                var shipCurrentDirection = math.normalize((float3)newPos - position.Value);
-                rotation.Value = quaternion.LookRotation(shipCurrentDirection, math.up());
+                var dist = (float3) newPos - position.Value;
+                var lenSq = math.lengthsq(dist);
+                if (lenSq > math.FLT_MIN_NORMAL)
+                {
+                    var shipCurrentDirection = dist / math.sqrt(lenSq);
+                    rotation.Value = quaternion.LookRotation(shipCurrentDirection, math.up());
+                    Rotations[index] = rotation;
+                }
 
                 position.Value = newPos;
                 Positions[index] = position;
-                Rotations[index] = rotation;
             }
         }
 
