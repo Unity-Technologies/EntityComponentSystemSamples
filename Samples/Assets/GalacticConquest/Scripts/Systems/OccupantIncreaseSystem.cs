@@ -52,8 +52,7 @@ namespace Systems
             spawnCounter += deltaTime;
             if (spawnCounter < spawnInterval)
                 return inputDeps;
-            //spawnCounter = 0.0f; 
-              spawnCounter -= spawnInterval; 
+            spawnCounter -= spawnInterval; 
               
             var job = new PlanetsOccupantsJob
             {
