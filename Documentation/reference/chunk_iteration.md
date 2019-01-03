@@ -216,7 +216,7 @@ var chunkEntities = chunk.GetNativeSlice(entityType);
 
 ## Accessing SharedComponent (index) data in chunks
 
-You cannot directly access `SharedComponent` in a `Chunk` because `SharedComponent` data is not stored in the `Chunks`. However, each `archetype` contains the index of the specific value of the `SharedComponent` which is part of its definition, and indexes into the global list of `SharedComponent` values.
+You cannot directly access `SharedComponent` in a `Chunk` because `SharedComponent` data is not stored in the `Chunks`. However, each `Chunk` contains the index of the specific value of the `SharedComponent` which is part of its definition, and indexes into the global list of `SharedComponent` values.
 
 Retrieving the `SharedComponent` index works very much like retrieving component data. An `ArchetypeChunkSharedComponentType<T>` is returned by a call to `GetArchetypeChunkSharedComponentType<T>()` within a `ComponentSystem` or `JobComponentSystem`. 
 
