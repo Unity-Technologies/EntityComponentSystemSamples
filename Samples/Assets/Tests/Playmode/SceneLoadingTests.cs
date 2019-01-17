@@ -18,7 +18,8 @@ public class SceneLoadingTests
         while (sceneIndex < sceneCount)
         {
             var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
-            if (!scenePath.StartsWith("Assets/Scenes/") || scenePath.Contains("InitTestScene") || scenePath.Contains("SceneSwitcher"))
+            if (scenePath.Contains("SceneSwitcher") || scenePath.Contains("InitTestScene") )
+                
             {
                 sceneIndex++;
                 continue;
@@ -27,7 +28,7 @@ public class SceneLoadingTests
             var fileName = scenePath.Substring(scenePath.LastIndexOf("/") + 1);
             var sceneName = fileName.Substring(0, fileName.LastIndexOf(".unity"));
 
-            yield return sceneName;
+            yield return scenePath;
             sceneIndex++;
         }
     }
@@ -42,9 +43,9 @@ public class SceneLoadingTests
     }
 
     [UnityTest]
-    public IEnumerator LoadScenes_NoScenesShouldLog([ValueSource(nameof(GetScenes))] string sceneName)
+    public IEnumerator LoadScenes_NoScenesShouldLog([ValueSource(nameof(GetScenes))] string scenePath)
     {
-        SceneManager.LoadScene($"Assets/Scenes/{sceneName}.unity");
+        SceneManager.LoadScene(scenePath);
         yield return new WaitForSeconds(1);
         EntitiesCleanup();
         yield return new WaitForFixedUpdate();

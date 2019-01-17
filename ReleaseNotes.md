@@ -1,3 +1,32 @@
+# 0.0.21
+## New Features
+* Added new batched renderer for MegaCity sample (Requires API in 19.1 and is disabled by default)
+* Added custom job type to schedule parallel jobs over hash map.
+* Added DynamicBuffer accessor to ExclusiveEntityTransaction.
+* ComponentSystem.GetSingleton / ComponentSystem.SetSingleton to simplify access to singleton data
+* ComponentSystem.RequireForUpdate(ComponentGroup) for specifiying ComponentGroups that are required for a system to run.
+* GameObjectConversionSystem & GameObjectConversionUtility can be used to perform conversion of existing GameObject scenes into entity representation.
+* WorldDiff can be used to create a diff between a previously applied state of the world.
+* GameObjectConversionSystem & WorldDiff combined are the foundation for scene management tools & live pipeline tools that are in progress and not yet part of this.
+* NativeHashMap.GetKeyArray lets you retrieve all keys of the HashMap into a NativeArray
+* Added support for chunk components. Chunk components are like ordinary components expect they can be added to and accessed by ArchetypeChunks.
+
+## Upgrade guide
+* Much of the rendering logic has been moved to a separate package called Hybrid Renderer (com.unity.rendering.hybrid). So in custom projects you are likely to need to now add the Hybrid Renderer in the Package Manager window.
+  * Note especially that the `MeshInstanceRenderer` component has been renamed to `RenderMesh`, and is part of the new Hybrid Renderer package.
+* Systems that use BarrierSystem.CreateCommandBuffer() to create an EntityCommandBuffer and record that command buffer in a job must now call BarrierSystem.AddJobHandleForProducer() to ensure that the recording job completes before the barrier initiates command buffer playback.
+
+## Changes
+* Systems that should execute in edit mode should now use the ExecuteAlways attribute instead of ExecuteInEditMode.
+* ISerializationCallbackReceiver interfaces on ComponentDataWrapperBase are no longer public.
+* IJobProcessComponentData now supports up to 6 seperate IComponentData
+* TypeManager.BuildComponentType() has been made internal.
+* EntityManager.MoveEntitiesFrom now supports shared components with entity references
+
+## Fixes
+* Fixed null exception arising when entering prefab editing mode during play mode, and then exiting play mode while still in prefab editing mode (Fogbugz case 1091596).
+* Fixed null exception when resetting a ComponentDataWrapper via the context menu in the Inspector.
+
 # 0.0.20
 ## New Features
 
