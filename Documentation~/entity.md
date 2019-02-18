@@ -4,7 +4,7 @@
 
 You can add and remove components from entities at runtime. `Entity` ID's are stable. They are the only stable way to store a reference to another component or Entity.
 
-You can add and remove components from entities at runtime in much the same way as a `GameObject`. Entities can be created from [Prefabs](https://docs.unity3d.com/Manual/Prefabs.html) by using `ComponentDataWrapper`. The `EntityManager` will parse the Prefab for [ComponentData](component_data.md) and add it when it creates the `Entity`. 
+You can add and remove components from entities at runtime in much the same way as a `GameObject`. Entities can be created from [Prefabs](https://docs.unity3d.com/Manual/Prefabs.html) by using `ComponentDataProxy`. The `EntityManager` will parse the Prefab for [ComponentData](component_data.md) and add it when it creates the `Entity`. 
 
 ## Iterating entities
 

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using Unity.Entities;
 
 /// <summary>
-/// Store float speed. This component requests that if another component is moving the PositionComponent
+/// Store float speed. This component requests that if another component is moving the PositionProxy
 /// it should respect this value and move the position at the constant speed specified.
 /// </summary>
 [Serializable]
@@ -12,4 +12,4 @@ public struct MoveSpeed : IComponentData
 }
 
 [UnityEngine.DisallowMultipleComponent]
-public class MoveSpeedComponent : ComponentDataWrapper<MoveSpeed> { }
+public class MoveSpeedProxy : ComponentDataProxy<MoveSpeed> { }

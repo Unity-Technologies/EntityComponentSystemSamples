@@ -9,4 +9,4 @@ public struct HelloSpawner : ISharedComponentData
     public GameObject prefab;
 }
 
-public class HelloSpawnerComponent : SharedComponentDataWrapper<HelloSpawner> { }
+public class HelloSpawnerProxy : SharedComponentDataProxy<HelloSpawner> { }

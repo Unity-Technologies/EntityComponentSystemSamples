@@ -11,4 +11,4 @@ public struct Boid : ISharedComponentData
     public float obstacleAversionDistance;
 }
 
-public class BoidComponent : SharedComponentDataWrapper<Boid> { }
+public class BoidProxy : SharedComponentDataProxy<Boid> { }

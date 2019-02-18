@@ -10,4 +10,4 @@ public struct SpawnRandomInSphere : ISharedComponentData
     public int count;
 }
 
-public class SpawnRandomInSphereComponent : SharedComponentDataWrapper<SpawnRandomInSphere> { }
+public class SpawnRandomInSphereProxy: SharedComponentDataProxy<SpawnRandomInSphere> { }

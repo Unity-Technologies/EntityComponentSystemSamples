@@ -12,10 +12,9 @@ public class HelloMovementSpeedSystem : JobComponentSystem
     [BurstCompile]
     struct HelloMovementSpeedJob : IJobProcessComponentData<Position, HelloMovementSpeed>
     {
-        // The [ReadOnly] attribute tells the job scheduler that this job cannot write to dT.
-        [ReadOnly] public float dT;
+        public float dT;
 
-        // Position is read/write
+        // The [ReadOnly] attribute tells the job scheduler that this job will not write to movementSpeed
         public void Execute(ref Position Position, [ReadOnly] ref HelloMovementSpeed movementSpeed)
         {
             // Move something in the +X direction at the speed given by HelloMovementSpeed.

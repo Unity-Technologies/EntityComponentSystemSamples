@@ -1,3 +1,32 @@
+# 0.0.22
+## New Features
+
+* Added DynamicBufferProxy base class to allow authoring DynamicBuffer data in hybrid mode (similar to ComponentDataProxy).
+* EntityManager.AddComponentObject and EntityManager.GetComponentObject let you attach UnityEngine.Component based classes to an entity.
+* Added CopyFromComponentDataArray API to ComponentGroup for easy write-back of data to chunks from a NativeArray
+
+## Upgrade guide
+
+* EntityCommandBuffer functions that implicitly operate on the most recently created/instantiated Entity are now deprecated
+  in favor of the variants that take an explicit Entity parameter.
+* EntityManager.CreateArchetypeChunkArray() is now deprecated; use ComponentGroup.CreateArchetypeChunkArray() instead.
+* EntityManager.AddMatchingArchetypes() is now deprecated. No direct alternative is available.
+* ComponentDataWrapper and SharedComponentDataWrapper have been renamed to ComponentDataProxy and SharedComponentDataProxy
+  * Hybrid MonoBehaviours XComponent have been renamed to XProxy throughout
+
+## Changes
+
+* EntityDebugger and Entity inspector API are no longer public
+
+## Fixes
+
+* Fix to a bug in ComponentChunkIterator which causes incorrect calculation of entity offset while filtering by a shared component data value (affected both IJobChunk and IJobProcessComponentData)
+* Fix IJobProcessComponentData.ScheduleGroupSingle & RunGroup to not use parallel scheduling codepath. Thus able to write to full range of arrays or command buffers.
+* HybridSerializeUtility no longer has an implicit naming convention requirement for SharedComponentDataProxy (i.e. wrapper) classes.
+
+## Known issues
+* Playmode tests sometimes crashes for 2018.3 on windows
+
 # 0.0.21
 ## New Features
 * Added new batched renderer for MegaCity sample (Requires API in 19.1 and is disabled by default)
@@ -9,7 +38,7 @@
 * WorldDiff can be used to create a diff between a previously applied state of the world.
 * GameObjectConversionSystem & WorldDiff combined are the foundation for scene management tools & live pipeline tools that are in progress and not yet part of this.
 * NativeHashMap.GetKeyArray lets you retrieve all keys of the HashMap into a NativeArray
-* Added support for chunk components. Chunk components are like ordinary components expect they can be added to and accessed by ArchetypeChunks.
+* Added support for chunk components. Chunk components are like ordinary components except they can be added to and accessed by ArchetypeChunks.
 
 ## Upgrade guide
 * Much of the rendering logic has been moved to a separate package called Hybrid Renderer (com.unity.rendering.hybrid). So in custom projects you are likely to need to now add the Hybrid Renderer in the Package Manager window.

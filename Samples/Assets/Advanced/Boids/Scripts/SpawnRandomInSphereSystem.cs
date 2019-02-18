@@ -6,6 +6,7 @@ using Unity.Transforms;
 
 namespace Samples.Common
 {
+    [UpdateAfter(typeof(CopyInitialTransformFromGameObjectSystem))]
     public class SpawnRandomInSphereSystem : ComponentSystem
     {
         struct SpawnRandomInSphereInstance
@@ -50,7 +51,7 @@ namespace Samples.Common
 
                     if (m_MainGroup.CalculateLength() == 0)
                         continue;
- 
+
                     var entities = m_MainGroup.ToEntityArray(Allocator.TempJob);
                     var positions = m_MainGroup.ToComponentDataArray<Position>(Allocator.TempJob);
 

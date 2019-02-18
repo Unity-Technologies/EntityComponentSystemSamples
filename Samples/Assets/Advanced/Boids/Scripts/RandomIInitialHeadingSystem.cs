@@ -6,7 +6,6 @@ using Unity.Jobs;
 
 namespace Samples.Common
 {
-    [DisableAutoCreation]
     [UpdateAfter(typeof(RandomInitialHeadingSystem))]
     public class RandomInitialHeadingBarrier : BarrierSystem
     { }

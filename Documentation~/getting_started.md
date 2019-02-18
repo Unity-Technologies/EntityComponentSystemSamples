@@ -137,9 +137,8 @@ public struct RotationSpeed : IComponentData
     public float Value;
 }
 
-// This wrapper component is currently necessary to add ComponentData to GameObjects.
-// In the future we want to make this wrapper component automatic.
-public class RotationSpeedComponent : ComponentDataWrapper<RotationSpeed> { } 
+// This proxy component is currently necessary to add ComponentData to GameObjects.
+public class RotationSpeedProxy : ComponentDataProxy<RotationSpeed> { } 
 ```
 
 ```cs

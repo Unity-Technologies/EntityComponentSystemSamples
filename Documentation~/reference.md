@@ -25,7 +25,7 @@ Here is a quick reference of the features and concepts that have been introduced
 * [ComponentData](component_data.md)
 * ComponentDataArray
 * [ComponentDataFromEntity](component_data_from_entity.md)
-* ComponentDataWrapper
+* ComponentDataProxy
 * [ComponentGroup](component_group.md)
 * [ComponentSystem](component_system.md)
 * ComponentType

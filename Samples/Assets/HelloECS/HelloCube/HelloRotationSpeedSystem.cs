@@ -13,10 +13,9 @@ public class HelloRotationSpeedSystem : JobComponentSystem
     [BurstCompile]
     struct HelloRotationSpeedJob : IJobProcessComponentData<Rotation, HelloRotationSpeed>
     {
-        // The [ReadOnly] attribute tells the job scheduler that this job cannot write to dT.
-        [ReadOnly] public float dT;
+        public float dT;
 
-        // rotation is read/write in this job
+        // The [ReadOnly] attribute tells the job scheduler that this job will not write to rotSpeed
         public void Execute(ref Rotation rotation, [ReadOnly] ref HelloRotationSpeed rotSpeed)
         {
             // Rotate something about its up vector at the speed given by HelloRotationSpeed.

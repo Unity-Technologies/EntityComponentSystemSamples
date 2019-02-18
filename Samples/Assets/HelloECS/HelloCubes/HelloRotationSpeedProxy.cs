@@ -8,6 +8,6 @@ public struct HelloRotationSpeed : IComponentData
     public float Value;
 }
 
-// ComponentDataWrapper is for creating a Monobehaviour representation of this component (for editor support).
+// ComponentDataProxy is for creating a MonoBehaviour representation of this component (for editor support).
 [UnityEngine.DisallowMultipleComponent]
-public class HelloRotationSpeedComponent : ComponentDataWrapper<HelloRotationSpeed> { }
+public class HelloRotationSpeedProxy : ComponentDataProxy<HelloRotationSpeed> { }

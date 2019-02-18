@@ -195,16 +195,18 @@ In terms of the general process above:
         m_RotationSpeedRotationGroup = GetComponentGroup(query);
     }
     ```
+
     - Store a ComponentGroup on the ComponentSystem or JobComponentSystem
     - Initialize it with GetComponentGroup()
     - Pass in an EntityArchetypeQuery which defines which Archetypes should match.
-       - `All` = All components in the array must exist in the Archetype
-       - `Any` = Any of the components in the array must exist in the Archetype (at least one)
-       - `None` = None of the components in the array can exist in the Archetype
-       - Note: For completely optional components (zero or more), they should not be specified, as that is implicit based on the other requirements.
+        - `All` = All components in the array must exist in the Archetype
+        - `Any` = Any of the components in the array must exist in the Archetype (at least one)
+        - `None` = None of the components in the array can exist in the Archetype
+
+        **Note:** Do not include completely optional components in the EntityArchetypeQuery. To handle optional components, use the `chunk.Has<T>()` method inside `IJobChunk.Execute()` to determine whether the current ArchetypeChunk has the optional Component or not. Since all Entities within the same chunk have the same Components, you only need to check whether an optional Component exists once per chunk -- not once per Entity.
        
 
-    For instance:
+    The following code example defines an EntityArchetypeQuery for a System in its `OnCreateManager()` function:
     ```
     ComponentGroup m_RotationSpeedRotationGroup;
     
@@ -218,9 +220,9 @@ In terms of the general process above:
         m_RotationSpeedRotationGroup = GetComponentGroup(query);
     }
     ```
-    ...means find all archetypes that have `Rotation` and `RotationSpeed` but *not* a `Frozen` component.
+    ...this query means, find all archetypes that have `Rotation` and `RotationSpeed` but *not* a `Frozen` component.
 
-    In addition, you can logically or multiple queries together by providing multiple `EntityArchetypeQuery` in an array. e.g.
+    In addition, you can logically OR multiple queries together by providing multiple `EntityArchetypeQuery` in an array. e.g.
     ```
     var query0 = new EntityArchetypeQuery
     {

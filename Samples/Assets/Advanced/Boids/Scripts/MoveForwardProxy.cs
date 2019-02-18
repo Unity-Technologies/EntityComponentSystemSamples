@@ -2,4 +2,4 @@
 
 public struct MoveForward : ISharedComponentData { }
 
-public class MoveForwardComponent : SharedComponentDataWrapper<MoveForward> { }
+public class MoveForwardProxy : SharedComponentDataProxy<MoveForward> { }

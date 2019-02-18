@@ -8,4 +8,4 @@ public struct RotationSpeed : IComponentData
 }
 
 [UnityEngine.DisallowMultipleComponent]
-public class RotationSpeedComponent : ComponentDataWrapper<RotationSpeed> { }
+public class RotationSpeedProxy : ComponentDataProxy<RotationSpeed> { }

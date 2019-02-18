@@ -14,4 +14,4 @@ public struct Heading : IComponentData
 }
 
 [UnityEngine.DisallowMultipleComponent]
-public class HeadingComponent : ComponentDataWrapper<Heading> { }
+public class HeadingProxy : ComponentDataProxy<Heading> { }
