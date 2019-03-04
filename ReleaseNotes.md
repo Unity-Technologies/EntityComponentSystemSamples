@@ -1,3 +1,58 @@
+# 0.0.23
+## New Features
+* Added ComponentGroup versions of AddChunkComponentData, RemoveChunkComponentData and AddSharedComponentData. Also optimized the ComponentGroup versions of AddComponent and RemoveComponent.
+These can now be used to add and remove components to all the chunks/entities in an ComponentGroup. For components that don't change the layout of chunks (Tag, Shared and Chunk components)
+these functions will take an optimized path that migrates the chunks to new archetypes without copying the component data.
+* Added new transform-related components as part of redesign (in progress)
+  * `CompositeRotation`
+    * `PreRotation`
+    * `PreRotationEulerXYZ`…`ZYX`
+    * `RotationEulerXYZ`…`ZYX`
+    * `RotationPivot`
+    * `RotationPivotTranslation`
+  * `CompositeScale`
+    * `Scale` (now for uniform scale)
+    * `ScalePivot`
+    * `ScalePivotTranslation`
+
+## Upgrade guide
+
+## Changes
+* 2018.3 support has been dropped. Please ensure you are on 2019.1+ if you want to keep getting new updates
+* BarrierSystem renamed to EntityCommandBufferSystem
+* Subtractive renamed to Exclude
+  * `[RequireSubtractiveComponent]` renamed to `[ExcludeComponent]`
+* ComponentType.Create renamed to ComponentType.ReadWrite
+* Transform-related component names changes
+  * `Position`-\>`Translation`
+  * `Scale`-\>`NonUniformScale`
+* Attach, Attached components removed. (No transform hierarchy)
+* `ComponentDataArray`, `BufferArray`, `SharedComponentDataArray`, and `EntityArray` have been deprecated. Please use `ForEach`, `IJobProcessComponentData`, `IJobChunk`, and `ComponentGroup` APIs to access component data.
+* `[Inject]` has been deprecated. See [the Injection documentation](Documentation/content/injection.md) for more information.
+* Component system update ordering is now hierarchical. A forthcoming document will cover this feature in detail. Key changes:
+  * Added `ComponentSystemGroup` class, representing a group of systems (and system groups) to update in a fixed order.
+  * The following `ComponentSystemGroup`s are added to the Unity player loop by default:
+    * `InitializationSystemGroup` (in the `Initialization` phase)
+    * `SimulationSystemGroup` (in the `FixedUpdate` phase)
+    * `PresentationSystemGroup` (in the `Update` phase)
+  * Each of the default system groups contains a pair of `BarrierSystem`s which run at the beginning and end of that group (e.g. `EndSimulationBarrier`).
+    * `EndFrameBarrier` has been removed; use the `End` barrier in the appropriate system group instead.
+  * Use `[UpdateInGroup]` to specify which `ComponentSystemGroup` a system should be added to during default world initialization.
+    * If omitted, systems are added to the `SimulationSystemGroup` by default (and will thus update during the FixedUpdate phase).
+    * Built-in ECS systems have been pre-assigned to the appropriate groups.
+  * Use `[UpdateBefore]` and `[UpdateAfter]` to specify relative ordering of systems within their common `ComponentSystemGroup`.
+    * Ordering relative to systems in different system groups is implicit from the group hierarchy; explicitly specifying this ordering triggers a warning and will be ignored.
+  * Added `ICustomBootstrap` interface to allow applications to partially/fully override the default world initialization process, support multiple Worlds, etc.
+* MoveEntitiesFrom no longer remaps Entity references.
+
+## Fixes
+* Fixed bug causing incorrect read dependency error on Unity.Entities.Entity
+* ComponentSystem.GetComponentGroup(...) will no longer treat two queries with the same component types and access modes, but in a different order as different groups.
+
+## Known issues
+
+
+
 # 0.0.22
 ## New Features
 

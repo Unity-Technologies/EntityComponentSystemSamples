@@ -6,6 +6,72 @@ Injection is on its way out, it is not recommended to use to the `[Inject]` attr
 * ComponentDataFromEntity injection is replaced by `(Job)ComponentSystem.GetComponentDataFromEntity`.
 * Injecting other systems is replaced by `(Job)ComponentSystem.World.GetOrCreateManager`.
 
+```cs
+class MySystem : JobComponentSystem
+{
+    // Deprecated Injection-based setup. Moved to a ComponentGroup.
+    //public struct Group
+    //{
+    //    // ComponentDataArray lets us access IComponentData 
+    //    public ComponentDataArray<Position> Position;
+
+    //    [ReadOnly]
+    //    public ComponentDataArray<Velocity> Velocity;
+
+    //    // The Length can be injected for convenience as well 
+    //    public int Length;
+    //}
+    //[Inject] private Group m_Group;
+
+    struct MoveJob : IJobProcessComponentData<Position, Velocity>
+    {
+        public float dt;
+
+        public void Execute(ref Position position, [ReadOnly] ref Velocity velocity)
+        {
+            position = new Position { position.value + velocity.value * dt };
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        var job = new MoveJob
+        {
+            dt = Time.deltaTime
+        };
+
+        return job.Schedule(this, inputDeps);
+    }
+}
+```
+
+```cs
+class PositionSystem : JobComponentSystem
+{
+    private OtherSystem m_SomeOtherSystem;
+
+    protected override void OnCreateManager()
+    {
+        m_SomeOtherSystem = World.GetOrCreateManager<OtherSystem>();
+    }
+}
+```
+
+```cs
+class PositionSystem : JobComponentSystem
+{
+    //[Inject] ComponentDataFromEntity<Position> m_Positions;
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        // Moved to a local variable in OnUpdate (must be called every frame)
+        var positions = GetComponentDataFromEntity<Position>();
+
+        ...
+    }
+}
+```
+
 # Injection
 
 Injection allows your system to declare its dependencies, while those dependencies are then automatically injected into the injected variables before `OnCreateManager`, `OnDestroyManager`, and `OnUpdate`.
