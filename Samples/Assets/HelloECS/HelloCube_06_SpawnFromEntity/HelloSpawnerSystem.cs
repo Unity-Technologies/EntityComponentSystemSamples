@@ -30,7 +30,7 @@ namespace Samples.HelloCube_06
             {
                 for (int x = 0; x < spawner.CountX; x++)
                 {
-                    for (int y = 0; y < spawner.CountX; y++)
+                    for (int y = 0; y < spawner.CountY; y++)
                     {
                         var instance = CommandBuffer.Instantiate(spawner.Prefab);
 
