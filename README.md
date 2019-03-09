@@ -1,56 +1,78 @@
 # Welcome
-Welcome to the Entity Component System and C# Job System samples repository!
+Welcome to the DOTS Samples repository!
 
 Here you can find the resources required to start building with these new systems today.
 
-We have also provided a new forum where you can find more information and share your experiences with these new systems.
+We have also provided a forum where you can find more information and share your experiences with these new systems.
 
 [Click here to visit the forum](https://unity3d.com/performance-by-default)
 
-## What is in the build
-We have been working on a new high performance multithreaded system, that will make it possible for games to fully utilise the multicore processors available today without heavy programming headache. This is possible thanks to the new Entity Component System which provides a way to write performant code by default. Paired with the C# Job System and a new math-aware backend compiler technology named Burst. Unity can produce highly optimised code for the particular capabilities of the platform you’re compiling for. 
+## What is the Unity Data Oriented Tech Stack?
+We have been working on a new high performance multithreaded system, that will make it possible for games to fully utilise the multicore processors available today without heavy programming headache. The Data Oriented Tech Stack includes the following major systems:
 
-[Download the beta build required here](https://unity3d.com/unity/beta-download)
+* The **Entity Component System** provides a way to write performant code by default. 
+* The **C# Job System** provides a way to run your game code in parallel on multiple CPU cores
+* The **Burst compiler** a new math-aware, backend compiler tuned to produce highly optimized machine code.
+
+With these systems, Unity can produce highly optimised code for the particular capabilities of the platform you’re compiling for. 
 
 ## Entity Component System
-Offers a better approach to game design  that allows you to concentrate on the actual problems you are solving: the data and behavior that make up your game. It leverages the C# Job System and Burst Compiler enabling you to take full advantage of today's multicore processors. By moving from object-oriented to data-oriented design it will be easier for you to reuse the code and easier for others to understand and work on it
+The Entity Component System offers a better approach to game design that allows you to concentrate on the actual problems you are solving: the data and behavior that make up your game. It leverages the C# Job System and Burst Compiler enabling you to take full advantage of today's multicore processors. Moving from object-oriented to data-oriented design makes it easier for you to reuse the code and easier for others to understand and work on it.
 
-The Entity Component System ships as an experimental package in 2018.1 and later, and we’ll continue to develop and release new versions of the package in the 2018.x cycle. It is important to stress that the Entity Component System is not production ready 
+The Entity Component System ships as an experimental package that currently supports Unity 2018.3 and later. It is important to stress that the Entity Component System is not production ready.
 
 ## C# Job System
-The new C# Job System takes advantage of multiple cores in a safe and easy way. Easy, as it’s designed to open this approach up to user scripts and allows users to write safe, fast, jobified code while providing protection from some of the pitfalls of multi-threading such as race conditions.
+The new C# Job System takes advantage of multiple cores in a safe and easy way. Easy, as it’s designed to open this approach up to user scripts and allows you to write safe, fast, jobified code while providing protection from some of the pitfalls of multi-threading such as race conditions.
 
-The C# Job System ships in 2018.1.
+The C# Job System is a built-in module included in Unity 2018.1+.
 
 [Further sample projects on the C# Job System can be found here](https://github.com/stella3d/job-system-cookbook)
 
 ## Burst
-Burst is a new LLVM based math-aware backend Compiler Technology makes things easier for you. It takes the C# jobs and produces highly-optimized code taking advantage of the particular capabilities of the platform you’re compiling for.
+Burst is a new LLVM-based, math-aware backend compiler. It compiles C# jobs into highly-optimized machine code that takes advantage of the particular capabilities of the platform you’re compiling for.
 
-Burst ships as an experimental package in 2018.1, and we’ll continue to develop and release new versions of the package in the 2018.x cycle. For the current package release, Burst only works in the Unity editor. It is important to stress that Burst is not production ready
+Burst is an experimental package that currently supports Unity 2018.3 and later. It is important to stress that Burst is not production ready.
 
 [Watch Joachim Ante present these new systems at Unite Austin](https://youtu.be/tGmnZdY5Y-E)
 
 ## Samples
 To help you get started, we have provided this repository of examples for learning how to to write systems at scale. 
 
-### The TwoStickShooter project
-This is a set of projects that demonstrates different approaches with the MonoBehaviour, Hybrid Entity Component System and Pure Entity Component System. This is a good starting point to understand how the Entity Component System paradigm works. 
+### HelloECS
+This is a set of projects demonstrate the absolute basics of the Unity ECS architecture:
+
+* **HelloCube_01_ForEach** — creates a pair of rotating cubes. This example demonstrates the separation of data and behavior with System and Components.
+* **HelloCube_02_IJobProcessComponentData** — builds on HelloCube_01_ForEach, using a Job-based system. Systems based on IJobProcessComponentData are the recommended approach and can take advantage of available CPU cores.
+* **HelloCube_03_IJobChunk** — shows how to write a System using IJobChunk. IJobChunk is the recommended method for processing Components for cases more complex than a simple IJobProcessComponentData can describe.  
+* **HelloCube_04_SubScene** — demonstrates how to create and modify Entities using SubScenes in the Unity editor.
+* **HelloCube_05_SpawFromMonoBehaviour** — demonstrates how to spawn multiple Entities from a MonoBehaviour function based on a Prefab GameObject.
+* **HelloCube_04_Spawner** — demonstrates how to spawn multiple Entities at runtime using a spawning Job in a System.
+
+### Boids
+
+The Boids example provides a more complex scenario with thousands of Entities. Boids simulates an underwater scene with a shark and schools containing thousands of fish. (It uses the classic Boids flocking algorithm for the schooling fish behavior.)
 
 ## Installation guide for blank ECS project
 
-> Note: If you want to have multiple versions of Unity on one machine then you need to follow [these instructions](https://docs.unity3d.com/462/Documentation/Manual/InstallingMultipleVersionsofUnity.html). The manual page is a bit old, in terms of which versions of Unity it describes, but the instructions are otherwise correct.
+1. Open the Unity Editor (2019.1b4 or later)
+2. Create a new Project.
+3. Open the Package Manager (menu: **Window** > **Package Manager**).
+4. Click the **Advanced** button at the top of the window and turn on the **Show preview packages** option.
+5. Add the following packages to the project:
 
-* Make sure you have installed the required version of [Unity](#what-is-in-the-build).
-* Open Unity on your computer.
-* Create a new Unity project and name it whatever you like. 
+  * Entities
+  * Hybrid.Renderer
 
-> Note: In Unity 2018.1 the new Project window is a little different because it offers you more than just 2D and 3D options.
+  Adding the Entities package to your Project also adds the following packages:
+  
+  * Burst
+  * Collections
+  * Jobs
+  * Mathematics 
 
-* Once the project is created then navigate in the Editor menu to: __Edit__ > __Project Settings__ > __Player__ > __Other Settings__ then set __Scripting Runtime Version__ to: __4.x equivalent__. This will cause Unity to restart.
-* Then navigate to __Window__ > __Package Manager__ and select the __Entities__ package and install it. This is also where you update the package to a newer version.
+**Note:** You can use the [Unity Hub](https://unity3d.com/get-unity/download) to install multiple versions of Unity on the same computer.
 
 ## Documentation
-Looking for information on how to get started or have specific questions? Visit our ECS & Job system documentation 
+Looking for information on how to get started or have specific questions? Visit our ECS & Job system documentation.
 
-[Go to documentation](Documentation/index.md)
+[Go to documentation](Documentation~/index.md)
