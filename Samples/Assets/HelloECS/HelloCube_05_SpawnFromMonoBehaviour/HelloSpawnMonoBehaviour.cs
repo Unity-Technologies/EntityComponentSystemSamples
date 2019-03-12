@@ -22,7 +22,7 @@ namespace Samples.HelloCube_05
         
             for (int x = 0; x < CountX; x++)
             {
-                for (int y = 0; y < CountX; y++)
+                for (int y = 0; y < CountY; y++)
                 {
                     // Efficiently instantiate a bunch of entities from the already converted entity prefab
                     var instance = entityManager.Instantiate(prefab);
