@@ -1,12 +1,37 @@
+# 0.0.25
+
+## New Features
+* Added BlobAssetReference<T> and support for building and serializing blob assets.
+  * Blob assets are built using BlobAllocator and BlobAssetReference fields in components are automatically serialized and deserialized.
+  * BlobPtr and BlobArray are used to represent pointers and arrays inside blobs and are allocated using BlobAllocator.Allocate.
+  * BlobAssetReference are currently not supported inside DynamicBuffer components.
+* bool and char can now be used in ComponentData and in native collections.
+* GetBufferFromEntity and GetComponentDataFromEntity only available on JobComponentSystem
+ 
+## Upgrade guide
+* Unity 2019.1b5 or later is now required.
+
+## Changes
+* If a system in a ComponentSystemGroup throws an exception, the group will now log the exception as an error and continue updating the
+  next system in the group. Previously, the entire group update would abort.
+* Moved most documentation to the [Entities](https://docs.unity3d.com/Packages/com.unity.entities@0.0/manual/index.html), [Collections extensions](https://docs.unity3d.com/Packages/com.unity.collections@0.0/manual/index.html), and [Job extensions](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/manual/index.html) packages.
+
+## Fixes
+* Fix underconstrained systems in the `TransformSystemGroup`, which could cause child transforms to lag
+  behind their parents for one frame.
+
+## Known issues
+
+
 # 0.0.24
 
 ## New Features
 
 * New ["Fluent"](https://en.wikipedia.org/wiki/Fluent_interface) API for more easily tuning the query used in a `ForEach` or even constructing a `ComponentGroup`.
-  * To use, try the `Entities` property of `ComponentSystem`, which returns a `ComponentQueryBuilder` that has a set of `With` methods on it to construct a query.
-  * `ForEach` now lives on this and the parameters of the lambda will be combined with the builder to form the final cached `ComponentQueryGroup`.
+  * To use, try the `Entities` property of `ComponentSystem`, which returns a `EntityQueryBuilder` that has a set of `With` methods on it to construct a query.
+  * `ForEach` now lives on this and the parameters of the lambda will be combined with the builder to form the final cached `ComponentGroup`.
   * You can also call `ToComponentGroup` from the builder if you just want to use this new way of constructing one.
-  * The default cache size of 10 for `ComponentQueryBuilder`-created queries can be tuned with `InitComponentQueryCache`.
+  * The default cache size of 10 for `EntityQueryBuilder`-created queries can be tuned with `InitEntityQueryCache`.
 
 ## Upgrade guide
 
@@ -29,6 +54,7 @@
 * `[UpdateInGroup(G)]` will now fail more obviously if type `G` is not derived from `ComponentSystemGroup`.
   * A warning will also be logged if `G` throws an error in its constructor, indicating that construction
     of member systems will be skipped.
+* `ComponentSystemGroup` sort order is now deterministic, for a given set of systems and ordering constraints.
 
 ## Known issues
 

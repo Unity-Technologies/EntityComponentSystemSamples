@@ -9,11 +9,11 @@ Data is stored in components, while functionality is written into systems.
 
 The **RotationSpeedSystem** *updates* the object's rotation using the *data* stored in the **RotationSpeed** Component.
 
-## Component Systems and ForEach
+## Component Systems and Entities.ForEach
 
-RotationSpeedSystem is a ComponentSystem and uses a ForEach delegate to iterate through the Entities. This example only creates a single Entity, but if you added more Entities to the scene, the RotationSpeedSystem updates them all — as long as they have a RotationSpeed Component (and the Rotation Component added when converting the GameObject's Transform to ECS Components).
+RotationSpeedSystem is a ComponentSystem and uses an Entities.ForEach delegate to iterate through the Entities. This example only creates a single Entity, but if you added more Entities to the scene, the RotationSpeedSystem updates them all — as long as they have a RotationSpeed Component (and the Rotation Component added when converting the GameObject's Transform to ECS Components).
 
-Note that Component Systems using ForEach run on the main thread. To take advantage of multiple cores, you can use a JobComponentSystem (as shown in the next HelloECS examples).
+Note that Component Systems using Entities.ForEach run on the main thread. To take advantage of multiple cores, you can use a JobComponentSystem (as shown in the next HelloECS examples).
 
 ## Converting from GameObject to Entity
  

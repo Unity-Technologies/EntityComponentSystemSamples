@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Samples.HelloCube_01
 {
+    [RequiresEntityConversion]
     public class RotationSpeedProxy : MonoBehaviour, IConvertGameObjectToEntity
     {
         public float DegreesPerSecond;

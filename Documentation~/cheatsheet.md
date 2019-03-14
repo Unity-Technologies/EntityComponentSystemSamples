@@ -2,43 +2,43 @@
 
 Here is a quick reference of the most useful classes, interfaces, structs, and attributes that have been introduced in this documentation by [ECS](#ecs-related), the [C# Job System](#c-job-system-related), and the [Burst compiler](#burst-compiler-related). 
 
-> **Note**: This is not an exhaustive list and can be added to over time as the Unity Data-Oriented Tech Stack, and its related documentation, expands. Check the [repository code](https://github.com/Unity-Technologies/EntityComponentSystemSamples) and the [Scripting API](https://docs.unity3d.com/ScriptReference/) under the namespaces mentioned below for more examples. Be aware that links can break as the code evolves, so if you notice a problem let us know in the [forums](http://www.unity3d.com/performance-by-default) or as an [issue](https://github.com/Unity-Technologies/EntityComponentSystemSamples/issues/new) in the repository.
-
 ## ECS related
 
-| Name     | Path   | Type  |
+| Name     | Namespace   | Type  |
 | :-------------: |:-------------| :-----:|
-| CopyInitialTransformFromGameObjectComponent | /Packages/com.unity.entities/Unity.Transforms.Hybrid/CopyInitialTransformFromGameObjectComponent.cs |     Class      |
-| Chunk | /Packages/com.unity.entities/Unity.Entities/ArchetypeManager.cs | Unsafe Struct |
-| ComponentDataArray | /Packages/com.unity.entities/Unity.Entities/Iterators/ComponentDataArray.cs | Unsafe Struct |
-| ComponentDataFromEntity | /Packages/com.unity.entities/Unity.Entities/Iterators/ComponentDataFromEntity.cs | Unsafe Struct |
-| ComponentGroup | /Packages/com.unity.entities/Unity.Entities/Iterators/ComponentGroup.cs | Unsafe Class |
-| ComponentSystem | /Packages/com.unity.entities/Unity.Entities/ComponentSystem.cs | Abstract Class |
-| ComponentType | /Packages/com.unity.entities/Unity.Entities/Types/ComponentType.cs | Struct |
-| DynamicBuffer | /Packages/com.unity.entities/Unity.Entities/Iterators/DynamicBuffer.cs | Unsafe Struct |
-| Entity | /Packages/com.unity.entities/Unity.Entities/EntityManager.cs | Struct |
-| EntityArchetype | /Packages/com.unity.entities/Unity.Entities/EntityManager.cs | Unsafe Struct |
-| EntityCommandBuffer | /Packages/com.unity.entities/Unity.Entities/EntityCommandBuffer.cs | Unsafe Struct |
-| EntityManager | /Packages/com.unity.entities/Unity.Entities/EntityManager.cs | Unsafe Class |
-| ExclusiveEntityTransaction | /Packages/com.unity.entities/Unity.Entities/ExclusiveEntityTransaction.cs | Unsafe Struct |
-| GameObjectEntity | /Packages/com.unity.entities/Unity.Entities.Hybrid/GameObjectEntity.cs | Class |
-| IComponentData | /Packages/com.unity.entities/Unity.Entities/IComponentData.cs | Interface |
-| IJobParallelForBatch | /Packages/com.unity.jobs/Unity.Jobs/IJobParallelForBatch.cs) | Interface |
-| IJobParallelForFilter | /Packages/com.unity.jobs/Unity.Jobs/IJobParallelForFilter.cs | Interface |
-| IJobProcessComponentData | /Packages/com.unity.entities/Unity.Entities/IJobProcessComponentData.cs | Interface |
-| ISharedComponentData | /Packages/com.unity.entities/Unity.Entities/IComponentData.cs | Interface |
-| JobComponentSystem | /Packages/com.unity.entities/Unity.Entities/ComponentSystem.cs | Abstract Class |
-| MeshInstanceRendererComponent | /Packages/com.unity.entities/Unity.Rendering.Hybrid/MeshInstanceRendererComponent.cs | Class |
-| NativeHashMap | /Packages/com.unity.collections/Unity.Collections/NativeHashMap.cs | Unsafe Struct |
-| NativeList | /Packages/com.unity.collections/Unity.Collections/NativeList.cs | Unsafe Struct |
-| NativeQueue | /Packages/com.unity.collections/Unity.Collections/NativeQueue.cs | Unsafe Struct |
-| PositionComponent | /Packages/com.unity.entities/Unity.Transforms/PositionComponent.cs | Class |
-| TransformSystem | /Packages/com.unity.entities/Unity.Transforms/TransformSystem.cs | Class |
-| World | /Packages/com.unity.entities/Unity.Entities/Injection/World.cs | Class |
+| [ArchetypeChunk](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ArchetypeChunk.html) | Unity.Entities | Unsafe Struct |
+| [ComponentGroup](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ComponentGroup.html) | Unity.Entities | Unsafe Class |
+| [ComponentSystem](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ComponentSystem.html) | Unity.Entities | Abstract Class |
+| [ComponentType](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ComponentType.html) | Unity.Entities | Struct |
+| [DynamicBuffer](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.DynamicBuffer-1.html) | Unity.Entities | Unsafe Struct |
+| [Entity](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.Entity.html) | Unity.Entities | Struct |
+| [EntityArchetype](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.EntityArchetype.html) | Unity.Entities | Unsafe Struct |
+| [EntityCommandBuffer](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.EntityCommandBuffer.html) | Unity.Entities | Unsafe Struct |
+| [EntityManager](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.EntityManager.html) | Unity.Entities | Unsafe Class |
+| [ExclusiveEntityTransaction](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ExclusiveEntityTransaction.html) | Unity.Entities | Unsafe Struct |
+| [IBufferElementData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IBufferElementData.html) | Unity.Entities | Interface |
+| [IComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IComponentData.html) | Unity.Entities | Interface |
+| [IJobChunk](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IJobChunk.html) | Unity.Entities | Interface |
+| [IJobNativeMultiHashMapMergedSharedKeyIndices](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.IJobNativeMultiHashMapMergedSharedKeyIndices.html) | Unity.Collections | Interface |
+| [IJobParallelForBatch](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/api/Unity.Jobs.IJobParallelForBatch.html) | Unity.Jobs | Interface |
+| [IJobParallelForFilter](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/api/Unity.Jobs.IJobParallelForFilter.html) | Unity.Jobs | Interface |
+| [IJobProcessComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IJobProcessComponentData-1.html) | Unity.Entities | Interface |
+| [ISharedComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISharedComponentData.html) | Unity.Entities | Interface |
+| [ISystemStateBufferElementData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateBufferElementData.html) | Unity.Entities | Interface |
+| [ISystemStateComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateComponentData.html) | Unity.Entities | Interface |
+| [ISystemStateSharedComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateSharedComponentData.html) | Unity.Entities | Interface |
+| [JobComponentSystem](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.JobComponentSystem.html) | Unity.Entities | Abstract Class |
+| [RenderMesh](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Rendering.RenderMesh.html) |Unity.Rendering | Class |
+| [NativeHashMap](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeHashMap-2.html) | Unity.Collections | Unsafe Struct |
+| [NativeList](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeList-1.html) | Unity.Collections | Unsafe Struct |
+| [NativeMultiHashMap](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeMultiHashMap-2.html) | Unity.Collections | Unsafe Struct |
+| [NativeQueue](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeQueue-1.html) | Unity.Collections | Unsafe Struct |
+| [LocalToWorld](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.LocalToWorld.html) | Unity.Transforms | Struct |
+| [Translation](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.Translation.html) | Unity.Transforms | Struct |
+| [Rotation](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.Rotation.html) | Unity.Transforms | Struct |
+| [Scale](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.Scale.html) | Unity.Transforms | Struct |
+| [World](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.World.html) | Unity.Entities | Class |
 
-### Attributes
-
-* [Inject]
 
 #### Unsafe attributes 
 
@@ -78,3 +78,28 @@ Here is a quick reference of the most useful classes, interfaces, structs, and a
 
 * [[BurstDiscard]](https://docs.unity3d.com/ScriptReference/Unity.Burst.BurstDiscardAttribute.html)
 * [BurstCompile]
+
+## General computing terms
+
+* [AOT compilation](glossary.md#aot_compilation)
+* [Atomic operation](glossary.md#atomic_operation)
+* [Blittable types](glossary.md#blittable_types)
+* [Cache lines](https://en.wikipedia.org/wiki/CPU_cache#Cache_entries)
+* [Context switching](https://docs.unity3d.com/Manual/JobSystemMultithreading.html) - see the end of the page.
+* [Dependency](glossary.md#dependency)
+* [JIT compilation](glossary.md#jit_compilation)
+* [Job system](https://docs.unity3d.com/Manual/JobSystemJobSystems.html)
+* [Logical CPU](glossary.md#logical_cpu)
+* [Main thread](glossary.md#main_thread)
+* [Managed code](glossary.md#managed_code)
+* [Memory leak](glossary.md#memory_leak)
+* [Multicore](glossary.md#multicore)
+* [Multithreading](https://docs.unity3d.com/Manual/JobSystemMultithreading.html) 
+* [Native code](https://en.wikipedia.org/wiki/Machine_code)
+* [Native memory](glossary.md#native_memory)
+* [Parallel computing](https://en.wikipedia.org/wiki/Parallel_computing)
+* [Performant](glossary.md#performant)
+* [Race condition](https://docs.unity3d.com/Manual/JobSystemSafetySystem.html)
+* [SIMD](glossary.md#simd)
+* [Unmanaged code](glossary.md#unmanaged_code)
+* [Worker threads](glossary.md#worker_threads)

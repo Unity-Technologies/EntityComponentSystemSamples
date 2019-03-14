@@ -1,6 +1,6 @@
 # Unity Data-Oriented Tech Stack 
 
-This documentation covers the three main aspects of Unity's [Data-Oriented Tech Stack](manual.md) (DOTS): Unity Entity-Component-System (ECS) as covered by the Entities package, Unity C# Job System, and the Unity Burst compiler. As Entities is the primary package involved in DOTS, it is described below:
+This documentation covers the three main aspects of Unity's [Data-Oriented Tech Stack](Readme.md) (DOTS): Unity Entity-Component-System (ECS) as covered by the Entities package, Unity C# Job System, and the Unity Burst compiler. As Entities is the primary package involved in DOTS, it is described below:
 
 # About Entities
 
@@ -14,7 +14,7 @@ To install this package, follow the instructions in the [Package Manager documen
 
 # Using Entities
 
-Components hold data, systems process that data. Entities refer to individual instances of component data. For more information, see the [DOTS manual](manual.md) or the [Entities API](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.html).
+Components hold data, systems process that data. Entities refer to individual instances of component data. For more information, see the [ECS Manual](https://docs.unity3d.com/Packages/com.unity.entities@0.0/manual/index.html) or the [Entities API](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.html).
 
 ## Entity Debugger
 
@@ -28,7 +28,7 @@ You can look at currently running systems and filter entities by archetype in th
 
 This version of Entities is compatible with the following versions of the Unity __Editor__:
 
-* 2018.3.0b and later (recommended)
+* 2019.1.0b5 and later (recommended)
 
 
 ## Samples contents
@@ -37,5 +37,5 @@ The following table indicates the sample folders in the package where you can fi
 
 |Location|Description|
 |---|---|
-|`Samples/Assets/HelloECS`|Contains very basic "hello world" sample for getting started with entity-component-systems.|
+|`Samples/Assets/HelloECS`|Contains a set of very basic "hello world" samples for getting started with entity-component-systems.|
 |`Samples/Assets/Advanced`|Contains the boid simulation for understanding more complex simulations|

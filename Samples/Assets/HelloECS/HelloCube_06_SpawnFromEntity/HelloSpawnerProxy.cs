@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Samples.HelloCube_06
 {
+    [RequiresEntityConversion]
     public class HelloSpawnerProxy : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
     {
         public GameObject Prefab;

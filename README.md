@@ -46,7 +46,7 @@ This is a set of projects demonstrate the absolute basics of the Unity ECS archi
 * **HelloCube_03_IJobChunk** — shows how to write a System using IJobChunk. IJobChunk is the recommended method for processing Components for cases more complex than a simple IJobProcessComponentData can describe.  
 * **HelloCube_04_SubScene** — demonstrates how to create and modify Entities using SubScenes in the Unity editor.
 * **HelloCube_05_SpawFromMonoBehaviour** — demonstrates how to spawn multiple Entities from a MonoBehaviour function based on a Prefab GameObject.
-* **HelloCube_04_Spawner** — demonstrates how to spawn multiple Entities at runtime using a spawning Job in a System.
+* **HelloCube_06_SpawnFromEntity** — demonstrates how to spawn multiple Entities at runtime using a spawning Job in a system.
 
 ### Boids
 
@@ -54,7 +54,7 @@ The Boids example provides a more complex scenario with thousands of Entities. B
 
 ## Installation guide for blank ECS project
 
-1. Open the Unity Editor (2019.1b4 or later)
+1. Open the Unity Editor (2019.1b5 or later)
 2. Create a new Project.
 3. Open the Package Manager (menu: **Window** > **Package Manager**).
 4. Click the **Advanced** button at the top of the window and turn on the **Show preview packages** option.
