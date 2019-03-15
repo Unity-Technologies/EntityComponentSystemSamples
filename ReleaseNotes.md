@@ -1,3 +1,13 @@
+# 0.0.26
+## New Features
+## Upgrade guide
+## Changes
+* More improvements to the documentation
+## Fixes
+* Change filtering with two component types now works again.
+## Known issues
+
+
 # 0.0.25
 
 ## New Features
