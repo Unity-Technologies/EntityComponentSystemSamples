@@ -76,3 +76,5 @@ The Boids example provides a more complex scenario with thousands of Entities. B
 Looking for information on how to get started or have specific questions? Visit our ECS & Job system documentation.
 
 [Go to documentation](Documentation~/index.md)
+
+[Click here for the Physics samples Documentation](UnityPhysicsExamples/Documentation/samples.md)
