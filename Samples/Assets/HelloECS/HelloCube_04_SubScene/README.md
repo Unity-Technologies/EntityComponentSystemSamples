@@ -6,7 +6,7 @@ Sub Scenes provide an efficient way to edit and load large game scenes in Unity.
 
 ## What does it show?
 
-This sample uses the Components and Systems from HelloCube_02_IJobProcessComponentData. The scene contains a pair of rotating cubes that are loaded automatically on play from a Sub Scene.
+This sample uses the Components and Systems from HelloCube_02_IJobForEach. The scene contains a pair of rotating cubes that are loaded automatically on play from a Sub Scene.
 
 ## Sub Scenes
 

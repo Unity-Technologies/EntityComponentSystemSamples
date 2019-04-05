@@ -11,12 +11,12 @@ namespace Samples.HelloCube_03
     // This system updates all entities in the scene with both a RotationSpeed and Rotation component.
     public class RotationSpeedSystem : JobComponentSystem
     {
-        private ComponentGroup m_Group;
+        private EntityQuery m_Group;
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
             // Cached access to a set of ComponentData based on a specific query
-            m_Group = GetComponentGroup(typeof(Rotation), ComponentType.ReadOnly<RotationSpeed>());
+            m_Group = GetEntityQuery(typeof(Rotation), ComponentType.ReadOnly<RotationSpeed>());
         }
 
         // Use the [BurstCompile] attribute to compile a job with Burst. You may see significant speed ups, so try it!

@@ -18,14 +18,14 @@ In addition to better utilizing modern CPUs, the [data-oriented](https://en.wiki
 The C# Job System takes advantage of the multiple cores in today's computers. It’s designed to open this approach up to C# user scripts and allows users to write safe, fast, jobified code while protecting against some of the pitfalls of multithreading such as race conditions.
 
 - [C# Job System manual](https://docs.unity3d.com/Manual/JobSystem.html)
-- [Low-level overview - creating containers & custom job types](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/manual/index.html)
-- [Scheduling a job from a job - why not?](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/manual/index.html)
+- [Low-level overview - creating containers & custom job types](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/manual/custom_job_types.html)
+- [Scheduling a job from a job - why not?](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/manual/scheduling_a_job_from_a_job.html)
 
 ## Burst overview
 
 Burst is a new [LLVM](https://en.wikipedia.org/wiki/LLVM) based backend compiler technology that makes things easier for you. It takes C# jobs and produces highly-optimized machine code taking advantage of the particular capabilities of your platform. So you get a lot of the benefits of hand tuned assembler code, across multiple platforms, without all the hard work. The Burst compiler can be used to increase performance of jobs written for the C# Job System. 
 
-- [Burst documentation](https://docs.unity3d.com/Packages/com.unity.burst@0.0/manual/index.html)
+- [Burst documentation](https://docs.unity3d.com/Packages/com.unity.burst@1.0/manual/index.html)
 - [How to optimize for the Burst compiler](burst_optimization.md)
 
 ## Further information

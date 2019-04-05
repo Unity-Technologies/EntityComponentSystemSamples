@@ -1,13 +1,16 @@
-*    text=auto
-# Text files
-*.cs diff=csharp text
-*.txt text
-*.mat text
-*.shader text
-*.meta text
-*.md5 text
+* text=auto
+
 *.compute text
+*.cs diff=csharp text
+*.mat text
 *.md text
+*.md5 text
+*.meta text
 *.prefab text
+*.shader text
+*.txt text
+
 */ProjectSettings/*.asset text
 
+# the ms t4 processor requires crlf
+*.tt eol=crlf text

@@ -19,7 +19,7 @@ This way you can write all of your runtime code using JobComponentSystem and Com
 The HelloSpawnerSystem looks for any HelloSpawner Component.
 When it finds one, the System instantiates the prefabs in a grid and then destroys the spawner Entity (so that it only spawns a given set of Entities once).
 
-The HelloSpawnerSystem uses a Job based on IJobProcessComponentDataWithEntity, which is very similar to the IJobProcessComponentData Jobs demonstrated in earlier examples. The difference is that this type of Job provides the Entity object (and the Component array index) to your Execute() function. The Entity object is required so that the System can destroy the Spawner Entity once it has been processed.
+The HelloSpawnerSystem uses a Job based on IJobForEachWithEntity, which is very similar to the IJobForEach Jobs demonstrated in earlier examples. The difference is that this type of Job provides the Entity object (and the Component array index) to your Execute() function. The Entity object is required so that the System can destroy the Spawner Entity once it has been processed.
 
 Another important concept that the HelloSpawnerSystem illustrates is the use of an EntityCommandBuffer and a EntityCommandBufferSystem. To prevent race conditions, you cannot make _structural changes_ inside a Job. Structural changes include anything that changes the structure of your data. These include creating and destroying Entities and adding or removing Components . To overcome this limitation, ECS provides the EntityCommandBuffer. 
 

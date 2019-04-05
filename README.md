@@ -42,8 +42,8 @@ To help you get started, we have provided this repository of examples for learni
 This is a set of projects demonstrate the absolute basics of the Unity ECS architecture:
 
 * **HelloCube_01_ForEach** — creates a pair of rotating cubes. This example demonstrates the separation of data and behavior with System and Components.
-* **HelloCube_02_IJobProcessComponentData** — builds on HelloCube_01_ForEach, using a Job-based system. Systems based on IJobProcessComponentData are the recommended approach and can take advantage of available CPU cores.
-* **HelloCube_03_IJobChunk** — shows how to write a System using IJobChunk. IJobChunk is the recommended method for processing Components for cases more complex than a simple IJobProcessComponentData can describe.  
+* **HelloCube_02_IJobForEach** — builds on HelloCube_01_ForEach, using a Job-based system. Systems based on IJobForEach are the recommended approach and can take advantage of available CPU cores.
+* **HelloCube_03_IJobChunk** — shows how to write a System using IJobChunk. IJobChunk is the recommended method for processing Components for cases more complex than a simple IJobForEach can describe.  
 * **HelloCube_04_SubScene** — demonstrates how to create and modify Entities using SubScenes in the Unity editor.
 * **HelloCube_05_SpawFromMonoBehaviour** — demonstrates how to spawn multiple Entities from a MonoBehaviour function based on a Prefab GameObject.
 * **HelloCube_06_SpawnFromEntity** — demonstrates how to spawn multiple Entities at runtime using a spawning Job in a system.
@@ -54,7 +54,7 @@ The Boids example provides a more complex scenario with thousands of Entities. B
 
 ## Installation guide for blank ECS project
 
-1. Open the Unity Editor (2019.1b5 or later)
+1. Open the Unity Editor (`2019.1.0b9` or later)
 2. Create a new Project.
 3. Open the Package Manager (menu: **Window** > **Package Manager**).
 4. Click the **Advanced** button at the top of the window and turn on the **Show preview packages** option.

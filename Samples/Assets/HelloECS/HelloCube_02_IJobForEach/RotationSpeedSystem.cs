@@ -13,7 +13,7 @@ namespace Samples.HelloCube_02
     {
         // Use the [BurstCompile] attribute to compile a job with Burst. You may see significant speed ups, so try it!
         [BurstCompile]
-        struct RotationSpeedJob : IJobProcessComponentData<Rotation, RotationSpeed>
+        struct RotationSpeedJob : IJobForEach<Rotation, RotationSpeed>
         {
             public float DeltaTime;
     

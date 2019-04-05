@@ -19,7 +19,7 @@ public class SceneLoadingTests
         {
             var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
             if (scenePath.Contains("SceneSwitcher") || scenePath.Contains("InitTestScene") )
-                
+
             {
                 sceneIndex++;
                 continue;
@@ -61,7 +61,7 @@ public class SceneLoadingTests
 
     static void EntitiesCleanup()
     {
-        var entityManager = World.Active.GetExistingManager<EntityManager>();
+        var entityManager = World.Active.EntityManager;
         var entities = entityManager.GetAllEntities();
         entityManager.DestroyEntity(entities);
         entities.Dispose();

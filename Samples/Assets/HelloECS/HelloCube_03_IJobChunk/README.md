@@ -4,7 +4,7 @@ This sample demonstrates a Job-based ECS System that rotates a pair of cubes. In
 
 ## What does it show?
 
-This sample builds on HelloCube_02_IJobProcessComponentData. It uses a Job based on IJobChunk.
+This sample builds on HelloCube_02_IJobForEach. It uses a Job based on IJobChunk.
 
 As in the previous examples, the **RotationSpeedSystem** *updates* the object's rotation using the *data* stored in the **RotationSpeed** Component.
 
@@ -14,8 +14,8 @@ In this example, the Job in RotationSpeedSystem is now implemented using IJobChu
 
 In a Job implemented with IJobChunk, the ECS framework passes an ArchetypeChunk instance to your Execute() function for each chunk of memory containing the required Components. You can then iterate through the arrays of Components stored in that chunk.
 
-Notice that you have to do a little more manual setup for an IJobChunkJob. This includes constructing a ComponentGroup that identifies which Component types the System operates upon. You must also pass ArchetypeChunkComponentType objects to the Job, which you then use inside the Job to get the NativeArray instances required to access the Component arrays themselves. 
+Notice that you have to do a little more manual setup for an IJobChunkJob. This includes constructing a EntityQuery that identifies which Component types the System operates upon. You must also pass ArchetypeChunkComponentType objects to the Job, which you then use inside the Job to get the NativeArray instances required to access the Component arrays themselves. 
 
-Systems using IJobChunk can handle more complex situations than those supported by IJobProcessComponentData, while maintaining maximum efficiency. 
+Systems using IJobChunk can handle more complex situations than those supported by IJobForEach, while maintaining maximum efficiency. 
 
 

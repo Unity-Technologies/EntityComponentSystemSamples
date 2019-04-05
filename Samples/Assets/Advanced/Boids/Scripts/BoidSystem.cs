@@ -13,9 +13,9 @@ namespace Samples.Boids
     [UpdateBefore(typeof(TransformSystemGroup))]
     public class BoidSystem : JobComponentSystem
     {
-        private ComponentGroup  m_BoidGroup;
-        private ComponentGroup  m_TargetGroup;
-        private ComponentGroup  m_ObstacleGroup;
+        private EntityQuery  m_BoidGroup;
+        private EntityQuery  m_TargetGroup;
+        private EntityQuery  m_ObstacleGroup;
 
         private List<Boid>      m_UniqueTypes = new List<Boid>(10);
         private List<PrevCells> m_PrevCells   = new List<PrevCells>();
@@ -35,7 +35,7 @@ namespace Samples.Boids
         }
 
         [BurstCompile]
-        struct CopyPositions : IJobProcessComponentDataWithEntity<LocalToWorld>
+        struct CopyPositions : IJobForEachWithEntity<LocalToWorld>
         {
             public NativeArray<float3> positions;
 
@@ -46,7 +46,7 @@ namespace Samples.Boids
         }
 
         [BurstCompile]
-        struct CopyHeadings : IJobProcessComponentDataWithEntity<LocalToWorld>
+        struct CopyHeadings : IJobForEachWithEntity<LocalToWorld>
         {
             public NativeArray<float3> headings;
 
@@ -59,7 +59,7 @@ namespace Samples.Boids
 
         [BurstCompile]
         [RequireComponentTag(typeof(Boid))]
-        struct HashPositions : IJobProcessComponentDataWithEntity<LocalToWorld>
+        struct HashPositions : IJobForEachWithEntity<LocalToWorld>
         {
             public NativeMultiHashMap<int, int>.Concurrent hashMap;
             public float                                   cellRadius;
@@ -129,7 +129,7 @@ namespace Samples.Boids
 
         [BurstCompile]
         [RequireComponentTag(typeof(Boid))]
-        struct Steer : IJobProcessComponentDataWithEntity<LocalToWorld>
+        struct Steer : IJobForEachWithEntity<LocalToWorld>
         {
             [ReadOnly] public NativeArray<int>             cellIndices;
             [ReadOnly] public Boid                         settings;
@@ -236,25 +236,25 @@ namespace Samples.Boids
                 {
                     headings = cellAlignment
                 };
-                var initialCellAlignmentJobHandle = initialCellAlignmentJob.ScheduleGroup(m_BoidGroup, inputDeps);
+                var initialCellAlignmentJobHandle = initialCellAlignmentJob.Schedule(m_BoidGroup, inputDeps);
 
                 var initialCellSeparationJob = new CopyPositions
                 {
                     positions = cellSeparation
                 };
-                var initialCellSeparationJobHandle = initialCellSeparationJob.ScheduleGroup(m_BoidGroup, inputDeps);
+                var initialCellSeparationJobHandle = initialCellSeparationJob.Schedule(m_BoidGroup, inputDeps);
 
                 var copyTargetPositionsJob = new CopyPositions
                 {
                     positions = copyTargetPositions
                 };
-                var copyTargetPositionsJobHandle = copyTargetPositionsJob.ScheduleGroup(m_TargetGroup, inputDeps);
+                var copyTargetPositionsJobHandle = copyTargetPositionsJob.Schedule(m_TargetGroup, inputDeps);
 
                 var copyObstaclePositionsJob = new CopyPositions
                 {
                     positions = copyObstaclePositions
                 };
-                var copyObstaclePositionsJobHandle = copyObstaclePositionsJob.ScheduleGroup(m_ObstacleGroup, inputDeps);
+                var copyObstaclePositionsJobHandle = copyObstaclePositionsJob.Schedule(m_ObstacleGroup, inputDeps);
 
                 var nextCells = new PrevCells
                 {
@@ -294,7 +294,7 @@ namespace Samples.Boids
                     hashMap        = hashMap.ToConcurrent(),
                     cellRadius     = settings.CellRadius
                 };
-                var hashPositionsJobHandle = hashPositionsJob.ScheduleGroup(m_BoidGroup, inputDeps);
+                var hashPositionsJobHandle = hashPositionsJob.Schedule(m_BoidGroup, inputDeps);
 
                 var initialCellCountJob = new MemsetNativeArray<int>
                 {
@@ -335,7 +335,7 @@ namespace Samples.Boids
                     obstaclePositions         = copyObstaclePositions,
                     dt                        = Time.deltaTime,
                 };
-                var steerJobHandle = steerJob.ScheduleGroup(m_BoidGroup, mergeCellsJobHandle);
+                var steerJobHandle = steerJob.Schedule(m_BoidGroup, mergeCellsJobHandle);
 
                 inputDeps = steerJobHandle;
                 m_BoidGroup.AddDependency(inputDeps);
@@ -345,20 +345,20 @@ namespace Samples.Boids
             return inputDeps;
         }
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            m_BoidGroup = GetComponentGroup(new EntityArchetypeQuery
+            m_BoidGroup = GetEntityQuery(new EntityQueryDesc
             {
                 All = new [] { ComponentType.ReadOnly<Boid>(), ComponentType.ReadWrite<LocalToWorld>() },
-                Options = EntityArchetypeQueryOptions.FilterWriteGroup
+                Options = EntityQueryOptions.FilterWriteGroup
             });
 
-            m_TargetGroup = GetComponentGroup(new EntityArchetypeQuery
+            m_TargetGroup = GetEntityQuery(new EntityQueryDesc
             {
                 All = new [] { ComponentType.ReadOnly<BoidTarget>(), ComponentType.ReadOnly<LocalToWorld>() },
             });
             
-            m_ObstacleGroup = GetComponentGroup(new EntityArchetypeQuery
+            m_ObstacleGroup = GetEntityQuery(new EntityQueryDesc
             {
                 All = new [] { ComponentType.ReadOnly<BoidObstacle>(), ComponentType.ReadOnly<LocalToWorld>() },
             });

@@ -30,7 +30,7 @@ public class SceneSwitcher : MonoBehaviour
 
     private void DestroyAllEntitiesInScene()
     {
-        var entityManager = World.Active.GetExistingManager<EntityManager>();
+        var entityManager = World.Active.EntityManager;
         var entities = entityManager.GetAllEntities();
         entityManager.DestroyEntity(entities);
         entities.Dispose();

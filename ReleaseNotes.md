@@ -1,3 +1,57 @@
+# 0.0.27
+## New Features
+* Script templates have been added to help you create new component types and systems, similar to Unity's built-in template for new MonoBehaviours. Use them via the `Assets/Create/ECS` menu.
+
+## Upgrade guide
+### Some APIs have been deprecated in this release
+* [API Deprecation FAQ](https://forum.unity.com/threads/api-deprecation-faq-0-0-23.636994/)
+** Removed obsolete `ComponentSystem.ForEach`
+** Removed obsolete `[Inject]`
+** Removed obsolete `ComponentDataArray`
+** Removed obsolete `SharedComponentDataArray`
+** Removed obsolete `BufferArray`
+** Removed obsolete `EntityArray`
+** Removed obsolete `ComponentGroupArray`
+
+### ScriptBehaviourManager removal
+* The `ScriptBehaviourManager` class has been removed.
+* `ComponentSystem` and `JobComponentSystem` remain as system base classes (with a common `ComponentSystemBase` class)
+** ComponentSystems have overridable methods `OnCreateManager` and `OnDestroyManager`.  These have been renamed to `OnCreate` and `OnDestroy`.
+*** This is NOT handled by the obsolete API updater and will need to be done manually.
+*** The old OnCreateManager/OnDestroyManager will continue to work temporarily, but will print a warning if a system contains them.
+* World APIs have been updated as follows:
+** `CreateManager`, `GetOrCreateManager`, `GetExistingManager`, `DestroyManager`, `BehaviourManagers` have been renamed to `CreateSystem`, `GetOrCreateSystem`, `GetExistingSystem`, `DestroySystem`, `Systems`.
+*** These should be handled by the obsolete API updater.
+** `EntityManager` is no longer accessed via `GetExistingManager`.  There is now a property directly on World: `World.EntityManager`.
+*** This is NOT handled by the obsolete API updater and will need to be done manually.
+*** Searching and replacing `Manager<EntityManager>` should locate the right spots.  For example, `world.GetExistingManager<EntityManager>()` should become just `world.EntityManager`.
+### IJobProcessComponentData renamed to IJobForeach
+* This rename unfortunately cannot be handled by the obsolete API updater.
+* A global search and replace of `IJobProcessComponentData` to `IJobForEach` should be sufficient.
+
+### ComponentGroup renamed to EntityQuery
+* `ComponentGroup` has been renamed to `EntityQuery` to better represent what it does.
+* All APIs that refer to `ComponentGroup` have been changed to refer to `EntityQuery` in their name, e.g. `CreateEntityQuery`, `GetEntityQuery`, etc.
+
+### EntityArchetypeQuery renamed to EntityQueryDesc
+* `EntityArchetypeQuery` has been renamed to `EntityQueryDesc`
+
+## Changes
+
+* Minimum required Unity version is now 2019.1.0b9
+* Adding tag components or chunk components to entities that already have them is now properly ignored.
+* UNITY_CSHARP_TINY is now NET_DOTS to match our other NET_* defines
+
+## Fixes
+* In HelloCube_06_SpawnFromEntity, `HelloSpawnerSystem` now delays spawning entities until the beginning of the next simulation group update. This ensures
+  that spawned entities are fully instantiated and processed by the `TransformSystemGroup` before they are rendered for the first time.
+* Fixed exception in inspector when Script is missing
+* The presence of chunk components could lead to corruption of the entity remapping during deserialization of SubScene sections.
+* Fix for an issue causing filtering with `IJobForEachWithEntity` to try to access entities outside of the range of the group it was scheduled with.
+
+## Known issues
+
+
 # 0.0.26
 ## New Features
 ## Upgrade guide

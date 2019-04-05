@@ -1,6 +1,6 @@
 # Unity Data-Oriented Tech Stack Cheat Sheet
 
-Here is a quick reference of the most useful classes, interfaces, structs, and attributes that have been introduced in this documentation by [ECS](#ecs-related), the [C# Job System](#c-job-system-related), and the [Burst compiler](#burst-compiler-related). 
+Here is a quick reference of the most useful classes, interfaces, structs, and attributes that have been introduced in this documentation by [ECS](#ecs-related), the [C# Job System](#c-job-system-related), and the [Burst compiler](#burst-compiler-related).
 
 ## ECS related
 
@@ -22,7 +22,7 @@ Here is a quick reference of the most useful classes, interfaces, structs, and a
 | [IJobNativeMultiHashMapMergedSharedKeyIndices](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.IJobNativeMultiHashMapMergedSharedKeyIndices.html) | Unity.Collections | Interface |
 | [IJobParallelForBatch](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/api/Unity.Jobs.IJobParallelForBatch.html) | Unity.Jobs | Interface |
 | [IJobParallelForFilter](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/api/Unity.Jobs.IJobParallelForFilter.html) | Unity.Jobs | Interface |
-| [IJobProcessComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IJobProcessComponentData-1.html) | Unity.Entities | Interface |
+| [IJobForEach](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IJobForEach-1.html) | Unity.Entities | Interface |
 | [ISharedComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISharedComponentData.html) | Unity.Entities | Interface |
 | [ISystemStateBufferElementData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateBufferElementData.html) | Unity.Entities | Interface |
 | [ISystemStateComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateComponentData.html) | Unity.Entities | Interface |
@@ -39,23 +39,33 @@ Here is a quick reference of the most useful classes, interfaces, structs, and a
 | [Scale](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.Scale.html) | Unity.Transforms | Struct |
 | [World](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.World.html) | Unity.Entities | Class |
 
-
-#### Unsafe attributes 
+### Unsafe attributes
 
 * [[NativeContainer]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeContainerAttribute.html)
-* [[NativeContainerIsAtomicWriteOnly]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeContainerIsAtomicWriteOnlyAttribute.html) 
-* [[NativeContainerSupportsMinMaxWriteRestriction]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeContainerSupportsMinMaxWriteRestrictionAttribute.html) 
+* [[NativeContainerIsAtomicWriteOnly]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeContainerIsAtomicWriteOnlyAttribute.html)
+* [[NativeContainerSupportsMinMaxWriteRestriction]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeContainerSupportsMinMaxWriteRestrictionAttribute.html)
 * [[NativeContainerSupportsDeallocateOnJobCompletion]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeContainerSupportsDeallocateOnJobCompletionAttribute.html)
 * [[NativeDisableUnsafePtrRestriction]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestrictionAttribute.html)
 * [[NativeSetClassTypeToNullOnSchedule]](https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.NativeSetClassTypeToNullOnScheduleAttribute.html)
 
-### Other
+### Defines
 
-* \#if ENABLE_UNITY_COLLECTIONS_CHECKS ... #endif
+Frequently used:
+
+* `ENABLE_UNITY_COLLECTIONS_CHECKS`: Wrap around validation code, for example bounds checking, parameter validation, or leak detection.
+* `NET_DOTS`: DOTS C# profile (vs full .NET) - for example, if you use `Dictionary`, you want `#if !NET_DOTS`; see [Platform dependent compilation](https://docs.unity3d.com/Manual/PlatformDependentCompilation.html) for the other `NET_*` defines
+* `UNITY_ZEROPLAYER`: Standalone DOTS (vs hybrid DOTS) - for example, if you use `UnityEngine`, you want `#if !UNITY_ZEROPLAYER`
+
+Rarely used:
+
+* `UNITY_ZEROPLAYER_DOTNET`: Standalone DOTS built for real .NET execution target
+* `UNITY_ZEROPLAYER_IL2CPP`: Standalone DOTS built for IL2CPP - for example, where il2cpp provides an intrinsic for vs. an implementation using reflection in .NET
+
+_Note: The `ZEROPLAYER` defines are for the DOTS runtime, which has not been publicly released yet._
 
 ## C# Job System related
 
-> **Note**: ECS code can also use the following objects, but they are part of the  Unity codebase since 2018.1 and not part of any related packages. For more information, see the [C# Job System manual](https://docs.unity3d.com/Manual/JobSystem.html).
+> **Note**: ECS code can also use the following objects, but they are part of the Unity codebase since 2018.1 and not part of any related packages. For more information, see the [C# Job System manual](https://docs.unity3d.com/Manual/JobSystem.html).
 
 | Namespace     | Name          | Type  |
 | :-------------: |:-------------:| :-----:|
@@ -94,7 +104,7 @@ Here is a quick reference of the most useful classes, interfaces, structs, and a
 * [Managed code](glossary.md#managed_code)
 * [Memory leak](glossary.md#memory_leak)
 * [Multicore](glossary.md#multicore)
-* [Multithreading](https://docs.unity3d.com/Manual/JobSystemMultithreading.html) 
+* [Multithreading](https://docs.unity3d.com/Manual/JobSystemMultithreading.html)
 * [Native code](https://en.wikipedia.org/wiki/Machine_code)
 * [Native memory](glossary.md#native_memory)
 * [Parallel computing](https://en.wikipedia.org/wiki/Parallel_computing)

@@ -17,11 +17,11 @@ namespace Samples.Common
             public float3 position;
         }
 
-        ComponentGroup m_MainGroup;
+        EntityQuery m_MainGroup;
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            m_MainGroup = GetComponentGroup(
+            m_MainGroup = GetEntityQuery(
                 ComponentType.ReadOnly<SpawnRandomInSphere>(),
                 ComponentType.ReadOnly<LocalToWorld>());
         }
