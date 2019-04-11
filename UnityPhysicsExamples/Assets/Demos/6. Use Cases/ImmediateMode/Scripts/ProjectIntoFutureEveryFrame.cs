@@ -32,7 +32,7 @@ public class ProjectIntoFutureEveryFrame : MonoBehaviour
     {
         //UnityEngine.Material material = new UnityEngine.Material(Shader.Find("Lightweight-Default"));
         //material.color = color;
-        var em = World.Active.GetOrCreateManager<EntityManager>();
+        var em = World.Active.EntityManager;
 
         const float minVelocitySq = 0.1f;
         for( int i = 0; i < localWorld.DynamicBodies.Length; i++ )
@@ -75,7 +75,7 @@ public class ProjectIntoFutureEveryFrame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ref PhysicsWorld world = ref World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+        ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
         var localWorld = (PhysicsWorld)world.Clone();
         var simulation = new Simulation();
@@ -97,7 +97,7 @@ public class ProjectIntoFutureEveryFrame : MonoBehaviour
             for (int i = 0; i < numSteps; i++)
             {
                 simulation.Step(stepInput);
-                
+
                 if (i > 0)
                 {
                     createTrails(localWorld, color);

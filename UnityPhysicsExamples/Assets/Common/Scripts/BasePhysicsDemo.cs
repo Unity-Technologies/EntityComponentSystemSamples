@@ -15,7 +15,7 @@ using Mesh = UnityEngine.Mesh;
 /// </summary>
 public class BasePhysicsDemo : MonoBehaviour
 {
-    public static EntityManager EntityManager => World.Active.GetOrCreateManager<EntityManager>();
+    public static EntityManager EntityManager => World.Active.EntityManager;
     protected Entity stepper;
 
     public Material dynamicMaterial;
@@ -131,7 +131,7 @@ public class BasePhysicsDemo : MonoBehaviour
 
     protected unsafe Entity CreateJoint(BlobAssetReference<JointData> jointData, Entity entityA, Entity entityB, bool enableCollision = false)
     {
-        EntityManager entityManager = World.Active.GetOrCreateManager<EntityManager>();
+        EntityManager entityManager = World.Active.EntityManager;
         ComponentType[] componentTypes = new ComponentType[1];
         componentTypes[0] = typeof(PhysicsJoint);
         Entity jointEntity = entityManager.CreateEntity(componentTypes);

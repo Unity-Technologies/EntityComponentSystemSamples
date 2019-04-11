@@ -23,17 +23,17 @@ public class AddNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObject
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class AddContactsSystem : JobComponentSystem
 {
-    ComponentGroup m_ContactAdderGroup;
+    EntityQuery m_ContactAdderGroup;
 
     BuildPhysicsWorld m_BuildPhysicsWorldSystem;
     StepPhysicsWorld m_StepPhysicsWorld;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
-        m_BuildPhysicsWorldSystem = World.GetOrCreateManager<BuildPhysicsWorld>();
-        m_StepPhysicsWorld = World.GetOrCreateManager<StepPhysicsWorld>();
+        m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
+        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
 
-        m_ContactAdderGroup = GetComponentGroup(new EntityArchetypeQuery
+        m_ContactAdderGroup = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(AddNarrowphaseContacts) }
         });

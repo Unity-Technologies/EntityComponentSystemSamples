@@ -62,11 +62,11 @@ public class CreatePyramidsBehaviour : MonoBehaviour, IDeclareReferencedPrefabs,
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class CreatePyramidsSystem : ComponentSystem
 {
-    ComponentGroup m_MainGroup;
+    EntityQuery m_MainGroup;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
-        m_MainGroup = GetComponentGroup(ComponentType.ReadOnly<CreatePyramids>());
+        m_MainGroup = GetEntityQuery(ComponentType.ReadOnly<CreatePyramids>());
     }
 
     protected override void OnUpdate()

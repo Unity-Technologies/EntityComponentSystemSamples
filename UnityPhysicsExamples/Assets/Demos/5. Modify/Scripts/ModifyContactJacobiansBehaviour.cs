@@ -22,13 +22,13 @@ public class ModifyContactJacobiansBehaviour : MonoBehaviour, IConvertGameObject
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyContactJacobiansSystem : JobComponentSystem
 {
-    ComponentGroup m_ContactModifierGroup;
+    EntityQuery m_ContactModifierGroup;
     StepPhysicsWorld m_StepPhysicsWorld;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
-        m_StepPhysicsWorld = World.GetOrCreateManager<StepPhysicsWorld>();
-        m_ContactModifierGroup = GetComponentGroup(new EntityArchetypeQuery
+        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
+        m_ContactModifierGroup = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(ModifyContactJacobians) }
         });
@@ -63,7 +63,7 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
                 // UserData 4 - clip impulse
                 // UserData 5 - disabled contact
 
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 0)) || 
+                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 0)) ||
                     0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 0)))
                 {
                     manifold.JacobianFlags |= JacobianFlags.UserFlag0; // Soft Contact
@@ -88,7 +88,7 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
                 {
                     manifold.JacobianFlags |= JacobianFlags.EnableMaxImpulse; // No Torque
                 }
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 5)) || 
+                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 5)) ||
                     0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 5)))
                 {
                     manifold.JacobianFlags |= JacobianFlags.Disabled;

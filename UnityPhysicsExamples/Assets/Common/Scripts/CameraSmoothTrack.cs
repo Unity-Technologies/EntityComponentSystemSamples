@@ -48,7 +48,7 @@ public class CameraSmoothTrack : MonoBehaviour
             newPositionTo = LookTo.transform.position;
         }
 
-        PhysicsWorld world = World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+        PhysicsWorld world = World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
         // check barrier
         {
             var rayInput = new RaycastInput
@@ -66,7 +66,7 @@ public class CameraSmoothTrack : MonoBehaviour
         if (Target != null)
         {
             // add velocity
-            var em = World.Active.GetOrCreateManager<EntityManager>();
+            var em = World.Active.EntityManager;
             var e = Target.GetComponent<GameObjectEntity>();
             if ((em != null) && (e != null) && (e.Entity != Entity.Null))
             {
@@ -83,7 +83,7 @@ public class CameraSmoothTrack : MonoBehaviour
         Vector3 newForward = newPositionTo - newPositionFrom;
         newForward.Normalize();
         Quaternion newRotation = Quaternion.LookRotation(newForward, Vector3.up);
-        
+
         gameObject.transform.SetPositionAndRotation(newPositionFrom, newRotation);
         oldPositionTo = newPositionTo;
     }

@@ -86,7 +86,7 @@ public class CharacterControllerBodySystem : ComponentSystem
             {
                 float3 up = math.up();
 
-                ref PhysicsWorld world = ref World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+                ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
                 // movement and firing
                 {
                     float x = Input.GetAxis("Horizontal");

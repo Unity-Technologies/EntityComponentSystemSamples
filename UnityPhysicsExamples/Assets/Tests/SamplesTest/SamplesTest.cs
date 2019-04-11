@@ -11,10 +11,7 @@ namespace Unity.Physics.Samples.Test
     [TestFixture]
     public class SamplesTest
     {
-        private World previousWorld;
-        private World testWorld;
-
-        private static IEnumerable GetScenes()
+        protected static IEnumerable GetScenes()
         {
             var sceneCount = SceneManager.sceneCountInBuildSettings;
             var scenes = new List<string>();
@@ -32,7 +29,7 @@ namespace Unity.Physics.Samples.Test
 
         [UnityTest]
         [Timeout(60000)]
-        public IEnumerator LoadScenes_NoScenesShouldLog([ValueSource(nameof(GetScenes))] string scenePath)
+        public virtual IEnumerator LoadScenes_NoScenesShouldLog([ValueSource(nameof(GetScenes))] string scenePath)
         {
             // Log scene name in case Unity crashes and test results aren't written out.
             Debug.Log("Loading " + scenePath);
@@ -51,9 +48,9 @@ namespace Unity.Physics.Samples.Test
             EntitiesCleanup();
         }
 
-        static void EntitiesCleanup()
+        protected static void EntitiesCleanup()
         {
-            var entityManager = World.Active.GetExistingManager<EntityManager>();
+            var entityManager = World.Active.EntityManager;
             var entities = entityManager.GetAllEntities();
             entityManager.DestroyEntity(entities);
             entities.Dispose();

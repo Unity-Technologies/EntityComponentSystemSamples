@@ -21,17 +21,17 @@ public class ModifyBroadphasePairsBehaviour : MonoBehaviour, IConvertGameObjectT
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyBroadphasePairsSystem : JobComponentSystem
 {
-    ComponentGroup m_PairModifierGroup;
+    EntityQuery m_PairModifierGroup;
 
     BuildPhysicsWorld m_PhysicsWorld;
     StepPhysicsWorld m_StepPhysicsWorld;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
-        m_PhysicsWorld = World.GetOrCreateManager<BuildPhysicsWorld>();
-        m_StepPhysicsWorld = World.GetOrCreateManager<StepPhysicsWorld>();
+        m_PhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
+        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
 
-        m_PairModifierGroup = GetComponentGroup(new EntityArchetypeQuery
+        m_PairModifierGroup = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(ModifyBroadphasePairs) }
         });

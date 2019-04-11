@@ -94,7 +94,7 @@ namespace Unity.Physics.Extensions
                 return;
             }
 
-            RayTracerSystem rbs = Entities.World.Active.GetExistingManager<RayTracerSystem>();
+            RayTracerSystem rbs = Entities.World.Active.GetExistingSystem<RayTracerSystem>();
             if (rbs == null || !rbs.IsEnabled)
             {
                 return;

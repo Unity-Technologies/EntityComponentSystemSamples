@@ -23,7 +23,7 @@ public class ToggleSubsceneLoading : MonoBehaviour
         {
             FramesUntilToggleLoad = 0;
 
-            var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+            var entityManager = World.Active.EntityManager;
             foreach (var sceneEntity in subscene._SceneEntities)
             {
                 if (!entityManager.HasComponent<RequestSceneLoaded>(sceneEntity))

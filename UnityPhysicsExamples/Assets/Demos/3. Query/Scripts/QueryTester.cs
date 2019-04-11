@@ -1,4 +1,5 @@
-﻿using Unity.Physics.Systems;
+﻿using System;
+using Unity.Physics.Systems;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Entities;
@@ -84,6 +85,9 @@ namespace Unity.Physics.Extensions
                     float3 vertex1 = bounds.center; vertex1[z] = (max - radius);
                     return CapsuleCollider.Create(vertex0, vertex1, radius);
                 }
+                case ColliderType.Cylinder:
+                    // TODO: need someone to add
+                    throw new NotImplementedException();
                 case ColliderType.Convex:
                 {
                     NativeArray<float3> points = new NativeArray<float3>(mesh.vertices.Length, Allocator.Temp);
@@ -130,7 +134,7 @@ namespace Unity.Physics.Extensions
 
         void RunQueries()
         {
-            ref PhysicsWorld world = ref Entities.World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+            ref PhysicsWorld world = ref Entities.World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
             float3 origin = transform.position;
             float3 direction = (transform.rotation * Direction) * Distance;
@@ -243,7 +247,7 @@ namespace Unity.Physics.Extensions
             {
                 RunQueries();
 
-                ref PhysicsWorld world = ref Entities.World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+                ref PhysicsWorld world = ref Entities.World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
                 // Draw the query
                 Gizmos.color = new Color(0.94f, 0.35f, 0.15f, 0.75f);

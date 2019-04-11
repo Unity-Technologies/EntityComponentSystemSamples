@@ -26,7 +26,7 @@ namespace Unity.Physics.Extensions
     {
         const float k_MaxDistance = 100.0f;
 
-        ComponentGroup m_MouseGroup;
+        EntityQuery m_MouseGroup;
         BuildPhysicsWorld m_BuildPhysicsWorldSystem;
 
         public NativeArray<SpringData> SpringDatas;
@@ -96,10 +96,10 @@ namespace Unity.Physics.Extensions
             SpringDatas[0] = new SpringData();
         }
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            m_BuildPhysicsWorldSystem = World.GetOrCreateManager<BuildPhysicsWorld>();
-            m_MouseGroup = GetComponentGroup(new EntityArchetypeQuery
+            m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
+            m_MouseGroup = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(MousePick) }
             });
@@ -155,13 +155,13 @@ namespace Unity.Physics.Extensions
     [UpdateBefore(typeof(BuildPhysicsWorld))]
     public class MouseSpringSystem : JobComponentSystem
     {
-        ComponentGroup m_MouseGroup;
+        EntityQuery m_MouseGroup;
         MousePickSystem m_PickSystem;
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            m_PickSystem = World.GetOrCreateManager<MousePickSystem>();
-            m_MouseGroup = GetComponentGroup(new EntityArchetypeQuery
+            m_PickSystem = World.GetOrCreateSystem<MousePickSystem>();
+            m_MouseGroup = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(MousePick) }
             });

@@ -50,7 +50,7 @@ public class ProjectIntoFutureGO : MonoBehaviour
     // Update is called once per frame
     void Update ()
     {
-        ref PhysicsWorld world = ref World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+        ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
         var localWorld = (PhysicsWorld)world.Clone();
         var simulation = new Simulation();

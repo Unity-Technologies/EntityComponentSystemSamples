@@ -79,7 +79,7 @@ namespace Unity.Physics.Extensions
 
                         float3 targetImagePlane = Request.ImageCenter + Request.Up * Request.PlaneHalfExtents * yFrac + Request.Right * Request.PlaneHalfExtents * xFrac;
                         float3 rayDir = Request.RayLength * (Request.PinHole - targetImagePlane);
-                        
+
                         RaycastHit hit;
                         bool hasHit;
                         if (Request.CastSphere)
@@ -182,13 +182,13 @@ namespace Unity.Physics.Extensions
             }
         }
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            m_BuildPhysicsWorldSystem = World.GetOrCreateManager<BuildPhysicsWorld>();
+            m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
             m_Requests = new List<RayRequest>();
             m_Results = new List<RayResult>();
         }
-        
+
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             if (m_Requests == null || m_Requests.Count == 0)

@@ -26,6 +26,15 @@ public struct CharacterControllerComponentData : IComponentData
     public int AffectsPhysicsBodies;
 }
 
+[Serializable]
+public struct CharacterControllerUserInputData : IComponentData
+{
+    public float HorizontalInput;
+    public float VerticalInput;
+    public int JumpInput;
+    public float ShootXInput;
+}
+
 public struct CharacterControllerInternalData : IComponentData
 {
     public float3 RequestedMovementDirection;
@@ -55,7 +64,7 @@ public class CharacterControllerComponent : MonoBehaviour, IConvertGameObjectToE
     {
         if (enabled)
         {
-            ref PhysicsWorld world = ref World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+            ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
             var componentData = new CharacterControllerComponentData
             {
                 Gravity = Gravity,
@@ -68,12 +77,14 @@ public class CharacterControllerComponent : MonoBehaviour, IConvertGameObjectToE
                 ContactTolerance = ContactTolerance,
                 AffectsPhysicsBodies = AffectsPhysicsBodies,
             };
+            var userInputData = new CharacterControllerUserInputData();
             var internalData = new CharacterControllerInternalData
             {
                 Entity = entity
             };
 
             dstManager.AddComponentData(entity, componentData);
+            dstManager.AddComponentData(entity, userInputData);
             dstManager.AddComponentData(entity, internalData);
         }
     }
@@ -87,20 +98,17 @@ public class CharacterControllerSystem : JobComponentSystem
     {
         // ChunkIndex makes sure we write to different parts of these arrays, so [NativeDisableContainerSafetyRestriction] is fine.
         // Also for DeferredImpulseWriter below.
-        [NativeDisableContainerSafetyRestriction] public ArchetypeChunkComponentType<CharacterControllerComponentData> CharacterControllerComponentType;
         [NativeDisableContainerSafetyRestriction] public ArchetypeChunkComponentType<CharacterControllerInternalData> CharacterControllerInternalType;
         [NativeDisableContainerSafetyRestriction] public ArchetypeChunkComponentType<Translation> TranslationType;
         [NativeDisableContainerSafetyRestriction] public ArchetypeChunkComponentType<Rotation> RotationType;
+        [ReadOnly] public ArchetypeChunkComponentType<CharacterControllerComponentData> CharacterControllerComponentType;
+        [ReadOnly] public ArchetypeChunkComponentType<CharacterControllerUserInputData> CharacterControllerUserInputType;
         [ReadOnly] public ArchetypeChunkComponentType<PhysicsCollider> PhysicsColliderType;
 
         [DeallocateOnJobCompletion] public NativeArray<DistanceHit> DistanceHits;
         [DeallocateOnJobCompletion] public NativeArray<ColliderCastHit> CastHits;
         [DeallocateOnJobCompletion] public NativeArray<SurfaceConstraintInfo> Constraints;
 
-        public float HorizontalInput;
-        public float VerticalInput;
-        public bool JumpInput;
-        public float ShootXInput;
         public float DeltaTime;
 
         [ReadOnly]
@@ -117,6 +125,7 @@ public class CharacterControllerSystem : JobComponentSystem
             float3 up = math.up();
 
             var chunkCCData = chunk.GetNativeArray(CharacterControllerComponentType);
+            var chunkCCInputData = chunk.GetNativeArray(CharacterControllerUserInputType);
             var chunkCCInternalData = chunk.GetNativeArray(CharacterControllerInternalType);
             var chunkPhysicsColliderData = chunk.GetNativeArray(PhysicsColliderType);
             var chunkTranslationData = chunk.GetNativeArray(TranslationType);
@@ -127,6 +136,7 @@ public class CharacterControllerSystem : JobComponentSystem
             for (int i = 0; i < chunk.Count; i++)
             {
                 var ccComponentData = chunkCCData[i];
+                var ccInputData = chunkCCInputData[i];
                 var ccInternalData = chunkCCInternalData[i];
                 var collider = chunkPhysicsColliderData[i];
                 var position = chunkTranslationData[i];
@@ -163,11 +173,11 @@ public class CharacterControllerSystem : JobComponentSystem
                 // petarm.todo: incorporate support plane's velocity and project input onto it
 
                 // User input
-                HandleUserInput(ref ccComponentData, ref ccInternalData, ref ccInternalData.LinearVelocity);
+                HandleUserInput(ccInputData, ccComponentData, ref ccInternalData, ref ccInternalData.LinearVelocity);
 
                 // World collision + integrate
                 CharacterControllerUtilities.CollideAndIntegrate(PhysicsWorld, DeltaTime, ccComponentData.MaxIterations, up, ccComponentData.Gravity,
-                    ccComponentData.CharacterMass, tau, damping, ccComponentData.AffectsPhysicsBodies > 0, capsuleColliderForQueries,
+                    ccComponentData.CharacterMass, tau, damping, ccComponentData.MaxSlope, ccComponentData.AffectsPhysicsBodies > 0, capsuleColliderForQueries,
                     ref DistanceHits, ref CastHits, ref Constraints,
                     ref transform, ref ccInternalData.LinearVelocity, ref DeferredImpulseWriter);
 
@@ -177,7 +187,6 @@ public class CharacterControllerSystem : JobComponentSystem
 
                 // Write back to chunk data
                 {
-                    chunkCCData[i] = ccComponentData;
                     chunkCCInternalData[i] = ccInternalData;
                     chunkTranslationData[i] = position;
                     chunkRotationData[i] = rotation;
@@ -187,7 +196,8 @@ public class CharacterControllerSystem : JobComponentSystem
             DeferredImpulseWriter.EndForEachIndex();
         }
 
-        private void HandleUserInput(ref CharacterControllerComponentData ccComponentData, ref CharacterControllerInternalData ccInternalData, ref float3 linearVelocity)
+        private void HandleUserInput(CharacterControllerUserInputData ccInputData, CharacterControllerComponentData ccComponentData,
+            ref CharacterControllerInternalData ccInternalData, ref float3 linearVelocity)
         {
             float3 up = math.up();
 
@@ -197,10 +207,9 @@ public class CharacterControllerSystem : JobComponentSystem
                 float3 forward = math.forward(quaternion.identity);
                 float3 right = math.cross(up, forward);
 
-                // petarm.todo: hook input through component data, not here
-                float horizontal = HorizontalInput;
-                float vertical = VerticalInput;
-                bool jumpRequested = JumpInput;
+                float horizontal = ccInputData.HorizontalInput;
+                float vertical = ccInputData.VerticalInput;
+                bool jumpRequested = ccInputData.JumpInput > 0;
                 bool haveInput = (math.abs(horizontal) > float.Epsilon) || (math.abs(vertical) > float.Epsilon);
                 if (haveInput)
                 {
@@ -212,12 +221,12 @@ public class CharacterControllerSystem : JobComponentSystem
                 {
                     ccInternalData.RequestedMovementDirection = float3.zero;
                 }
-                shouldJump = jumpRequested && ccInternalData.SupportedState != CharacterControllerUtilities.CharacterSupportState.Unsupported;
+                shouldJump = jumpRequested && ccInternalData.SupportedState == CharacterControllerUtilities.CharacterSupportState.Supported;
             }
 
             // Turning
             {
-                float horizontal = ShootXInput;
+                float horizontal = ccInputData.ShootXInput;
                 bool haveInput = (math.abs(horizontal) > float.Epsilon);
                 if (haveInput)
                 {
@@ -298,20 +307,20 @@ public class CharacterControllerSystem : JobComponentSystem
     ExportPhysicsWorld m_ExportPhysicsWorldSystem;
     EndFramePhysicsSystem m_EndFramePhysicsSystem;
 
-    ComponentGroup m_CharacterControllersGroup;
+    EntityQuery m_CharacterControllersGroup;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
-        m_BuildPhysicsWorldSystem = World.GetOrCreateManager<BuildPhysicsWorld>();
-        m_ExportPhysicsWorldSystem = World.GetOrCreateManager<ExportPhysicsWorld>();
-        m_EndFramePhysicsSystem = World.GetOrCreateManager<EndFramePhysicsSystem>();
+        m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
+        m_ExportPhysicsWorldSystem = World.GetOrCreateSystem<ExportPhysicsWorld>();
+        m_EndFramePhysicsSystem = World.GetOrCreateSystem<EndFramePhysicsSystem>();
 
-        var query = new EntityArchetypeQuery
+        EntityQueryDesc query = new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(CharacterControllerComponentData), typeof(CharacterControllerInternalData),
-                typeof(PhysicsCollider), typeof(Translation), typeof(Rotation) }
+                typeof(CharacterControllerUserInputData), typeof(PhysicsCollider), typeof(Translation), typeof(Rotation) }
         };
-        m_CharacterControllersGroup = GetComponentGroup(query);
+        m_CharacterControllersGroup = GetEntityQuery(query);
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -321,6 +330,7 @@ public class CharacterControllerSystem : JobComponentSystem
         var chunks = m_CharacterControllersGroup.CreateArchetypeChunkArray(Allocator.TempJob);
 
         var ccComponentType = GetArchetypeChunkComponentType<CharacterControllerComponentData>();
+        var ccInputType = GetArchetypeChunkComponentType<CharacterControllerUserInputData>();
         var ccInternalType = GetArchetypeChunkComponentType<CharacterControllerInternalData>();
         var physicsColliderType = GetArchetypeChunkComponentType<PhysicsCollider>();
         var translationType = GetArchetypeChunkComponentType<Translation>();
@@ -331,26 +341,49 @@ public class CharacterControllerSystem : JobComponentSystem
         // Maximum number of hits character controller can store in world queries
         const int maxQueryHits = 128;
 
+        // Read user input
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+        int jumpInput = Input.GetButtonDown("Jump") ? 1 : 0;
+        float shootXInput = Input.GetAxis("ShootX");
+
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            var chunk = chunks[i];
+
+            // Fill all input data with the same values read from user.
+            // These can be hooked differently, this is just an example.
+            {
+                var chunkCCInputData = chunk.GetNativeArray(ccInputType);
+                for (int j = 0; j < chunk.Count; j++)
+                {
+                    var inputData = chunkCCInputData[j];
+                    inputData.HorizontalInput = horizontalInput;
+                    inputData.VerticalInput = verticalInput;
+                    inputData.JumpInput = jumpInput;
+                    inputData.ShootXInput = shootXInput;
+                    chunkCCInputData[j] = inputData;
+                }
+            }
+        }
+
         var ccJob = new CharacterControllerJob()
         {
             // Archetypes
             CharacterControllerComponentType = ccComponentType,
+            CharacterControllerUserInputType = ccInputType,
             CharacterControllerInternalType = ccInternalType,
             PhysicsColliderType = physicsColliderType,
             TranslationType = translationType,
             RotationType = rotationType,
             // Input
-            HorizontalInput = Input.GetAxis("Horizontal"),
-            VerticalInput = Input.GetAxis("Vertical"),
-            JumpInput = Input.GetButtonDown("Jump"),
-            ShootXInput = Input.GetAxis("ShootX"),
             DeltaTime = Time.fixedDeltaTime,
             PhysicsWorld = m_BuildPhysicsWorldSystem.PhysicsWorld,
             DeferredImpulseWriter = deferredImpulses,
             // Memory
             DistanceHits = new NativeArray<DistanceHit>(maxQueryHits, Allocator.TempJob),
             CastHits = new NativeArray<ColliderCastHit>(maxQueryHits, Allocator.TempJob),
-            Constraints = new NativeArray<SurfaceConstraintInfo>(2 * maxQueryHits, Allocator.TempJob)
+            Constraints = new NativeArray<SurfaceConstraintInfo>(4 * maxQueryHits, Allocator.TempJob)
         };
 
         inputDeps = ccJob.Schedule(m_CharacterControllersGroup, inputDeps);

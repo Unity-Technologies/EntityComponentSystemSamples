@@ -38,16 +38,16 @@ public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObj
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyNarrowphaseContactsSystem : JobComponentSystem
 {
-    ComponentGroup m_ContactModifierGroup;
+    EntityQuery m_ContactModifierGroup;
     StepPhysicsWorld m_StepPhysicsWorld;
     BuildPhysicsWorld m_BuildPhysicsWorld;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
-        m_StepPhysicsWorld = World.GetOrCreateManager<StepPhysicsWorld>();
-        m_BuildPhysicsWorld = World.GetOrCreateManager<BuildPhysicsWorld>();
+        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
+        m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
 
-        m_ContactModifierGroup = GetComponentGroup(new EntityArchetypeQuery
+        m_ContactModifierGroup = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(ModifyNarrowphaseContacts) }
         });

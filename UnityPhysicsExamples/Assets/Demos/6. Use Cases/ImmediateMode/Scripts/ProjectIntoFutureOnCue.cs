@@ -40,10 +40,10 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
             material = referenceMaterial
         };
     }
-    
+
     void clearTrails()
     {
-        var em = World.Active.GetOrCreateManager<EntityManager>();
+        var em = World.Active.EntityManager;
         var eA = em.GetAllEntities(Allocator.Temp);
         foreach (var e in eA)
         {
@@ -59,7 +59,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
     {
         //UnityEngine.Material material = new UnityEngine.Material(Shader.Find("Lightweight-Default"));
         //material.color = color;
-        var em = World.Active.GetOrCreateManager<EntityManager>();
+        var em = World.Active.EntityManager;
         const float minVelocitySq = 0.05f;
         for (int i = 0; i < localWorld.DynamicBodies.Length; i++)
         {
@@ -115,7 +115,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
             return;
         }
 
-        ref PhysicsWorld world = ref World.Active.GetExistingManager<BuildPhysicsWorld>().PhysicsWorld;
+        ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
         var localWorld = (PhysicsWorld)world.Clone();
         localWorld.SetLinearVelocity(world.GetRigidBodyIndex(WhiteBallEntity), GetVelocityFromSliders());

@@ -55,16 +55,16 @@ public class PlanetGravityBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 public class PlanetGravitySystem : JobComponentSystem
 {
     [BurstCompile]
-    struct PlanetGravityJob : IJobProcessComponentData<Translation, PhysicsMass, PhysicsVelocity, PlanetGravity>
+    struct PlanetGravityJob : IJobForEach<Translation, PhysicsMass, PhysicsVelocity, PlanetGravity>
     {
         public float dt;
 
-        public void Execute([ReadOnly]ref Translation pos, 
+        public void Execute([ReadOnly]ref Translation pos,
                             ref PhysicsMass bodyMass,
-                            ref PhysicsVelocity bodyVelocity, 
+                            ref PhysicsVelocity bodyVelocity,
                             [ReadOnly]ref PlanetGravity gravity)
         {
-#if UNITY_ANDROID  //XX 
+#if UNITY_ANDROID  //XX
             float mass = 1.0f;
 #else
             float mass = math.rcp(bodyMass.InverseMass);

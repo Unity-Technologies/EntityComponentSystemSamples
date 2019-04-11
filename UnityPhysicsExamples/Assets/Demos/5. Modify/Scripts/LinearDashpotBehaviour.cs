@@ -32,7 +32,7 @@ namespace Demos.LinearDashpot
     {
         public PhysicsBody parentBody;
         public float3 parentOffset;
-        public float3 localOffset; 
+        public float3 localOffset;
 
         public bool dontApplyImpulseToParent = false;
         public float strength;
@@ -76,9 +76,9 @@ namespace Demos.LinearDashpot
     {
         BuildPhysicsWorld m_BuildPhysicsWorldSystem;
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            m_BuildPhysicsWorldSystem = World.GetOrCreateManager<BuildPhysicsWorld>();
+            m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
         }
 
         protected override void OnUpdate()
@@ -98,7 +98,7 @@ namespace Demos.LinearDashpot
 
                 // Find the rigid bodies in the physics world
                 int rbAIdx = world.GetRigidBodyIndex(eA);
-                int rbBIdx = world.GetRigidBodyIndex(eB); 
+                int rbBIdx = world.GetRigidBodyIndex(eB);
 
                 // Calculate and apply the impulses
                 RigidBody rbA = rbAIdx >= 0 ? world.Bodies[rbAIdx] : RigidBody.Zero;

@@ -55,12 +55,12 @@ namespace Demos
     public class VehicleMechanicsSystem : ComponentSystem
     {
         BuildPhysicsWorld CreatePhysicsWorldSystem;
-        private ComponentGroup VehicleGroup;
+        private EntityQuery VehicleGroup;
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            CreatePhysicsWorldSystem = World.GetOrCreateManager<BuildPhysicsWorld>();
-            VehicleGroup = GetComponentGroup(new EntityArchetypeQuery
+            CreatePhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
+            VehicleGroup = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[]
                 {
@@ -84,7 +84,7 @@ namespace Demos
             }
         }
 
-        public static JobHandle ScheduleBatchRayCast(CollisionWorld world, 
+        public static JobHandle ScheduleBatchRayCast(CollisionWorld world,
             NativeArray<RaycastInput> inputs, NativeArray<RaycastHit> results)
         {
             JobHandle rcj = new RaycastJob
@@ -104,7 +104,7 @@ namespace Demos
             // Make sure the world has finished building before querying it
             CreatePhysicsWorldSystem.FinalJobHandle.Complete();
 
-            var em = World.Active.GetOrCreateManager<EntityManager>();
+            var em = World.Active.EntityManager;
             PhysicsWorld world = CreatePhysicsWorldSystem.PhysicsWorld;
 
             float invDt = 1.0f / Time.fixedDeltaTime;
@@ -163,7 +163,7 @@ namespace Demos
                     {
                         Ray ray = rayInputs[i].Ray;
                         float3 wheelPos = math.lerp(ray.Origin, (ray.Origin + ray.Direction), rayResult.Fraction);
-                        wheelPos -= (cePosition - ceCenterOfMass); 
+                        wheelPos -= (cePosition - ceCenterOfMass);
 
                         float3 velocityAtWheel = world.GetLinearVelocity(ceIdx, wheelPos);
                         rayVelocities[i] = velocityAtWheel;
