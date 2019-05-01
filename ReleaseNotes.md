@@ -1,9 +1,40 @@
+# 0.0.28
+
+Please note that the version of the Samples (`0.0.28`) is not related to the preview version of entities (`preview.31`).
+To view the changelog for a the package, go to **Package Manager** and click on **View changelog**. 
+
+## New Samples
+
+* Added new sample, HelloCube_08_SpawnAndRemove, to demonstrate both creating and removing entities at runtime.
+* Added a hybrid sample of driving a component system with a fixed timestep. See `Samples/Assets/HelloECS/Hybrid_01_FixedTimestep`. The method demonstrated in this sample is intended as a short-term workaround; the entire `SimulationSystemGroup` will eventually use a fixed timestep by default.
+
+## Upgrade guide
+
+* Serialized entities file format version has changed, Sub Scenes entity caches will require rebuilding.
+
+## Changes
+
+* Rebuilding the entity cache files for sub scenes will now properly request checkout from source control if required.
+
+## Fixes
+
+* `IJobForEach` will only create new entity queries when scheduled, and won't rely on injection anymore. This avoids the creation of useless queries when explicit ones are used to schedule those jobs. Those useless queries could cause systems to keep updating even though the actual queries were empty.
+* LODGroup conversion now handles renderers being present in a LOD Group in multipe LOD levels correctly
+* Fixed an issue where chunk utilization histograms weren't properly clipped in EntityDebugger
+* Fixed an issue where tag components were incorrectly shown as subtractive in EntityDebugger
+
+## Known issues
+
 # 0.0.27
+
 ## New Features
+
 * Script templates have been added to help you create new component types and systems, similar to Unity's built-in template for new MonoBehaviours. Use them via the `Assets/Create/ECS` menu.
 
 ## Upgrade guide
+
 ### Some APIs have been deprecated in this release
+
 * [API Deprecation FAQ](https://forum.unity.com/threads/api-deprecation-faq-0-0-23.636994/)
 ** Removed obsolete `ComponentSystem.ForEach`
 ** Removed obsolete `[Inject]`
@@ -14,6 +45,7 @@
 ** Removed obsolete `ComponentGroupArray`
 
 ### ScriptBehaviourManager removal
+
 * The `ScriptBehaviourManager` class has been removed.
 * `ComponentSystem` and `JobComponentSystem` remain as system base classes (with a common `ComponentSystemBase` class)
 ** ComponentSystems have overridable methods `OnCreateManager` and `OnDestroyManager`.  These have been renamed to `OnCreate` and `OnDestroy`.
@@ -25,67 +57,80 @@
 ** `EntityManager` is no longer accessed via `GetExistingManager`.  There is now a property directly on World: `World.EntityManager`.
 *** This is NOT handled by the obsolete API updater and will need to be done manually.
 *** Searching and replacing `Manager<EntityManager>` should locate the right spots.  For example, `world.GetExistingManager<EntityManager>()` should become just `world.EntityManager`.
+
 ### IJobProcessComponentData renamed to IJobForeach
+
 * This rename unfortunately cannot be handled by the obsolete API updater.
 * A global search and replace of `IJobProcessComponentData` to `IJobForEach` should be sufficient.
 
 ### ComponentGroup renamed to EntityQuery
+
 * `ComponentGroup` has been renamed to `EntityQuery` to better represent what it does.
 * All APIs that refer to `ComponentGroup` have been changed to refer to `EntityQuery` in their name, e.g. `CreateEntityQuery`, `GetEntityQuery`, etc.
 
 ### EntityArchetypeQuery renamed to EntityQueryDesc
+
 * `EntityArchetypeQuery` has been renamed to `EntityQueryDesc`
 
 ## Changes
 
 * Minimum required Unity version is now 2019.1.0b9
-* Adding tag components or chunk components to entities that already have them is now properly ignored.
+* Adding components to entities that already have them is now properly ignored.
 * UNITY_CSHARP_TINY is now NET_DOTS to match our other NET_* defines
 
 ## Fixes
+
 * In HelloCube_06_SpawnFromEntity, `HelloSpawnerSystem` now delays spawning entities until the beginning of the next simulation group update. This ensures
   that spawned entities are fully instantiated and processed by the `TransformSystemGroup` before they are rendered for the first time.
 * Fixed exception in inspector when Script is missing
-* The presence of chunk components could lead to corruption of the entity remapping during deserialization of SubScene sections.
+* Fixed issue where the presence of chunk components could lead to corruption of the entity remapping during deserialization of SubScene sections.
 * Fix for an issue causing filtering with `IJobForEachWithEntity` to try to access entities outside of the range of the group it was scheduled with.
 
 ## Known issues
 
-
 # 0.0.26
-## New Features
-## Upgrade guide
-## Changes
-* More improvements to the documentation
-## Fixes
-* Change filtering with two component types now works again.
-## Known issues
 
+## New Features
+
+## Upgrade guide
+
+## Changes
+
+* More improvements to the documentation
+
+## Fixes
+
+* Change filtering with two component types now works again.
+
+## Known issues
 
 # 0.0.25
 
 ## New Features
+
 * Added BlobAssetReference<T> and support for building and serializing blob assets.
   * Blob assets are built using BlobAllocator and BlobAssetReference fields in components are automatically serialized and deserialized.
   * BlobPtr and BlobArray are used to represent pointers and arrays inside blobs and are allocated using BlobAllocator.Allocate.
   * BlobAssetReference are currently not supported inside DynamicBuffer components.
 * bool and char can now be used in ComponentData and in native collections.
 * GetBufferFromEntity and GetComponentDataFromEntity only available on JobComponentSystem
- 
+
 ## Upgrade guide
+
 * Unity 2019.1b5 or later is now required.
 
 ## Changes
+
 * If a system in a ComponentSystemGroup throws an exception, the group will now log the exception as an error and continue updating the
   next system in the group. Previously, the entire group update would abort.
 * Moved most documentation to the [Entities](https://docs.unity3d.com/Packages/com.unity.entities@0.0/manual/index.html), [Collections extensions](https://docs.unity3d.com/Packages/com.unity.collections@0.0/manual/index.html), and [Job extensions](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/manual/index.html) packages.
 
 ## Fixes
+
 * Fix underconstrained systems in the `TransformSystemGroup`, which could cause child transforms to lag
   behind their parents for one frame.
 
 ## Known issues
-
 
 # 0.0.24
 
@@ -103,6 +148,7 @@
 `ForEach(..., group)` to `Entities.With(group).ForEach(...)`.
 
 ## Changes
+
 * Top-level `ComponentSystemGroup`s in the default world are now updated from different stages of the player loop. This is a temporary workaround;
   see [forum post](https://forum.unity.com/threads/why-is-simulation-the-default-system-group.639058/#post-4289911) for more details.
   * `SimulationSystemGroup` is now updated at the end of the `Update` phase of the player loop, not `FixedUpdate`. As a side effect, it will now be updated
@@ -240,7 +286,7 @@ these functions will take an optimized path that migrates the chunks to new arch
 
 * Systems that should execute in edit mode should now use the ExecuteAlways attribute instead of ExecuteInEditMode.
 * ISerializationCallbackReceiver interfaces on ComponentDataWrapperBase are no longer public.
-* IJobProcessComponentData now supports up to 6 seperate IComponentData
+* IJobProcessComponentData now supports up to 6 separate IComponentData
 * TypeManager.BuildComponentType() has been made internal.
 * EntityManager.MoveEntitiesFrom now supports shared components with entity references
 

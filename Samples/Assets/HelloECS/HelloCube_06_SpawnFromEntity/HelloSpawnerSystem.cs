@@ -30,7 +30,7 @@ namespace Samples.HelloCube_06
 
         struct SpawnJob : IJobForEachWithEntity<HelloSpawner, LocalToWorld>
         {
-            public EntityCommandBuffer CommandBuffer;
+            public EntityCommandBuffer.Concurrent CommandBuffer;
 
             public void Execute(Entity entity, int index, [ReadOnly] ref HelloSpawner spawner,
                 [ReadOnly] ref LocalToWorld location)
@@ -39,16 +39,16 @@ namespace Samples.HelloCube_06
                 {
                     for (int y = 0; y < spawner.CountY; y++)
                     {
-                        var instance = CommandBuffer.Instantiate(spawner.Prefab);
+                        var instance = CommandBuffer.Instantiate(index, spawner.Prefab);
 
                         // Place the instantiated in a grid with some noise
                         var position = math.transform(location.Value,
                             new float3(x * 1.3F, noise.cnoise(new float2(x, y) * 0.21F) * 2, y * 1.3F));
-                        CommandBuffer.SetComponent(instance, new Translation {Value = position});
+                        CommandBuffer.SetComponent(index, instance, new Translation {Value = position});
                     }
                 }
 
-                CommandBuffer.DestroyEntity(entity);
+                CommandBuffer.DestroyEntity(index, entity);
             }
         }
 
@@ -60,8 +60,8 @@ namespace Samples.HelloCube_06
             // Schedule the job that will add Instantiate commands to the EntityCommandBuffer.
             var job = new SpawnJob
             {
-                CommandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer()
-            }.ScheduleSingle(this, inputDeps);
+                CommandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().ToConcurrent()
+            }.Schedule(this, inputDeps);
 
 
             // SpawnJob runs in parallel with no sync point until the barrier system executes.

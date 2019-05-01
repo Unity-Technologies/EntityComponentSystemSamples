@@ -54,12 +54,12 @@ Frequently used:
 
 * `ENABLE_UNITY_COLLECTIONS_CHECKS`: Wrap around validation code, for example bounds checking, parameter validation, or leak detection.
 * `NET_DOTS`: DOTS C# profile (vs full .NET) - for example, if you use `Dictionary`, you want `#if !NET_DOTS`; see [Platform dependent compilation](https://docs.unity3d.com/Manual/PlatformDependentCompilation.html) for the other `NET_*` defines
-* `UNITY_ZEROPLAYER`: Standalone DOTS (vs hybrid DOTS) - for example, if you use `UnityEngine`, you want `#if !UNITY_ZEROPLAYER`
+* `UNITY_DOTSPLAYER`: Standalone DOTS (vs hybrid DOTS) - for example, if you use `UnityEngine`, you want `#if !UNITY_DOTSPLAYER`
 
 Rarely used:
 
-* `UNITY_ZEROPLAYER_DOTNET`: Standalone DOTS built for real .NET execution target
-* `UNITY_ZEROPLAYER_IL2CPP`: Standalone DOTS built for IL2CPP - for example, where il2cpp provides an intrinsic for vs. an implementation using reflection in .NET
+* `UNITY_DOTSPLAYER_DOTNET`: Standalone DOTS built for real .NET execution target
+* `UNITY_DOTSPLAYER_IL2CPP`: Standalone DOTS built for IL2CPP - for example, where il2cpp provides an intrinsic for vs. an implementation using reflection in .NET
 
 _Note: The `ZEROPLAYER` defines are for the DOTS runtime, which has not been publicly released yet._
 

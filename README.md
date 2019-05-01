@@ -47,6 +47,8 @@ This is a set of projects demonstrate the absolute basics of the Unity ECS archi
 * **HelloCube_04_SubScene** — demonstrates how to create and modify Entities using SubScenes in the Unity editor.
 * **HelloCube_05_SpawFromMonoBehaviour** — demonstrates how to spawn multiple Entities from a MonoBehaviour function based on a Prefab GameObject.
 * **HelloCube_06_SpawnFromEntity** — demonstrates how to spawn multiple Entities at runtime using a spawning Job in a system.
+* **HelloCube_07_FluentQuery** — demonstrates how to use fluent queries to select the correct set of entities to update.
+* **HelloCube_08_SpawnAndRemove** — demonstrates spawning and removing entities from the world.
 
 ### Boids
 
@@ -54,7 +56,7 @@ The Boids example provides a more complex scenario with thousands of Entities. B
 
 ## Installation guide for blank ECS project
 
-1. Open the Unity Editor (`2019.1.0b9` or later)
+1. Open the Unity Editor (`2019.1.0f1` or later)
 2. Create a new Project.
 3. Open the Package Manager (menu: **Window** > **Package Manager**).
 4. Click the **Advanced** button at the top of the window and turn on the **Show preview packages** option.

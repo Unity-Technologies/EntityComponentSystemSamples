@@ -1,7 +1,12 @@
-using System;
 using Unity.Entities;
+using Unity.Transforms;
+using UnityEngine;
 
-public struct BoidObstacle : IComponentData { }
-
-[UnityEngine.DisallowMultipleComponent]
-public class BoidObstacleProxy : ComponentDataProxy<BoidObstacle> { }
+namespace Samples.Boids
+{
+    public struct BoidObstacle : IComponentData
+    { }
+    
+    [DisallowMultipleComponent] 
+    public class BoidObstacleProxy : ComponentDataProxy<BoidObstacle> { }
+}

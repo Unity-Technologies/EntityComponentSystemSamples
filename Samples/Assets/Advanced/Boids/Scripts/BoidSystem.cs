@@ -350,7 +350,6 @@ namespace Samples.Boids
             m_BoidGroup = GetEntityQuery(new EntityQueryDesc
             {
                 All = new [] { ComponentType.ReadOnly<Boid>(), ComponentType.ReadWrite<LocalToWorld>() },
-                Options = EntityQueryOptions.FilterWriteGroup
             });
 
             m_TargetGroup = GetEntityQuery(new EntityQueryDesc

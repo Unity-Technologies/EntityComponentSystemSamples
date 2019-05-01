@@ -1,4 +1,4 @@
-# HelloCube_06_SpawnFromMonoBehaviour
+# HelloCube_06_SpawnFromEntity
 
 This sample demonstrates a different way to spawn Entities and Components using a Prefab GameObject. Like the previous example, the scene spawns a "field" of the pairs of spinning cubes.
 
