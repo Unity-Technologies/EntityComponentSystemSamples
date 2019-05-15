@@ -10,22 +10,21 @@ namespace Samples.HelloCube_06
     // JobComponentSystems can run on worker threads.
     // However, creating and removing Entities can only be done on the main thread to prevent race conditions.
     // The system uses an EntityCommandBuffer to defer tasks that can't be done inside the Job.
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
     public class HelloSpawnerSystem : JobComponentSystem
     {
-        // BeginInitializationEntityCommandBufferSystem is used to create a command buffer which will then be played back
+        // EndInitializationEntityCommandBufferSystem is used to create a command buffer which will then be played back
         // when that barrier system executes.
         // Though the instantiation command is recorded in the SpawnJob, it's not actually processed (or "played back")
         // until the corresponding EntityCommandBufferSystem is updated. To ensure that the transform system has a chance
         // to run on the newly-spawned entities before they're rendered for the first time, the HelloSpawnerSystem
-        // will use the BeginSimulationEntityCommandBufferSystem to play back its commands. This introduces a one-frame lag
-        // between recording the commands and instantiating the entities, but in practice this is usually not noticeable.
-        BeginInitializationEntityCommandBufferSystem m_EntityCommandBufferSystem;
+        // will use the EndInitializationEntityCommandBufferSystem to play back its commands.
+        EndInitializationEntityCommandBufferSystem m_EntityCommandBufferSystem;
 
         protected override void OnCreate()
         {
             // Cache the BeginInitializationEntityCommandBufferSystem in a field, so we don't have to create it every frame
-            m_EntityCommandBufferSystem = World.GetOrCreateSystem<BeginInitializationEntityCommandBufferSystem>();
+            m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndInitializationEntityCommandBufferSystem>();
         }
 
         struct SpawnJob : IJobForEachWithEntity<HelloSpawner, LocalToWorld>
