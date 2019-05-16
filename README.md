@@ -38,17 +38,17 @@ Burst is an experimental package that currently supports Unity 2018.3 and later.
 ## Samples
 To help you get started, we have provided this repository of examples for learning how to to write systems at scale. 
 
-### HelloECS
+### HelloCube
 This is a set of projects demonstrate the absolute basics of the Unity ECS architecture:
 
-* **HelloCube_01_ForEach** — creates a pair of rotating cubes. This example demonstrates the separation of data and behavior with System and Components.
-* **HelloCube_02_IJobForEach** — builds on HelloCube_01_ForEach, using a Job-based system. Systems based on IJobForEach are the recommended approach and can take advantage of available CPU cores.
-* **HelloCube_03_IJobChunk** — shows how to write a System using IJobChunk. IJobChunk is the recommended method for processing Components for cases more complex than a simple IJobForEach can describe.  
-* **HelloCube_04_SubScene** — demonstrates how to create and modify Entities using SubScenes in the Unity editor.
-* **HelloCube_05_SpawFromMonoBehaviour** — demonstrates how to spawn multiple Entities from a MonoBehaviour function based on a Prefab GameObject.
-* **HelloCube_06_SpawnFromEntity** — demonstrates how to spawn multiple Entities at runtime using a spawning Job in a system.
-* **HelloCube_07_FluentQuery** — demonstrates how to use fluent queries to select the correct set of entities to update.
-* **HelloCube_08_SpawnAndRemove** — demonstrates spawning and removing entities from the world.
+* **ForEach** — creates a pair of rotating cubes. This example demonstrates the separation of data and behavior with System and Components.
+* **IJobForEach** — builds on the ForEach sample, using a Job-based system. Systems based on IJobForEach are the recommended approach and can take advantage of available CPU cores.
+* **IJobChunk** — shows how to write a System using IJobChunk. IJobChunk is the recommended method for processing Components for cases more complex than a simple IJobForEach can describe.  
+* **SubScene** — demonstrates how to create and modify Entities using SubScenes in the Unity editor.
+* **SpawnFromMonoBehaviour** — demonstrates how to spawn multiple Entities from a MonoBehaviour function based on a Prefab GameObject.
+* **SpawnFromEntity** — demonstrates how to spawn multiple Entities at runtime using a spawning Job in a system.
+* **FluentQuery** — demonstrates how to use fluent queries to select the correct set of entities to update.
+* **SpawnAndRemove** — demonstrates spawning and removing entities from the world.
 
 ### Boids
 

@@ -37,5 +37,5 @@ The following table indicates the sample folders in the package where you can fi
 
 |Location|Description|
 |---|---|
-|`Samples/Assets/HelloECS`|Contains a set of very basic "hello world" samples for getting started with entity-component-systems.|
+|`Samples/Assets/HelloCube`|Contains a set of basic samples for getting started with the key concepts and API's of entity-component-systems.|
 |`Samples/Assets/Advanced`|Contains the boid simulation for understanding more complex simulations|

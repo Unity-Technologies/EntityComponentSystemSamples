@@ -1,3 +1,13 @@
+# Samples 29
+
+To view the changelog for a the package, go to **Package Manager** and click on **View changelog** or open the respective `CHANGELOG.md` file inside the package folder. 
+
+## Changes
+
+* Rearranged all HelloECS samples into new HelloCube folder structure. Also renamed most types to make it clear in the Unity UI exactly what types are being used (namespaces are not typically visible in Unity).
+* Moved the `Hybrid_01_FixedTimestep` to `Advanced/FixedTimestepWorkaround`.
+
+
 # 0.0.28
 
 Please note that the version of the Samples (`0.0.28`) is not related to the preview version of entities (`preview.31`).
@@ -7,6 +17,12 @@ To view the changelog for a the package, go to **Package Manager** and click on 
 
 * Added new sample, HelloCube_08_SpawnAndRemove, to demonstrate both creating and removing entities at runtime.
 * Added a hybrid sample of driving a component system with a fixed timestep. See `Samples/Assets/HelloECS/Hybrid_01_FixedTimestep`. The method demonstrated in this sample is intended as a short-term workaround; the entire `SimulationSystemGroup` will eventually use a fixed timestep by default.
+
+* Added versions of `IJobForEach` that support `DynamicBuffer`s
+  * Due to C# language contraints, these overloads needed different names. For example:
+  * `IJobForEach_BCC` is a job which takes 1 `IBufferElementData` and 2 `IComponentData`
+  * `IJobForEach_BBC` is a job which takes 2 `IBufferElementData` and 1 `IComponentData`
+  * ...etc
 
 ## Upgrade guide
 

@@ -4,11 +4,12 @@ root = true
 
 [*]
 # help with sharing files across os's (i.e. network share or through local vm)
-#end_of_line = lf
 #charset temporarily disabled due to bug in VS2017 changing to UTF-8 with BOM (https://favro.com/card/c564ede4ed3337f7b17986b6/Uni-17877)
 #charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
+;;;;; temporarily disabled until we enable com.unity.coding
+;;trim_trailing_whitespace = true
+;;insert_final_newline = true
+;;;;;
 
 # formattable file extensions (keep in sync with format.ini from unity-meta repo)
 #
@@ -47,6 +48,8 @@ indent_size = 4
 indent_style = tab
 
 [*.{md,markdown}]
+indent_style = space
+indent_size = 2
 # trailing whitespace is significant in markdown (bad choice, bad!)
 trim_trailing_whitespace = false
 
