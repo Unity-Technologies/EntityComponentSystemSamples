@@ -8,14 +8,32 @@ using Unity.Mathematics;
 using Math = Unity.Physics.Math;
 using UnityEngine;
 
-public struct ModifyContactJacobians : IComponentData { }
+public struct ModifyContactJacobians : IComponentData
+{
+    public enum ModificationType
+    {
+        None,
+        SoftContact,
+        SurfaceVelocity,
+        InfiniteInertia,
+        NoAngularEffects,
+        ClippedImpulse,
+        DisabledContact
+    }
 
+    public ModificationType type;
+}
+
+[Serializable]
 public class ModifyContactJacobiansBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 {
     void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        dstManager.AddComponentData(entity, new ModifyContactJacobians());
+        dstManager.AddComponentData(entity, new ModifyContactJacobians { type = ModificationType } );
     }
+
+
+    public ModifyContactJacobians.ModificationType ModificationType;
 }
 
 // A system which configures the simulation step to modify contact jacobains in various ways
@@ -34,177 +52,192 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
         });
     }
 
+    // This job reads the modify component and sets some data on the contact, to get propogated to the jacobian
+    // for processing in our jacobian modifier job. This is necessary because some flags require extra data to
+    // be allocated along with the jacobian (e.g., SurfaceVelocity data typically does not exist). We also set
+    // user data bits in the jacobianFlags to save us from looking up the ComponentDataFromEntity later.
+    struct SetContactFlagsJob : IContactsJob
+    {
+        [ReadOnly]
+        public ComponentDataFromEntity<ModifyContactJacobians> modificationData;
+
+        public void Execute(ref ModifiableContactHeader manifold, ref ModifiableContactPoint contact)
+        {
+            Entity entityA = manifold.Entities.EntityA;
+            Entity entityB = manifold.Entities.EntityB;
+
+            ModifyContactJacobians.ModificationType typeA = ModifyContactJacobians.ModificationType.None;
+            if(modificationData.Exists(entityA))
+            {
+                typeA = modificationData[entityA].type;
+            }
+
+            ModifyContactJacobians.ModificationType typeB = ModifyContactJacobians.ModificationType.None;
+            if(modificationData.Exists(entityB))
+            {
+                typeB = modificationData[entityB].type;
+            }
+
+            if (typeA == ModifyContactJacobians.ModificationType.SurfaceVelocity || typeB == ModifyContactJacobians.ModificationType.SurfaceVelocity)
+            {
+                manifold.JacobianFlags |= JacobianFlags.EnableSurfaceVelocity;
+            }
+            if (typeA == ModifyContactJacobians.ModificationType.InfiniteInertia || typeB == ModifyContactJacobians.ModificationType.InfiniteInertia)
+            {
+                manifold.JacobianFlags |= JacobianFlags.EnableMassFactors;
+            }
+            if (typeA == ModifyContactJacobians.ModificationType.ClippedImpulse || typeB == ModifyContactJacobians.ModificationType.ClippedImpulse)
+            {
+                manifold.JacobianFlags |= JacobianFlags.EnableMaxImpulse;
+            }
+        }
+    }
+
+    struct ModifyJacobiansJob : IJacobiansJob
+    {
+        [ReadOnly]
+        public ComponentDataFromEntity<ModifyContactJacobians> modificationData;
+
+        // Don't do anything for triggers
+        public void Execute(ref ModifiableJacobianHeader h, ref ModifiableTriggerJacobian j){ }
+
+        public void Execute(ref ModifiableJacobianHeader jacHeader, ref ModifiableContactJacobian contactJacobian)
+        {
+            Entity entityA = jacHeader.Entities.EntityA;
+            Entity entityB = jacHeader.Entities.EntityB;
+
+            ModifyContactJacobians.ModificationType typeA = ModifyContactJacobians.ModificationType.None;
+            if (modificationData.Exists(entityA))
+            {
+                typeA = modificationData[entityA].type;
+            }
+
+            ModifyContactJacobians.ModificationType typeB = ModifyContactJacobians.ModificationType.None;
+            if (modificationData.Exists(entityB))
+            {
+                typeB = modificationData[entityB].type;
+            }
+
+            {
+                // Check for jacobians we want to ignore:
+                if (typeA == ModifyContactJacobians.ModificationType.DisabledContact || typeB == ModifyContactJacobians.ModificationType.DisabledContact)
+                {
+                    jacHeader.Flags = jacHeader.Flags | JacobianFlags.Disabled;
+                }
+
+                // Check if NoTorque modifier
+                if (typeA == ModifyContactJacobians.ModificationType.NoAngularEffects || typeB == ModifyContactJacobians.ModificationType.NoAngularEffects)
+                {
+                    // Disable all friction angular effects
+                    var friction0 = contactJacobian.Friction0;
+                    friction0.AngularA = 0.0f;
+                    friction0.AngularB = 0.0f;
+                    contactJacobian.Friction0 = friction0;
+
+                    var friction1 = contactJacobian.Friction1;
+                    friction1.AngularA = 0.0f;
+                    friction1.AngularB = 0.0f;
+                    contactJacobian.Friction1 = friction1;
+
+                    var angularFriction = contactJacobian.AngularFriction;
+                    angularFriction.AngularA = 0.0f;
+                    angularFriction.AngularB = 0.0f;
+                    contactJacobian.AngularFriction = angularFriction;
+                }
+
+                // Check if SurfaceVelocity present
+                if (jacHeader.HasSurfaceVelocity &&
+                    (typeA == ModifyContactJacobians.ModificationType.SurfaceVelocity || typeB == ModifyContactJacobians.ModificationType.SurfaceVelocity))
+                {
+                    // Since surface normal can change, make sure angular velocity is always relative to it, not independent
+                    float3 angVel = contactJacobian.Normal * (new float3(0.0f, 1.0f, 0.0f));
+                    float3 linVel = float3.zero;
+
+                    Math.CalculatePerpendicularNormalized(contactJacobian.Normal, out float3 dir0, out float3 dir1);
+                    float linVel0 = math.dot(linVel, dir0);
+                    float linVel1 = math.dot(linVel, dir1);
+
+                    float angVelProj = math.dot(angVel, contactJacobian.Normal);
+
+                    jacHeader.SurfaceVelocity = new SurfaceVelocity { ExtraFrictionDv = new float3(linVel0, linVel1, angVelProj) };
+                }
+
+                // Check if MaxImpulse present
+                if (jacHeader.HasMaxImpulse &&
+                    (typeA == ModifyContactJacobians.ModificationType.ClippedImpulse || typeB == ModifyContactJacobians.ModificationType.ClippedImpulse))
+                {
+                    // Max impulse in Ns (Newton-second)
+                    jacHeader.MaxImpulse = 20.0f;
+                }
+
+                // Check if MassFactors present
+                if (jacHeader.HasMassFactors &&
+                    (typeA == ModifyContactJacobians.ModificationType.InfiniteInertia || typeB == ModifyContactJacobians.ModificationType.InfiniteInertia))
+                {
+                    // Give both bodies infinite inertia
+                    jacHeader.MassFactors = new MassFactors
+                    {
+                        InvInertiaAndMassFactorA = new float4(0.0f, 0.0f, 0.0f, 1.0f),
+                        InvInertiaAndMassFactorB = new float4(0.0f, 0.0f, 0.0f, 1.0f)
+                    };
+                }
+            }
+
+            // Angular jacobian modifications
+            for (int i = 0; i < contactJacobian.NumContacts; i++)
+            {
+                ContactJacAngAndVelToReachCp jacobianAngular = jacHeader.GetAngularJacobian(i);
+
+                // Check if NoTorque modifier
+                if (typeA == ModifyContactJacobians.ModificationType.NoAngularEffects || typeB == ModifyContactJacobians.ModificationType.NoAngularEffects)
+                {
+                    // Disable all angular effects
+                    jacobianAngular.Jac.AngularA = 0.0f;
+                    jacobianAngular.Jac.AngularB = 0.0f;
+                }
+
+                // Check if SoftContact modifier
+                if (typeA == ModifyContactJacobians.ModificationType.SoftContact || typeB == ModifyContactJacobians.ModificationType.SoftContact)
+                {
+                    jacobianAngular.Jac.EffectiveMass *= 0.1f;
+                    if (jacobianAngular.VelToReachCp > 0.0f)
+                    {
+                        jacobianAngular.VelToReachCp *= 0.5f;
+                    }
+                }
+
+                jacHeader.SetAngularJacobian(i, jacobianAngular);
+            }
+        }
+    }
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if(m_ContactModifierGroup.CalculateLength() == 0)
-        {
-            return inputDeps;
-        }
-
         if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics)
         {
             return inputDeps;
         }
 
-        SimulationCallbacks.Callback preparationCallback = (ref ISimulation simulation, JobHandle inDeps) =>
+        SimulationCallbacks.Callback preparationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
         {
-            inDeps.Complete();  // shouldn't be needed (jobify the below)
-
-            SimulationData.Contacts.Iterator iterator = simulation.Contacts.GetIterator();
-            while (iterator.HasItemsLeft())
+            return new SetContactFlagsJob
             {
-                ContactHeader manifold = iterator.GetNextContactHeader();
-
-                // JacobianModifierFlags format for this example
-                // UserData 0 - soft contact
-                // UserData 1 - surface velocity
-                // UserData 2 - infinite inertia
-                // UserData 3 - no torque
-                // UserData 4 - clip impulse
-                // UserData 5 - disabled contact
-
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 0)) ||
-                    0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 0)))
-                {
-                    manifold.JacobianFlags |= JacobianFlags.UserFlag0; // Soft Contact
-                }
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 1)) ||
-                    0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 1)))
-                {
-                    manifold.JacobianFlags |= JacobianFlags.EnableSurfaceVelocity;
-                }
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 2)) ||
-                    0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 2)))
-                {
-                    manifold.JacobianFlags |= JacobianFlags.EnableMassFactors;
-                }
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 3)) ||
-                    0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 3)))
-                {
-                    manifold.JacobianFlags |= JacobianFlags.UserFlag1; // No Torque
-                }
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 4)) ||
-                    0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 4)))
-                {
-                    manifold.JacobianFlags |= JacobianFlags.EnableMaxImpulse; // No Torque
-                }
-                if (0 != (manifold.BodyCustomDatas.CustomDataA & (byte)(1 << 5)) ||
-                    0 != (manifold.BodyCustomDatas.CustomDataB & (byte)(1 << 5)))
-                {
-                    manifold.JacobianFlags |= JacobianFlags.Disabled;
-                }
-
-                iterator.UpdatePreviousContactHeader(manifold);
-
-                // Just read contacts
-                for (int i = 0; i < manifold.NumContacts; i++)
-                {
-                    iterator.GetNextContact();
-                }
-            }
-
-            return inDeps;
+                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
+            }.Schedule(simulation, ref world, inDeps);
         };
 
-        SimulationCallbacks.Callback jacobianModificationCallback = (ref ISimulation simulation, JobHandle inDeps) =>
+        SimulationCallbacks.Callback jacobianModificationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
         {
-            inDeps.Complete();  // shouldn't be needed (jobify the below)
-
-            JacobianIterator iterator = simulation.Jacobians.Iterator;
-            while (iterator.HasJacobiansLeft())
+            return new ModifyJacobiansJob
             {
-                // JacobianModifierFlags format for this example
-                // UserFlag0 - soft contact
-                // UserFlag1 - no torque
-
-                // Jacobian header
-                ref JacobianHeader jacHeader = ref iterator.ReadJacobianHeader();
-
-                // Triggers can only be disabled, other modifiers have no effect
-                if (jacHeader.Type == JacobianType.Contact)
-                {
-                    // Contact jacobian modification
-                    ref ContactJacobian contactJacobian = ref jacHeader.AccessBaseJacobian<ContactJacobian>();
-                    {
-                        // Check if NoTorque modifier
-                        if ((jacHeader.Flags & JacobianFlags.UserFlag1) != 0)
-                        {
-                            // Disable all friction angular effects
-                            contactJacobian.Friction0.AngularA = 0.0f;
-                            contactJacobian.Friction1.AngularA = 0.0f;
-                            contactJacobian.AngularFriction.AngularA = 0.0f;
-                            contactJacobian.Friction0.AngularB = 0.0f;
-                            contactJacobian.Friction1.AngularB = 0.0f;
-                            contactJacobian.AngularFriction.AngularB = 0.0f;
-                        }
-
-                        // Check if SurfaceVelocity present
-                        if (jacHeader.HasSurfaceVelocity)
-                        {
-                            // Since surface normal can change, make sure angular velocity is always relative to it, not independent
-                            float3 angVel = contactJacobian.BaseJacobian.Normal * (new float3(0.0f, 1.0f, 0.0f));
-                            float3 linVel = float3.zero;
-
-                            Math.CalculatePerpendicularNormalized(contactJacobian.BaseJacobian.Normal, out float3 dir0, out float3 dir1);
-                            float linVel0 = math.dot(linVel, dir0);
-                            float linVel1 = math.dot(linVel, dir1);
-
-                            float angVelProj = math.dot(angVel, contactJacobian.BaseJacobian.Normal);
-
-                            jacHeader.SurfaceVelocity = new SurfaceVelocity { ExtraFrictionDv = new float3(linVel0, linVel1, angVelProj) };
-                        }
-
-                        // Check if MaxImpulse present
-                        if (jacHeader.HasMaxImpulse)
-                        {
-                            // Max impulse in Ns (Newton-second)
-                            jacHeader.MaxImpulse = 20.0f;
-                        }
-
-                        // Check if MassFactors present
-                        if (jacHeader.HasMassFactors)
-                        {
-                            // Give both bodies infinite inertia
-                            jacHeader.MassFactors = new MassFactors
-                            {
-                                InvInertiaAndMassFactorA = new float4(0.0f, 0.0f, 0.0f, 1.0f),
-                                InvInertiaAndMassFactorB = new float4(0.0f, 0.0f, 0.0f, 1.0f)
-                            };
-                        }
-                    }
-
-                    // Angular jacobian modifications
-                    for (int i = 0; i < contactJacobian.BaseJacobian.NumContacts; i++)
-                    {
-                        ref ContactJacAngAndVelToReachCp jacobianAngular = ref jacHeader.AccessAngularJacobian(i);
-
-                        // Check if NoTorque modifier
-                        if ((jacHeader.Flags & JacobianFlags.UserFlag1) != 0)
-                        {
-                            // Disable all angular effects
-                            jacobianAngular.Jac.AngularA = 0.0f;
-                            jacobianAngular.Jac.AngularB = 0.0f;
-                        }
-
-                        // Check if SoftContact modifier
-                        if ((jacHeader.Flags & JacobianFlags.UserFlag0) != 0)
-                        {
-                            jacobianAngular.Jac.EffectiveMass *= 0.1f;
-                            if (jacobianAngular.VelToReachCp > 0.0f)
-                            {
-                                jacobianAngular.VelToReachCp *= 0.5f;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return inDeps;
+                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
+            }.Schedule(simulation, ref world, inDeps);
         };
 
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, preparationCallback);
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, jacobianModificationCallback);
+        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, preparationCallback, inputDeps);
+        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, jacobianModificationCallback, inputDeps);
 
         return inputDeps;
     }
+
 }

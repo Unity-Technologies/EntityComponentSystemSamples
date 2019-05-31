@@ -58,7 +58,7 @@ public class ProjectIntoFutureEveryFrame : MonoBehaviour
                 rotation.Value = body.WorldFromBody.rot;
                 em.SetComponentData(ghost, rotation);
 
-                var scale = new NonUniformScale() { Value = 0.5f };
+                var scale = new NonUniformScale() { Value = 0.05f };
                 if (em.HasComponent<NonUniformScale>(ghost))
                 {
                     scale.Value *= em.GetComponentData<NonUniformScale>(ghost).Value;
@@ -114,9 +114,3 @@ public class ProjectIntoFutureEveryFrame : MonoBehaviour
         simulation.Dispose();
     }
 }
-
-//[UpdateAfter(typeof(Physics.Systems.UpdatePhysicsWorld)), UpdateBefore(typeof(Physics.Systems.PhysicsEndSystem))]
-//public class ProjectIntoFutureSystem: ComponentSystem
-//{
-
-//}

@@ -8,7 +8,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using Ray = Unity.Physics.Ray;
 using RaycastHit = Unity.Physics.RaycastHit;
 using Unity.Burst;
 using Unity.Jobs;
@@ -141,14 +140,14 @@ namespace Demos
 
                     float3 rayStart = weGO.transform.parent.position;
                     float3 rayEnd = (-ceUp * (mechanics.suspensionLength + mechanics.wheelBase)) + rayStart;
-                    float3 rayDir = rayEnd - rayStart;
 
                     if (mechanics.drawDebugInformation)
-                        Debug.DrawRay(rayStart, rayDir);
+                        Debug.DrawRay(rayStart, rayEnd - rayStart);
 
                     rayInputs[i] = new RaycastInput
                     {
-                        Ray = new Ray { Origin = rayStart, Direction = rayDir },
+                        Start = rayStart,
+                        End = rayEnd,
                         Filter = filter
                     };
                 }
@@ -161,8 +160,7 @@ namespace Demos
                     rayVelocities[i] = float3.zero;
                     if( rayResult.RigidBodyIndex != -1 )
                     {
-                        Ray ray = rayInputs[i].Ray;
-                        float3 wheelPos = math.lerp(ray.Origin, (ray.Origin + ray.Direction), rayResult.Fraction);
+                        float3 wheelPos = rayResult.Position;
                         wheelPos -= (cePosition - ceCenterOfMass);
 
                         float3 velocityAtWheel = world.GetLinearVelocity(ceIdx, wheelPos);

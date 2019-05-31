@@ -16,7 +16,8 @@ namespace Unity.Physics.Authoring
         {
             if (AutoSetConnected)
             {
-                PositionLocal = math.transform(math.inverse(worldFromA), math.transform(worldFromB, PositionInConnectedEntity));
+                RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
+                PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
             }
 
             CreateJointEntity(JointData.CreateBallAndSocket(PositionLocal, PositionInConnectedEntity), entityManager);

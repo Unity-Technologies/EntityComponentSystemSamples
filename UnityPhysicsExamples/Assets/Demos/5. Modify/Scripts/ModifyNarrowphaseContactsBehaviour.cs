@@ -69,39 +69,15 @@ public class ModifyNarrowphaseContactsSystem : JobComponentSystem
         var surfaceNormal = modifiers[0].surfaceNormal;
         var surfaceRBIdx = m_BuildPhysicsWorld.PhysicsWorld.GetRigidBodyIndex(modifiers[0].surfaceEntity);
 
-        SimulationCallbacks.Callback callback = (ref ISimulation simulation, JobHandle inDeps) =>
+        SimulationCallbacks.Callback callback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
         {
             inDeps.Complete();  // TODO: shouldn't be needed (jobify the below)
 
-            SimulationData.Contacts.Iterator iterator = simulation.Contacts.GetIterator();
-            while (iterator.HasItemsLeft())
+            return new ModifyNormalsJob
             {
-                ContactHeader manifold = iterator.GetNextContactHeader();
-                bool bUpdateNormal = (manifold.BodyPair.BodyAIndex == surfaceRBIdx) || (manifold.BodyPair.BodyBIndex == surfaceRBIdx);
-
-                float distanceScale = 1;
-                if (bUpdateNormal)
-                {
-                    var newNormal = surfaceNormal;
-                    distanceScale = math.dot(newNormal, manifold.Normal);
-
-                    //<todo.eoin.hpi Feels pretty weird.
-                    //<todo.eoin.hp Need to make this work if user has read a contact
-                    iterator.SetManifoldNormal(newNormal);
-                }
-                for (int i = 0; i < manifold.NumContacts; i++)
-                {
-                    ContactPoint cp = iterator.GetNextContact();
-
-                    if (bUpdateNormal)
-                    {
-                        cp.Distance *= distanceScale;
-                        iterator.UpdatePreviousContact(cp);
-                    }
-                }
-            }
-
-            return inDeps;
+                m_SurfaceRBIdx = surfaceRBIdx,
+                m_SurfaceNormal = surfaceNormal
+            }.Schedule(simulation, ref world, inDeps);
         };
 
         modifiers.Dispose();
@@ -109,5 +85,30 @@ public class ModifyNarrowphaseContactsSystem : JobComponentSystem
         m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, callback);
 
         return inputDeps;
+    }
+
+    struct ModifyNormalsJob : IContactsJob
+    {
+        public int m_SurfaceRBIdx;
+        public float3 m_SurfaceNormal;
+        float distanceScale;
+
+        public void Execute(ref ModifiableContactHeader contactHeader, ref ModifiableContactPoint contactPoint)
+        {
+            bool bUpdateNormal = (contactHeader.BodyIndexPair.BodyAIndex == m_SurfaceRBIdx) || (contactHeader.BodyIndexPair.BodyBIndex == m_SurfaceRBIdx);
+
+            if (bUpdateNormal && contactPoint.Index == 0)
+            {
+                var newNormal = m_SurfaceNormal;
+                distanceScale = math.dot(newNormal, contactHeader.Normal);
+
+                contactHeader.Normal = newNormal;
+            }
+
+            if (bUpdateNormal)
+            {
+                contactPoint.Distance *= distanceScale;
+            }
+        }
     }
 }

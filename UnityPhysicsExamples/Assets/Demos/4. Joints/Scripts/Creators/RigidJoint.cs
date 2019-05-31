@@ -18,9 +18,9 @@ namespace Unity.Physics.Authoring
         {
             if (AutoSetConnected)
             {
-                RigidTransform aFromB = math.mul(math.inverse(worldFromA), worldFromB);
-                PositionLocal = math.transform(aFromB, PositionInConnectedEntity);
-                OrientationLocal = math.mul(aFromB.rot, OrientationInConnectedEntity);
+                RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
+                PositionLocal = math.transform(bFromA, PositionInConnectedEntity);
+                OrientationLocal = math.mul(bFromA.rot, OrientationInConnectedEntity);
             }
             else
             {

@@ -45,8 +45,8 @@ public class BasePhysicsDemo : MonoBehaviour
         {
             SimulationType = StepType,
             Gravity = gravity,
-            SolverIterationCount = 4,
-            ThreadCountHint = 4
+            SolverIterationCount = PhysicsStep.Default.SolverIterationCount,
+            ThreadCountHint = PhysicsStep.Default.ThreadCountHint
         });
         // Add options for visually debugging physics information
         entityManager.SetComponentData(stepper, new Unity.Physics.Authoring.PhysicsDebugDisplayData { });
@@ -66,7 +66,7 @@ public class BasePhysicsDemo : MonoBehaviour
     // Object creation
     //
 
-    private unsafe Entity CreateBody(float3 position, quaternion orientation, BlobAssetReference<Collider> collider,
+    private Entity CreateBody(float3 position, quaternion orientation, BlobAssetReference<Collider> collider,
         float3 linearVelocity, float3 angularVelocity, float mass, bool isDynamic)
     {
         EntityManager entityManager = EntityManager;
@@ -76,9 +76,13 @@ public class BasePhysicsDemo : MonoBehaviour
         entityManager.AddComponentData(entity, new LocalToWorld { });
         entityManager.AddComponentData(entity, new Translation { Value = position });
         entityManager.AddComponentData(entity, new Rotation { Value = orientation });
-        entityManager.AddComponentData(entity, new PhysicsCollider { Value = collider });
 
-        List<Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.DisplayResult> meshes = Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.BuildDebugDisplayMesh((Collider*)collider.GetUnsafePtr());
+        var colliderComponent = new PhysicsCollider { Value = collider };
+        entityManager.AddComponentData(entity, colliderComponent);
+
+        Mesh mesh = new Mesh();
+        List<Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.DisplayResult> meshes;
+        unsafe { meshes = Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.BuildDebugDisplayMesh(colliderComponent.ColliderPtr); }
         CombineInstance[] instances = new CombineInstance[meshes.Count];
         for (int i = 0; i < meshes.Count; i++)
         {
@@ -88,7 +92,6 @@ public class BasePhysicsDemo : MonoBehaviour
                 transform = Matrix4x4.TRS(meshes[i].Position, meshes[i].Orientation, meshes[i].Scale)
             };
         }
-        Mesh mesh = new Mesh();
         mesh.CombineMeshes(instances);
 
         entityManager.AddSharedComponentData(entity, new RenderMesh
@@ -99,10 +102,9 @@ public class BasePhysicsDemo : MonoBehaviour
 
         if (isDynamic)
         {
-            Collider* colliderPtr = (Collider*)collider.GetUnsafePtr();
-            entityManager.AddComponentData(entity, PhysicsMass.CreateDynamic(colliderPtr->MassProperties, mass));
+            entityManager.AddComponentData(entity, PhysicsMass.CreateDynamic(colliderComponent.MassProperties, mass));
 
-            float3 angularVelocityLocal = math.mul(math.inverse(colliderPtr->MassProperties.MassDistribution.Transform.rot), angularVelocity);
+            float3 angularVelocityLocal = math.mul(math.inverse(colliderComponent.MassProperties.MassDistribution.Transform.rot), angularVelocity);
             entityManager.AddComponentData(entity, new PhysicsVelocity()
             {
                 Linear = linearVelocity,

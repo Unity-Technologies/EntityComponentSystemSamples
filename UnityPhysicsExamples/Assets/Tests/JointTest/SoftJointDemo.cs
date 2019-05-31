@@ -94,10 +94,13 @@ public class SoftJointDemo : BasePhysicsDemo
             // Create the prismatic joint
             float3 pivotLocal = float3.zero;
             float3 pivotInWorld = math.transform(GetBodyTransform(body), pivotLocal);
-            float3 axisInWorld = new float3(1, 0, 0);
+            float3 axisLocal = new float3(1, 0, 0);
+            float3 axisInWorld = axisLocal;
+            float3 perpendicularLocal = new float3(0, 1, 0);
+            float3 perpendicularInWorld = perpendicularLocal;
 
             BlobAssetReference<JointData> jointData;
-            jointData = JointData.CreatePrismatic(pivotLocal, pivotInWorld, axisInWorld, -2.0f, 2.0f, 0.0f, 0.0f);
+            jointData = JointData.CreatePrismatic(pivotLocal, pivotInWorld, axisLocal, axisInWorld, perpendicularLocal, perpendicularInWorld, - 2.0f, 2.0f, 0.0f, 0.0f);
             jointData.Value.Constraints[0].SpringDamping = 0.0f;
             jointData.Value.Constraints[0].SpringFrequency = 5.0f;
             CreateJoint(jointData, body, Entity.Null);

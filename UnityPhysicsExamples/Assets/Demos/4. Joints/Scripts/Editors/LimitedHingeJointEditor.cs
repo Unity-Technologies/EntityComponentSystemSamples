@@ -54,8 +54,8 @@ namespace Unity.Physics.Editor
             if (limitedHinge.EditLimits)
             {
                 EditorUtilities.EditLimits(limitedHinge.worldFromA, limitedHinge.worldFromB, 
-                    limitedHinge.PositionLocal, limitedHinge.HingeAxisLocal, 
-                    limitedHinge.HingeAxisInConnectedEntity,
+                    limitedHinge.PositionLocal, 
+                    limitedHinge.HingeAxisLocal, limitedHinge.HingeAxisInConnectedEntity,
                     limitedHinge.PerpendicularAxisLocal, limitedHinge.PerpendicularAxisInConnectedEntity, 
                     ref limitedHinge.MinAngle, ref limitedHinge.MaxAngle, m_LimitHandle, limitedHinge);
             }

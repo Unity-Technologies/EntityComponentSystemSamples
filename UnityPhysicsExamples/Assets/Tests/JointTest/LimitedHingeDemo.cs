@@ -25,8 +25,8 @@ public class LimitedHingeDemo : BasePhysicsDemo
         {
             CollisionFilter filter = new CollisionFilter
             {
-                MaskBits = (uint)(1 << i),
-                CategoryBits = (uint)~(1 << (1 - i))
+                CollidesWith = (uint)(1 << i),
+                BelongsTo = (uint)~(1 << (1 - i))
             };
             BlobAssetReference<Collider> collider = BoxCollider.Create(
                 float3.zero, Quaternion.identity, new float3(1.0f, 0.2f, 0.2f), 0.0f, filter);

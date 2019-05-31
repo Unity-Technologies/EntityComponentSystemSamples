@@ -14,8 +14,8 @@ public class BoxCapsuleDemo : BasePhysicsDemo
     {
         return new CollisionFilter
         {
-            MaskBits = layer,
-            CategoryBits = ~disabled,
+            CollidesWith = layer,
+            BelongsTo = ~disabled,
             GroupIndex = 0
         };
     }

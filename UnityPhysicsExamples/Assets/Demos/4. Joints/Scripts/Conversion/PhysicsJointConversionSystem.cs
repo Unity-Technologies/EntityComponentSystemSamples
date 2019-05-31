@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Unity.Physics.Authoring
 {
-    [UpdateAfter(typeof(PhysicsShapeConversionSystem))]
+    [UpdateAfter(typeof(PhysicsBodyConversionSystem))]
+    [UpdateAfter(typeof(LegacyRigidbodyConversionSystem))]
     public class PhysicsJointConversionSystem : GameObjectConversionSystem
     {
         private void CreateJoint( BaseJoint joint )
@@ -27,6 +28,7 @@ namespace Unity.Physics.Authoring
             Entities.ForEach((PrismaticJoint joint) => { CreateJoint(joint); });
             Entities.ForEach((RagdollJoint joint) => { CreateJoint(joint); }); // Note: RagdollJoint.Create add 2 entities
             Entities.ForEach((RigidJoint joint) => { CreateJoint(joint); });
+            Entities.ForEach((LimitDOFJoint joint) => { CreateJoint(joint); });
         }
     }
 }

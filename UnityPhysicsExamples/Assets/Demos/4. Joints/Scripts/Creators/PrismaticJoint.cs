@@ -11,7 +11,10 @@ namespace Unity.Physics.Authoring
 
         public float3 PositionLocal;
         public float3 PositionInConnectedEntity;
+        public float3 AxisLocal;
         public float3 AxisInConnectedEntity;
+        public float3 PerpendicularAxisLocal;
+        public float3 PerpendicularAxisInConnectedEntity;
         public float MinDistanceOnAxis;
         public float MaxDistanceOnAxis;
         public float MinDistanceFromAxis;
@@ -21,11 +24,14 @@ namespace Unity.Physics.Authoring
         {
             if (AutoSetConnected)
             {
-                PositionLocal = math.transform(math.inverse(worldFromA), math.transform(worldFromB, PositionInConnectedEntity));
+                RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
+                PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
+                AxisInConnectedEntity = math.mul(bFromA.rot, AxisLocal);
+                PerpendicularAxisInConnectedEntity = math.mul(bFromA.rot, PerpendicularAxisLocal);
             }
 
-            CreateJointEntity(JointData.CreatePrismatic(PositionLocal, PositionInConnectedEntity, AxisInConnectedEntity,
-                    MinDistanceOnAxis, MaxDistanceOnAxis, MinDistanceFromAxis, MaxDistanceFromAxis), entityManager);
+            CreateJointEntity(JointData.CreatePrismatic(PositionLocal, PositionInConnectedEntity, AxisLocal, AxisInConnectedEntity,
+                    PerpendicularAxisLocal, PerpendicularAxisInConnectedEntity, MinDistanceOnAxis, MaxDistanceOnAxis, MinDistanceFromAxis, MaxDistanceFromAxis), entityManager);
         }
     }
 }

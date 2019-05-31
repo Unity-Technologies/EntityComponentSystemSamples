@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 273677838}
   - component: {fileID: 273677837}
   - component: {fileID: 273677836}
+  - component: {fileID: 273677842}
   m_Layer: 0
   m_Name: Kinematic Monkey
   m_TagString: Untagged
@@ -175,7 +176,7 @@ MonoBehaviour:
     y: 0
     z: 0
   m_InitialAngularVelocity:
-    x: -0.1
+    x: 0
     y: 0
     z: 0
   m_GravityFactor: 1
@@ -185,11 +186,11 @@ MonoBehaviour:
     y: 0
     z: 0
   m_Orientation:
-    value:
+    Value:
       x: 0
       y: 0
       z: 0
-      w: 1
+    RotationOrder: 4
   m_InertiaTensor:
     x: 0
     y: 0
@@ -313,12 +314,28 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 273677835}
   m_LocalRotation: {x: 0, y: 0.9961947, z: 0.08715578, w: 0}
-  m_LocalPosition: {x: -2, y: 1, z: 0}
+  m_LocalPosition: {x: -2, y: -0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: -10, y: 180, z: 0}
+--- !u!114 &273677842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 273677835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 655e2484af6aa7c40a2686d702bb733d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Range:
+    x: 2
+    y: 0
+    z: 2
 --- !u!1 &443357469
 GameObject:
   m_ObjectHideFlags: 0
@@ -384,11 +401,11 @@ MonoBehaviour:
     y: 0
     z: 0
   m_Orientation:
-    value:
+    Value:
       x: 0
       y: 0
       z: 0
-      w: 1
+    RotationOrder: 4
   m_InertiaTensor:
     x: 0
     y: 0
@@ -512,7 +529,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 443357469}
   m_LocalRotation: {x: 0, y: 0.9961947, z: 0.08715578, w: 0}
-  m_LocalPosition: {x: 2, y: 1, z: 0}
+  m_LocalPosition: {x: 2, y: -0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -582,11 +599,11 @@ MonoBehaviour:
     y: 0
     z: 0
   m_Orientation:
-    value:
+    Value:
       x: 0
       y: 0
       z: 0
-      w: 1
+    RotationOrder: 4
   m_InertiaTensor:
     x: 0
     y: 0
@@ -653,6 +670,55 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!1 &1039134249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1039134251}
+  - component: {fileID: 1039134250}
+  m_Layer: 0
+  m_Name: Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1039134250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039134249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c503de21125bd8c41bcb1e59f207ef2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 1191054677816456, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
+  range:
+    x: 2
+    y: 0
+    z: 2
+  count: 5
+--- !u!4 &1039134251
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039134249}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.04, y: 0.48, z: -0.74752426}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1342932421
 GameObject:
   m_ObjectHideFlags: 0
@@ -899,11 +965,11 @@ MonoBehaviour:
     y: 0
     z: 0
   m_Orientation:
-    value:
+    Value:
       x: 0
       y: 0
       z: 0
-      w: 1
+    RotationOrder: 4
   m_InertiaTensor:
     x: 0
     y: 0
@@ -931,7 +997,7 @@ MonoBehaviour:
     z: 1.703125
   m_PrimitiveOrientation:
     Value:
-      x: 0
+      x: -0
       y: 0
       z: 0
     RotationOrder: 4
@@ -1100,7 +1166,7 @@ MonoBehaviour:
     z: 0.45
   m_PrimitiveOrientation:
     Value:
-      x: 0
+      x: -0
       y: 0
       z: 0
     RotationOrder: 4
@@ -1209,6 +1275,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: DrawColliderEdges
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c0ce7b3c74021e840a5995cf136ee0fe, type: 3}

@@ -38,7 +38,7 @@ public static class CharacterControllerUtilities
             m_NumHits = 0;
         }
 
-        #region
+        #region IQueryResult implementation
 
         public bool AddHit(T hit)
         {
@@ -195,14 +195,13 @@ public static class CharacterControllerUtilities
             // Then do a collider cast
             {
                 float3 displacement = lastDisplacement + gravityMovement;
-                float3 endPosition = newPosition + displacement;
                 MaxHitsCollector<ColliderCastHit> collector = new MaxHitsCollector<ColliderCastHit>(1.0f, ref castHits);
                 ColliderCastInput input = new ColliderCastInput()
                 {
                     Collider = collider,
                     Orientation = orientation,
-                    Position = newPosition,
-                    Direction = displacement
+                    Start = newPosition,
+                    End = newPosition + displacement,
                 };
                 world.CastCollider(input, ref collector);
 
@@ -259,13 +258,12 @@ public static class CharacterControllerUtilities
             if (math.lengthsq(newDisplacement) > SimplexSolver.c_SimplexSolverEpsilon)
             {
                 float3 displacement = newDisplacement + gravityMovement;
-                float3 endPosition = prevPosition + displacement;
                 ColliderCastInput input = new ColliderCastInput()
                 {
                     Collider = collider,
                     Orientation = orientation,
-                    Position = prevPosition,
-                    Direction = displacement
+                    Start = prevPosition,
+                    End = prevPosition + displacement
                 };
 
                 world.CastCollider(input, ref newCollector);

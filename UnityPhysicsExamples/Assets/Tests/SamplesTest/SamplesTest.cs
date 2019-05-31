@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 namespace Unity.Physics.Samples.Test
 {
     [TestFixture]
-    public class SamplesTest
+    public class UnityPhysicsSamplesTest
     {
         protected static IEnumerable GetScenes()
         {
@@ -29,7 +29,7 @@ namespace Unity.Physics.Samples.Test
 
         [UnityTest]
         [Timeout(60000)]
-        public virtual IEnumerator LoadScenes_NoScenesShouldLog([ValueSource(nameof(GetScenes))] string scenePath)
+        public virtual IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
         {
             // Log scene name in case Unity crashes and test results aren't written out.
             Debug.Log("Loading " + scenePath);

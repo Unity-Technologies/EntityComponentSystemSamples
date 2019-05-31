@@ -84,7 +84,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
                 rotation.Value = body.WorldFromBody.rot;
                 em.SetComponentData(ghost, rotation);
 
-                var scale = new NonUniformScale() { Value = 0.5f };
+                var scale = new NonUniformScale() { Value = 0.05f };
                 if (em.HasComponent<NonUniformScale>(ghost))
                 {
                     scale.Value *= em.GetComponentData<NonUniformScale>(ghost).Value;
@@ -154,7 +154,6 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
             localWorld.Dispose();
             simulation.Dispose();
         }
-
     }
 
     // Update is called once per frame
@@ -165,6 +164,8 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
             clearTrails();
 
             UpdateTrails();
+
+            NeedUpdate = false;
         }
     }
 

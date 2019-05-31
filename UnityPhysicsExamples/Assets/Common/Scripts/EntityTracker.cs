@@ -26,7 +26,7 @@ public class EntityTracker : MonoBehaviour, IRecieveEntity
             }
             catch
             {
-                // Dirty why to check for an Entity that no longer exists.
+                // Dirty way to check for an Entity that no longer exists.
                 EntityToTrack = Entity.Null;
             }
         }

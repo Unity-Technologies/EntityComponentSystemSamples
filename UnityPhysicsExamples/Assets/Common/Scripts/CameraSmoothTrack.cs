@@ -53,7 +53,8 @@ public class CameraSmoothTrack : MonoBehaviour
         {
             var rayInput = new RaycastInput
             {
-                Ray = {Origin = newPositionFrom, Direction = newPositionTo - newPositionFrom},
+                Start = newPositionFrom,
+                End = newPositionTo,
                 Filter = CollisionFilter.Default
             };
 

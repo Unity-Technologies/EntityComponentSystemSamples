@@ -50,40 +50,35 @@ public class ModifyBroadphasePairsSystem : JobComponentSystem
         }
 
         // Add a custom callback to the simulation, which will inject our custom job after the body pairs have been created
-        SimulationCallbacks.Callback callback = (ref ISimulation simulation, JobHandle inDeps) =>
+        SimulationCallbacks.Callback callback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
         {
             inDeps.Complete(); //<todo Needed to initialize our modifier
 
             return new DisablePairsJob
             {
                 Bodies = m_PhysicsWorld.PhysicsWorld.Bodies,
-                Motions = m_PhysicsWorld.PhysicsWorld.MotionVelocities,
-                Iterator = simulation.BodyPairs.GetIterator()
-            }.Schedule(inDeps);
+                Motions = m_PhysicsWorld.PhysicsWorld.MotionVelocities
+            }.Schedule(simulation, ref world, inputDeps);
         };
         m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, callback);
 
         return inputDeps;
     }
 
-    struct DisablePairsJob : IJob
+    struct DisablePairsJob : IBodyPairsJob
     {
         public NativeSlice<RigidBody> Bodies;
         [ReadOnly] public NativeSlice<MotionVelocity> Motions;
-        public SimulationData.BodyPairs.Iterator Iterator;
 
-        public unsafe void Execute()
+        public unsafe void Execute(ref ModifiableBodyPair pair)
         {
-            while (Iterator.HasPairsLeft())
+            // Disable the pair if a box collides with a static object
+            int indexA = pair.BodyIndices.BodyAIndex;
+            int indexB = pair.BodyIndices.BodyBIndex;
+            if ((Bodies[indexA].Collider != null && Bodies[indexA].Collider->Type == ColliderType.Box && indexB >= Motions.Length)
+                || (Bodies[indexB].Collider != null && Bodies[indexB].Collider->Type == ColliderType.Box && indexA >= Motions.Length))
             {
-                BodyIndexPair pair = Iterator.NextPair();
-
-                // Disable the pair if a box collides with a static object
-                if ((Bodies[pair.BodyAIndex].Collider != null && Bodies[pair.BodyAIndex].Collider->Type == ColliderType.Box && pair.BodyBIndex >= Motions.Length)
-                    || (Bodies[pair.BodyBIndex].Collider != null && Bodies[pair.BodyBIndex].Collider->Type == ColliderType.Box && pair.BodyAIndex >= Motions.Length))
-                {
-                    Iterator.DisableLastPair();
-                }
+                pair.Disable();
             }
         }
     }

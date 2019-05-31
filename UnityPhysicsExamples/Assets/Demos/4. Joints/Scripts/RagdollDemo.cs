@@ -29,8 +29,8 @@ public class RagdollDemo : BasePhysicsDemo
     {
         return new CollisionFilter
         {
-            CategoryBits = (uint)layer,
-            MaskBits = ~(uint)disabled,
+            BelongsTo = (uint)layer,
+            CollidesWith = ~(uint)disabled,
             GroupIndex = 0
         };
     }
@@ -38,8 +38,8 @@ public class RagdollDemo : BasePhysicsDemo
     {
         return new CollisionFilter
         {
-            CategoryBits = 4294967295,
-            MaskBits = 4294967295,
+            BelongsTo = 4294967295,
+            CollidesWith = 4294967295,
             GroupIndex = groupIndex
         };
     }

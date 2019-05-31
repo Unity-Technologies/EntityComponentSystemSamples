@@ -18,9 +18,9 @@ namespace Unity.Physics.Authoring
         {
             if (AutoSetConnected)
             {
-                var pb = math.transform(worldFromB, PositionInConnectedEntity);
-                PositionLocal = math.transform(math.inverse(worldFromA), pb);
-                HingeAxisLocal = math.rotate(math.inverse(worldFromA), math.rotate(worldFromB, HingeAxisInConnectedEntity));
+                RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
+                PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
+                HingeAxisInConnectedEntity = math.mul(bFromA.rot, HingeAxisLocal);
             }
 
             CreateJointEntity(JointData.CreateHinge(

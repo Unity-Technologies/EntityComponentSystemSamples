@@ -33,10 +33,10 @@ namespace Unity.Physics.Authoring
         {
             if (AutoSetConnected)
             {
-                var pb = math.transform(worldFromB, PositionInConnectedEntity);
-                PositionLocal = math.transform(math.inverse(worldFromA), pb);
-                TwistAxisLocal = math.rotate(math.inverse(worldFromA), math.rotate(worldFromB, TwistAxisInConnectedEntity));
-                PerpendicularAxisLocal = math.rotate(math.inverse(worldFromA), math.rotate(worldFromB, PerpendicularAxisInConnectedEntity));
+                RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
+                PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
+                TwistAxisInConnectedEntity = math.mul(bFromA.rot, TwistAxisLocal);
+                PerpendicularAxisInConnectedEntity = math.mul(bFromA.rot, PerpendicularAxisLocal);
             }
 
             BlobAssetReference<JointData> jointData0, jointData1;

@@ -183,7 +183,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DrawColliders: 0
-  DrawMeshEdges: 0
+  DrawColliderEdges: 0
   DrawColliderAabbs: 0
   DrawBroadphase: 0
   DrawMassProperties: 0
@@ -203,6 +203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140a4ee5d3253224a9e854c61748f606, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IgnoreTriggers: 1
 --- !u!114 &5547838745719349873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,7 +222,7 @@ MonoBehaviour:
     y: -9.81
     z: -0
   SolverIterationCount: 4
-  ThreadCountHint: 4
+  ThreadCountHint: 8
 --- !u!114 &2390444599841514890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -544,11 +545,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1716085102806623427, guid: ebfe93b387bf4a54989a6f911bdc11d1,
-        type: 3}
-      propertyPath: m_Orientation.value.w
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3945518518046659535, guid: ebfe93b387bf4a54989a6f911bdc11d1,
         type: 3}
       propertyPath: m_Capsule.Height
@@ -568,6 +564,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SphereRadius
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1716085102806623427, guid: ebfe93b387bf4a54989a6f911bdc11d1,
+        type: 3}
+      propertyPath: m_Orientation.value.w
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7890845515503907925, guid: ebfe93b387bf4a54989a6f911bdc11d1,
         type: 3}

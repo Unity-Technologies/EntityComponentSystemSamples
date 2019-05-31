@@ -14,23 +14,23 @@ namespace Unity.Physics.Editor
     public class EditorUtilities
     {
         // Editor for a joint pivot or pivot pair
-        public static void EditPivot(RigidTransform worldFromA, RigidTransform worldFromB, bool lockAtoB,
+        public static void EditPivot(RigidTransform worldFromA, RigidTransform worldFromB, bool lockBtoA,
             ref float3 pivotA, ref float3 pivotB, Object target)
         {
             EditorGUI.BeginChangeCheck();
-            float3 pivotBinW = Handles.PositionHandle(math.transform(worldFromB, pivotB), quaternion.identity);
-            float3 pivotAinW;
-
-            if (lockAtoB)
+            float3 pivotAinW = Handles.PositionHandle(math.transform(worldFromA, pivotA), quaternion.identity);
+            float3 pivotBinW;
+            
+            if (lockBtoA)
             {
-                pivotA = math.transform(math.inverse(worldFromA), pivotBinW);
-                pivotAinW = pivotBinW;
+                pivotBinW = pivotAinW;
+                pivotB = math.transform(math.inverse(worldFromB), pivotBinW);
             }
             else
             {
-                pivotAinW = Handles.PositionHandle(math.transform(worldFromA, pivotA), quaternion.identity);
+                pivotBinW = Handles.PositionHandle(math.transform(worldFromB, pivotB), quaternion.identity);
             }
-
+            
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(target, "Edit joint pivot");
@@ -75,7 +75,7 @@ namespace Unity.Physics.Editor
 
             private static bool NormalizePerpendicular(float3 axis, ref float3 perpendicular)
             {
-                // make sure perpendicularB is actually perpendicular to directionB
+                // make sure perpendicular is actually perpendicular to direction
                 float dot = math.dot(axis, perpendicular);
                 float absDot = math.abs(dot);
                 if (absDot > 1.0f - 1e-5f)
@@ -88,7 +88,7 @@ namespace Unity.Physics.Editor
 
                 if (absDot > 1e-5f)
                 {
-                    // reject directionB
+                    // reject direction
                     perpendicular -= dot * axis;
                     NormalizeSafe(ref perpendicular);
                     return true;
@@ -97,7 +97,7 @@ namespace Unity.Physics.Editor
                 return NormalizeSafe(ref perpendicular);
             }
 
-            public void Update(RigidTransform worldFromA, RigidTransform worldFromB, bool lockAtoB, float3 pivotA, float3 pivotB,
+            public void Update(RigidTransform worldFromA, RigidTransform worldFromB, bool lockBtoA, float3 pivotA, float3 pivotB,
                 ref float3 directionA, ref float3 directionB, ref float3 perpendicularA, ref float3 perpendicularB, Object target)
             {
                 // Work in world space
@@ -120,19 +120,19 @@ namespace Unity.Physics.Editor
                     changed |= NormalizePerpendicular(directionAinW, ref perpendicularAinW);
                     changed |= NormalizePerpendicular(directionBinW, ref perpendicularBinW);
 
-                    // Calculate the rotation of the joint in B from direction and perpendicular
-                    float3x3 rotationB = new float3x3(directionBinW, perpendicularBinW, math.cross(directionBinW, perpendicularBinW));
-                    m_RefB = new quaternion(rotationB);
+                    // Calculate the rotation of the joint in A from direction and perpendicular
+                    float3x3 rotationA = new float3x3(directionAinW, perpendicularAinW, math.cross(directionAinW, perpendicularAinW));
+                    m_RefA = new quaternion(rotationA);
 
-                    if (lockAtoB)
+                    if (lockBtoA)
                     {
-                        m_RefA = m_RefB;
+                        m_RefB = m_RefA;
                     }
                     else
                     {
-                        // Calculate the rotation of the joint in A from direction and perpendicular
-                        float3x3 rotationA = new float3x3(directionAinW, perpendicularAinW, math.cross(directionAinW, perpendicularAinW));
-                        m_RefA = new quaternion(rotationA);
+                        // Calculate the rotation of the joint in B from direction and perpendicular
+                        float3x3 rotationB = new float3x3(directionBinW, perpendicularBinW, math.cross(directionBinW, perpendicularBinW));
+                        m_RefB = new quaternion(rotationB);
                     }
                 }
 
@@ -142,21 +142,21 @@ namespace Unity.Physics.Editor
                 quaternion oldRefA = m_RefA;
                 quaternion oldRefB = m_RefB;
 
-                float3 pivotBinW = math.transform(worldFromB, pivotB);
-                m_RefB = Handles.RotationHandle(m_RefB, pivotBinW);
+                float3 pivotAinW = math.transform(worldFromA, pivotA);
+                m_RefA = Handles.RotationHandle(m_RefA, pivotAinW);
 
-                float3 pivotAinW;
-                if (lockAtoB)
+                float3 pivotBinW;
+                if (lockBtoA)
                 {
-                    directionA = math.rotate(math.inverse(worldFromA), directionBinW);
-                    perpendicularA = math.rotate(math.inverse(worldFromA), perpendicularBinW);
-                    pivotAinW = pivotBinW;
-                    m_RefA = m_RefB;
+                    directionB = math.rotate(math.inverse(worldFromB), directionAinW);
+                    perpendicularB = math.rotate(math.inverse(worldFromB), perpendicularAinW);
+                    pivotBinW = pivotAinW;
+                    m_RefB = m_RefA;
                 }
                 else
                 {
-                    pivotAinW = math.transform(worldFromA, pivotA);
-                    m_RefA = Handles.RotationHandle(m_RefA, pivotAinW);
+                    pivotBinW = math.transform(worldFromB, pivotB);
+                    m_RefB = Handles.RotationHandle(m_RefB, pivotBinW);
                 }
 
                 // Apply changes from the rotators
@@ -183,12 +183,12 @@ namespace Unity.Physics.Editor
 
                 // Draw the updated axes
                 float3 z = new float3(0, 0, 1); // ArrowHandleCap() draws an arrow pointing in (0, 0, 1)
-                Handles.ArrowHandleCap(0, pivotBinW, Quaternion.FromToRotation(z, directionBinW), HandleUtility.GetHandleSize(pivotBinW), Event.current.type);
-                Handles.ArrowHandleCap(0, pivotBinW, Quaternion.FromToRotation(z, perpendicularBinW), HandleUtility.GetHandleSize(pivotBinW), Event.current.type);
-                if (!lockAtoB)
+                Handles.ArrowHandleCap(0, pivotAinW, Quaternion.FromToRotation(z, directionAinW), HandleUtility.GetHandleSize(pivotAinW) * 0.75f, Event.current.type);
+                Handles.ArrowHandleCap(0, pivotAinW, Quaternion.FromToRotation(z, perpendicularAinW), HandleUtility.GetHandleSize(pivotAinW) * 0.75f, Event.current.type);
+                if (!lockBtoA)
                 {
-                    Handles.ArrowHandleCap(0, pivotAinW, Quaternion.FromToRotation(z, directionAinW), HandleUtility.GetHandleSize(pivotAinW), Event.current.type);
-                    Handles.ArrowHandleCap(0, pivotAinW, Quaternion.FromToRotation(z, perpendicularAinW), HandleUtility.GetHandleSize(pivotAinW), Event.current.type);
+                    Handles.ArrowHandleCap(0, pivotBinW, Quaternion.FromToRotation(z, directionBinW), HandleUtility.GetHandleSize(pivotBinW) * 0.75f, Event.current.type);
+                    Handles.ArrowHandleCap(0, pivotBinW, Quaternion.FromToRotation(z, perpendicularBinW), HandleUtility.GetHandleSize(pivotBinW) * 0.75f, Event.current.type);
                 }
             }
         }
@@ -214,7 +214,7 @@ namespace Unity.Physics.Editor
             quaternion limitOrientation = math.mul(quaternion.AxisAngle(axisAinW, angle), new quaternion(worldFromJointA));
             Matrix4x4 handleMatrix = Matrix4x4.TRS(pivotAinW, limitOrientation, Vector3.one);
 
-            float size = HandleUtility.GetHandleSize(pivotAinW);
+            float size = HandleUtility.GetHandleSize(pivotAinW) * 0.75f;
 
             limitHandle.xMin = -maxLimit;
             limitHandle.xMax = -minLimit;

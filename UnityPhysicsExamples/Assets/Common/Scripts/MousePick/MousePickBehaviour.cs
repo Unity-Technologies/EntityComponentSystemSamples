@@ -6,17 +6,124 @@ using Unity.Mathematics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Assertions;
 using static Unity.Physics.Math;
 
 namespace Unity.Physics.Extensions
 {
-    public struct MousePick : IComponentData { }
+    public class ColliderUtils
+    {
+        [BurstCompile]
+        public static unsafe bool IsTrigger(Collider* c, ColliderKey key)
+        {
+            bool bIsTrigger = false;
+            {
+                var cc = ((ConvexCollider*)c);
+                if (cc->CollisionType != CollisionType.Convex)
+                {
+                    c->GetLeaf(key, out ChildCollider child);
+                    cc = (ConvexCollider*)child.Collider;
+                    UnityEngine.Assertions.Assert.IsTrue(cc->CollisionType == CollisionType.Convex);
+                }
+                bIsTrigger = cc->Material.IsTrigger;
+            }
+            return bIsTrigger;
+        }
+    }
+
+    // A mouse pick collector which stores every hit. Based off the ClosestHitCollector
+    // Creating an ICollector<RaycastHit> specifically as the base IQueryResult interface doesn't have RigidBodyIndex etc
+    // This is a workaround to filter out static bodies and trigger volumes from the mouse picker.
+    // Currently filtered in the TransformHits function when the Body Index is available.
+    // This interface will be changed in future so that hits can be filtered appropriately during AddHit instead.
+    // With this temporary filtering workaround CastRay will return true even if we filtered hits.
+    // Hence, the MaxFraction is checked instead to see if a true hit was collected.
+    [BurstCompile]
+    public struct MousePickCollector : ICollector<RaycastHit>
+    {
+        public bool IgnoreTriggers;
+        public NativeSlice<RigidBody> Bodies;
+        public int NumDynamicBodies;
+
+        public bool EarlyOutOnFirstHit => false;
+        public float MaxFraction { get; private set; }
+        public int NumHits { get; private set; }
+
+        private RaycastHit m_OldHit;
+        private RaycastHit m_ClosestHit;
+        public RaycastHit Hit => m_ClosestHit;
+
+        public MousePickCollector(float maxFraction, NativeSlice<RigidBody> rigidBodies, int numDynamicBodies)
+        {
+            m_OldHit = default(RaycastHit);
+            m_ClosestHit = default(RaycastHit);
+            MaxFraction = maxFraction;
+            NumHits = 0;
+            IgnoreTriggers = true;
+            Bodies = rigidBodies;
+            NumDynamicBodies = numDynamicBodies;
+        }
+
+        #region ICollector
+
+        public bool AddHit(RaycastHit hit)
+        {
+            Assert.IsTrue(hit.Fraction < MaxFraction);
+            MaxFraction = hit.Fraction;
+            m_OldHit = m_ClosestHit;
+            m_ClosestHit = hit;
+            NumHits = 1;
+            return true;
+        }
+
+        void CheckIsAcceptable(float oldFraction)
+        {
+            var isAcceptable =  (0 <= m_ClosestHit.RigidBodyIndex) && (m_ClosestHit.RigidBodyIndex < NumDynamicBodies);
+            if (isAcceptable)
+            {
+                var body = Bodies[m_ClosestHit.RigidBodyIndex];
+                if (IgnoreTriggers)
+                {
+                    unsafe { isAcceptable = !ColliderUtils.IsTrigger(body.Collider, m_ClosestHit.ColliderKey); }
+                }
+            }
+            if (!isAcceptable)
+            {
+                m_ClosestHit = m_OldHit;
+                NumHits = 0;
+                MaxFraction = oldFraction;
+                m_OldHit = default(RaycastHit);
+            }
+        }
+
+        public void TransformNewHits(int oldNumHits, float oldFraction, MTransform transform, uint numSubKeyBits, uint subKey)
+        {
+            m_ClosestHit.Transform(transform, numSubKeyBits, subKey);
+        }
+
+        public void TransformNewHits(int oldNumHits, float oldFraction, MTransform transform, int rigidBodyIndex)
+        {
+            m_ClosestHit.Transform(transform, rigidBodyIndex);
+            CheckIsAcceptable(oldFraction);
+        }
+        #endregion
+    }
+
+    public struct MousePick : IComponentData
+    {
+        public int IgnoreTriggers;
+    }
 
     public class MousePickBehaviour : MonoBehaviour, IConvertGameObjectToEntity
     {
+        public bool IgnoreTriggers = true;
+
         void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
-            dstManager.AddComponentData(entity, new MousePick());
+            dstManager.AddComponentData(entity, new MousePick()
+            {
+                IgnoreTriggers = IgnoreTriggers ? 1 : 0,
+            });
         }
     }
 
@@ -40,44 +147,38 @@ namespace Unity.Physics.Extensions
             public float MouseDepth;
         }
 
+
         [BurstCompile]
         struct Pick : IJob
         {
             [ReadOnly] public CollisionWorld CollisionWorld;
             [ReadOnly] public int NumDynamicBodies;
             public NativeArray<SpringData> SpringData;
-            public Ray Ray;
+            public RaycastInput RayInput;
             public float Near;
             public float3 Forward;
+            [ReadOnly] public bool IgnoreTriggers;
 
             public void Execute()
             {
-                float fraction = 1.0f;
-                RigidBody? hitBody = null;
+                var mousePickCollector = new MousePickCollector(1.0f, CollisionWorld.Bodies, NumDynamicBodies);
+                mousePickCollector.IgnoreTriggers = IgnoreTriggers;
 
-                var rayCastInput = new RaycastInput { Ray = Ray, Filter = CollisionFilter.Default };
-                if (CollisionWorld.CastRay(rayCastInput, out RaycastHit hit))
+                CollisionWorld.CastRay(RayInput, ref mousePickCollector);
+                if (mousePickCollector.MaxFraction < 1.0f)
                 {
-                    if (hit.RigidBodyIndex < NumDynamicBodies)
-                    {
-                        hitBody = CollisionWorld.Bodies[hit.RigidBodyIndex];
-                        fraction = hit.Fraction;
-                    }
-                }
+                    float fraction = mousePickCollector.Hit.Fraction;
+                    RigidBody hitBody = CollisionWorld.Bodies[mousePickCollector.Hit.RigidBodyIndex];
 
-                // If there was a hit, set up the spring
-                if (hitBody != null)
-                {
-                    float3 pointInWorld = (Ray.Origin + Ray.Direction * fraction);
-                    MTransform bodyFromWorld = Inverse(new MTransform(hitBody.Value.WorldFromBody));
-                    float3 pointOnBody = Mul(bodyFromWorld, pointInWorld);
+                    MTransform bodyFromWorld = Inverse(new MTransform(hitBody.WorldFromBody));
+                    float3 pointOnBody = Mul(bodyFromWorld, mousePickCollector.Hit.Position);
 
                     SpringData[0] = new SpringData
                     {
-                        Entity = hitBody.Value.Entity,
+                        Entity = hitBody.Entity,
                         Dragging = 1,
                         PointOnBody = pointOnBody,
-                        MouseDepth = Near + math.dot(math.normalize(Ray.Direction), Forward) * fraction * k_MaxDistance
+                        MouseDepth = Near + math.dot(math.normalize(RayInput.End - RayInput.Start), Forward) * fraction * k_MaxDistance,
                     };
                 }
                 else
@@ -123,7 +224,10 @@ namespace Unity.Physics.Extensions
             {
                 Vector2 mousePosition = Input.mousePosition;
                 UnityEngine.Ray unityRay = Camera.main.ScreenPointToRay(mousePosition);
-                var ray = new Ray(unityRay.origin, unityRay.direction * k_MaxDistance);
+
+                var mice = m_MouseGroup.ToComponentDataArray<MousePick>(Allocator.TempJob);
+                var IgnoreTriggers = mice[0].IgnoreTriggers != 0;
+                mice.Dispose();
 
                 // Schedule picking job, after the collision world has been built
                 handle = new Pick
@@ -131,9 +235,15 @@ namespace Unity.Physics.Extensions
                     CollisionWorld = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld,
                     NumDynamicBodies = m_BuildPhysicsWorldSystem.PhysicsWorld.NumDynamicBodies,
                     SpringData = SpringDatas,
-                    Ray = ray,
+                    RayInput = new RaycastInput
+                    {
+                        Start = unityRay.origin,
+                        End = unityRay.origin + unityRay.direction * k_MaxDistance,
+                        Filter = CollisionFilter.Default,
+                    },
                     Near = Camera.main.nearClipPlane,
-                    Forward = Camera.main.transform.forward
+                    Forward = Camera.main.transform.forward,
+                    IgnoreTriggers = IgnoreTriggers,
                 }.Schedule(JobHandle.CombineDependencies(handle, m_BuildPhysicsWorldSystem.FinalJobHandle));
 
                 PickJobHandle = handle;

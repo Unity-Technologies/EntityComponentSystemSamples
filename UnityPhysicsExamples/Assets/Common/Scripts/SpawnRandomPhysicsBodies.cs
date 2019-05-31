@@ -17,7 +17,7 @@ public class SpawnRandomPhysicsBodies : MonoBehaviour
 
     void OnEnable()
     {
-        if (this.isActiveAndEnabled)
+        if (this.enabled)
         {
             // Create entity prefab from the game object hierarchy once
             Entity sourceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, World.Active);

@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using System;
 using UnityEngine;
+using Unity.Jobs;
 
 public struct EntityKiller : IComponentData
 {
@@ -19,19 +20,41 @@ public class EntityKillerBehaviour : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
-public class EntityKillerSystem : ComponentSystem
+public class EntityKillerSystem : JobComponentSystem
 {
-    protected override void OnUpdate()
+    EndSimulationEntityCommandBufferSystem m_EntityCommandBufferSystem;
+
+    protected override void OnCreate()
     {
-        Entities.ForEach(
-            (Entity entity, ref EntityKiller killer) =>
+        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+    }
+
+    struct EntityKillerJob : IJobForEachWithEntity<EntityKiller>
+    {
+        public EntityCommandBuffer CommandBuffer;
+
+        public void Execute(Entity entity, int index, ref EntityKiller killer)
+        {
+            if (killer.TimeToDie > 0)
             {
-                killer.TimeToDie--;
-                if(killer.TimeToDie <= 0)
-                {
-                    PostUpdateCommands.DestroyEntity(entity);
-                }
+                CommandBuffer.SetComponent<EntityKiller>(entity, new EntityKiller() { TimeToDie = killer.TimeToDie - 1 });
             }
-        );
+            else
+            {
+                CommandBuffer.DestroyEntity(entity);
+            }
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        var job = new EntityKillerJob
+        {
+            CommandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer()
+        }.ScheduleSingle(this, inputDeps);
+
+        m_EntityCommandBufferSystem.AddJobHandleForProducer(job);
+
+        return job;
     }
 }

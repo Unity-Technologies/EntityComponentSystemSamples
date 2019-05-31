@@ -149,7 +149,8 @@ namespace Unity.Physics.Extensions
                 {
                     RaycastInput = new RaycastInput
                     {
-                        Ray = new Ray { Origin = origin, Direction = direction },
+                        Start = origin,
+                        End = origin + direction,
                         Filter = CollisionFilter.Default
                     };
 
@@ -181,16 +182,16 @@ namespace Unity.Physics.Extensions
                     }
                 }
             }
-            else
+            else //(ColliderMesh)
             {
                 if (math.any(new float3(Direction) != float3.zero))
                 {
                     ColliderCastInput = new ColliderCastInput
                     {
                         Collider = (Collider*)(Collider.GetUnsafePtr()),
-                        Position = origin,
                         Orientation = transform.rotation,
-                        Direction = direction
+                        Start = origin,
+                        End = origin + direction,
                     };
 
                     if (CollectAllHits)
@@ -255,8 +256,8 @@ namespace Unity.Physics.Extensions
                 {
                     if (math.any(new float3(Direction) != float3.zero))
                     {
-                        Gizmos.DrawRay(ColliderCastInput.Position, ColliderCastInput.Direction);
-                        Gizmos.DrawWireMesh(ColliderMesh, ColliderCastInput.Position, ColliderCastInput.Orientation);
+                        Gizmos.DrawRay(ColliderCastInput.Start, ColliderCastInput.End - ColliderCastInput.Start);
+                        Gizmos.DrawWireMesh(ColliderMesh, ColliderCastInput.Start, ColliderCastInput.Orientation);
                     }
                     else
                     {
@@ -267,7 +268,7 @@ namespace Unity.Physics.Extensions
                 {
                     if (math.any(new float3(Direction) != float3.zero))
                     {
-                        Gizmos.DrawRay(RaycastInput.Ray.Origin, RaycastInput.Ray.Direction);
+                        Gizmos.DrawRay(RaycastInput.Start, RaycastInput.End - RaycastInput.Start);
                     }
                     else
                     {
@@ -284,7 +285,7 @@ namespace Unity.Physics.Extensions
                         Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
 
                         Gizmos.color = Color.magenta;
-                        Gizmos.DrawRay(RaycastInput.Ray.Origin, RaycastInput.Ray.Direction * hit.Fraction);
+                        Gizmos.DrawRay(RaycastInput.Start, hit.Position - RaycastInput.Start);
                         Gizmos.DrawSphere(hit.Position, 0.02f);
 
                         if (DrawSurfaceNormal)
@@ -314,12 +315,9 @@ namespace Unity.Physics.Extensions
                         Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
                         Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
 
-                        float3 rayMovement = ColliderCastInput.Direction * hit.Fraction;
-                        float3 endPoint = ColliderCastInput.Position + rayMovement;
-
                         Gizmos.color = Color.magenta;
                         Gizmos.DrawSphere(hit.Position, 0.02f);
-                        Gizmos.DrawWireMesh(ColliderMesh, endPoint, ColliderCastInput.Orientation);
+                        Gizmos.DrawWireMesh(ColliderMesh, math.lerp(ColliderCastInput.Start, ColliderCastInput.End, hit.Fraction), ColliderCastInput.Orientation);
 
                         if (DrawSurfaceNormal)
                         {
