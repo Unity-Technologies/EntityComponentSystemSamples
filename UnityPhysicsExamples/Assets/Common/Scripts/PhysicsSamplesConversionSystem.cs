@@ -16,6 +16,9 @@ namespace Unity.Physics.Authoring
         protected override void OnUpdate()
         {
             Entities.ForEach((SetInertiaInverseBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
+            Entities.ForEach((ChangeSphereColliderRadiusBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
+            Entities.ForEach((ChangeColliderTypeBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
+            Entities.ForEach((ChangeMotionTypeBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
         }
     }
 }

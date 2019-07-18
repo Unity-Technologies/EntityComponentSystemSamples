@@ -14,7 +14,7 @@ using Unity.Jobs;
 
 namespace Demos
 {
-    public class VehicleMechanics : MonoBehaviour, IRecieveEntity
+    public class VehicleMechanics : MonoBehaviour, IReceiveEntity
     {
         [Header("Chassis Parameters...")]
         public GameObject chassis;
@@ -43,7 +43,7 @@ namespace Demos
         public bool drawDebugInformation = false;
 
         public Entity chassisEntity = Entity.Null;
-        public void SetRecievedEntity(Entity entity)
+        public void SetReceivedEntity(Entity entity)
         {
             chassisEntity = entity;
         }

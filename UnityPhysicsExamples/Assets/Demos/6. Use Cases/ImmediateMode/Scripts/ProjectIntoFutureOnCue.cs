@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 public struct ProjectIntoFutureTrail : IComponentData { }
 
-public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
+public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
 {
     public Mesh referenceMesh;
     public Material referenceMaterial;
@@ -127,6 +127,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
             World = localWorld,
             TimeStep = Time.fixedDeltaTime,
             ThreadCountHint = Unity.Physics.PhysicsStep.Default.ThreadCountHint,
+            NumSolverIterations = Unity.Physics.PhysicsStep.Default.SolverIterationCount,
             Gravity = Unity.Physics.PhysicsStep.Default.Gravity,
             SynchronizeCollisionWorld = true
         };
@@ -186,7 +187,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IRecieveEntity
         }
     }
 
-    public void SetRecievedEntity(Entity entity)
+    public void SetReceivedEntity(Entity entity)
     {
         WhiteBallEntity = entity;
     }

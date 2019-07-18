@@ -1,11 +1,10 @@
-﻿using System;
-using Unity.Physics;
-using Unity.Physics.Systems;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Physics;
+using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
@@ -64,11 +63,7 @@ public class PlanetGravitySystem : JobComponentSystem
                             ref PhysicsVelocity bodyVelocity,
                             [ReadOnly]ref PlanetGravity gravity)
         {
-#if UNITY_ANDROID  //XX
-            float mass = 1.0f;
-#else
             float mass = math.rcp(bodyMass.InverseMass);
-#endif
             //motion.LinearVelocity *= 0.99f;
 
             float3 dir = (gravity.GravitationalCenter - pos.Value);

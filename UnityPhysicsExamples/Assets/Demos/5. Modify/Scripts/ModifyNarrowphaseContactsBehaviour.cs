@@ -8,6 +8,7 @@ using UnityEngine;
 using System;
 using ContactPoint = Unity.Physics.ContactPoint;
 using Unity.Physics.Extensions;
+using Unity.Burst;
 
 public struct ModifyNarrowphaseContacts : IComponentData
 {
@@ -87,6 +88,7 @@ public class ModifyNarrowphaseContactsSystem : JobComponentSystem
         return inputDeps;
     }
 
+    [BurstCompile]
     struct ModifyNormalsJob : IContactsJob
     {
         public int m_SurfaceRBIdx;

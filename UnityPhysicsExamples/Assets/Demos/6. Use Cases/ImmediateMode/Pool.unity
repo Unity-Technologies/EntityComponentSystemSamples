@@ -167,7 +167,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 30.69, y: -13.55}
+  m_AnchoredPosition: {x: 40, y: -13.55}
   m_SizeDelta: {x: 61.38, y: 27.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &229873738
@@ -395,8 +395,6 @@ GameObject:
   m_Component:
   - component: {fileID: 420695318}
   - component: {fileID: 420695320}
-  - component: {fileID: 420695319}
-  - component: {fileID: 420695317}
   m_Layer: 0
   m_Name: Trails
   m_TagString: Untagged
@@ -404,20 +402,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &420695317
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420695316}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b583e81a371c90e4a851c578ad0fa73b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  referenceMaterial: {fileID: 2100000, guid: 7c3ccde00934b2942ad74c8c52a2d6fd, type: 2}
-  numSteps: 25
 --- !u!4 &420695318
 Transform:
   m_ObjectHideFlags: 0
@@ -432,21 +416,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &420695319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420695316}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95d315261c03d4e4f8510f850ee4e78b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  referenceMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  referenceMaterial: {fileID: 2100000, guid: 7c3ccde00934b2942ad74c8c52a2d6fd, type: 2}
-  numSteps: 25
 --- !u!114 &420695320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -763,8 +732,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 240, y: 2.25}
-  m_SizeDelta: {x: 390, y: 20}
+  m_AnchoredPosition: {x: 230, y: 2.25}
+  m_SizeDelta: {x: 380, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &635344889
 MonoBehaviour:
@@ -901,7 +870,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 156.8, y: -15}
+  m_AnchoredPosition: {x: 245, y: -15}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &691157787
@@ -1076,15 +1045,24 @@ MonoBehaviour:
     y: 0
     z: 0
   m_Orientation:
-    value:
+    Value:
       x: 0
       y: 0
       z: 0
-      w: 1
+    RotationOrder: 4
   m_InertiaTensor:
     x: 0.4
     y: 0.4
     z: 0.4
+  m_CustomTags:
+    Tag00: 0
+    Tag01: 0
+    Tag02: 0
+    Tag03: 0
+    Tag04: 0
+    Tag05: 0
+    Tag06: 0
+    Tag07: 0
 --- !u!114 &719645920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1148,7 +1126,7 @@ MonoBehaviour:
     m_RaisesCollisionEvents:
       m_Override: 0
       m_Value: 0
-    m_CustomFlags:
+    m_CustomTags:
       m_Override: 0
       m_Value: 0000000000000000
 --- !u!23 &719645921
@@ -1783,12 +1761,12 @@ MonoBehaviour:
   m_Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.6
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -1902,10 +1880,10 @@ RectTransform:
   m_Father: {fileID: 1200079728}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -87.26}
-  m_SizeDelta: {x: 475.59, y: 87.26}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -237.5, y: 10}
+  m_SizeDelta: {x: 475.58997, y: 87.26001}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1217651084
 MonoBehaviour:
@@ -2312,8 +2290,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 240, y: 0.37}
-  m_SizeDelta: {x: 390, y: 20}
+  m_AnchoredPosition: {x: 230, y: 0.37}
+  m_SizeDelta: {x: 380, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1540360434
 MonoBehaviour:
@@ -2458,7 +2436,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4306946284488698811, guid: fe81db7799a50fe4c89e36467c47a5ab,
         type: 3}
-      propertyPath: EntityRecievers.Array.size
+      propertyPath: EntityReceivers.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4306946284488698811, guid: fe81db7799a50fe4c89e36467c47a5ab,
@@ -2473,7 +2451,7 @@ PrefabInstance:
       objectReference: {fileID: 420695316}
     - target: {fileID: 4306946284488698811, guid: fe81db7799a50fe4c89e36467c47a5ab,
         type: 3}
-      propertyPath: EntityRecievers.Array.data[0]
+      propertyPath: EntityReceivers.Array.data[0]
       value: 
       objectReference: {fileID: 420695316}
     m_RemovedComponents: []
@@ -2549,7 +2527,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 30.689995, y: -39.35}
+  m_AnchoredPosition: {x: 40, y: -39.35}
   m_SizeDelta: {x: 61.38, y: 24.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1701876255
@@ -3158,15 +3136,24 @@ MonoBehaviour:
     y: 0
     z: 0
   m_Orientation:
-    value:
+    Value:
       x: 0
       y: 0
       z: 0
-      w: 1
+    RotationOrder: 4
   m_InertiaTensor:
     x: 0.4
     y: 0.4
     z: 0.4
+  m_CustomTags:
+    Tag00: 0
+    Tag01: 0
+    Tag02: 0
+    Tag03: 0
+    Tag04: 0
+    Tag05: 0
+    Tag06: 0
+    Tag07: 0
 --- !u!114 &1950980976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3230,7 +3217,7 @@ MonoBehaviour:
     m_RaisesCollisionEvents:
       m_Override: 0
       m_Value: 0
-    m_CustomFlags:
+    m_CustomTags:
       m_Override: 0
       m_Value: 0000000000000000
 --- !u!114 &1950980977

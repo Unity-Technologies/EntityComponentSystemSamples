@@ -4,10 +4,10 @@ using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 
-public class EntityTracker : MonoBehaviour, IRecieveEntity
+public class EntityTracker : MonoBehaviour, IReceiveEntity
 {
     private Entity EntityToTrack = Entity.Null;
-    public void SetRecievedEntity(Entity entity)
+    public void SetReceivedEntity(Entity entity)
     {
         EntityToTrack = entity;
     }

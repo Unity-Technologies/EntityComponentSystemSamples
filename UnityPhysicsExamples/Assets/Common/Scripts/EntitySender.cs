@@ -1,30 +1,29 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Entities;
+﻿using Unity.Entities;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-
-public interface IRecieveEntity
+public interface IReceiveEntity
 {
-    void SetRecievedEntity(Entity entity);
+    void SetReceivedEntity(Entity entity);
 }
 
 public struct SentEntity : IComponentData { }
 
 public class EntitySender : MonoBehaviour, IConvertGameObjectToEntity
 {
-    public GameObject[] EntityRecievers;
+    public GameObject[] EntityReceivers;
+
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         dstManager.AddComponentData(entity, new SentEntity() { });
-        foreach( var EntityReciever in EntityRecievers)
+        foreach( var EntityReceiver in EntityReceivers)
         {
-            var potentialRecievers = EntityReciever.GetComponents<MonoBehaviour>();
-            foreach (var potentialReciever in potentialRecievers)
+            var potentialReceivers = EntityReceiver.GetComponents<MonoBehaviour>();
+            foreach (var potentialReceiver in potentialReceivers)
             {
-                if (potentialReciever is IRecieveEntity)
+                if (potentialReceiver is IReceiveEntity receiver)
                 {
-                    (potentialReciever as IRecieveEntity).SetRecievedEntity(entity);
+                    receiver.SetReceivedEntity(entity);
                 }
             }
         }

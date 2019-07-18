@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SpawnCopiesAsChildren : MonoBehaviour
+class SpawnCopiesAsChildren : MonoBehaviour
 {
     public GameObject Prefab;
     public int CountX = 10;
@@ -9,7 +9,7 @@ public class SpawnCopiesAsChildren : MonoBehaviour
     public float MaxVerticalOffset = 3;
     public float MaxHeightMultiplier = 3;
 
-    public void OnValidate()
+    void OnValidate()
     {
         if (CountX < 0)
             CountX = 0;

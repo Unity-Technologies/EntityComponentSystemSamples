@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Physics;
 using Unity.Physics.Extensions;
 using Unity.Entities;
@@ -81,9 +82,12 @@ public class BasePhysicsDemo : MonoBehaviour
         entityManager.AddComponentData(entity, colliderComponent);
 
         Mesh mesh = new Mesh();
+#pragma warning disable 618
         List<Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.DisplayResult> meshes;
         unsafe { meshes = Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.BuildDebugDisplayMesh(colliderComponent.ColliderPtr); }
+#pragma warning restore 618
         CombineInstance[] instances = new CombineInstance[meshes.Count];
+        int numVertices = 0;
         for (int i = 0; i < meshes.Count; i++)
         {
             instances[i] = new CombineInstance
@@ -91,7 +95,9 @@ public class BasePhysicsDemo : MonoBehaviour
                 mesh = meshes[i].Mesh,
                 transform = Matrix4x4.TRS(meshes[i].Position, meshes[i].Orientation, meshes[i].Scale)
             };
+            numVertices += meshes[i].Mesh.vertexCount;
         }
+        mesh.indexFormat = numVertices > UInt16.MaxValue ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
         mesh.CombineMeshes(instances);
 
         entityManager.AddSharedComponentData(entity, new RenderMesh

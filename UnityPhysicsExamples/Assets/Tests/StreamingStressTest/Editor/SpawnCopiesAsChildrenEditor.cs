@@ -4,7 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 [CustomEditor(typeof(SpawnCopiesAsChildren))]
-public class SpawnCopiesAsChildrenEditor : Editor
+class SpawnCopiesAsChildrenEditor : Editor
 {
     public override void OnInspectorGUI()
     {

@@ -7,6 +7,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Math = Unity.Physics.Math;
 using UnityEngine;
+using Unity.Burst;
 
 public struct ModifyContactJacobians : IComponentData
 {
@@ -17,8 +18,8 @@ public struct ModifyContactJacobians : IComponentData
         SurfaceVelocity,
         InfiniteInertia,
         NoAngularEffects,
-        ClippedImpulse,
-        DisabledContact
+        DisabledContact,
+        DisabledAngularFriction,
     }
 
     public ModificationType type;
@@ -56,6 +57,7 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
     // for processing in our jacobian modifier job. This is necessary because some flags require extra data to
     // be allocated along with the jacobian (e.g., SurfaceVelocity data typically does not exist). We also set
     // user data bits in the jacobianFlags to save us from looking up the ComponentDataFromEntity later.
+    [BurstCompile]
     struct SetContactFlagsJob : IContactsJob
     {
         [ReadOnly]
@@ -86,13 +88,10 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
             {
                 manifold.JacobianFlags |= JacobianFlags.EnableMassFactors;
             }
-            if (typeA == ModifyContactJacobians.ModificationType.ClippedImpulse || typeB == ModifyContactJacobians.ModificationType.ClippedImpulse)
-            {
-                manifold.JacobianFlags |= JacobianFlags.EnableMaxImpulse;
-            }
         }
     }
 
+    [BurstCompile]
     struct ModifyJacobiansJob : IJacobiansJob
     {
         [ReadOnly]
@@ -125,8 +124,9 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
                     jacHeader.Flags = jacHeader.Flags | JacobianFlags.Disabled;
                 }
 
-                // Check if NoTorque modifier
-                if (typeA == ModifyContactJacobians.ModificationType.NoAngularEffects || typeB == ModifyContactJacobians.ModificationType.NoAngularEffects)
+                // Check if NoTorque modifier, or friction should be disabled through jacobian
+                if (typeA == ModifyContactJacobians.ModificationType.NoAngularEffects || typeB == ModifyContactJacobians.ModificationType.NoAngularEffects ||
+                    typeA == ModifyContactJacobians.ModificationType.DisabledAngularFriction || typeB == ModifyContactJacobians.ModificationType.DisabledAngularFriction)
                 {
                     // Disable all friction angular effects
                     var friction0 = contactJacobian.Friction0;
@@ -150,24 +150,11 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
                     (typeA == ModifyContactJacobians.ModificationType.SurfaceVelocity || typeB == ModifyContactJacobians.ModificationType.SurfaceVelocity))
                 {
                     // Since surface normal can change, make sure angular velocity is always relative to it, not independent
-                    float3 angVel = contactJacobian.Normal * (new float3(0.0f, 1.0f, 0.0f));
-                    float3 linVel = float3.zero;
-
-                    Math.CalculatePerpendicularNormalized(contactJacobian.Normal, out float3 dir0, out float3 dir1);
-                    float linVel0 = math.dot(linVel, dir0);
-                    float linVel1 = math.dot(linVel, dir1);
-
-                    float angVelProj = math.dot(angVel, contactJacobian.Normal);
-
-                    jacHeader.SurfaceVelocity = new SurfaceVelocity { ExtraFrictionDv = new float3(linVel0, linVel1, angVelProj) };
-                }
-
-                // Check if MaxImpulse present
-                if (jacHeader.HasMaxImpulse &&
-                    (typeA == ModifyContactJacobians.ModificationType.ClippedImpulse || typeB == ModifyContactJacobians.ModificationType.ClippedImpulse))
-                {
-                    // Max impulse in Ns (Newton-second)
-                    jacHeader.MaxImpulse = 20.0f;
+                    jacHeader.SurfaceVelocity = new SurfaceVelocity
+                    {
+                        LinearVelocity = float3.zero,
+                        AngularVelocity = contactJacobian.Normal * (new float3(0.0f, 1.0f, 0.0f))
+                    };
                 }
 
                 // Check if MassFactors present

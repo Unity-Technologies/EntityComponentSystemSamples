@@ -7,6 +7,10 @@ using Unity.Physics.Authoring;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Unity.Jobs;
+using Unity.Burst;
+using Unity.Collections.LowLevel.Unsafe;
+
 
 namespace Unity.Physics.Extensions
 {
@@ -15,6 +19,111 @@ namespace Unity.Physics.Extensions
     /// Displays hit positions or the tested line segment.
     public unsafe class QueryTester : MonoBehaviour
     {
+        [BurstCompile]
+        public struct RaycastJob : IJob
+        {
+            public RaycastInput RaycastInput;
+            public NativeList<RaycastHit> RaycastHits;
+            public bool CollectAllHits;
+            [ReadOnly] public PhysicsWorld World;
+
+            public void Execute()
+            {
+                if (CollectAllHits)
+                {
+                    World.CastRay(RaycastInput, ref RaycastHits);
+                }
+                else if (World.CastRay(RaycastInput, out RaycastHit hit))
+                {
+                    RaycastHits.Add(hit);
+                }
+            }
+        }
+
+        [BurstCompile]
+        public struct ColliderCastJob : IJob
+        {
+            [NativeDisableUnsafePtrRestriction] public Collider* Collider;
+            public quaternion Orientation;
+            public float3 Start;
+            public float3 End;
+            public NativeList<ColliderCastHit> ColliderCastHits;
+            public bool CollectAllHits;
+            [ReadOnly] public PhysicsWorld World;
+
+            public void Execute()
+            {
+                ColliderCastInput colliderCastInput = new ColliderCastInput
+                {
+                    Collider = Collider,
+                    Orientation = Orientation,
+                    Start = Start,
+                    End = End
+                };
+
+                if (CollectAllHits)
+                {
+                    World.CastCollider(colliderCastInput, ref ColliderCastHits);
+                }
+                else if (World.CastCollider(colliderCastInput, out ColliderCastHit hit))
+                {
+                    ColliderCastHits.Add(hit);
+                }
+            }
+        }
+
+        [BurstCompile]
+        public struct PointDistanceJob : IJob
+        {
+            public PointDistanceInput PointDistanceInput;
+            public NativeList<DistanceHit> DistanceHits;
+            public bool CollectAllHits;
+            [ReadOnly] public PhysicsWorld World;
+
+            public void Execute()
+            {
+                if (CollectAllHits)
+                {
+                    World.CalculateDistance(PointDistanceInput, ref DistanceHits);
+                }
+                else if (World.CalculateDistance(PointDistanceInput, out DistanceHit hit))
+                {
+                    DistanceHits.Add(hit);
+                }
+            }
+        }
+
+        [BurstCompile]
+        public struct ColliderDistanceJob : IJob
+        {
+            public RigidTransform Transform;
+            public float MaxDistance;
+            [NativeDisableUnsafePtrRestriction] public Collider* Collider;
+            public NativeList<DistanceHit> DistanceHits;
+            public bool CollectAllHits;
+            [ReadOnly] public PhysicsWorld World;
+
+            public void Execute()
+            {
+
+                var colliderDistanceInput = new ColliderDistanceInput
+                {
+                    Collider = Collider,
+                    Transform = Transform,
+                    MaxDistance = MaxDistance
+                };
+
+                if (CollectAllHits)
+                {
+                    World.CalculateDistance(colliderDistanceInput, ref DistanceHits);
+                }
+                else if (World.CalculateDistance(colliderDistanceInput, out DistanceHit hit))
+                {
+                    DistanceHits.Add(hit);
+                }
+            }
+        }
+
         private BlobAssetReference<Collider> CreateCollider(UnityEngine.Mesh mesh, ColliderType type)
         {
             switch (type)
@@ -154,14 +263,13 @@ namespace Unity.Physics.Extensions
                         Filter = CollisionFilter.Default
                     };
 
-                    if (CollectAllHits)
+                    new RaycastJob
                     {
-                        world.CastRay(RaycastInput, ref RaycastHits);
-                    }
-                    else if (world.CastRay(RaycastInput, out RaycastHit hit))
-                    {
-                        RaycastHits.Add(hit);
-                    }
+                        RaycastInput = RaycastInput,
+                        RaycastHits = RaycastHits,
+                        CollectAllHits = CollectAllHits,
+                        World = world,
+                    }.Schedule().Complete();
                 }
                 else
                 {
@@ -172,14 +280,13 @@ namespace Unity.Physics.Extensions
                         Filter = CollisionFilter.Default
                     };
 
-                    if (CollectAllHits)
+                    new PointDistanceJob
                     {
-                        world.CalculateDistance(PointDistanceInput, ref DistanceHits);
-                    }
-                    else if (world.CalculateDistance(PointDistanceInput, out DistanceHit hit))
-                    {
-                        DistanceHits.Add(hit);
-                    }
+                        PointDistanceInput = PointDistanceInput,
+                        DistanceHits = DistanceHits,
+                        CollectAllHits = CollectAllHits,
+                        World = world,
+                    }.Schedule().Complete();
                 }
             }
             else //(ColliderMesh)
@@ -194,14 +301,16 @@ namespace Unity.Physics.Extensions
                         End = origin + direction,
                     };
 
-                    if (CollectAllHits)
+                    new ColliderCastJob
                     {
-                        world.CastCollider(ColliderCastInput, ref ColliderCastHits);
-                    }
-                    else if (world.CastCollider(ColliderCastInput, out ColliderCastHit hit))
-                    {
-                        ColliderCastHits.Add(hit);
-                    }
+                        Collider = ColliderCastInput.Collider,
+                        Orientation = ColliderCastInput.Orientation,
+                        Start = ColliderCastInput.Start,
+                        End = ColliderCastInput.End,
+                        ColliderCastHits = ColliderCastHits,
+                        CollectAllHits = CollectAllHits,
+                        World = world,
+                    }.Schedule().Complete();
                 }
                 else
                 {
@@ -212,14 +321,15 @@ namespace Unity.Physics.Extensions
                         MaxDistance = Distance
                     };
 
-                    if (CollectAllHits)
+                    new ColliderDistanceJob
                     {
-                        world.CalculateDistance(ColliderDistanceInput, ref DistanceHits);
-                    }
-                    else if (world.CalculateDistance(ColliderDistanceInput, out DistanceHit hit))
-                    {
-                        DistanceHits.Add(hit);
-                    }
+                        Transform = ColliderDistanceInput.Transform,
+                        MaxDistance = ColliderDistanceInput.MaxDistance,
+                        Collider = ColliderDistanceInput.Collider,
+                        DistanceHits = DistanceHits,
+                        CollectAllHits = CollectAllHits,
+                        World = world,
+                    }.Schedule().Complete();
                 }
             }
         }

@@ -2,7 +2,7 @@
 using Unity.Scenes;
 using UnityEngine;
 
-public class ToggleSubsceneLoading : MonoBehaviour
+class ToggleSubsceneLoading : MonoBehaviour
 {
     public int FramesBetweenStreamingOperations = 10;
     public int FramesUntilToggleLoad;

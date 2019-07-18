@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using NUnit.Framework;
+using System.Collections;
 using Unity.Entities;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
@@ -10,7 +9,7 @@ namespace Unity.Physics.Samples.Test
 {
 #if HAVOK_PHYSICS_EXISTS
     [TestFixture]
-    public class HavokPhysicsSamplesTest : UnityPhysicsSamplesTest
+    class HavokPhysicsSamplesTest : UnityPhysicsSamplesTest
     {
         void SetSimulationType(SimulationType simulationType, Scene scene, LoadSceneMode mode)
         {

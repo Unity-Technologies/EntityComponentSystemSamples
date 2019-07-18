@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 namespace Unity.Physics.Samples.Test
 {
     [TestFixture]
-    public class UnityPhysicsSamplesTest
+    class UnityPhysicsSamplesTest
     {
         protected static IEnumerable GetScenes()
         {

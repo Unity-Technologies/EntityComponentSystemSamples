@@ -97,7 +97,7 @@ LightmapSettings:
     m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -305,6 +305,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781253, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: DrawColliders
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1357867726873067494, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
       propertyPath: m_SerializedData.DrawColliders
@@ -348,26 +368,6 @@ PrefabInstance:
     - target: {fileID: 1357867726873067494, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
       propertyPath: m_SerializedData.DrawColliderAabbs
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: DrawColliders
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781253, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1357867725480173705, guid: c0ce7b3c74021e840a5995cf136ee0fe,
@@ -513,6 +513,15 @@ MonoBehaviour:
     x: 0.4
     y: 0.4
     z: 0.4
+  m_CustomTags:
+    Tag00: 0
+    Tag01: 0
+    Tag02: 0
+    Tag03: 0
+    Tag04: 0
+    Tag05: 0
+    Tag06: 0
+    Tag07: 0
 --- !u!114 &2151099788745967111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -552,6 +561,7 @@ MonoBehaviour:
   m_ConvexRadius: 0.05
   m_CustomMesh: {fileID: 0}
   m_Material:
+    m_SerializedVersion: 0
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
     m_IsTrigger:
@@ -576,7 +586,7 @@ MonoBehaviour:
     m_RaisesCollisionEvents:
       m_Override: 0
       m_Value: 0
-    m_CustomFlags:
+    m_CustomTags:
       m_Override: 0
       m_Value: 0000000000000000
 --- !u!114 &2151099788745967112
@@ -794,6 +804,11 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+    - target: {fileID: 2354788718452773182, guid: 38532010328ff464a8e1d6a12c61c0bf,
+        type: 3}
+      propertyPath: MaxSlope
+      value: 90
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 38532010328ff464a8e1d6a12c61c0bf, type: 3}
 --- !u!1001 &8604851078960587259

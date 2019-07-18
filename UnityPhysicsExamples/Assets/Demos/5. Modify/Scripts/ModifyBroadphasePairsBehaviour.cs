@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 using System;
+using Unity.Burst;
 
 //<todo.eoin.usermod Rename to ModifyOverlappingBodyPairsComponentData?
 public struct ModifyBroadphasePairs : IComponentData { }
@@ -65,6 +66,7 @@ public class ModifyBroadphasePairsSystem : JobComponentSystem
         return inputDeps;
     }
 
+    [BurstCompile]
     struct DisablePairsJob : IBodyPairsJob
     {
         public NativeSlice<RigidBody> Bodies;

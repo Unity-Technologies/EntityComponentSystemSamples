@@ -5,10 +5,10 @@ using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 
-public class Fabrik : MonoBehaviour, IRecieveEntity
+public class Fabrik : MonoBehaviour, IReceiveEntity
 {
     private List<Entity> targetEntities = new List<Entity>();
-    public void SetRecievedEntity(Entity entity)
+    public void SetReceivedEntity(Entity entity)
     {
         targetEntities.Add(entity);
     }

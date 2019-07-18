@@ -5,6 +5,7 @@ using Unity.Physics;
 using Unity.Physics.Extensions;
 using UnityEngine.Assertions;
 
+// Stores the impulse to be applied by the character controller body
 public struct DeferredCharacterControllerImpulse
 {
     public Entity Entity;
@@ -14,11 +15,26 @@ public struct DeferredCharacterControllerImpulse
 
 public static class CharacterControllerUtilities
 {
+    public const float c_DefaultTau = 0.4f;
+    public const float c_DefaultDamping = 0.9f;
+
     public enum CharacterSupportState : byte
     {
         Unsupported = 0,
         Sliding,
         Supported
+    }
+
+    public struct CharacterControllerStepInput
+    {
+        public PhysicsWorld World;
+        public float DeltaTime;
+        public float3 Gravity;
+        public float3 Up;
+        public int MaxIterations;
+        public float Tau;
+        public float Damping;
+        public float MaxSlope;
     }
 
     // A collector which stores every hit up to the length of the provided native array.
@@ -72,45 +88,37 @@ public static class CharacterControllerUtilities
         #endregion
     }
 
-    public static unsafe void CheckSupport(PhysicsWorld world, float deltaTime, RigidTransform transform,
-        float3 downwardsDirection, float maxSlope, float contactTolerance, Collider* collider, ref NativeArray<SurfaceConstraintInfo> constraints,
-        ref NativeArray<DistanceHit> checkSupportHits, out CharacterSupportState characterState)
+    public static unsafe void CheckSupport(CharacterControllerStepInput stepInput,
+        RigidTransform transform, float maxSlope, MaxHitsCollector<DistanceHit> distanceHitsCollector,
+        ref NativeArray<SurfaceConstraintInfo> constraints, out CharacterSupportState characterState)
     {
-        // Downwards direction must be normalized
-        Assert.IsTrue(Math.IsNormalized(downwardsDirection));
-
-        // "Broad phase"
-        MaxHitsCollector<DistanceHit> collector = new MaxHitsCollector<DistanceHit>(contactTolerance, ref checkSupportHits);
+        // If no hits, proclaim unsupported state
+        if (distanceHitsCollector.NumHits == 0)
         {
-            ColliderDistanceInput input = new ColliderDistanceInput()
-            {
-                MaxDistance = contactTolerance,
-                Transform = transform,
-                Collider = collider
-            };
-            world.CalculateDistance(input, ref collector);
+            characterState = CharacterSupportState.Unsupported;
+            return;
         }
 
-        // Iterate over hits and create constraints from them
-        for (int i = 0; i < collector.NumHits; i++)
+        // Downwards direction must be normalized
+        float3 downwardsDirection = -stepInput.Up;
+        Assert.IsTrue(Math.IsNormalized(downwardsDirection));
+
+        // Iterate over distance hits and create constraints from them
+        for (int i = 0; i < distanceHitsCollector.NumHits; i++)
         {
-            DistanceHit hit = collector.AllHits[i];
-            CreateConstraintFromHit(world, float3.zero, deltaTime, hit.RigidBodyIndex, hit.ColliderKey,
+            DistanceHit hit = distanceHitsCollector.AllHits[i];
+            CreateConstraintFromHit(stepInput.World, float3.zero, stepInput.DeltaTime, hit.RigidBodyIndex, hit.ColliderKey,
                 hit.Position, hit.SurfaceNormal, hit.Distance, true, out SurfaceConstraintInfo constraint);
             constraints[i] = constraint;
         }
 
-        // Solve downwards
+        // Solve downwards (don't respect min delta time, try to solve full step)
         float3 outVelocity = downwardsDirection;
         float3 outPosition = transform.pos;
-        SimplexSolver.Solve(world, deltaTime, -downwardsDirection, collector.NumHits, ref constraints, ref outPosition, ref outVelocity, out float integratedTime);
+        SimplexSolver.Solve(stepInput.World, stepInput.DeltaTime, stepInput.Up, distanceHitsCollector.NumHits,
+            ref constraints, ref outPosition, ref outVelocity, out float integratedTime, false);
 
-        // If no hits, proclaim unsupported state
-        if (collector.NumHits == 0)
-        {
-            characterState = CharacterSupportState.Unsupported;
-        }
-        else
+        // Check support state
         {
             if (math.lengthsq(downwardsDirection - outVelocity) < SimplexSolver.c_SimplexSolverEpsilon)
             {
@@ -129,7 +137,7 @@ public static class CharacterControllerUtilities
                 float slopeAngleSin = math.dot(outVelocity, downwardsDirection);
                 float slopeAngleCosSq = 1 - slopeAngleSin * slopeAngleSin;
                 float maxSlopeCosine = math.cos(maxSlope);
-                if (slopeAngleCosSq < maxSlopeCosine * maxSlopeCosine)
+                if (slopeAngleCosSq < maxSlopeCosine * maxSlopeCosine - SimplexSolver.c_SimplexSolverEpsilon)
                 {
                     characterState = CharacterSupportState.Sliding;
                 }
@@ -141,12 +149,17 @@ public static class CharacterControllerUtilities
         }
     }
 
-    public static unsafe void CollideAndIntegrate(PhysicsWorld world, float deltaTime,
-        int maxIterations, float3 up, float3 gravity,
-        float characterMass, float tau, float damping,  float maxSlope, bool affectBodies, Collider* collider,
-        ref NativeArray<DistanceHit> distanceHits, ref NativeArray<ColliderCastHit> castHits, ref NativeArray<SurfaceConstraintInfo> constraints,
+    public static unsafe void CollideAndIntegrate(
+        CharacterControllerStepInput stepInput, float characterMass, bool affectBodies, Collider* collider,
+        MaxHitsCollector<DistanceHit> distanceHitsCollector, ref NativeArray<ColliderCastHit> castHits, ref NativeArray<SurfaceConstraintInfo> constraints,
         ref RigidTransform transform, ref float3 linearVelocity, ref BlockStream.Writer deferredImpulseWriter)
     {
+        // Copy parameters
+        float deltaTime = stepInput.DeltaTime;
+        float3 gravity = stepInput.Gravity;
+        float3 up = stepInput.Up;
+        PhysicsWorld world = stepInput.World;
+
         float remainingTime = deltaTime;
         float3 lastDisplacement = linearVelocity * remainingTime;
 
@@ -154,45 +167,36 @@ public static class CharacterControllerUtilities
         quaternion orientation = transform.rot;
         float3 newVelocity = linearVelocity;
 
-        float maxSlopeCos = math.cos(maxSlope);
+        float maxSlopeCos = math.cos(stepInput.MaxSlope);
 
-        const float timeEpsilon = 0.000001f;
-        for (int i = 0; i < maxIterations && remainingTime > timeEpsilon; i++)
+        // Iterate over hits and create constraints from them
+        int numDistanceConstraints = 0;
+        for (int hitIndex = 0; hitIndex < distanceHitsCollector.NumHits; hitIndex++)
         {
-            // First do distance query for penetration recovery
-            MaxHitsCollector<DistanceHit> distanceHitsCollector = new MaxHitsCollector<DistanceHit>(0.0f, ref distanceHits);
-            int numConstraints = 0;
+            DistanceHit hit = distanceHitsCollector.AllHits[hitIndex];
+            CreateConstraintFromHit(world, gravity, deltaTime, hit.RigidBodyIndex, hit.ColliderKey, hit.Position,
+                hit.SurfaceNormal, hit.Distance, false, out SurfaceConstraintInfo constraint);
+
+            // Check if max slope plane is required
+            float verticalComponent = math.dot(constraint.Plane.Normal, up);
+            bool shouldAddPlane = verticalComponent > SimplexSolver.c_SimplexSolverEpsilon && verticalComponent < maxSlopeCos;
+            if (shouldAddPlane)
             {
-                ColliderDistanceInput input = new ColliderDistanceInput()
-                {
-                    MaxDistance = 0.0f,
-                    Transform = new RigidTransform
-                    {
-                        pos = newPosition,
-                        rot = orientation,
-                    },
-                    Collider = collider
-                };
-                world.CalculateDistance(input, ref distanceHitsCollector);
-
-                // Iterate over hits and create constraints from them
-                for (int hitIndex = 0; hitIndex < distanceHitsCollector.NumHits; hitIndex++)
-                {
-                    DistanceHit hit = distanceHitsCollector.AllHits[hitIndex];
-                    CreateConstraintFromHit(world, gravity, deltaTime, hit.RigidBodyIndex, hit.ColliderKey, hit.Position,
-                        hit.SurfaceNormal, hit.Distance, false, out SurfaceConstraintInfo constraint);
-
-                    // Potentially add a max slope constraint
-                    AddMaxSlopeConstraint(up, maxSlopeCos, ref constraint, ref constraints, ref numConstraints);
-
-                    // Add original constraint to the list
-                    constraints[numConstraints++] = constraint;
-                }
+                AddMaxSlopeConstraint(up, ref constraint, ref constraints, ref numDistanceConstraints);
             }
 
+            // Add original constraint to the list
+            constraints[numDistanceConstraints++] = constraint;
+        }
+
+        const float timeEpsilon = 0.000001f;
+        for (int i = 0; i < stepInput.MaxIterations && remainingTime > timeEpsilon; i++)
+        {
+            int numConstraints = numDistanceConstraints;
             float3 gravityMovement = gravity * remainingTime * remainingTime * 0.5f;
 
-            // Then do a collider cast
+            // Then do a collider cast (but not in first iteration)
+            if (i > 0)
             {
                 float3 displacement = lastDisplacement + gravityMovement;
                 MaxHitsCollector<ColliderCastHit> collector = new MaxHitsCollector<ColliderCastHit>(1.0f, ref castHits);
@@ -228,8 +232,13 @@ public static class CharacterControllerUtilities
                         CreateConstraintFromHit(world, gravity, deltaTime, hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal,
                             hit.Fraction * math.length(lastDisplacement), false, out SurfaceConstraintInfo constraint);
 
-                        // Potentially add a max slope constraint
-                        AddMaxSlopeConstraint(up, maxSlopeCos, ref constraint, ref constraints, ref numConstraints);
+                        // Check if max slope plane is required
+                        float verticalComponent = math.dot(constraint.Plane.Normal, up);
+                        bool shouldAddPlane = verticalComponent > SimplexSolver.c_SimplexSolverEpsilon && verticalComponent < maxSlopeCos;
+                        if (shouldAddPlane)
+                        {
+                            AddMaxSlopeConstraint(up, ref constraint, ref constraints, ref numConstraints);
+                        }
 
                         // Add original constraint to the list
                         constraints[numConstraints++] = constraint;
@@ -245,7 +254,7 @@ public static class CharacterControllerUtilities
             // Apply impulses to hit bodies
             if (affectBodies)
             {
-                ResolveContacts(world, remainingTime, gravity, tau, damping, characterMass, prevVelocity, numConstraints, ref constraints, ref deferredImpulseWriter);
+                CalculateAndStoreDeferredImpulses(stepInput, characterMass, prevVelocity, numConstraints, ref constraints, ref deferredImpulseWriter);
             }
 
             float3 newDisplacement = newPosition - prevPosition;
@@ -297,11 +306,10 @@ public static class CharacterControllerUtilities
             {
                 ColliderCastHit newContact = newCollector.AllHits[newContactIndex];
 
-                float fraction = newContact.Fraction / math.length(newDisplacement);
-                integratedTime *= fraction;
+                Assert.IsTrue(newContact.Fraction >= 0.0f && newContact.Fraction <= 1.0f);
 
-                float3 displacement = newDisplacement * fraction;
-                newPosition = prevPosition + displacement;
+                integratedTime *= newContact.Fraction;
+                newPosition = prevPosition + newDisplacement * newContact.Fraction;
             }
 
             remainingTime -= integratedTime;
@@ -343,39 +351,38 @@ public static class CharacterControllerUtilities
         }
     }
 
-    private static void AddMaxSlopeConstraint(float3 up, float maxSlopeCos, ref SurfaceConstraintInfo constraint, ref NativeArray<SurfaceConstraintInfo> constraints, ref int numConstraints)
+    private static void AddMaxSlopeConstraint(float3 up, ref SurfaceConstraintInfo constraint, ref NativeArray<SurfaceConstraintInfo> constraints, ref int numConstraints)
     {
-        // Check if max slope plane is required
         float verticalComponent = math.dot(constraint.Plane.Normal, up);
-        bool shouldAddPlane = verticalComponent > SimplexSolver.c_SimplexSolverEpsilon && verticalComponent < maxSlopeCos;
-        if (shouldAddPlane)
+
+        SurfaceConstraintInfo newConstraint = constraint;
+        newConstraint.Plane.Normal = math.normalize(newConstraint.Plane.Normal - verticalComponent * up);
+
+        float distance = newConstraint.Plane.Distance;
+
+        // Calculate distance to the original plane along the new normal.
+        // Clamp the new distance to 2x the old distance to avoid penetration recovery explosions.
+        newConstraint.Plane.Distance = distance / math.max(math.dot(newConstraint.Plane.Normal, constraint.Plane.Normal), 0.5f);
+
+        if (distance < 0.0f)
         {
-            SurfaceConstraintInfo newConstraint = constraint;
-            newConstraint.Plane.Normal = math.normalize(newConstraint.Plane.Normal - verticalComponent * up);
+            // Disable penetration recovery for the original plane
+            constraint.Plane.Distance = 0.0f;
 
-            float distance = newConstraint.Plane.Distance;
-
-            // Calculate distance to the original plane along the new normal
-            newConstraint.Plane.Distance = distance / math.dot(newConstraint.Plane.Normal, constraint.Plane.Normal);
-
-            if (distance < 0.0f)
-            {
-                // Disable penetration recovery for the original plane
-                constraint.Plane.Distance = 0.0f;
-
-                // Set the new constraint velocity
-                float3 newVel = newConstraint.Velocity - newConstraint.Plane.Normal * distance;
-                newConstraint.Velocity = newVel;
-            }
-
-            // Add max slope constraint to the list
-            constraints[numConstraints++] = newConstraint;
+            // Set the new constraint velocity
+            float3 newVel = newConstraint.Velocity - newConstraint.Plane.Normal * distance;
+            newConstraint.Velocity = newVel;
         }
+
+        // Add max slope constraint to the list
+        constraints[numConstraints++] = newConstraint;
     }
 
-    private static unsafe void ResolveContacts(PhysicsWorld world, float deltaTime, float3 gravity, float tau, float damping,
-        float characterMass, float3 linearVelocity, int numConstraints, ref NativeArray<SurfaceConstraintInfo> constraints, ref BlockStream.Writer deferredImpulseWriter)
+    private static unsafe void CalculateAndStoreDeferredImpulses(
+        CharacterControllerStepInput stepInput, float characterMass, float3 linearVelocity, int numConstraints,
+        ref NativeArray<SurfaceConstraintInfo> constraints, ref BlockStream.Writer deferredImpulseWriter)
     {
+        PhysicsWorld world = stepInput.World;
         for (int i = 0; i < numConstraints; i++)
         {
             SurfaceConstraintInfo constraint = constraints[i];
@@ -395,12 +402,12 @@ public static class CharacterControllerUtilities
             float projectedVelocity = math.dot(pointRelVel, constraint.Plane.Normal);
 
             // Required velocity change
-            float deltaVelocity = - projectedVelocity * damping;
+            float deltaVelocity = - projectedVelocity * stepInput.Damping;
 
             float distance = constraint.Plane.Distance;
             if (distance < 0.0f)
             {
-                deltaVelocity += (distance / deltaTime) * tau;
+                deltaVelocity += (distance / stepInput.DeltaTime) * stepInput.Tau;
             }
 
             // Calculate impulse
@@ -411,12 +418,7 @@ public static class CharacterControllerUtilities
                 // Impulse magnitude
                 float impulseMagnitude = 0.0f;
                 {
-                    float3 arm = constraint.HitPosition - (body.WorldFromBody.pos + body.Collider->MassProperties.MassDistribution.Transform.pos);
-                    float3 jacAng = math.cross(arm, constraint.Plane.Normal);
-                    float3 armC = jacAng * mv.InverseInertiaAndMass.xyz;
-
-                    float objectMassInv = math.dot(armC, jacAng);
-                    objectMassInv += mv.InverseInertiaAndMass.w;
+                    float objectMassInv = GetInvMassAtPoint(constraint.HitPosition, constraint.Plane.Normal, body, mv);
                     impulseMagnitude = deltaVelocity / objectMassInv;
                 }
 
@@ -426,7 +428,7 @@ public static class CharacterControllerUtilities
             // Add gravity
             {
                 // Effect of gravity on character velocity in the normal direction
-                float3 charVelDown = gravity * deltaTime;
+                float3 charVelDown = stepInput.Gravity * stepInput.DeltaTime;
                 float relVelN = math.dot(charVelDown, constraint.Plane.Normal);
 
                 // Subtract separation velocity if separating contact
@@ -454,5 +456,22 @@ public static class CharacterControllerUtilities
                     Point = constraint.HitPosition
                 });
         }
+    }
+
+    private static float GetInvMassAtPoint(float3 point, float3 normal, RigidBody body, MotionVelocity mv)
+    {
+        float3 massCenter;
+        unsafe
+        {
+            massCenter = math.transform(body.WorldFromBody, body.Collider->MassProperties.MassDistribution.Transform.pos);
+        }
+        float3 arm = point - massCenter;
+        float3 jacAng = math.cross(arm, normal);
+        float3 armC = jacAng * mv.InverseInertiaAndMass.xyz;
+
+        float objectMassInv = math.dot(armC, jacAng);
+        objectMassInv += mv.InverseInertiaAndMass.w;
+
+        return objectMassInv;
     }
 }

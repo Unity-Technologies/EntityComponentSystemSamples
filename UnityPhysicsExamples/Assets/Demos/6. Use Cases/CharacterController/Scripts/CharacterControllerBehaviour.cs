@@ -11,6 +11,8 @@ using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.Assertions;
+using static CharacterControllerUtilities;
+using static Unity.Physics.PhysicsStep;
 
 [Serializable]
 public struct CharacterControllerComponentData : IComponentData
@@ -18,8 +20,8 @@ public struct CharacterControllerComponentData : IComponentData
     public float3 Gravity;
     public float MovementSpeed;
     public float RotationSpeed;
-    public float JumpSpeed;
-    public float MaxSlope;
+    public float JumpUpwardsSpeed;
+    public float MaxSlope; // radians
     public int MaxIterations;
     public float CharacterMass;
     public float ContactTolerance;
@@ -39,7 +41,7 @@ public struct CharacterControllerInternalData : IComponentData
 {
     public float3 RequestedMovementDirection;
     public float CurrentRotationAngle;
-    public CharacterControllerUtilities.CharacterSupportState SupportedState;
+    public CharacterSupportState SupportedState;
     public float3 LinearVelocity;
     public Entity Entity;
 }
@@ -47,15 +49,32 @@ public struct CharacterControllerInternalData : IComponentData
 [Serializable]
 public class CharacterControllerBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 {
-    // Input
-    public float3 Gravity = new float3(0.0f, -10.0f, 0.0f);
+    // Gravity force applied to the character controller body
+    public float3 Gravity = Default.Gravity;
+
+    // Speed of movement initiated by user input
     public float MovementSpeed = 2.5f;
+
+    // Speed of rotation initiated by user input
     public float RotationSpeed = 2.5f;
-    public float JumpSpeed = 5.0f;
-    public float MaxSlope = 1.57f;
+
+    // Speed of upwards jump initiated by user input
+    public float JumpUpwardsSpeed = 5.0f;
+
+    // Maximum slope angle character can overcome (in degrees)
+    public float MaxSlope = 90.0f;
+
+    // Maximum number of character controller solver iterations
     public int MaxIterations = 10;
+
+    // Mass of the character (used for affecting other rigid bodies)
     public float CharacterMass = 1.0f;
+
+    // Anything in this distance to the character will be considered a potential contact
+    // when checking support
     public float ContactTolerance = 0.1f;
+
+    // Whether to affect other rigid bodies
     public int AffectsPhysicsBodies = 1;
 
     void OnEnable() { }
@@ -70,8 +89,8 @@ public class CharacterControllerBehaviour : MonoBehaviour, IConvertGameObjectToE
                 Gravity = Gravity,
                 MovementSpeed = MovementSpeed,
                 RotationSpeed = RotationSpeed,
-                JumpSpeed = JumpSpeed,
-                MaxSlope = MaxSlope,
+                JumpUpwardsSpeed = JumpUpwardsSpeed,
+                MaxSlope = math.radians(MaxSlope),
                 MaxIterations = MaxIterations,
                 CharacterMass = CharacterMass,
                 ContactTolerance = ContactTolerance,
@@ -90,7 +109,7 @@ public class CharacterControllerBehaviour : MonoBehaviour, IConvertGameObjectToE
     }
 }
 
-[UpdateAfter(typeof(ExportPhysicsWorld))]
+[UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
 public class CharacterControllerSystem : JobComponentSystem
 {
     [BurstCompile]
@@ -156,19 +175,41 @@ public class CharacterControllerSystem : JobComponentSystem
                     capsuleColliderForQueries->Filter = CollisionFilter.Default;
                 }
 
-                // Tau and damping for character solver
-                const float tau = 0.4f;
-                const float damping = 0.9f;
+                // Character step input
+                CharacterControllerStepInput stepInput = new CharacterControllerStepInput
+                {
+                    World = PhysicsWorld,
+                    DeltaTime = DeltaTime,
+                    Up = math.up(),
+                    Gravity = ccComponentData.Gravity,
+                    MaxIterations = ccComponentData.MaxIterations,
+                    Tau = c_DefaultTau,
+                    Damping = c_DefaultDamping,
+                    MaxSlope = ccComponentData.MaxSlope
+                };
 
-                // Check support
+                // Character transform
                 RigidTransform transform = new RigidTransform
                 {
                     pos = position.Value,
                     rot = rotation.Value
                 };
 
-                CharacterControllerUtilities.CheckSupport(PhysicsWorld, DeltaTime, transform, -up, ccComponentData.MaxSlope,
-                    ccComponentData.ContactTolerance, capsuleColliderForQueries, ref Constraints, ref DistanceHits, out ccInternalData.SupportedState);
+                // "Broad phase" (used both for checking support and actual character collide and integrate).
+                MaxHitsCollector<DistanceHit> distanceHitsCollector = new MaxHitsCollector<DistanceHit>(ccComponentData.ContactTolerance, ref DistanceHits);
+                {
+                    ColliderDistanceInput input = new ColliderDistanceInput()
+                    {
+                        MaxDistance = ccComponentData.ContactTolerance,
+                        Transform = transform,
+                        Collider = capsuleColliderForQueries
+                    };
+                    PhysicsWorld.CalculateDistance(input, ref distanceHitsCollector);
+                }
+
+                // Check support
+                CheckSupport(stepInput, transform, ccComponentData.MaxSlope, distanceHitsCollector,
+                    ref Constraints, out ccInternalData.SupportedState);
 
                 // petarm.todo: incorporate support plane's velocity and project input onto it
 
@@ -176,9 +217,8 @@ public class CharacterControllerSystem : JobComponentSystem
                 HandleUserInput(ccInputData, ccComponentData, ref ccInternalData, ref ccInternalData.LinearVelocity);
 
                 // World collision + integrate
-                CharacterControllerUtilities.CollideAndIntegrate(PhysicsWorld, DeltaTime, ccComponentData.MaxIterations, up, ccComponentData.Gravity,
-                    ccComponentData.CharacterMass, tau, damping, ccComponentData.MaxSlope, ccComponentData.AffectsPhysicsBodies > 0, capsuleColliderForQueries,
-                    ref DistanceHits, ref CastHits, ref Constraints,
+                CollideAndIntegrate(stepInput, ccComponentData.CharacterMass, ccComponentData.AffectsPhysicsBodies > 0,
+                    capsuleColliderForQueries, distanceHitsCollector, ref CastHits, ref Constraints,
                     ref transform, ref ccInternalData.LinearVelocity, ref DeferredImpulseWriter);
 
                 // Write back and orientation integration
@@ -221,7 +261,7 @@ public class CharacterControllerSystem : JobComponentSystem
                 {
                     ccInternalData.RequestedMovementDirection = float3.zero;
                 }
-                shouldJump = jumpRequested && ccInternalData.SupportedState == CharacterControllerUtilities.CharacterSupportState.Supported;
+                shouldJump = jumpRequested && ccInternalData.SupportedState == CharacterSupportState.Supported;
             }
 
             // Turning
@@ -243,9 +283,9 @@ public class CharacterControllerSystem : JobComponentSystem
                 linearVelocity = linearVelocity * up + ccInternalData.RequestedMovementDirection * ccComponentData.MovementSpeed;
                 if (shouldJump)
                 {
-                    linearVelocity += ccComponentData.JumpSpeed * up;
+                    linearVelocity += ccComponentData.JumpUpwardsSpeed * up;
                 }
-                else if (ccInternalData.SupportedState != CharacterControllerUtilities.CharacterSupportState.Supported)
+                else if (ccInternalData.SupportedState != CharacterSupportState.Supported)
                 {
                     linearVelocity += ccComponentData.Gravity * DeltaTime;
                 }
