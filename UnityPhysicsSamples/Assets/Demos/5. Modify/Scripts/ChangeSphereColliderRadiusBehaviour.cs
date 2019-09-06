@@ -62,7 +62,11 @@ public class ChangeSphereColliderRadiusSystem : JobComponentSystem
             {
                 radius.Target = radius.Target == radius.Min ? radius.Max : radius.Min;
             }
-            scPtr->Radius = newRadius;
+
+            // update the collider geometry
+            var sphereGeometry = scPtr->Geometry;
+            sphereGeometry.Radius = newRadius;
+            scPtr->Geometry = sphereGeometry;
 
             //
             // now tweak the graphical representation of the sphere

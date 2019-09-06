@@ -18,13 +18,15 @@ public struct PlatformMotion : IComponentData
     public float Height;
     public float Speed;
     public float3 Direction;
+    public float3 Rotation;
 }
 
-public class PlatformMotionBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class PlatformMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float Height = 1f;
     public float Speed = 1f;
     public float3 Direction = math.up();
+    public float3 Rotation = float3.zero;
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
@@ -35,6 +37,7 @@ public class PlatformMotionBehaviour : MonoBehaviour, IConvertGameObjectToEntity
             Height = Height,
             Speed = Speed,
             Direction = math.normalizesafe(Direction),
+            Rotation = Rotation,
         });
     }
 }
@@ -59,6 +62,8 @@ public class PlatformMotionSystem : JobComponentSystem
             var desiredOffset = motion.Height * math.sin(motion.CurrentTime * motion.Speed);
             var currentOffset = math.dot(position.Value - motion.InitialPosition, motion.Direction);
             velocity.Linear = motion.Direction * (desiredOffset - currentOffset);
+
+            velocity.Angular = motion.Rotation;
         }
     }
 

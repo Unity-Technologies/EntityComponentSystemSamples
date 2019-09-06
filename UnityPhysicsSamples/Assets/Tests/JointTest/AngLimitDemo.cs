@@ -23,14 +23,25 @@ public class AngLimitDemo : BasePhysicsDemo
         // static body
         Entity staticEntity;
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(1.0f), 0.01f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+            {
+                Center = float3.zero,
+                Orientation = quaternion.identity,
+                Size = new float3(1.0f),
+                BevelRadius = 0.01f
+            });
             staticEntity = CreateStaticBody(float3.zero, quaternion.identity, collider);
         }
 
         // dynamic body
         Entity dynamicEntity;
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.CapsuleCollider.Create(new float3(-0.5f, 0, 0), new float3(0.5f, 0, 0), 0.05f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(-0.5f, 0, 0),
+                Vertex1 = new float3(0.5f, 0, 0),
+                Radius = 0.05f
+            });
             float3 angularVelocity = new float3(0, 1.0f, 0);
             dynamicEntity = CreateDynamicBody(new float3(2, 0, 0), quaternion.identity, collider, float3.zero, angularVelocity, 1.0f);
         }

@@ -21,7 +21,13 @@ public class TwistGridDemo : BasePhysicsDemo
             DrawJoints = 1
         });
 
-        BlobAssetReference<Collider> collider = BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.2f, 0.2f, 0.2f), 0.0f);
+        BlobAssetReference<Collider> collider = BoxCollider.Create(new BoxGeometry
+        {
+            Center = float3.zero,
+            Orientation = quaternion.identity,
+            Size = new float3(0.2f, 0.2f, 0.2f),
+            BevelRadius = 0.0f
+        });
 
         // Make some 1d angular limit joints
         const int size = 6;

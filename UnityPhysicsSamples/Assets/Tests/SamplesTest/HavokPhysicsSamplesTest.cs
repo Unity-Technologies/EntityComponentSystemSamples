@@ -11,7 +11,7 @@ namespace Unity.Physics.Samples.Test
     [TestFixture]
     class HavokPhysicsSamplesTest : UnityPhysicsSamplesTest
     {
-        void SetSimulationType(SimulationType simulationType, Scene scene, LoadSceneMode mode)
+        public void SetSimulationType(SimulationType simulationType, Scene scene, LoadSceneMode mode)
         {
             var entityManager = World.Active.EntityManager;
             var entities = entityManager.GetAllEntities();

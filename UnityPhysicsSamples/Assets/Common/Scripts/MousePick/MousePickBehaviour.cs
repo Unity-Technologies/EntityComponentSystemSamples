@@ -36,6 +36,7 @@ namespace Unity.Physics.Extensions
     // This is a workaround to filter out static bodies and trigger volumes from the mouse picker.
     // Currently filtered in the TransformHits function when the Body Index is available.
     // This interface will be changed in future so that hits can be filtered appropriately during AddHit instead.
+    // https://github.com/Unity-Technologies/Unity.Physics/issues/256
     // With this temporary filtering workaround CastRay will return true even if we filtered hits.
     // Hence, the MaxFraction is checked instead to see if a true hit was collected.
     [BurstCompile]
@@ -206,7 +207,7 @@ namespace Unity.Physics.Extensions
             });
         }
 
-        protected override void OnDestroyManager()
+        protected override void OnDestroy()
         {
             SpringDatas.Dispose();
         }

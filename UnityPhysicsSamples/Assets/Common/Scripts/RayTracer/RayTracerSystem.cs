@@ -67,7 +67,11 @@ namespace Unity.Physics.Extensions
                 BlobAssetReference<Collider> sphere;
                 if (Request.CastSphere)
                 {
-                    sphere = SphereCollider.Create(float3.zero, sphereRadius, Request.CollisionFilter);
+                    sphere = SphereCollider.Create(new SphereGeometry
+                    {
+                        Center = float3.zero,
+                        Radius = sphereRadius
+                    }, Request.CollisionFilter);
                 }
 
                 for (int yCoord = index * numRows; yCoord < math.min(Request.ImageResolution, (index + 1) * numRows); yCoord++)

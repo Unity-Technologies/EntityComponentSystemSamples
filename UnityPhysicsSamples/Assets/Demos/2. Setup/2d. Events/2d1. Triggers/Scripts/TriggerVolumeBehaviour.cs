@@ -69,7 +69,7 @@ public class TriggerVolumeBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 
 // A system which adds caching information to dynamic bodies that enter, persist and leave
 // a Trigger Volume. 
-// A Trigger Volume is defined by a PhysicsShape with the `Is Trigger` flag ticked and a
+// A Trigger Volume is defined by a PhysicsShapeAuthoring with the `Is Trigger` flag ticked and a
 // TriggerVolume behaviour added. Each trigger volume can be a different type. 
 // When a dynamic body enters the Trigger Volume an OverlappingTriggerVolume component is added
 // to it associated Entity, along with a tag component to say which type of volume it has entered.

@@ -40,7 +40,7 @@ public class TriggerGravityFactorBehaviour : MonoBehaviour, IConvertGameObjectTo
 
 
 // This system sets the PhysicsGravityFactor of any dynamic body that enters a Trigger Volume.
-// A Trigger Volume is defined by a PhysicsShape with the `Is Trigger` flag ticked and a
+// A Trigger Volume is defined by a PhysicsShapeAuthoring with the `Is Trigger` flag ticked and a
 // TriggerGravityFactor behaviour added.
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class TriggerGravityFactorSystem : JobComponentSystem
