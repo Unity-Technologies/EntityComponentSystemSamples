@@ -19,7 +19,13 @@ public class SoftJointDemo : BasePhysicsDemo
 
         // Make soft ball and sockets
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.2f, 0.2f, 0.2f), 0.0f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+            {
+                Center = float3.zero,
+                Orientation = quaternion.identity,
+                Size = new float3(0.2f, 0.2f, 0.2f),
+                BevelRadius = 0.0f
+            });
 
             // Make joints with different spring frequency.  The leftmost joint should oscillate at 0.5hz, the next at 1hz, the next at 1.5hz, etc.
             for (int i = 0; i < 10; i++)
@@ -44,7 +50,13 @@ public class SoftJointDemo : BasePhysicsDemo
 
         // Make soft limited hinges
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.4f, 0.1f, 0.6f), 0.0f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+            {
+                Center = float3.zero,
+                Orientation = quaternion.identity,
+                Size = new float3(0.4f, 0.1f, 0.6f),
+                BevelRadius = 0.0f
+            });
 
             // First row has soft limit with hard hinge + pivot, second row has everything soft
             for (int j = 0; j < 2; j++)
@@ -83,7 +95,13 @@ public class SoftJointDemo : BasePhysicsDemo
 
         // Make a soft prismatic
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.2f, 0.2f, 0.2f), 0.0f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+            {
+                Center = float3.zero,
+                Orientation = quaternion.identity,
+                Size = new float3(0.2f, 0.2f, 0.2f),
+                BevelRadius = 0.0f
+            });
 
             // Create a body
             float3 position = new float3(0, 0, 9.0f);

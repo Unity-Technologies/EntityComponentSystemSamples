@@ -16,7 +16,7 @@ public struct TriggerVolumePortal : IComponentData
 
 public class TriggerVolumePortalBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 {
-    public PhysicsBody CompanionPortal;
+    public PhysicsBodyAuthoring CompanionPortal;
 
     void OnEnable() { }
 

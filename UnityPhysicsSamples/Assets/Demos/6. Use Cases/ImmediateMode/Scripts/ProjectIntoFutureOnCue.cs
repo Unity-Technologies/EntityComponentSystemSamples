@@ -181,7 +181,9 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
     {
         if (WhiteBallEntity != Entity.Null)
         {
-            WhiteBallEntity.SetLinearVelocity(GetVelocityFromSliders());
+            var velocity = World.Active.EntityManager.GetComponentData<PhysicsVelocity>(WhiteBallEntity);
+            velocity.Linear = GetVelocityFromSliders();
+            World.Active.EntityManager.SetComponentData(WhiteBallEntity, velocity);
             clearTrails();
             NeedUpdate = false;
         }

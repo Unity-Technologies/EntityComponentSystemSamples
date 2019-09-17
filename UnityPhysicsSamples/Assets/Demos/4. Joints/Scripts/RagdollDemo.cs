@@ -5,6 +5,7 @@ using Unity.Physics;
 using Unity.Collections;
 using Unity.Physics.Authoring;
 using Unity.Transforms;
+using Material = Unity.Physics.Material;
 
 public class RagdollDemo : BasePhysicsDemo
 {
@@ -46,7 +47,7 @@ public class RagdollDemo : BasePhysicsDemo
 
     private void CreateRagdoll(float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false)
     {
-        NativeList<Entity> entities = new NativeList<Entity>(Allocator.Temp);
+        var entities = new NativeList<Entity>(Allocator.Temp);
 
         // Head
         float headRadius = 0.1f;
@@ -54,7 +55,11 @@ public class RagdollDemo : BasePhysicsDemo
         Entity head;
         {
             CollisionFilter filter = internalCollisions ? layerFilter(layer.Head, layer.Torso) : groupFilter(-ragdollIndex);
-            BlobAssetReference <Unity.Physics.Collider> collider = Unity.Physics.SphereCollider.Create(float3.zero, headRadius, filter);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.SphereCollider.Create(new SphereGeometry
+            {
+                Center = float3.zero,
+                Radius = headRadius
+            }, filter);
             head = CreateDynamicBody(headPosition, quaternion.identity, collider, float3.zero, float3.zero, 5.0f);
         }
         entities.Add(head);
@@ -70,12 +75,15 @@ public class RagdollDemo : BasePhysicsDemo
 
             CollisionFilter filter = internalCollisions ? layerFilter(layer.Torso, layer.Thigh | layer.Head | layer.UpperArm | layer.Pelvis) : groupFilter(-ragdollIndex);
 
-            NativeArray<float3> points = new NativeArray<float3>(torsoMesh.vertices.Length, Allocator.Temp);
+            NativeArray<float3> points = new NativeArray<float3>(torsoMesh.vertices.Length, Allocator.TempJob);
             for (int i = 0; i < torsoMesh.vertices.Length; i++)
             {
                 points[i] = torsoMesh.vertices[i];
             }
-            BlobAssetReference<Unity.Physics.Collider> collider = ConvexCollider.Create(points, 0.01f);
+            BlobAssetReference<Unity.Physics.Collider> collider = ConvexCollider.Create(
+                points, ConvexHullGenerationParameters.Default, CollisionFilter.Default
+            );
+            points.Dispose();
             collider.Value.Filter = filter;
             torso = CreateDynamicBody(torsoPosition, quaternion.identity, collider, float3.zero, float3.zero, 20.0f);
         }
@@ -107,17 +115,29 @@ public class RagdollDemo : BasePhysicsDemo
             CollisionFilter armUpperFilter = internalCollisions ? layerFilter(layer.UpperArm, layer.Torso | layer.Forearm) : groupFilter(-ragdollIndex);
             CollisionFilter armLowerFilter = internalCollisions ? layerFilter(layer.Forearm, layer.UpperArm | layer.Hand) : groupFilter(-ragdollIndex);
 
-            BlobAssetReference<Unity.Physics.Collider> upperArmCollider = Unity.Physics.CapsuleCollider.Create(new float3(-armLength / 2, 0, 0), new float3(armLength / 2, 0, 0), armRadius,
-                armUpperFilter);
-            BlobAssetReference<Unity.Physics.Collider> foreArmCollider = Unity.Physics.CapsuleCollider.Create(new float3(-armLength / 2, 0, 0), new float3(armLength / 2, 0, 0), armRadius,
-                armLowerFilter);
+            BlobAssetReference<Unity.Physics.Collider> upperArmCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(-armLength / 2, 0, 0),
+                Vertex1 = new float3(armLength / 2, 0, 0),
+                Radius = armRadius
+            }, armUpperFilter);
+            BlobAssetReference<Unity.Physics.Collider> foreArmCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(-armLength / 2, 0, 0),
+                Vertex1 = new float3(armLength / 2, 0, 0),
+                Radius = armRadius
+            }, armLowerFilter);
 
             float handLength = 0.025f;
             float handRadius = 0.055f;
             CollisionFilter handFilter = internalCollisions ? layerFilter(layer.Hand, layer.Forearm) : groupFilter(-ragdollIndex);
 
-            BlobAssetReference<Unity.Physics.Collider> handCollider = Unity.Physics.CapsuleCollider.Create(new float3(-handLength / 2, 0, 0), new float3(handLength / 2, 0, 0), handRadius,
-                handFilter);
+            BlobAssetReference<Unity.Physics.Collider> handCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(-handLength / 2, 0, 0),
+                Vertex1 = new float3(handLength / 2, 0, 0),
+                Radius = handRadius
+            }, handFilter);
 
             for (int i = 0; i < 2; i++)
             {
@@ -188,8 +208,12 @@ public class RagdollDemo : BasePhysicsDemo
         Entity pelvis;
         {
             CollisionFilter filter = internalCollisions ? layerFilter(layer.Pelvis, layer.Torso | layer.Thigh) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.CapsuleCollider.Create(new float3(-pelvisLength / 2.0f, 0, 0), new float3(pelvisLength / 2.0f, 0, 0), pelvisRadius,
-                filter);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(-pelvisLength / 2, 0, 0),
+                Vertex1 = new float3(pelvisLength / 2, 0, 0),
+                Radius = pelvisRadius
+            }, filter);
             pelvis = CreateDynamicBody(pelvisPosition, quaternion.identity, collider, float3.zero, float3.zero, 15.0f);
         }
         entities.Add(pelvis);
@@ -218,20 +242,32 @@ public class RagdollDemo : BasePhysicsDemo
             float thighLength = 0.32f;
             float thighRadius = 0.08f;
             CollisionFilter thighFilter = internalCollisions ? layerFilter(layer.Thigh, layer.Pelvis | layer.Calf) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> thighCollider = Unity.Physics.CapsuleCollider.Create(new float3(0, -thighLength / 2, 0), new float3(0, thighLength / 2, 0), thighRadius,
-                thighFilter);
+            BlobAssetReference<Unity.Physics.Collider> thighCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(0, -thighLength / 2, 0),
+                Vertex1 = new float3(0, thighLength / 2, 0),
+                Radius = thighRadius
+            }, thighFilter);
 
             float calfLength = 0.32f;
             float calfRadius = 0.06f;
             CollisionFilter calfFilter = internalCollisions ? layerFilter(layer.Calf, layer.Thigh | layer.Foot) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> calfCollider = Unity.Physics.CapsuleCollider.Create(new float3(0, -calfLength / 2, 0), new float3(0, calfLength / 2, 0), calfRadius,
-                calfFilter);
+            BlobAssetReference<Unity.Physics.Collider> calfCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(0, -calfLength / 2, 0),
+                Vertex1 = new float3(0, calfLength / 2, 0),
+                Radius = calfRadius
+            }, calfFilter);
 
             float footLength = 0.08f;
             float footRadius = 0.06f;
             CollisionFilter footFilter = internalCollisions ? layerFilter(layer.Foot, layer.Calf) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> footCollider = Unity.Physics.CapsuleCollider.Create(new float3(0, 0, 0), new float3(0, 0, footLength), footRadius,
-                footFilter);
+            BlobAssetReference<Unity.Physics.Collider> footCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            {
+                Vertex0 = new float3(0),
+                Vertex1 = new float3(0, 0, footLength),
+                Radius = footRadius
+            }, footFilter);
 
             for (int i = 0; i < 2; i++)
             {
@@ -335,20 +371,29 @@ public class RagdollDemo : BasePhysicsDemo
         //base.init(float3.zero); // no gravity
 
         // Enable the joint viewer
-//         SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayComponentData
-//         {
-//             DrawJoints = 1
-//         });
+        //         SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayComponentData
+        //         {
+        //             DrawJoints = 1
+        //         });
 
         // Floor
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(20.0f, 0.2f, 20.0f), 0.01f, layerFilter(layer.Ground, 0));
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(
+                new BoxGeometry
+                {
+                    Center = float3.zero,
+                    Orientation = quaternion.identity,
+                    Size = new float3(20.0f, 0.2f, 20.0f),
+                    BevelRadius = 0.01f
+                },
+                layerFilter(layer.Ground, 0)
+            );
             CreateStaticBody(new float3(0, -0.1f, 0), quaternion.identity, collider);
         }
 
         for (int i = 0; i < numberOfRagdolls; i++)
         {
-            CreateRagdoll(new float3(0, i, 0), quaternion.Euler(math.radians(90), math.radians(90), 0), i+1);
+            CreateRagdoll(new float3(0, i, 0), quaternion.Euler(math.radians(90), math.radians(90), 0), i + 1);
         }
     }
 }

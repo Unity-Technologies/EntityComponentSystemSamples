@@ -6,7 +6,7 @@ namespace Unity.Physics.Authoring
 {
     public abstract class BaseJoint : MonoBehaviour
     {
-        public PhysicsBody ConnectedBody;
+        public PhysicsBodyAuthoring ConnectedBody;
 
         public RigidTransform worldFromA => new RigidTransform(gameObject.transform.rotation, gameObject.transform.position);
         public RigidTransform worldFromB => (ConnectedBody == null) ? RigidTransform.identity : new RigidTransform(ConnectedBody.transform.rotation, ConnectedBody.transform.position);

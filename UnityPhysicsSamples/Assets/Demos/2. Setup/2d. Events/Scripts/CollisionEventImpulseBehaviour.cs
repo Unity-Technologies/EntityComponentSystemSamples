@@ -40,7 +40,7 @@ public class CollisionEventImpulseBehaviour : MonoBehaviour, IConvertGameObjectT
 
 
 // This system applies an impulse to any dynamic that collides with a Repulsor.
-// A Repulsor is defined by a PhysicsShape with the `Raise Collision Events` flag ticked and a
+// A Repulsor is defined by a PhysicsShapeAuthoring with the `Raise Collision Events` flag ticked and a
 // CollisionEventImpulse behaviour added.
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 unsafe public class CollisionEventImpulseSystem : JobComponentSystem

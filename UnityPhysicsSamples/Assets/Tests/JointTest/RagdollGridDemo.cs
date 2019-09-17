@@ -17,7 +17,13 @@ public class RagdollGridDemo : BasePhysicsDemo
             DrawJoints = 1
         });
 
-        BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.2f, 1.0f, 0.2f), 0.0f);
+        BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+        {
+            Center = float3.zero,
+            Orientation = quaternion.identity,
+            Size = new float3(0.2f, 1.0f, 0.2f),
+            BevelRadius = 0.0f
+        });
 
         // Make some ragdoll joints
         for (int i = 0; i < 10; i++)
