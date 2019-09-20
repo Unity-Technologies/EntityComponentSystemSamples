@@ -71,8 +71,6 @@ public class ChangeMotionTypeSystem : ComponentSystem
 {
     protected override void OnUpdate()
     {
-        var em = World.Active.EntityManager;
-
         Entities.WithAll<ChangeMotionType, RenderMesh>().ForEach(
             (Entity entity, ref ChangeMotionType modifier) =>
         {
@@ -82,7 +80,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
 
             modifier.LocalTime = modifier.TimeToSwap;
 
-            var renderMesh = em.GetSharedComponentData<RenderMesh>(entity);
+            var renderMesh = World.EntityManager.GetSharedComponentData<RenderMesh>(entity);
             UnityEngine.Material material = renderMesh.material;
             switch (modifier.MotionType)
             {
@@ -93,7 +91,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
                     PostUpdateCommands.RemoveComponent<PhysicsMass>(entity);
 
                     // set the new modifier type and grab the appropriate new render material
-                    material = em.GetSharedComponentData<RenderMesh>(modifier.EntityKinematic).material;
+                    material = World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityKinematic).material;
                     modifier.MotionType = BodyMotionType.Kinematic;
                     break;
                 case BodyMotionType.Kinematic:
@@ -101,7 +99,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
                     PostUpdateCommands.RemoveComponent<PhysicsVelocity>(entity);
 
                     // set the new modifier type and grab the appropriate new render material
-                    material = em.GetSharedComponentData<RenderMesh>(modifier.EntityStatic).material;
+                    material = World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityStatic).material;
                     modifier.MotionType = BodyMotionType.Static;
                     break;
                 case BodyMotionType.Static:
@@ -111,7 +109,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
                     PostUpdateCommands.AddComponent(entity, modifier.DynamicMass);
 
                     // set the new modifier type and grab the appropriate new render material
-                    material = em.GetSharedComponentData<RenderMesh>(modifier.EntityDynamic).material;
+                    material = World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityDynamic).material;
                     modifier.MotionType = BodyMotionType.Dynamic;
                     break;
             }

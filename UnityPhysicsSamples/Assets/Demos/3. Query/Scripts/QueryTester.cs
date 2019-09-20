@@ -260,7 +260,7 @@ namespace Unity.Physics.Extensions
 
         void RunQueries()
         {
-            ref PhysicsWorld world = ref Entities.World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+            ref PhysicsWorld world = ref BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
             float3 origin = transform.position;
             float3 direction = (transform.rotation * Direction) * Distance;
@@ -375,7 +375,7 @@ namespace Unity.Physics.Extensions
             {
                 RunQueries();
 
-                ref PhysicsWorld world = ref Entities.World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+                ref PhysicsWorld world = ref BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
                 // Draw the query
                 Gizmos.color = new Color(0.94f, 0.35f, 0.15f, 0.75f);

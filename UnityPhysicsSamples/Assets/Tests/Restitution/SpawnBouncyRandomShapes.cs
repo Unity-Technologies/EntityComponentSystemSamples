@@ -18,8 +18,8 @@ public class SpawnBouncyRandomShapes : MonoBehaviour
         if (this.enabled)
         {
             // Create entity prefab from the game object hierarchy once
-            Entity sourceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, World.Active);
-            var entityManager = World.Active.EntityManager;
+            Entity sourceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, BasePhysicsDemo.DefaultWorld);
+            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
 
             var positions = new NativeArray<float3>(count, Allocator.Temp);
             var rotations = new NativeArray<quaternion>(count, Allocator.Temp);

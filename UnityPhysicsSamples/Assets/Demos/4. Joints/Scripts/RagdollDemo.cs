@@ -331,6 +331,8 @@ public class RagdollDemo : BasePhysicsDemo
             }
         }
 
+        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+
         // reposition with offset information
         if (entities.Length > 0)
         {
@@ -338,14 +340,14 @@ public class RagdollDemo : BasePhysicsDemo
             for (int i = 0; i < entities.Length; i++)
             {
                 var e = entities[i];
-                center += EntityManager.GetComponentData<Translation>(e).Value;
+                center += entityManager.GetComponentData<Translation>(e).Value;
             }
             center /= entities.Length;
             for (int i = 0; i < entities.Length; i++)
             {
                 var e = entities[i];
-                Translation positionComponent = EntityManager.GetComponentData<Translation>(e);
-                Rotation rotationComponent = EntityManager.GetComponentData<Rotation>(e);
+                Translation positionComponent = entityManager.GetComponentData<Translation>(e);
+                Rotation rotationComponent = entityManager.GetComponentData<Rotation>(e);
 
                 float3 position = positionComponent.Value;
                 quaternion rotation = rotationComponent.Value;
@@ -359,8 +361,8 @@ public class RagdollDemo : BasePhysicsDemo
                 positionComponent.Value = position;
                 rotationComponent.Value = rotation;
 
-                EntityManager.SetComponentData<Translation>(e, positionComponent);
-                EntityManager.SetComponentData<Rotation>(e, rotationComponent);
+                entityManager.SetComponentData<Translation>(e, positionComponent);
+                entityManager.SetComponentData<Rotation>(e, rotationComponent);
             }
         }
     }

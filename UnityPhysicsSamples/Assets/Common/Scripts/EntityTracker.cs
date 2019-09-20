@@ -19,10 +19,10 @@ public class EntityTracker : MonoBehaviour, IReceiveEntity
         {
             try
             {
-                var em = World.Active.EntityManager;
+                var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
 
-                transform.position = em.GetComponentData<Translation>(EntityToTrack).Value;
-                transform.rotation = em.GetComponentData<Rotation>(EntityToTrack).Value;
+                transform.position = entityManager.GetComponentData<Translation>(EntityToTrack).Value;
+                transform.rotation = entityManager.GetComponentData<Rotation>(EntityToTrack).Value;
             }
             catch
             {

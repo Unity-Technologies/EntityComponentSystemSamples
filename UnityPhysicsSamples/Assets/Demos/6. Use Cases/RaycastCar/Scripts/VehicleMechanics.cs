@@ -103,7 +103,6 @@ namespace Demos
             // Make sure the world has finished building before querying it
             CreatePhysicsWorldSystem.FinalJobHandle.Complete();
 
-            var em = World.Active.EntityManager;
             PhysicsWorld world = CreatePhysicsWorldSystem.PhysicsWorld;
 
             float invDt = 1.0f / Time.fixedDeltaTime;
@@ -119,8 +118,8 @@ namespace Demos
                 if (-1 == ceIdx || ceIdx >= world.NumDynamicBodies) return;
 
                 //float ceMass = world.GetMass(ceIdx);
-                float3 cePosition = em.GetComponentData<Translation>(ce).Value;
-                quaternion ceRotation = em.GetComponentData<Rotation>(ce).Value;
+                float3 cePosition = EntityManager.GetComponentData<Translation>(ce).Value;
+                quaternion ceRotation = EntityManager.GetComponentData<Rotation>(ce).Value;
                 float3 ceCenterOfMass = world.GetCenterOfMass(ceIdx);
                 float3 ceUp = math.mul(ceRotation, mechanics.chassisUp);
                 float3 ceForward = math.mul(ceRotation, mechanics.chassisForward);

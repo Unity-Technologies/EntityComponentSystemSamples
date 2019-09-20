@@ -86,7 +86,6 @@ public class CharacterControllerAuthoring : MonoBehaviour, IConvertGameObjectToE
     {
         if (enabled)
         {
-            ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
             var componentData = new CharacterControllerComponentData
             {
                 Gravity = Gravity,
@@ -423,7 +422,7 @@ public class CharacterControllerSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_CharacterControllersGroup.CalculateLength() == 0)
+        if (m_CharacterControllersGroup.CalculateEntityCount() == 0)
             return inputDeps;
 
         var chunks = m_CharacterControllersGroup.CreateArchetypeChunkArray(Allocator.TempJob);

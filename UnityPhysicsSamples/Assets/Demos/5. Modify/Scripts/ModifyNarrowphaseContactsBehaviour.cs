@@ -56,7 +56,7 @@ public class ModifyNarrowphaseContactsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_ContactModifierGroup.CalculateLength() == 0)
+        if (m_ContactModifierGroup.CalculateEntityCount() == 0)
         {
             return inputDeps;
         }

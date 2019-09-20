@@ -81,7 +81,8 @@ class LoaderScene : MonoBehaviour
 
     internal void LoadLevel(int indexOffset)
     {
-        World.Active.EntityManager.DestroyEntity(World.Active.EntityManager.UniversalQuery);
+        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+        entityManager.DestroyEntity(entityManager.UniversalQuery);
         var i = m_SceneData.FindIndex(s => s.Index == SceneManager.GetActiveScene().buildIndex);
         i += indexOffset;
         i = (i % m_SceneData.Count + m_SceneData.Count) % m_SceneData.Count;

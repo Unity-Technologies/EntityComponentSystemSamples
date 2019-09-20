@@ -16,7 +16,18 @@ using Mesh = UnityEngine.Mesh;
 /// </summary>
 public class BasePhysicsDemo : MonoBehaviour
 {
-    public static EntityManager EntityManager => World.Active.EntityManager;
+    public static World DefaultWorld
+    {
+        get
+        {
+#if UNITY_ENTITIES_0_2_0_OR_NEWER
+            return World.DefaultGameObjectInjectionWorld;
+#else
+            return World.Active;
+#endif
+        }
+    }
+
     protected Entity stepper;
 
     public Material dynamicMaterial;
@@ -35,7 +46,7 @@ public class BasePhysicsDemo : MonoBehaviour
         cameraControl.dragSpeed = 4.0f;
 
         // Create the stepper
-        EntityManager entityManager = EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
         ComponentType[] componentTypes = {
             typeof(PhysicsStep),
             typeof(Unity.Physics.Authoring.PhysicsDebugDisplayData),
@@ -70,7 +81,7 @@ public class BasePhysicsDemo : MonoBehaviour
     private Entity CreateBody(float3 position, quaternion orientation, BlobAssetReference<Collider> collider,
         float3 linearVelocity, float3 angularVelocity, float mass, bool isDynamic)
     {
-        EntityManager entityManager = EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
 
         Entity entity = entityManager.CreateEntity(new ComponentType[] { });
 
@@ -139,7 +150,7 @@ public class BasePhysicsDemo : MonoBehaviour
 
     protected unsafe Entity CreateJoint(BlobAssetReference<JointData> jointData, Entity entityA, Entity entityB, bool enableCollision = false)
     {
-        EntityManager entityManager = World.Active.EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
         ComponentType[] componentTypes = new ComponentType[1];
         componentTypes[0] = typeof(PhysicsJoint);
         Entity jointEntity = entityManager.CreateEntity(componentTypes);
@@ -159,12 +170,13 @@ public class BasePhysicsDemo : MonoBehaviour
 
     protected void SetDebugDisplay(Unity.Physics.Authoring.PhysicsDebugDisplayData debugDisplay)
     {
-        EntityManager.SetComponentData<Unity.Physics.Authoring.PhysicsDebugDisplayData>(stepper, debugDisplay);
+        var entityManager = DefaultWorld.EntityManager;
+        entityManager.SetComponentData<Unity.Physics.Authoring.PhysicsDebugDisplayData>(stepper, debugDisplay);
     }
 
     protected RigidTransform GetBodyTransform(Entity entity)
     {
-        EntityManager entityManager = EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
         return new RigidTransform(
             entityManager.GetComponentData<Rotation>(entity).Value,
             entityManager.GetComponentData<Translation>(entity).Value);

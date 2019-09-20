@@ -1,3 +1,11 @@
+## [Samples Project for 0.2.4-preview] - 2019-09-19
+
+### Changes
+
+* Fixed the issue with collider cast in character controller assuming ordered hits, potentially tunneling through objects.
+* When opening the Project with Unity `2019.3` below `0b5` it might be required to update the *Lightweight RP* package (com.unity.render-pipelines.lightweight) to version `7.0.1`  and reimport the `Assets/Common` folder.
+
+
 ## [Samples Project for 0.2.2-preview] - 2019-09-06
 
 ### Changes

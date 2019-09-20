@@ -66,8 +66,6 @@ public class ChangeColliderTypeSystem : ComponentSystem
 {
     protected unsafe override void OnUpdate()
     {
-        var em = World.Active.EntityManager;
-
         Entities.WithAll<PhysicsCollider, ChangeColliderType, RenderMesh>().ForEach( 
             (Entity entity, ref ChangeColliderType modifier) =>
         {
@@ -76,16 +74,16 @@ public class ChangeColliderTypeSystem : ComponentSystem
             if (modifier.LocalTime > 0.0f) return;
 
             modifier.LocalTime = modifier.TimeToSwap;
-            var collider = em.GetComponentData<PhysicsCollider>(entity);
+            var collider = World.EntityManager.GetComponentData<PhysicsCollider>(entity);
             if (collider.ColliderPtr->Type == modifier.ColliderA.ColliderPtr->Type)
             {
                 PostUpdateCommands.SetComponent(entity,modifier.ColliderB);
-                PostUpdateCommands.SetSharedComponent(entity,em.GetSharedComponentData<RenderMesh>(modifier.EntityB));
+                PostUpdateCommands.SetSharedComponent(entity, World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityB));
             }
             else
             {
                 PostUpdateCommands.SetComponent(entity, modifier.ColliderA);
-                PostUpdateCommands.SetSharedComponent(entity, em.GetSharedComponentData<RenderMesh>(modifier.EntityA));
+                PostUpdateCommands.SetSharedComponent(entity, World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityA));
             }
         });
     }

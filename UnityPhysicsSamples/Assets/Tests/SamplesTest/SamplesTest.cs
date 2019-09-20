@@ -11,6 +11,19 @@ namespace Unity.Physics.Samples.Test
     [TestFixture]
     class UnityPhysicsSamplesTest
     {
+        public static World DefaultWorld
+        {
+            private set { }
+            get
+            {
+#if UNITY_ENTITIES_0_2_0_OR_NEWER
+                return World.DefaultGameObjectInjectionWorld;
+#else
+                return World.Active;
+#endif
+            }
+        }
+
         protected static IEnumerable GetScenes()
         {
             var sceneCount = SceneManager.sceneCountInBuildSettings;
@@ -50,7 +63,7 @@ namespace Unity.Physics.Samples.Test
 
         protected static void EntitiesCleanup()
         {
-            var entityManager = World.Active.EntityManager;
+            var entityManager = DefaultWorld.EntityManager;
             var entities = entityManager.GetAllEntities();
             entityManager.DestroyEntity(entities);
             entities.Dispose();

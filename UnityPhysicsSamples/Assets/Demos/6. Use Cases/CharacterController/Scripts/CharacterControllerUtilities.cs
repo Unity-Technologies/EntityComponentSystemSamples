@@ -141,7 +141,7 @@ public static class CharacterControllerUtilities
         for (int i = 0; i < distanceHitsCollector.NumHits; i++)
         {
             DistanceHit hit = distanceHitsCollector.AllHits[i];
-            CreateConstraint(stepInput.World, stepInput.DeltaTime, stepInput.Gravity, stepInput.Up,
+            CreateConstraint(stepInput.World, stepInput.Up,
                 hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal, hit.Distance,
                 stepInput.SkinWidth, maxSlopeCos, ref constraints, ref numConstraints);
         }
@@ -282,7 +282,7 @@ public static class CharacterControllerUtilities
                 for (int hitIndex = 0; hitIndex < collector.NumHits; hitIndex++)
                 {
                     ColliderCastHit hit = collector.AllHits[hitIndex];
-                    CreateConstraint(stepInput.World, stepInput.DeltaTime, gravity, stepInput.Up,
+                    CreateConstraint(stepInput.World, stepInput.Up,
                         hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal, hit.Fraction * math.length(lastDisplacement),
                         stepInput.SkinWidth, maxSlopeCos, ref constraints, ref numCastConstraints);
                 }
@@ -328,27 +328,30 @@ public static class CharacterControllerUtilities
                 };
 
                 world.CastCollider(input, ref newCollector);
+                float minFraction = float.MaxValue;
 
                 for (int hitIndex = 0; hitIndex < newCollector.NumHits; hitIndex++)
                 {
                     ColliderCastHit hit = newCollector.AllHits[hitIndex];
-
-                    bool found = false;
-                    for (int constraintIndex = 0; constraintIndex < numConstraints; constraintIndex++)
+                    if (hit.Fraction < minFraction)
                     {
-                        SurfaceConstraintInfo constraint = constraints[constraintIndex];
-                        if (constraint.RigidBodyIndex == hit.RigidBodyIndex &&
-                            constraint.ColliderKey.Equals(hit.ColliderKey))
+                        bool found = false;
+                        for (int constraintIndex = 0; constraintIndex < numConstraints; constraintIndex++)
                         {
-                            found = true;
-                            break;
+                            SurfaceConstraintInfo constraint = constraints[constraintIndex];
+                            if (constraint.RigidBodyIndex == hit.RigidBodyIndex &&
+                                constraint.ColliderKey.Equals(hit.ColliderKey))
+                            {
+                                found = true;
+                                break;
+                            }
                         }
-                    }
 
-                    if (!found)
-                    {
-                        newContactIndex = hitIndex;
-                        break;
+                        if (!found)
+                        {
+                            minFraction = hit.Fraction;
+                            newContactIndex = hitIndex;
+                        }
                     }
                 }
             }
@@ -375,7 +378,7 @@ public static class CharacterControllerUtilities
         linearVelocity = newVelocity;
     }
 
-    private static void CreateConstraintFromHit(PhysicsWorld world, float3 gravity, float deltaTime, int rigidBodyIndex, ColliderKey colliderKey,
+    private static void CreateConstraintFromHit(PhysicsWorld world, int rigidBodyIndex, ColliderKey colliderKey,
         float3 hitPosition, float3 normal, float distance, float skinWidth, out SurfaceConstraintInfo constraint)
     {
         bool bodyIsDynamic = 0 <= rigidBodyIndex && rigidBodyIndex < world.NumDynamicBodies;
@@ -390,7 +393,7 @@ public static class CharacterControllerUtilities
             ColliderKey = colliderKey,
             HitPosition = hitPosition,
             Velocity = bodyIsDynamic ?
-                world.GetLinearVelocity(rigidBodyIndex, hitPosition) - world.MotionDatas[rigidBodyIndex].GravityFactor * gravity * deltaTime :
+                world.GetLinearVelocity(rigidBodyIndex, hitPosition) :
                 float3.zero,
             Priority = bodyIsDynamic ? 1 : 0
         };
@@ -437,11 +440,11 @@ public static class CharacterControllerUtilities
         }
     }
 
-    private static void CreateConstraint(PhysicsWorld world, float deltaTime, float3 gravity, float3 up,
+    private static void CreateConstraint(PhysicsWorld world, float3 up,
         int hitRigidBodyIndex, ColliderKey hitColliderKey, float3 hitPosition, float3 hitSurfaceNormal, float hitDistance,
         float skinWidth, float maxSlopeCos, ref NativeArray<SurfaceConstraintInfo> constraints, ref int numConstraints)
     {
-        CreateConstraintFromHit(world, gravity, deltaTime, hitRigidBodyIndex, hitColliderKey, hitPosition,
+        CreateConstraintFromHit(world, hitRigidBodyIndex, hitColliderKey, hitPosition,
             hitSurfaceNormal, hitDistance, skinWidth, out SurfaceConstraintInfo constraint);
 
         // Check if max slope plane is required

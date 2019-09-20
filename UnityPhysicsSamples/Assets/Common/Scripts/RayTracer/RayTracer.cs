@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Unity.Entities;
 
 namespace Unity.Physics.Extensions
 {
@@ -90,12 +91,12 @@ namespace Unity.Physics.Extensions
                 ExpectingResults = false;
             }
 
-            if (Entities.World.Active == null)
+            if (BasePhysicsDemo.DefaultWorld == null)
             {
                 return;
             }
 
-            RayTracerSystem rbs = Entities.World.Active.GetExistingSystem<RayTracerSystem>();
+            RayTracerSystem rbs = BasePhysicsDemo.DefaultWorld.GetExistingSystem<RayTracerSystem>();
             if (rbs == null || !rbs.IsEnabled)
             {
                 return;

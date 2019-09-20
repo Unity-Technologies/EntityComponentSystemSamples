@@ -48,7 +48,7 @@ public class CameraSmoothTrack : MonoBehaviour
             newPositionTo = LookTo.transform.position;
         }
 
-        PhysicsWorld world = World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+        PhysicsWorld world = BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
         // check barrier
         {
             var rayInput = new RaycastInput
@@ -67,11 +67,11 @@ public class CameraSmoothTrack : MonoBehaviour
         if (Target != null)
         {
             // add velocity
-            var em = World.Active.EntityManager;
-            var e = Target.GetComponent<GameObjectEntity>();
-            if ((em != null) && (e != null) && (e.Entity != Entity.Null))
+            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+            var goEntity = Target.GetComponent<GameObjectEntity>();
+            if ((entityManager != null) && (goEntity != null) && (goEntity.Entity != Entity.Null))
             {
-                Vector3 lv = world.GetLinearVelocity(world.GetRigidBodyIndex(e.Entity));
+                Vector3 lv = world.GetLinearVelocity(world.GetRigidBodyIndex(goEntity.Entity));
                 lv *= Time.fixedDeltaTime;
                 newPositionFrom += lv;
                 newPositionTo += lv;

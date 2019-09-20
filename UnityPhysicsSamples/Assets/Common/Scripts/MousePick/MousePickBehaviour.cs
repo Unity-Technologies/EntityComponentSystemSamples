@@ -214,7 +214,7 @@ namespace Unity.Physics.Extensions
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_MouseGroup.CalculateLength() == 0)
+            if (m_MouseGroup.CalculateEntityCount() == 0)
             {
                 return inputDeps;
             }
@@ -280,7 +280,7 @@ namespace Unity.Physics.Extensions
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_MouseGroup.CalculateLength() == 0)
+            if (m_MouseGroup.CalculateEntityCount() == 0)
             {
                 return inputDeps;
             }

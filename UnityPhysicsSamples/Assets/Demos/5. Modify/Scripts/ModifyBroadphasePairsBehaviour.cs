@@ -40,7 +40,7 @@ public class ModifyBroadphasePairsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_PairModifierGroup.CalculateLength() == 0)
+        if (m_PairModifierGroup.CalculateEntityCount() == 0)
         {
             return inputDeps;
         }
