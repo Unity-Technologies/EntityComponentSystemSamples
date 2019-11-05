@@ -30,6 +30,9 @@ public class SpawnRandomAsteroids : MonoBehaviour
             BlobAssetReference<Collider> sourceCollider = entityManager.GetComponentData<PhysicsCollider>(sourceEntity).Value;
             entityManager.Instantiate(sourceEntity, entities);
 
+            Random random = new Random();
+            random.InitState(10);
+            
             for (int i = 0; i < count; i++)
             {
                 var instance = entities[i];
@@ -40,8 +43,6 @@ public class SpawnRandomAsteroids : MonoBehaviour
                 {
                     var bodyMass = entityManager.GetComponentData<PhysicsMass>(instance);
                     
-                    Random random = new Random();
-                    random.InitState(10);
                     bodyMass.InverseMass = random.NextFloat(bodyMass.InverseMass, bodyMass.InverseMass * 4f);
 
                     entityManager.SetComponentData(instance, bodyMass);
