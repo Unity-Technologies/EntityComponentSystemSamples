@@ -22,20 +22,24 @@ public class SpawnRandomAsteroids : MonoBehaviour
             Entity sourceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, BasePhysicsDemo.DefaultWorld);
             var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
 
+            var entities = new NativeArray<Entity>(count, Allocator.Temp);
             var positions = new NativeArray<float3>(count, Allocator.Temp);
             var rotations = new NativeArray<quaternion>(count, Allocator.Temp);
             RandomPointsOnCircle(transform.position, range, ref positions, ref rotations);
 
             BlobAssetReference<Collider> sourceCollider = entityManager.GetComponentData<PhysicsCollider>(sourceEntity).Value;
+            entityManager.Instantiate(sourceEntity, entities);
+
             for (int i = 0; i < count; i++)
             {
-                var instance = entityManager.Instantiate(sourceEntity);
+                var instance = entities[i];
                 entityManager.SetComponentData(instance, new Translation { Value = positions[i] });
                 entityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
                 entityManager.SetComponentData(instance, new PhysicsCollider { Value = sourceCollider });
                 if (entityManager.HasComponent<PhysicsMass>(instance))
                 {
                     var bodyMass = entityManager.GetComponentData<PhysicsMass>(instance);
+                    
                     Random random = new Random();
                     random.InitState(10);
                     bodyMass.InverseMass = random.NextFloat(bodyMass.InverseMass, bodyMass.InverseMass * 4f);
@@ -44,6 +48,7 @@ public class SpawnRandomAsteroids : MonoBehaviour
                 }
             }
 
+            entities.Dispose();
             positions.Dispose();
             rotations.Dispose();
         }
