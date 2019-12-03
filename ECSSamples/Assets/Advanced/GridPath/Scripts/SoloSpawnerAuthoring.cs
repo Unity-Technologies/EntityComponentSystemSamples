@@ -4,9 +4,9 @@ using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
 [RequiresEntityConversion]
-[AddComponentMenu("DOTS Samples/GridPath/OnGridGenerator")]
-[ConverterVersion("joe", 1)]
-public class OnGridGeneratorAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+[AddComponentMenu("DOTS Samples/GridPath/Solo Spawner")]
+[ConverterVersion("macton", 2)]
+public class SoloSpawnerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
 {
     public GameObject Prefab;
     public float CoolDownSeconds;
@@ -15,7 +15,7 @@ public class OnGridGeneratorAuthoring : MonoBehaviour, IConvertGameObjectToEntit
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        dstManager.AddComponentData(entity, new OnGridGenerator
+        dstManager.AddComponentData(entity, new SoloSpawner
         {
             Prefab = conversionSystem.GetPrimaryEntity(Prefab),
             CoolDownSeconds = CoolDownSeconds,

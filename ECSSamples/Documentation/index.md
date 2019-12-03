@@ -29,7 +29,7 @@ The Entity Debugger also displays various information about the underlying ECS d
 
 This version of Entities is compatible with the following versions of the Unity __Editor__:
 
-* 2019.3.0b3 and later
+* 2019.3.0b11 and later
 
 
 ## Samples contents

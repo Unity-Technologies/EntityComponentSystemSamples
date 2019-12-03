@@ -1,7 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
-public struct OnGridGenerator : IComponentData
+public struct SoloSpawner : IComponentData
 {
     public Entity Prefab;
     public float CoolDownSeconds;
