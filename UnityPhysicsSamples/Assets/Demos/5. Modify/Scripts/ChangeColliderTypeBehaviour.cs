@@ -1,14 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Jobs;
-using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Rendering;
-using Unity.Transforms;
 using UnityEngine;
-using SphereCollider = Unity.Physics.SphereCollider;
 
 public struct ChangeColliderType : IComponentData
 {
@@ -69,7 +64,7 @@ public class ChangeColliderTypeSystem : ComponentSystem
         Entities.WithAll<PhysicsCollider, ChangeColliderType, RenderMesh>().ForEach( 
             (Entity entity, ref ChangeColliderType modifier) =>
         {
-            modifier.LocalTime -= Time.fixedDeltaTime;
+            modifier.LocalTime -= UnityEngine.Time.fixedDeltaTime;
 
             if (modifier.LocalTime > 0.0f) return;
 

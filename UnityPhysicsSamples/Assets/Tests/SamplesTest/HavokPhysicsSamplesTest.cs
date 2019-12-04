@@ -13,7 +13,7 @@ namespace Unity.Physics.Samples.Test
     {
         public void SetSimulationType(SimulationType simulationType, Scene scene, LoadSceneMode mode)
         {
-            var entityManager = DefaultWorld.EntityManager;
+            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             var entities = entityManager.GetAllEntities();
             foreach (var entity in entities)
             {

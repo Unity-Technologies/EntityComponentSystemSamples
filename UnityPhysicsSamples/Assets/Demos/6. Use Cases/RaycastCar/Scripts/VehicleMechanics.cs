@@ -105,8 +105,6 @@ namespace Demos
 
             PhysicsWorld world = CreatePhysicsWorldSystem.PhysicsWorld;
 
-            float invDt = 1.0f / Time.fixedDeltaTime;
-
             Entities.ForEach((VehicleMechanics mechanics) =>
             {
                 if (mechanics.wheels.Count == 0) return;
@@ -327,6 +325,4 @@ namespace Demos
     }
 
     #endregion
-
-
 }

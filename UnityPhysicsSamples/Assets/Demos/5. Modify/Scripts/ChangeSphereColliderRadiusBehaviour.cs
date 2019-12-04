@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -15,6 +13,10 @@ public struct ChangeSphereColliderRadius : IComponentData
     public float Max;
     public float Target;
 }
+
+// In general, you should treat colliders as immutable data at run-time, as several bodies might share the same collider.
+// If you plan to modify mesh or convex colliders at run-time, remember to tick the Force Unique box on the PhysicsShapeAuthoring component.
+// This guarantees that the PhysicsCollider component will have a unique instance in all cases.
 
 // Converted in PhysicsSamplesConversionSystem so Physics and Graphics conversion is over
 public class ChangeSphereColliderRadiusBehaviour : MonoBehaviour//, IConvertGameObjectToEntity

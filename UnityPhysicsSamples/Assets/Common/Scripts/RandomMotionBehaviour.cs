@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -94,11 +92,11 @@ public class RandomMotionSystem : JobComponentSystem
 
         var physicsStep = m_PhysicsGroup.GetSingleton<PhysicsStep>();
 
-        var job = new RandomMotionJob()
+        var job = new RandomMotionJob
         {
             gravity = physicsStep.Gravity,
-            deltaTime = Time.fixedDeltaTime,
-            random = random,
+            deltaTime = UnityEngine.Time.fixedDeltaTime,
+            random = random
         };
         var jobHandle = job.Schedule(this, inputDeps);
 

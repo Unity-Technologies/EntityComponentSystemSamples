@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -71,7 +69,7 @@ public class PlatformMotionSystem : JobComponentSystem
     {
         Random random = new Random();
 
-        var job = new PlatformMotionJob() { deltaTime = Time.fixedDeltaTime, random = random };
+        var job = new PlatformMotionJob { deltaTime = UnityEngine.Time.fixedDeltaTime, random = random };
         var jobHandle = job.ScheduleSingle(this, inputDeps);
 
         return jobHandle;

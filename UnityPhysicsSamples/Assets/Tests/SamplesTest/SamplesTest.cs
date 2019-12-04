@@ -11,18 +11,7 @@ namespace Unity.Physics.Samples.Test
     [TestFixture]
     class UnityPhysicsSamplesTest
     {
-        public static World DefaultWorld
-        {
-            private set { }
-            get
-            {
-#if UNITY_ENTITIES_0_2_0_OR_NEWER
-                return World.DefaultGameObjectInjectionWorld;
-#else
-                return World.Active;
-#endif
-            }
-        }
+        static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
 
         protected static IEnumerable GetScenes()
         {

@@ -338,7 +338,7 @@ namespace Unity.Physics.Extensions
 
                     const float elasticity = 0.1f;
                     const float damping = 0.5f;
-                    deltaVelocity = -pointDiff * (elasticity / Time.fixedDeltaTime) - damping * relativeVelocityInWorld;
+                    deltaVelocity = -pointDiff * (elasticity / UnityEngine.Time.fixedDeltaTime) - damping * relativeVelocityInWorld;
                 }
 
                 // Build effective mass matrix in world space
@@ -374,7 +374,7 @@ namespace Unity.Physics.Extensions
 
                 // Clip the impulse
                 const float maxAcceleration = 250.0f;
-                float maxImpulse = math.rcp(massComponent.InverseMass) * Time.fixedDeltaTime * maxAcceleration;
+                float maxImpulse = math.rcp(massComponent.InverseMass) * UnityEngine.Time.fixedDeltaTime * maxAcceleration;
                 impulse *= math.min(1.0f, math.sqrt((maxImpulse * maxImpulse) / math.lengthsq(impulse)));
 
                 // Apply the impulse

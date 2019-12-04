@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -40,7 +38,7 @@ public class ForceFieldBehaviour : MonoBehaviour, IConvertGameObjectToEntity
     {
         if (enabled)
         {
-            dstManager.AddComponentData<ForceField>(entity, new ForceField()
+            dstManager.AddComponentData(entity, new ForceField
             {
                 enabled = componentEnabled ? 1 : 0,
                 center = transform.position,
@@ -119,7 +117,7 @@ public class ForceFieldSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var job = new ForceFieldJob { dt = Time.fixedDeltaTime };
+        var job = new ForceFieldJob { dt = UnityEngine.Time.fixedDeltaTime };
         return job.Schedule(this, inputDeps);
     }
 }
