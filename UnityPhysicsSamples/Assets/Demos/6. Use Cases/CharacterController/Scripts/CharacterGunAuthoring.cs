@@ -1,9 +1,7 @@
-﻿using Unity.Physics.Systems;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using RaycastHit = Unity.Physics.RaycastHit;
 using System.Collections.Generic;
 using System;
 using Unity.Physics;
@@ -72,7 +70,7 @@ public class CharacterGunOneToManyInputSystem : ComponentSystem
     {
         var input = m_CharacterGunInputQuery.GetSingleton<CharacterGunInput>();
 
-        float dt = Time.fixedDeltaTime;
+        float dt = UnityEngine.Time.fixedDeltaTime;
         
         Entities.ForEach(
             (ref LocalToWorld gunTransform, ref Rotation gunRotation, ref CharacterGun gun) =>
@@ -98,9 +96,9 @@ public class CharacterGunOneToManyInputSystem : ComponentSystem
                     {
                         var e = PostUpdateCommands.Instantiate(gun.Bullet);
 
-                        Translation position = new Translation() { Value = gunTransform.Position + gunTransform.Forward };
-                        Rotation rotation = new Rotation() { Value = gunRotation.Value };
-                        PhysicsVelocity velocity = new PhysicsVelocity()
+                        Translation position = new Translation { Value = gunTransform.Position + gunTransform.Forward };
+                        Rotation rotation = new Rotation { Value = gunRotation.Value };
+                        PhysicsVelocity velocity = new PhysicsVelocity
                         {
                             Linear = gunTransform.Forward * gun.Strength,
                             Angular = float3.zero

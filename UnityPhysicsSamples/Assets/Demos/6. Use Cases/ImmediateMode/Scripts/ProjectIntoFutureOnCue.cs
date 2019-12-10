@@ -43,13 +43,13 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
 
     void clearTrails()
     {
-        var em = World.Active.EntityManager;
-        var eA = em.GetAllEntities(Allocator.Temp);
+        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+        var eA = entityManager.GetAllEntities(Allocator.Temp);
         foreach (var e in eA)
         {
-            if (em.HasComponent<ProjectIntoFutureTrail>(e))
+            if (entityManager.HasComponent<ProjectIntoFutureTrail>(e))
             {
-                em.DestroyEntity(e);
+                entityManager.DestroyEntity(e);
             }
         }
         eA.Dispose();
@@ -59,7 +59,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
     {
         //UnityEngine.Material material = new UnityEngine.Material(Shader.Find("Lightweight-Default"));
         //material.color = color;
-        var em = World.Active.EntityManager;
+        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
         const float minVelocitySq = 0.05f;
         for (int i = 0; i < localWorld.DynamicBodies.Length; i++)
         {
@@ -67,32 +67,32 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
             {
                 var body = localWorld.DynamicBodies[i];
 
-                var ghost = em.Instantiate(body.Entity);
+                var ghost = entityManager.Instantiate(body.Entity);
 
-                em.RemoveComponent<PhysicsCollider>(ghost);
-                em.RemoveComponent<PhysicsVelocity>(ghost);
+                entityManager.RemoveComponent<PhysicsCollider>(ghost);
+                entityManager.RemoveComponent<PhysicsVelocity>(ghost);
 
-                em.AddComponentData(ghost, new ProjectIntoFutureTrail() );
+                entityManager.AddComponentData(ghost, new ProjectIntoFutureTrail() );
 
-                em.SetSharedComponentData(ghost, ghostMaterial);
+                entityManager.SetSharedComponentData(ghost, ghostMaterial);
 
-                Translation position = em.GetComponentData<Translation>(ghost);
+                Translation position = entityManager.GetComponentData<Translation>(ghost);
                 position.Value = body.WorldFromBody.pos;
-                em.SetComponentData(ghost, position);
+                entityManager.SetComponentData(ghost, position);
 
-                Rotation rotation = em.GetComponentData<Rotation>(ghost);
+                Rotation rotation = entityManager.GetComponentData<Rotation>(ghost);
                 rotation.Value = body.WorldFromBody.rot;
-                em.SetComponentData(ghost, rotation);
+                entityManager.SetComponentData(ghost, rotation);
 
                 var scale = new NonUniformScale() { Value = 0.05f };
-                if (em.HasComponent<NonUniformScale>(ghost))
+                if (entityManager.HasComponent<NonUniformScale>(ghost))
                 {
-                    scale.Value *= em.GetComponentData<NonUniformScale>(ghost).Value;
-                    em.SetComponentData(ghost, scale);
+                    scale.Value *= entityManager.GetComponentData<NonUniformScale>(ghost).Value;
+                    entityManager.SetComponentData(ghost, scale);
                 }
                 else
                 {
-                    em.AddComponentData(ghost, scale);
+                    entityManager.AddComponentData(ghost, scale);
                 }
             }
         }
@@ -115,7 +115,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
             return;
         }
 
-        ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+        ref PhysicsWorld world = ref BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
         var localWorld = (PhysicsWorld)world.Clone();
         localWorld.SetLinearVelocity(world.GetRigidBodyIndex(WhiteBallEntity), GetVelocityFromSliders());
@@ -135,7 +135,7 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
         try
         {
             // Sync the collision world first
-            localWorld.CollisionWorld.ScheduleUpdateDynamicLayer(ref localWorld, stepInput.TimeStep, stepInput.ThreadCountHint, new JobHandle()).Complete();
+            localWorld.CollisionWorld.ScheduleUpdateDynamicLayer(ref localWorld, stepInput.TimeStep, stepInput.Gravity, stepInput.ThreadCountHint, new JobHandle()).Complete();
 
             Color color = Color.red;
             for (int i = 0; i < numSteps; i++)
@@ -181,9 +181,10 @@ public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
     {
         if (WhiteBallEntity != Entity.Null)
         {
-            var velocity = World.Active.EntityManager.GetComponentData<PhysicsVelocity>(WhiteBallEntity);
+            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+            var velocity = entityManager.GetComponentData<PhysicsVelocity>(WhiteBallEntity);
             velocity.Linear = GetVelocityFromSliders();
-            World.Active.EntityManager.SetComponentData(WhiteBallEntity, velocity);
+            entityManager.SetComponentData(WhiteBallEntity, velocity);
             clearTrails();
             NeedUpdate = false;
         }

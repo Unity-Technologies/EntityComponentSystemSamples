@@ -38,7 +38,7 @@ class VehicleSteeringSystem : ComponentSystem
                     switch (cameraSettings.OrientationType)
                     {
                         case VehicleCameraOrientation.Relative:
-                            references.CameraOrbit.transform.rotation *= quaternion.Euler(0, z * Time.deltaTime * cameraSettings.OrbitAngularSpeed, 0);
+                            references.CameraOrbit.transform.rotation *= quaternion.Euler(0, z * UnityEngine.Time.deltaTime * cameraSettings.OrbitAngularSpeed, 0);
                             break;
                         case VehicleCameraOrientation.Absolute:
                             references.CameraOrbit.transform.rotation = quaternion.Euler(0f, z * math.PI, 0f);

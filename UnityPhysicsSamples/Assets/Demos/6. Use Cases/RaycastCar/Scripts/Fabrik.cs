@@ -122,12 +122,12 @@ public class Fabrik : MonoBehaviour, IReceiveEntity
         if (targetEntities.Count > 0)
         {
             positionTargets = new Vector3[targetEntities.Count];
-            var em = World.Active.EntityManager;
+            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
             for (int i = 0; i < targetEntities.Count; ++i)
             {
                 try
                 {
-                    var component = em.GetComponentData<Translation>(targetEntities[i]);
+                    var component = entityManager.GetComponentData<Translation>(targetEntities[i]);
                     positionTargets[i] = component.Value;
                 }
                 catch

@@ -1,9 +1,28 @@
+## [Samples Project for 0.2.5-preview] - 2019-12-04
+
+### Changes
+* Added `CharacterControllerAuthoring.MaxMovementSpeed` to avoid large velocities coming from penetration recovery.
+* Improved the behavior of character controller walking on multiple objects or mesh triangles:
+    * Fixed the problems with losing support state
+    * Fixed the problems with being unstable due to interaction with steep slopes
+    * Improved penetration recovery
+* Character controller is now using native lists instead of native arrays for constraints and query hits to avoid large preallocations.
+* Planet gravity sample now correctly randomizes mass of orbiting bodies.
+
+## [Samples Project for 0.2.4-preview] - 2019-09-19
+
+### Changes
+
+* Fixed the issue with collider cast in character controller assuming ordered hits, potentially tunneling through objects.
+* When opening the Project with Unity `2019.3` below `0b5` it might be required to update the *Lightweight RP* package (com.unity.render-pipelines.lightweight) to version `7.0.1`  and reimport the `Assets/Common` folder.
+
+
 ## [Samples Project for 0.2.2-preview] - 2019-09-06
 
 ### Changes
 
 * Character controller changes include:
-    - Character controller demo scenes merged into single scene. 
+    - Character controller demo scenes merged into single scene.
     - Character controller can now use any collision filter, as opposed to previously being forced to set it to 'Nothing'.
     - Default max slope to climb is now 60 degrees.
     - Character controller can now use any collider, instead of previously being forced to use capsule.
@@ -49,7 +68,7 @@
    - *Hybrid Renderer* (com.unity.rendering.hybrid) has to be upgraded to `0.1.1-preview`
    - *Lightweight RP* (com.unity.render-pipelines.lightweight) has to be updated to version `7.0.1`
    - A reimport of the materials might be required when this is done while the Unity Editor is opened.
-   
+
 
 ## [Samples Project for 0.2.0-preview] - 2019-07-18
 
@@ -73,7 +92,7 @@
 * `2c2. Material Properties - Restitution` shows the changes to the restitution model, with complex bodies bouncing more with high restitution values.
 * `2c3. Material Properties - Collision Filters` shows the filtering setup between potentially colliding objects
 * `2d1. Events - Triggers` shows a simple trigger use case that changes a bodies gravity fractor when inside the volume.
-    - The more advanced trigger use cases capture state such as Entering, Overlapping and Leaving a trigger volume. 
+    - The more advanced trigger use cases capture state such as Entering, Overlapping and Leaving a trigger volume.
     - `2d1. Triggers - Change Material` shows set of triggers that change a bodies material when they enter the trigger volume.
     - `2d2. Triggers - Portals` shows set of triggers that transform a body to a new location and orientation while preserving local velocity.
     - `2d3. Triggers - Force Field` shows a trigger volume acting and a tornado moving through the world.
@@ -91,7 +110,7 @@
     - Collider Edges can be display independent of solid Colliders.
     - Trigger events draw connecting line between overlapping bodies.
     - Collision events draw impulse half-way between colliding bodies.
-    
+
 * Various tests have been added to confirm API changes and as comparisons for WIP and the upcoming Havok Physics release.
 
 

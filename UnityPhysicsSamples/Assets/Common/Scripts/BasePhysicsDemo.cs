@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using Unity.Physics;
-using Unity.Physics.Extensions;
+using System.Reflection;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
+using Unity.Physics.Extensions;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
@@ -16,7 +18,8 @@ using Mesh = UnityEngine.Mesh;
 /// </summary>
 public class BasePhysicsDemo : MonoBehaviour
 {
-    public static EntityManager EntityManager => World.Active.EntityManager;
+    public static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
+
     protected Entity stepper;
 
     public Material dynamicMaterial;
@@ -35,7 +38,7 @@ public class BasePhysicsDemo : MonoBehaviour
         cameraControl.dragSpeed = 4.0f;
 
         // Create the stepper
-        EntityManager entityManager = EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
         ComponentType[] componentTypes = {
             typeof(PhysicsStep),
             typeof(Unity.Physics.Authoring.PhysicsDebugDisplayData),
@@ -67,10 +70,22 @@ public class BasePhysicsDemo : MonoBehaviour
     // Object creation
     //
 
-    private Entity CreateBody(float3 position, quaternion orientation, BlobAssetReference<Collider> collider,
+    // TODO: add proper utility APIs for converting Collider into buffers usable for UnityEngine.Mesh and for drawing lines
+    static readonly Type k_DrawComponent = typeof(Unity.Physics.Authoring.DisplayBodyColliders)
+        .GetNestedType("DrawComponent", BindingFlags.NonPublic);
+
+    static readonly MethodInfo k_DrawComponent_BuildDebugDisplayMesh = k_DrawComponent
+        .GetMethod("BuildDebugDisplayMesh", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(BlobAssetReference<Collider>) }, null);
+
+    static readonly Type k_DisplayResult = k_DrawComponent.GetNestedType("DisplayResult");
+
+    static readonly FieldInfo k_DisplayResultsMesh = k_DisplayResult.GetField("Mesh");
+    static readonly PropertyInfo k_DisplayResultsTransform = k_DisplayResult.GetProperty("Transform");
+
+    Entity CreateBody(float3 position, quaternion orientation, BlobAssetReference<Collider> collider,
         float3 linearVelocity, float3 angularVelocity, float mass, bool isDynamic)
     {
-        EntityManager entityManager = EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
 
         Entity entity = entityManager.CreateEntity(new ComponentType[] { });
 
@@ -81,24 +96,21 @@ public class BasePhysicsDemo : MonoBehaviour
         var colliderComponent = new PhysicsCollider { Value = collider };
         entityManager.AddComponentData(entity, colliderComponent);
 
-        Mesh mesh = new Mesh();
-#pragma warning disable 618
-        List<Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.DisplayResult> meshes;
-        unsafe { meshes = Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.BuildDebugDisplayMesh(colliderComponent.ColliderPtr); }
-#pragma warning restore 618
-        CombineInstance[] instances = new CombineInstance[meshes.Count];
-        int numVertices = 0;
-        for (int i = 0; i < meshes.Count; i++)
+        var mesh = new Mesh();
+        var instances = new List<CombineInstance>(8);
+        var numVertices = 0;
+        foreach (var displayResult in (IEnumerable)k_DrawComponent_BuildDebugDisplayMesh.Invoke(null, new object[] { collider }))
         {
-            instances[i] = new CombineInstance
+            var instance = new CombineInstance
             {
-                mesh = meshes[i].Mesh,
-                transform = Matrix4x4.TRS(meshes[i].Position, meshes[i].Orientation, meshes[i].Scale)
+                mesh = k_DisplayResultsMesh.GetValue(displayResult) as Mesh,
+                transform = (float4x4)k_DisplayResultsTransform.GetValue(displayResult)
             };
-            numVertices += meshes[i].Mesh.vertexCount;
+            instances.Add(instance);
+            numVertices += mesh.vertexCount;
         }
         mesh.indexFormat = numVertices > UInt16.MaxValue ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
-        mesh.CombineMeshes(instances);
+        mesh.CombineMeshes(instances.ToArray());
 
         entityManager.AddSharedComponentData(entity, new RenderMesh
         {
@@ -139,7 +151,7 @@ public class BasePhysicsDemo : MonoBehaviour
 
     protected unsafe Entity CreateJoint(BlobAssetReference<JointData> jointData, Entity entityA, Entity entityB, bool enableCollision = false)
     {
-        EntityManager entityManager = World.Active.EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
         ComponentType[] componentTypes = new ComponentType[1];
         componentTypes[0] = typeof(PhysicsJoint);
         Entity jointEntity = entityManager.CreateEntity(componentTypes);
@@ -159,12 +171,13 @@ public class BasePhysicsDemo : MonoBehaviour
 
     protected void SetDebugDisplay(Unity.Physics.Authoring.PhysicsDebugDisplayData debugDisplay)
     {
-        EntityManager.SetComponentData<Unity.Physics.Authoring.PhysicsDebugDisplayData>(stepper, debugDisplay);
+        var entityManager = DefaultWorld.EntityManager;
+        entityManager.SetComponentData<Unity.Physics.Authoring.PhysicsDebugDisplayData>(stepper, debugDisplay);
     }
 
     protected RigidTransform GetBodyTransform(Entity entity)
     {
-        EntityManager entityManager = EntityManager;
+        var entityManager = DefaultWorld.EntityManager;
         return new RigidTransform(
             entityManager.GetComponentData<Rotation>(entity).Value,
             entityManager.GetComponentData<Translation>(entity).Value);

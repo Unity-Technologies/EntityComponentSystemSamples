@@ -38,7 +38,7 @@ public class TriggerVolumePortalBehaviour : MonoBehaviour, IConvertGameObjectToE
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class TriggerVolumePortalSystem : JobComponentSystem
 {
-    public EntityQuery m_OverlappingGroup;
+    EntityQuery m_OverlappingGroup;
 
     protected override void OnCreate()
     {
@@ -121,10 +121,10 @@ public class TriggerVolumePortalSystem : JobComponentSystem
         var rotationComponents = GetComponentDataFromEntity<Rotation>();
         var velocityComponents = GetComponentDataFromEntity<PhysicsVelocity>();
 
-        JobHandle job = new PortalOverlapUpdateJob()
+        var job = new PortalOverlapUpdateJob
         {
             OverlappingEntities = overlappingEntities,
-            DeltaTime = Time.fixedDeltaTime,
+            DeltaTime = UnityEngine.Time.fixedDeltaTime,
 
             OverlappingComponents = overlappingComponents,
             TriggerComponents = triggerComponents,

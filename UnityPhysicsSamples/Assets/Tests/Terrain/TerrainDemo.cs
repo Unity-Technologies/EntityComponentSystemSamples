@@ -1,6 +1,5 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Physics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -12,9 +11,9 @@ public class TerrainDemo : BasePhysicsDemo
     public float ScaleX;
     public float ScaleY;
     public float ScaleZ;
-    public Unity.Physics.TerrainCollider.CollisionMethod Method;
+    public TerrainCollider.CollisionMethod Method;
 
-    protected unsafe override void Start()
+    protected override void Start()
     {
         float3 gravity = new float3(0, -9.81f, 0);
         base.init(gravity);
@@ -61,26 +60,10 @@ public class TerrainDemo : BasePhysicsDemo
         // static terrain
         Entity staticEntity;
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.TerrainCollider.Create(heights, size, scale, Method);
-
-            bool convertToMesh = false;
-            if (convertToMesh)
-            {
-#pragma warning disable 618
-                var res = Unity.Physics.Authoring.DisplayBodyColliders.DrawComponent.BuildDebugDisplayMesh((Unity.Physics.Collider*)collider.GetUnsafePtr());
-#pragma warning restore 618
-                Vector3[] v = res[0].Mesh.vertices;
-                var vertices = new NativeArray<float3>(v.Length, Allocator.TempJob);
-                var triangles = new NativeArray<int>(res[0].Mesh.triangles, Allocator.TempJob);
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = v[i];
-                }
-                collider = Unity.Physics.MeshCollider.Create(vertices, triangles);
-                
-                vertices.Dispose();
-                triangles.Dispose();
-            }
+            bool createMesh = false;
+            var collider = createMesh
+                ? CreateMeshTerrain(heights, new int2(SizeX, SizeZ), new float3(ScaleX, ScaleY, ScaleZ))
+                : TerrainCollider.Create(heights, size, scale, Method);
 
             bool compound = false;
             if (compound)
@@ -105,5 +88,36 @@ public class TerrainDemo : BasePhysicsDemo
             float3 position = new float3(size.x - 1, 0.0f, size.y - 1) * scale * -0.5f;
             staticEntity = CreateStaticBody(position, quaternion.identity, collider);
         }
+    }
+
+    static BlobAssetReference<Collider> CreateMeshTerrain(NativeArray<float> heights, int2 size, float3 scale)
+    {
+        var vertices = new NativeList<float3>(Allocator.Temp);
+        var triangles = new NativeList<int3>(Allocator.Temp);
+        var vertexIndex = 0;
+        for (int i = 0; i < size.x - 1; i++)
+        for (int j = 0; j < size.y - 1; j++)
+        {
+            int i0 = i;
+            int i1 = i + 1;
+            int j0 = j;
+            int j1 = j + 1;
+            float3 v0 = new float3(i0, heights[i0 + size.x * j0], j0) * scale;
+            float3 v1 = new float3(i1, heights[i1 + size.x * j0], j0) * scale;
+            float3 v2 = new float3(i0, heights[i0 + size.x * j1], j1) * scale;
+            float3 v3 = new float3(i1, heights[i1 + size.x * j1], j1) * scale;
+
+            vertices.Add(v1);
+            vertices.Add(v0);
+            vertices.Add(v2);
+            vertices.Add(v1);
+            vertices.Add(v2);
+            vertices.Add(v3);
+
+            triangles.Add(new int3(vertexIndex++, vertexIndex++, vertexIndex++));
+            triangles.Add(new int3(vertexIndex++, vertexIndex++, vertexIndex++));
+        }
+
+        return MeshCollider.Create(vertices, triangles);
     }
 }

@@ -16,7 +16,7 @@ namespace Samples.FixedTimestepSystem
         {
             Entities.ForEach((Entity spawnerEntity, ref VariableRateSpawner spawnerData, ref Translation translation) =>
             {
-                var spawnTime = Time.timeSinceLevelLoad;
+                var spawnTime = (float)Time.ElapsedTime;
                 var newEntity = PostUpdateCommands.Instantiate(spawnerData.Prefab);
                 PostUpdateCommands.AddComponent(newEntity, new Parent {Value = spawnerEntity});
                 PostUpdateCommands.AddComponent(newEntity, new LocalToParent());

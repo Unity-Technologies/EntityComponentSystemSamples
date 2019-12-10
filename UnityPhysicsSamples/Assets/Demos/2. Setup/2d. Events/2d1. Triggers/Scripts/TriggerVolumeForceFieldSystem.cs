@@ -6,7 +6,7 @@ using UnityEngine;
 using Unity.Transforms;
 using Unity.Burst;
 
-[UpdateBefore(typeof(ForceFieldSystem))]//, UpdateBefore(typeof(EndFramePhysicsSystem))]
+[UpdateBefore(typeof(ForceFieldSystem))]
 public class TriggerVolumeForceFieldSystem : JobComponentSystem
 {
     public EntityQuery m_OverlappingGroup;
@@ -81,26 +81,26 @@ public class TriggerVolumeForceFieldSystem : JobComponentSystem
 
         var overlappingComponents = GetComponentDataFromEntity<OverlappingTriggerVolume>(true);
         var triggerComponents = GetComponentDataFromEntity<TriggerVolume>(true);
-        var forcefieldComponents = GetComponentDataFromEntity<ForceField>(true);
+        var forceFieldComponents = GetComponentDataFromEntity<ForceField>(true);
         var positionComponents = GetComponentDataFromEntity<Translation>(true);
         var rotationComponents = GetComponentDataFromEntity<Rotation>(true);
         var massComponents = GetComponentDataFromEntity<PhysicsMass>(true);
         var velocityComponents = GetComponentDataFromEntity<PhysicsVelocity>();
 
-        JobHandle job = new ForceFieldOverlapUpdateJob()
+        var job = new ForceFieldOverlapUpdateJob
         {
             OverlappingEntities = enteredEntities,
             StepComponent = stepComponent,
-            DeltaTime = Time.fixedDeltaTime,
+            DeltaTime = UnityEngine.Time.fixedDeltaTime,
 
             OverlappingComponents = overlappingComponents,
             TriggerComponents = triggerComponents,
-            ForceFieldComponents = forcefieldComponents,
+            ForceFieldComponents = forceFieldComponents,
             PositionComponents = positionComponents,
             RotationComponents = rotationComponents,
             MassComponents = massComponents,
 
-            VelocityComponents = velocityComponents,
+            VelocityComponents = velocityComponents
         }.Schedule(inputDeps);
 
         return job;

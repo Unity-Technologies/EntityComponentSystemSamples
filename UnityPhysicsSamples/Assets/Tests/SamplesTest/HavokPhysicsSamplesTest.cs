@@ -13,7 +13,7 @@ namespace Unity.Physics.Samples.Test
     {
         public void SetSimulationType(SimulationType simulationType, Scene scene, LoadSceneMode mode)
         {
-            var entityManager = World.Active.EntityManager;
+            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             var entities = entityManager.GetAllEntities();
             foreach (var entity in entities)
             {
@@ -31,6 +31,9 @@ namespace Unity.Physics.Samples.Test
         [Timeout(60000)]
         public override IEnumerator LoadScenes([ValueSource(nameof(UnityPhysicsSamplesTest.GetScenes))] string scenePath)
         {
+            // Don't create log messages about the number of trial days remaining
+            PlayerPrefs.SetInt("Havok.Auth.SuppressDialogs", 1);
+
             // Log scene name in case Unity crashes and test results aren't written out.
             Debug.Log("Loading " + scenePath);
             LogAssert.Expect(LogType.Log, "Loading " + scenePath);
@@ -41,6 +44,8 @@ namespace Unity.Physics.Samples.Test
             UnityPhysicsSamplesTest.EntitiesCleanup();
             yield return new WaitForFixedUpdate();
             LogAssert.NoUnexpectedReceived();
+
+            PlayerPrefs.DeleteKey("Havok.Auth.SuppressDialogs");
         }
     }
 #endif

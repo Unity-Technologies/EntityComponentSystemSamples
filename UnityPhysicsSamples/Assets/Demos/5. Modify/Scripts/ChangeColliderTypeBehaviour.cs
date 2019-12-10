@@ -1,14 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Jobs;
-using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Rendering;
-using Unity.Transforms;
 using UnityEngine;
-using SphereCollider = Unity.Physics.SphereCollider;
 
 public struct ChangeColliderType : IComponentData
 {
@@ -66,26 +61,24 @@ public class ChangeColliderTypeSystem : ComponentSystem
 {
     protected unsafe override void OnUpdate()
     {
-        var em = World.Active.EntityManager;
-
         Entities.WithAll<PhysicsCollider, ChangeColliderType, RenderMesh>().ForEach( 
             (Entity entity, ref ChangeColliderType modifier) =>
         {
-            modifier.LocalTime -= Time.fixedDeltaTime;
+            modifier.LocalTime -= UnityEngine.Time.fixedDeltaTime;
 
             if (modifier.LocalTime > 0.0f) return;
 
             modifier.LocalTime = modifier.TimeToSwap;
-            var collider = em.GetComponentData<PhysicsCollider>(entity);
+            var collider = World.EntityManager.GetComponentData<PhysicsCollider>(entity);
             if (collider.ColliderPtr->Type == modifier.ColliderA.ColliderPtr->Type)
             {
                 PostUpdateCommands.SetComponent(entity,modifier.ColliderB);
-                PostUpdateCommands.SetSharedComponent(entity,em.GetSharedComponentData<RenderMesh>(modifier.EntityB));
+                PostUpdateCommands.SetSharedComponent(entity, World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityB));
             }
             else
             {
                 PostUpdateCommands.SetComponent(entity, modifier.ColliderA);
-                PostUpdateCommands.SetSharedComponent(entity, em.GetSharedComponentData<RenderMesh>(modifier.EntityA));
+                PostUpdateCommands.SetSharedComponent(entity, World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityA));
             }
         });
     }

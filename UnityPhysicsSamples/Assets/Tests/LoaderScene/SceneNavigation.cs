@@ -36,8 +36,9 @@ public class SceneNavigation : MonoBehaviour
 
         m_MenuButton.onClick.AddListener(() =>
         {
-            World.Active.EntityManager.DestroyEntity(
-                World.Active.EntityManager.CreateEntityQuery(new EntityQueryDesc
+            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+            entityManager.DestroyEntity(
+                entityManager.CreateEntityQuery(new EntityQueryDesc
                 {
                     None = new ComponentType[] { typeof(CharacterControllerInput) }
                 })

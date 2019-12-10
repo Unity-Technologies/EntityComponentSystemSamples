@@ -41,6 +41,9 @@ namespace Unity.Physics.Tests
         struct VerifyCollisionEventDataJob : ICollisionEventsJob
         {
             [ReadOnly]
+            public PhysicsWorld World;
+
+            [ReadOnly]
             public NativeSlice<RigidBody> Bodies;
 
             [ReadOnly]
@@ -50,7 +53,9 @@ namespace Unity.Physics.Tests
             {
                 // Collision event is between a static and dynamic box.
                 // Verify all data in the provided event struct.
-                Assert.IsTrue(math.all(collisionEvent.AccumulatedImpulses >= float4.zero));
+                CollisionEvent.Details details = collisionEvent.CalculateDetails(ref World);
+                Assert.IsTrue(details.EstimatedImpulse >= 0.0f);
+                Assert.IsTrue(details.EstimatedContactPointPositions.Length == 4);
                 Assert.AreNotEqual(collisionEvent.BodyIndices.BodyAIndex, collisionEvent.BodyIndices.BodyBIndex);
                 Assert.AreEqual(collisionEvent.ColliderKeys.ColliderKeyA.Value, ColliderKey.Empty.Value);
                 Assert.AreEqual(collisionEvent.ColliderKeys.ColliderKeyB.Value, ColliderKey.Empty.Value);
@@ -70,6 +75,7 @@ namespace Unity.Physics.Tests
             {
                 return new VerifyCollisionEventDataJob
                 {
+                    World = world,
                     Bodies = world.Bodies,
                     VerificationData = GetComponentDataFromEntity<VerifyCollisionEventDataData>(true)
                 }.Schedule(simulation, ref world, inDeps);

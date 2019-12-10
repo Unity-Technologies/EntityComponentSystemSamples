@@ -18,6 +18,7 @@ public struct CharacterControllerComponentData : IComponentData
 {
     public float3 Gravity;
     public float MovementSpeed;
+    public float MaxMovementSpeed;
     public float RotationSpeed;
     public float JumpUpwardsSpeed;
     public float MaxSlope; // radians
@@ -55,6 +56,9 @@ public class CharacterControllerAuthoring : MonoBehaviour, IConvertGameObjectToE
     // Speed of movement initiated by user input
     public float MovementSpeed = 2.5f;
 
+    // Maximum speed of movement at any given time
+    public float MaxMovementSpeed = 10.0f;
+
     // Speed of rotation initiated by user input
     public float RotationSpeed = 2.5f;
 
@@ -86,11 +90,11 @@ public class CharacterControllerAuthoring : MonoBehaviour, IConvertGameObjectToE
     {
         if (enabled)
         {
-            ref PhysicsWorld world = ref World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
             var componentData = new CharacterControllerComponentData
             {
                 Gravity = Gravity,
                 MovementSpeed = MovementSpeed,
+                MaxMovementSpeed = MaxMovementSpeed,
                 RotationSpeed = RotationSpeed,
                 JumpUpwardsSpeed = JumpUpwardsSpeed,
                 MaxSlope = math.radians(MaxSlope),
@@ -136,7 +140,7 @@ public class CharacterControllerSystem : JobComponentSystem
         // Stores impulses we wish to apply to dynamic bodies the character is interacting with.
         // This is needed to avoid race conditions when 2 characters are interacting with the
         // same body at the same time.
-        public BlockStream.Writer DeferredImpulseWriter;
+        public NativeStream.Writer DeferredImpulseWriter;
 
         public unsafe void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
         {
@@ -149,12 +153,6 @@ public class CharacterControllerSystem : JobComponentSystem
             var chunkRotationData = chunk.GetNativeArray(RotationType);
 
             DeferredImpulseWriter.BeginForEachIndex(chunkIndex);
-
-            // Maximum number of hits character controller can store in world queries
-            const int maxQueryHits = 128;
-            var distanceHits = new NativeArray<DistanceHit>(maxQueryHits, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var castHits = new NativeArray<ColliderCastHit>(maxQueryHits, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var constraints = new NativeArray<SurfaceConstraintInfo>(4 * maxQueryHits, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
             for (int i = 0; i < chunk.Count; i++)
             {
@@ -181,7 +179,8 @@ public class CharacterControllerSystem : JobComponentSystem
                     ContactTolerance = ccComponentData.ContactTolerance,
                     MaxSlope = ccComponentData.MaxSlope,
                     RigidBodyIndex = PhysicsWorld.GetRigidBodyIndex(ccInternalData.Entity),
-                    CurrentVelocity = ccInternalData.LinearVelocity
+                    CurrentVelocity = ccInternalData.LinearVelocity,
+                    MaxMovementSpeed = ccComponentData.MaxMovementSpeed
                 };
 
                 // Character transform
@@ -191,22 +190,9 @@ public class CharacterControllerSystem : JobComponentSystem
                     rot = rotation.Value
                 };
 
-                // "Broad phase" (used both for checking support and actual character collide and integrate).
-                MaxHitsCollector<DistanceHit> distanceHitsCollector = new MaxHitsCollector<DistanceHit>(
-                    stepInput.RigidBodyIndex, ccComponentData.ContactTolerance, ref distanceHits);
-                {
-                    ColliderDistanceInput input = new ColliderDistanceInput()
-                    {
-                        MaxDistance = ccComponentData.ContactTolerance,
-                        Transform = transform,
-                        Collider = collider.ColliderPtr
-                    };
-                    PhysicsWorld.CalculateDistance(input, ref distanceHitsCollector);
-                }
-
                 // Check support
-                CheckSupport(stepInput, transform, ccComponentData.MaxSlope, distanceHitsCollector,
-                    ref constraints, out int numConstraints, out ccInternalData.SupportedState, out float3 surfaceNormal, out float3 surfaceVelocity);
+                CheckSupport(ref PhysicsWorld, ref collider, stepInput, transform, ccComponentData.MaxSlope,
+                    out ccInternalData.SupportedState, out float3 surfaceNormal, out float3 surfaceVelocity);
 
                 // User input
                 float3 desiredVelocity = ccInternalData.LinearVelocity;
@@ -225,8 +211,7 @@ public class CharacterControllerSystem : JobComponentSystem
 
                 // World collision + integrate
                 CollideAndIntegrate(stepInput, ccComponentData.CharacterMass, ccComponentData.AffectsPhysicsBodies > 0,
-                    collider.ColliderPtr, ref castHits, ref constraints, numConstraints,
-                    ref transform, ref ccInternalData.LinearVelocity, ref DeferredImpulseWriter);
+                    collider.ColliderPtr, ref transform, ref ccInternalData.LinearVelocity, ref DeferredImpulseWriter);
 
                 // Write back and orientation integration
                 position.Value = transform.pos;
@@ -351,7 +336,7 @@ public class CharacterControllerSystem : JobComponentSystem
         // Chunks can be deallocated at this point
         [DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> Chunks;
 
-        public BlockStream.Reader DeferredImpulseReader;
+        public NativeStream.Reader DeferredImpulseReader;
 
         public ComponentDataFromEntity<PhysicsVelocity> PhysicsVelocityData;
         public ComponentDataFromEntity<PhysicsMass> PhysicsMassData;
@@ -423,7 +408,7 @@ public class CharacterControllerSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_CharacterControllersGroup.CalculateLength() == 0)
+        if (m_CharacterControllersGroup.CalculateEntityCount() == 0)
             return inputDeps;
 
         var chunks = m_CharacterControllersGroup.CreateArchetypeChunkArray(Allocator.TempJob);
@@ -434,9 +419,9 @@ public class CharacterControllerSystem : JobComponentSystem
         var translationType = GetArchetypeChunkComponentType<Translation>();
         var rotationType = GetArchetypeChunkComponentType<Rotation>();
 
-        BlockStream deferredImpulses = new BlockStream(chunks.Length, 0xCA37B9F2);
+        var deferredImpulses = new NativeStream(chunks.Length, Allocator.TempJob);
 
-        var ccJob = new CharacterControllerJob()
+        var ccJob = new CharacterControllerJob
         {
             // Archetypes
             CharacterControllerComponentType = ccComponentType,
@@ -445,9 +430,9 @@ public class CharacterControllerSystem : JobComponentSystem
             TranslationType = translationType,
             RotationType = rotationType,
             // Input
-            DeltaTime = Time.fixedDeltaTime,
+            DeltaTime = UnityEngine.Time.fixedDeltaTime,
             PhysicsWorld = m_BuildPhysicsWorldSystem.PhysicsWorld,
-            DeferredImpulseWriter = deferredImpulses
+            DeferredImpulseWriter = deferredImpulses.AsWriter()
         };
 
         inputDeps = JobHandle.CombineDependencies(inputDeps, m_ExportPhysicsWorldSystem.FinalJobHandle);
@@ -456,7 +441,7 @@ public class CharacterControllerSystem : JobComponentSystem
         var applyJob = new ApplyDefferedPhysicsUpdatesJob()
         {
             Chunks = chunks,
-            DeferredImpulseReader = deferredImpulses,
+            DeferredImpulseReader = deferredImpulses.AsReader(),
             PhysicsVelocityData = GetComponentDataFromEntity<PhysicsVelocity>(),
             PhysicsMassData = GetComponentDataFromEntity<PhysicsMass>(),
             TranslationData = GetComponentDataFromEntity<Translation>(),

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.0056278347, g: 0.0025239203, b: 0.008966776, a: 1}
+  m_IndirectSpecularColor: {r: 0.00558429, g: 0.002545912, b: 0.0088953795, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -94,8 +94,9 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -181,6 +182,15 @@ MonoBehaviour:
     x: 0.4
     y: 0.4
     z: 0.4
+  m_CustomTags:
+    Tag00: 0
+    Tag01: 0
+    Tag02: 0
+    Tag03: 0
+    Tag04: 0
+    Tag05: 0
+    Tag06: 0
+    Tag07: 0
 --- !u!114 &1426082913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,9 +226,15 @@ MonoBehaviour:
     Height: 1
     Radius: 0.5
     Axis: 2
+  m_CylinderSideCount: 20
   m_SphereRadius: 0.5
-  m_ConvexRadius: 0.05
+  m_MinimumSkinnedVertexWeight: 0.1
+  m_ConvexHullGenerationParameters:
+    m_SimplificationTolerance: 0.015
+    m_BevelRadius: 0.05
+    m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
@@ -244,9 +260,10 @@ MonoBehaviour:
     m_RaisesCollisionEvents:
       m_Override: 0
       m_Value: 0
-    m_CustomFlags:
+    m_CustomTags:
       m_Override: 0
       m_Value: 0000000000000000
+  m_ConvexRadius_Deprecated: -1
 --- !u!114 &1426082914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,6 +291,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -285,6 +303,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -344,8 +363,9 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1663781554}
   m_Enabled: 1
-  serializedVersion: 9
+  serializedVersion: 10
   m_Type: 1
+  m_Shape: 0
   m_Color: {r: 1, g: 0.95166487, b: 0.6839622, a: 1}
   m_Intensity: 2
   m_Range: 10
@@ -353,7 +373,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -420,6 +440,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1666823652}
   - component: {fileID: 1666823650}
+  - component: {fileID: 1666823651}
   m_Layer: 0
   m_Name: AsteroidSpawner
   m_TagString: Untagged
@@ -444,7 +465,21 @@ MonoBehaviour:
     x: 200
     y: 200
     z: 200
+  massFactor: 4
   count: 9999
+--- !u!114 &1666823651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666823649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 0
 --- !u!4 &1666823652
 Transform:
   m_ObjectHideFlags: 0
@@ -484,8 +519,9 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1819872071}
   m_Enabled: 1
-  serializedVersion: 9
+  serializedVersion: 10
   m_Type: 1
+  m_Shape: 0
   m_Color: {r: 0, g: 0.016406652, b: 0.6509434, a: 1}
   m_Intensity: 2
   m_Range: 10
@@ -493,7 +529,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1

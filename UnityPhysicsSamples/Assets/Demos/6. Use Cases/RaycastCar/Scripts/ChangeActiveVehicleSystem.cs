@@ -46,7 +46,7 @@ class ChangeActiveVehicleSystem : ComponentSystem
     protected override void OnUpdate()
     {
         // update stable list of vehicles if they have changed
-        if (m_NewVehicleQuery.CalculateLength() > 0 || m_DeletedVehicleQuery.CalculateLength() > 0)
+        if (m_NewVehicleQuery.CalculateEntityCount() > 0 || m_DeletedVehicleQuery.CalculateEntityCount() > 0)
         {
             EntityManager.AddComponent(m_NewVehicleQuery, typeof(AvailableVehicle));
             EntityManager.RemoveComponent<AvailableVehicle>(m_DeletedVehicleQuery);
@@ -62,7 +62,7 @@ class ChangeActiveVehicleSystem : ComponentSystem
 
         // validate active vehicle singleton
         var activeVehicle = Entity.Null;
-        if (m_ActiveVehicleQuery.CalculateLength() == 1)
+        if (m_ActiveVehicleQuery.CalculateEntityCount() == 1)
             activeVehicle = m_ActiveVehicleQuery.GetSingletonEntity();
         else
         {

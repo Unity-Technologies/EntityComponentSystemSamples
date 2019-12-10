@@ -83,7 +83,7 @@ public class PlanetGravitySystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var planetGravityAccelerationJob = new PlanetGravityJob { dt = Time.fixedDeltaTime };
+        var planetGravityAccelerationJob = new PlanetGravityJob { dt = UnityEngine.Time.fixedDeltaTime };
         return planetGravityAccelerationJob.Schedule(this, inputDeps);
     }
 }

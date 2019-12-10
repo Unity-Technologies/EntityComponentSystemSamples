@@ -45,7 +45,7 @@ class DemoInputGatheringSystem : ComponentSystem,
     protected override void OnUpdate()
     {
         // character controller
-        if (m_CharacterControllerInputQuery.CalculateLength() == 0)
+        if (m_CharacterControllerInputQuery.CalculateEntityCount() == 0)
             EntityManager.CreateEntity(typeof(CharacterControllerInput));
 
         m_CharacterControllerInputQuery.SetSingleton(new CharacterControllerInput
@@ -55,7 +55,7 @@ class DemoInputGatheringSystem : ComponentSystem,
             Jumped = m_CharacterJumped ? 1 : 0
         });
 
-        if (m_CharacterGunInputQuery.CalculateLength() == 0)
+        if (m_CharacterGunInputQuery.CalculateEntityCount() == 0)
             EntityManager.CreateEntity(typeof(CharacterGunInput));
 
         m_CharacterGunInputQuery.SetSingleton(new CharacterGunInput
@@ -67,7 +67,7 @@ class DemoInputGatheringSystem : ComponentSystem,
         m_CharacterJumped = false;
 
         // vehicle
-        if (m_VehicleInputQuery.CalculateLength() == 0)
+        if (m_VehicleInputQuery.CalculateEntityCount() == 0)
             EntityManager.CreateEntity(typeof(VehicleInput));
 
         m_VehicleInputQuery.SetSingleton(new VehicleInput
