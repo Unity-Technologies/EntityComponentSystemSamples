@@ -1,13 +1,21 @@
 using Unity.Entities;
+using Unity.Rendering;
 using UnityEngine;
 
 [RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/GridPath/Cartesian Grid Movement")]
-[ConverterVersion("joe", 1)]
+[ConverterVersion("macton", 4)]
 public class CartesianGridMovementAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
+    public enum MovementOptions
+    {
+        Bounce,
+        FollowTarget
+    };
+
     [Range(0.0f, 2.0f)]
     public float Speed;
+    public MovementOptions Movement;
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
@@ -21,8 +29,11 @@ public class CartesianGridMovementAuthoring : MonoBehaviour, IConvertGameObjectT
         });
         dstManager.AddComponentData(entity, new CartesianGridCoordinates
         {
-            x = -1,
-            y = -1
+            x = 0,
+            y = 0 
         });
+
+        if (Movement == MovementOptions.FollowTarget)
+            dstManager.AddComponentData(entity, new CartesianGridFollowTarget());
     }
 }

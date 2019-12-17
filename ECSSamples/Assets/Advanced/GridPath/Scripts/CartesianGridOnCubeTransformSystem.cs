@@ -1,4 +1,3 @@
-using System;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -31,7 +30,7 @@ public unsafe class CartesianGridOnCubeTransformSystem : JobComponentSystem
             .WithNativeDisableUnsafePtrRestriction(faceLocalToWorld)
             .ForEach((ref LocalToWorld localToWorld,
                 in Translation translation,
-                in CubeFace cubeFace) =>
+                in CartesianGridOnCubeFace cubeFace) =>
             {
                 var cubeFaceIndex = cubeFace.Value;
                 var resultLocalToWorld = faceLocalToWorld[cubeFaceIndex];

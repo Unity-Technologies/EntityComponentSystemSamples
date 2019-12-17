@@ -5,15 +5,48 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
-public static class CartesianGridGeneratorUtility
+public static  unsafe class CartesianGridGeneratorUtility
 {
     public enum WallFlags : byte
     {
         SouthWall = 1,
         WestWall = 2,
     }
+    
+    static readonly float4x4[] m_FaceLocalToWorldRotation =
+    {
+        new float4x4(
+            new float4(0.00f, -1.00f, 0.00f, 0.00f),
+            new float4(1.00f, 0.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, 1.00f, 0.00f),
+            new float4(0.00f, 0.00f, 0.00f, 1.00f)),
+        new float4x4(
+            new float4(0.00f, 1.00f, 0.00f, 0.00f),
+            new float4(-1.00f, 0.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, 1.00f, 0.00f),
+            new float4(0.00f, 0.00f, 0.00f, 1.00f)),
+        new float4x4(
+            new float4(1.00f, 0.00f, 0.00f, 0.00f),
+            new float4(0.00f, 1.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, 1.00f, 0.00f),
+            new float4(0.00f, 0.00f, 0.00f, 1.00f)),
+        new float4x4(
+            new float4(-1.00f, 0.00f, 0.00f, 0.00f),
+            new float4(0.00f, -1.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, 1.00f, 0.00f),
+            new float4(0.00f, 0.00f, 0.00f, 1.00f)),
+        new float4x4(
+            new float4(-1.00f, 0.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, 1.00f, 0.00f),
+            new float4(0.00f, 1.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, 0.00f, 1.00f)),
+        new float4x4(
+            new float4(1.00f, 0.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, -1.00f, 0.00f),
+            new float4(0.00f, 1.00f, 0.00f, 0.00f),
+            new float4(0.00f, 0.00f, 0.00f, 1.00f)),
+    };
     
     public static unsafe void CreateGridPath(int rowCount, int columnCount, byte* gridWalls, float wallSProbability, float wallWProbability, bool outerWalls)
     {
@@ -58,6 +91,8 @@ public static class CartesianGridGeneratorUtility
             for (int x = 0; x < GridWallsColumnCount; x++)
             {
                 // By default place outer walls along the edge of the grid.
+                if (((y&1)==1) && (x&1)==1)
+                    GridWallsSW[(y * GridWallsColumnCount) + x] |= (byte)WallFlags.SouthWall;
                 if ((y == 0) && (x < (GridWallsColumnCount - 1)))
                     GridWallsSW[(y * GridWallsColumnCount) + x] |= (byte)WallFlags.SouthWall;
                 if ((x == 0) && (y < (GridWallsRowCount - 1)))
@@ -71,9 +106,10 @@ public static class CartesianGridGeneratorUtility
                 {
                     var tx = ((float)x) - cx;
                     var tz = ((float)y) - cz;
+                    var noiseShift = (float)((((long)GridWalls) >> 8) & 0xfff);
 
-                    var n0 = noise.snoise(new float2(tx * 1.2345f, tz * 1.2345f));
-                    var n1 = noise.snoise(new float2(tz * 1.6789f, tx * 1.6789f));
+                    var n0 = noise.snoise(new float2(tx * 1.2345f + noiseShift, tz * 1.2345f + noiseShift));
+                    var n1 = noise.snoise(new float2(tz * 1.6789f + noiseShift, tx * 1.6789f + noiseShift));
 
                     if (((n0 * 0.5f) + 0.5f) < WallSProbability)
                         GridWallsSW[(y * GridWallsColumnCount) + x] |= (byte)WallFlags.SouthWall;
@@ -95,6 +131,9 @@ public static class CartesianGridGeneratorUtility
                 }
             }
 
+            int gridWallSize = RowCount * ((ColumnCount + 1) / 2);
+            UnsafeUtility.MemClear(GridWalls, gridWallSize);
+            
             for (int y = 0; y < RowCount; y++)
             for (int x = 0; x < ColumnCount; x++)
             {
@@ -158,5 +197,31 @@ public static class CartesianGridGeneratorUtility
         dstManager.RemoveComponent<Translation>(panelEntity);
         dstManager.RemoveComponent<Rotation>(panelEntity);
         dstManager.SetComponentData(panelEntity, localToWorld);
+    }
+
+
+    public static void FillCubeFaceTransforms(int rowCount, float4x4* faceLocalToWorld, float4x4* faceWorldToLocal, float4x4* faceLocalToLocal)
+    {
+        for (int faceIndex = 0; faceIndex < 6; faceIndex++)
+        {
+            ref var localToWorld = ref m_FaceLocalToWorldRotation[faceIndex];
+
+            // Translate along normal of face by width
+            localToWorld.c3.xyz = localToWorld.c1.xyz * rowCount * 0.5f;
+
+            faceLocalToWorld[faceIndex] = localToWorld;
+            faceWorldToLocal[faceIndex] = math.fastinverse(faceLocalToWorld[faceIndex]);
+        }
+
+        // Face x Face matrix for access simplicity, but:
+        //   - Diagonal is identity and unused
+        //   - Only the edge transitions are actually used (4 edges for each face) 
+        for (int i = 0; i < 6; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                faceLocalToLocal[(i * 6) + j] = math.mul(faceWorldToLocal[j], faceLocalToWorld[i]);
+            }
+        }
     }
 }

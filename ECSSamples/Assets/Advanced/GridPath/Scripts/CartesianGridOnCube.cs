@@ -1,4 +1,3 @@
-using System;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -45,7 +44,8 @@ public struct CartesianGridOnCubeBlob
 //     4 = Z+
 //     5 = Z-
 [WriteGroup((typeof(LocalToWorld)))]
-public struct CubeFace : IComponentData
+[WriteGroup((typeof(CartesianGridCoordinates)))]
+public struct CartesianGridOnCubeFace : IComponentData
 {
     public byte Value;
 }

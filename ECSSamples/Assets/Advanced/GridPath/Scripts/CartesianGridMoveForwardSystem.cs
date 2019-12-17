@@ -1,4 +1,3 @@
-using System;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -22,6 +21,9 @@ public class CartesianGridMoveForwardSystem : JobComponentSystem
                 in CartesianGridCoordinates gridPosition) =>
             {
                 var dir = gridDirection.Value;
+                if (dir == 0xff)
+                    return;
+                
                 var pos = translation.Value;
 
                 // Speed adjusted to float m/s from fixed point 6:10 m/s

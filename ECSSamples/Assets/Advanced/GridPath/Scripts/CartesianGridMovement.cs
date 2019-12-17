@@ -1,4 +1,3 @@
-using System;
 using Unity.Mathematics;
 
 public static unsafe class CartesianGridMovement
@@ -16,7 +15,7 @@ public static unsafe class CartesianGridMovement
     //   - Calculate gridX, gridY based on current actual position (Translation)
     //   - Get 4 path options = [(gridY * rowCount)+gridX]
     //   - Select path option based on current direction (Each of 4 direction 2bits of result)
-    public static readonly byte[] NextDirection =
+    static readonly byte[] m_NextDirection =
     {
         // Standard paths. Bounce off walls.
         // Two paths because two directions can be equally likely.
@@ -48,6 +47,22 @@ public static unsafe class CartesianGridMovement
         0x64, 0x66, 0x28, 0xaa, 0x54, 0x55, 0x00, 0xff,
         0x64, 0x66, 0x28, 0xaa, 0x54, 0x55, 0x00, 0xe4,
     };
+    
+    public static readonly byte[] ReverseDirection =
+    {
+        1, 0, 3, 2 // N=S, S=N, W=E, E=W
+    };
+    
+    // Rotate through variations of shortest paths.
+    // - Note: Biased on first available if there are three available. But meh.
+    public static readonly byte[] PathVariation =
+    {
+        // -  N  S  NS W  NW SW NSW E  NE SE NSE WE NWE SWE NSWE
+        0xff, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+        0xff, 0, 1, 1, 2, 2, 2, 1, 3, 3, 3, 1, 3, 2, 2, 1,
+        0xff, 0, 1, 0, 2, 0, 1, 2, 3, 0, 1, 3, 2, 3, 3, 2,
+        0xff, 0, 1, 1, 2, 2, 2, 0, 3, 3, 3, 0, 3, 0, 1, 3,
+    };
 
     public static int NextPathIndex(ref int pathCounter)
     {
@@ -74,7 +89,16 @@ public static unsafe class CartesianGridMovement
         return nextPathIndex;
     }
 
-    public static float3 ClampToGrid(float3 v, byte dir, CartesianGridCoordinates cartesianGridCoordinates, float2 cellCenterOffset)
+    /// <summary>
+    /// Snap translation to center of grid cell along the direction movement.
+    /// This ensures translation does not drift substantially over time with accumulated errors.
+    /// </summary>
+    /// <param name="translation">Translation (in grid space) to snap</param>
+    /// <param name="dir">Direction of movement. See: CartesianGridDirection</param>
+    /// <param name="cellPosition">Current cell to snap to</param>
+    /// <param name="cellCenterOlffset">Offset relative to center of grid.</param>
+    /// <returns></returns>
+    public static float3 SnapToGridAlongDirection(float3 translation, byte dir, CartesianGridCoordinates cellPosition, float2 cellCenterOffset)
     {
         // When (dir == N,S) clamp to grid cell center x
         // When (dir == W,E) clamp to grid cell center y
@@ -83,24 +107,74 @@ public static unsafe class CartesianGridMovement
 
         return new float3
         {
-            x = (mx * v.x) + (my * (cartesianGridCoordinates.x - cellCenterOffset.x)),
-            z = (my * v.z) + (mx * (cartesianGridCoordinates.y - cellCenterOffset.y)),
-            y = v.y
+            x = (mx * translation.x) + (my * (cellPosition.x - cellCenterOffset.x)),
+            z = (my * translation.z) + (mx * (cellPosition.y - cellCenterOffset.y)),
+            y = translation.y
         };
     }
 
-    // gridPosition needs to be on-grid (positive and < [colCount, rowCount]) when looking up next direction.
-    public static byte LookupGridDirectionFromWalls(CartesianGridCoordinates cartesianGridCoordinates, byte dir, int rowStride, byte* gridWalls, int pathIndex)
+    static byte LookupWalls(CartesianGridCoordinates cartesianGridCoordinates, int rowCount, int colCount, byte* gridWalls)
     {
-        var pathOffset = pathIndex * 16;
-
-        // Index into grid array
+        var rowStride = ((colCount + 1) / 2);
         var gridWallsIndex = (cartesianGridCoordinates.y * rowStride) + (cartesianGridCoordinates.x / 2);
 
         // Walls in current grid element (odd columns in upper 4 bits of byte)
         var walls = (gridWalls[gridWallsIndex] >> ((cartesianGridCoordinates.x & 1) * 4)) & 0x0f;
 
+        return (byte)walls;
+    }
+
+    /// <summary>
+    /// Pick valid direction to "bounce" off (move along) walls. 
+    /// </summary>
+    /// <param name="cellPosition">Position to test (must be valid on grid)</param>
+    /// <param name="dir">Current movement direction</param>
+    /// <param name="rowCount">Height of grid</param>
+    /// <param name="colCount">Width of grid</param>
+    /// <param name="gridWalls">Table representing walls of grid.</param>
+    /// <param name="pathIndex">Index to select from multiple valid options. See: m_NextDirection</param>
+    /// <returns></returns>
+    // gridPosition needs to be on-grid (positive and < [colCount, rowCount]) when looking up next direction.
+    public static byte BounceDirectionOffWalls(CartesianGridCoordinates cellPosition, byte dir, int rowCount, int colCount, byte* gridWalls, int pathIndex)
+    {
+        var pathOffset = pathIndex * 16;
+        var walls = LookupWalls(cellPosition, rowCount, colCount, gridWalls);
+        
         // New direction = f( grid index, movement direction )
-        return (byte)((NextDirection[pathOffset + walls] >> (dir * 2)) & 0x03);
+        return (byte)((m_NextDirection[pathOffset + walls] >> (dir * 2)) & 0x03);
+    }
+
+    /// <summary>
+    /// Return directions from cellPosition which are not blocked by walls. 
+    /// </summary>
+    /// <param name="cellPosition">Position to test</param>
+    /// <param name="rowCount">Height of grid</param>
+    /// <param name="colCount">Width of grid</param>
+    /// <param name="gridWalls">Table representing walls of grid.</param>
+    /// <returns></returns>
+    public static byte ValidDirections(CartesianGridCoordinates cellPosition, int rowCount, int colCount, byte* gridWalls)
+    {
+        return (byte)(0x0f & ~LookupWalls(cellPosition, rowCount, colCount, gridWalls));
+    }
+
+    /// <summary>
+    /// Which edge of GridCube face is being exited (if any)
+    /// </summary>
+    /// <param name="cellPosition">Position to test</param>
+    /// <param name="rowCount">Height/Width of cube face</param>
+    /// <returns></returns>
+    public static int CubeExitEdge(CartesianGridCoordinates cellPosition, int rowCount)
+    {
+        // Which edge of GridCube face is being exited (if any)
+        var edge = -1;
+
+        // Edge is in order specified in m_NextFaceIndex and m_NextFaceDirection 
+        // - Matches GridDirection values.
+        edge = math.select(edge, 0, cellPosition.y >= rowCount);
+        edge = math.select(edge, 1, cellPosition.y < 0);
+        edge = math.select(edge, 2, cellPosition.x < 0);
+        edge = math.select(edge, 3, cellPosition.x >= rowCount);
+
+        return edge;
     }
 }

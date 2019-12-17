@@ -1,11 +1,10 @@
-using System;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateBefore(typeof(CartesianGridMoveForwardSystem))]
-public unsafe class CartesianGridOnPlaneChangeDirectionSystem : JobComponentSystem
+[UpdateInGroup(typeof(CartesianGridChangeDirectionSystemGroup))]
+public unsafe class CartesianGridOnPlaneBounceOffWallsSystem : JobComponentSystem
 {
     EntityQuery m_GridQuery;
 
@@ -25,7 +24,6 @@ public unsafe class CartesianGridOnPlaneChangeDirectionSystem : JobComponentSyst
         var cartesianGridPlane = GetSingleton<CartesianGridOnPlane>();
         var rowCount = cartesianGridPlane.Blob.Value.RowCount;
         var colCount = cartesianGridPlane.Blob.Value.ColCount;
-        var rowStride = ((colCount + 1) / 2);
         var gridWalls = (byte*)cartesianGridPlane.Blob.Value.Walls.GetUnsafePtr();
         var trailingOffsets = (float2*)cartesianGridPlane.Blob.Value.TrailingOffsets.GetUnsafePtr();
 
@@ -36,6 +34,7 @@ public unsafe class CartesianGridOnPlaneChangeDirectionSystem : JobComponentSyst
             .WithName("CartesianGridPlaneChangeDirection")
             .WithNativeDisableUnsafePtrRestriction(trailingOffsets)
             .WithNativeDisableUnsafePtrRestriction(gridWalls)
+            .WithEntityQueryOptions(EntityQueryOptions.FilterWriteGroup)
             .ForEach((ref CartesianGridDirection gridDirection,
                 ref CartesianGridCoordinates gridCoordinates,
                 ref Translation translation) =>
@@ -45,12 +44,12 @@ public unsafe class CartesianGridOnPlaneChangeDirectionSystem : JobComponentSyst
                 if (gridCoordinates.Equals(nextGridPosition))
                 {
                     // Don't allow translation to drift
-                    translation.Value = CartesianGridMovement.ClampToGrid(translation.Value, dir, gridCoordinates, cellCenterOffset);
+                    translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
                     return; // Still in the same grid cell. No need to change direction.
                 }
                 
                 gridCoordinates = nextGridPosition;
-                gridDirection.Value = CartesianGridMovement.LookupGridDirectionFromWalls(gridCoordinates, dir, rowStride, gridWalls, pathOffset);
+                gridDirection.Value = CartesianGridMovement.BounceDirectionOffWalls(gridCoordinates, dir, rowCount, colCount, gridWalls, pathOffset);
             }).Schedule(lastJobHandle);
         
         return lastJobHandle;

@@ -7,7 +7,7 @@ using Unity.Transforms;
 namespace Samples.Boids
 {
     [UpdateInGroup(typeof(GameObjectConversionGroup))]
-    [ConverterVersion("macton", 4)]
+    [ConverterVersion("macton", 5)]
     public class BoidConversion : GameObjectConversionSystem
     {
         protected override void OnUpdate()
@@ -29,10 +29,6 @@ namespace Samples.Boids
                 // Remove default transform system components
                 DstEntityManager.RemoveComponent<Translation>(entity);
                 DstEntityManager.RemoveComponent<Rotation>(entity);
-
-                // Add world render bounds components so they do not need to be added at initialization time.
-                DstEntityManager.AddComponent(entity, ComponentType.ChunkComponent<ChunkWorldRenderBounds>());
-                DstEntityManager.AddComponent<WorldRenderBounds>(entity);
             });
         }
     }
