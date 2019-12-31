@@ -1,14 +1,13 @@
-﻿using Unity.Physics;
-using Unity.Physics.Systems;
+﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
-using System;
-using ContactPoint = Unity.Physics.ContactPoint;
+using Unity.Physics;
 using Unity.Physics.Extensions;
-using Unity.Burst;
+using Unity.Physics.Systems;
+using UnityEngine;
 
 public struct ModifyNarrowphaseContacts : IComponentData
 {
@@ -26,7 +25,7 @@ public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObj
     {
         if (enabled)
         {
-            dstManager.AddComponentData(entity, new ModifyNarrowphaseContacts()
+            dstManager.AddComponentData(entity, new ModifyNarrowphaseContacts
             {
                 surfaceEntity = entity,
                 surfaceNormal = surfaceMesh.transform.up
@@ -72,8 +71,6 @@ public class ModifyNarrowphaseContactsSystem : JobComponentSystem
 
         SimulationCallbacks.Callback callback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
         {
-            inDeps.Complete();  // TODO: shouldn't be needed (jobify the below)
-
             return new ModifyNormalsJob
             {
                 m_SurfaceRBIdx = surfaceRBIdx,

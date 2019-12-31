@@ -43,7 +43,7 @@ namespace Samples.FixedTimestepSystem
             var jobHandle = new MoveProjectileJob()
             {
                 Commands = m_beginSimEcbSystem.CreateCommandBuffer().ToConcurrent(),
-                TimeSinceLoad = Time.timeSinceLevelLoad,
+                TimeSinceLoad = (float)Time.ElapsedTime,
                 ProjectileSpeed = 5.0f,
             }.Schedule(this, inputDependencies);
             m_beginSimEcbSystem.AddJobHandleForProducer(jobHandle);

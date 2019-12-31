@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028328, g: 0.22571322, b: 0.30692163, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -94,8 +94,9 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -179,7 +180,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 229873736}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -188,8 +189,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 14
@@ -257,7 +256,7 @@ PrefabInstance:
     - target: {fileID: 8030459012802420261, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Strip
+      value: Ball.Red
       objectReference: {fileID: 0}
     - target: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
@@ -326,7 +325,7 @@ PrefabInstance:
     - target: {fileID: 8030459012802420261, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Strip
+      value: Ball.Red
       objectReference: {fileID: 0}
     - target: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
@@ -480,7 +479,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 513583635}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -489,8 +488,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
@@ -500,6 +497,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &513583638
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -518,7 +516,7 @@ PrefabInstance:
     - target: {fileID: 5231463773608345446, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Spot
+      value: Ball.Yellow
       objectReference: {fileID: 0}
     - target: {fileID: 5227912323972074310, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
@@ -631,7 +629,7 @@ PrefabInstance:
     - target: {fileID: 5231463773608345446, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Spot
+      value: Ball.Yellow
       objectReference: {fileID: 0}
     - target: {fileID: 5227912323972074310, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
@@ -744,7 +742,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 635344887}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -796,8 +794,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!1 &649943884
 GameObject:
   m_ObjectHideFlags: 0
@@ -882,7 +878,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 691157785}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -927,8 +923,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!114 &691157788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -938,7 +932,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 691157785}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -947,8 +941,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
@@ -958,6 +950,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &691157789
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1098,9 +1091,15 @@ MonoBehaviour:
     Height: 4.828428
     Radius: 1.2262912
     Axis: 0
+  m_CylinderSideCount: 20
   m_SphereRadius: 2.414214
-  m_ConvexRadius: 0.021765029
+  m_MinimumSkinnedVertexWeight: 0.1
+  m_ConvexHullGenerationParameters:
+    m_SimplificationTolerance: 0.015
+    m_BevelRadius: 0.021765029
+    m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
@@ -1129,6 +1128,7 @@ MonoBehaviour:
     m_CustomTags:
       m_Override: 0
       m_Value: 0000000000000000
+  m_ConvexRadius_Deprecated: -1
 --- !u!23 &719645921
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1143,6 +1143,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1154,6 +1155,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -1226,7 +1228,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 840839962}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -1235,8 +1237,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
@@ -1246,6 +1246,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &840839965
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1264,7 +1265,7 @@ PrefabInstance:
     - target: {fileID: 5231463773608345446, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Spot
+      value: Ball.Yellow
       objectReference: {fileID: 0}
     - target: {fileID: 5227912323972074310, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
@@ -1350,7 +1351,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 918175352}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1077351063, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_HorizontalAxis: Horizontal
@@ -1369,7 +1370,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 918175352}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -619905303, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_FirstSelected: {fileID: 0}
@@ -1441,7 +1442,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1026364385}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -1450,8 +1451,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 0
   m_PreserveAspect: 0
@@ -1461,6 +1460,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1026364388
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1479,7 +1479,7 @@ PrefabInstance:
     - target: {fileID: 5231463773608345446, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Spot
+      value: Ball.Yellow
       objectReference: {fileID: 0}
     - target: {fileID: 5227912323972074310, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
@@ -1584,7 +1584,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1089022602}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -1593,8 +1593,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 0
   m_PreserveAspect: 0
@@ -1604,6 +1602,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1089022605
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1628,7 +1627,7 @@ PrefabInstance:
     - target: {fileID: 5231463773608345446, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Spot
+      value: Ball.Yellow
       objectReference: {fileID: 0}
     - target: {fileID: 5227912323972074310, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
@@ -1741,7 +1740,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1200079724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1301386320, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
@@ -1758,7 +1757,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1200079724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_UiScaleMode: 1
@@ -1821,7 +1820,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1200079724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
@@ -1894,7 +1893,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1217651082}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -1903,8 +1902,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
@@ -1914,6 +1911,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1217651085
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2007,7 +2005,7 @@ PrefabInstance:
     - target: {fileID: 8030459012802420261, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Strip
+      value: Ball.Red
       objectReference: {fileID: 0}
     - target: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
@@ -2157,7 +2155,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1477648318}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -2166,8 +2164,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
@@ -2177,6 +2173,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1477648321
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2195,7 +2192,7 @@ PrefabInstance:
     - target: {fileID: 5231463773608345446, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Spot
+      value: Ball.Yellow
       objectReference: {fileID: 0}
     - target: {fileID: 5227912323972074310, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
@@ -2302,7 +2299,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1540360432}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -2354,8 +2351,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!4 &1559265285 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
@@ -2539,7 +2534,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1701876253}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -2548,8 +2543,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 14
@@ -2662,6 +2655,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2673,6 +2667,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -2739,7 +2734,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1769330350}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -2748,8 +2743,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
@@ -2759,6 +2752,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1769330353
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2777,7 +2771,7 @@ PrefabInstance:
     - target: {fileID: 8030459012802420261, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Strip
+      value: Ball.Red
       objectReference: {fileID: 0}
     - target: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
@@ -2846,7 +2840,7 @@ PrefabInstance:
     - target: {fileID: 8030459012802420261, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Strip
+      value: Ball.Red
       objectReference: {fileID: 0}
     - target: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
@@ -2952,7 +2946,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1911359807}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -2961,8 +2955,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 14
@@ -3037,7 +3029,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1938929717}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -3046,8 +3038,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 14
@@ -3189,9 +3179,15 @@ MonoBehaviour:
     Height: 0.2176503
     Radius: 2.250225
     Axis: 1
+  m_CylinderSideCount: 20
   m_SphereRadius: 2.250225
-  m_ConvexRadius: 0.021765029
+  m_MinimumSkinnedVertexWeight: 0.1
+  m_ConvexHullGenerationParameters:
+    m_SimplificationTolerance: 0.015
+    m_BevelRadius: 0.021765029
+    m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
@@ -3220,6 +3216,7 @@ MonoBehaviour:
     m_CustomTags:
       m_Override: 0
       m_Value: 0000000000000000
+  m_ConvexRadius_Deprecated: -1
 --- !u!114 &1950980977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3247,6 +3244,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -3258,6 +3256,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -3345,11 +3344,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.53
-      objectReference: {fileID: 0}
     - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
       propertyPath: m_LocalRotation.x
@@ -3400,6 +3394,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.53
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c0ce7b3c74021e840a5995cf136ee0fe, type: 3}
 --- !u!1001 &2017119101
@@ -3412,7 +3411,7 @@ PrefabInstance:
     - target: {fileID: 8030459012802420261, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Strip
+      value: Ball.Red
       objectReference: {fileID: 0}
     - target: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
@@ -3481,7 +3480,7 @@ PrefabInstance:
     - target: {fileID: 8030459012802420261, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Strip
+      value: Ball.Red
       objectReference: {fileID: 0}
     - target: {fileID: 8026903232765618693, guid: 1d8107ba484d38a49ad278a28579e82b,
         type: 3}
@@ -3586,7 +3585,7 @@ PrefabInstance:
     - target: {fileID: 5231463773608345446, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}
       propertyPath: m_Name
-      value: Ball.Spot
+      value: Ball.Yellow
       objectReference: {fileID: 0}
     - target: {fileID: 5227912323972074310, guid: 05f027d34f7108843bd238196cb1a24b,
         type: 3}

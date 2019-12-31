@@ -130,6 +130,7 @@ GameObject:
   m_Component:
   - component: {fileID: 59106053}
   - component: {fileID: 59106052}
+  - component: {fileID: 59106054}
   m_Layer: 0
   m_Name: SpawnRandomTetrahedrons
   m_TagString: Untagged
@@ -154,6 +155,7 @@ MonoBehaviour:
     x: 10
     y: 0
     z: 10
+  restitution: 1
   count: 20
 --- !u!4 &59106053
 Transform:
@@ -169,6 +171,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &59106054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 59106051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 0
 --- !u!1001 &680140560
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -263,6 +278,7 @@ GameObject:
   m_Component:
   - component: {fileID: 958956081}
   - component: {fileID: 958956080}
+  - component: {fileID: 958956082}
   m_Layer: 0
   m_Name: SpawnRandomCylinders
   m_TagString: Untagged
@@ -287,6 +303,7 @@ MonoBehaviour:
     x: 10
     y: 0
     z: 10
+  restitution: 1
   count: 20
 --- !u!4 &958956081
 Transform:
@@ -302,6 +319,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &958956082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 958956079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 0
 --- !u!1 &1085058172
 GameObject:
   m_ObjectHideFlags: 0
@@ -520,6 +550,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1269660586}
   - component: {fileID: 1269660585}
+  - component: {fileID: 1269660587}
   m_Layer: 0
   m_Name: SpawnRandomBoxes
   m_TagString: Untagged
@@ -544,6 +575,7 @@ MonoBehaviour:
     x: 10
     y: 0
     z: 10
+  restitution: 1
   count: 20
 --- !u!4 &1269660586
 Transform:
@@ -559,6 +591,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1269660587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269660584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 0
 --- !u!1 &1674847942
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,6 +614,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1674847944}
   - component: {fileID: 1674847943}
+  - component: {fileID: 1674847945}
   m_Layer: 0
   m_Name: SpawnRandomSpheres
   m_TagString: Untagged
@@ -593,6 +639,7 @@ MonoBehaviour:
     x: 10
     y: 0
     z: 10
+  restitution: 1
   count: 20
 --- !u!4 &1674847944
 Transform:
@@ -608,6 +655,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1674847945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674847942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 0
 --- !u!1 &1689665872
 GameObject:
   m_ObjectHideFlags: 0
@@ -618,6 +678,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1689665874}
   - component: {fileID: 1689665873}
+  - component: {fileID: 1689665875}
   m_Layer: 0
   m_Name: SpawnRandomCapsules
   m_TagString: Untagged
@@ -642,6 +703,7 @@ MonoBehaviour:
     x: 10
     y: 0
     z: 10
+  restitution: 1
   count: 20
 --- !u!4 &1689665874
 Transform:
@@ -657,3 +719,16 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1689665875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689665872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 0

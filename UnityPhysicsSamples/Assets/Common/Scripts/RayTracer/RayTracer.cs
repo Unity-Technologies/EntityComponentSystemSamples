@@ -72,7 +72,7 @@ namespace Unity.Physics.Extensions
 
             if (ExpectingResults)
             {
-                BlockStream.Reader reader = lastResults.PixelData;
+                NativeStream.Reader reader = lastResults.PixelData.AsReader();
                 for (int i = 0; i < lastResults.PixelData.ForEachCount; i++)
                 {
                     reader.BeginForEachIndex(i);

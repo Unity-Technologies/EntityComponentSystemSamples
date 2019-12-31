@@ -2,53 +2,38 @@
 using Unity.Scenes;
 using UnityEngine;
 
-
+[RequireComponent(typeof(SubScene))]
 class ToggleSubsceneLoading : MonoBehaviour
 {
     public int FramesBetweenStreamingOperations = 10;
     public int FramesUntilToggleLoad;
+    SubScene m_SubScene;
 
-    public void OnValidate()
+    void OnValidate()
     {
         if (FramesBetweenStreamingOperations < 1)
             FramesBetweenStreamingOperations = 1;
     }
 
-    public static World DefaultWorld
-    {
-        private set { }
-        get
-        {
-#if UNITY_ENTITIES_0_2_0_OR_NEWER
-            return World.DefaultGameObjectInjectionWorld;
-#else
-            return World.Active;
-#endif
-        }
-    }
+    void Start() => m_SubScene = GetComponent<SubScene>();
 
     void Update()
     {
-        var subscene = GetComponent<SubScene>();
-        if (subscene == null)
-            return;
-
         if (++FramesUntilToggleLoad >= FramesBetweenStreamingOperations)
         {
+            if (m_SubScene == null)
+                return;
+
             FramesUntilToggleLoad = 0;
 
-            var entityManager = DefaultWorld.EntityManager;
-            foreach (var sceneEntity in subscene._SceneEntities)
-            {
-                if (!entityManager.HasComponent<RequestSceneLoaded>(sceneEntity))
-                {
-                    entityManager.AddComponentData(sceneEntity, new RequestSceneLoaded());
-                }
-                else
-                {
-                    entityManager.RemoveComponent<RequestSceneLoaded>(sceneEntity);
-                }
-            }
+            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            var sceneSystem = entityManager.World.GetExistingSystem<SceneSystem>();
+            var sceneEntity = sceneSystem.GetSceneEntity(m_SubScene.SceneGUID);
+
+            if (!entityManager.HasComponent<RequestSceneLoaded>(sceneEntity))
+                sceneSystem.LoadSceneAsync(m_SubScene.SceneGUID);
+            else
+                sceneSystem.UnloadScene(m_SubScene.SceneGUID);
         }
     }
 }

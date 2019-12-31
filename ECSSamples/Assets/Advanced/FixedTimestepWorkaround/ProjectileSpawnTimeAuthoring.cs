@@ -1,11 +1,12 @@
 ﻿using System;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Samples.FixedTimestepSystem.Authoring
 {
     [RequiresEntityConversion]
+    [AddComponentMenu("DOTS Samples/FixedTimestepWorkaround/Projectile Spawn Time")]
+    [ConverterVersion("joe", 1)]
     public class ProjectileSpawnTimeAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     {
         public float SpawnTime;

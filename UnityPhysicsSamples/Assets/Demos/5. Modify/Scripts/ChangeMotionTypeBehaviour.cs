@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics;
+using Unity.Physics.Authoring;
 using Unity.Physics.Systems;
 using Unity.Rendering;
 using UnityEngine;
-
-using Unity.Physics.Authoring;
-using Unity.Mathematics;
 
 public struct ChangeMotionType : IComponentData
 {
@@ -40,7 +36,7 @@ public class ChangeMotionTypeBehaviour : MonoBehaviour, IDeclareReferencedPrefab
         var mass = dstManager.GetComponentData<PhysicsMass>(entity);
         var velocity = dstManager.GetComponentData<PhysicsVelocity>(entity);
 
-        dstManager.AddComponentData(entity, new ChangeMotionType()
+        dstManager.AddComponentData(entity, new ChangeMotionType
         {
             EntityDynamic = conversionSystem.GetPrimaryEntity(DynamicBody),
             EntityKinematic = conversionSystem.GetPrimaryEntity(KinematicBody),
@@ -74,7 +70,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
         Entities.WithAll<ChangeMotionType, RenderMesh>().ForEach(
             (Entity entity, ref ChangeMotionType modifier) =>
         {
-            modifier.LocalTime -= Time.deltaTime;
+            modifier.LocalTime -= UnityEngine.Time.deltaTime;
 
             if (modifier.LocalTime > 0.0f) return;
 

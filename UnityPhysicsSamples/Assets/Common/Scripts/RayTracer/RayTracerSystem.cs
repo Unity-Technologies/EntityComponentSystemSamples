@@ -33,13 +33,13 @@ namespace Unity.Physics.Extensions
 
         public struct RayResult
         {
-            public BlockStream PixelData;
+            public NativeStream PixelData;
         }
 
         public RayResult AddRequest(RayRequest req)
         {
             int numWorkItems = 5;
-            RayResult res = new RayResult { PixelData = new BlockStream(numWorkItems, 0xa1070b6d) };
+            var res = new RayResult { PixelData = new NativeStream(numWorkItems, Allocator.TempJob) };
             m_Requests.Add(req);
             m_Results.Add(res);
             return res;
@@ -53,7 +53,7 @@ namespace Unity.Physics.Extensions
         [BurstCompile]
         protected struct RaycastJob : IJobParallelFor
         {
-            public BlockStream.Writer Results;
+            public NativeStream.Writer Results;
             public RayRequest Request;
             [ReadOnly] public CollisionWorld World;
             public int NumDynamicBodies;
@@ -210,7 +210,7 @@ namespace Unity.Physics.Extensions
             {
                 JobHandle rcj = new RaycastJob
                 {
-                    Results = m_Results[0].PixelData,
+                    Results = m_Results[0].PixelData.AsWriter(),
                     Request = m_Requests[0],
                     World = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld,
                     NumDynamicBodies = m_BuildPhysicsWorldSystem.PhysicsWorld.NumDynamicBodies

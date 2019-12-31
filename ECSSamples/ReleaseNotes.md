@@ -1,16 +1,41 @@
-# Samples Version 30
+# Samples Version 32
 
-To view the changelog for a package, go to **Package Manager** and click on **View changelog** or open the respective `CHANGELOG.md` file inside the package folder. 
+## New Samples
+
+* Adding new `GridCubeFollowTargets` and `GridPlaneFollowTargets` samples.
+
+## Changes
+
+* The project does now require Unity `2019.3.0f1` or later.
+
+
+# Samples Version 31
+
+To view the changelog for a specific package, go to **Package Manager** and click on **View changelog** or open the respective `CHANGELOG.md` file inside the package folder. 
+
+## New Samples
+
+* Added the `Advanced/GridPath` sample which showcases how to build a grid-based level using the conversion workflow and how to implement simple actor movement. You can find more information in the `Assets/Advanced/GridPath/Scripts/README.md` file. 
+
+## Changes
+
+* The project does now require Unity `2019.3.0b11` or later: some of the new features in the entities package require features in Unity that were introduced with that version.
+* Updated packages and applied respective required api changes.
+* GridPath samples now include `GridPlaneFollowTarget` and `GridCubeFollowTarget` demonstrating building tables of shortest paths and lookup.
+
+
+# Samples Version 30
 
 ## Changes
 
 * Improved documentation for the Boids Sample
 * Updated API to correspond to the latest package APIs
+* JobComponentSystem now supports Entities.ForEach. Its implementation is different from the old one, in that it uses a compiler extension to transform your Entities.ForEach into a job that you have to .Schedule(). It aims to provide the usability of Entities.ForEach, with the performance of jobs. See the [docs](Documentation/entities_foreach.md) for reference and the ForEach sample in "Samples/Assets/HelloCube/1. ForEach" for example usage.
+* It is now possible to auto-generate authoring components with the GenerateAuthoringComponent attribute.  This will create an authoring MonoBehaviour with the same fields as the IComponentData type that the attribute was added to.  Generated authoring components will have add an "Authoring" suffix to the IComponentData type name.  See the ForEach sample in "Samples/Assets/HelloCube/1. ForEach" for example usage.
+* Updated HelloCube samples to use Entities.ForEach and GenerateAuthoringComponent when possible.
 
 
 # Samples Version 29
-
-To view the changelog for a package, go to **Package Manager** and click on **View changelog** or open the respective `CHANGELOG.md` file inside the package folder. 
 
 ## Changes
 
@@ -149,7 +174,7 @@ To view the changelog for a the package, go to **Package Manager** and click on 
 
 * If a system in a ComponentSystemGroup throws an exception, the group will now log the exception as an error and continue updating the
   next system in the group. Previously, the entire group update would abort.
-* Moved most documentation to the [Entities](https://docs.unity3d.com/Packages/com.unity.entities@0.0/manual/index.html), [Collections extensions](https://docs.unity3d.com/Packages/com.unity.collections@0.0/manual/index.html), and [Job extensions](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/manual/index.html) packages.
+* Moved most documentation to the [Entities](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/manual/index.html), [Collections extensions](https://docs.unity3d.com/Packages/com.unity.collections@latest?preview=1&subfolder=/manual/index.html), and [Job extensions](https://docs.unity3d.com/Packages/com.unity.jobs@latest?preview=1&subfolder=/manual/index.html) packages.
 
 ## Fixes
 
@@ -227,7 +252,7 @@ these functions will take an optimized path that migrates the chunks to new arch
   * `Scale`-\>`NonUniformScale`
 * Attach, Attached components removed. (No transform hierarchy)
 * `ComponentDataArray`, `BufferArray`, `SharedComponentDataArray`, and `EntityArray` have been deprecated. Please use `ForEach`, `IJobProcessComponentData`, `IJobChunk`, and `ComponentGroup` APIs to access component data.
-* `[Inject]` has been deprecated. See [the Injection documentation](Documentation/content/injection.md) for more information.
+* `[Inject]` has been deprecated. 
 * Component system update ordering is now hierarchical. A forthcoming document will cover this feature in detail. Key changes:
   * Added `ComponentSystemGroup` class, representing a group of systems (and system groups) to update in a fixed order.
   * The following `ComponentSystemGroup`s are added to the Unity player loop by default:
@@ -493,7 +518,7 @@ these functions will take an optimized path that migrates the chunks to new arch
 * IJobProcessComponentData supports up to 4 components now.
 * IJobProcessComponentData.Schedule function no longers takes the number of batch iteration count. Batch iteration count is now always implicit to be the size of a whole chunk. This requires changing all code using IJobProcessComponentData.
 * IJobProcessComponentData.ScheduleSingle can be used to execute IJobProcessComponentData in a single job. IJobProcessComponentData.Schedule on the other hand by default schedules parallel for jobs.
-* ForEachComponentGroupFilter has been removed. We recommend ArchetypeChunk API as a replacement (Documentation/content/chunk_iteration.md)
+* ForEachComponentGroupFilter has been removed. We recommend ArchetypeChunk API as a replacement (https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/manual/chunk_iteration.html)
 * `TransformSystem` is now an abstract class and no longer have a generic `<T>` parameter
 * Removed MeshCulledComponent & MeshCullingComponent. They were accidentally still left after the rewrite of the InstanceRendererSystem in preview 11.
 
@@ -508,13 +533,13 @@ these functions will take an optimized path that migrates the chunks to new arch
 
 ## New Features
 
-* [Dynamic Buffers](Documentation/content/dynamic_buffers.md) (FixedArray functionality has been removed.)
-* [Chunk Iteration](Documentation/content/chunk_iteration.md)
-* [TransformSystem](Documentation/content/transform_system.md)
+* [Dynamic Buffers](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/manual/dynamic_buffers.html) (FixedArray functionality has been removed.)
+* [Chunk Iteration](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/manual/chunk_iteration_job.html)
+* [TransformSystem](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/manual/transform_system.html)
   * Note: Completely incompatible with previous version.
   * Some Components "downgraded" to Samples.Common (not part of Unity.Transforms) - MoveForward, MoveSpeed, Heading, RotationSpeed
   * Transform2D Removed.
-* [SystemStateComponents](Documentation/content/system_state_components.md)
+* [SystemStateComponents](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/manual/system_state_components.html)
 * EntityCommandBuffer.Concurrent added to support command buffer recording in parallel for-type jobs
 * EntityManager.MoveEntitiesFrom optimizations (Moving real world scene with 50k entities takes less than 1ms now)
 * Unity.Entities.Serialization API for writing binary scene format (No backwards compatibility, but incredibly fast load speed)

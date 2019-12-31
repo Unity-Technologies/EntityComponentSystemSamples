@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace Samples.FixedTimestepSystem.Authoring
 {
+    [AddComponentMenu("DOTS Samples/FixedTimestepWorkaround/Variable Rate Spawner")]
+    [ConverterVersion("joe", 1)]
     public class VariableRateSpawnerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
     {
         public GameObject projectilePrefab;
