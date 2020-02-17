@@ -12,49 +12,49 @@ using Unity.Build;
 #pragma warning disable 649
 
 [ExecuteAlways]
-public class SetBuildSettingsComponent : MonoBehaviour
+public class SetBuildConfigurationComponent : MonoBehaviour
 {
 #if UNITY_EDITOR 
     [SerializeField] 
-    public BuildSettings _BuildSettingsA;
+    public BuildConfiguration _BuildConfigurationA;
     [SerializeField]
-    public BuildSettings _BuildSettingsB;
+    public BuildConfiguration _BuildConfigurationB;
 #endif
     
     [SerializeField]
     [HideInInspector]
-    Hash128 _BuildSettingsGUIDA;
+    Hash128 _BuildConfigurationGUIDA;
 
     [SerializeField]
     [HideInInspector]
-    Hash128 _BuildSettingsGUIDB;
+    Hash128 _BuildConfigurationGUIDB;
     
     
     private World worldA;
     private World worldB;
 
-    static void SetBuildSettingOnWorld(Hash128 buildSettingsGUID, World world)
+    static void SetBuildConfigurationOnWorld(Hash128 buildConfigurationGUID, World world)
     {
         if (world == null)
             return;
-        world.GetExistingSystem<SceneSystem>().BuildSettingsGUID = buildSettingsGUID;
+        world.GetExistingSystem<SceneSystem>().BuildConfigurationGUID = buildConfigurationGUID;
     }
 
     private void OnValidate()
     {
 #if UNITY_EDITOR
-        _BuildSettingsGUIDA = new GUID(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_BuildSettingsA)));
-        _BuildSettingsGUIDB = new GUID(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_BuildSettingsB)));
+        _BuildConfigurationGUIDA = new GUID(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_BuildConfigurationA)));
+        _BuildConfigurationGUIDB = new GUID(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_BuildConfigurationB)));
 #endif
 
-        SetBuildSettingOnWorld(_BuildSettingsGUIDA, worldA);
-        SetBuildSettingOnWorld(_BuildSettingsGUIDB, worldB);
+        SetBuildConfigurationOnWorld(_BuildConfigurationGUIDA, worldA);
+        SetBuildConfigurationOnWorld(_BuildConfigurationGUIDB, worldB);
     }
 
     private void OnEnable()
     {
-        var worldNameA = "BuildSettings Test World A";
-        var worldNameB = "BuildSettings Test World B";
+        var worldNameA = "BuildConfiguration Test World A";
+        var worldNameB = "BuildConfiguration Test World B";
         
         World.DisposeAllWorlds();
         DefaultWorldInitialization.Initialize(worldNameA, !Application.isPlaying);

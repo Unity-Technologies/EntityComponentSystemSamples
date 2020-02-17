@@ -11,7 +11,7 @@ public class RotationSpeedFromBuildSettings_IJobChunk : MonoBehaviour, IConvertG
 {
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        var rotationSpeedSetting = conversionSystem.GetBuildSettingsComponent<RotationSpeedSetting>();
+        var rotationSpeedSetting = conversionSystem.GetBuildConfigurationComponent<RotationSpeedSetting>();
         
         // Change rotation speed
         var data = new RotationSpeed_IJobChunk { RadiansPerSecond = math.radians(rotationSpeedSetting.RotationSpeed) };

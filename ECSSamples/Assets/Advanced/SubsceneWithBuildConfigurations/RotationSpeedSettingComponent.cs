@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 
 #if UNITY_EDITOR
-public class RotationSpeedSetting : Unity.Build.IBuildSettingsComponent
+public class RotationSpeedSetting : Unity.Build.IBuildComponent
 {
     public float RotationSpeed;
     public float Offset;

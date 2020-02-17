@@ -14,12 +14,12 @@ There are two key differences to the way Entities were spawned in the previous e
 
 Component data can have references to other entities. In this case we have a reference to a entity prefab. Similar to GameObjects, when instantiating and destroying a prefab, the whole prefab is cloned or deleted as a group.
 
-This way you can write all of your runtime code using JobComponentSystem and ComponentData.
+This way you can write all of your runtime code using a System and ComponentData.
 
 The SpawnerSystem_FromEntity looks for any Spawner_FromEntity Component.
 When it finds one, the System instantiates the prefabs in a grid and then destroys the spawner Entity (so that it only spawns a given set of Entities once).
 
-The SpawnerSystem_FromEntity uses a Job based on IJobForEachWithEntity, which is very similar to the IJobForEach Jobs demonstrated in earlier examples. The difference is that this type of Job provides the Entity object (and the Component array index) to your Execute() function. The Entity object is required so that the System can destroy the Spawner Entity once it has been processed.
+The SpawnerSystem_FromEntity uses an Entities.ForEach, which is very similar to the those demonstrated in earlier examples. The difference is that this Entities.ForEach provides the Entity object (and the entity index in query) to your lambda. The Entity object is required so that the System can destroy the Spawner Entity once it has been processed.
 
 Another important concept that SpawnerSystem_FromEntity illustrates is the use of an EntityCommandBuffer and a EntityCommandBufferSystem. To prevent race conditions, you cannot make _structural changes_ inside a Job. Structural changes include anything that changes the structure of your data, such as creating/destroying Entities or adding/removing Components. To overcome this limitation, ECS provides the EntityCommandBuffer.
 

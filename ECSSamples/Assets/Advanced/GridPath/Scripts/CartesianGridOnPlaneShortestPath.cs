@@ -67,7 +67,7 @@ public static unsafe class CartesianGridOnPlaneShortestPath
     {
         var cellCount = rowCount * colCount;
 
-        while (open.Count > 0)
+        while (open.Length > 0)
         {
             var cellIndex = open.Dequeue();
             var y = cellIndex / colCount;

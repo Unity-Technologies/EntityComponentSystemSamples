@@ -10,7 +10,7 @@ As in the previous examples, the **RotationSpeedSystem_IJobChunk** *updates* the
 
 This sample also demonstrates writing a custom authoring component.  This can provide more flexibility that generating one with the **GenerateAuthoringComponent** attribute.
 
-## JobComponentSystems and IJobChunk
+## Systems and IJobChunk
 
 In this example, the Job in RotationSpeedSystem_IJobChunk is now implemented using IJobChunk.
 
@@ -18,7 +18,7 @@ In a Job implemented with IJobChunk, the ECS framework passes an ArchetypeChunk 
 
 Notice that you have to do a little more manual setup for an IJobChunkJob. This includes constructing an EntityQuery that identifies which Component types the System operates upon. You must also pass ArchetypeChunkComponentType objects to the Job, which you then use inside the Job to get the NativeArray instances required to access the Component arrays themselves.
 
-Systems using IJobChunk can handle more complex situations than those supported by IJobForEach, while maintaining maximum efficiency.
+Systems using IJobChunk can handle more complex situations than those supported by Entities.ForEach, while maintaining maximum efficiency.
 
 ## Converting from GameObject to Entity
 

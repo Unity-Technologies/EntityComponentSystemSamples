@@ -6,13 +6,13 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Random = Unity.Mathematics.Random;
 
-// JobComponentSystems can run on worker threads.
+// Systems can schedule work to run on worker threads.
 // However, creating and removing Entities can only be done on the main thread to prevent race conditions.
 // The system uses an EntityCommandBuffer to defer tasks that can't be done inside the Job.
 
 // ReSharper disable once InconsistentNaming
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-public class SpawnerSystem_SpawnAndRemove : JobComponentSystem
+public class SpawnerSystem_SpawnAndRemove : SystemBase
 {
     // BeginInitializationEntityCommandBufferSystem is used to create a command buffer which will then be played back
     // when that barrier system executes.
@@ -31,7 +31,7 @@ public class SpawnerSystem_SpawnAndRemove : JobComponentSystem
         m_EntityCommandBufferSystem = World.GetOrCreateSystem<BeginInitializationEntityCommandBufferSystem>();
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDependencies)
+    protected override void OnUpdate()
     {
         // Instead of performing structural changes directly, a Job can add a command to an EntityCommandBuffer to
         // perform such changes on the main thread after the Job has finished. Command buffers allow you to perform
@@ -42,7 +42,7 @@ public class SpawnerSystem_SpawnAndRemove : JobComponentSystem
         // Schedule the job that will add Instantiate commands to the EntityCommandBuffer.
         // Since this job only runs on the first frame, we want to ensure Burst compiles it before running to get the best performance (3rd parameter of WithBurst)
         // The actual job will be cached once it is compiled (it will only get Burst compiled once).
-        var jobHandle = Entities
+        Entities
             .WithName("SpawnerSystem_SpawnAndRemove")
             .WithBurst(FloatMode.Default, FloatPrecision.Standard, true)
             .ForEach((Entity entity, int entityInQueryIndex, in Spawner_SpawnAndRemove spawner, in LocalToWorld location) =>
@@ -64,14 +64,12 @@ public class SpawnerSystem_SpawnAndRemove : JobComponentSystem
             }
 
             commandBuffer.DestroyEntity(entityInQueryIndex, entity);
-        }).Schedule(inputDependencies);
+        }).ScheduleParallel();
 
         // SpawnJob runs in parallel with no sync point until the barrier system executes.
         // When the barrier system executes we want to complete the SpawnJob and then play back the commands
         // (Creating the entities and placing them). We need to tell the barrier system which job it needs to
         // complete before it can play back the commands.
-        m_EntityCommandBufferSystem.AddJobHandleForProducer(jobHandle);
-
-        return jobHandle;
+        m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
     }
 }

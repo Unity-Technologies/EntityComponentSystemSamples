@@ -8,7 +8,7 @@ using Unity.Transforms;
 // This system updates all entities in the scene with both a RotationSpeed_IJobChunk and Rotation component.
 
 // ReSharper disable once InconsistentNaming
-public class RotationSpeedSystem_IJobChunk : JobComponentSystem
+public class RotationSpeedSystem_IJobChunk : SystemBase
 {
     EntityQuery m_Group;
 
@@ -46,7 +46,7 @@ public class RotationSpeedSystem_IJobChunk : JobComponentSystem
     }
 
     // OnUpdate runs on the main thread.
-    protected override JobHandle OnUpdate(JobHandle inputDependencies)
+    protected override void OnUpdate()
     {
         // Explicitly declare:
         // - Read-Write access to Rotation
@@ -61,6 +61,6 @@ public class RotationSpeedSystem_IJobChunk : JobComponentSystem
             DeltaTime = Time.DeltaTime
         };
 
-        return job.Schedule(m_Group, inputDependencies);
+        Dependency = job.Schedule(m_Group, Dependency);
     }
 }

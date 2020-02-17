@@ -4,7 +4,7 @@ This sample demonstrates how to spawn Entities and Components using a Prefab Gam
 
 ## What does it show?
 
-This sample uses the Components and Systems from HelloCube IJobForEach.
+This sample uses the Components and Systems from HelloCube ForEach.
 
 Unity.Entities provides a GameObjectConversionUtility to convert a GameObject hierarchy to its Entity representation. With this utility, you can convert a Prefab into an Entity representation and use that representation to spawn new instances whenever needed.
 

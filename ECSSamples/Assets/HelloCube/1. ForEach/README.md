@@ -8,11 +8,11 @@ This sample demonstrates the separation of data and functionality in ECS. Data i
 
 The **RotationSpeedSystem_ForEach** *updates* the object's rotation using the *data* stored in the **RotationSpeed_ForEach** Component.
 
-## JobComponentSystems and Entities.ForEach
+## Systems and Entities.ForEach
 
-RotationSpeedSystem_ForEach is a JobComponentSystem and uses an Entities.ForEach lambda to iterate through the Entities. This example only creates a single Entity, but if you added more Entities to the scene, the RotationSpeedSystem_ForEach updates them all — as long as they have a RotationSpeed_ForEach Component (and the Rotation Component added when converting the GameObject's Transform to ECS Components).
+RotationSpeedSystem_ForEach is a system that derives from SystemBase and uses an Entities.ForEach lambda to iterate through the Entities. This example only creates a single Entity, but if you added more Entities to the scene, the RotationSpeedSystem_ForEach updates them all — as long as they have a RotationSpeed_ForEach Component (and the Rotation Component added when converting the GameObject's Transform to ECS Components).
 
-Note that JobComponentSystems using Entities.ForEach schedules the lambda to run on multiple worker threads if there are multiple chunks. This automatically takes advantage of multiple cores if they are available (and if your data spans multiple chunks).
+Note that the system using Entities.ForEach uses ScheduleParallel to schedule the lambda to run on multiple worker threads if there are multiple chunks. This automatically takes advantage of multiple cores if they are available (and if your data spans multiple chunks).
 
 ## Converting from GameObject to Entity
 

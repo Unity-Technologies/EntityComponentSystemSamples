@@ -25,7 +25,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
     protected override void OnCreate()
     {
         base.OnCreate();
-        GetEntityQuery(ComponentType.ReadOnly<MeshToBoundingBoxsAuthoring>());
+        GetEntityQuery(ComponentType.ReadOnly<MeshToBoundingBoxAuthoring>());
     }
 
     protected override void OnUpdate()
@@ -40,7 +40,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
         using (var context = new BlobAssetComputationContext<MeshBBFactorySettings, MeshBBBlobAsset>(BlobAssetStore, 128, Allocator.Temp))
         {
             // First step: for all changed GameObjects we compute the hash of their blob asset then get the asset or register its computation
-            Entities.ForEach((MeshToBoundingBoxsAuthoring auth) =>
+            Entities.ForEach((MeshToBoundingBoxAuthoring auth) =>
             {
                 // Compute the blob asset hash based on Authoring properties
                 var hasMesh = auth.Mesh != null;
@@ -49,7 +49,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
 
                 // Query the context to determine if we need to build the BlobAsset
                 processBlobAssets.Add(hash);
-                context.AssociateBlobAssetWithGameObject(hash, auth.gameObject);
+                context.AssociateBlobAssetWithUnityObject(hash, auth.gameObject);
                 if (context.NeedToComputeBlobAsset(hash))
                 {
                     Profiler.BeginSample("CopyVertices");
@@ -112,7 +112,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
 
             // Third step, create the ECS component with the associated blob asset
             var index = 0;
-            Entities.ForEach((MeshToBoundingBoxsAuthoring auth) =>
+            Entities.ForEach((MeshToBoundingBoxAuthoring auth) =>
             {
                 context.GetBlobAsset(processBlobAssets[index++], out var blob);
 
@@ -120,6 +120,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
                 var entity = GetPrimaryEntity(auth);
 
                 DstEntityManager.AddComponentData(entity, new MeshBBComponent(blob));
+                DstEntityManager.AddComponentData(entity,new Translation{Value=auth.transform.position});                
             });
 
             Profiler.EndSample();

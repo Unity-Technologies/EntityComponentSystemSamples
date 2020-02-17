@@ -2,7 +2,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-[UpdateBefore(typeof(CartesianGridOnPlaneFollowTargetSystem))]
+[UpdateBefore(typeof(CartesianGridChangeDirectionSystemGroup))]
 public unsafe class CartesianGridOnCubeTargetSystem : JobComponentSystem
 {
     EntityQuery m_GridQuery;
