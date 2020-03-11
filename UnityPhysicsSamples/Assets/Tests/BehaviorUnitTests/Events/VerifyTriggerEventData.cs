@@ -19,6 +19,12 @@ namespace Unity.Physics.Tests
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             dstManager.AddComponentData(entity, new VerifyTriggerEventDataData());
+
+#if HAVOK_PHYSICS_EXISTS
+            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+            config.EnableSleeping = 0;
+            dstManager.AddComponentData(entity, config);
+#endif
         }
     }
 
@@ -54,8 +60,6 @@ namespace Unity.Physics.Tests
                 Assert.AreEqual(triggerEvent.ColliderKeys.ColliderKeyB.Value, ColliderKey.Empty.Value);
                 Assert.AreEqual(triggerEvent.Entities.EntityA, Bodies[triggerEvent.BodyIndices.BodyAIndex].Entity);
                 Assert.AreEqual(triggerEvent.Entities.EntityB, Bodies[triggerEvent.BodyIndices.BodyBIndex].Entity);
-                Assert.AreEqual(triggerEvent.Entities.EntityA.Version, 1);
-                Assert.AreEqual(triggerEvent.Entities.EntityB.Version, 1);
             }
         }
 

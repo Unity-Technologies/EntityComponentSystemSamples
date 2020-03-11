@@ -1,10 +1,11 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using static Unity.Physics.Math;
 
 namespace Unity.Physics.Authoring
 {
-    public class StiffSpringJoint : BaseJoint
+    public class LimitedDistanceJoint : BaseJoint
     {
         [Tooltip("If checked, PositionLocal will snap to match PositionInConnectedEntity")]
         public bool AutoSetConnected = true;
@@ -14,17 +15,21 @@ namespace Unity.Physics.Authoring
         public float MinDistance;
         public float MaxDistance;
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             if (AutoSetConnected)
             {
                 PositionLocal = math.transform(math.inverse(worldFromA), math.transform(worldFromB, PositionInConnectedEntity));
             }
 
-            CreateJointEntity(JointData.CreateStiffSpring(
-                PositionLocal, PositionInConnectedEntity, 
-                MinDistance, MaxDistance),
-                entityManager);
+            CreateJointEntity(
+                JointData.CreateLimitedDistance(
+                    PositionLocal,
+                    PositionInConnectedEntity,
+                    new FloatRange(MinDistance, MaxDistance)
+                ),
+                entityManager, conversionSystem
+            );
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Unity.Physics.Authoring
 
     [UpdateAfter(typeof(PhysicsBodyConversionSystem))]
     [UpdateAfter(typeof(LegacyRigidbodyConversionSystem))]
+    [UpdateAfter(typeof(LegacyJointConversionSystem))]
     public class PhysicsSamplesConversionSystem : GameObjectConversionSystem
     {
         // Update is called once per frame

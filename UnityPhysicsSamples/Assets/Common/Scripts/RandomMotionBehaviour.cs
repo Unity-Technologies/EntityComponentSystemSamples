@@ -90,11 +90,15 @@ public class RandomMotionSystem : JobComponentSystem
     {
         Random random = new Random();
 
-        var physicsStep = m_PhysicsGroup.GetSingleton<PhysicsStep>();
+        PhysicsStep stepComponent = PhysicsStep.Default;
+        if (HasSingleton<PhysicsStep>())
+        {
+            stepComponent = GetSingleton<PhysicsStep>();
+        }
 
         var job = new RandomMotionJob
         {
-            gravity = physicsStep.Gravity,
+            gravity = stepComponent.Gravity,
             deltaTime = UnityEngine.Time.fixedDeltaTime,
             random = random
         };

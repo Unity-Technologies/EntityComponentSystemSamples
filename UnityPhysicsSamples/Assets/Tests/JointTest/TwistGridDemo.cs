@@ -1,13 +1,11 @@
-﻿using Unity.Physics;
-using Unity.Physics.Extensions;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using UnityEngine;
 using static Unity.Physics.Math;
 using BoxCollider = Unity.Physics.BoxCollider;
 using Collider = Unity.Physics.Collider;
-using Material = Unity.Physics.Material;
 
 public class TwistGridDemo : BasePhysicsDemo
 {
@@ -56,12 +54,12 @@ public class TwistGridDemo : BasePhysicsDemo
                 // Create a 1D angular limit about the axis
                 float3x3 rotationB = float3x3.identity;
                 float3x3 rotationA = math.mul(new float3x3(q2), rotationB);
-                MTransform transformA = new MTransform(rotationA, new float3(0, 0, 0));
-                MTransform transformB = new MTransform(rotationB, pos);
                 BlobAssetReference<JointData> jointData = JointData.Create(
-                    transformA, transformB,
-                    new[] {
-                        Constraint.Twist(0, -(float)math.PI / 4.0f, (float)math.PI / 4.0f)
+                    new RigidTransform(rotationA, new float3(0, 0, 0)),
+                    new RigidTransform(rotationB, pos),
+                    new NativeArray<Constraint>(1, Allocator.Temp)
+                    {
+                        [0] = Constraint.Twist(0, new FloatRange(-math.PI / 4f, math.PI / 4f))
                     }
                 );
 

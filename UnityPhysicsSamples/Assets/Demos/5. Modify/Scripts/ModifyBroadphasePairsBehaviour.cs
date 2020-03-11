@@ -77,8 +77,8 @@ public class ModifyBroadphasePairsSystem : JobComponentSystem
             // Disable the pair if a box collides with a static object
             int indexA = pair.BodyIndices.BodyAIndex;
             int indexB = pair.BodyIndices.BodyBIndex;
-            if ((Bodies[indexA].Collider != null && Bodies[indexA].Collider->Type == ColliderType.Box && indexB >= Motions.Length)
-                || (Bodies[indexB].Collider != null && Bodies[indexB].Collider->Type == ColliderType.Box && indexA >= Motions.Length))
+            if ((Bodies[indexA].Collider != null && Bodies[indexA].Collider.Value.Type == ColliderType.Box && indexB >= Motions.Length)
+                || (Bodies[indexB].Collider != null && Bodies[indexB].Collider.Value.Type == ColliderType.Box && indexA >= Motions.Length))
             {
                 pair.Disable();
             }

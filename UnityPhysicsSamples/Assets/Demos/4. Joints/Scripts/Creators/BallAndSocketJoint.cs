@@ -12,7 +12,7 @@ namespace Unity.Physics.Authoring
         public float3 PositionLocal;
         public float3 PositionInConnectedEntity;
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             if (AutoSetConnected)
             {
@@ -20,7 +20,7 @@ namespace Unity.Physics.Authoring
                 PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
             }
 
-            CreateJointEntity(JointData.CreateBallAndSocket(PositionLocal, PositionInConnectedEntity), entityManager);
+            CreateJointEntity(JointData.CreateBallAndSocket(PositionLocal, PositionInConnectedEntity), entityManager, conversionSystem);
         }
     }
 }

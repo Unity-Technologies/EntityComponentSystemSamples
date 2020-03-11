@@ -1,9 +1,10 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Physics;
-using Unity.Physics.Extensions;
+using UnityEngine;
 using static Unity.Physics.Math;
+
 
 public class FixedAngleGridDemo : BasePhysicsDemo
 {
@@ -50,16 +51,13 @@ public class FixedAngleGridDemo : BasePhysicsDemo
             float3 pivotLocal = float3.zero;
             float3 pivotInWorld = math.transform(GetBodyTransform(body), pivotLocal);
 
-            quaternion worldFromLocal = Quaternion.AngleAxis((i - 4.5f) * 20.0f, new float3(0, 0, 1));
-
             BlobAssetReference<JointData> jointData = JointData.Create(
-                new MTransform(orientationA, pivotLocal),
-                new MTransform(orientationB, pivotInWorld),
-                new Constraint[]
+                new RigidTransform(orientationA, pivotLocal),
+                new RigidTransform(orientationB, pivotInWorld),
+                new NativeArray<Constraint>(2, Allocator.Temp)
                 {
-                    Constraint.BallAndSocket(),
-                    new Constraint
-                    {
+                    [0]  = Constraint.BallAndSocket(),
+                    [1] = new Constraint {
                         ConstrainedAxes = new bool3(true, true, true),
                         Type = ConstraintType.Angular,
                         Min = math.max(i - 5, 0) * 0.1f,
@@ -67,7 +65,9 @@ public class FixedAngleGridDemo : BasePhysicsDemo
                         SpringDamping = Constraint.DefaultSpringDamping,
                         SpringFrequency = Constraint.DefaultSpringFrequency
                     }
-                });
+                }
+
+            );
             CreateJoint(jointData, body, Entity.Null);
         }
     }

@@ -1,8 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Physics;
-using Unity.Physics.Extensions;
+using UnityEngine;
 using static Unity.Physics.Math;
 
 public class RagdollGridDemo : BasePhysicsDemo
@@ -43,15 +42,13 @@ public class RagdollGridDemo : BasePhysicsDemo
             float3 perpendicularWorld = math.mul(worldFromLocal, perpendicularLocal);
 
             float maxConeAngle = (float)math.PI / 4.0f;
-            float maxPerpendicularAngle = (float)math.PI / 2.0f;
-            float minPerpendicularAngle = -maxPerpendicularAngle;
-            float maxTwistAngle = (float)math.PI / 8.0f;
-            float minTwistAngle = -maxTwistAngle;
+            var perpendicularAngle = new FloatRange(-math.PI / 2f, math.PI / 2f);
+            var twistAngle = new FloatRange(-math.PI / 8f, math.PI / 8f);
 
             BlobAssetReference<JointData> ragdoll0, ragdoll1;
-            JointData.CreateRagdoll(pivotLocal, pivotInWorld, axisLocal, axisWorld, perpendicularLocal, perpendicularWorld,
-                maxConeAngle, minPerpendicularAngle, maxPerpendicularAngle, minTwistAngle, maxTwistAngle,
-                out ragdoll0, out ragdoll1);
+            var localFrame = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+            var worldFrame = new JointFrame { Axis = axisWorld, PerpendicularAxis = perpendicularWorld, Position = pivotInWorld };
+            JointData.CreateRagdoll(localFrame, worldFrame, maxConeAngle, perpendicularAngle, twistAngle, out ragdoll0, out ragdoll1);
             CreateJoint(ragdoll0, body, Entity.Null);
             CreateJoint(ragdoll1, body, Entity.Null);
         }

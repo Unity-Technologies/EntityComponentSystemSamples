@@ -1,6 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using static Unity.Physics.Math;
 
 namespace Unity.Physics.Authoring
 {
@@ -19,7 +20,7 @@ namespace Unity.Physics.Authoring
         public float MinAngle;
         public float MaxAngle;
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             if (AutoSetConnected)
             {
@@ -30,11 +31,22 @@ namespace Unity.Physics.Authoring
             }
 
             CreateJointEntity(JointData.CreateLimitedHinge(
-                    PositionLocal, PositionInConnectedEntity, 
-                    math.normalize(HingeAxisLocal), math.normalize(HingeAxisInConnectedEntity),
-                    math.normalize(PerpendicularAxisLocal), math.normalize(PerpendicularAxisInConnectedEntity), 
-                    math.radians(MinAngle), math.radians(MaxAngle)),
-                    entityManager);
+                    new JointFrame
+                    {
+                        Axis = math.normalize(HingeAxisLocal),
+                        PerpendicularAxis = math.normalize(PerpendicularAxisLocal),
+                        Position = PositionLocal
+                    },
+                    new JointFrame
+                    {
+                        Axis = math.normalize(HingeAxisInConnectedEntity),
+                        PerpendicularAxis = math.normalize(PerpendicularAxisInConnectedEntity),
+                        Position = PositionInConnectedEntity
+                    },
+                    math.radians(new FloatRange(MinAngle, MaxAngle))
+                ),
+                entityManager, conversionSystem
+            );
         }
     }
 }
