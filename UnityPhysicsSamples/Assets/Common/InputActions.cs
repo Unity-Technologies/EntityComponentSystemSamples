@@ -1,14 +1,15 @@
 // GENERATED AUTOMATICALLY FROM 'Assets/Common/InputActions.inputactions'
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-public class InputActions : IInputActionCollection
+public class @InputActions : IInputActionCollection, IDisposable
 {
-    private InputActionAsset asset;
-    public InputActions()
+    public InputActionAsset asset { get; }
+    public @InputActions()
     {
         asset = InputActionAsset.FromJson(@"{
     ""name"": ""InputActions"",
@@ -788,31 +789,31 @@ public class InputActions : IInputActionCollection
     ]
 }");
         // CharacterController
-        m_CharacterController = asset.GetActionMap("CharacterController");
-        m_CharacterController_Move = m_CharacterController.GetAction("Move");
-        m_CharacterController_Look = m_CharacterController.GetAction("Look");
-        m_CharacterController_Fire = m_CharacterController.GetAction("Fire");
-        m_CharacterController_Jump = m_CharacterController.GetAction("Jump");
+        m_CharacterController = asset.FindActionMap("CharacterController", throwIfNotFound: true);
+        m_CharacterController_Move = m_CharacterController.FindAction("Move", throwIfNotFound: true);
+        m_CharacterController_Look = m_CharacterController.FindAction("Look", throwIfNotFound: true);
+        m_CharacterController_Fire = m_CharacterController.FindAction("Fire", throwIfNotFound: true);
+        m_CharacterController_Jump = m_CharacterController.FindAction("Jump", throwIfNotFound: true);
         // UI
-        m_UI = asset.GetActionMap("UI");
-        m_UI_Navigate = m_UI.GetAction("Navigate");
-        m_UI_Submit = m_UI.GetAction("Submit");
-        m_UI_Cancel = m_UI.GetAction("Cancel");
-        m_UI_Point = m_UI.GetAction("Point");
-        m_UI_Click = m_UI.GetAction("Click");
-        m_UI_ScrollWheel = m_UI.GetAction("ScrollWheel");
-        m_UI_MiddleClick = m_UI.GetAction("MiddleClick");
-        m_UI_RightClick = m_UI.GetAction("RightClick");
+        m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
+        m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
+        m_UI_Submit = m_UI.FindAction("Submit", throwIfNotFound: true);
+        m_UI_Cancel = m_UI.FindAction("Cancel", throwIfNotFound: true);
+        m_UI_Point = m_UI.FindAction("Point", throwIfNotFound: true);
+        m_UI_Click = m_UI.FindAction("Click", throwIfNotFound: true);
+        m_UI_ScrollWheel = m_UI.FindAction("ScrollWheel", throwIfNotFound: true);
+        m_UI_MiddleClick = m_UI.FindAction("MiddleClick", throwIfNotFound: true);
+        m_UI_RightClick = m_UI.FindAction("RightClick", throwIfNotFound: true);
         // Vehicle
-        m_Vehicle = asset.GetActionMap("Vehicle");
-        m_Vehicle_Steering = m_Vehicle.GetAction("Steering");
-        m_Vehicle_Throttle = m_Vehicle.GetAction("Throttle");
-        m_Vehicle_Previous = m_Vehicle.GetAction("Previous");
-        m_Vehicle_Next = m_Vehicle.GetAction("Next");
-        m_Vehicle_Look = m_Vehicle.GetAction("Look");
+        m_Vehicle = asset.FindActionMap("Vehicle", throwIfNotFound: true);
+        m_Vehicle_Steering = m_Vehicle.FindAction("Steering", throwIfNotFound: true);
+        m_Vehicle_Throttle = m_Vehicle.FindAction("Throttle", throwIfNotFound: true);
+        m_Vehicle_Previous = m_Vehicle.FindAction("Previous", throwIfNotFound: true);
+        m_Vehicle_Next = m_Vehicle.FindAction("Next", throwIfNotFound: true);
+        m_Vehicle_Look = m_Vehicle.FindAction("Look", throwIfNotFound: true);
     }
 
-    ~InputActions()
+    public void Dispose()
     {
         UnityEngine.Object.Destroy(asset);
     }
@@ -865,8 +866,8 @@ public class InputActions : IInputActionCollection
     private readonly InputAction m_CharacterController_Jump;
     public struct CharacterControllerActions
     {
-        private InputActions m_Wrapper;
-        public CharacterControllerActions(InputActions wrapper) { m_Wrapper = wrapper; }
+        private @InputActions m_Wrapper;
+        public CharacterControllerActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_CharacterController_Move;
         public InputAction @Look => m_Wrapper.m_CharacterController_Look;
         public InputAction @Fire => m_Wrapper.m_CharacterController_Fire;
@@ -880,34 +881,34 @@ public class InputActions : IInputActionCollection
         {
             if (m_Wrapper.m_CharacterControllerActionsCallbackInterface != null)
             {
-                Move.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnMove;
-                Move.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnMove;
-                Move.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnMove;
-                Look.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnLook;
-                Look.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnLook;
-                Look.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnLook;
-                Fire.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnFire;
-                Fire.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnFire;
-                Fire.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnFire;
-                Jump.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnJump;
-                Jump.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnJump;
-                Jump.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnJump;
+                @Move.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnMove;
+                @Move.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnMove;
+                @Move.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnMove;
+                @Look.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnLook;
+                @Look.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnLook;
+                @Look.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnLook;
+                @Fire.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnFire;
+                @Fire.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnFire;
+                @Fire.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnFire;
+                @Jump.started -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnJump;
+                @Jump.performed -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnJump;
+                @Jump.canceled -= m_Wrapper.m_CharacterControllerActionsCallbackInterface.OnJump;
             }
             m_Wrapper.m_CharacterControllerActionsCallbackInterface = instance;
             if (instance != null)
             {
-                Move.started += instance.OnMove;
-                Move.performed += instance.OnMove;
-                Move.canceled += instance.OnMove;
-                Look.started += instance.OnLook;
-                Look.performed += instance.OnLook;
-                Look.canceled += instance.OnLook;
-                Fire.started += instance.OnFire;
-                Fire.performed += instance.OnFire;
-                Fire.canceled += instance.OnFire;
-                Jump.started += instance.OnJump;
-                Jump.performed += instance.OnJump;
-                Jump.canceled += instance.OnJump;
+                @Move.started += instance.OnMove;
+                @Move.performed += instance.OnMove;
+                @Move.canceled += instance.OnMove;
+                @Look.started += instance.OnLook;
+                @Look.performed += instance.OnLook;
+                @Look.canceled += instance.OnLook;
+                @Fire.started += instance.OnFire;
+                @Fire.performed += instance.OnFire;
+                @Fire.canceled += instance.OnFire;
+                @Jump.started += instance.OnJump;
+                @Jump.performed += instance.OnJump;
+                @Jump.canceled += instance.OnJump;
             }
         }
     }
@@ -926,8 +927,8 @@ public class InputActions : IInputActionCollection
     private readonly InputAction m_UI_RightClick;
     public struct UIActions
     {
-        private InputActions m_Wrapper;
-        public UIActions(InputActions wrapper) { m_Wrapper = wrapper; }
+        private @InputActions m_Wrapper;
+        public UIActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Navigate => m_Wrapper.m_UI_Navigate;
         public InputAction @Submit => m_Wrapper.m_UI_Submit;
         public InputAction @Cancel => m_Wrapper.m_UI_Cancel;
@@ -945,58 +946,58 @@ public class InputActions : IInputActionCollection
         {
             if (m_Wrapper.m_UIActionsCallbackInterface != null)
             {
-                Navigate.started -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigate;
-                Navigate.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigate;
-                Navigate.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigate;
-                Submit.started -= m_Wrapper.m_UIActionsCallbackInterface.OnSubmit;
-                Submit.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnSubmit;
-                Submit.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnSubmit;
-                Cancel.started -= m_Wrapper.m_UIActionsCallbackInterface.OnCancel;
-                Cancel.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnCancel;
-                Cancel.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnCancel;
-                Point.started -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
-                Point.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
-                Point.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
-                Click.started -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
-                Click.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
-                Click.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
-                ScrollWheel.started -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
-                ScrollWheel.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
-                ScrollWheel.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
-                MiddleClick.started -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
-                MiddleClick.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
-                MiddleClick.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
-                RightClick.started -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
-                RightClick.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
-                RightClick.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
+                @Navigate.started -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigate;
+                @Navigate.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigate;
+                @Navigate.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigate;
+                @Submit.started -= m_Wrapper.m_UIActionsCallbackInterface.OnSubmit;
+                @Submit.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnSubmit;
+                @Submit.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnSubmit;
+                @Cancel.started -= m_Wrapper.m_UIActionsCallbackInterface.OnCancel;
+                @Cancel.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnCancel;
+                @Cancel.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnCancel;
+                @Point.started -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                @Point.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                @Point.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                @Click.started -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
+                @Click.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
+                @Click.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
+                @ScrollWheel.started -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
+                @ScrollWheel.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
+                @ScrollWheel.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
+                @MiddleClick.started -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
+                @MiddleClick.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
+                @MiddleClick.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
+                @RightClick.started -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
+                @RightClick.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
+                @RightClick.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
             }
             m_Wrapper.m_UIActionsCallbackInterface = instance;
             if (instance != null)
             {
-                Navigate.started += instance.OnNavigate;
-                Navigate.performed += instance.OnNavigate;
-                Navigate.canceled += instance.OnNavigate;
-                Submit.started += instance.OnSubmit;
-                Submit.performed += instance.OnSubmit;
-                Submit.canceled += instance.OnSubmit;
-                Cancel.started += instance.OnCancel;
-                Cancel.performed += instance.OnCancel;
-                Cancel.canceled += instance.OnCancel;
-                Point.started += instance.OnPoint;
-                Point.performed += instance.OnPoint;
-                Point.canceled += instance.OnPoint;
-                Click.started += instance.OnClick;
-                Click.performed += instance.OnClick;
-                Click.canceled += instance.OnClick;
-                ScrollWheel.started += instance.OnScrollWheel;
-                ScrollWheel.performed += instance.OnScrollWheel;
-                ScrollWheel.canceled += instance.OnScrollWheel;
-                MiddleClick.started += instance.OnMiddleClick;
-                MiddleClick.performed += instance.OnMiddleClick;
-                MiddleClick.canceled += instance.OnMiddleClick;
-                RightClick.started += instance.OnRightClick;
-                RightClick.performed += instance.OnRightClick;
-                RightClick.canceled += instance.OnRightClick;
+                @Navigate.started += instance.OnNavigate;
+                @Navigate.performed += instance.OnNavigate;
+                @Navigate.canceled += instance.OnNavigate;
+                @Submit.started += instance.OnSubmit;
+                @Submit.performed += instance.OnSubmit;
+                @Submit.canceled += instance.OnSubmit;
+                @Cancel.started += instance.OnCancel;
+                @Cancel.performed += instance.OnCancel;
+                @Cancel.canceled += instance.OnCancel;
+                @Point.started += instance.OnPoint;
+                @Point.performed += instance.OnPoint;
+                @Point.canceled += instance.OnPoint;
+                @Click.started += instance.OnClick;
+                @Click.performed += instance.OnClick;
+                @Click.canceled += instance.OnClick;
+                @ScrollWheel.started += instance.OnScrollWheel;
+                @ScrollWheel.performed += instance.OnScrollWheel;
+                @ScrollWheel.canceled += instance.OnScrollWheel;
+                @MiddleClick.started += instance.OnMiddleClick;
+                @MiddleClick.performed += instance.OnMiddleClick;
+                @MiddleClick.canceled += instance.OnMiddleClick;
+                @RightClick.started += instance.OnRightClick;
+                @RightClick.performed += instance.OnRightClick;
+                @RightClick.canceled += instance.OnRightClick;
             }
         }
     }
@@ -1012,8 +1013,8 @@ public class InputActions : IInputActionCollection
     private readonly InputAction m_Vehicle_Look;
     public struct VehicleActions
     {
-        private InputActions m_Wrapper;
-        public VehicleActions(InputActions wrapper) { m_Wrapper = wrapper; }
+        private @InputActions m_Wrapper;
+        public VehicleActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Steering => m_Wrapper.m_Vehicle_Steering;
         public InputAction @Throttle => m_Wrapper.m_Vehicle_Throttle;
         public InputAction @Previous => m_Wrapper.m_Vehicle_Previous;
@@ -1028,40 +1029,40 @@ public class InputActions : IInputActionCollection
         {
             if (m_Wrapper.m_VehicleActionsCallbackInterface != null)
             {
-                Steering.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnSteering;
-                Steering.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnSteering;
-                Steering.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnSteering;
-                Throttle.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnThrottle;
-                Throttle.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnThrottle;
-                Throttle.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnThrottle;
-                Previous.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnPrevious;
-                Previous.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnPrevious;
-                Previous.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnPrevious;
-                Next.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnNext;
-                Next.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnNext;
-                Next.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnNext;
-                Look.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnLook;
-                Look.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnLook;
-                Look.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnLook;
+                @Steering.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnSteering;
+                @Steering.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnSteering;
+                @Steering.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnSteering;
+                @Throttle.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnThrottle;
+                @Throttle.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnThrottle;
+                @Throttle.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnThrottle;
+                @Previous.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnPrevious;
+                @Previous.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnPrevious;
+                @Previous.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnPrevious;
+                @Next.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnNext;
+                @Next.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnNext;
+                @Next.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnNext;
+                @Look.started -= m_Wrapper.m_VehicleActionsCallbackInterface.OnLook;
+                @Look.performed -= m_Wrapper.m_VehicleActionsCallbackInterface.OnLook;
+                @Look.canceled -= m_Wrapper.m_VehicleActionsCallbackInterface.OnLook;
             }
             m_Wrapper.m_VehicleActionsCallbackInterface = instance;
             if (instance != null)
             {
-                Steering.started += instance.OnSteering;
-                Steering.performed += instance.OnSteering;
-                Steering.canceled += instance.OnSteering;
-                Throttle.started += instance.OnThrottle;
-                Throttle.performed += instance.OnThrottle;
-                Throttle.canceled += instance.OnThrottle;
-                Previous.started += instance.OnPrevious;
-                Previous.performed += instance.OnPrevious;
-                Previous.canceled += instance.OnPrevious;
-                Next.started += instance.OnNext;
-                Next.performed += instance.OnNext;
-                Next.canceled += instance.OnNext;
-                Look.started += instance.OnLook;
-                Look.performed += instance.OnLook;
-                Look.canceled += instance.OnLook;
+                @Steering.started += instance.OnSteering;
+                @Steering.performed += instance.OnSteering;
+                @Steering.canceled += instance.OnSteering;
+                @Throttle.started += instance.OnThrottle;
+                @Throttle.performed += instance.OnThrottle;
+                @Throttle.canceled += instance.OnThrottle;
+                @Previous.started += instance.OnPrevious;
+                @Previous.performed += instance.OnPrevious;
+                @Previous.canceled += instance.OnPrevious;
+                @Next.started += instance.OnNext;
+                @Next.performed += instance.OnNext;
+                @Next.canceled += instance.OnNext;
+                @Look.started += instance.OnLook;
+                @Look.performed += instance.OnLook;
+                @Look.canceled += instance.OnLook;
             }
         }
     }
@@ -1071,7 +1072,7 @@ public class InputActions : IInputActionCollection
     {
         get
         {
-            if (m_KeyboardMouseSchemeIndex == -1) m_KeyboardMouseSchemeIndex = asset.GetControlSchemeIndex("Keyboard&Mouse");
+            if (m_KeyboardMouseSchemeIndex == -1) m_KeyboardMouseSchemeIndex = asset.FindControlSchemeIndex("Keyboard&Mouse");
             return asset.controlSchemes[m_KeyboardMouseSchemeIndex];
         }
     }
@@ -1080,7 +1081,7 @@ public class InputActions : IInputActionCollection
     {
         get
         {
-            if (m_GamepadSchemeIndex == -1) m_GamepadSchemeIndex = asset.GetControlSchemeIndex("Gamepad");
+            if (m_GamepadSchemeIndex == -1) m_GamepadSchemeIndex = asset.FindControlSchemeIndex("Gamepad");
             return asset.controlSchemes[m_GamepadSchemeIndex];
         }
     }

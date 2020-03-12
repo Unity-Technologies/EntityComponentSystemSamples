@@ -19,6 +19,12 @@ namespace Unity.Physics.Tests
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             dstManager.AddComponentData(entity, new VerifyCollisionEventsData());
+
+#if HAVOK_PHYSICS_EXISTS
+            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+            config.EnableSleeping = 0;
+            dstManager.AddComponentData(entity, config);
+#endif
         }
     }
 

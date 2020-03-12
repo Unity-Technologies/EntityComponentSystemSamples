@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -14,16 +14,17 @@ namespace Unity.Physics.Extensions
     public class ColliderUtils
     {
         [BurstCompile]
-        public static unsafe bool IsTrigger(Collider* c, ColliderKey key)
+        public static unsafe bool IsTrigger(BlobAssetReference<Collider> collider, ColliderKey key)
         {
             bool bIsTrigger = false;
+            var c = (Collider*)collider.GetUnsafePtr();
             {
                 var cc = ((ConvexCollider*)c);
                 if (cc->CollisionType != CollisionType.Convex)
                 {
                     c->GetLeaf(key, out ChildCollider child);
                     cc = (ConvexCollider*)child.Collider;
-                    UnityEngine.Assertions.Assert.IsTrue(cc->CollisionType == CollisionType.Convex);
+                    Assert.IsTrue(cc->CollisionType == CollisionType.Convex);
                 }
                 bIsTrigger = cc->Material.IsTrigger;
             }
@@ -85,7 +86,7 @@ namespace Unity.Physics.Extensions
                 var body = Bodies[m_ClosestHit.RigidBodyIndex];
                 if (IgnoreTriggers)
                 {
-                    unsafe { isAcceptable = !ColliderUtils.IsTrigger(body.Collider, m_ClosestHit.ColliderKey); }
+                    isAcceptable = !ColliderUtils.IsTrigger(body.Collider, m_ClosestHit.ColliderKey);
                 }
             }
             if (!isAcceptable)

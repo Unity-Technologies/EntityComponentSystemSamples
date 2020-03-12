@@ -57,6 +57,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -68,6 +69,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -115,9 +117,15 @@ MonoBehaviour:
     Height: 1
     Radius: 0.5
     Axis: 2
+  m_CylinderSideCount: 20
   m_SphereRadius: 0.5
-  m_ConvexRadius: 0.05
+  m_MinimumSkinnedVertexWeight: 0.1
+  m_ConvexHullGenerationParameters:
+    m_SimplificationTolerance: 0.015
+    m_BevelRadius: 0.05
+    m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
@@ -143,9 +151,10 @@ MonoBehaviour:
     m_RaisesCollisionEvents:
       m_Override: 0
       m_Value: 0
-    m_CustomFlags:
+    m_CustomTags:
       m_Override: 0
       m_Value: 0000000000000000
+  m_ConvexRadius_Deprecated: -1
 --- !u!114 &6568163706455896031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,8 +169,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_MotionType: 0
   m_Mass: 1
-  m_LinearDamping: 0.1
-  m_AngularDamping: 1
+  m_LinearDamping: 0.75
+  m_AngularDamping: 0.5
   m_InitialLinearVelocity:
     x: 0
     y: 0
@@ -177,15 +186,24 @@ MonoBehaviour:
     y: 0
     z: 0
   m_Orientation:
-    value:
+    Value:
       x: 0
       y: 0
       z: 0
-      w: 1
+    RotationOrder: 4
   m_InertiaTensor:
     x: 0.4
     y: 0.4
     z: 0.4
+  m_CustomTags:
+    Tag00: 0
+    Tag01: 0
+    Tag02: 0
+    Tag03: 0
+    Tag04: 0
+    Tag05: 0
+    Tag06: 0
+    Tag07: 0
 --- !u!114 &5416995829475053962
 MonoBehaviour:
   m_ObjectHideFlags: 0

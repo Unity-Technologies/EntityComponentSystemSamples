@@ -8,8 +8,13 @@ namespace Unity.Physics.Authoring
     {
         public PhysicsBodyAuthoring ConnectedBody;
 
-        public RigidTransform worldFromA => new RigidTransform(gameObject.transform.rotation, gameObject.transform.position);
-        public RigidTransform worldFromB => (ConnectedBody == null) ? RigidTransform.identity : new RigidTransform(ConnectedBody.transform.rotation, ConnectedBody.transform.position);
+        public RigidTransform worldFromA =>
+            Math.DecomposeRigidBodyTransform(gameObject.transform.localToWorldMatrix);
+
+        public RigidTransform worldFromB => ConnectedBody == null
+            ? RigidTransform.identity
+            : Math.DecomposeRigidBodyTransform(ConnectedBody.transform.localToWorldMatrix);
+
 
         private Entity m_entityA = Entity.Null;
         public Entity entityA { get => m_entityA; set => m_entityA = value; }
@@ -23,7 +28,7 @@ namespace Unity.Physics.Authoring
             // included so tick box appears in Editor
         }
 
-        protected unsafe void CreateJointEntity(BlobAssetReference<JointData> jointData, EntityManager entityManager)
+        protected void CreateJointEntity(BlobAssetReference<JointData> jointData, EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             var componentData = new PhysicsJoint
             {
@@ -33,9 +38,8 @@ namespace Unity.Physics.Authoring
                 EnableCollision = EnableCollision ? 1 : 0,
             };
 
-            ComponentType[] componentTypes = new ComponentType[1];
-            componentTypes[0] = typeof(PhysicsJoint);
-            Entity jointEntity = entityManager.CreateEntity(componentTypes);
+            var jointEntity = conversionSystem.CreateAdditionalEntity(this);
+            entityManager.AddComponent<PhysicsJoint>(jointEntity);
 #if UNITY_EDITOR
             var nameEntityA = entityManager.GetName(entityA);
             var nameEntityB = entityB == Entity.Null ? "PhysicsWorld" : entityManager.GetName(entityB);
@@ -52,7 +56,6 @@ namespace Unity.Physics.Authoring
             }
         }
 
-        public abstract unsafe void Create(EntityManager entityManager);
-
+        public abstract void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem);
     }
 }

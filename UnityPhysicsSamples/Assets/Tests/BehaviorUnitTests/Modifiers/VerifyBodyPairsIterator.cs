@@ -50,8 +50,6 @@ namespace Unity.Physics.Tests
                 Assert.AreNotEqual(pair.BodyIndices.BodyAIndex, pair.BodyIndices.BodyBIndex);
                 Assert.AreEqual(pair.Entities.EntityA, Bodies[pair.BodyIndices.BodyAIndex].Entity);
                 Assert.AreEqual(pair.Entities.EntityB, Bodies[pair.BodyIndices.BodyBIndex].Entity);
-                Assert.AreEqual(pair.Entities.EntityA.Version, 1);
-                Assert.AreEqual(pair.Entities.EntityB.Version, 1);
             }
         }
 

@@ -1,13 +1,13 @@
-﻿using Unity.Physics;
-using Unity.Physics.Systems;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using UnityEngine;
-using Unity.Transforms;
-using Unity.Physics.Authoring;
 using Unity.Mathematics;
-using Unity.Burst;
+using Unity.Physics;
+using Unity.Physics.Authoring;
+using Unity.Physics.Systems;
+using Unity.Transforms;
+using UnityEngine;
 
 public struct TriggerVolumePortal : IComponentData
 {
@@ -39,6 +39,7 @@ public class TriggerVolumePortalBehaviour : MonoBehaviour, IConvertGameObjectToE
 public class TriggerVolumePortalSystem : JobComponentSystem
 {
     EntityQuery m_OverlappingGroup;
+    EntityQueryMask m_HierarchyChildMask;
 
     protected override void OnCreate()
     {
@@ -50,6 +51,16 @@ public class TriggerVolumePortalSystem : JobComponentSystem
                 typeof(PortalOverlappingTriggerVolume),
             }
         });
+        m_HierarchyChildMask = EntityManager.GetEntityQueryMask(
+            GetEntityQuery(new EntityQueryDesc
+            {
+                All = new ComponentType[]
+                {
+                    typeof(Parent),
+                    typeof(LocalToWorld)
+                }
+            })
+        );
     }
 
     [BurstCompile]
@@ -60,6 +71,9 @@ public class TriggerVolumePortalSystem : JobComponentSystem
 
         [ReadOnly] public ComponentDataFromEntity<TriggerVolume> TriggerComponents;
         [ReadOnly] public ComponentDataFromEntity<TriggerVolumePortal> PortalComponents;
+        [ReadOnly] public ComponentDataFromEntity<LocalToWorld> LocalToWorldComponents;
+
+        public EntityQueryMask HierarchyChildMask;
 
         public ComponentDataFromEntity<OverlappingTriggerVolume> OverlappingComponents;
         public ComponentDataFromEntity<Translation> PositionComponents;
@@ -78,13 +92,16 @@ public class TriggerVolumePortalSystem : JobComponentSystem
                 {
                     var companionEntity = PortalComponents[portalEntity].Companion;
 
-                    var orangePosition = PositionComponents[portalEntity].Value;
-                    var bluePosition = PositionComponents[companionEntity].Value;
-                    var portalPositionOffset = bluePosition - orangePosition;
+                    // a static body may be in a hierarchy, in which case Translation and Rotation may not be in world space
+                    var portalTransform = HierarchyChildMask.Matches(portalEntity)
+                        ? Math.DecomposeRigidBodyTransform(LocalToWorldComponents[portalEntity].Value)
+                        : new RigidTransform(RotationComponents[portalEntity].Value, PositionComponents[portalEntity].Value);
+                    var companionTransform = HierarchyChildMask.Matches(companionEntity)
+                        ? Math.DecomposeRigidBodyTransform(LocalToWorldComponents[companionEntity].Value)
+                        : new RigidTransform(RotationComponents[companionEntity].Value, PositionComponents[companionEntity].Value);
 
-                    var orangeRotation = RotationComponents[portalEntity].Value;
-                    var blueRotation = RotationComponents[companionEntity].Value;
-                    var portalRotationOffset = math.mul(blueRotation, math.inverse(orangeRotation));
+                    var portalPositionOffset = companionTransform.pos - portalTransform.pos;
+                    var portalRotationOffset = math.mul(companionTransform.rot, math.inverse(portalTransform.rot));
 
                     var entityPositionComponent = PositionComponents[overlappingEntity];
                     var entityRotationComponent = RotationComponents[overlappingEntity];
@@ -117,6 +134,7 @@ public class TriggerVolumePortalSystem : JobComponentSystem
         var portalComponents = GetComponentDataFromEntity<TriggerVolumePortal>(true);
 
         var overlappingComponents = GetComponentDataFromEntity<OverlappingTriggerVolume>();
+        var localToWorldComponents = GetComponentDataFromEntity<LocalToWorld>();
         var positionComponents = GetComponentDataFromEntity<Translation>();
         var rotationComponents = GetComponentDataFromEntity<Rotation>();
         var velocityComponents = GetComponentDataFromEntity<PhysicsVelocity>();
@@ -129,6 +147,8 @@ public class TriggerVolumePortalSystem : JobComponentSystem
             OverlappingComponents = overlappingComponents,
             TriggerComponents = triggerComponents,
             PortalComponents = portalComponents,
+            LocalToWorldComponents = localToWorldComponents,
+            HierarchyChildMask = m_HierarchyChildMask,
             PositionComponents = positionComponents,
             RotationComponents = rotationComponents,
             VelocityComponents = velocityComponents,

@@ -64,7 +64,7 @@ namespace Unity.Physics.Extensions
                 int numRows = (Request.ImageResolution + Results.ForEachCount - 1) / Results.ForEachCount;
 
                 const float sphereRadius = 0.005f;
-                BlobAssetReference<Collider> sphere;
+                BlobAssetReference<Collider> sphere = default;
                 if (Request.CastSphere)
                 {
                     sphere = SphereCollider.Create(new SphereGeometry
@@ -131,7 +131,7 @@ namespace Unity.Physics.Extensions
                             // Lighten alternate keys
                             if (Request.AlternateKeys && !hit.ColliderKey.Equals(ColliderKey.Empty))
                             {
-                                Collider* collider = World.Bodies[hit.RigidBodyIndex].Collider;
+                                var collider = (Collider*)World.Bodies[hit.RigidBodyIndex].Collider.GetUnsafePtr();
                                 hit.ColliderKey.PopSubKey(collider->NumColliderKeyBits, out uint key);
                                 if (key % 2 == 0)
                                 {

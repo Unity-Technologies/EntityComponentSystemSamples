@@ -3,7 +3,6 @@ using Unity.Physics.Systems;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Entities;
-using Unity.Physics.Authoring;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -512,7 +511,7 @@ namespace Unity.Physics.Extensions
 
         private void DrawLeafCollider(RigidBody body, ColliderKey key)
         {
-            if (body.Collider->GetLeaf(key, out ChildCollider leaf) && (leaf.Collider == null))
+            if (body.Collider.Value.GetLeaf(key, out ChildCollider leaf) && (leaf.Collider == null))
             {
                 RigidTransform worldFromLeaf = math.mul(body.WorldFromBody, leaf.TransformFromChild);
                 if (leaf.Collider->Type == ColliderType.Triangle || leaf.Collider->Type == ColliderType.Quad)
