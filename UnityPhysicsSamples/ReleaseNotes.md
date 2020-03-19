@@ -1,3 +1,9 @@
+## [Samples Project for 0.3.1-preview] - 2020-03-19
+
+### Changes
+* Fixed a potential character controller tunneling issue.
+* Removed the Lightweight RP package.
+
 ## [Samples Project for 0.3.0-preview] - 2020-03-12
 
 ### Changes

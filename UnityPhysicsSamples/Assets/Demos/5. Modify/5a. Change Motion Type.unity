@@ -94,8 +94,9 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -239,10 +240,45 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1357867726848807436, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+    - target: {fileID: 1357867725548836660, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
-      propertyPath: m_Name
-      value: Physics Scene Basic Elements
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.026996076
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.0050904173
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.00013747318
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.9996226
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.12090264
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.301496
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -25.838259
       objectReference: {fileID: 0}
     - target: {fileID: 1357867726848807427, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
@@ -299,50 +335,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+    - target: {fileID: 1357867726848807436, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
-      propertyPath: DrawColliders
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.026996076
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.0050904173
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0.00013747318
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: -0.9996226
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.12090264
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 6.301496
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -25.838259
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867725548836660, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
+      propertyPath: m_Name
+      value: Physics Scene Basic Elements
       objectReference: {fileID: 0}
     - target: {fileID: 6438706173552325010, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
@@ -358,6 +354,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_OverrideDefaultMassDistribution
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_CenterOfMass.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_LinearDamping
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_GravityFactor
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606214, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
       propertyPath: m_Name
@@ -418,6 +434,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -10
       objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2e2eb05792add304c8a5467548e44c47, type: 3}
+--- !u!1001 &1431731320
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
     - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
       propertyPath: m_OverrideDefaultMassDistribution
@@ -438,15 +463,6 @@ PrefabInstance:
       propertyPath: m_GravityFactor
       value: 0.5
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 2e2eb05792add304c8a5467548e44c47, type: 3}
---- !u!1001 &1431731320
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
     - target: {fileID: 3025946137087606214, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
       propertyPath: m_Name
@@ -506,26 +522,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -10
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_OverrideDefaultMassDistribution
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_CenterOfMass.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_LinearDamping
-      value: 0.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_GravityFactor
-      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2e2eb05792add304c8a5467548e44c47, type: 3}
@@ -592,6 +588,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_OverrideDefaultMassDistribution
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_CenterOfMass.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_LinearDamping
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
+      propertyPath: m_GravityFactor
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606214, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
       propertyPath: m_Name
@@ -651,26 +667,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -10
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_OverrideDefaultMassDistribution
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_CenterOfMass.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_LinearDamping
-      value: 0.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_GravityFactor
-      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2e2eb05792add304c8a5467548e44c47, type: 3}

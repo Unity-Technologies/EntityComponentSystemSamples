@@ -22,13 +22,16 @@ public class TerrainDemo : BasePhysicsDemo
         NativeArray<float> heights;
         int2 size;
         float3 scale;
-        bool simple = false;
+        bool simple = false; 
+#if UNITY_ANDROID || UNITY_IOS
+        simple = true;
+#endif
         bool flat = false;
         bool mountain = false;
         if (simple)
         {
             size = new int2(2, 2);
-            scale = new float3(1, 0.1f, 1);
+            scale = new float3(25, 0.1f, 25);
             heights = new NativeArray<float>(size.x * size.y * UnsafeUtility.SizeOf<float>(), Allocator.Temp);
             heights[0] = 1;
             heights[1] = 0;
