@@ -2,6 +2,8 @@
 
 The Entity Debugger allows you to look at currently running systems, filter entities by archetype and analyze how the entities are layed out within these archetypes.
 
+Open the Entity Debugger using the Unity Editor **Window** > **Analysis** > **Entity Debugger** menu command.
+
 ## How to read the *Chunk Utilization* panel
 Here's a breakdown of all the information available in the *Chunk utilization* panel.
 

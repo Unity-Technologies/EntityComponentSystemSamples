@@ -1,3 +1,26 @@
+## [Samples Project for 0.3.1-preview] - 2020-03-19
+
+### Changes
+* Fixed a potential character controller tunneling issue.
+* Removed the Lightweight RP package.
+
+## [Samples Project for 0.3.0-preview] - 2020-03-12
+
+### Changes
+
+* Joint samples now correctly add new joint entity to prefab's linked entity group so they will be instantiated along with the rest of a prefab.
+* Renamed `StiffSpringJoint` to `LimitedDistanceJoint` to reflect changes in API.
+* Updated the following packages
+    * Input System from `0.9.6-preview` to `1.0.0-preview.5`
+    * Lightweight RP from `7.1.6` to `7.1.7`
+    * DOTS Editor from `0.2.0-preview` to `0.3.0-preview`
+    * Hybrid Renderer from `0.3.3-preview.11` to `0.3.4-preview.24`
+* Character controller improvements
+    * `CharacterControllerUtilities.CheckSupport()` now uses a collider cast
+    * Character now doesn't collide with triggers, but raises trigger events instead
+    * Fixed the support check issue with slopes equal to MaxSlope
+    * Fixed the returned support state when there are no supporting planes
+
 ## [Samples Project for 0.2.5-preview] - 2019-12-04
 
 ### Changes

@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ namespace Unity.Physics.Authoring
             RigidTransform offset, bool3 linearLocks, bool3 angularLocks)
         {
             var constraintCount = (math.any(linearLocks) ? 1 : 0) + (math.any(angularLocks) ? 1 : 0);
-            Constraint[] constraints = new Constraint[constraintCount];
+            var constraints = new NativeArray<Constraint>(constraintCount, Allocator.Temp);
             int index = 0;
             if (math.any(linearLocks))
             {
@@ -43,20 +44,17 @@ namespace Unity.Physics.Authoring
                     SpringDamping = Constraint.DefaultSpringDamping
                 };
             }
-            return JointData.Create(
-                    new Math.MTransform(float3x3.identity, float3.zero),
-                    new Math.MTransform(offset),
-                    constraints
-                );
+            
+            return JointData.Create(RigidTransform.identity, offset, constraints);
         }
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
 
             if (math.any(LockLinearAxes) || math.any(LockAngularAxes))
             {
-                CreateJointEntity(CreateLimitDOFJoint(bFromA, LockLinearAxes, LockAngularAxes), entityManager);
+                CreateJointEntity(CreateLimitDOFJoint(bFromA, LockLinearAxes, LockAngularAxes), entityManager, conversionSystem);
             }
         }
     }

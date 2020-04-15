@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -111,12 +111,14 @@ public class BasePhysicsDemo : MonoBehaviour
         }
         mesh.indexFormat = numVertices > UInt16.MaxValue ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
         mesh.CombineMeshes(instances.ToArray());
+        mesh.RecalculateBounds();
 
         entityManager.AddSharedComponentData(entity, new RenderMesh
         {
             mesh = mesh,
             material = isDynamic ? dynamicMaterial : staticMaterial
         });
+        entityManager.AddComponentData(entity, new RenderBounds { Value = mesh.bounds.ToAABB() });
 
         if (isDynamic)
         {

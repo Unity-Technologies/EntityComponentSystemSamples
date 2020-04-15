@@ -1,8 +1,8 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Physics;
-using Unity.Physics.Extensions;
+using UnityEngine;
+using static Unity.Physics.Math;
 
 public class SoftJointDemo : BasePhysicsDemo
 {
@@ -81,7 +81,9 @@ public class SoftJointDemo : BasePhysicsDemo
                     float3 perpendicularInWorld = perpendicularLocal;
 
                     BlobAssetReference<JointData> jointData;
-                    jointData = JointData.CreateLimitedHinge(pivotLocal, pivotInWorld, axisLocal, axisInWorld, perpendicularLocal, perpendicularInWorld, 0.0f, 0.0f);
+                    var frameLocal = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+                    var frameWorld = new JointFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
+                    jointData = JointData.CreateLimitedHinge(frameLocal, frameWorld, default);
 
                     // First constraint is the limit, next two are the hinge and pivot
                     for (int k = 0; k < 1 + 2 * j; k++)
@@ -122,7 +124,9 @@ public class SoftJointDemo : BasePhysicsDemo
             float3 perpendicularInWorld = perpendicularLocal;
 
             BlobAssetReference<JointData> jointData;
-            jointData = JointData.CreatePrismatic(pivotLocal, pivotInWorld, axisLocal, axisInWorld, perpendicularLocal, perpendicularInWorld, - 2.0f, 2.0f, 0.0f, 0.0f);
+            var localFrame = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+            var worldFrame = new JointFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
+            jointData = JointData.CreatePrismatic(localFrame, worldFrame, new FloatRange(-2f, 2f), default);
             var constraint = jointData.Value.Constraints[0];
             constraint.SpringDamping = 0.0f;
             constraint.SpringFrequency = 5.0f;

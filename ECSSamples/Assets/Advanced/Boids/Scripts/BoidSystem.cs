@@ -19,7 +19,7 @@ namespace Samples.Boids
 {
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [UpdateBefore(typeof(TransformSystemGroup))]
-    public class BoidSystem : JobComponentSystem
+    public class BoidSystem : SystemBase
     {
         EntityQuery  m_BoidQuery;
         EntityQuery  m_TargetQuery;
@@ -101,7 +101,7 @@ namespace Samples.Boids
             }
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             var obstacleCount = m_ObstacleQuery.CalculateEntityCount();
             var targetCount = m_TargetQuery.CalculateEntityCount();
@@ -157,7 +157,7 @@ namespace Samples.Boids
                     {
                         cellAlignment[entityInQueryIndex] = localToWorld.Forward;
                     })
-                    .Schedule(inputDeps);
+                    .ScheduleParallel(Dependency);
                 
                 var initialCellSeparationJobHandle = Entities
                     .WithSharedComponentFilter(settings)
@@ -166,7 +166,7 @@ namespace Samples.Boids
                     {
                         cellSeparation[entityInQueryIndex] = localToWorld.Position;
                     })
-                    .Schedule(inputDeps);
+                    .ScheduleParallel(Dependency);
                 
                 var copyTargetPositionsJobHandle = Entities
                     .WithName("CopyTargetPositionsJob")
@@ -176,7 +176,7 @@ namespace Samples.Boids
                     {
                         copyTargetPositions[entityInQueryIndex] = localToWorld.Position;
                     })
-                    .Schedule(inputDeps);
+                    .ScheduleParallel(Dependency);
                 
                 var copyObstaclePositionsJobHandle = Entities
                     .WithName("CopyObstaclePositionsJob")
@@ -186,7 +186,7 @@ namespace Samples.Boids
                     {
                         copyObstaclePositions[entityInQueryIndex] = localToWorld.Position;
                     })
-                    .Schedule(inputDeps);
+                    .ScheduleParallel(Dependency);
 
                 // Populates a hash map, where each bucket contains the indices of all Boids whose positions quantize
                 // to the same value for a given cell radius so that the information can be randomly accessed by
@@ -203,14 +203,14 @@ namespace Samples.Boids
                         var hash = (int)math.hash(new int3(math.floor(localToWorld.Position / settings.CellRadius)));
                         parallelHashMap.Add(hash, entityInQueryIndex);
                     })
-                    .Schedule(inputDeps);
+                    .ScheduleParallel(Dependency);
 
                 var initialCellCountJob = new MemsetNativeArray<int>
                 {
                     Source = cellCount,
                     Value  = 1
                 };
-                var initialCellCountJobHandle = initialCellCountJob.Schedule(boidCount, 64, inputDeps);
+                var initialCellCountJobHandle = initialCellCountJob.Schedule(boidCount, 64, Dependency);
 
                 var initialCellBarrierJobHandle = JobHandle.CombineDependencies(initialCellAlignmentJobHandle, initialCellSeparationJobHandle, initialCellCountJobHandle);
                 var copyTargetObstacleBarrierJobHandle = JobHandle.CombineDependencies(copyTargetPositionsJobHandle, copyObstaclePositionsJobHandle);
@@ -228,7 +228,7 @@ namespace Samples.Boids
                     targetPositions           = copyTargetPositions,
                     obstaclePositions         = copyObstaclePositions
                 };
-                var mergeCellsJobHandle = mergeCellsJob.Schedule(hashMap,64,mergeCellsBarrierJobHandle);
+                var mergeCellsJobHandle = mergeCellsJob.Schedule(hashMap, 64, mergeCellsBarrierJobHandle);
 
                 // This reads the previously calculated boid information for all the boids of each cell to update
                 // the `localToWorld` of each of the boids based on their newly calculated headings using
@@ -307,33 +307,31 @@ namespace Samples.Boids
                                 quaternion.LookRotationSafe(nextHeading, math.up()),
                                 new float3(1.0f, 1.0f, 1.0f))
                         };
-                    }).Schedule(mergeCellsJobHandle);
+                    }).ScheduleParallel(mergeCellsJobHandle);
 
                 // Dispose allocated containers with dispose jobs.
-                inputDeps = steerJobHandle;
-                var disposeJobHandle = hashMap.Dispose(inputDeps);
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellIndices.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellObstaclePositionIndex.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellTargetPositionIndex.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellCount.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellObstacleDistance.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellAlignment.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellSeparation.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, copyObstaclePositions.Dispose(inputDeps));
-                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, copyTargetPositions.Dispose(inputDeps));
-                inputDeps = disposeJobHandle;
+                Dependency = steerJobHandle;
+                var disposeJobHandle = hashMap.Dispose(Dependency);
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellIndices.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellObstaclePositionIndex.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellTargetPositionIndex.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellCount.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellObstacleDistance.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellAlignment.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellSeparation.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, copyObstaclePositions.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, copyTargetPositions.Dispose(Dependency));
+                Dependency = disposeJobHandle;
                 
                 // We pass the job handle and add the dependency so that we keep the proper ordering between the jobs
                 // as the looping iterates. For our purposes of execution, this ordering isn't necessary; however, without
                 // the add dependency call here, the safety system will throw an error, because we're accessing multiple
                 // pieces of boid data and it would think there could possibly be a race condition.
                 
-                m_BoidQuery.AddDependency(inputDeps);
+                m_BoidQuery.AddDependency(Dependency);
                 m_BoidQuery.ResetFilter();
             }
             m_UniqueTypes.Clear();
-
-            return inputDeps;
         }
 
         protected override void OnCreate()

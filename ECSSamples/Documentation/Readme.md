@@ -31,5 +31,4 @@ Burst is a new [LLVM](https://en.wikipedia.org/wiki/LLVM) based backend compiler
 ## Further information
 
 - [Unity Data-Oriented cheat sheet](cheatsheet.md)
-- [Unity Data-Oriented learning resources](resources.md)
 - [Performance by default](http://unity3d.com/performance-by-default)

@@ -19,6 +19,12 @@ namespace Unity.Physics.Tests
         void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             dstManager.AddComponentData(entity, new VerifyContactsIteratorData());
+
+#if HAVOK_PHYSICS_EXISTS
+            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+            config.EnableSleeping = 0;
+            dstManager.AddComponentData(entity, config);
+#endif
         }
     }
 
@@ -79,8 +85,6 @@ namespace Unity.Physics.Tests
                 Assert.AreEqual(manifold.ColliderKeys.ColliderKeyB.Value, ColliderKey.Empty.Value);
                 Assert.AreEqual(manifold.Entities.EntityA, Bodies[manifold.BodyIndexPair.BodyAIndex].Entity);
                 Assert.AreEqual(manifold.Entities.EntityB, Bodies[manifold.BodyIndexPair.BodyBIndex].Entity);
-                Assert.AreEqual(manifold.Entities.EntityA.Version, 1);
-                Assert.AreEqual(manifold.Entities.EntityB.Version, 1);
                 Assert.AreEqual(manifold.JacobianFlags, (JacobianFlags)0);
                 Assert.IsFalse(manifold.Modified);
                 Assert.AreEqual(manifold.NumContacts, 4);

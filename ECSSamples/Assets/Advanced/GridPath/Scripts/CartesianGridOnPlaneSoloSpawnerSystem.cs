@@ -3,6 +3,9 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+/// <summary>
+/// Spawn one prefab entity at a time at a random position on grid at the given frequency.
+/// </summary>
 public class CartesianGridOnPlaneSoloSpawnerSystem : JobComponentSystem
 {
     BeginInitializationEntityCommandBufferSystem m_EntityCommandBufferSystem;

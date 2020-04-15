@@ -1,3 +1,14 @@
+# Samples Version 32
+
+## New Samples
+
+* Adding new `GridCubeFollowTargets` and `GridPlaneFollowTargets` samples.
+
+## Changes
+
+* The project does now require Unity `2019.3.0f1` or later.
+
+
 # Samples Version 31
 
 To view the changelog for a specific package, go to **Package Manager** and click on **View changelog** or open the respective `CHANGELOG.md` file inside the package folder. 
@@ -10,6 +21,7 @@ To view the changelog for a specific package, go to **Package Manager** and clic
 
 * The project does now require Unity `2019.3.0b11` or later: some of the new features in the entities package require features in Unity that were introduced with that version.
 * Updated packages and applied respective required api changes.
+* GridPath samples now include `GridPlaneFollowTarget` and `GridCubeFollowTarget` demonstrating building tables of shortest paths and lookup.
 
 
 # Samples Version 30

@@ -9,7 +9,7 @@ public struct LifeTime : IComponentData
 }
 
 // This system updates all entities in the scene with both a RotationSpeed_SpawnAndRemove and Rotation component.
-public class LifeTimeSystem : JobComponentSystem
+public class LifeTimeSystem : SystemBase
 {
     EntityCommandBufferSystem m_Barrier;
 
@@ -17,42 +17,23 @@ public class LifeTimeSystem : JobComponentSystem
     {
         m_Barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
-
-    // Use the [BurstCompile] attribute to compile a job with Burst.
-    // You may see significant speed ups, so try it!
-    [BurstCompile]
-    struct LifeTimeJob : IJobForEachWithEntity<LifeTime>
-    {
-        public float DeltaTime;
-
-        [WriteOnly]
-        public EntityCommandBuffer.Concurrent CommandBuffer;
-
-        public void Execute(Entity entity, int jobIndex, ref LifeTime lifeTime)
-        {
-            lifeTime.Value -= DeltaTime;
-
-            if (lifeTime.Value < 0.0f)
-            {
-                CommandBuffer.DestroyEntity(jobIndex, entity);
-            }
-        }
-    }
-
+    
     // OnUpdate runs on the main thread.
-    protected override JobHandle OnUpdate(JobHandle inputDependencies)
+    protected override void OnUpdate()
     {
         var commandBuffer = m_Barrier.CreateCommandBuffer().ToConcurrent();
 
-        var job = new LifeTimeJob
+        var deltaTime = Time.DeltaTime;
+        Entities.ForEach((Entity entity, int nativeThreadIndex, ref LifeTime lifetime) =>
         {
-            DeltaTime = Time.DeltaTime,
-            CommandBuffer = commandBuffer,
+            lifetime.Value -= deltaTime;
 
-        }.Schedule(this, inputDependencies);
-
-        m_Barrier.AddJobHandleForProducer(job);
-
-        return job;
+            if (lifetime.Value < 0.0f)
+            {
+                commandBuffer.DestroyEntity(nativeThreadIndex, entity);
+            }
+        }).ScheduleParallel();
+            
+        m_Barrier.AddJobHandleForProducer(Dependency);
     }
 }

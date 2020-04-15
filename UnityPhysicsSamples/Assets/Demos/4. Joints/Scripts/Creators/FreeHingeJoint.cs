@@ -14,7 +14,7 @@ namespace Unity.Physics.Authoring
         public float3 HingeAxisLocal;
         public float3 HingeAxisInConnectedEntity;
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             if (AutoSetConnected)
             {
@@ -23,10 +23,13 @@ namespace Unity.Physics.Authoring
                 HingeAxisInConnectedEntity = math.mul(bFromA.rot, HingeAxisLocal);
             }
 
-            CreateJointEntity(JointData.CreateHinge(
-                PositionLocal, PositionInConnectedEntity, 
-                HingeAxisLocal, HingeAxisInConnectedEntity),
-                entityManager);
+            CreateJointEntity(
+                JointData.CreateHinge(
+                    new JointFrame { Axis = HingeAxisLocal, Position = PositionLocal },
+                    new JointFrame { Axis = HingeAxisInConnectedEntity, Position = PositionInConnectedEntity }
+                ),
+                entityManager, conversionSystem
+            );
         }
     }
 }

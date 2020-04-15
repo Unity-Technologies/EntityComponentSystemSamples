@@ -6,14 +6,14 @@ Sub Scenes provide an efficient way to edit and load large game scenes in Unity.
 
 ## What does it show?
 
-This sample uses the Components and Systems from HelloCube IJobForEach. The scene contains a pair of rotating cubes that are loaded automatically on play from a Sub Scene.
+This sample uses the Components and Systems from HelloCube ForEach. The scene contains a pair of rotating cubes that are loaded automatically on play from a Sub Scene.
 
 ## Sub Scenes
 
 When you save a scene, Unity converts any Sub Scenes to a native, binary format.
 This format is memory-ready and can be loaded or streamed with only minimal alteration of the data in RAM. The format is ideally suited for streaming large amounts of Entities.
 
-You can load a Sub Scene automatically on play. You can also defer loading until you stream the SubScene in from code (Using the RequestSceneLoaded component)
+You can load a Sub Scene automatically on play. You can also defer loading until you stream the Sub Scene in from code (Using the RequestSceneLoaded component)
 
 By default, Sub Scenes are loaded from the Entity binary files, even in the editor.
 
@@ -25,8 +25,8 @@ The ability to edit only part of the scene and still have all the other Sub Scen
 
 ### To Create a Sub Scene
 
-1. In the Unity Hierarchy window, right-click on the parent GameObject that you want to move to a Sub Scene. (You can also start with an empty GameObject.)
+1. In the Unity Hierarchy window, right-click on empty space, or on a GameObject that you want to create the Sub Scene next to.
 
-2. Select **New SubScene from Selection** from the pop-up menu. Unity then moves the GameObject and any children into a SubScene object and creates a Scene Asset file in your project.
+2. Select **New Sub Scene > Empty Scene...** in the context menu. Unity then creates an empty Sub Scene and creates a corresponding Scene Asset file in your project.
 
-Click on the SubScene in the Hierarchy window to view its properties in the Inspector.
+Click on the Sub Scene in the Hierarchy window to view its properties in the Inspector.

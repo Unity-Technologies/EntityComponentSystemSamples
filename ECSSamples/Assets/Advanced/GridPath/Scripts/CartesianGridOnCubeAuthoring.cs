@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
@@ -7,7 +6,7 @@ using UnityEngine;
 // ReSharper disable once InconsistentNaming
 [RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/GridPath/Cartesian Grid on Cube")]
-[ConverterVersion("macton", 4)]
+[ConverterVersion("macton", 20)]
 public class CartesianGridOnCubeAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
 {
     [Range(2, 512)]
