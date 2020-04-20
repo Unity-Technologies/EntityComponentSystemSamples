@@ -22,14 +22,14 @@ public struct RandomMotion : IComponentData
 // This behavior will set a dynamic body's linear velocity to get to randomly selected
 // point in space. When the body gets with a specified tolerance of the random position,
 // a new random position is chosen and the body starts header there instead.
-public class RandomMotionBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class RandomMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float3 Range = new float3(1);
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         var length = math.length(Range);
-        dstManager.AddComponentData<RandomMotion>(entity, new RandomMotion
+        dstManager.AddComponentData(entity, new RandomMotion
         {
             InitialPosition = transform.position,
             DesiredPosition = transform.position,
@@ -42,26 +42,20 @@ public class RandomMotionBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 
 
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class RandomMotionSystem : JobComponentSystem
+public class RandomMotionSystem : SystemBase
 {
-    EntityQuery m_PhysicsGroup;
-
-    protected override void OnCreate()
+    protected override void OnUpdate()
     {
-        m_PhysicsGroup = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[] { typeof(PhysicsStep), }
-        });
-    }
+        var random = new Random();
+        float deltaTime = UnityEngine.Time.fixedDeltaTime;
+        float3 gravity = HasSingleton<PhysicsStep>()
+            ? PhysicsStep.Default.Gravity
+            : GetSingleton<PhysicsStep>().Gravity;
 
-    [BurstCompile]
-    protected struct RandomMotionJob : IJobForEach<RandomMotion, Translation, PhysicsVelocity, PhysicsMass>
-    {
-        public Random random;
-        public float deltaTime;
-        public float3 gravity;
-
-        public void Execute(ref RandomMotion motion, [ReadOnly] ref Translation position, ref PhysicsVelocity velocity, [ReadOnly] ref PhysicsMass mass)
+        Entities
+            .WithName("ApplyRandomMotion")
+            .WithBurst()
+            .ForEach((ref RandomMotion motion, ref PhysicsVelocity velocity, in Translation position, in PhysicsMass mass) =>
         {
             motion.CurrentTime += deltaTime;
 
@@ -83,27 +77,6 @@ public class RandomMotionSystem : JobComponentSystem
             {
                 velocity.Linear -= gravity * deltaTime;
             }
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        Random random = new Random();
-
-        PhysicsStep stepComponent = PhysicsStep.Default;
-        if (HasSingleton<PhysicsStep>())
-        {
-            stepComponent = GetSingleton<PhysicsStep>();
-        }
-
-        var job = new RandomMotionJob
-        {
-            gravity = stepComponent.Gravity,
-            deltaTime = UnityEngine.Time.fixedDeltaTime,
-            random = random
-        };
-        var jobHandle = job.Schedule(this, inputDeps);
-
-        return jobHandle;
+        }).Schedule();
     }
 }

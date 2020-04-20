@@ -2,7 +2,6 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -46,13 +45,13 @@ class PeriodicallySpawnRandomShapeSystem : SpawnRandomObjectsSystemBase<Periodic
     }
 
 
-    internal override unsafe void OnBeforeInstantiatePrefab(PeriodicSpawnSettings spawnSettings)
+    internal override void OnBeforeInstantiatePrefab(PeriodicSpawnSettings spawnSettings)
     {
-        if( !EntityManager.HasComponent<EntityKiller>(spawnSettings.Prefab) )
+        if( !EntityManager.HasComponent<LifeTime>(spawnSettings.Prefab) )
         {
-            EntityManager.AddComponent<EntityKiller>(spawnSettings.Prefab);
+            EntityManager.AddComponent<LifeTime>(spawnSettings.Prefab);
         }
-        EntityManager.SetComponentData(spawnSettings.Prefab, new EntityKiller { TimeToDie = spawnSettings.DeathRate });
+        EntityManager.SetComponentData(spawnSettings.Prefab, new LifeTime { Value = spawnSettings.DeathRate });
     }
 
     protected override void OnUpdate()

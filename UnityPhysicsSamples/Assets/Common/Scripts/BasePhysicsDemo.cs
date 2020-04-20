@@ -20,6 +20,18 @@ public class BasePhysicsDemo : MonoBehaviour
 {
     public static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
 
+    public static void ResetDefaultWorld()
+    {
+        DefaultWorld.EntityManager.CompleteAllJobs();
+        foreach(var system in DefaultWorld.Systems)
+        {
+            system.Enabled = false;
+        }
+
+        DefaultWorld.Dispose();
+        DefaultWorldInitialization.Initialize("Default World", false);
+    }
+
     protected Entity stepper;
 
     public Material dynamicMaterial;
@@ -60,6 +72,28 @@ public class BasePhysicsDemo : MonoBehaviour
         //dynamicMaterial = (Material)Resources.Load("Materials/PhysicsDynamicMaterial");
         //staticMaterial = (Material)Resources.Load("Materials/PhysicsStaticMaterial");
     }
+
+#if !UNITY_EDITOR
+    void OnEnable()
+    {
+        Application.logMessageReceivedThreaded += HandleLogEntry;
+    }
+
+    void HandleLogEntry(string logEntry, string stackTrace, LogType logType)
+    {
+        if (logType == LogType.Exception)
+        {
+            // Log exception and exit with non-zero error code
+            UnityEngine.Debug.Log($"Caught an exception, exiting... \n {logEntry} \n {stackTrace}");
+            Application.Quit(1);
+        }
+    }
+
+    void OnDisable()
+    {
+        Application.logMessageReceivedThreaded -= HandleLogEntry;
+    }
+#endif
 
     protected virtual void Start()
     {

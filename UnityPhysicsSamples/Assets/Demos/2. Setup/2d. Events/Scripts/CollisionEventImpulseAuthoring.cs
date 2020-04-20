@@ -1,24 +1,19 @@
-﻿using Unity.Physics;
-using Unity.Physics.Systems;
+﻿using System;
+using Unity.Burst;
+using Unity.Physics;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using UnityEngine;
-using Collider = Unity.Physics.Collider;
-using Unity.Transforms;
-using Unity.Profiling;
-using Unity.Burst;
-using System;
-using UnityEditor;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using Unity.Physics.Systems;
+using UnityEngine;
 
 public struct CollisionEventImpulse : IComponentData
 {
     public float3 Impulse;
 }
 
-public class CollisionEventImpulseBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class CollisionEventImpulseAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float Magnitude = 1.0f;
     public float3 Direction = math.up();
@@ -43,7 +38,7 @@ public class CollisionEventImpulseBehaviour : MonoBehaviour, IConvertGameObjectT
 // A Repulsor is defined by a PhysicsShapeAuthoring with the `Raise Collision Events` flag ticked and a
 // CollisionEventImpulse behaviour added.
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-unsafe public class CollisionEventImpulseSystem : JobComponentSystem
+public class CollisionEventImpulseSystem : JobComponentSystem
 {
     BuildPhysicsWorld m_BuildPhysicsWorldSystem;
     StepPhysicsWorld m_StepPhysicsWorldSystem;

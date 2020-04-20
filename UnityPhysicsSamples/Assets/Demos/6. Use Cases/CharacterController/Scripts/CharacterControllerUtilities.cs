@@ -301,7 +301,7 @@ public static class CharacterControllerUtilities
                 {
                     ColliderCastHit hit = collector.AllHits[hitIndex];
                     CreateConstraint(stepInput.World, stepInput.Up,
-                        hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal, hit.Fraction * math.length(displacement),
+                        hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal, math.dot(-hit.SurfaceNormal, hit.Fraction * displacement),
                         stepInput.SkinWidth, maxSlopeCos, ref constraints);
                 }
             }

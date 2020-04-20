@@ -1,7 +1,18 @@
+## [Samples Project for 0.3.2-preview] - 2020-04-20
+
+### Changes
+
+* Updated the following packages:
+    * Removed DOTS Editor
+    * Hybrid Renderer from `0.3.4-preview.24` to `0.4.0-preview.8`
+    * Input System from `1.0.0-preview.5` to `1.0.0-preview.6`
+* Fixed character controller tunnelling issue.
+* Made standalone player quit (with exit code 1) if an exception is caught in BasePhysicsDemo or derived classes.
+
 ## [Samples Project for 0.3.1-preview] - 2020-03-19
 
 ### Changes
-* Fixed a potential character controller tunneling issue.
+* Fixed a potential character controller tunnelling issue.
 * Removed the Lightweight RP package.
 
 ## [Samples Project for 0.3.0-preview] - 2020-03-12

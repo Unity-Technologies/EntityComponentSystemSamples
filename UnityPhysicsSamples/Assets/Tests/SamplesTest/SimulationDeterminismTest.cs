@@ -18,9 +18,20 @@ namespace Unity.Physics.Samples.Test
 #if !UNITY_EDITOR
     [TestFixture]
 #endif
-    class SimulationDeterminismTest
+    class UnityPhysicsSimulationDeterminismTest
     {
+#if HAVOK_PHYSICS_EXISTS
+        public bool SimulateHavok = false;
+#endif
         static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
+
+        // Put the names of demos that shouldn't
+        // be run in this test in this array
+        private static string[] s_FilteredOutDemos =
+        {
+            "SingleThreadedRagdoll", "LoaderScene",
+            "InitTestScene"
+        };
 
         protected static IEnumerable GetScenes()
         {
@@ -29,15 +40,25 @@ namespace Unity.Physics.Samples.Test
             for (int sceneIndex = 0; sceneIndex < sceneCount; ++sceneIndex)
             {
                 var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
-                if (scenePath.Contains("InitTestScene"))
-                    continue;
+                var shouldAdd = true;
 
-                scenes.Add(scenePath);
+                for (int i = 0; i < s_FilteredOutDemos.Length; i++)
+                {
+                    if (scenePath.Contains(s_FilteredOutDemos[i]))
+                    {
+                        shouldAdd = false;
+                        break;
+                    }
+                }
+
+                if (shouldAdd)
+                {
+                    scenes.Add(scenePath);
+                }
             }
             scenes.Sort();
             return scenes;
         }
-
 #if !UNITY_EDITOR
         [UnityTest]
         [Timeout(60000)]
@@ -47,6 +68,9 @@ namespace Unity.Physics.Samples.Test
             // Log scene name in case Unity crashes and test results aren't written out.
             Debug.Log("Loading " + scenePath);
             LogAssert.Expect(LogType.Log, "Loading " + scenePath);
+
+            // Wait for next frame
+            yield return null;
 
             // Number of steps to simulate
             const int k_StopAfterStep = 100;
@@ -61,18 +85,21 @@ namespace Unity.Physics.Samples.Test
             numThreadsPerRun[2] = 0;
             numThreadsPerRun[3] = -1;
 
-            // Load the scene and wait a while
+            // Load the scene and wait 2 frames
             SceneManager.LoadScene(scenePath);
 
-            // Finalize the current build of physics world and wait for bodies to appear in the physics world
-            var buildPhysicsWorld = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>();
-            buildPhysicsWorld.FinalJobHandle.Complete();
-            while (buildPhysicsWorld.PhysicsWorld.NumBodies == 0)
+            yield return null;
+            yield return null;
+
+            var sampler = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorldSampler>();
+            sampler.BeginSampling();
+
+            while (!sampler.FinishedSampling)
             {
-                yield return new WaitForSeconds(0.01f);
-                buildPhysicsWorld.FinalJobHandle.Complete();
+                yield return new WaitForSeconds(0.05f);
             }
 
+            var buildPhysicsWorld = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorld>();
             var stepComponent = PhysicsStep.Default;
             if (buildPhysicsWorld.HasSingleton<PhysicsStep>())
             {
@@ -81,7 +108,8 @@ namespace Unity.Physics.Samples.Test
 
             // Extract original world and make copies
             List<PhysicsWorld> physicsWorlds = new List<PhysicsWorld>(k_NumWorlds);
-            physicsWorlds.Add(buildPhysicsWorld.PhysicsWorld.Clone());
+            physicsWorlds.Add(sampler.PhysicsWorld.Clone());
+
             physicsWorlds.Add(physicsWorlds[0].Clone());
             physicsWorlds.Add(physicsWorlds[1].Clone());
             physicsWorlds.Add(physicsWorlds[2].Clone());
@@ -108,32 +136,71 @@ namespace Unity.Physics.Samples.Test
                     stepInput.World.CollisionWorld.BuildBroadphase(
                         ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, true);
 
-                    var simulationContext = new SimulationContext();
-                    for (int step = 0; step < k_StopAfterStep; step++)
+#if HAVOK_PHYSICS_EXISTS
+                    if (SimulateHavok)
                     {
-                        simulationContext.Reset(ref stepInput.World);
-                        new StepJob
+                        var simulationContext = new Havok.Physics.SimulationContext(Havok.Physics.HavokConfiguration.Default);
+                        for (int step = 0; step < k_StopAfterStep; step++)
                         {
-                            Input = stepInput,
-                            SimulationContext = simulationContext
-                        }.Schedule().Complete();
-                    }
+                            simulationContext.Reset(ref stepInput.World);
+                            new StepHavokJob
+                            {
+                                Input = stepInput,
+                                SimulationContext = simulationContext
+                            }.Schedule().Complete();
+                        }
 
-                    simulationContext.Dispose();
+                        simulationContext.Dispose();
+                    }
+                    else
+#endif
+                    {
+                        var simulationContext = new SimulationContext();
+                        for (int step = 0; step < k_StopAfterStep; step++)
+                        {
+                            simulationContext.Reset(ref stepInput.World);
+                            new StepJob
+                            {
+                                Input = stepInput,
+                                SimulationContext = simulationContext
+                            }.Schedule().Complete();
+                        }
+
+                        simulationContext.Dispose();
+                    }
                 }
                 else
                 {
-                    var simulation = new Simulation();
-                    stepInput.World = physicsWorlds[i];
-                    stepInput.World.CollisionWorld.ScheduleBuildBroadphaseJobs(
-                        ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, threadCountHint).Complete();
-                    for (int step = 0; step < k_StopAfterStep; step++)
+#if HAVOK_PHYSICS_EXISTS
+                    if (SimulateHavok)
                     {
-                        var handles = simulation.ScheduleStepJobs(stepInput, null, default, threadCountHint);
-                        handles.FinalExecutionHandle.Complete();
-                        handles.FinalDisposeHandle.Complete();
+                        var simulation = new Havok.Physics.HavokSimulation(Havok.Physics.HavokConfiguration.Default);
+                        stepInput.World = physicsWorlds[i];
+                        stepInput.World.CollisionWorld.ScheduleBuildBroadphaseJobs(
+                            ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, threadCountHint).Complete();
+                        for (int step = 0; step < k_StopAfterStep; step++)
+                        {
+                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, threadCountHint);
+                            handles.FinalExecutionHandle.Complete();
+                            handles.FinalDisposeHandle.Complete();
+                        }
+                        simulation.Dispose();
                     }
-                    simulation.Dispose();
+                    else
+#endif
+                    {
+                        var simulation = new Simulation();
+                        stepInput.World = physicsWorlds[i];
+                        stepInput.World.CollisionWorld.ScheduleBuildBroadphaseJobs(
+                            ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, threadCountHint).Complete();
+                        for (int step = 0; step < k_StopAfterStep; step++)
+                        {
+                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, threadCountHint);
+                            handles.FinalExecutionHandle.Complete();
+                            handles.FinalDisposeHandle.Complete();
+                        }
+                        simulation.Dispose();
+                    }
                 }
             }
 
@@ -162,8 +229,7 @@ namespace Unity.Physics.Samples.Test
 
             // Clean up
             {
-                EntitiesCleanup();
-                yield return new WaitForFixedUpdate();
+                SwitchWorlds();
                 numThreadsPerRun.Dispose();
                 buildStaticTree.Dispose();
                 for (int i = 0; i < physicsWorlds.Count; i++)
@@ -177,15 +243,23 @@ namespace Unity.Physics.Samples.Test
         [TearDown]
         public void TearDown()
         {
-            EntitiesCleanup();
+            SwitchWorlds();
         }
 
-        protected static void EntitiesCleanup()
+        protected static void SwitchWorlds()
         {
             var entityManager = DefaultWorld.EntityManager;
+            entityManager.CompleteAllJobs();
             var entities = entityManager.GetAllEntities();
             entityManager.DestroyEntity(entities);
             entities.Dispose();
+
+            foreach (var system in DefaultWorld.Systems)
+            {
+                system.Enabled = false;
+            }
+            DefaultWorld.Dispose();
+            DefaultWorldInitialization.Initialize("Default World", false);
         }
 
         [Burst.BurstCompile]
@@ -199,5 +273,72 @@ namespace Unity.Physics.Samples.Test
                 Simulation.StepImmediate(Input, ref SimulationContext);
             }
         }
+
+        [UpdateAfter(typeof(BuildPhysicsWorld))]
+        class BuildPhysicsWorldSampler : ComponentSystem
+        {
+            public bool FinishedSampling = false;
+            public World DefaultWorld => World.DefaultGameObjectInjectionWorld;
+            public PhysicsWorld PhysicsWorld;
+
+            public BuildPhysicsWorld BuildPhysicWorldSystem;
+
+            public void BeginSampling()
+            {
+                Enabled = true;
+            }
+
+            protected override void OnCreate()
+            {
+                Enabled = false;
+                PhysicsWorld = new PhysicsWorld(0, 0, 0);
+                BuildPhysicWorldSystem = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorld>();
+            }
+
+            protected override void OnUpdate()
+            {
+                BuildPhysicWorldSystem.FinalJobHandle.Complete();
+                if (BuildPhysicWorldSystem.PhysicsWorld.NumBodies != 0)
+                {
+                    EntityManager.CompleteAllJobs();
+                    PhysicsWorld.Dispose();
+                    PhysicsWorld = BuildPhysicWorldSystem.PhysicsWorld.Clone();
+                    Enabled = false;
+                    FinishedSampling = true;
+                }
+            }
+
+            protected override void OnDestroy()
+            {
+                PhysicsWorld.Dispose();
+            }
+        }
+
+#if HAVOK_PHYSICS_EXISTS
+        [Burst.BurstCompile]
+        internal struct StepHavokJob : IJob
+        {
+            public SimulationStepInput Input;
+            public Havok.Physics.SimulationContext SimulationContext;
+
+            public void Execute()
+            {
+                Havok.Physics.HavokSimulation.StepImmediate(Input, ref SimulationContext);
+            }
+        }
+#endif
     }
+
+#if HAVOK_PHYSICS_EXISTS
+#if !UNITY_EDITOR
+    [TestFixture]
+#endif
+    class HavokPhysicsSimulationDeterminismTest : UnityPhysicsSimulationDeterminismTest
+    {
+        public HavokPhysicsSimulationDeterminismTest()
+        {
+            SimulateHavok = true;
+        }
+    }
+#endif
 }

@@ -1,11 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Physics;
-using Unity.Physics.Extensions;
-using static Unity.Physics.Math;
-using Unity.Collections;
-
+using UnityEngine;
 
 public class InvalidPhysicsJointDemo : BasePhysicsDemo
 {
@@ -37,7 +33,7 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             Entity body = CreateDynamicBody(pivotWorld, quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
 
             // add timeout on dynamic body after 15 frames.
-            manager.AddComponentData<EntityKiller>(body, new EntityKiller() { TimeToDie = 15 });
+            manager.AddComponentData(body, new LifeTime { Value = 15 });
 
             // Create the joint
             float3 pivotLocal = float3.zero;
@@ -45,7 +41,7 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             var jointEntity = CreateJoint(jointData, body, Entity.Null);
 
             // add timeout on joint entity after 30 frames.
-            manager.AddComponentData<EntityKiller>(jointEntity, new EntityKiller() { TimeToDie = 30 });
+            manager.AddComponentData(jointEntity, new LifeTime { Value = 30 });
         }
 
         // Add two static bodies constrained together
@@ -61,7 +57,7 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             var jointEntity = CreateJoint(jointData, bodyA, bodyB);
 
             // add timeout on joint entity after 15 frames.
-            manager.AddComponentData<EntityKiller>(jointEntity, new EntityKiller() { TimeToDie = 15 });
+            manager.AddComponentData(jointEntity, new LifeTime { Value = 15 });
         }
     }
 }

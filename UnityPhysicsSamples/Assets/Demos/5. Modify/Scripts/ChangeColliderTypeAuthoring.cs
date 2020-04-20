@@ -16,12 +16,11 @@ public struct ChangeColliderType : IComponentData
 }
 
 // Converted in PhysicsSamplesConversionSystem so Physics and Graphics conversion is over
-public class ChangeColliderTypeBehaviour : MonoBehaviour, IDeclareReferencedPrefabs//, IConvertGameObjectToEntity
+public class ChangeColliderTypeAuthoring : MonoBehaviour, IDeclareReferencedPrefabs//, IConvertGameObjectToEntity
 {
     public GameObject PhysicsColliderPrefabA;
     public GameObject PhysicsColliderPrefabB;
     [Range(0, 10)] public float TimeToSwap = 1.0f;
-
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
@@ -55,32 +54,44 @@ public class ChangeColliderTypeBehaviour : MonoBehaviour, IDeclareReferencedPref
     }
 }
 
-
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ChangeColliderTypeSystem : ComponentSystem
+public class ChangeColliderTypeSystem : SystemBase
 {
-    protected unsafe override void OnUpdate()
+    EntityCommandBufferSystem m_EntityCommandBufferSystem;
+
+    protected override void OnCreate() =>
+        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+
+    protected override unsafe void OnUpdate()
     {
-        Entities.WithAll<PhysicsCollider, ChangeColliderType, RenderMesh>().ForEach( 
-            (Entity entity, ref ChangeColliderType modifier) =>
+        var deltaTime = UnityEngine.Time.deltaTime;
+        EntityCommandBuffer commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
+
+        Entities
+            .WithName("ChangeColliderType")
+            .WithAll<PhysicsCollider, RenderMesh>()
+            .WithoutBurst()
+            .ForEach((Entity entity, ref ChangeColliderType modifier) =>
         {
-            modifier.LocalTime -= UnityEngine.Time.fixedDeltaTime;
+            modifier.LocalTime -= deltaTime;
 
             if (modifier.LocalTime > 0.0f) return;
 
             modifier.LocalTime = modifier.TimeToSwap;
-            var collider = World.EntityManager.GetComponentData<PhysicsCollider>(entity);
+            var collider = EntityManager.GetComponentData<PhysicsCollider>(entity);
             if (collider.ColliderPtr->Type == modifier.ColliderA.ColliderPtr->Type)
             {
-                PostUpdateCommands.SetComponent(entity,modifier.ColliderB);
-                PostUpdateCommands.SetSharedComponent(entity, World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityB));
+                commandBuffer.SetComponent(entity, modifier.ColliderB);
+                commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityB));
             }
             else
             {
-                PostUpdateCommands.SetComponent(entity, modifier.ColliderA);
-                PostUpdateCommands.SetSharedComponent(entity, World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityA));
+                commandBuffer.SetComponent(entity, modifier.ColliderA);
+                commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityA));
             }
-        });
+        }).Run();
+
+        m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
     }
 }
 

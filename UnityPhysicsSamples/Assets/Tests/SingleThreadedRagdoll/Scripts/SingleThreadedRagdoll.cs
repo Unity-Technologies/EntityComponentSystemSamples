@@ -13,7 +13,11 @@ public class SingleThreadedRagdoll : MonoBehaviour
 {
     public PhysicsWorld PhysicsWorld;
 
-    private SimulationContext SimulationContext = new SimulationContext();
+    private SimulationContext SimulationContext;
+#if HAVOK_PHYSICS_EXISTS
+    private Havok.Physics.SimulationContext HavokSimulationContext;
+    public bool SimulateHavok = false;
+#endif
 
     public void Update()
     {
@@ -32,16 +36,34 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
         NativeHashMap<int, int> indexMap = new NativeHashMap<int, int>(m_Bodies.Length, Allocator.TempJob);
 
-        SimulationContext.Reset(ref PhysicsWorld);
-
-        new SingleThreadedPhysicsSimulationJob
+#if HAVOK_PHYSICS_EXISTS
+        if (SimulateHavok)
         {
-            Bodies = m_Bodies,
-            Joints = m_Joints,
-            Input = input,
-            SimulationContext = SimulationContext,
-            IndexMap = indexMap
-        }.Schedule().Complete();
+            HavokSimulationContext.Reset(ref PhysicsWorld);
+
+            new SingleThreadedPhysicsHavokSimulationJob
+            {
+                Bodies = m_Bodies,
+                Joints = m_Joints,
+                Input = input,
+                SimulationContext = HavokSimulationContext,
+                IndexMap = indexMap
+            }.Schedule().Complete();
+        }
+        else
+#endif
+        {
+            SimulationContext.Reset(ref PhysicsWorld);
+
+            new SingleThreadedPhysicsSimulationJob
+            {
+                Bodies = m_Bodies,
+                Joints = m_Joints,
+                Input = input,
+                SimulationContext = SimulationContext,
+                IndexMap = indexMap
+            }.Schedule().Complete();
+        }
 
         // Map the results to GameObjects
         for (int i = 0; i < numOfBodies; i++)
@@ -79,19 +101,20 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
         public NativeHashMap<int, int> IndexMap;
 
-        private void CreateRigidBodiesAndMotions()
+        internal static void CreateRigidBodiesAndMotions(SimulationStepInput input,
+            NativeList<BodyInfo> bodies, NativeHashMap<int, int> indexMap)
         {
-            NativeSlice<RigidBody> dynamicBodies = Input.World.DynamicBodies;
-            NativeSlice<RigidBody> staticBodies = Input.World.StaticBodies;
-            NativeSlice<MotionData> motionDatas = Input.World.MotionDatas;
-            NativeSlice<MotionVelocity> motionVelocities = Input.World.MotionVelocities;
+            NativeSlice<RigidBody> dynamicBodies = input.World.DynamicBodies;
+            NativeSlice<RigidBody> staticBodies = input.World.StaticBodies;
+            NativeSlice<MotionData> motionDatas = input.World.MotionDatas;
+            NativeSlice<MotionVelocity> motionVelocities = input.World.MotionVelocities;
 
             int dynamicBodyIndex = 0;
             int staticBodyIndex = 0;
 
-            for (int i = 0; i < Bodies.Length; i++)
+            for (int i = 0; i < bodies.Length; i++)
             {
-                BodyInfo bodyInfo = Bodies[i];
+                BodyInfo bodyInfo = bodies[i];
 
                 unsafe
                 {
@@ -126,7 +149,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
                             AngularExpansionFactor = collider->MassProperties.AngularExpansionFactor
                         };
 
-                        IndexMap.Add(i, dynamicBodyIndex);
+                        indexMap.Add(i, dynamicBodyIndex);
                         dynamicBodyIndex++;
                     }
                     else
@@ -157,16 +180,17 @@ public class SingleThreadedRagdoll : MonoBehaviour
             }
         }
 
-        private void CreateJoints()
+        internal static void CreateJoints(SimulationStepInput input,
+            NativeList<JointInfo> jointInfos, NativeHashMap<int, int> indexMap)
         {
-            NativeSlice<Unity.Physics.Joint> joints = Input.World.Joints;
+            NativeSlice<Unity.Physics.Joint> joints = input.World.Joints;
 
-            for (int i = 0; i < Joints.Length; i++)
+            for (int i = 0; i < jointInfos.Length; i++)
             {
-                var jointInfo = Joints[i];
+                var jointInfo = jointInfos[i];
 
-                IndexMap.TryGetValue(jointInfo.BodyAIndex, out int bodyAIndex);
-                IndexMap.TryGetValue(jointInfo.BodyBIndex, out int bodyBIndex);
+                indexMap.TryGetValue(jointInfo.BodyAIndex, out int bodyAIndex);
+                indexMap.TryGetValue(jointInfo.BodyBIndex, out int bodyBIndex);
 
                 BodyIndexPair pair = new BodyIndexPair
                 {
@@ -186,26 +210,26 @@ public class SingleThreadedRagdoll : MonoBehaviour
             }
         }
 
-        private void ExportData()
+        internal static void ExportData(SimulationStepInput input, NativeList<BodyInfo> bodies)
         {
             int dynamicBodyIndex = 0;
-            for (int i = 0; i < Bodies.Length; i++)
+            for (int i = 0; i < bodies.Length; i++)
             {
-                BodyInfo bodyInfo = Bodies[i];
+                BodyInfo bodyInfo = bodies[i];
                 if (!bodyInfo.IsDynamic)
                 {
                     continue;
                 }
 
-                MotionData md = Input.World.MotionDatas[dynamicBodyIndex];
+                MotionData md = input.World.MotionDatas[dynamicBodyIndex];
                 RigidTransform worldFromBody = math.mul(md.WorldFromMotion, math.inverse(md.BodyFromMotion));
 
                 bodyInfo.Position = worldFromBody.pos;
                 bodyInfo.Orientation = worldFromBody.rot;
-                bodyInfo.LinearVelocity = Input.World.MotionVelocities[dynamicBodyIndex].LinearVelocity;
-                bodyInfo.AngularVelocity = Input.World.MotionVelocities[dynamicBodyIndex].AngularVelocity;
+                bodyInfo.LinearVelocity = input.World.MotionVelocities[dynamicBodyIndex].LinearVelocity;
+                bodyInfo.AngularVelocity = input.World.MotionVelocities[dynamicBodyIndex].AngularVelocity;
 
-                Bodies[i] = bodyInfo;
+                bodies[i] = bodyInfo;
                 dynamicBodyIndex++;
             }
         }
@@ -213,8 +237,8 @@ public class SingleThreadedRagdoll : MonoBehaviour
         public void Execute()
         {
             // Create the physics world
-            CreateRigidBodiesAndMotions();
-            CreateJoints();
+            CreateRigidBodiesAndMotions(Input, Bodies, IndexMap);
+            CreateJoints(Input, Joints, IndexMap);
 
             // Build the broadphase
             Input.World.CollisionWorld.BuildBroadphase(ref Input.World, Input.TimeStep, Input.Gravity);
@@ -223,12 +247,46 @@ public class SingleThreadedRagdoll : MonoBehaviour
             Simulation.StepImmediate(Input, ref SimulationContext);
 
             // Export the changed motion data to body info
-            ExportData();
+            ExportData(Input, Bodies);
         }
     }
 
+#if HAVOK_PHYSICS_EXISTS
+    private struct SingleThreadedPhysicsHavokSimulationJob : IJob
+    {
+        public SimulationStepInput Input;
+        public Havok.Physics.SimulationContext SimulationContext;
+
+        public NativeList<BodyInfo> Bodies;
+        public NativeList<JointInfo> Joints;
+
+        public NativeHashMap<int, int> IndexMap;
+
+        public void Execute()
+        {
+            // Create the physics world
+            SingleThreadedPhysicsSimulationJob.CreateRigidBodiesAndMotions(Input, Bodies, IndexMap);
+            SingleThreadedPhysicsSimulationJob.CreateJoints(Input, Joints, IndexMap);
+
+            // Build the broadphase
+            Input.World.CollisionWorld.BuildBroadphase(ref Input.World, Input.TimeStep, Input.Gravity);
+
+            // Step the physics world
+            Havok.Physics.HavokSimulation.StepImmediate(Input, ref SimulationContext);
+
+            // Export the changed motion data to body info
+            SingleThreadedPhysicsSimulationJob.ExportData(Input, Bodies);
+        }
+    }
+#endif
+
     public void Start()
     {
+        SimulationContext = new SimulationContext();
+#if HAVOK_PHYSICS_EXISTS
+        HavokSimulationContext = new Havok.Physics.SimulationContext(Havok.Physics.HavokConfiguration.Default);
+#endif
+
         m_BodyIndexToGameObjectMapping = new Dictionary<int, GameObject>();
         m_Bodies = new NativeList<BodyInfo>(Allocator.Persistent);
         m_Joints = new NativeList<JointInfo>(Allocator.Persistent);
@@ -394,5 +452,8 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
         PhysicsWorld.Dispose();
         SimulationContext.Dispose();
+#if HAVOK_PHYSICS_EXISTS
+        HavokSimulationContext.Dispose();
+#endif
     }
 }

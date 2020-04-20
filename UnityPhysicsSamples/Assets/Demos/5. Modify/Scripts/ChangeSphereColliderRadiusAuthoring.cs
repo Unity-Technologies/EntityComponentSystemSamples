@@ -1,5 +1,4 @@
 ﻿using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -19,7 +18,7 @@ public struct ChangeSphereColliderRadius : IComponentData
 // This guarantees that the PhysicsCollider component will have a unique instance in all cases.
 
 // Converted in PhysicsSamplesConversionSystem so Physics and Graphics conversion is over
-public class ChangeSphereColliderRadiusBehaviour : MonoBehaviour//, IConvertGameObjectToEntity
+public class ChangeSphereColliderRadiusAuthoring : MonoBehaviour//, IConvertGameObjectToEntity
 {
     [Range(0, 10)] public float Min = 0;
     [Range(0, 10)] public float Max = 10;
@@ -44,33 +43,45 @@ public class ChangeSphereColliderRadiusBehaviour : MonoBehaviour//, IConvertGame
 }
 
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ChangeSphereColliderRadiusSystem : JobComponentSystem
+public class ChangeSphereColliderRadiusSystem : SystemBase
 {
-    private struct ChangeSphereColliderRadiusJob : IJobForEach<PhysicsCollider, ChangeSphereColliderRadius, Scale>
+    protected override void OnUpdate()
     {
-        public unsafe void Execute(ref PhysicsCollider collider, ref ChangeSphereColliderRadius radius, ref Scale scale)
+        Entities
+            .WithName("ChangeSphereColliderRadius")
+            .WithBurst()
+            .ForEach((ref PhysicsCollider collider, ref ChangeSphereColliderRadius radius, ref Scale scale) =>
         {
             // make sure we are dealing with spheres
-            if (collider.ColliderPtr->Type != ColliderType.Sphere) return;
+            if (collider.Value.Value.Type != ColliderType.Sphere) return;
 
-            //
             // tweak the physical representation of the sphere
-            // grab the sphere pointer
-            SphereCollider* scPtr = (SphereCollider*)collider.ColliderPtr;
-            float oldRadius = scPtr->Radius;
-            float newRadius = math.lerp(oldRadius, radius.Target, 0.05f);
-            // if we have reached the target radius get a new target
-            if (math.abs(newRadius - radius.Target) < 0.01f)
+
+            // NOTE: this approach affects all instances using the same BlobAsset
+            // so you cannot simply use this approach for instantiated prefabs
+            // if you want to modify prefab instances independently, you need to create 
+            // unique BlobAssets at run-time and dispose them when you are done
+
+            float oldRadius = 1.0f;
+            float newRadius = 1.0f;
+            unsafe
             {
-                radius.Target = radius.Target == radius.Min ? radius.Max : radius.Min;
+                // grab the sphere pointer
+                SphereCollider* scPtr = (SphereCollider*)collider.ColliderPtr;
+                oldRadius = scPtr->Radius;
+                newRadius = math.lerp(oldRadius, radius.Target, 0.05f);
+                // if we have reached the target radius get a new target
+                if (math.abs(newRadius - radius.Target) < 0.01f)
+                {
+                    radius.Target = radius.Target == radius.Min ? radius.Max : radius.Min;
+                }
+
+                // update the collider geometry
+                var sphereGeometry = scPtr->Geometry;
+                sphereGeometry.Radius = newRadius;
+                scPtr->Geometry = sphereGeometry;
             }
 
-            // update the collider geometry
-            var sphereGeometry = scPtr->Geometry;
-            sphereGeometry.Radius = newRadius;
-            scPtr->Geometry = sphereGeometry;
-
-            //
             // now tweak the graphical representation of the sphere
             float oldScale = scale.Value;
             float newScale = oldScale;
@@ -83,14 +94,7 @@ public class ChangeSphereColliderRadiusSystem : JobComponentSystem
             {
                 newScale *= newRadius / oldRadius;
             }
-            scale = new Scale() { Value = newScale };
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        JobHandle job = new ChangeSphereColliderRadiusJob().Schedule(this, inputDeps);
-
-        return job;
+            scale = new Scale { Value = newScale };
+        }).Schedule();
     }
 }

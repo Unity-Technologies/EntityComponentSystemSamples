@@ -8,7 +8,6 @@ using Unity.Physics.Systems;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Collider = Unity.Physics.Collider;
 using Joint = Unity.Physics.Joint;
 using Material = UnityEngine.Material;
@@ -21,7 +20,7 @@ public struct CustomVelocity : IComponentData
 
 public struct CustomCollider : IComponentData
 {
-    public unsafe Collider* ColliderPtr; 
+    public BlobAssetReference<Collider> ColliderRef;
 }
 
 public class SingleThreadedPhysics : MonoBehaviour
@@ -49,7 +48,10 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
 
     private StepPhysicsWorld m_StepPhysicsWorld;
 
-    private SimulationContext SimulationContext = new SimulationContext();
+    private SimulationContext SimulationContext;
+#if HAVOK_PHYSICS_EXISTS
+    private Havok.Physics.SimulationContext HavokSimulationContext;
+#endif
 
     // Static and dynamic rigid bodies
     public unsafe void CreateRigidBodies()
@@ -70,7 +72,7 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
                 dynamicBodies[i] = new RigidBody
                 {
                     WorldFromBody = new RigidTransform(rotations[i].Value, positions[i].Value),
-                    Collider = BlobAssetReference<Collider>.Create(colliders[i].ColliderPtr, colliders[i].ColliderPtr->MemorySize),
+                    Collider = colliders[i].ColliderRef,
                     Entity = entities[i],
                     CustomTags = customTags[i].Value
                 };
@@ -97,7 +99,7 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
                 staticBodies[i] = new RigidBody
                 {
                     WorldFromBody = new RigidTransform(rotations[i].Value, positions[i].Value),
-                    Collider = BlobAssetReference<Collider>.Create(colliders[i].ColliderPtr, colliders[i].ColliderPtr->MemorySize),
+                    Collider = colliders[i].ColliderRef,
                     Entity = entities[i],
                     CustomTags = customTags[i].Value
                 };
@@ -233,7 +235,7 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
     }
 
     // Custom data initialization
-    public unsafe void Initialize(Material referenceMaterial)
+    public void Initialize(Material referenceMaterial)
     {
         // Key is new entity that gets copied from old entity
         EntityQuery query = GetEntityQuery(new EntityQueryDesc
@@ -310,14 +312,25 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
                 EntityManager.AddComponentData(ghost, defaultGravityFactor);
             }
 
-            CustomCollider customCollider;
-            if (EntityManager.HasComponent<PhysicsCollider>(entities[i]))
+            if (!EntityManager.HasComponent<CustomCollider>(entities[i]))
             {
-                customCollider.ColliderPtr = EntityManager.GetComponentData<PhysicsCollider>(entities[i]).ColliderPtr;
-            }
-            else
-            {
-                customCollider.ColliderPtr = null;
+                CustomCollider customCollider;
+                if (EntityManager.HasComponent<PhysicsCollider>(entities[i]))
+                {
+                    unsafe
+                    {
+                        customCollider.ColliderRef = BlobAssetReference<Collider>.Create(
+                            EntityManager.GetComponentData<PhysicsCollider>(entities[i]).ColliderPtr,
+                            EntityManager.GetComponentData<PhysicsCollider>(entities[i]).ColliderPtr->MemorySize);
+                    }
+                }
+                else
+                {
+                    customCollider.ColliderRef = default;
+                }
+
+                EntityManager.AddComponentData(ghost, customCollider);
+                EntityManager.RemoveComponent<PhysicsCollider>(ghost);
             }
 
             if (EntityManager.HasComponent<PhysicsVelocity>(entities[i]))
@@ -327,27 +340,26 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
                 EntityManager.AddComponentData(ghost, customVel);
             }
 
-            EntityManager.AddComponentData(ghost, customCollider);
-
             var position = EntityManager.GetComponentData<Translation>(entities[i]);
             // The idea is that static bodies overlap, and dynamic ones are separated from original ones
             position.Value = new float3(position.Value.x, position.Value.y, position.Value.z);
 
             EntityManager.SetComponentData(ghost, position);
-
-            EntityManager.RemoveComponent<PhysicsCollider>(ghost);
             EntityManager.RemoveComponent<PhysicsVelocity>(ghost);
 
             EntityManager.SetSharedComponentData(ghost, ghostMaterial);
         }
 
-        Enabled = true;
         entities.Dispose();
-    }
 
-    protected override void OnCreate()
+        SimulationContext = new SimulationContext();
+#if HAVOK_PHYSICS_EXISTS
+        HavokSimulationContext = new Havok.Physics.SimulationContext(Havok.Physics.HavokConfiguration.Default);
+#endif
+}
+
+protected override void OnCreate()
     {
-        Enabled = false;
         CustomDynamicEntityGroup = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[]
@@ -415,21 +427,42 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
         // Step the world
         if (PhysicsWorld.NumDynamicBodies != 0)
         {
+            PhysicsStep stepComponent = PhysicsStep.Default;
+            if (HasSingleton<PhysicsStep>())
+            {
+                stepComponent = GetSingleton<PhysicsStep>();
+            }
+
             SimulationStepInput input = new SimulationStepInput
             {
                 World = PhysicsWorld,
                 TimeStep = UnityEngine.Time.fixedDeltaTime,
-                NumSolverIterations = PhysicsStep.Default.SolverIterationCount,
-                Gravity = PhysicsStep.Default.Gravity
+                NumSolverIterations = stepComponent.SolverIterationCount,
+                Gravity = stepComponent.Gravity
             };
 
-            SimulationContext.Reset(ref PhysicsWorld);
-
-            new SimulateSingleThreadedJob
+            if (stepComponent.SimulationType == SimulationType.UnityPhysics)
             {
-                Input = input,
-                SimulationContext = SimulationContext
-            }.Schedule().Complete();
+                SimulationContext.Reset(ref PhysicsWorld);
+
+                new SimulateSingleThreadedJob
+                {
+                    Input = input,
+                    SimulationContext = SimulationContext
+                }.Schedule().Complete();
+            }
+#if HAVOK_PHYSICS_EXISTS
+            else
+            {
+                HavokSimulationContext.Reset(ref PhysicsWorld);
+
+                new SimulateSingleThreadedHavokJob
+                {
+                    Input = input,
+                    SimulationContext = HavokSimulationContext
+                }.Schedule().Complete();
+            }
+#endif
         }
 
         // Export the data
@@ -454,6 +487,24 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
         }
     }
 
+#if HAVOK_PHYSICS_EXISTS
+    [BurstCompile]
+    public struct SimulateSingleThreadedHavokJob : IJob
+    {
+        public SimulationStepInput Input;
+        public Havok.Physics.SimulationContext SimulationContext;
+
+        public void Execute()
+        {
+            // Build broad phase
+            Input.World.CollisionWorld.BuildBroadphase(ref Input.World, Input.TimeStep, Input.Gravity);
+
+            // Step the simulation
+            Havok.Physics.HavokSimulation.StepImmediate(Input, ref SimulationContext);
+        }
+    }
+#endif
+
     protected override void OnDestroy()
     {
         base.OnDestroy();
@@ -464,5 +515,8 @@ public class SingleThreadedPhysicsSystem : JobComponentSystem
 
         PhysicsWorld.Dispose();
         SimulationContext.Dispose();
+#if HAVOK_PHYSICS_EXISTS
+        HavokSimulationContext.Dispose();
+#endif
     }
 }

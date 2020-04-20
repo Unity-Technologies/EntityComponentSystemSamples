@@ -1,7 +1,4 @@
-﻿using Unity.Burst;
-using Unity.Collections;
-using Unity.Entities;
-using Unity.Jobs;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -18,7 +15,7 @@ public struct PlanetGravity : IComponentData
     public float RotationMultiplier;
 }
 
-public class PlanetGravityBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class PlanetGravityAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float GravitationalMass;
     public float GravitationalConstant;
@@ -27,7 +24,7 @@ public class PlanetGravityBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 
     void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        var component = new PlanetGravity()
+        var component = new PlanetGravity
         {
             GravitationalCenter = transform.position,
             GravitationalMass = GravitationalMass,
@@ -40,7 +37,7 @@ public class PlanetGravityBehaviour : MonoBehaviour, IConvertGameObjectToEntity
         if (dstManager.HasComponent<PhysicsMass>(entity))
         {
             var bodyMass = dstManager.GetComponentData<PhysicsMass>(entity);
-            Random random = new Random();
+            var random = new Random();
             random.InitState(10);
             bodyMass.InverseMass = random.NextFloat(bodyMass.InverseMass, bodyMass.InverseMass * 4f);
 
@@ -49,22 +46,21 @@ public class PlanetGravityBehaviour : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
-#region System
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class PlanetGravitySystem : JobComponentSystem
+public class PlanetGravitySystem : SystemBase
 {
-    [BurstCompile]
-    struct PlanetGravityJob : IJobForEach<Translation, PhysicsMass, PhysicsVelocity, PlanetGravity>
-    {
-        public float dt;
+    static readonly quaternion k_GravityOrientation = quaternion.RotateY(math.PI / 2f);
 
-        public void Execute([ReadOnly]ref Translation pos,
-                            ref PhysicsMass bodyMass,
-                            ref PhysicsVelocity bodyVelocity,
-                            [ReadOnly]ref PlanetGravity gravity)
+    protected override void OnUpdate()
+    {
+        var dt = UnityEngine.Time.fixedDeltaTime;
+
+        Entities
+            .WithName("ApplyGravityFromPlanet")
+            .WithBurst()
+            .ForEach((ref PhysicsMass bodyMass, ref PhysicsVelocity bodyVelocity, in Translation pos, in PlanetGravity gravity) =>
         {
             float mass = math.rcp(bodyMass.InverseMass);
-            //motion.LinearVelocity *= 0.99f;
 
             float3 dir = (gravity.GravitationalCenter - pos.Value);
             float dist = math.length(dir);
@@ -75,16 +71,8 @@ public class PlanetGravitySystem : JobComponentSystem
             if (dist < gravity.EventHorizonDistance)
             {
                 xtraGravity = (gravity.RotationMultiplier * gravity.GravitationalConstant * gravity.GravitationalMass * dir) * invDist;
-                quaternion quat = quaternion.RotateY(90.0f);
-                bodyVelocity.Linear += math.rotate(quat, xtraGravity) * gravity.RotationMultiplier * dt;
+                bodyVelocity.Linear += math.rotate(k_GravityOrientation, xtraGravity) * gravity.RotationMultiplier * dt;
             }
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        var planetGravityAccelerationJob = new PlanetGravityJob { dt = UnityEngine.Time.fixedDeltaTime };
-        return planetGravityAccelerationJob.Schedule(this, inputDeps);
+        }).Schedule();
     }
 }
-#endregion

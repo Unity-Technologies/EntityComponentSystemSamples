@@ -1,18 +1,14 @@
-﻿using Unity.Collections;
-using Unity.Entities;
-using Unity.Jobs;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
-using Random = Unity.Mathematics.Random;
 
 public struct PlatformMotion : IComponentData
 {
     public float CurrentTime;
     public float3 InitialPosition;
-    public float3 DesiredPosition;
     public float Height;
     public float Speed;
     public float3 Direction;
@@ -28,10 +24,9 @@ public class PlatformMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        dstManager.AddComponentData<PlatformMotion>(entity, new PlatformMotion
+        dstManager.AddComponentData(entity, new PlatformMotion
         {
             InitialPosition = transform.position,
-            DesiredPosition = transform.position,
             Height = Height,
             Speed = Speed,
             Direction = math.normalizesafe(Direction),
@@ -40,20 +35,17 @@ public class PlatformMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
-
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class PlatformMotionSystem : JobComponentSystem
+public class PlatformMotionSystem : SystemBase
 {
-    protected override void OnCreate()
+    protected override void OnUpdate()
     {
-    }
+        var deltaTime = UnityEngine.Time.fixedDeltaTime;
 
-    protected struct PlatformMotionJob : IJobForEach<PlatformMotion, Translation, PhysicsVelocity>
-    {
-        public Random random;
-        public float deltaTime;
-
-        public void Execute(ref PlatformMotion motion, [ReadOnly] ref Translation position, ref PhysicsVelocity velocity)
+        Entities
+            .WithName("MovePlatforms")
+            .WithBurst()
+            .ForEach((ref PlatformMotion motion, ref PhysicsVelocity velocity, in Translation position) =>
         {
             motion.CurrentTime += deltaTime;
 
@@ -62,16 +54,6 @@ public class PlatformMotionSystem : JobComponentSystem
             velocity.Linear = motion.Direction * (desiredOffset - currentOffset);
 
             velocity.Angular = motion.Rotation;
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        Random random = new Random();
-
-        var job = new PlatformMotionJob { deltaTime = UnityEngine.Time.fixedDeltaTime, random = random };
-        var jobHandle = job.ScheduleSingle(this, inputDeps);
-
-        return jobHandle;
+        }).Schedule();
     }
 }

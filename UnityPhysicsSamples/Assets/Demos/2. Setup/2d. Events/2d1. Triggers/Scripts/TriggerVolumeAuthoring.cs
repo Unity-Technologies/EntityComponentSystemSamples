@@ -1,12 +1,11 @@
-﻿using Unity.Physics;
-using Unity.Physics.Systems;
+﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Physics;
+using Unity.Physics.Systems;
 using UnityEngine;
-using Unity.Burst;
-using System;
-using UnityEditor;
 
 [Flags]
 public enum TriggerVolumeType 
@@ -40,7 +39,7 @@ public struct TriggerVolume : IComponentData
     public int CurrentFrame;
 }
 
-public class TriggerVolumeBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class TriggerVolumeAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public TriggerVolumeType Type = TriggerVolumeType.None;
 
@@ -49,7 +48,7 @@ public class TriggerVolumeBehaviour : MonoBehaviour, IConvertGameObjectToEntity
     void OnGui()
     {
 #if UNITY_EDITOR
-        Type = (TriggerVolumeType)EditorGUILayout.EnumFlagsField(Type);
+        Type = (TriggerVolumeType)UnityEditor.EditorGUILayout.EnumFlagsField(Type);
 #endif
     }
 
@@ -82,7 +81,7 @@ public class TriggerVolumeBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 // to another in a single frame. 
 // More data & logic would be needed to handle multiple overlaps, single frame Volume jumping and single entering & leaving.
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-unsafe public class TriggerVolumeSystem : JobComponentSystem
+public class TriggerVolumeSystem : SystemBase
 {
     EndSimulationEntityCommandBufferSystem m_EntityCommandBufferSystem;
 
@@ -127,27 +126,14 @@ unsafe public class TriggerVolumeSystem : JobComponentSystem
     }
 
     [BurstCompile]
-    struct UpdateTriggerVolumesJob : IJobForEach<TriggerVolume>
-    {
-        public void Execute(ref TriggerVolume volumeComponent)
-        {
-            // Increment the frame count for all TriggerVolumes
-            // This frame count is compared with the overlapping entity
-            // frame count so that we can tell if an entity has left the volume.
-            volumeComponent.CurrentFrame++;
-        }
-    }
-
-
-    [BurstCompile]
     struct GetTriggerEventCount : ITriggerEventsJob
     {
-        [NativeFixedLength(1)] public NativeArray<int> pCounter;
+        [NativeFixedLength(1)] public NativeArray<int> NumTriggerEvents;
         
         // unsafe writing to this?
         public void Execute(TriggerEvent triggerEvent)
         {
-            pCounter[0]++;
+            NumTriggerEvents[0]++;
         }
     }
 
@@ -158,10 +144,10 @@ unsafe public class TriggerVolumeSystem : JobComponentSystem
         [ReadOnly] public ComponentDataFromEntity<PhysicsVelocity> PhysicsVelocityGroup;
         [ReadOnly] public ComponentDataFromEntity<TriggerVolume> VolumeGroup;
 
-        [NativeFixedLength(1)] public NativeArray<int> pCounter;
+        [NativeFixedLength(1)] public NativeArray<int> NumTriggerEntities;
         public NativeArray<TriggerEntities> TriggerEntities;
 
-        public unsafe void Execute(TriggerEvent triggerEvent)
+        public void Execute(TriggerEvent triggerEvent)
         {
             Entity entityA = triggerEvent.Entities.EntityA;
             Entity entityB = triggerEvent.Entities.EntityB;
@@ -182,7 +168,7 @@ unsafe public class TriggerVolumeSystem : JobComponentSystem
                 return;
 
             // Increment the output counter in a thread safe way.
-            var count = ++pCounter[0] - 1;
+            var count = ++NumTriggerEntities[0] - 1;
 
             TriggerEntities[count] = new TriggerEntities()
             {
@@ -244,28 +230,28 @@ unsafe public class TriggerVolumeSystem : JobComponentSystem
                 if (!OverlappingGroup.Exists(overlappingEntity))
                 {
                     var triggerComponent = TriggerGroup[entities.VolumeEntity];
-                    var overlapComponent = new OverlappingTriggerVolume()
+                    var overlapComponent = new OverlappingTriggerVolume
                     {
                         VolumeEntity = entities.VolumeEntity,
                         VolumeType = triggerComponent.Type,
                         CreatedFrame = triggerComponent.CurrentFrame,
                         CurrentFrame = triggerComponent.CurrentFrame,
                     };
-                    CommandBuffer.AddComponent<OverlappingTriggerVolume>(overlappingEntity, overlapComponent);
+                    CommandBuffer.AddComponent(overlappingEntity, overlapComponent);
                     switch ((TriggerVolumeType)triggerComponent.Type)
                     {
                         case TriggerVolumeType.Portal:
-                            CommandBuffer.AddComponent<PortalOverlappingTriggerVolume>(overlappingEntity, new PortalOverlappingTriggerVolume());
+                            CommandBuffer.AddComponent<PortalOverlappingTriggerVolume>(overlappingEntity);
                             break;
                         case TriggerVolumeType.ChangeMaterial:
-                            CommandBuffer.AddComponent<ChangeMaterialOverlappingTriggerVolume>(overlappingEntity, new ChangeMaterialOverlappingTriggerVolume());
+                            CommandBuffer.AddComponent<ChangeMaterialOverlappingTriggerVolume>(overlappingEntity);
                             break;
                         case TriggerVolumeType.ChangeMaterialPortal:
-                            CommandBuffer.AddComponent<ChangeMaterialOverlappingTriggerVolume>(overlappingEntity, new ChangeMaterialOverlappingTriggerVolume());
-                            CommandBuffer.AddComponent<PortalOverlappingTriggerVolume>(overlappingEntity, new PortalOverlappingTriggerVolume());
+                            CommandBuffer.AddComponent<ChangeMaterialOverlappingTriggerVolume>(overlappingEntity);
+                            CommandBuffer.AddComponent<PortalOverlappingTriggerVolume>(overlappingEntity);
                             break;
                         case TriggerVolumeType.ForceField:
-                            CommandBuffer.AddComponent<ForceFieldOverlappingTriggerVolume>(overlappingEntity, new ForceFieldOverlappingTriggerVolume());
+                            CommandBuffer.AddComponent<ForceFieldOverlappingTriggerVolume>(overlappingEntity);
                             break;
                         case TriggerVolumeType.None:
                         default:
@@ -326,20 +312,22 @@ unsafe public class TriggerVolumeSystem : JobComponentSystem
         }
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
-        JobHandle jobHandle;
-
-        // Increment the frame count on all active TriggerVolume components
-        JobHandle updateVolumesJobHandle = new UpdateTriggerVolumesJob().Schedule(this, inputDeps);
-
         // Get the number of TriggerEvents so that we can allocate a native array
         m_TriggerEntitiesIndex[0] = 0;
-        JobHandle getTriggerEventCountJobHandle = new GetTriggerEventCount()
+        JobHandle getTriggerEventCountJobHandle = new GetTriggerEventCount
         {
-            pCounter = m_TriggerEntitiesIndex,
-        }.Schedule(m_StepPhysicsWorldSystem.Simulation, ref m_BuildPhysicsWorldSystem.PhysicsWorld, inputDeps);
+            NumTriggerEvents = m_TriggerEntitiesIndex,
+        }.Schedule(m_StepPhysicsWorldSystem.Simulation, ref m_BuildPhysicsWorldSystem.PhysicsWorld, Dependency);
         getTriggerEventCountJobHandle.Complete();
+
+        // Increment the frame count for all TriggerVolumes
+        // This frame count is compared with the overlapping entity frame count so that we can tell if an entity has left the volume.
+        JobHandle updateVolumesJobHandle = Entities
+            .WithName("UpdateTriggerVolumeFrameCounts")
+            .WithBurst()
+            .ForEach((ref TriggerVolume triggerVolume) => triggerVolume.CurrentFrame++).ScheduleParallel(Dependency);
 
         // Get the list of overlapping bodies
         var triggerEntities = new NativeArray<TriggerEntities>(m_TriggerEntitiesIndex[0], Allocator.TempJob);
@@ -349,7 +337,7 @@ unsafe public class TriggerVolumeSystem : JobComponentSystem
             PhysicsVelocityGroup = GetComponentDataFromEntity<PhysicsVelocity>(true),
             VolumeGroup = GetComponentDataFromEntity<TriggerVolume>(true),
             TriggerEntities = triggerEntities,
-            pCounter = m_TriggerEntitiesIndex,
+            NumTriggerEntities = m_TriggerEntitiesIndex,
         }.Schedule(m_StepPhysicsWorldSystem.Simulation, ref m_BuildPhysicsWorldSystem.PhysicsWorld, updateVolumesJobHandle);
 
         // Increment the frame count on the OverlappingTriggerVolume components
@@ -387,8 +375,6 @@ unsafe public class TriggerVolumeSystem : JobComponentSystem
         }.Schedule(updateOverlappingJobHandle);
         m_EntityCommandBufferSystem.AddJobHandleForProducer(removeOldJobHandle);
 
-        jobHandle = JobHandle.CombineDependencies( addNewJobHandle, removeOldJobHandle );
-
-        return jobHandle;
+        Dependency = JobHandle.CombineDependencies(addNewJobHandle, removeOldJobHandle);
     }
 }

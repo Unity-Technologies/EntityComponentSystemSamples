@@ -3,7 +3,6 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
-using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Extensions;
@@ -11,14 +10,15 @@ using Unity.Physics.Systems;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 using Material = UnityEngine.Material;
 using Mesh = UnityEngine.Mesh;
+using Slider = UnityEngine.UI.Slider;
 
 public struct ProjectIntoFutureTrail : IComponentData { }
 
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class ProjectIntoFutureOnCueSystem : JobComponentSystem
+public class ProjectIntoFutureOnCueSystem : SystemBase
 {
     private bool NeedsUpdate = true;
     private int m_NumSteps = 0;
@@ -35,6 +35,9 @@ public class ProjectIntoFutureOnCueSystem : JobComponentSystem
     private NativeArray<float3> Positions;
     private PhysicsWorld LocalWorld;
     private SimulationContext SimulationContext;
+#if HAVOK_PHYSICS_EXISTS
+    private Havok.Physics.SimulationContext HavokSimulationContext;
+#endif
 
     private JobHandle FinalJobHandle;
 
@@ -49,14 +52,11 @@ public class ProjectIntoFutureOnCueSystem : JobComponentSystem
         };
 
         CheckEntityPool(world.NumDynamicBodies);
-    }
 
-    public void ClearTrails()
-    {
-        JobHandle handle = new JobHandle();
-        handle = new ResetPositionsJob { Positions = Positions }.Schedule(handle);
-        handle = new UpdateTrailEntityPositionsJob { NewPositions = Positions, NumSteps = NumSteps, GhostScale = GhostScale }.Schedule(this, handle);
-        handle.Complete();
+        SimulationContext = new SimulationContext();
+#if HAVOK_PHYSICS_EXISTS
+        HavokSimulationContext = new Havok.Physics.SimulationContext(Havok.Physics.HavokConfiguration.Default);
+#endif
     }
 
     public void CheckEntityPool(int numDynamicBodies)
@@ -108,53 +108,6 @@ public class ProjectIntoFutureOnCueSystem : JobComponentSystem
     }
 
     [BurstCompile]
-    struct UpdateTrailEntityPositionsJob : IJobForEachWithEntity<Translation, Rotation, NonUniformScale, ProjectIntoFutureTrail>
-    {
-        [ReadOnly] public NativeArray<float3> NewPositions;
-        [ReadOnly] public int NumSteps;
-        [ReadOnly] public float GhostScale;
-
-        public void Execute(Entity entity, int index, 
-            ref Translation t, ref Rotation r, ref NonUniformScale s,
-            [ReadOnly] ref ProjectIntoFutureTrail p)
-        {
-            var posT0 = NewPositions[index];
-
-            // Return if we are on the last step
-            if ((index % NumSteps) == (NumSteps - 1))
-            {
-                t.Value = posT0;
-                s.Value = GhostScale;
-                return;
-            }
-
-            // Get the next position
-            var posT1 = NewPositions[index+1];
-
-            // Return if we haven't moved
-            var haveMovement = !posT0.Equals(posT1);
-            if (!haveMovement)
-            {
-                t.Value = posT0; // Comment this out to leave the trails after shot.
-                s.Value = GhostScale;
-                return;
-            }
-
-            // Position the ghost ball half way between T0 and T1
-            t.Value = math.lerp(posT0, posT1, 0.5f);
-
-            // Orientation the ball along the direction between T0 and T1
-            // and stretch the ball between those 2 positions.
-            var forward = posT1 - posT0;
-            var scale = math.length(forward);
-            var rotation = quaternion.LookRotationSafe(forward, new float3(0, 1, 0));
-
-            r.Value = rotation;
-            s.Value = new float3(s.Value.x, s.Value.y, scale);
-        }
-    }
-
-    [BurstCompile]
     struct StepLocalWorldJob : IJob
     {
         public SimulationStepInput StepInput;
@@ -178,12 +131,37 @@ public class ProjectIntoFutureOnCueSystem : JobComponentSystem
         }
     }
 
+#if HAVOK_PHYSICS_EXISTS
+    [BurstCompile]
+    struct StepLocalWorldHavokJob : IJob
+    {
+        public SimulationStepInput StepInput;
+        public Havok.Physics.SimulationContext SimulationContext;
+
+        [NativeDisableContainerSafetyRestriction]
+        public NativeArray<float3> TrailPositions;
+
+        public int NumSteps;
+        public int StepIndex;
+
+        public void Execute()
+        {
+            // Update the trails
+            for (int b = 0; b < StepInput.World.DynamicBodies.Length; b++)
+            {
+                TrailPositions[b * NumSteps + StepIndex] = StepInput.World.DynamicBodies[b].WorldFromBody.pos;
+            }
+
+            // Step the local world
+            Havok.Physics.HavokSimulation.StepImmediate(StepInput, ref SimulationContext);
+        }
+    }
+#endif
+
     protected override void OnCreate()
     {
         Positions = new NativeArray<float3>();
         LocalWorld = new PhysicsWorld();
-        SimulationContext = new SimulationContext();
-        SimulationContext.Reset(ref LocalWorld);
 
         FinalJobHandle = new JobHandle();
     }
@@ -194,19 +172,20 @@ public class ProjectIntoFutureOnCueSystem : JobComponentSystem
         if (LocalWorld.NumBodies != 0) LocalWorld.Dispose();
         
         SimulationContext.Dispose();
+#if HAVOK_PHYSICS_EXISTS
+        HavokSimulationContext.Dispose();
+#endif
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         bool bUpdate = true;
         bUpdate &= (IsInitialized && NeedsUpdate);
         bUpdate &= !WhiteBallVelocity.Equals(float3.zero);
         if (!bUpdate)
-        {
-            return inputDeps;
-        }
+            return;
 
-        var jobHandle = inputDeps;
+        var jobHandle = Dependency;
 
         var buildPhysics = BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>();
         ref var world = ref buildPhysics.PhysicsWorld;
@@ -230,12 +209,19 @@ public class ProjectIntoFutureOnCueSystem : JobComponentSystem
 #else
         float timeStep = Time.DeltaTime;
 #endif
+
+        PhysicsStep stepComponent = PhysicsStep.Default;
+        if (HasSingleton<PhysicsStep>())
+        {
+            stepComponent = GetSingleton<PhysicsStep>();
+        }
+
         var stepInput = new SimulationStepInput
         {
             World = LocalWorld,
             TimeStep = timeStep,
-            NumSolverIterations = Unity.Physics.PhysicsStep.Default.SolverIterationCount,
-            Gravity = Unity.Physics.PhysicsStep.Default.Gravity,
+            NumSolverIterations = stepComponent.SolverIterationCount,
+            Gravity = stepComponent.Gravity,
             SynchronizeCollisionWorld = true,
         };
 
@@ -256,39 +242,92 @@ public class ProjectIntoFutureOnCueSystem : JobComponentSystem
         // Step the local world
         for (int i = 0; i < NumSteps; i++)
         {
-            // TODO: look into a public version of SimulationContext.ScheduleReset
-            // so that we can chain multiple StepLocalWorldJob instances.
-
-            // Dispose and reallocate input velocity buffer, if dynamic body count has increased.
-            // Dispose previous collision and trigger event streams and allocator new streams. 
-            SimulationContext.Reset(ref stepInput.World);
-
-            // Step the local world and complete the job.
-            new StepLocalWorldJob()
+            if (stepComponent.SimulationType == SimulationType.UnityPhysics)
             {
-                StepInput = stepInput,
-                SimulationContext = SimulationContext,
-                StepIndex = i,
-                NumSteps = NumSteps,
-                TrailPositions = Positions
-            }.Schedule(jobHandle).Complete();
+                // TODO: look into a public version of SimulationContext.ScheduleReset
+                // so that we can chain multiple StepLocalWorldJob instances.
+
+                // Dispose and reallocate input velocity buffer, if dynamic body count has increased.
+                // Dispose previous collision and trigger event streams and allocator new streams.
+                SimulationContext.Reset(ref LocalWorld);
+                
+                new StepLocalWorldJob()
+                {
+                    StepInput = stepInput,
+                    SimulationContext = SimulationContext,
+                    StepIndex = i,
+                    NumSteps = NumSteps,
+                    TrailPositions = Positions
+                }.Schedule().Complete();
+            }
+#if HAVOK_PHYSICS_EXISTS
+            else
+            {
+                HavokSimulationContext.Reset(ref LocalWorld);
+                new StepLocalWorldHavokJob()
+                {
+                    StepInput = stepInput,
+                    SimulationContext = HavokSimulationContext,
+                    StepIndex = i,
+                    NumSteps = NumSteps,
+                    TrailPositions = Positions
+                }.Schedule().Complete();
+            }
+#endif
         }
 
-        jobHandle = new UpdateTrailEntityPositionsJob
-        {
-            NewPositions = Positions,
-            NumSteps = NumSteps,
-            GhostScale = GhostScale,
-        }.Schedule(this, jobHandle);
+        Dependency = jobHandle;
+        var positions = Positions;
+        var ghostScale = GhostScale;
+        var numSteps = NumSteps;
+        Entities
+            .WithName("UpdateTrailEntityPositions")
+            .WithBurst()
+            .WithReadOnly(positions)
+            .ForEach((Entity entity, int entityInQueryIndex, ref Translation t, ref Rotation r, ref NonUniformScale s, in ProjectIntoFutureTrail p) =>
+            {
+                var posT0 = positions[entityInQueryIndex];
+
+                // Return if we are on the last step
+                if ((entityInQueryIndex % numSteps) == (numSteps - 1))
+                {
+                    t.Value = posT0;
+                    s.Value = ghostScale;
+                    return;
+                }
+
+                // Get the next position
+                var posT1 = positions[entityInQueryIndex + 1];
+
+                // Return if we haven't moved
+                var haveMovement = !posT0.Equals(posT1);
+                if (!haveMovement)
+                {
+                    t.Value = posT0; // Comment this out to leave the trails after shot.
+                    s.Value = ghostScale;
+                    return;
+                }
+
+                // Position the ghost ball half way between T0 and T1
+                t.Value = math.lerp(posT0, posT1, 0.5f);
+
+                // Orientation the ball along the direction between T0 and T1
+                // and stretch the ball between those 2 positions.
+                var forward = posT1 - posT0;
+                var scale = math.length(forward);
+                var rotation = quaternion.LookRotationSafe(forward, new float3(0, 1, 0));
+
+                r.Value = rotation;
+                s.Value = new float3(s.Value.x, s.Value.y, scale);
+            }).Schedule();
 
         NeedsUpdate = false;
 
-        FinalJobHandle = jobHandle;
-        return FinalJobHandle;
+        FinalJobHandle = Dependency;
     }
 }
 
-public class ProjectIntoFutureOnCue : MonoBehaviour, IReceiveEntity
+public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
 {
     public Mesh ReferenceMesh;
     public Material ReferenceMaterial;

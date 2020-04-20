@@ -1,16 +1,11 @@
-﻿using Unity.Physics;
-using Unity.Physics.Systems;
+﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Physics;
+using Unity.Physics.Systems;
 using UnityEngine;
-using Collider = Unity.Physics.Collider;
-using Unity.Transforms;
-using Unity.Profiling;
-using Unity.Burst;
-using System;
-using UnityEditor;
-using Unity.Collections.LowLevel.Unsafe;
 
 public struct TriggerGravityFactor : IComponentData
 {
@@ -18,7 +13,7 @@ public struct TriggerGravityFactor : IComponentData
     public float DampingFactor;
 }
 
-public class TriggerGravityFactorBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class TriggerGravityFactorAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float GravityFactor = 0f;
     public float DampingFactor = 0.9f;

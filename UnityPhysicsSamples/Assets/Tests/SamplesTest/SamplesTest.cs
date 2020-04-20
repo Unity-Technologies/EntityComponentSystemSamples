@@ -67,16 +67,27 @@ namespace Unity.Physics.Samples.Test
         [TearDown]
         public void TearDown()
         {
-            EntitiesCleanup();
+            SwitchWorlds();
         }
 
-        protected static void EntitiesCleanup()
+        protected static void SwitchWorlds()
         {
             var entityManager = DefaultWorld.EntityManager;
             var entities = entityManager.GetAllEntities();
             entityManager.DestroyEntity(entities);
-            entityManager.CompleteAllJobs();
             entities.Dispose();
+
+            if (DefaultWorld.IsCreated)
+            {
+                var systems = DefaultWorld.Systems;
+                foreach (var s in systems)
+                {
+                    s.Enabled = false;
+                }
+                DefaultWorld.Dispose();
+            }
+
+            DefaultWorldInitialization.Initialize("Default World", false);
         }
     }
 
@@ -93,8 +104,9 @@ namespace Unity.Physics.Samples.Test
 
             SceneManager.LoadScene(scenePath);
             yield return new WaitForSeconds(1);
-            EntitiesCleanup();
+            SwitchWorlds();
             yield return new WaitForFixedUpdate();
+
             LogAssert.NoUnexpectedReceived();
         }
     }
@@ -124,11 +136,9 @@ namespace Unity.Physics.Samples.Test
 
             SceneManager.LoadScene(scenePath);
             yield return new WaitForSeconds(1);
-            EntitiesCleanup();
+            SwitchWorlds();
             yield return new WaitForFixedUpdate();
 
-            world.GetExistingSystem<SimulationSystemGroup>().RemoveSystemFromUpdateList(stSystem);
-            world.DestroySystem(stSystem);
             LogAssert.NoUnexpectedReceived();
         }
     }
