@@ -7,8 +7,6 @@ using Unity.Entities;
 using UnityEngine;
 using Unity.Transforms;
 
-
-
 [ConverterVersion("joe", 2)]
 class SimpleMeshRenderingAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {

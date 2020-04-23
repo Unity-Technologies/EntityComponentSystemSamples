@@ -5,7 +5,6 @@ using Unity.Transforms;
 using UnityEngine;
 
 [ExecuteAlways]
-[UpdateInGroup(typeof(PresentationSystemGroup))]
 public class MeshBBRenderSystem : ComponentSystem
 {
     protected override void OnUpdate()

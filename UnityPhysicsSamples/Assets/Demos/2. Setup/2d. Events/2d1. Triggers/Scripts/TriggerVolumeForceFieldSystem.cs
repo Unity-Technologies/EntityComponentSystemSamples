@@ -62,9 +62,8 @@ public class TriggerVolumeForceFieldSystem : JobComponentSystem
                 forceField.center = PositionComponents[volumeEntity].Value;
                 forceField.enabled = 1;
 
-                // Directly call the ForceFieldJob execute function to apply the velocity change
-                var forceFieldJob = new ForceFieldSystem.ForceFieldJob() { dt = DeltaTime };
-                forceFieldJob.Execute(ref position, ref rotation, ref mass, ref velocity, ref forceField);
+                // Directly call ApplyForceField() function to apply the velocity change
+                ForceFieldSystem.ApplyForceField(DeltaTime, ref velocity, position, rotation, mass, forceField);
 
                 // Counter-act gravity
                 velocity.Linear += -1.25f * StepComponent.Gravity * DeltaTime;

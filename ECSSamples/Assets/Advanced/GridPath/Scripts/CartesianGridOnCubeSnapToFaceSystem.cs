@@ -30,7 +30,7 @@ public unsafe class CartesianGridOnCubeSnapToFaceSystem : JobComponentSystem
         // Anything that's placed with CartesianGridDirection but does not have CubeFace assigned, needs to 
         // find appropriate CubeFace, add it and convert transform into local space of face.
         Entities
-            .WithName("Find CubeFace")
+            .WithName("Find_CubeFace")
             .WithStructuralChanges()
             .WithNativeDisableUnsafePtrRestriction(faceLocalToWorld)
             .WithNativeDisableUnsafePtrRestriction(faceWorldToLocal)

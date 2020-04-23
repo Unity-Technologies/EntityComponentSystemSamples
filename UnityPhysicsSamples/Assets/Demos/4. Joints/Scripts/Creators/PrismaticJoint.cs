@@ -1,6 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using static Unity.Physics.Math;
 
 namespace Unity.Physics.Authoring
 {
@@ -20,7 +21,7 @@ namespace Unity.Physics.Authoring
         public float MinDistanceFromAxis;
         public float MaxDistanceFromAxis;
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             if (AutoSetConnected)
             {
@@ -30,8 +31,24 @@ namespace Unity.Physics.Authoring
                 PerpendicularAxisInConnectedEntity = math.mul(bFromA.rot, PerpendicularAxisLocal);
             }
 
-            CreateJointEntity(JointData.CreatePrismatic(PositionLocal, PositionInConnectedEntity, AxisLocal, AxisInConnectedEntity,
-                    PerpendicularAxisLocal, PerpendicularAxisInConnectedEntity, MinDistanceOnAxis, MaxDistanceOnAxis, MinDistanceFromAxis, MaxDistanceFromAxis), entityManager);
+            CreateJointEntity(JointData.CreatePrismatic(
+                    new JointFrame
+                    {
+                        Axis = AxisLocal,
+                        PerpendicularAxis = PerpendicularAxisLocal,
+                        Position = PositionLocal
+                    },
+                    new JointFrame
+                    {
+                        Axis = AxisInConnectedEntity,
+                        PerpendicularAxis = PerpendicularAxisInConnectedEntity,
+                        Position = PositionInConnectedEntity
+                    },
+                    new FloatRange(MinDistanceOnAxis, MaxDistanceOnAxis),
+                    new FloatRange(MinDistanceFromAxis, MaxDistanceFromAxis)
+                ),
+                entityManager, conversionSystem
+            );
         }
     }
 }

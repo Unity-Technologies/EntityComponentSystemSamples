@@ -14,7 +14,7 @@ namespace Unity.Physics.Authoring
         public quaternion OrientationLocal;
         public quaternion OrientationInConnectedEntity;
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             if (AutoSetConnected)
             {
@@ -28,10 +28,13 @@ namespace Unity.Physics.Authoring
                 OrientationInConnectedEntity = math.normalize(OrientationInConnectedEntity);
             }
 
-            CreateJointEntity(JointData.CreateFixed(
-                PositionLocal, PositionInConnectedEntity, 
-                OrientationLocal, OrientationInConnectedEntity),
-                entityManager);
+            CreateJointEntity(
+                JointData.CreateFixed(
+                    new RigidTransform(OrientationLocal, PositionLocal),
+                    new RigidTransform(OrientationInConnectedEntity, PositionInConnectedEntity)
+                ),
+                entityManager, conversionSystem
+            );
         }
     }
 }

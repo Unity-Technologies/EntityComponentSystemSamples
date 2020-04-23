@@ -10,14 +10,15 @@ namespace Unity.Physics.Authoring
 
     [UpdateAfter(typeof(PhysicsBodyConversionSystem))]
     [UpdateAfter(typeof(LegacyRigidbodyConversionSystem))]
+    [UpdateAfter(typeof(LegacyJointConversionSystem))]
     public class PhysicsSamplesConversionSystem : GameObjectConversionSystem
     {
         // Update is called once per frame
         protected override void OnUpdate()
         {
             Entities.ForEach((SetInertiaInverseBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
-            Entities.ForEach((ChangeSphereColliderRadiusBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
-            Entities.ForEach((ChangeColliderTypeBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
+            Entities.ForEach((ChangeSphereColliderRadiusAuthoring behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
+            Entities.ForEach((ChangeColliderTypeAuthoring behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
             Entities.ForEach((ChangeMotionTypeBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });
         }
     }

@@ -1,8 +1,10 @@
-﻿using Unity.Burst;
+using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -14,31 +16,28 @@ namespace Unity.Physics.Extensions
     public class ColliderUtils
     {
         [BurstCompile]
-        public static unsafe bool IsTrigger(Collider* c, ColliderKey key)
+        public static bool IsTrigger(BlobAssetReference<Collider> collider, ColliderKey key)
         {
             bool bIsTrigger = false;
+            unsafe
             {
-                var cc = ((ConvexCollider*)c);
-                if (cc->CollisionType != CollisionType.Convex)
+                var c = (Collider*)collider.GetUnsafePtr();
                 {
-                    c->GetLeaf(key, out ChildCollider child);
-                    cc = (ConvexCollider*)child.Collider;
-                    UnityEngine.Assertions.Assert.IsTrue(cc->CollisionType == CollisionType.Convex);
+                    var cc = ((ConvexCollider*)c);
+                    if (cc->CollisionType != CollisionType.Convex)
+                    {
+                        c->GetLeaf(key, out ChildCollider child);
+                        cc = (ConvexCollider*)child.Collider;
+                        Assert.IsTrue(cc->CollisionType == CollisionType.Convex);
+                    }
+                    bIsTrigger = cc->Material.IsTrigger;
                 }
-                bIsTrigger = cc->Material.IsTrigger;
             }
             return bIsTrigger;
         }
     }
 
     // A mouse pick collector which stores every hit. Based off the ClosestHitCollector
-    // Creating an ICollector<RaycastHit> specifically as the base IQueryResult interface doesn't have RigidBodyIndex etc
-    // This is a workaround to filter out static bodies and trigger volumes from the mouse picker.
-    // Currently filtered in the TransformHits function when the Body Index is available.
-    // This interface will be changed in future so that hits can be filtered appropriately during AddHit instead.
-    // https://github.com/Unity-Technologies/Unity.Physics/issues/256
-    // With this temporary filtering workaround CastRay will return true even if we filtered hits.
-    // Hence, the MaxFraction is checked instead to see if a true hit was collected.
     [BurstCompile]
     public struct MousePickCollector : ICollector<RaycastHit>
     {
@@ -50,13 +49,11 @@ namespace Unity.Physics.Extensions
         public float MaxFraction { get; private set; }
         public int NumHits { get; private set; }
 
-        private RaycastHit m_OldHit;
         private RaycastHit m_ClosestHit;
         public RaycastHit Hit => m_ClosestHit;
 
         public MousePickCollector(float maxFraction, NativeSlice<RigidBody> rigidBodies, int numDynamicBodies)
         {
-            m_OldHit = default(RaycastHit);
             m_ClosestHit = default(RaycastHit);
             MaxFraction = maxFraction;
             NumHits = 0;
@@ -70,44 +67,27 @@ namespace Unity.Physics.Extensions
         public bool AddHit(RaycastHit hit)
         {
             Assert.IsTrue(hit.Fraction < MaxFraction);
+
+            var isAcceptable = (hit.RigidBodyIndex >= 0) && (hit.RigidBodyIndex < NumDynamicBodies);
+            if(IgnoreTriggers)
+            {
+                var body = Bodies[hit.RigidBodyIndex];
+                isAcceptable = isAcceptable && !ColliderUtils.IsTrigger(body.Collider, hit.ColliderKey);
+            }
+
+            if (!isAcceptable)
+            {
+                return false;
+            }
+
             MaxFraction = hit.Fraction;
-            m_OldHit = m_ClosestHit;
             m_ClosestHit = hit;
             NumHits = 1;
             return true;
         }
 
-        void CheckIsAcceptable(float oldFraction)
-        {
-            var isAcceptable =  (0 <= m_ClosestHit.RigidBodyIndex) && (m_ClosestHit.RigidBodyIndex < NumDynamicBodies);
-            if (isAcceptable)
-            {
-                var body = Bodies[m_ClosestHit.RigidBodyIndex];
-                if (IgnoreTriggers)
-                {
-                    unsafe { isAcceptable = !ColliderUtils.IsTrigger(body.Collider, m_ClosestHit.ColliderKey); }
-                }
-            }
-            if (!isAcceptable)
-            {
-                m_ClosestHit = m_OldHit;
-                NumHits = 0;
-                MaxFraction = oldFraction;
-                m_OldHit = default(RaycastHit);
-            }
-        }
-
-        public void TransformNewHits(int oldNumHits, float oldFraction, MTransform transform, uint numSubKeyBits, uint subKey)
-        {
-            m_ClosestHit.Transform(transform, numSubKeyBits, subKey);
-        }
-
-        public void TransformNewHits(int oldNumHits, float oldFraction, MTransform transform, int rigidBodyIndex)
-        {
-            m_ClosestHit.Transform(transform, rigidBodyIndex);
-            CheckIsAcceptable(oldFraction);
-        }
         #endregion
+
     }
 
     public struct MousePick : IComponentData

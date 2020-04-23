@@ -8,20 +8,20 @@ using Unity.Transforms;
 // This system updates all entities in the scene with both a RotationSpeed_SpawnAndRemove and Rotation component.
 
 // ReSharper disable once InconsistentNaming
-public class RotationSpeedSystem_SpawnAndRemove : JobComponentSystem
+public class RotationSpeedSystem_SpawnAndRemove : SystemBase
 {
     // OnUpdate runs on the main thread.
-    protected override JobHandle OnUpdate(JobHandle inputDependencies)
+    protected override void OnUpdate()
     {
         var deltaTime = Time.DeltaTime;
         
         // The in keyword on the RotationSpeed_SpawnAndRemove component tells the job scheduler that this job will not write to rotSpeedSpawnAndRemove
-        return Entities
+        Entities
             .WithName("RotationSpeedSystem_SpawnAndRemove")
             .ForEach((ref Rotation rotation, in RotationSpeed_SpawnAndRemove rotSpeedSpawnAndRemove) =>
         {
             // Rotate something about its up vector at the speed given by RotationSpeed_SpawnAndRemove.
             rotation.Value = math.mul(math.normalize(rotation.Value), quaternion.AxisAngle(math.up(), rotSpeedSpawnAndRemove.RadiansPerSecond * deltaTime));
-        }).Schedule(inputDependencies);
+        }).ScheduleParallel();
     }
 }

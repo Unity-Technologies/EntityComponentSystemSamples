@@ -163,7 +163,8 @@ public class CharacterControllerSystem : JobComponentSystem
                 var rotation = chunkRotationData[i];
 
                 // Collision filter must be valid
-                Assert.IsTrue(collider.ColliderPtr->Filter.IsValid);
+                if (!collider.IsValid || collider.Value.Value.Filter.IsEmpty)
+                    continue;
 
                 // Character step input
                 CharacterControllerStepInput stepInput = new CharacterControllerStepInput
@@ -191,7 +192,7 @@ public class CharacterControllerSystem : JobComponentSystem
                 };
 
                 // Check support
-                CheckSupport(ref PhysicsWorld, ref collider, stepInput, transform, ccComponentData.MaxSlope,
+                CheckSupport(ref PhysicsWorld, ref collider, stepInput, transform,
                     out ccInternalData.SupportedState, out float3 surfaceNormal, out float3 surfaceVelocity);
 
                 // User input

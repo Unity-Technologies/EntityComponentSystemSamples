@@ -43,7 +43,7 @@ Burst is a new LLVM-based, math-aware backend compiler. It compiles C# jobs into
 
 ## Installation guide
 
-1. Create or open a project with the Unity Editor (`2019.3.0b11` or later to use the latest DOTS packages).
+1. Create or open a project with the Unity Editor (`2019.3.0f1` or later to use the latest DOTS packages).
 2. Open the Package Manager (menu: **Window** > **Package Manager**).
 3. Open the **Advanced** menu at the top of the window and turn on the **Show preview packages** option.
 4. Add the **Hybrid Renderer** package to the project.

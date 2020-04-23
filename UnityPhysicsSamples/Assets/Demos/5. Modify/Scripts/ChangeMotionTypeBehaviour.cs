@@ -60,8 +60,6 @@ public class ChangeMotionTypeBehaviour : MonoBehaviour, IDeclareReferencedPrefab
     }
 }
 
-
-
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class ChangeMotionTypeSystem : ComponentSystem
 {
@@ -70,7 +68,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
         Entities.WithAll<ChangeMotionType, RenderMesh>().ForEach(
             (Entity entity, ref ChangeMotionType modifier) =>
         {
-            modifier.LocalTime -= UnityEngine.Time.deltaTime;
+            modifier.LocalTime -= UnityEngine.Time.fixedDeltaTime;
 
             if (modifier.LocalTime > 0.0f) return;
 

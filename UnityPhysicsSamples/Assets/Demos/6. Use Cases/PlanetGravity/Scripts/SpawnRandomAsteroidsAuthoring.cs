@@ -26,6 +26,14 @@ class SpawnRandomAsteroidsSystem : SpawnRandomObjectsSystemBase<AsteroidSpawnSet
 
     Random m_RandomMass;
 
+    internal override int GetRandomSeed(AsteroidSpawnSettings spawnSettings)
+    {
+        var seed = base.GetRandomSeed(spawnSettings);
+        seed = (seed * 397) ^ spawnSettings.Prefab.GetHashCode();
+        seed = (seed * 397) ^ (int)(spawnSettings.MassFactor * 1000);
+        return seed;
+    }
+
     internal override void OnBeforeInstantiatePrefab(AsteroidSpawnSettings spawnSettings)
     {
         m_RandomMass = new Random();

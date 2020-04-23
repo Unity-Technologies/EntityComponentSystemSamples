@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace Samples.Boids
 {
-    public class SampledAnimationClipPlaybackSystem : JobComponentSystem
+    public class SampledAnimationClipPlaybackSystem : SystemBase
     {
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             var deltaTime = math.min(0.05f,Time.DeltaTime);
             
-            var transformJobHandle = Entities.ForEach((ref Translation translation, ref Rotation rotation, in SampledAnimationClip sampledAnimationClip) =>
+            Entities.ForEach((ref Translation translation, ref Rotation rotation, in SampledAnimationClip sampledAnimationClip) =>
             {
                 var frameIndex = sampledAnimationClip.FrameIndex;
                 var timeOffset = sampledAnimationClip.TimeOffset;
@@ -25,9 +25,9 @@ namespace Samples.Boids
                 
                 translation.Value = math.lerp(prevTranslation, nextTranslation, timeOffset);
                 rotation.Value = math.slerp(prevRotation, nextRotation, timeOffset);
-            }).Schedule(inputDeps);
+            }).ScheduleParallel();
 
-            var clipJobHandle = Entities.ForEach((ref SampledAnimationClip sampledAnimationClip) =>
+            Entities.ForEach((ref SampledAnimationClip sampledAnimationClip) =>
             {
                 var currentTime = sampledAnimationClip.CurrentTime + deltaTime;
                 var sampleRate = sampledAnimationClip.SampleRate;
@@ -48,9 +48,7 @@ namespace Samples.Boids
                 sampledAnimationClip.CurrentTime = currentTime;
                 sampledAnimationClip.FrameIndex = frameIndex;
                 sampledAnimationClip.TimeOffset = timeOffset;
-            }).Schedule(transformJobHandle);
-
-            return clipJobHandle;
+            }).ScheduleParallel();
         }
     }
 }

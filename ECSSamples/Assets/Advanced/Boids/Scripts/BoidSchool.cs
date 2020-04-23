@@ -16,7 +16,7 @@ namespace Samples.Boids
         public int Count;
     }
 
-    public class BoidSchoolSpawnSystem : JobComponentSystem
+    public class BoidSchoolSpawnSystem : SystemBase
     {
         [BurstCompile]
         struct SetBoidLocalToWorld : IJobParallelFor
@@ -43,7 +43,7 @@ namespace Samples.Boids
             }
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             Entities.WithStructuralChanges().ForEach((Entity entity, int entityInQueryIndex, in BoidSchool boidSchool, in LocalToWorld boidSchoolLocalToWorld) =>
             {
@@ -61,13 +61,11 @@ namespace Samples.Boids
                     Center = boidSchoolLocalToWorld.Position,
                     Radius = boidSchool.InitialRadius
                 };
-                inputDeps = setBoidLocalToWorldJob.Schedule(boidSchool.Count, 64, inputDeps);
-                inputDeps = boidEntities.Dispose(inputDeps);
+                Dependency = setBoidLocalToWorldJob.Schedule(boidSchool.Count, 64, Dependency);
+                Dependency = boidEntities.Dispose(Dependency);
                 
                 EntityManager.DestroyEntity(entity);
             }).Run();
-            
-            return inputDeps;
         }
     }
 }

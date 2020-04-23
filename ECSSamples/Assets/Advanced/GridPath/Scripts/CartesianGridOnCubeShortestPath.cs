@@ -77,7 +77,7 @@ public static unsafe class CartesianGridOnCubeShortestPath
         var cellCount = rowCount * rowCount;
         var maxPathLength = 6*(cellCount + 1);
 
-        while (open.Count > 0)
+        while (open.Length > 0)
         {
             var cellIndex = open.Dequeue();
             var cellPosition = CartesianGridOnCubeUtility.CellFaceCoordinates(cellIndex, rowCount);
