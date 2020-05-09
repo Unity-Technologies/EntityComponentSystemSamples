@@ -14,7 +14,7 @@ To install this package, follow the instructions in the [Package Manager documen
 
 # Using Entities
 
-Components hold data, systems process that data. Entities refer to individual instances of component data. For more information, see the [ECS Manual](https://docs.unity3d.com/Packages/com.unity.entities@0.0/manual/index.html) or the [Entities API](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.html).
+Components hold data, systems process that data. Entities refer to individual instances of component data. For more information, see the [ECS Manual](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/manual/index.html) or the [Entities API](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.html).
 
 ## Entity Debugger
 
@@ -22,13 +22,14 @@ You can look at currently running systems and filter entities by archetype in th
 
 ![An entity and some running systems in the Entity Debugger window.](images/entitydebugger.png)
 
+The Entity Debugger also displays various information about the underlying ECS data layout: [understand the information displayed in Entity Debugger](entity_debugger_overview.md).
 
 # Technical details
 ## Requirements
 
 This version of Entities is compatible with the following versions of the Unity __Editor__:
 
-* 2019.1.0b5 and later (recommended)
+* 2019.3.0b11 and later
 
 
 ## Samples contents

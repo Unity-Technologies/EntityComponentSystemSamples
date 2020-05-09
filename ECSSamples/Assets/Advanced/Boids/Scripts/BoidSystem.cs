@@ -5,10 +5,9 @@ using Unity.Jobs;
 using Unity.Burst;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 // Mike's GDC Talk on 'A Data Oriented Approach to Using Component Systems'
-// is a great reference for disecting the Boids sample code:
+// is a great reference for dissecting the Boids sample code:
 // https://youtu.be/p65Yt20pw0g?t=1446
 // It explains a slightly older implementation of this sample but almost all the
 // information is still relevant.
@@ -20,65 +19,28 @@ namespace Samples.Boids
 {
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [UpdateBefore(typeof(TransformSystemGroup))]
-    public class BoidSystem : JobComponentSystem
+    public class BoidSystem : SystemBase
     {
-        private EntityQuery  m_BoidQuery;
-        private EntityQuery  m_TargetQuery;
-        private EntityQuery  m_ObstacleQuery;
+        EntityQuery  m_BoidQuery;
+        EntityQuery  m_TargetQuery;
+        EntityQuery  m_ObstacleQuery;
 
         // In this sample there are 3 total unique boid variants, one for each unique value of the 
         // Boid SharedComponent (note: this includes the default uninitialized value at
         // index 0, which isnt actually used in the sample).
-        private List<Boid>                               m_UniqueTypes = new List<Boid>(3);
-        private List<NativeMultiHashMap<int, int>> m_PrevFrameHashmaps = new List<NativeMultiHashMap<int, int>>();
+        List<Boid>   m_UniqueTypes = new List<Boid>(3);
 
-        // `CopyPositions` and `CopyHeadings` are both for extracting the relevant position, heading component
-        // to NativeArrays so that they can be randomly accessed by the `MergeCells` and `Steer` jobs
-        
-        [BurstCompile]
-        struct CopyPositions : IJobForEachWithEntity<LocalToWorld>
-        {
-            public NativeArray<float3> positions;
-
-            public void Execute(Entity entity, int index, [ReadOnly]ref LocalToWorld localToWorld)
-            {
-                positions[index] = localToWorld.Position;
-            }
-        }
-
-        [BurstCompile]
-        struct CopyHeadings : IJobForEachWithEntity<LocalToWorld>
-        {
-            public NativeArray<float3> headings;
-
-            public void Execute(Entity entity, int index, [ReadOnly]ref LocalToWorld localToWorld)
-            {
-                headings[index] = localToWorld.Forward;
-            }
-        }
-        
-        // Populates a hash map, where each bucket contains the indices of all Boids whose positions quantize
-        // to the same value for a given cell radius so that the information can be randomly accessed by
-        // the `MergeCells` and `Steer` jobs.
-        [BurstCompile]
-        [RequireComponentTag(typeof(Boid))]
-        struct HashPositions : IJobForEachWithEntity<LocalToWorld>
-        {
-            public NativeMultiHashMap<int, int>.ParallelWriter hashMap;
-            public float                                       cellRadius;
-
-            public void Execute(Entity entity, int index, [ReadOnly]ref LocalToWorld localToWorld)
-            {
-                var hash = (int)math.hash(new int3(math.floor(localToWorld.Position / cellRadius)));
-                hashMap.Add(hash, index);
-            }
-        }
-        
-        // This accumulates the `positions` (separations) and `headings` (alignments) of all the Boids in each cell
-        // in order to do the following:
-        // 1) count the number of Boids in each cell
+        // This accumulates the `positions` (separations) and `headings` (alignments) of all the boids in each cell to:
+        // 1) count the number of boids in each cell
         // 2) find the nearest obstacle and target to each boid cell
-        // 3) track which array entry contains the accumulated values for each Boid's cell
+        // 3) track which array entry contains the accumulated values for each boid's cell
+        // In this context, the cell represents the hashed bucket of boids that are near one another within cellRadius 
+        // floored to the nearest int3.
+        // Note: `IJobNativeMultiHashMapMergedSharedKeyIndices` is a custom job to iterate safely/efficiently over the 
+        // NativeContainer used in this sample (`NativeMultiHashMap`). Currently these kinds of changes or additions of
+        // custom jobs generally require access to data/fields that aren't available through the `public` API of the
+        // containers. This is why the custom job type `IJobNativeMultiHashMapMergedSharedKeyIndicies` is declared in
+        // the DOTS package (which can see the `internal` container fields) and not in the Boids sample.
         [BurstCompile]
         struct MergeCells : IJobNativeMultiHashMapMergedSharedKeyIndices
         {
@@ -129,6 +91,7 @@ namespace Samples.Boids
             
             // Sums the alignment and separation of the actual index being considered and stores
             // the index of this first value where we're storing the cells.
+            // note: these items are summed so that in `Steer` their average for the cell can be resolved.
             public void ExecuteNext(int cellIndex, int index)
             {
                 cellCount[cellIndex]      += 1;
@@ -138,89 +101,12 @@ namespace Samples.Boids
             }
         }
 
-        // This reads the previously calculated boid information for all the Boids of each cell to update
-        // the `localToWorld` of each of the boids based on their newly calculated headings using
-        // the standard boids flocking algorithm.
-        [BurstCompile]
-        [RequireComponentTag(typeof(Boid))]
-        struct Steer : IJobForEachWithEntity<LocalToWorld>
+        protected override void OnUpdate()
         {
-            public float                                                       dt; 
-            [ReadOnly] public Boid                                             settings;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<int>     cellIndices;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<float3>  targetPositions;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<float3>  obstaclePositions;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<float3>  cellAlignment;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<float3>  cellSeparation;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<int>     cellObstaclePositionIndex;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<float>   cellObstacleDistance;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<int>     cellTargetPositionIndex;
-            [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<int>     cellCount;
-
-            public void Execute(Entity entity, int index, ref LocalToWorld localToWorld)
-            {
-                // temporarily storing the values for code readability
-                var forward                           = localToWorld.Forward;
-                var currentPosition                   = localToWorld.Position;
-                var cellIndex                         = cellIndices[index];
-                var neighborCount                     = cellCount[cellIndex];
-                var alignment                         = cellAlignment[cellIndex];
-                var separation                        = cellSeparation[cellIndex];
-                var nearestObstacleDistance           = cellObstacleDistance[cellIndex];
-                var nearestObstaclePositionIndex      = cellObstaclePositionIndex[cellIndex];
-                var nearestTargetPositionIndex        = cellTargetPositionIndex[cellIndex];
-                var nearestObstaclePosition           = obstaclePositions[nearestObstaclePositionIndex];
-                var nearestTargetPosition             = targetPositions[nearestTargetPositionIndex];
-
-                // steering calculations based on the boids algorithm
-                var obstacleSteering                  = currentPosition - nearestObstaclePosition;
-                var avoidObstacleHeading              = (nearestObstaclePosition + math.normalizesafe(obstacleSteering)
-                                                        * settings.ObstacleAversionDistance)- currentPosition;
-                var targetHeading                     = settings.TargetWeight
-                                                        * math.normalizesafe(nearestTargetPosition - currentPosition);
-                var nearestObstacleDistanceFromRadius = nearestObstacleDistance - settings.ObstacleAversionDistance;
-                var alignmentResult                   = settings.AlignmentWeight
-                                                        * math.normalizesafe((alignment/neighborCount)-forward);
-                var separationResult                  = settings.SeparationWeight
-                                                        * math.normalizesafe((currentPosition * neighborCount) - separation);
-                var normalHeading                     = math.normalizesafe(alignmentResult + separationResult + targetHeading);
-                var targetForward                     = math.select(normalHeading, avoidObstacleHeading, nearestObstacleDistanceFromRadius < 0);
-                var nextHeading                       = math.normalizesafe(forward + dt*(targetForward-forward));
-
-                // updates based on the new heading
-                localToWorld = new LocalToWorld
-                {
-                    Value = float4x4.TRS(
-                        new float3(localToWorld.Position + (nextHeading * settings.MoveSpeed * dt)),
-                        quaternion.LookRotationSafe(nextHeading, math.up()),
-                        new float3(1.0f, 1.0f, 1.0f))
-                };
-            }
-        }
-
-        protected override void OnStopRunning()
-        {
-            for (var i = 0; i < m_PrevFrameHashmaps.Count; ++i)
-            {
-                m_PrevFrameHashmaps[i].Dispose();
-            }
-            m_PrevFrameHashmaps.Clear();
-        }
-
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
-        {
-            EntityManager.GetAllUniqueSharedComponentData(m_UniqueTypes);
-
             var obstacleCount = m_ObstacleQuery.CalculateEntityCount();
-            var targetCount = m_TargetQuery.CalculateEntityCount(); 
-            
-            // Cannot call [DeallocateOnJobCompletion] on Hashmaps yet, so doing own cleanup here
-            // of the hashes created in the previous iteration.
-            for (int i = 0; i < m_PrevFrameHashmaps.Count; ++i)
-            {
-                m_PrevFrameHashmaps[i].Dispose();
-            }
-            m_PrevFrameHashmaps.Clear();
+            var targetCount = m_TargetQuery.CalculateEntityCount();
+
+            EntityManager.GetAllUniqueSharedComponentData(m_UniqueTypes);
 
             // Each variant of the Boid represents a different value of the SharedComponentData and is self-contained,
             // meaning Boids of the same variant only interact with one another. Thus, this loop processes each
@@ -228,7 +114,8 @@ namespace Samples.Boids
             for (int boidVariantIndex = 0; boidVariantIndex < m_UniqueTypes.Count; boidVariantIndex++)
             {
                 var settings = m_UniqueTypes[boidVariantIndex];
-                m_BoidQuery.SetFilter(settings);
+                m_BoidQuery.AddSharedComponentFilter(settings);
+                
                 var boidCount = m_BoidQuery.CalculateEntityCount();
                 
                 if (boidCount == 0)
@@ -236,6 +123,7 @@ namespace Samples.Boids
                     // Early out. If the given variant includes no Boids, move on to the next loop.
                     // For example, variant 0 will always exit early bc it's it represents a default, uninitialized
                     // Boid struct, which does not appear in this sample.
+                    m_BoidQuery.ResetFilter();
                     continue;
                 }
 
@@ -244,13 +132,10 @@ namespace Samples.Boids
                 // are no predefined borders of the space.
 
                 var hashMap                   = new NativeMultiHashMap<int,int>(boidCount,Allocator.TempJob);
-
                 var cellIndices               = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
                 var cellObstaclePositionIndex = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
                 var cellTargetPositionIndex   = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                
                 var cellCount                 = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-
                 var cellObstacleDistance      = new NativeArray<float>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
                 var cellAlignment             = new NativeArray<float3>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
                 var cellSeparation            = new NativeArray<float3>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
@@ -261,50 +146,71 @@ namespace Samples.Boids
                 // The following jobs all run in parallel because the same JobHandle is passed for their
                 // input dependencies when the jobs are scheduled; thus, they can run in any order (or concurrently).
                 // The concurrency is property of how they're scheduled, not of the job structs themselves.
-
-                var initialCellAlignmentJob = new CopyHeadings
-                {
-                    headings = cellAlignment
-                };
-                var initialCellAlignmentJobHandle = initialCellAlignmentJob.Schedule(m_BoidQuery, inputDeps);
-
-                var initialCellSeparationJob = new CopyPositions
-                {
-                    positions = cellSeparation
-                };
-                var initialCellSeparationJobHandle = initialCellSeparationJob.Schedule(m_BoidQuery, inputDeps);
-
-                var copyTargetPositionsJob = new CopyPositions
-                {
-                    positions = copyTargetPositions
-                };
-                var copyTargetPositionsJobHandle = copyTargetPositionsJob.Schedule(m_TargetQuery, inputDeps);
-
-                var copyObstaclePositionsJob = new CopyPositions
-                {
-                    positions = copyObstaclePositions
-                };
-                var copyObstaclePositionsJobHandle = copyObstaclePositionsJob.Schedule(m_ObstacleQuery, inputDeps);
-
-                // Cannot call [DeallocateOnJobCompletion] on Hashmaps yet, so adding resolved hashes to the list
-                // so that theyre usable in the upcoming cell jobs and also have a straight forward cleanup.
-                m_PrevFrameHashmaps.Add(hashMap);
-
-                // setting up the jobs for position and cell count
                 
-                var hashPositionsJob = new HashPositions
-                {
-                    hashMap        = hashMap.AsParallelWriter(),
-                    cellRadius     = settings.CellRadius
-                };
-                var hashPositionsJobHandle = hashPositionsJob.Schedule(m_BoidQuery, inputDeps);
+                // These jobs extract the relevant position, heading component
+                // to NativeArrays so that they can be randomly accessed by the `MergeCells` and `Steer` jobs.
+                // These jobs are defined inline using the Entities.ForEach lambda syntax.
+                var initialCellAlignmentJobHandle = Entities
+                    .WithSharedComponentFilter(settings)
+                    .WithName("InitialCellAlignmentJob")
+                    .ForEach((int entityInQueryIndex, in LocalToWorld localToWorld) =>
+                    {
+                        cellAlignment[entityInQueryIndex] = localToWorld.Forward;
+                    })
+                    .ScheduleParallel(Dependency);
+                
+                var initialCellSeparationJobHandle = Entities
+                    .WithSharedComponentFilter(settings)
+                    .WithName("InitialCellSeparationJob")
+                    .ForEach((int entityInQueryIndex, in LocalToWorld localToWorld) =>
+                    {
+                        cellSeparation[entityInQueryIndex] = localToWorld.Position;
+                    })
+                    .ScheduleParallel(Dependency);
+                
+                var copyTargetPositionsJobHandle = Entities
+                    .WithName("CopyTargetPositionsJob")
+                    .WithAll<BoidTarget>()
+                    .WithStoreEntityQueryInField(ref m_TargetQuery)
+                    .ForEach((int entityInQueryIndex, in LocalToWorld localToWorld) =>
+                    {
+                        copyTargetPositions[entityInQueryIndex] = localToWorld.Position;
+                    })
+                    .ScheduleParallel(Dependency);
+                
+                var copyObstaclePositionsJobHandle = Entities
+                    .WithName("CopyObstaclePositionsJob")
+                    .WithAll<BoidObstacle>()
+                    .WithStoreEntityQueryInField(ref m_ObstacleQuery)
+                    .ForEach((int entityInQueryIndex, in LocalToWorld localToWorld) =>
+                    {
+                        copyObstaclePositions[entityInQueryIndex] = localToWorld.Position;
+                    })
+                    .ScheduleParallel(Dependency);
+
+                // Populates a hash map, where each bucket contains the indices of all Boids whose positions quantize
+                // to the same value for a given cell radius so that the information can be randomly accessed by
+                // the `MergeCells` and `Steer` jobs.
+                // This is useful in terms of the algorithm because it limits the number of comparisons that will
+                // actually occur between the different boids. Instead of for each boid, searching through all
+                // boids for those within a certain radius, this limits those by the hash-to-bucket simplification.
+                var parallelHashMap = hashMap.AsParallelWriter();
+                var hashPositionsJobHandle = Entities
+                    .WithName("HashPositionsJob")
+                    .WithAll<Boid>()
+                    .ForEach((int entityInQueryIndex, in LocalToWorld localToWorld) =>
+                    {
+                        var hash = (int)math.hash(new int3(math.floor(localToWorld.Position / settings.CellRadius)));
+                        parallelHashMap.Add(hash, entityInQueryIndex);
+                    })
+                    .ScheduleParallel(Dependency);
 
                 var initialCellCountJob = new MemsetNativeArray<int>
                 {
                     Source = cellCount,
                     Value  = 1
                 };
-                var initialCellCountJobHandle = initialCellCountJob.Schedule(boidCount, 64, inputDeps);
+                var initialCellCountJobHandle = initialCellCountJob.Schedule(boidCount, 64, Dependency);
 
                 var initialCellBarrierJobHandle = JobHandle.CombineDependencies(initialCellAlignmentJobHandle, initialCellSeparationJobHandle, initialCellCountJobHandle);
                 var copyTargetObstacleBarrierJobHandle = JobHandle.CombineDependencies(copyTargetPositionsJobHandle, copyObstaclePositionsJobHandle);
@@ -322,30 +228,110 @@ namespace Samples.Boids
                     targetPositions           = copyTargetPositions,
                     obstaclePositions         = copyObstaclePositions
                 };
-                var mergeCellsJobHandle = mergeCellsJob.Schedule(hashMap,64,mergeCellsBarrierJobHandle);
+                var mergeCellsJobHandle = mergeCellsJob.Schedule(hashMap, 64, mergeCellsBarrierJobHandle);
 
-                var steerJob = new Steer
-                {
-                    cellIndices               = cellIndices,
-                    settings                  = settings,
-                    cellAlignment             = cellAlignment,
-                    cellSeparation            = cellSeparation,
-                    cellObstacleDistance      = cellObstacleDistance,
-                    cellObstaclePositionIndex = cellObstaclePositionIndex,
-                    cellTargetPositionIndex   = cellTargetPositionIndex,
-                    cellCount                 = cellCount,
-                    targetPositions           = copyTargetPositions,
-                    obstaclePositions         = copyObstaclePositions,
-                    dt                        = Time.deltaTime,
-                };
-                var steerJobHandle = steerJob.Schedule(m_BoidQuery, mergeCellsJobHandle);
+                // This reads the previously calculated boid information for all the boids of each cell to update
+                // the `localToWorld` of each of the boids based on their newly calculated headings using
+                // the standard boid flocking algorithm.
+                float deltaTime = math.min(0.05f,Time.DeltaTime);
+                var steerJobHandle = Entities
+                    .WithName("Steer")
+                    .WithSharedComponentFilter(settings) // implies .WithAll<Boid>()
+                    .WithReadOnly(cellIndices)
+                    .WithReadOnly(cellCount)
+                    .WithReadOnly(cellAlignment)
+                    .WithReadOnly(cellSeparation)
+                    .WithReadOnly(cellObstacleDistance)
+                    .WithReadOnly(cellObstaclePositionIndex)
+                    .WithReadOnly(cellTargetPositionIndex)
+                    .WithReadOnly(copyObstaclePositions)
+                    .WithReadOnly(copyTargetPositions)
+                    .ForEach((int entityInQueryIndex, ref LocalToWorld localToWorld) =>
+                    {
+                        // temporarily storing the values for code readability
+                        var forward                           = localToWorld.Forward;
+                        var currentPosition                   = localToWorld.Position;
+                        var cellIndex                         = cellIndices[entityInQueryIndex];
+                        var neighborCount                     = cellCount[cellIndex];
+                        var alignment                         = cellAlignment[cellIndex];
+                        var separation                        = cellSeparation[cellIndex];
+                        var nearestObstacleDistance           = cellObstacleDistance[cellIndex];
+                        var nearestObstaclePositionIndex      = cellObstaclePositionIndex[cellIndex];
+                        var nearestTargetPositionIndex        = cellTargetPositionIndex[cellIndex];
+                        var nearestObstaclePosition           = copyObstaclePositions[nearestObstaclePositionIndex];
+                        var nearestTargetPosition             = copyTargetPositions[nearestTargetPositionIndex];
+                        
+                        // Setting up the directions for the three main biocrowds influencing directions adjusted based
+                        // on the predefined weights:
+                        // 1) alignment - how much should it move in a direction similar to those around it?
+                        // note: we use `alignment/neighborCount`, because we need the average alignment in this case; however
+                        // alignment is currently the summation of all those of the boids within the cellIndex being considered.
+                        var alignmentResult     = settings.AlignmentWeight
+                                                  * math.normalizesafe((alignment/neighborCount)-forward);
+                        // 2) separation - how close is it to other boids and are there too many or too few for comfort?
+                        // note: here separation represents the summed possible center of the cell. We perform the multiplication
+                        // so that both `currentPosition` and `separation` are weighted to represent the cell as a whole and not
+                        // the current individual boid.
+                        var separationResult    = settings.SeparationWeight
+                                                  * math.normalizesafe((currentPosition * neighborCount) - separation);
+                        // 3) target - is it still towards its destination?
+                        var targetHeading       = settings.TargetWeight 
+                                                  * math.normalizesafe(nearestTargetPosition - currentPosition);
 
-                inputDeps = steerJobHandle;
-                m_BoidQuery.AddDependency(inputDeps);
+                        // creating the obstacle avoidant vector s.t. it's pointing towards the nearest obstacle
+                        // but at the specified 'ObstacleAversionDistance'. If this distance is greater than the 
+                        // current distance to the obstacle, the direction becomes inverted. This simulates the 
+                        // idea that if `currentPosition` is too close to an obstacle, the weight of this pushes
+                        // the current boid to escape in the fastest direction; however, if the obstacle isn't
+                        // too close, the weighting denotes that the boid doesnt need to escape but will move
+                        // slower if still moving in that direction (note: we end up not using this move-slower
+                        // case, because of `targetForward`'s decision to not use obstacle avoidance if an obstacle
+                        // isn't close enough).
+                        var obstacleSteering                  = currentPosition - nearestObstaclePosition;
+                        var avoidObstacleHeading              = (nearestObstaclePosition + math.normalizesafe(obstacleSteering)
+                                                                 * settings.ObstacleAversionDistance)- currentPosition;
+                        
+                        // the updated heading direction. If not needing to be avoidant (ie obstacle is not within 
+                        // predefined radius) then go with the usual defined heading that uses the amalgamation of
+                        // the weighted alignment, separation, and target direction vectors.
+                        var nearestObstacleDistanceFromRadius = nearestObstacleDistance - settings.ObstacleAversionDistance;
+                        var normalHeading                     = math.normalizesafe(alignmentResult + separationResult + targetHeading);
+                        var targetForward                     = math.select(normalHeading, avoidObstacleHeading, nearestObstacleDistanceFromRadius < 0);
+                       
+                        // updates using the newly calculated heading direction
+                        var nextHeading                       = math.normalizesafe(forward + deltaTime*(targetForward-forward));
+                        localToWorld = new LocalToWorld
+                        {
+                            Value = float4x4.TRS(
+                                new float3(localToWorld.Position + (nextHeading * settings.MoveSpeed * deltaTime)),
+                                quaternion.LookRotationSafe(nextHeading, math.up()),
+                                new float3(1.0f, 1.0f, 1.0f))
+                        };
+                    }).ScheduleParallel(mergeCellsJobHandle);
+
+                // Dispose allocated containers with dispose jobs.
+                Dependency = steerJobHandle;
+                var disposeJobHandle = hashMap.Dispose(Dependency);
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellIndices.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellObstaclePositionIndex.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellTargetPositionIndex.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellCount.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellObstacleDistance.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellAlignment.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, cellSeparation.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, copyObstaclePositions.Dispose(Dependency));
+                disposeJobHandle = JobHandle.CombineDependencies( disposeJobHandle, copyTargetPositions.Dispose(Dependency));
+                Dependency = disposeJobHandle;
+                
+                // We pass the job handle and add the dependency so that we keep the proper ordering between the jobs
+                // as the looping iterates. For our purposes of execution, this ordering isn't necessary; however, without
+                // the add dependency call here, the safety system will throw an error, because we're accessing multiple
+                // pieces of boid data and it would think there could possibly be a race condition.
+                
+                m_BoidQuery.AddDependency(Dependency);
+                m_BoidQuery.ResetFilter();
             }
             m_UniqueTypes.Clear();
-
-            return inputDeps;
         }
 
         protected override void OnCreate()
@@ -355,15 +341,9 @@ namespace Samples.Boids
                 All = new [] { ComponentType.ReadOnly<Boid>(), ComponentType.ReadWrite<LocalToWorld>() },
             });
 
-            m_TargetQuery = GetEntityQuery(new EntityQueryDesc
-            {
-                All = new [] { ComponentType.ReadOnly<BoidTarget>(), ComponentType.ReadOnly<LocalToWorld>() },
-            });
-            
-            m_ObstacleQuery = GetEntityQuery(new EntityQueryDesc
-            {
-                All = new [] { ComponentType.ReadOnly<BoidObstacle>(), ComponentType.ReadOnly<LocalToWorld>() },
-            });
+            RequireForUpdate(m_BoidQuery);
+            RequireForUpdate(m_ObstacleQuery);
+            RequireForUpdate(m_TargetQuery);
         }
     }
 }

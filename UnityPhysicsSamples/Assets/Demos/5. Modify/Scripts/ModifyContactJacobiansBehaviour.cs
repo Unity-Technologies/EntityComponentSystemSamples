@@ -164,8 +164,10 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
                     // Give both bodies infinite inertia
                     jacHeader.MassFactors = new MassFactors
                     {
-                        InvInertiaAndMassFactorA = new float4(0.0f, 0.0f, 0.0f, 1.0f),
-                        InvInertiaAndMassFactorB = new float4(0.0f, 0.0f, 0.0f, 1.0f)
+                        InverseInertiaFactorA = float3.zero,
+                        InverseMassFactorA = 1.0f,
+                        InverseInertiaFactorB = float3.zero,
+                        InverseMassFactorB = 1.0f
                     };
                 }
             }

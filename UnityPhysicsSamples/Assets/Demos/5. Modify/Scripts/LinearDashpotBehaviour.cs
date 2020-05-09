@@ -28,7 +28,7 @@ public struct LinearDashpot : IComponentData
 
 public class LinearDashpotBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 {
-    public PhysicsBody parentBody;
+    public PhysicsBodyAuthoring parentBody;
     public float3 parentOffset;
     public float3 localOffset;
 

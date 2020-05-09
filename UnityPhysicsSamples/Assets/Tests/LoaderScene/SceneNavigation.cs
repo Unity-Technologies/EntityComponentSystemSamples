@@ -36,7 +36,7 @@ public class SceneNavigation : MonoBehaviour
 
         m_MenuButton.onClick.AddListener(() =>
         {
-            World.Active.EntityManager.DestroyEntity(World.Active.EntityManager.CreateEntityQuery(Array.Empty<ComponentType>()));
+            BasePhysicsDemo.ResetDefaultWorld();
             SceneManager.LoadScene(0, LoadSceneMode.Single);
             Destroy(gameObject);
             Destroy(m_EventSystem.gameObject);
@@ -48,11 +48,15 @@ public class SceneNavigation : MonoBehaviour
 
         m_ReloadButton.onClick.AddListener(() => { Loader.LoadLevel(0); });
 
-        m_Title.text = SceneManager.GetActiveScene().name;
+        OnSceneLoaded(SceneManager.GetActiveScene(), default);
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode) => m_Title.text = scene.name;
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        m_Title.text = scene.name;
+        EventSystem.current.SetSelectedGameObject(m_NextButton.gameObject);
+    }
 
     void OnDestroy() => SceneManager.sceneLoaded -= OnSceneLoaded;
 }

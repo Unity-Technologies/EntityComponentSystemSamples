@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics;
+using Unity.Physics.Authoring;
 using Unity.Physics.Systems;
 using Unity.Rendering;
 using UnityEngine;
-
-using Unity.Physics.Authoring;
-using Unity.Mathematics;
 
 public struct ChangeMotionType : IComponentData
 {
@@ -40,7 +36,7 @@ public class ChangeMotionTypeBehaviour : MonoBehaviour, IDeclareReferencedPrefab
         var mass = dstManager.GetComponentData<PhysicsMass>(entity);
         var velocity = dstManager.GetComponentData<PhysicsVelocity>(entity);
 
-        dstManager.AddComponentData(entity, new ChangeMotionType()
+        dstManager.AddComponentData(entity, new ChangeMotionType
         {
             EntityDynamic = conversionSystem.GetPrimaryEntity(DynamicBody),
             EntityKinematic = conversionSystem.GetPrimaryEntity(KinematicBody),
@@ -64,25 +60,21 @@ public class ChangeMotionTypeBehaviour : MonoBehaviour, IDeclareReferencedPrefab
     }
 }
 
-
-
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class ChangeMotionTypeSystem : ComponentSystem
 {
     protected override void OnUpdate()
     {
-        var em = World.Active.EntityManager;
-
         Entities.WithAll<ChangeMotionType, RenderMesh>().ForEach(
             (Entity entity, ref ChangeMotionType modifier) =>
         {
-            modifier.LocalTime -= Time.deltaTime;
+            modifier.LocalTime -= UnityEngine.Time.fixedDeltaTime;
 
             if (modifier.LocalTime > 0.0f) return;
 
             modifier.LocalTime = modifier.TimeToSwap;
 
-            var renderMesh = em.GetSharedComponentData<RenderMesh>(entity);
+            var renderMesh = World.EntityManager.GetSharedComponentData<RenderMesh>(entity);
             UnityEngine.Material material = renderMesh.material;
             switch (modifier.MotionType)
             {
@@ -93,7 +85,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
                     PostUpdateCommands.RemoveComponent<PhysicsMass>(entity);
 
                     // set the new modifier type and grab the appropriate new render material
-                    material = em.GetSharedComponentData<RenderMesh>(modifier.EntityKinematic).material;
+                    material = World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityKinematic).material;
                     modifier.MotionType = BodyMotionType.Kinematic;
                     break;
                 case BodyMotionType.Kinematic:
@@ -101,7 +93,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
                     PostUpdateCommands.RemoveComponent<PhysicsVelocity>(entity);
 
                     // set the new modifier type and grab the appropriate new render material
-                    material = em.GetSharedComponentData<RenderMesh>(modifier.EntityStatic).material;
+                    material = World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityStatic).material;
                     modifier.MotionType = BodyMotionType.Static;
                     break;
                 case BodyMotionType.Static:
@@ -111,7 +103,7 @@ public class ChangeMotionTypeSystem : ComponentSystem
                     PostUpdateCommands.AddComponent(entity, modifier.DynamicMass);
 
                     // set the new modifier type and grab the appropriate new render material
-                    material = em.GetSharedComponentData<RenderMesh>(modifier.EntityDynamic).material;
+                    material = World.EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityDynamic).material;
                     modifier.MotionType = BodyMotionType.Dynamic;
                     break;
             }

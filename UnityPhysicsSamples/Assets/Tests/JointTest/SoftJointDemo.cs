@@ -1,8 +1,8 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Physics;
-using Unity.Physics.Extensions;
+using UnityEngine;
+using static Unity.Physics.Math;
 
 public class SoftJointDemo : BasePhysicsDemo
 {
@@ -19,7 +19,13 @@ public class SoftJointDemo : BasePhysicsDemo
 
         // Make soft ball and sockets
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.2f, 0.2f, 0.2f), 0.0f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+            {
+                Center = float3.zero,
+                Orientation = quaternion.identity,
+                Size = new float3(0.2f, 0.2f, 0.2f),
+                BevelRadius = 0.0f
+            });
 
             // Make joints with different spring frequency.  The leftmost joint should oscillate at 0.5hz, the next at 1hz, the next at 1.5hz, etc.
             for (int i = 0; i < 10; i++)
@@ -36,15 +42,23 @@ public class SoftJointDemo : BasePhysicsDemo
 
                 BlobAssetReference<JointData> jointData;
                 jointData = JointData.CreateBallAndSocket(pivotLocal, pivotInWorld);
-                jointData.Value.Constraints[0].SpringDamping = 0.0f;
-                jointData.Value.Constraints[0].SpringFrequency = 0.5f * (float)(i + 1);
+                var constraint = jointData.Value.Constraints[0];
+                constraint.SpringDamping = 0.0f;
+                constraint.SpringFrequency = 0.5f * (float)(i + 1);
+                jointData.Value.Constraints[0] = constraint;
                 CreateJoint(jointData, body, Entity.Null);
             }
         }
 
         // Make soft limited hinges
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.4f, 0.1f, 0.6f), 0.0f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+            {
+                Center = float3.zero,
+                Orientation = quaternion.identity,
+                Size = new float3(0.4f, 0.1f, 0.6f),
+                BevelRadius = 0.0f
+            });
 
             // First row has soft limit with hard hinge + pivot, second row has everything soft
             for (int j = 0; j < 2; j++)
@@ -67,13 +81,17 @@ public class SoftJointDemo : BasePhysicsDemo
                     float3 perpendicularInWorld = perpendicularLocal;
 
                     BlobAssetReference<JointData> jointData;
-                    jointData = JointData.CreateLimitedHinge(pivotLocal, pivotInWorld, axisLocal, axisInWorld, perpendicularLocal, perpendicularInWorld, 0.0f, 0.0f);
+                    var frameLocal = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+                    var frameWorld = new JointFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
+                    jointData = JointData.CreateLimitedHinge(frameLocal, frameWorld, default);
 
                     // First constraint is the limit, next two are the hinge and pivot
                     for (int k = 0; k < 1 + 2 * j; k++)
                     {
-                        jointData.Value.Constraints[k].SpringDamping = 0.0f;
-                        jointData.Value.Constraints[k].SpringFrequency = 0.5f * (float)(i + 1);
+                        var constraint = jointData.Value.Constraints[k];
+                        constraint.SpringDamping = 0.0f;
+                        constraint.SpringFrequency = 0.5f * (float)(i + 1);
+                        jointData.Value.Constraints[k] = constraint;
                     }
 
                     CreateJoint(jointData, body, Entity.Null);
@@ -83,7 +101,13 @@ public class SoftJointDemo : BasePhysicsDemo
 
         // Make a soft prismatic
         {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.2f, 0.2f, 0.2f), 0.0f);
+            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+            {
+                Center = float3.zero,
+                Orientation = quaternion.identity,
+                Size = new float3(0.2f, 0.2f, 0.2f),
+                BevelRadius = 0.0f
+            });
 
             // Create a body
             float3 position = new float3(0, 0, 9.0f);
@@ -100,9 +124,13 @@ public class SoftJointDemo : BasePhysicsDemo
             float3 perpendicularInWorld = perpendicularLocal;
 
             BlobAssetReference<JointData> jointData;
-            jointData = JointData.CreatePrismatic(pivotLocal, pivotInWorld, axisLocal, axisInWorld, perpendicularLocal, perpendicularInWorld, - 2.0f, 2.0f, 0.0f, 0.0f);
-            jointData.Value.Constraints[0].SpringDamping = 0.0f;
-            jointData.Value.Constraints[0].SpringFrequency = 5.0f;
+            var localFrame = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+            var worldFrame = new JointFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
+            jointData = JointData.CreatePrismatic(localFrame, worldFrame, new FloatRange(-2f, 2f), default);
+            var constraint = jointData.Value.Constraints[0];
+            constraint.SpringDamping = 0.0f;
+            constraint.SpringFrequency = 5.0f;
+            jointData.Value.Constraints[0] = constraint;
             CreateJoint(jointData, body, Entity.Null);
         }
     }

@@ -6,38 +6,37 @@ Here is a quick reference of the most useful classes, interfaces, structs, and a
 
 | Name     | Namespace   | Type  |
 | :-------------: |:-------------| :-----:|
-| [ArchetypeChunk](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ArchetypeChunk.html) | Unity.Entities | Unsafe Struct |
-| [ComponentGroup](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ComponentGroup.html) | Unity.Entities | Unsafe Class |
-| [ComponentSystem](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ComponentSystem.html) | Unity.Entities | Abstract Class |
-| [ComponentType](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ComponentType.html) | Unity.Entities | Struct |
-| [DynamicBuffer](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.DynamicBuffer-1.html) | Unity.Entities | Unsafe Struct |
-| [Entity](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.Entity.html) | Unity.Entities | Struct |
-| [EntityArchetype](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.EntityArchetype.html) | Unity.Entities | Unsafe Struct |
-| [EntityCommandBuffer](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.EntityCommandBuffer.html) | Unity.Entities | Unsafe Struct |
-| [EntityManager](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.EntityManager.html) | Unity.Entities | Unsafe Class |
-| [ExclusiveEntityTransaction](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ExclusiveEntityTransaction.html) | Unity.Entities | Unsafe Struct |
-| [IBufferElementData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IBufferElementData.html) | Unity.Entities | Interface |
-| [IComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IComponentData.html) | Unity.Entities | Interface |
-| [IJobChunk](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IJobChunk.html) | Unity.Entities | Interface |
-| [IJobNativeMultiHashMapMergedSharedKeyIndices](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.IJobNativeMultiHashMapMergedSharedKeyIndices.html) | Unity.Collections | Interface |
-| [IJobParallelForBatch](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/api/Unity.Jobs.IJobParallelForBatch.html) | Unity.Jobs | Interface |
-| [IJobParallelForFilter](https://docs.unity3d.com/Packages/com.unity.jobs@0.0/api/Unity.Jobs.IJobParallelForFilter.html) | Unity.Jobs | Interface |
-| [IJobForEach](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.IJobForEach-1.html) | Unity.Entities | Interface |
-| [ISharedComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISharedComponentData.html) | Unity.Entities | Interface |
-| [ISystemStateBufferElementData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateBufferElementData.html) | Unity.Entities | Interface |
-| [ISystemStateComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateComponentData.html) | Unity.Entities | Interface |
-| [ISystemStateSharedComponentData](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.ISystemStateSharedComponentData.html) | Unity.Entities | Interface |
-| [JobComponentSystem](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.JobComponentSystem.html) | Unity.Entities | Abstract Class |
-| [RenderMesh](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Rendering.RenderMesh.html) |Unity.Rendering | Class |
-| [NativeHashMap](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeHashMap-2.html) | Unity.Collections | Unsafe Struct |
-| [NativeList](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeList-1.html) | Unity.Collections | Unsafe Struct |
-| [NativeMultiHashMap](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeMultiHashMap-2.html) | Unity.Collections | Unsafe Struct |
-| [NativeQueue](https://docs.unity3d.com/Packages/com.unity.collections@0.0/api/Unity.Collections.NativeQueue-1.html) | Unity.Collections | Unsafe Struct |
-| [LocalToWorld](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.LocalToWorld.html) | Unity.Transforms | Struct |
-| [Translation](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.Translation.html) | Unity.Transforms | Struct |
-| [Rotation](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.Rotation.html) | Unity.Transforms | Struct |
-| [Scale](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Transforms.Scale.html) | Unity.Transforms | Struct |
-| [World](https://docs.unity3d.com/Packages/com.unity.entities@0.0/api/Unity.Entities.World.html) | Unity.Entities | Class |
+| [ArchetypeChunk](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ArchetypeChunk.html) | Unity.Entities | Unsafe Struct |
+| [ComponentSystem](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ComponentSystem.html) | Unity.Entities | Abstract Class |
+| [ComponentType](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ComponentType.html) | Unity.Entities | Struct |
+| [DynamicBuffer](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.DynamicBuffer-1.html) | Unity.Entities | Unsafe Struct |
+| [Entity](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.Entity.html) | Unity.Entities | Struct |
+| [EntityArchetype](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.EntityArchetype.html) | Unity.Entities | Unsafe Struct |
+| [EntityCommandBuffer](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.EntityCommandBuffer.html) | Unity.Entities | Unsafe Struct |
+| [EntityManager](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.EntityManager.html) | Unity.Entities | Unsafe Class |
+| [ExclusiveEntityTransaction](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ExclusiveEntityTransaction.html) | Unity.Entities | Unsafe Struct |
+| [IBufferElementData](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.IBufferElementData.html) | Unity.Entities | Interface |
+| [IComponentData](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.IComponentData.html) | Unity.Entities | Interface |
+| [IJobChunk](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.IJobChunk.html) | Unity.Entities | Interface |
+| [IJobNativeMultiHashMapMergedSharedKeyIndices](https://docs.unity3d.com/Packages/com.unity.collections@latest?preview=1&subfolder=/api/Unity.Collections.IJobNativeMultiHashMapMergedSharedKeyIndices.html) | Unity.Collections | Interface |
+| [IJobParallelForBatch](https://docs.unity3d.com/Packages/com.unity.jobs@latest?preview=1&subfolder=/api/Unity.Jobs.IJobParallelForBatch.html) | Unity.Jobs | Interface |
+| [IJobParallelForFilter](https://docs.unity3d.com/Packages/com.unity.jobs@latest?preview=1&subfolder=/api/Unity.Jobs.IJobParallelForFilter.html) | Unity.Jobs | Interface |
+| [IJobForEach](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.IJobForEach-1.html) | Unity.Entities | Interface |
+| [ISharedComponentData](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ISharedComponentData.html) | Unity.Entities | Interface |
+| [ISystemStateBufferElementData](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ISystemStateBufferElementData.html) | Unity.Entities | Interface |
+| [ISystemStateComponentData](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ISystemStateComponentData.html) | Unity.Entities | Interface |
+| [ISystemStateSharedComponentData](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.ISystemStateSharedComponentData.html) | Unity.Entities | Interface |
+| [JobComponentSystem](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.JobComponentSystem.html) | Unity.Entities | Abstract Class |
+| [RenderMesh](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@latest?preview=1&subfolder=/api/Unity.Rendering.RenderMesh.html) |Unity.Rendering | Class |
+| [NativeHashMap](https://docs.unity3d.com/Packages/com.unity.collections@latest?preview=1&subfolder=/api/Unity.Collections.NativeHashMap-2.html) | Unity.Collections | Unsafe Struct |
+| [NativeList](https://docs.unity3d.com/Packages/com.unity.collections@latest?preview=1&subfolder=/api/Unity.Collections.NativeList-1.html) | Unity.Collections | Unsafe Struct |
+| [NativeMultiHashMap](https://docs.unity3d.com/Packages/com.unity.collections@latest?preview=1&subfolder=/api/Unity.Collections.NativeMultiHashMap-2.html) | Unity.Collections | Unsafe Struct |
+| [NativeQueue](https://docs.unity3d.com/Packages/com.unity.collections@latest?preview=1&subfolder=/api/Unity.Collections.NativeQueue-1.html) | Unity.Collections | Unsafe Struct |
+| [LocalToWorld](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Transforms.LocalToWorld.html) | Unity.Transforms | Struct |
+| [Translation](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Transforms.Translation.html) | Unity.Transforms | Struct |
+| [Rotation](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Transforms.Rotation.html) | Unity.Transforms | Struct |
+| [Scale](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Transforms.Scale.html) | Unity.Transforms | Struct |
+| [World](https://docs.unity3d.com/Packages/com.unity.entities@latest?preview=1&subfolder=/api/Unity.Entities.World.html) | Unity.Entities | Class |
 
 ### Unsafe attributes
 
@@ -87,7 +86,7 @@ _Note: The `ZEROPLAYER` defines are for the DOTS runtime, which has not been pub
 ### Attributes
 
 * [[BurstDiscard]](https://docs.unity3d.com/ScriptReference/Unity.Burst.BurstDiscardAttribute.html)
-* [BurstCompile]
+* [[BurstCompile]](https://docs.unity3d.com/Packages/com.unity.burst@latest?preview=1&subfolder=/api/Unity.Burst.BurstCompileAttribute.html)
 
 ## General computing terms
 
@@ -106,7 +105,6 @@ _Note: The `ZEROPLAYER` defines are for the DOTS runtime, which has not been pub
 * [Multicore](glossary.md#multicore)
 * [Multithreading](https://docs.unity3d.com/Manual/JobSystemMultithreading.html)
 * [Native code](https://en.wikipedia.org/wiki/Machine_code)
-* [Native memory](glossary.md#native_memory)
 * [Parallel computing](https://en.wikipedia.org/wiki/Parallel_computing)
 * [Performant](glossary.md#performant)
 * [Race condition](https://docs.unity3d.com/Manual/JobSystemSafetySystem.html)

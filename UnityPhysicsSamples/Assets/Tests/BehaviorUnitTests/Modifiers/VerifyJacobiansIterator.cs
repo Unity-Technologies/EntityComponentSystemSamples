@@ -19,6 +19,12 @@ namespace Unity.Physics.Tests
         void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             dstManager.AddComponentData(entity, new VerifyJacobiansIteratorData());
+
+#if HAVOK_PHYSICS_EXISTS
+            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+            config.EnableSleeping = 0;
+            dstManager.AddComponentData(entity, config);
+#endif
         }
     }
 
@@ -54,8 +60,6 @@ namespace Unity.Physics.Tests
                 Assert.AreEqual(header.ColliderKeys.ColliderKeyB.Value, ColliderKey.Empty.Value);
                 Assert.AreEqual(header.Entities.EntityA, Bodies[header.BodyPair.BodyAIndex].Entity);
                 Assert.AreEqual(header.Entities.EntityB, Bodies[header.BodyPair.BodyBIndex].Entity);
-                Assert.AreEqual(header.Entities.EntityA.Version, 1);
-                Assert.AreEqual(header.Entities.EntityB.Version, 1);
                 Assert.AreEqual(header.Flags, (JacobianFlags)0);
                 Assert.IsFalse(header.HasColliderKeys);
                 Assert.IsFalse(header.HasMassFactors);

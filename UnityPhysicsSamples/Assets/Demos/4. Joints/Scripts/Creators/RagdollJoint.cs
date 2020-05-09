@@ -1,6 +1,7 @@
-﻿using Unity.Mathematics;
+﻿using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
-using Unity.Entities;
+using static Unity.Physics.Math;
 
 namespace Unity.Physics.Authoring
 {
@@ -29,7 +30,7 @@ namespace Unity.Physics.Authoring
         public float MinTwistAngle;
         public float MaxTwistAngle;
 
-        public override unsafe void Create(EntityManager entityManager)
+        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             if (AutoSetConnected)
             {
@@ -39,14 +40,18 @@ namespace Unity.Physics.Authoring
                 PerpendicularAxisInConnectedEntity = math.mul(bFromA.rot, PerpendicularAxisLocal);
             }
 
-            BlobAssetReference<JointData> jointData0, jointData1;
             JointData.CreateRagdoll(
-                    PositionLocal, PositionInConnectedEntity, TwistAxisLocal, TwistAxisInConnectedEntity, PerpendicularAxisLocal, PerpendicularAxisInConnectedEntity,
-                    math.radians(MaxConeAngle), math.radians(MinPerpendicularAngle), math.radians(MaxPerpendicularAngle), math.radians(MinTwistAngle), math.radians(MaxTwistAngle),
-                    out jointData0, out jointData1);
+                new JointFrame { Axis = TwistAxisLocal, PerpendicularAxis = PerpendicularAxisLocal, Position = PositionLocal },
+                new JointFrame { Axis = TwistAxisInConnectedEntity, PerpendicularAxis = PerpendicularAxisInConnectedEntity, Position = PositionInConnectedEntity },
+                math.radians(MaxConeAngle),
+                math.radians(new FloatRange(MinPerpendicularAngle, MaxPerpendicularAngle)),
+                math.radians(new FloatRange(MinTwistAngle, MaxTwistAngle)),
+                out BlobAssetReference<JointData> jointData0,
+                out BlobAssetReference<JointData> jointData1
+            );
 
-            CreateJointEntity(jointData0, entityManager);
-            CreateJointEntity(jointData1, entityManager);
+            CreateJointEntity(jointData0, entityManager, conversionSystem);
+            CreateJointEntity(jointData1, entityManager, conversionSystem);
         }
     }
 }

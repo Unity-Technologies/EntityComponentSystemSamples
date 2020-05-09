@@ -1,11 +1,11 @@
 ﻿using Unity.Physics;
-using Unity.Physics.Extensions;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using BoxCollider = Unity.Physics.BoxCollider;
 using Collider = Unity.Physics.Collider;
 using Material = Unity.Physics.Material;
+using static Unity.Physics.Math;
 
 public class LimitedHingeDemo : BasePhysicsDemo
 {
@@ -29,16 +29,20 @@ public class LimitedHingeDemo : BasePhysicsDemo
                 BelongsTo = (uint)~(1 << (1 - i))
             };
             BlobAssetReference<Collider> collider = BoxCollider.Create(
-                float3.zero, Quaternion.identity, new float3(1.0f, 0.2f, 0.2f), 0.0f, filter);
+                new BoxGeometry
+                {
+                    Center = float3.zero,
+                    Orientation = quaternion.identity,
+                    Size = new float3(1.0f, 0.2f, 0.2f),
+                    BevelRadius = 0.0f
+                },
+                filter, Material.Default);
             entities[i] = CreateDynamicBody(float3.zero, quaternion.identity, collider, float3.zero, new float3(0, 1 - i, 0), 1.0f);
         }
 
-        float3 pivot = float3.zero;
-        float3 axis = new float3(0, 1, 0);
-        float3 perpendicular = new float3(0, 0, 1);
-
-        //BlobAssetReference<JointData> hingeData = JointData.CreateLimitedHinge(pivot, pivot, axis, axis, perpendicular, perpendicular, 0.2f, (float)math.PI);
-        BlobAssetReference<JointData> hingeData = JointData.CreateLimitedHinge(pivot, pivot, axis, axis, perpendicular, perpendicular, -(float)math.PI, -0.2f);
+        var jointFrame = new JointFrame { Axis = new float3(0, 1, 0), PerpendicularAxis = new float3(0, 0, 1) };
+        BlobAssetReference<JointData> hingeData =
+            JointData.CreateLimitedHinge(jointFrame, jointFrame, new FloatRange(-math.PI, -0.2f));
         CreateJoint(hingeData, entities[0], entities[1]);
     }
 }

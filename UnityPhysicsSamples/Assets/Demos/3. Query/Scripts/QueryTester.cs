@@ -3,7 +3,6 @@ using Unity.Physics.Systems;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Entities;
-using Unity.Physics.Authoring;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -131,7 +130,11 @@ namespace Unity.Physics.Extensions
                 case ColliderType.Sphere:
                 {
                     Bounds bounds = mesh.bounds;
-                    return SphereCollider.Create(bounds.center, math.cmax(bounds.extents));
+                    return SphereCollider.Create(new SphereGeometry
+                    {
+                        Center = bounds.center,
+                        Radius = math.cmax(bounds.extents)
+                    });
                 }
                 case ColliderType.Triangle:
                 {
@@ -179,7 +182,13 @@ namespace Unity.Physics.Extensions
                 case ColliderType.Box:
                 {
                     Bounds bounds = mesh.bounds;
-                    return BoxCollider.Create(bounds.center, quaternion.identity, 2.0f * bounds.extents, 0.0f);
+                    return BoxCollider.Create(new BoxGeometry
+                    {
+                        Center = bounds.center,
+                        Orientation = quaternion.identity,
+                        Size = 2.0f * bounds.extents,
+                        BevelRadius = 0.0f
+                    });
                 }
                 case ColliderType.Capsule:
                 {
@@ -192,19 +201,26 @@ namespace Unity.Physics.Extensions
                     float radius = bounds.extents[y];
                     float3 vertex0 = bounds.center; vertex0[z] = -(max - radius);
                     float3 vertex1 = bounds.center; vertex1[z] = (max - radius);
-                    return CapsuleCollider.Create(vertex0, vertex1, radius);
+                    return CapsuleCollider.Create(new CapsuleGeometry
+                    {
+                        Vertex0 = vertex0,
+                        Vertex1 = vertex1,
+                        Radius = radius
+                    });
                 }
                 case ColliderType.Cylinder:
                     // TODO: need someone to add
                     throw new NotImplementedException();
                 case ColliderType.Convex:
                 {
-                    NativeArray<float3> points = new NativeArray<float3>(mesh.vertices.Length, Allocator.Temp);
+                    NativeArray<float3> points = new NativeArray<float3>(mesh.vertices.Length, Allocator.TempJob);
                     for (int i = 0; i < mesh.vertices.Length; i++)
                     {
                         points[i] = mesh.vertices[i];
                     }
-                    return ConvexCollider.Create(points, 0.0f);
+                    BlobAssetReference<Collider> collider = ConvexCollider.Create(points, default, CollisionFilter.Default);
+                    points.Dispose();
+                    return collider;
                 }
                 default:
                     throw new System.NotImplementedException();
@@ -243,7 +259,7 @@ namespace Unity.Physics.Extensions
 
         void RunQueries()
         {
-            ref PhysicsWorld world = ref Entities.World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+            ref PhysicsWorld world = ref BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
             float3 origin = transform.position;
             float3 direction = (transform.rotation * Direction) * Distance;
@@ -358,7 +374,7 @@ namespace Unity.Physics.Extensions
             {
                 RunQueries();
 
-                ref PhysicsWorld world = ref Entities.World.Active.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+                ref PhysicsWorld world = ref BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
                 // Draw the query
                 Gizmos.color = new Color(0.94f, 0.35f, 0.15f, 0.75f);
@@ -495,7 +511,7 @@ namespace Unity.Physics.Extensions
 
         private void DrawLeafCollider(RigidBody body, ColliderKey key)
         {
-            if (body.Collider->GetLeaf(key, out ChildCollider leaf) && (leaf.Collider == null))
+            if (body.Collider.Value.GetLeaf(key, out ChildCollider leaf) && (leaf.Collider == null))
             {
                 RigidTransform worldFromLeaf = math.mul(body.WorldFromBody, leaf.TransformFromChild);
                 if (leaf.Collider->Type == ColliderType.Triangle || leaf.Collider->Type == ColliderType.Quad)

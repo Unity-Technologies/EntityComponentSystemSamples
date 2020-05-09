@@ -1,9 +1,10 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Physics;
-using Unity.Physics.Extensions;
+using UnityEngine;
 using static Unity.Physics.Math;
+
 
 public class FixedAngleGridDemo : BasePhysicsDemo
 {
@@ -17,7 +18,13 @@ public class FixedAngleGridDemo : BasePhysicsDemo
             DrawJoints = 1
         });
 
-        BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(float3.zero, Quaternion.identity, new float3(0.25f), 0.0f);
+        BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+        {
+            Center = float3.zero,
+            Orientation = quaternion.identity,
+            Size = new float3(0.25f),
+            BevelRadius = 0.0f
+        });
 
         quaternion orientationA = quaternion.identity;
         bool identityA = true;
@@ -44,16 +51,13 @@ public class FixedAngleGridDemo : BasePhysicsDemo
             float3 pivotLocal = float3.zero;
             float3 pivotInWorld = math.transform(GetBodyTransform(body), pivotLocal);
 
-            quaternion worldFromLocal = Quaternion.AngleAxis((i - 4.5f) * 20.0f, new float3(0, 0, 1));
-
             BlobAssetReference<JointData> jointData = JointData.Create(
-                new MTransform(orientationA, pivotLocal),
-                new MTransform(orientationB, pivotInWorld),
-                new Constraint[]
+                new RigidTransform(orientationA, pivotLocal),
+                new RigidTransform(orientationB, pivotInWorld),
+                new NativeArray<Constraint>(2, Allocator.Temp)
                 {
-                    Constraint.BallAndSocket(),
-                    new Constraint
-                    {
+                    [0]  = Constraint.BallAndSocket(),
+                    [1] = new Constraint {
                         ConstrainedAxes = new bool3(true, true, true),
                         Type = ConstraintType.Angular,
                         Min = math.max(i - 5, 0) * 0.1f,
@@ -61,7 +65,9 @@ public class FixedAngleGridDemo : BasePhysicsDemo
                         SpringDamping = Constraint.DefaultSpringDamping,
                         SpringFrequency = Constraint.DefaultSpringFrequency
                     }
-                });
+                }
+
+            );
             CreateJoint(jointData, body, Entity.Null);
         }
     }
