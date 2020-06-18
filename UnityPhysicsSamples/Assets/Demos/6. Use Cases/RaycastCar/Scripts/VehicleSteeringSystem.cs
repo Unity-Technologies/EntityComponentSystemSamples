@@ -10,22 +10,20 @@ struct VehicleInput : IComponentData
     public int Change; // positive to change to a subsequent vehicle, negative to change to a previous one
 }
 
-class VehicleSteeringSystem : ComponentSystem
+class VehicleSteeringSystem : SystemBase
 {
-    EntityQuery m_VehicleInputQuery;
-
-    protected override void OnCreate() => m_VehicleInputQuery = GetEntityQuery(typeof(VehicleInput));
-
     protected override void OnUpdate()
     {
-        var input = m_VehicleInputQuery.GetSingleton<VehicleInput>();
+        var input = GetSingleton<VehicleInput>();
 
-        Entities.WithAllReadOnly<ActiveVehicle>().ForEach(
-            (VehicleReferences references, ref VehicleSpeed speed, ref VehicleSteering steering, ref VehicleCameraSettings cameraSettings) =>
+        Entities
+            .WithName("VehicleSteeringJob")
+            .WithoutBurst()
+            .WithAll<ActiveVehicle>()
+            .ForEach((VehicleReferences references, ref VehicleSpeed speed, ref VehicleSteering steering, in VehicleCameraSettings cameraSettings) =>
             {
                 if (references.Mechanics == null)
                     return;
-
                 float x = input.Steering.x;
                 float a = input.Throttle;
                 float z = input.Looking.x;
@@ -51,6 +49,6 @@ class VehicleSteeringSystem : ComponentSystem
                 m.steeringAngle = Mathf.Lerp(m.steeringAngle, steering.DesiredSteeringAngle, 0.1f);
                 m.driveDesiredSpeed = Mathf.Lerp(m.driveDesiredSpeed, speed.DesiredSpeed, 0.01f);
                 m.driveEngaged = 0.0f != speed.DesiredSpeed;
-            });
+            }).Run();
     }
 }

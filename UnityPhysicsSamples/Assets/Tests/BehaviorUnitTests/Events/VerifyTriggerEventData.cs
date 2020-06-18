@@ -29,7 +29,7 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyTriggerEventDataSystem : JobComponentSystem
+    public class VerifyTriggerEventDataSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;
@@ -46,7 +46,7 @@ namespace Unity.Physics.Tests
         struct VerifyTriggerEventDataJob : ITriggerEventsJob
         {
             [ReadOnly]
-            public NativeSlice<RigidBody> Bodies;
+            public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
             public ComponentDataFromEntity<VerifyTriggerEventDataData> VerificationData;
@@ -55,15 +55,15 @@ namespace Unity.Physics.Tests
             {
                 // Trigger event is between a static and dynamic box.
                 // Verify all data in the provided event struct.
-                Assert.AreNotEqual(triggerEvent.BodyIndices.BodyAIndex, triggerEvent.BodyIndices.BodyBIndex);
-                Assert.AreEqual(triggerEvent.ColliderKeys.ColliderKeyA.Value, ColliderKey.Empty.Value);
-                Assert.AreEqual(triggerEvent.ColliderKeys.ColliderKeyB.Value, ColliderKey.Empty.Value);
-                Assert.AreEqual(triggerEvent.Entities.EntityA, Bodies[triggerEvent.BodyIndices.BodyAIndex].Entity);
-                Assert.AreEqual(triggerEvent.Entities.EntityB, Bodies[triggerEvent.BodyIndices.BodyBIndex].Entity);
+                Assert.AreNotEqual(triggerEvent.BodyIndexA, triggerEvent.BodyIndexB);
+                Assert.AreEqual(triggerEvent.ColliderKeyA.Value, ColliderKey.Empty.Value);
+                Assert.AreEqual(triggerEvent.ColliderKeyB.Value, ColliderKey.Empty.Value);
+                Assert.AreEqual(triggerEvent.EntityA, Bodies[triggerEvent.BodyIndexA].Entity);
+                Assert.AreEqual(triggerEvent.EntityB, Bodies[triggerEvent.BodyIndexB].Entity);
             }
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             SimulationCallbacks.Callback testTriggerEventCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
             {
@@ -74,9 +74,7 @@ namespace Unity.Physics.Tests
                 }.Schedule(simulation, ref world, inDeps);
             };
 
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostSolveJacobians, testTriggerEventCallback, inputDeps);
-
-            return inputDeps;
+            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostSolveJacobians, testTriggerEventCallback, Dependency);
         }
     }
 }

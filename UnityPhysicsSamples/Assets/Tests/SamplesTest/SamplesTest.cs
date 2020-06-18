@@ -61,16 +61,16 @@ namespace Unity.Physics.Samples.Test
         }
 
         [UnityTest]
-        [Timeout(60000)]
+        [Timeout(240000)]
         public abstract IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath);
 
         [TearDown]
         public void TearDown()
         {
-            SwitchWorlds();
+            ResetDefaultWorld();
         }
 
-        protected static void SwitchWorlds()
+        protected static void ResetDefaultWorld()
         {
             var entityManager = DefaultWorld.EntityManager;
             var entities = entityManager.GetAllEntities();
@@ -95,7 +95,7 @@ namespace Unity.Physics.Samples.Test
     class UnityPhysicsSamplesTestMT : UnityPhysicsSamplesTest
     {
         [UnityTest]
-        [Timeout(60000)]
+        [Timeout(240000)]
         public override IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
         {
             // Log scene name in case Unity crashes and test results aren't written out.
@@ -104,7 +104,7 @@ namespace Unity.Physics.Samples.Test
 
             SceneManager.LoadScene(scenePath);
             yield return new WaitForSeconds(1);
-            SwitchWorlds();
+            ResetDefaultWorld();
             yield return new WaitForFixedUpdate();
 
             LogAssert.NoUnexpectedReceived();
@@ -115,7 +115,7 @@ namespace Unity.Physics.Samples.Test
     class UnityPhysicsSamplesTestST : UnityPhysicsSamplesTest
     {
         [UnityTest]
-        [Timeout(60000)]
+        [Timeout(240000)]
         public override IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
         {
             // Log scene name in case Unity crashes and test results aren't written out.
@@ -136,7 +136,7 @@ namespace Unity.Physics.Samples.Test
 
             SceneManager.LoadScene(scenePath);
             yield return new WaitForSeconds(1);
-            SwitchWorlds();
+            ResetDefaultWorld();
             yield return new WaitForFixedUpdate();
 
             LogAssert.NoUnexpectedReceived();

@@ -30,7 +30,7 @@ namespace Unity.Physics.Extensions
                         cc = (ConvexCollider*)child.Collider;
                         Assert.IsTrue(cc->CollisionType == CollisionType.Convex);
                     }
-                    bIsTrigger = cc->Material.IsTrigger;
+                    bIsTrigger = cc->Material.CollisionResponse == CollisionResponsePolicy.RaiseTriggerEvents;
                 }
             }
             return bIsTrigger;
@@ -42,7 +42,7 @@ namespace Unity.Physics.Extensions
     public struct MousePickCollector : ICollector<RaycastHit>
     {
         public bool IgnoreTriggers;
-        public NativeSlice<RigidBody> Bodies;
+        public NativeArray<RigidBody> Bodies;
         public int NumDynamicBodies;
 
         public bool EarlyOutOnFirstHit => false;
@@ -52,7 +52,7 @@ namespace Unity.Physics.Extensions
         private RaycastHit m_ClosestHit;
         public RaycastHit Hit => m_ClosestHit;
 
-        public MousePickCollector(float maxFraction, NativeSlice<RigidBody> rigidBodies, int numDynamicBodies)
+        public MousePickCollector(float maxFraction, NativeArray<RigidBody> rigidBodies, int numDynamicBodies)
         {
             m_ClosestHit = default(RaycastHit);
             MaxFraction = maxFraction;
@@ -110,7 +110,7 @@ namespace Unity.Physics.Extensions
 
     // Attaches a virtual spring to the picked entity
     [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public class MousePickSystem : JobComponentSystem
+    public class MousePickSystem : SystemBase
     {
         const float k_MaxDistance = 100.0f;
 
@@ -192,14 +192,14 @@ namespace Unity.Physics.Extensions
             SpringDatas.Dispose();
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             if (m_MouseGroup.CalculateEntityCount() == 0)
             {
-                return inputDeps;
+                return;
             }
 
-            var handle = JobHandle.CombineDependencies(inputDeps, m_BuildPhysicsWorldSystem.FinalJobHandle);
+            var handle = JobHandle.CombineDependencies(Dependency, m_BuildPhysicsWorldSystem.GetOutputDependency());
 
             if (Input.GetMouseButtonDown(0) && (Camera.main != null))
             {
@@ -225,7 +225,7 @@ namespace Unity.Physics.Extensions
                     Near = Camera.main.nearClipPlane,
                     Forward = Camera.main.transform.forward,
                     IgnoreTriggers = IgnoreTriggers,
-                }.Schedule(JobHandle.CombineDependencies(handle, m_BuildPhysicsWorldSystem.FinalJobHandle));
+                }.Schedule(JobHandle.CombineDependencies(handle, m_BuildPhysicsWorldSystem.GetOutputDependency()));
 
                 PickJobHandle = handle;
 
@@ -238,13 +238,13 @@ namespace Unity.Physics.Extensions
                 SpringDatas[0] = new SpringData();
             }
 
-            return handle;
+            Dependency = handle;
         }
     }
 
     // Applies any mouse spring as a change in velocity on the entity's motion component
     [UpdateBefore(typeof(BuildPhysicsWorld))]
-    public class MouseSpringSystem : JobComponentSystem
+    public class MouseSpringSystem : SystemBase
     {
         EntityQuery m_MouseGroup;
         MousePickSystem m_PickSystem;
@@ -258,11 +258,11 @@ namespace Unity.Physics.Extensions
             });
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             if (m_MouseGroup.CalculateEntityCount() == 0)
             {
-                return inputDeps;
+                return;
             }
 
             ComponentDataFromEntity<Translation> Positions = GetComponentDataFromEntity<Translation>(true);
@@ -273,7 +273,7 @@ namespace Unity.Physics.Extensions
             // If there's a pick job, wait for it to finish
             if (m_PickSystem.PickJobHandle != null)
             {
-                JobHandle.CombineDependencies(inputDeps, m_PickSystem.PickJobHandle.Value).Complete();
+                JobHandle.CombineDependencies(Dependency, m_PickSystem.PickJobHandle.Value).Complete();
             }
 
             // If there's a picked entity, drag it
@@ -283,7 +283,7 @@ namespace Unity.Physics.Extensions
                 Entity entity = m_PickSystem.SpringDatas[0].Entity;
                 if (!EntityManager.HasComponent<PhysicsMass>(entity))
                 {
-                    return inputDeps;
+                    return;
                 }
 
                 PhysicsMass massComponent = Masses[entity];
@@ -291,7 +291,7 @@ namespace Unity.Physics.Extensions
 
                 if (massComponent.InverseMass == 0)
                 {
-                    return inputDeps;
+                    return;
                 }
 
                 var worldFromBody = new MTransform(Rotations[entity].Value, Positions[entity].Value);
@@ -369,8 +369,6 @@ namespace Unity.Physics.Extensions
                 // Write back velocity
                 Velocities[entity] = velocityComponent;
             }
-
-            return inputDeps;
         }
     }
 }

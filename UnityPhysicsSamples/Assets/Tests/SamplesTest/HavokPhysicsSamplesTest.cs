@@ -13,7 +13,7 @@ namespace Unity.Physics.Samples.Test
     class HavokPhysicsSamplesTestMT : UnityPhysicsSamplesTest
     {
         [UnityTest]
-        [Timeout(60000)]
+        [Timeout(240000)]
         public override IEnumerator LoadScenes([ValueSource(nameof(UnityPhysicsSamplesTest.GetScenes))] string scenePath)
         {
             // Don't create log messages about the number of trial days remaining
@@ -31,7 +31,7 @@ namespace Unity.Physics.Samples.Test
 
             SceneManager.LoadScene(scenePath);
             yield return new WaitForSeconds(1);
-            UnityPhysicsSamplesTest.SwitchWorlds();
+            UnityPhysicsSamplesTest.ResetDefaultWorld();
             yield return new WaitForFixedUpdate();
 
             LogAssert.NoUnexpectedReceived();
@@ -44,7 +44,7 @@ namespace Unity.Physics.Samples.Test
     class HavokPhysicsSamplesTestST : UnityPhysicsSamplesTest
     {
         [UnityTest]
-        [Timeout(60000)]
+        [Timeout(240000)]
         public override IEnumerator LoadScenes([ValueSource(nameof(UnityPhysicsSamplesTest.GetScenes))] string scenePath)
         {
             // Don't create log messages about the number of trial days remaining
@@ -71,7 +71,7 @@ namespace Unity.Physics.Samples.Test
 
             SceneManager.LoadScene(scenePath);
             yield return new WaitForSeconds(1);
-            UnityPhysicsSamplesTest.SwitchWorlds();
+            UnityPhysicsSamplesTest.ResetDefaultWorld();
             yield return new WaitForFixedUpdate();
 
             LogAssert.NoUnexpectedReceived();

@@ -94,8 +94,9 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -242,9 +243,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -262,12 +263,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -278,18 +280,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &17931415
 MonoBehaviour:
@@ -317,6 +405,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &17931416
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -331,6 +421,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -342,6 +433,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -498,9 +590,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -518,12 +610,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -534,18 +627,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &65515303
 MonoBehaviour:
@@ -573,6 +752,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &65515304
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -587,6 +768,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -598,6 +780,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -799,9 +982,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -819,12 +1002,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -835,18 +1019,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &83073071
 MonoBehaviour:
@@ -874,6 +1144,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &83073072
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -888,6 +1160,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -899,6 +1172,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -1055,9 +1329,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -1075,12 +1349,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1091,18 +1366,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &101454937
 MonoBehaviour:
@@ -1130,6 +1491,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &101454938
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1144,6 +1507,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1155,6 +1519,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -1311,9 +1676,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -1331,12 +1696,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1347,18 +1713,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &188300287
 MonoBehaviour:
@@ -1386,6 +1838,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &188300288
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1400,6 +1854,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1411,6 +1866,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -1567,9 +2023,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -1587,12 +2043,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1603,18 +2060,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &194814894
 MonoBehaviour:
@@ -1642,6 +2185,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &194814895
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1656,6 +2201,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1667,6 +2213,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -1823,9 +2370,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -1843,12 +2390,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1859,18 +2407,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &268194114
 MonoBehaviour:
@@ -1898,6 +2532,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &268194115
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1912,6 +2548,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1923,6 +2560,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -2079,9 +2717,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -2099,12 +2737,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2115,18 +2754,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &274917129
 MonoBehaviour:
@@ -2154,6 +2879,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &274917130
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2168,6 +2895,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2179,6 +2907,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -2335,9 +3064,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -2355,12 +3084,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2371,18 +3101,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &309163193
 MonoBehaviour:
@@ -2410,6 +3226,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &309163194
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2424,6 +3242,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2435,6 +3254,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -2580,13 +3400,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -2595,10 +3415,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -2611,18 +3432,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &343256693
 MeshRenderer:
@@ -2638,6 +3545,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2649,6 +3557,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -2805,9 +3714,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -2825,12 +3734,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2841,18 +3751,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &343942668
 MonoBehaviour:
@@ -2880,6 +3876,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &343942669
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2894,6 +3892,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2905,6 +3904,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -3061,9 +4061,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -3081,12 +4081,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -3097,18 +4098,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &395150046
 MonoBehaviour:
@@ -3136,6 +4223,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &395150047
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3150,6 +4239,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3161,6 +4251,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -3306,13 +4397,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -3321,10 +4412,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -3337,18 +4429,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &495160683
 MeshRenderer:
@@ -3364,6 +4542,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3375,6 +4554,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -3531,9 +4711,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -3551,12 +4731,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -3567,18 +4748,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &496811298
 MonoBehaviour:
@@ -3606,6 +4873,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &496811299
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3620,6 +4889,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3631,6 +4901,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -3787,9 +5058,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -3807,12 +5078,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -3823,18 +5095,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &514043195
 MonoBehaviour:
@@ -3862,6 +5220,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &514043196
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3876,6 +5236,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3887,6 +5248,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -4032,13 +5394,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -4047,10 +5409,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -4063,18 +5426,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &533674573
 MeshRenderer:
@@ -4090,6 +5539,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4101,6 +5551,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -4257,9 +5708,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -4277,12 +5728,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -4293,18 +5745,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &593650381
 MonoBehaviour:
@@ -4332,6 +5870,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &593650382
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4346,6 +5886,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4357,6 +5898,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -4502,13 +6044,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -4517,10 +6059,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -4533,18 +6076,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &606201812
 MeshRenderer:
@@ -4560,6 +6189,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4571,6 +6201,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -4727,9 +6358,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -4747,12 +6378,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -4763,18 +6395,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &607298107
 MonoBehaviour:
@@ -4802,6 +6520,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &607298108
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4816,6 +6536,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4827,6 +6548,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -4997,9 +6719,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -5017,12 +6739,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -5033,18 +6756,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &617317407
 MonoBehaviour:
@@ -5072,6 +6881,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &617317408
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5086,6 +6897,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5097,6 +6909,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -5239,9 +7052,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -5259,12 +7072,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -5275,18 +7089,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &619723394
 MonoBehaviour:
@@ -5314,6 +7214,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &619723395
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5328,6 +7230,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5339,6 +7242,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -5495,9 +7399,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -5515,12 +7419,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -5531,18 +7436,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &644366935
 MonoBehaviour:
@@ -5570,6 +7561,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &644366936
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5584,6 +7577,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5595,6 +7589,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -5740,13 +7735,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -5755,10 +7750,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -5771,18 +7767,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &807395044
 MeshRenderer:
@@ -5798,6 +7880,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5809,6 +7892,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -5997,9 +8081,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -6017,12 +8101,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -6033,18 +8118,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &863480945
 MonoBehaviour:
@@ -6072,6 +8243,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &863480946
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6086,6 +8259,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6097,6 +8271,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -6253,9 +8428,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -6273,12 +8448,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -6289,18 +8465,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &909300757
 MonoBehaviour:
@@ -6328,6 +8590,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &909300758
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6342,6 +8606,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6353,6 +8618,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -6509,9 +8775,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -6529,12 +8795,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -6545,18 +8812,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1135436355
 MonoBehaviour:
@@ -6584,6 +8937,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1135436356
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6598,6 +8953,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6609,6 +8965,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -6765,9 +9122,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -6785,12 +9142,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -6801,18 +9159,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1227947805
 MonoBehaviour:
@@ -6840,6 +9284,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1227947806
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6854,6 +9300,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6865,6 +9312,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -7021,9 +9469,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -7041,12 +9489,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -7057,18 +9506,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1246862792
 MonoBehaviour:
@@ -7096,6 +9631,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1246862793
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7110,6 +9647,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7121,6 +9659,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -7266,13 +9805,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -7281,10 +9820,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -7297,18 +9837,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &1272368834
 MeshRenderer:
@@ -7324,6 +9950,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7335,6 +9962,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -7491,9 +10119,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -7511,12 +10139,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -7527,18 +10156,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1325875840
 MonoBehaviour:
@@ -7566,6 +10281,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1325875841
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7580,6 +10297,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7591,6 +10309,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -7747,9 +10466,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -7767,12 +10486,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -7783,18 +10503,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1382586561
 MonoBehaviour:
@@ -7822,6 +10628,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1382586562
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7836,6 +10644,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7847,6 +10656,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -8003,9 +10813,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -8023,12 +10833,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -8039,18 +10850,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1410869952
 MonoBehaviour:
@@ -8078,6 +10975,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1410869953
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8092,6 +10991,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8103,6 +11003,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -8259,9 +11160,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -8279,12 +11180,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -8295,18 +11197,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1442270525
 MonoBehaviour:
@@ -8334,6 +11322,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1442270526
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8348,6 +11338,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8359,6 +11350,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -8515,9 +11507,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -8535,12 +11527,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -8551,18 +11544,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1453518563
 MonoBehaviour:
@@ -8590,6 +11669,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1453518564
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8604,6 +11685,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8615,6 +11697,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -8801,9 +11884,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -8821,12 +11904,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -8837,18 +11921,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1556355307
 MonoBehaviour:
@@ -8876,6 +12046,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1556355308
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8890,6 +12062,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8901,6 +12074,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -9057,9 +12231,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -9077,12 +12251,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -9093,18 +12268,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1609272152
 MonoBehaviour:
@@ -9132,6 +12393,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1609272153
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9146,6 +12409,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9157,6 +12421,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -9343,9 +12608,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -9363,12 +12628,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -9379,18 +12645,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1773527916
 MonoBehaviour:
@@ -9418,6 +12770,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1773527917
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9432,6 +12786,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9443,6 +12798,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -9599,9 +12955,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -9619,12 +12975,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -9635,18 +12992,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1778386344
 MonoBehaviour:
@@ -9674,6 +13117,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1778386345
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9688,6 +13133,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9699,6 +13145,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -9844,13 +13291,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -9859,10 +13306,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -9875,18 +13323,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &1801889966
 MeshRenderer:
@@ -9902,6 +13436,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9913,6 +13448,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -10069,9 +13605,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -10089,12 +13625,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -10105,18 +13642,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1831370550
 MonoBehaviour:
@@ -10144,6 +13767,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1831370551
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -10158,6 +13783,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10169,6 +13795,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -10325,9 +13952,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -10345,12 +13972,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -10361,18 +13989,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1862640727
 MonoBehaviour:
@@ -10400,6 +14114,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1862640728
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -10414,6 +14130,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10425,6 +14142,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -10466,10 +14184,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1357867726848807436, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
-      propertyPath: m_Name
-      value: Physics Scene Basic Elements
+      propertyPath: DrawColliders
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: DrawColliderEdges
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867725480173705, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867725548836660, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781253, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1357867726848807427, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
@@ -10526,35 +14264,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+    - target: {fileID: 1357867726848807436, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
-      propertyPath: DrawColliders
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: DrawColliderEdges
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867725548836660, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781253, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
+      propertyPath: m_Name
+      value: Physics Scene Basic Elements
       objectReference: {fileID: 0}
     - target: {fileID: 1357867726873067494, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
@@ -10601,10 +14314,15 @@ PrefabInstance:
       propertyPath: m_SerializedData.DrawColliderAabbs
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1357867725480173705, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
-      propertyPath: m_IsActive
-      value: 0
+      propertyPath: m_LocalScale.x
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 8666090344260274590, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 30
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c0ce7b3c74021e840a5995cf136ee0fe, type: 3}
@@ -10753,9 +14471,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -10773,12 +14491,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -10789,18 +14508,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1887227268
 MonoBehaviour:
@@ -10828,6 +14633,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1887227269
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -10842,6 +14649,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10853,6 +14661,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -11009,9 +14818,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -11029,12 +14838,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -11045,18 +14855,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1916454450
 MonoBehaviour:
@@ -11084,6 +14980,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1916454451
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -11098,6 +14996,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -11109,6 +15008,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -11254,13 +15154,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -11269,10 +15169,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -11285,18 +15186,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &1954513987
 MeshRenderer:
@@ -11312,6 +15299,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -11323,6 +15311,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -11479,9 +15468,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -11499,12 +15488,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -11515,18 +15505,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &1980026172
 MonoBehaviour:
@@ -11554,6 +15630,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &1980026173
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -11568,6 +15646,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -11579,6 +15658,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -11735,9 +15815,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -11755,12 +15835,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -11771,18 +15852,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &2071203997
 MonoBehaviour:
@@ -11810,6 +15977,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &2071203998
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -11824,6 +15993,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -11835,6 +16005,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -11991,9 +16162,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -12011,12 +16182,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -12027,18 +16199,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &2095793874
 MonoBehaviour:
@@ -12066,6 +16324,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &2095793875
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -12080,6 +16340,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -12091,6 +16352,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -12236,13 +16498,13 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_Capsule:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_Cylinder:
-    Height: 65.52365
-    Radius: 19.005905
-    Axis: 0
+    Height: 38.01181
+    Radius: 32.761826
+    Axis: 2
   m_CylinderSideCount: 20
   m_SphereRadius: 32.761826
   m_MinimumSkinnedVertexWeight: 0.1
@@ -12251,10 +16513,11 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
       m_Value: 0
     m_Friction:
@@ -12267,18 +16530,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!23 &2096206524
 MeshRenderer:
@@ -12294,6 +16643,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -12305,6 +16655,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -12461,9 +16812,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -12481,12 +16832,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -12497,18 +16849,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &2108110991
 MonoBehaviour:
@@ -12536,6 +16974,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &2108110992
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -12550,6 +16990,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -12561,6 +17002,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -12717,9 +17159,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: 270
-      y: 270
-      z: 0
+      x: -90
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -12737,12 +17179,13 @@ MonoBehaviour:
     m_BevelRadius: 0.05
     m_MinimumAngle: 2.5000002
   m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
   m_Material:
     m_SupportsTemplate: 1
     m_Template: {fileID: 0}
-    m_IsTrigger:
+    m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -12753,18 +17196,104 @@ MonoBehaviour:
       m_Value:
         Value: 0
         CombineMode: 2
-    m_BelongsTo:
+    m_BelongsToCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_CollidesWith:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
       m_Override: 0
-      m_Value: 0101010101010101010101010101010101010101010101010101010101010101
-    m_RaisesCollisionEvents:
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
       m_Override: 0
       m_Value: 0
-    m_CustomTags:
+    m_RaisesCollisionEvents_Deprecated:
       m_Override: 0
-      m_Value: 0000000000000000
+      m_Value: 0
+  m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 --- !u!114 &2137034162
 MonoBehaviour:
@@ -12792,6 +17321,8 @@ MonoBehaviour:
   SkinWidth: 0.02
   ContactTolerance: 0.1
   AffectsPhysicsBodies: 1
+  RaiseCollisionEvents: 0
+  RaiseTriggerEvents: 0
 --- !u!23 &2137034163
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -12806,6 +17337,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -12817,6 +17349,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

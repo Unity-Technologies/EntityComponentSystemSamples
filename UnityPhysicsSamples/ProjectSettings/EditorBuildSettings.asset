@@ -12,8 +12,23 @@ EditorBuildSettings:
     path: Assets/Demos/6. Use Cases/PlanetGravity/PlanetGravity.unity
     guid: 88bcbef748dbd464ca253805fdbe6acf
   - enabled: 1
-    path: Assets/Demos/1. Hello World/1. Hello World.unity
+    path: Assets/Demos/1. Hello World/1a. Hello World.unity
     guid: 2a687b81fe1bb614bb65164b75cf5765
+  - enabled: 1
+    path: Assets/Demos/1. Hello World/1b. Representations.unity
+    guid: 73e5687e5a408214ca1c5de063a29931
+  - enabled: 1
+    path: Assets/Demos/1. Hello World/1c. Conversion.unity
+    guid: 2e2067153c43e3148806937cdb5335a9
+  - enabled: 1
+    path: Assets/Demos/1. Hello World/1c. Conversion/1c1. GameObjects GravityWell.unity
+    guid: d83b2db332f922247b1ac452d36eb0d3
+  - enabled: 1
+    path: Assets/Demos/1. Hello World/1c. Conversion/1c2. Convertible GravityWell.unity
+    guid: 90012837924254c43a65890d3128c569
+  - enabled: 1
+    path: Assets/Demos/1. Hello World/1c. Conversion/1c3. DOTS GravityWell.unity
+    guid: 640ac29680a7e4d46a5ca4fcf64b8ca5
   - enabled: 1
     path: Assets/Demos/2. Setup/2a. Collision Geometry/2a1. Collider Parade - Basic.unity
     guid: 5d3a1c39ea4e60d4187833eb6910c328
@@ -57,9 +72,6 @@ EditorBuildSettings:
     path: Assets/Demos/2. Setup/2d. Events/2d1. Events - Triggers.unity
     guid: 875032b6965d69f4f848891e6a0febb8
   - enabled: 1
-    path: Assets/Demos/2. Setup/2d. Events/2d2. Events - Contacts.unity
-    guid: f838a9537481ad34099c40174918d676
-  - enabled: 1
     path: Assets/Demos/2. Setup/2d. Events/2d1. Triggers/2d1a. Triggers - Change
       Material.unity
     guid: 8ca24c4840a73334fb6ee34129c7ff2b
@@ -70,6 +82,13 @@ EditorBuildSettings:
     path: Assets/Demos/2. Setup/2d. Events/2d1. Triggers/2d1c. Triggers - Force Field.unity
     guid: 6086803bc3f29984b996d21168c06522
   - enabled: 1
+    path: Assets/Demos/2. Setup/2d. Events/2d2. Events - Contacts.unity
+    guid: f838a9537481ad34099c40174918d676
+  - enabled: 1
+    path: Assets/Demos/2. Setup/2d. Events/2d2. Collision Events/2d2a. Collision
+      Events - Event States.unity
+    guid: 2cabec6b8fb8298459d0c2343b450ac9
+  - enabled: 1
     path: Assets/Demos/3. Query/AllHitsDistanceTest.unity
     guid: 6f365cbd1e58c514ca747bf333baf419
   - enabled: 1
@@ -79,6 +98,9 @@ EditorBuildSettings:
     path: Assets/Demos/3. Query/ClosestHitDistanceTest.unity
     guid: bfa86b2ab5ba4b04490b67847382c940
   - enabled: 1
+    path: Assets/Demos/3. Query/CustomCollector.unity
+    guid: fdd38846f2fdcec4f918940e42a2ab31
+  - enabled: 1
     path: Assets/Demos/4. Joints/4a. Joints Parade.unity
     guid: d4ffb704ffe9ed146ad1516edebb50aa
   - enabled: 1
@@ -87,6 +109,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Demos/4. Joints/Ragdoll.unity
     guid: 017d1b86e3c94ef46abcfcc0d9f6d97e
+  - enabled: 1
+    path: Assets/Demos/5. Modify/5a. Change Motion Type.unity
+    guid: bacd936e90c42cb41a6b6e6ce8527618
+  - enabled: 1
+    path: Assets/Demos/5. Modify/5b. Change Collider Size.unity
+    guid: 50a301ea8f7601e4ea369bcfb199bd5e
+  - enabled: 1
+    path: Assets/Demos/5. Modify/5c. Change Collider Type.unity
+    guid: 29663539465f0d940a1a13a274ad5b5c
+  - enabled: 1
+    path: Assets/Demos/5. Modify/5d. Kinematic Motion.unity
+    guid: 6f534511593dc499992b7191c712a3a6
   - enabled: 1
     path: Assets/Demos/5. Modify/ApplyImpulse.unity
     guid: 6283a56ece09be24ba5f5ba2e1d5018f
@@ -138,15 +172,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Tests/LargeMesh/LargeMesh.unity
     guid: 5211f6293288d59408a79b01a5bcdb0a
-  - enabled: 1
-    path: Assets/Demos/5. Modify/5a. Change Motion Type.unity
-    guid: bacd936e90c42cb41a6b6e6ce8527618
-  - enabled: 1
-    path: Assets/Demos/5. Modify/5b. Change Collider Size.unity
-    guid: 50a301ea8f7601e4ea369bcfb199bd5e
-  - enabled: 1
-    path: Assets/Demos/5. Modify/5c. Change Collider Type.unity
-    guid: 29663539465f0d940a1a13a274ad5b5c
   - enabled: 1
     path: Assets/Tests/BehaviorUnitTests/Collision/CollisionUT.unity
     guid: d79e7bc9ccc049d4588116ffa10e487d
@@ -223,9 +248,21 @@ EditorBuildSettings:
     path: Assets/Tests/CollisionEvents/NoDynamicBodies.unity
     guid: d9d1615654759e246bc1ed9141fb2e1c
   - enabled: 1
-    path: Assets/Demos/3. Query/CustomCollector.unity
-    guid: fdd38846f2fdcec4f918940e42a2ab31
-  - enabled: 1
     path: Assets/Tests/AddRemove/AddRemove.unity
     guid: e9c09f36907a8e14190f322770cea95b
+  - enabled: 1
+    path: Assets/Tests/CharacterController/CC_Events.unity
+    guid: 250ce4ca9a250ad4886a46f2a17a3536
+  - enabled: 1
+    path: Assets/Tests/CollisionResponse/CollisionResponse.None.unity
+    guid: b3de4f8ab2d375843916ac983d165596
+  - enabled: 1
+    path: Assets/Tests/Stacking/ComplexStacking.unity
+    guid: d7d9a1f50c842444f87fd276dac8119b
+  - enabled: 1
+    path: Assets/Tests/Stacking/SimpleStacking.unity
+    guid: f2b27c604df25a84c875bd047ae927ed
+  - enabled: 1
+    path: Assets/Tests/Stacking/BasicStacks.unity
+    guid: 57753409bad1c304bac6620f2e98cd26
   m_configObjects: {}

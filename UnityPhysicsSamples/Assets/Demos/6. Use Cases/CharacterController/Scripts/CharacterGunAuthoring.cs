@@ -1,10 +1,9 @@
-﻿using Unity.Entities;
+﻿using System.Collections.Generic;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
-using System.Collections.Generic;
-using System;
 using Unity.Physics;
+using UnityEngine;
 
 public struct CharacterGun: IComponentData
 {
@@ -17,13 +16,11 @@ public struct CharacterGun: IComponentData
     public int IsFiring;
 }
 
-
 public struct CharacterGunInput : IComponentData
 {
     public float2 Looking;
     public float Firing;
 }
-
 
 public class CharacterGunAuthoring : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
 {
@@ -40,9 +37,9 @@ public class CharacterGunAuthoring : MonoBehaviour, IDeclareReferencedPrefabs, I
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        dstManager.AddComponentData<CharacterGun>(
+        dstManager.AddComponentData(
             entity,
-            new CharacterGun()
+            new CharacterGun
             {
                 Bullet = conversionSystem.GetPrimaryEntity(Bullet),
                 Strength = Strength,
@@ -53,27 +50,29 @@ public class CharacterGunAuthoring : MonoBehaviour, IDeclareReferencedPrefabs, I
     }
 }
 
-
 #region System
 // Update before physics gets going so that we don't have hazard warnings.
 // This assumes that all gun are being controlled from the same single input system
 [UpdateAfter(typeof(CharacterControllerSystem))]
-public class CharacterGunOneToManyInputSystem : ComponentSystem
+public class CharacterGunOneToManyInputSystem : SystemBase
 {
-    EntityQuery m_CharacterGunInputQuery;
+    EntityCommandBufferSystem m_EntityCommandBufferSystem;
 
-    protected override void OnCreate() =>
-        m_CharacterGunInputQuery = GetEntityQuery(ComponentType.ReadOnly<CharacterGunInput>());
-
+    protected override void OnCreate()
+    {
+        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+    }
 
     protected override void OnUpdate()
     {
-        var input = m_CharacterGunInputQuery.GetSingleton<CharacterGunInput>();
-
+        var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+        var input = GetSingleton<CharacterGunInput>();
         float dt = UnityEngine.Time.fixedDeltaTime;
-        
-        Entities.ForEach(
-            (ref LocalToWorld gunTransform, ref Rotation gunRotation, ref CharacterGun gun) =>
+
+        Entities
+            .WithName("CharacterControllerGunToManyInputJob")
+            .WithBurst()
+            .ForEach((Entity entity, int entityInQueryIndex, ref Rotation gunRotation, ref CharacterGun gun, in LocalToWorld gunTransform) =>
             {
                 // Handle input
                 {
@@ -90,11 +89,11 @@ public class CharacterGunOneToManyInputSystem : ComponentSystem
                 }
 
                 gun.Duration += dt;
-                if ( (gun.Duration > gun.Rate) || (gun.WasFiring == 0) )
+                if ((gun.Duration > gun.Rate) || (gun.WasFiring == 0))
                 {
                     if (gun.Bullet != null)
                     {
-                        var e = PostUpdateCommands.Instantiate(gun.Bullet);
+                        var e = commandBuffer.Instantiate(entityInQueryIndex, gun.Bullet);
 
                         Translation position = new Translation { Value = gunTransform.Position + gunTransform.Forward };
                         Rotation rotation = new Rotation { Value = gunRotation.Value };
@@ -104,15 +103,15 @@ public class CharacterGunOneToManyInputSystem : ComponentSystem
                             Angular = float3.zero
                         };
 
-                        PostUpdateCommands.SetComponent(e, position);
-                        PostUpdateCommands.SetComponent(e, rotation);
-                        PostUpdateCommands.SetComponent(e, velocity);
+                        commandBuffer.SetComponent(entityInQueryIndex, e, position);
+                        commandBuffer.SetComponent(entityInQueryIndex, e, rotation);
+                        commandBuffer.SetComponent(entityInQueryIndex, e, velocity);
                     }
                     gun.Duration = 0;
                 }
                 gun.WasFiring = 1;
-            }
-        );
+            }).ScheduleParallel();
+        m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
     }
 }
 #endregion

@@ -1,13 +1,12 @@
 ﻿using System;
-using Unity.Physics;
-using Unity.Physics.Systems;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Math = Unity.Physics.Math;
+using Unity.Physics;
+using Unity.Physics.Systems;
 using UnityEngine;
-using Unity.Burst;
 
 public struct ModifyContactJacobians : IComponentData
 {
@@ -39,7 +38,7 @@ public class ModifyContactJacobiansBehaviour : MonoBehaviour, IConvertGameObject
 
 // A system which configures the simulation step to modify contact jacobains in various ways
 [UpdateBefore(typeof(StepPhysicsWorld))]
-public class ModifyContactJacobiansSystem : JobComponentSystem
+public class ModifyContactJacobiansSystem : SystemBase
 {
     EntityQuery m_ContactModifierGroup;
     StepPhysicsWorld m_StepPhysicsWorld;
@@ -65,17 +64,17 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
 
         public void Execute(ref ModifiableContactHeader manifold, ref ModifiableContactPoint contact)
         {
-            Entity entityA = manifold.Entities.EntityA;
-            Entity entityB = manifold.Entities.EntityB;
+            Entity entityA = manifold.EntityA;
+            Entity entityB = manifold.EntityB;
 
             ModifyContactJacobians.ModificationType typeA = ModifyContactJacobians.ModificationType.None;
-            if(modificationData.Exists(entityA))
+            if(modificationData.HasComponent(entityA))
             {
                 typeA = modificationData[entityA].type;
             }
 
             ModifyContactJacobians.ModificationType typeB = ModifyContactJacobians.ModificationType.None;
-            if(modificationData.Exists(entityB))
+            if(modificationData.HasComponent(entityB))
             {
                 typeB = modificationData[entityB].type;
             }
@@ -102,17 +101,17 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
 
         public void Execute(ref ModifiableJacobianHeader jacHeader, ref ModifiableContactJacobian contactJacobian)
         {
-            Entity entityA = jacHeader.Entities.EntityA;
-            Entity entityB = jacHeader.Entities.EntityB;
+            Entity entityA = jacHeader.EntityA;
+            Entity entityB = jacHeader.EntityB;
 
             ModifyContactJacobians.ModificationType typeA = ModifyContactJacobians.ModificationType.None;
-            if (modificationData.Exists(entityA))
+            if (modificationData.HasComponent(entityA))
             {
                 typeA = modificationData[entityA].type;
             }
 
             ModifyContactJacobians.ModificationType typeB = ModifyContactJacobians.ModificationType.None;
-            if (modificationData.Exists(entityB))
+            if (modificationData.HasComponent(entityB))
             {
                 typeB = modificationData[entityB].type;
             }
@@ -200,11 +199,11 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
         }
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics)
         {
-            return inputDeps;
+            return;
         }
 
         SimulationCallbacks.Callback preparationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
@@ -223,10 +222,7 @@ public class ModifyContactJacobiansSystem : JobComponentSystem
             }.Schedule(simulation, ref world, inDeps);
         };
 
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, preparationCallback, inputDeps);
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, jacobianModificationCallback, inputDeps);
-
-        return inputDeps;
+        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, preparationCallback, Dependency);
+        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, jacobianModificationCallback, Dependency);
     }
-
 }

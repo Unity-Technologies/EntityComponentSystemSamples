@@ -1,9 +1,8 @@
-using System;
 using Unity.Entities;
 using UnityEngine;
 
 [UpdateAfter(typeof(ChangeActiveVehicleSystem))]
-class CameraFollowActiveVehicleSystem : ComponentSystem
+class CameraFollowActiveVehicleSystem : SystemBase
 {
     CameraSmoothTrack m_CameraTracker;
 
@@ -16,11 +15,15 @@ class CameraFollowActiveVehicleSystem : ComponentSystem
         if (m_CameraTracker == null)
             return;
 
-        Entities.WithAllReadOnly<ActiveVehicle, VehicleReferences>().ForEach((VehicleReferences vehicle) =>
-        {
-            m_CameraTracker.Target = vehicle.CameraTarget.gameObject;
-            m_CameraTracker.LookTo = vehicle.CameraTo.gameObject;
-            m_CameraTracker.LookFrom = vehicle.CameraFrom.gameObject;
-        });
+        Entities
+            .WithName("CameraFollowActiveVehicleJob")
+            .WithoutBurst()
+            .WithAll<ActiveVehicle>()
+            .ForEach((in VehicleReferences vehicle) =>
+            {
+                m_CameraTracker.Target = vehicle.CameraTarget.gameObject;
+                m_CameraTracker.LookTo = vehicle.CameraTo.gameObject;
+                m_CameraTracker.LookFrom = vehicle.CameraFrom.gameObject;
+            }).Run();
     }
 }

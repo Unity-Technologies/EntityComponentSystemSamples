@@ -101,7 +101,7 @@ namespace Demos
         protected override void OnUpdate()
         {
             // Make sure the world has finished building before querying it
-            CreatePhysicsWorldSystem.FinalJobHandle.Complete();
+            CreatePhysicsWorldSystem.GetOutputDependency().Complete();
 
             PhysicsWorld world = CreatePhysicsWorldSystem.PhysicsWorld;
 

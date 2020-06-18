@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Unity.Physics.Extensions
 {
     [UpdateAfter(typeof(BuildPhysicsWorld))]
-    public class RayTracerSystem : JobComponentSystem
+    public class RayTracerSystem : SystemBase
     {
         BuildPhysicsWorld m_BuildPhysicsWorldSystem;
 
@@ -196,16 +196,16 @@ namespace Unity.Physics.Extensions
             m_Results = new List<RayResult>();
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             if (m_Requests == null || m_Requests.Count == 0)
             {
-                return inputDeps;
+                return;
             }
 
-            inputDeps = JobHandle.CombineDependencies(inputDeps, m_BuildPhysicsWorldSystem.FinalJobHandle);
+            var handle = JobHandle.CombineDependencies(Dependency, m_BuildPhysicsWorldSystem.GetOutputDependency());
 
-            JobHandle combinedJobs = inputDeps;
+            JobHandle combinedJobs = handle;
             for (int i = 0; i < m_Requests.Count; i++)
             {
                 JobHandle rcj = new RaycastJob
@@ -214,7 +214,7 @@ namespace Unity.Physics.Extensions
                     Request = m_Requests[0],
                     World = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld,
                     NumDynamicBodies = m_BuildPhysicsWorldSystem.PhysicsWorld.NumDynamicBodies
-                }.Schedule(m_Results[0].PixelData.ForEachCount, 1, inputDeps);
+                }.Schedule(m_Results[0].PixelData.ForEachCount, 1, handle);
                 rcj.Complete(); //<todo.eoin How can we properly wait on this task when reading results?
                 combinedJobs = JobHandle.CombineDependencies(combinedJobs, rcj);
             }
@@ -222,7 +222,7 @@ namespace Unity.Physics.Extensions
             m_Requests.Clear();
             m_Results.Clear();
 
-            return combinedJobs;
+            Dependency = combinedJobs;
         }
     }
 }

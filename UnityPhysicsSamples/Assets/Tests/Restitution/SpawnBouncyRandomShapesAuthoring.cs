@@ -1,10 +1,14 @@
 ﻿using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using UnityEngine.Assertions;
 using Collider = Unity.Physics.Collider;
+#if !UNITY_ENTITIES_0_12_OR_NEWER
+using UnsafeUtility = UnsafeUtility_BackwardCompatibility;
+#else
+using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 class SpawnBouncyRandomShapesAuthoring : SpawnRandomObjectsAuthoringBase<BouncySpawnSettings>
 {

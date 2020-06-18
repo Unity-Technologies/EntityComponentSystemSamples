@@ -22,9 +22,9 @@ public static class RagdollDemoUtilities
 
     public struct JointInfo
     {
-        public int BodyAIndex;
-        public int BodyBIndex;
-        public BlobAssetReference<JointData> JointData;
+        public int BodyIndexA;
+        public int BodyIndexB;
+        public PhysicsJoint JointData;
         public bool EnabledCollisions;
     }
 
@@ -103,7 +103,7 @@ public static class RagdollDemoUtilities
         };
     }
 
-    public static void CreateNeck(GameObject torso, GameObject head, out BlobAssetReference<JointData> jointData0, out BlobAssetReference<JointData> jointData1)
+    public static void CreateNeck(GameObject torso, GameObject head, out PhysicsJoint jointData0, out PhysicsJoint jointData1)
     {
         var headTransform = head.GetComponent<Transform>();
         float headRadius = 0.5f * headTransform.localScale.x;
@@ -121,13 +121,13 @@ public static class RagdollDemoUtilities
         var perpendicularAngle = new FloatRange { Max = math.PI };
         var twistAngle = new FloatRange(-math.PI / 3f, math.PI / 3f);
 
-        var jointFrameTorso = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotTorso };
-        var jointFrameHead = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHead };
+        var jointFrameTorso = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotTorso };
+        var jointFrameHead = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHead };
 
-        JointData.CreateRagdoll(jointFrameTorso, jointFrameHead, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
+        PhysicsJoint.CreateRagdoll(jointFrameTorso, jointFrameHead, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
     }
 
-    public static void CreateShoulder(GameObject torso, GameObject upperArm, out BlobAssetReference<JointData> jointData0, out BlobAssetReference<JointData> jointData1)
+    public static void CreateShoulder(GameObject torso, GameObject upperArm, out PhysicsJoint jointData0, out PhysicsJoint jointData1)
     {
         float armLength = 2 * upperArm.transform.localScale.y;
 
@@ -153,13 +153,13 @@ public static class RagdollDemoUtilities
         var perpendicularAngle = new FloatRange(math.PI / 6f, math.PI * 5f / 6f);
         var twistAngle = new FloatRange(-0.0872665f, 0.0872665f);
 
-        var jointFrameBody = new JointFrame { Axis = twistAxisTorso, PerpendicularAxis = perpendicularAxisTorso, Position = pivotBody };
-        var jointFrameArm = new JointFrame { Axis = twistAxisArm, PerpendicularAxis = perpendicularAxisArm, Position = pivotArm };
+        var jointFrameBody = new BodyFrame { Axis = twistAxisTorso, PerpendicularAxis = perpendicularAxisTorso, Position = pivotBody };
+        var jointFrameArm = new BodyFrame { Axis = twistAxisArm, PerpendicularAxis = perpendicularAxisArm, Position = pivotArm };
 
-        JointData.CreateRagdoll(jointFrameBody, jointFrameArm, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
+        PhysicsJoint.CreateRagdoll(jointFrameBody, jointFrameArm, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
     }
 
-    public static void CreateWaist(GameObject torso, GameObject pelvis, out BlobAssetReference<JointData> jointData0, out BlobAssetReference<JointData> jointData1)
+    public static void CreateWaist(GameObject torso, GameObject pelvis, out PhysicsJoint jointData0, out PhysicsJoint jointData1)
     {
         float3 pivotTorso = float3.zero;
 
@@ -179,13 +179,13 @@ public static class RagdollDemoUtilities
         var perpendicularAngle = new FloatRange { Max = math.PI };
         var twistAngle = new FloatRange(-0.01f, 0.1f);
 
-        var jointFrameTorso = new JointFrame { Axis = axisTorso, PerpendicularAxis = perpendicularTorso, Position = pivotTorso };
-        var jointFramePelvis = new JointFrame { Axis = axisPelvis, PerpendicularAxis = perpendicularPelvis, Position = pivotPelvis };
+        var jointFrameTorso = new BodyFrame { Axis = axisTorso, PerpendicularAxis = perpendicularTorso, Position = pivotTorso };
+        var jointFramePelvis = new BodyFrame { Axis = axisPelvis, PerpendicularAxis = perpendicularPelvis, Position = pivotPelvis };
 
-        JointData.CreateRagdoll(jointFrameTorso, jointFramePelvis, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
+        PhysicsJoint.CreateRagdoll(jointFrameTorso, jointFramePelvis, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
     }
 
-    public static void CreateHip(GameObject pelvis, GameObject upperLeg, out BlobAssetReference<JointData> jointData0, out BlobAssetReference<JointData> jointData1)
+    public static void CreateHip(GameObject pelvis, GameObject upperLeg, out PhysicsJoint jointData0, out PhysicsJoint jointData1)
     {
         float upperLegHeight = 2.0f * upperLeg.transform.localScale.y;
 
@@ -208,13 +208,13 @@ public static class RagdollDemoUtilities
         var perpendicularAngle = new FloatRange(math.PI / 3f, math.PI * 2f / 3f);
         var twistAngle = new FloatRange(-0.2f, 0.2f);
 
-        var jointFramePelvis = new JointFrame { Axis = twistAxisPelvis, PerpendicularAxis = perpendicularAxisPelvis, Position = pivotPelvis };
-        var jointFrameLeg = new JointFrame { Axis = twistAxisLeg, PerpendicularAxis = perpendicularAxisLeg, Position = pivotLeg };
+        var jointFramePelvis = new BodyFrame { Axis = twistAxisPelvis, PerpendicularAxis = perpendicularAxisPelvis, Position = pivotPelvis };
+        var jointFrameLeg = new BodyFrame { Axis = twistAxisLeg, PerpendicularAxis = perpendicularAxisLeg, Position = pivotLeg };
 
-        JointData.CreateRagdoll(jointFramePelvis, jointFrameLeg, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
+        PhysicsJoint.CreateRagdoll(jointFramePelvis, jointFrameLeg, coneAngle, perpendicularAngle, twistAngle, out jointData0, out jointData1);
     }
 
-    public static BlobAssetReference<JointData> CreateElbow(GameObject upperArm, GameObject lowerArm)
+    public static PhysicsJoint CreateElbow(GameObject upperArm, GameObject lowerArm)
     {
         float upperArmLength = 2 * upperArm.transform.localScale.y;
         float lowerArmLength = 2 * lowerArm.transform.localScale.y;
@@ -228,13 +228,13 @@ public static class RagdollDemoUtilities
         float3 axis = new float3(0, 0, 1);
         float3 perpendicular = new float3(0, 1, 0);
 
-        var jointFrameUpperArm = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotUpper };
-        var jointFrameLowerArm = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotLower };
+        var jointFrameUpperArm = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotUpper };
+        var jointFrameLowerArm = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotLower };
 
-        return JointData.CreateLimitedHinge(jointFrameUpperArm, jointFrameLowerArm, new FloatRange { Max = 3f });
+        return PhysicsJoint.CreateLimitedHinge(jointFrameUpperArm, jointFrameLowerArm, new FloatRange { Max = 3f });
     }
 
-    public static BlobAssetReference<JointData> CreateWrist(GameObject lowerArm, GameObject hand)
+    public static PhysicsJoint CreateWrist(GameObject lowerArm, GameObject hand)
     {
         float armLength = 2.0f * lowerArm.transform.localScale.y;
         float handLength = 2.0f * hand.transform.localScale.y;
@@ -246,13 +246,13 @@ public static class RagdollDemoUtilities
         float3 axis = new float3(0, 0, 1);
         float3 perpendicular = new float3(0, 1, 0);
 
-        var jointFrameForearm = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
-        var jointFrameHand = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHand };
+        var jointFrameForearm = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
+        var jointFrameHand = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHand };
 
-        return JointData.CreateLimitedHinge(jointFrameForearm, jointFrameHand, new FloatRange(-0.3f, 0.6f));
+        return PhysicsJoint.CreateLimitedHinge(jointFrameForearm, jointFrameHand, new FloatRange(-0.3f, 0.6f));
     }
 
-    public static BlobAssetReference<JointData> CreateKnee(GameObject upperLeg, GameObject lowerLeg)
+    public static PhysicsJoint CreateKnee(GameObject upperLeg, GameObject lowerLeg)
     {
         float upperLegHeight = 2.0f * upperLeg.transform.localScale.y;
 
@@ -266,13 +266,13 @@ public static class RagdollDemoUtilities
         float3 axis = new float3(1, 0, 0);
         float3 perpendicular = new float3(0, 0, 1);
 
-        var jointFrameUpperLeg = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotUpperLeg };
-        var jointFrameLowerLeg = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotLowerLeg };
+        var jointFrameUpperLeg = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotUpperLeg };
+        var jointFrameLowerLeg = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotLowerLeg };
 
-        return JointData.CreateLimitedHinge(jointFrameUpperLeg, jointFrameLowerLeg, new FloatRange { Min = -1.2f });
+        return PhysicsJoint.CreateLimitedHinge(jointFrameUpperLeg, jointFrameLowerLeg, new FloatRange { Min = -1.2f });
     }
 
-    public static BlobAssetReference<JointData> CreateAnkle(GameObject lowerLeg, GameObject foot)
+    public static PhysicsJoint CreateAnkle(GameObject lowerLeg, GameObject foot)
     {
         float lowerLegLength = 2.0f * lowerLeg.transform.localScale.y;
 
@@ -285,9 +285,9 @@ public static class RagdollDemoUtilities
         float3 axis = new float3(1, 0, 0);
         float3 perpendicular = new float3(0, 0, 1);
 
-        var jointFrameLowerLeg = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotLowerLeg };
-        var jointFrameFoot = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFoot };
+        var jointFrameLowerLeg = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotLowerLeg };
+        var jointFrameFoot = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFoot };
 
-        return JointData.CreateLimitedHinge(jointFrameLowerLeg, jointFrameFoot, new FloatRange(-0.4f, 0.1f));
+        return PhysicsJoint.CreateLimitedHinge(jointFrameLowerLeg, jointFrameFoot, new FloatRange(-0.4f, 0.1f));
     }
 }

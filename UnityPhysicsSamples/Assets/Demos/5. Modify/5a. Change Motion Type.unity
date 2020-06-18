@@ -127,7 +127,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1431731320}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &259436053
+--- !u!114 &259436047
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -141,6 +141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 0}
   EnableCollision: 0
+  EditPivots: 0
   AutoSetConnected: 1
   PositionLocal:
     x: 0
@@ -150,6 +151,7 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
+  EditAxes: 0
   HingeAxisLocal:
     x: 0
     y: 0
@@ -170,12 +172,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26d371c4070e2934b94c8c6bed12c677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DynamicBody: {fileID: 8987201829957160811, guid: fc6405f0d5e8afa4aae68e160bb99a2f,
-    type: 3}
-  KinematicBody: {fileID: 1620785302907994383, guid: 772c503b1389fa5488163ef3c9cdae82,
-    type: 3}
-  StaticBody: {fileID: 6172597758238345661, guid: f639d57ba7266984ba0c7e5f7a5d2479,
-    type: 3}
+  DynamicMaterial: {fileID: 2100000, guid: 959eccfeb940d0e4b9bff9d7d3841c5a, type: 2}
+  KinematicMaterial: {fileID: 2100000, guid: 35342607fbc35834abde11a825cc6e51, type: 2}
+  StaticMaterial: {fileID: 2100000, guid: 64716136fbbea404388c6534383d7b5e, type: 2}
   TimeToSwap: 1
 --- !u!1 &596994920 stripped
 GameObject:
@@ -195,12 +194,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26d371c4070e2934b94c8c6bed12c677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DynamicBody: {fileID: 8987201829957160811, guid: fc6405f0d5e8afa4aae68e160bb99a2f,
-    type: 3}
-  KinematicBody: {fileID: 1620785302907994383, guid: 772c503b1389fa5488163ef3c9cdae82,
-    type: 3}
-  StaticBody: {fileID: 6172597758238345661, guid: f639d57ba7266984ba0c7e5f7a5d2479,
-    type: 3}
+  DynamicMaterial: {fileID: 2100000, guid: 959eccfeb940d0e4b9bff9d7d3841c5a, type: 2}
+  KinematicMaterial: {fileID: 2100000, guid: 35342607fbc35834abde11a825cc6e51, type: 2}
+  StaticMaterial: {fileID: 2100000, guid: 64716136fbbea404388c6534383d7b5e, type: 2}
   TimeToSwap: 1.5
 --- !u!114 &596994922
 MonoBehaviour:
@@ -216,6 +212,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 0}
   EnableCollision: 0
+  EditPivots: 0
   AutoSetConnected: 1
   PositionLocal:
     x: 0
@@ -225,6 +222,7 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
+  EditAxes: 0
   HingeAxisLocal:
     x: 0
     y: 0
@@ -361,18 +359,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
+      propertyPath: m_GravityFactor
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
+        type: 3}
       propertyPath: m_CenterOfMass.y
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
-      propertyPath: m_LinearDamping
-      value: 0.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
-        type: 3}
-      propertyPath: m_GravityFactor
-      value: 0.5
+      propertyPath: m_InitialLinearVelocity.y
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606214, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
@@ -455,13 +453,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
-      propertyPath: m_LinearDamping
-      value: 0.01
+      propertyPath: m_GravityFactor
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
-      propertyPath: m_GravityFactor
-      value: 0.5
+      propertyPath: m_InitialLinearVelocity.y
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606214, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
@@ -543,12 +541,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26d371c4070e2934b94c8c6bed12c677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DynamicBody: {fileID: 8987201829957160811, guid: fc6405f0d5e8afa4aae68e160bb99a2f,
-    type: 3}
-  KinematicBody: {fileID: 1620785302907994383, guid: 772c503b1389fa5488163ef3c9cdae82,
-    type: 3}
-  StaticBody: {fileID: 6172597758238345661, guid: f639d57ba7266984ba0c7e5f7a5d2479,
-    type: 3}
+  DynamicMaterial: {fileID: 2100000, guid: 959eccfeb940d0e4b9bff9d7d3841c5a, type: 2}
+  KinematicMaterial: {fileID: 2100000, guid: 35342607fbc35834abde11a825cc6e51, type: 2}
+  StaticMaterial: {fileID: 2100000, guid: 64716136fbbea404388c6534383d7b5e, type: 2}
   TimeToSwap: 0.5
 --- !u!114 &1689974206
 MonoBehaviour:
@@ -564,6 +559,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 0}
   EnableCollision: 0
+  EditPivots: 0
   AutoSetConnected: 1
   PositionLocal:
     x: 0
@@ -573,6 +569,7 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
+  EditAxes: 0
   HingeAxisLocal:
     x: 0
     y: 0
@@ -600,13 +597,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
-      propertyPath: m_LinearDamping
-      value: 0.01
+      propertyPath: m_GravityFactor
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606212, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}
-      propertyPath: m_GravityFactor
-      value: 0.5
+      propertyPath: m_InitialLinearVelocity.y
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3025946137087606214, guid: 2e2eb05792add304c8a5467548e44c47,
         type: 3}

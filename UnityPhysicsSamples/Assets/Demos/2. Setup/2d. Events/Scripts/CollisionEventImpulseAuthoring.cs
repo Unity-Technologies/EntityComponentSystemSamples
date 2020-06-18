@@ -1,10 +1,8 @@
-﻿using System;
-using Unity.Burst;
-using Unity.Physics;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using UnityEngine;
 
@@ -32,26 +30,26 @@ public class CollisionEventImpulseAuthoring : MonoBehaviour, IConvertGameObjectT
     }
 }
 
-
-
 // This system applies an impulse to any dynamic that collides with a Repulsor.
 // A Repulsor is defined by a PhysicsShapeAuthoring with the `Raise Collision Events` flag ticked and a
 // CollisionEventImpulse behaviour added.
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class CollisionEventImpulseSystem : JobComponentSystem
+public class CollisionEventImpulseSystem : SystemBase
 {
     BuildPhysicsWorld m_BuildPhysicsWorldSystem;
     StepPhysicsWorld m_StepPhysicsWorldSystem;
-
-    EntityQuery ImpulseGroup;
+    EntityQuery m_ImpulseGroup;
 
     protected override void OnCreate()
     {
         m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
         m_StepPhysicsWorldSystem = World.GetOrCreateSystem<StepPhysicsWorld>();
-        ImpulseGroup = GetEntityQuery(new EntityQueryDesc
+        m_ImpulseGroup = GetEntityQuery(new EntityQueryDesc
         {
-            All = new ComponentType[] { typeof(CollisionEventImpulse), }
+            All = new ComponentType[]
+            {
+                typeof(CollisionEventImpulse)
+            }
         });
     }
 
@@ -63,16 +61,16 @@ public class CollisionEventImpulseSystem : JobComponentSystem
 
         public void Execute(CollisionEvent collisionEvent)
         {
-            Entity entityA = collisionEvent.Entities.EntityA;
-            Entity entityB = collisionEvent.Entities.EntityB;
+            Entity entityA = collisionEvent.EntityA;
+            Entity entityB = collisionEvent.EntityB;
 
-            bool isBodyADynamic = PhysicsVelocityGroup.Exists(entityA);
-            bool isBodyBDynamic = PhysicsVelocityGroup.Exists(entityB);
+            bool isBodyADynamic = PhysicsVelocityGroup.HasComponent(entityA);
+            bool isBodyBDynamic = PhysicsVelocityGroup.HasComponent(entityB);
 
-            bool isBodyARepulser = ColliderEventImpulseGroup.Exists(entityA);
-            bool isBodyBRepulser = ColliderEventImpulseGroup.Exists(entityB);
+            bool isBodyARepulser = ColliderEventImpulseGroup.HasComponent(entityA);
+            bool isBodyBRepulser = ColliderEventImpulseGroup.HasComponent(entityB);
 
-            if(isBodyARepulser && isBodyBDynamic)
+            if (isBodyARepulser && isBodyBDynamic)
             {
                 var impulseComponent = ColliderEventImpulseGroup[entityA];
                 var velocityComponent = PhysicsVelocityGroup[entityB];
@@ -89,15 +87,18 @@ public class CollisionEventImpulseSystem : JobComponentSystem
         }
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
-        JobHandle jobHandle = new CollisionEventImpulseJob
+        if (m_ImpulseGroup.CalculateEntityCount() == 0)
+        {
+            return;
+        }
+
+        Dependency = new CollisionEventImpulseJob
         {
             ColliderEventImpulseGroup = GetComponentDataFromEntity<CollisionEventImpulse>(true),
             PhysicsVelocityGroup = GetComponentDataFromEntity<PhysicsVelocity>(),
-        }.Schedule(m_StepPhysicsWorldSystem.Simulation, 
-                    ref m_BuildPhysicsWorldSystem.PhysicsWorld, inputDeps);
-
-        return jobHandle;
+        }.Schedule(m_StepPhysicsWorldSystem.Simulation,
+            ref m_BuildPhysicsWorldSystem.PhysicsWorld, Dependency);
     }
 }

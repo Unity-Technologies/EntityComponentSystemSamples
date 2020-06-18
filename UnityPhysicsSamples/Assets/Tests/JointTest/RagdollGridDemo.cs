@@ -45,10 +45,9 @@ public class RagdollGridDemo : BasePhysicsDemo
             var perpendicularAngle = new FloatRange(-math.PI / 2f, math.PI / 2f);
             var twistAngle = new FloatRange(-math.PI / 8f, math.PI / 8f);
 
-            BlobAssetReference<JointData> ragdoll0, ragdoll1;
-            var localFrame = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
-            var worldFrame = new JointFrame { Axis = axisWorld, PerpendicularAxis = perpendicularWorld, Position = pivotInWorld };
-            JointData.CreateRagdoll(localFrame, worldFrame, maxConeAngle, perpendicularAngle, twistAngle, out ragdoll0, out ragdoll1);
+            var localFrame = new BodyFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+            var worldFrame = new BodyFrame { Axis = axisWorld, PerpendicularAxis = perpendicularWorld, Position = pivotInWorld };
+            PhysicsJoint.CreateRagdoll(localFrame, worldFrame, maxConeAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
             CreateJoint(ragdoll0, body, Entity.Null);
             CreateJoint(ragdoll1, body, Entity.Null);
         }

@@ -23,7 +23,7 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyBodyPairsIteratorSystem : JobComponentSystem
+    public class VerifyBodyPairsIteratorSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;
@@ -40,20 +40,20 @@ namespace Unity.Physics.Tests
         struct VerifyBodyPairsIteratorJob : IBodyPairsJob
         {
             [ReadOnly]
-            public NativeSlice<RigidBody> Bodies;
+            public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
             public ComponentDataFromEntity<VerifyBodyPairsIteratorData> VerificationData;
 
             public void Execute(ref ModifiableBodyPair pair)
             {
-                Assert.AreNotEqual(pair.BodyIndices.BodyAIndex, pair.BodyIndices.BodyBIndex);
-                Assert.AreEqual(pair.Entities.EntityA, Bodies[pair.BodyIndices.BodyAIndex].Entity);
-                Assert.AreEqual(pair.Entities.EntityB, Bodies[pair.BodyIndices.BodyBIndex].Entity);
+                Assert.AreNotEqual(pair.BodyIndexA, pair.BodyIndexB);
+                Assert.AreEqual(pair.EntityA, Bodies[pair.BodyIndexA].Entity);
+                Assert.AreEqual(pair.EntityB, Bodies[pair.BodyIndexB].Entity);
             }
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             SimulationCallbacks.Callback verifyBodyPairsIteratorJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
             {
@@ -64,9 +64,7 @@ namespace Unity.Physics.Tests
                 }.Schedule(simulation, ref world, inDeps);
             };
 
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, verifyBodyPairsIteratorJobCallback, inputDeps);
-
-            return inputDeps;
+            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, verifyBodyPairsIteratorJobCallback, Dependency);
         }
     }
 }

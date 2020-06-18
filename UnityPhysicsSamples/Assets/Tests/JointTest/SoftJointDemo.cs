@@ -1,7 +1,7 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
-using UnityEngine;
 using static Unity.Physics.Math;
 
 public class SoftJointDemo : BasePhysicsDemo
@@ -40,12 +40,15 @@ public class SoftJointDemo : BasePhysicsDemo
                 float3 pivotLocal = float3.zero;
                 float3 pivotInWorld = math.transform(GetBodyTransform(body), pivotLocal);
 
-                BlobAssetReference<JointData> jointData;
-                jointData = JointData.CreateBallAndSocket(pivotLocal, pivotInWorld);
-                var constraint = jointData.Value.Constraints[0];
-                constraint.SpringDamping = 0.0f;
+                var jointData = PhysicsJoint.CreateBallAndSocket(pivotLocal, pivotInWorld);
+                var constraints = jointData.GetConstraints();
+                var constraint = constraints[0];
+                // Choose a small damping value instead of 0 to improve stability of the joints
+                constraint.SpringDamping = 0.05f;
                 constraint.SpringFrequency = 0.5f * (float)(i + 1);
-                jointData.Value.Constraints[0] = constraint;
+                constraints[0] = constraint;
+                jointData.SetConstraints(constraints);
+
                 CreateJoint(jointData, body, Entity.Null);
             }
         }
@@ -80,19 +83,21 @@ public class SoftJointDemo : BasePhysicsDemo
                     float3 perpendicularLocal = new float3(0, 1, 0);
                     float3 perpendicularInWorld = perpendicularLocal;
 
-                    BlobAssetReference<JointData> jointData;
-                    var frameLocal = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
-                    var frameWorld = new JointFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
-                    jointData = JointData.CreateLimitedHinge(frameLocal, frameWorld, default);
+                    var frameLocal = new BodyFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+                    var frameWorld = new BodyFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
+                    var jointData = PhysicsJoint.CreateLimitedHinge(frameLocal, frameWorld, default);
 
                     // First constraint is the limit, next two are the hinge and pivot
+                    var constraints = jointData.GetConstraints();
                     for (int k = 0; k < 1 + 2 * j; k++)
                     {
-                        var constraint = jointData.Value.Constraints[k];
-                        constraint.SpringDamping = 0.0f;
-                        constraint.SpringFrequency = 0.5f * (float)(i + 1);
-                        jointData.Value.Constraints[k] = constraint;
+                        var constraint = constraints[k];
+                        // Choose a small damping value instead of 0 to improve stability of the joints
+                        constraint.SpringDamping = 0.05f;
+                        constraint.SpringFrequency = 0.5f * (i + 1);
+                        constraints[k] = constraint;
                     }
+                    jointData.SetConstraints(constraints);
 
                     CreateJoint(jointData, body, Entity.Null);
                 }
@@ -123,14 +128,16 @@ public class SoftJointDemo : BasePhysicsDemo
             float3 perpendicularLocal = new float3(0, 1, 0);
             float3 perpendicularInWorld = perpendicularLocal;
 
-            BlobAssetReference<JointData> jointData;
-            var localFrame = new JointFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
-            var worldFrame = new JointFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
-            jointData = JointData.CreatePrismatic(localFrame, worldFrame, new FloatRange(-2f, 2f), default);
-            var constraint = jointData.Value.Constraints[0];
-            constraint.SpringDamping = 0.0f;
+            var localFrame = new BodyFrame { Axis = axisLocal, PerpendicularAxis = perpendicularLocal, Position = pivotLocal };
+            var worldFrame = new BodyFrame { Axis = axisInWorld, PerpendicularAxis = perpendicularInWorld, Position = pivotInWorld };
+            var jointData = PhysicsJoint.CreatePrismatic(localFrame, worldFrame, new FloatRange(-2f, 2f));
+            var constraints = jointData.GetConstraints();
+            var constraint = constraints[0];
+            // Choose a small damping value instead of 0 to improve stability of the joints
+            constraint.SpringDamping = 0.05f;
             constraint.SpringFrequency = 5.0f;
-            jointData.Value.Constraints[0] = constraint;
+            constraints[0] = constraint;
+            jointData.SetConstraints(constraints);
             CreateJoint(jointData, body, Entity.Null);
         }
     }

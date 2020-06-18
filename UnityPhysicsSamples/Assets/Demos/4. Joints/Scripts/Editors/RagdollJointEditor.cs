@@ -5,7 +5,6 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Unity.Mathematics;
 using Unity.Physics.Authoring;
-using Unity.Physics.Extensions;
 
 namespace Unity.Physics.Editor
 {
@@ -83,8 +82,8 @@ namespace Unity.Physics.Editor
                 DrawCone(pivotB, axisB, math.radians(ragdoll.MaxConeAngle), Color.yellow);
 
                 float3 perpendicularB = math.rotate(ragdoll.worldFromB, ragdoll.PerpendicularAxisInConnectedEntity);
-                DrawCone(pivotB, perpendicularB, math.radians(ragdoll.MinPerpendicularAngle), Color.red);
-                DrawCone(pivotB, perpendicularB, math.radians(ragdoll.MaxPerpendicularAngle), Color.red);
+                DrawCone(pivotB, perpendicularB, math.radians(ragdoll.MinPerpendicularAngle + 90f), Color.red);
+                DrawCone(pivotB, perpendicularB, math.radians(ragdoll.MaxPerpendicularAngle + 90f), Color.red);
             }
         }
     }

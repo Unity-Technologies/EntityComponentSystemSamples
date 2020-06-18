@@ -20,7 +20,7 @@ public class ModifyBroadphasePairsBehaviour : MonoBehaviour, IConvertGameObjectT
 
 // A system which configures the simulation step to disable certain broad phase pairs
 [UpdateBefore(typeof(StepPhysicsWorld))]
-public class ModifyBroadphasePairsSystem : JobComponentSystem
+public class ModifyBroadphasePairsSystem : SystemBase
 {
     EntityQuery m_PairModifierGroup;
 
@@ -38,16 +38,16 @@ public class ModifyBroadphasePairsSystem : JobComponentSystem
         });
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         if (m_PairModifierGroup.CalculateEntityCount() == 0)
         {
-            return inputDeps;
+            return;
         }
 
         if( m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics )
         {
-            return inputDeps;
+            return;
         }
 
         // Add a custom callback to the simulation, which will inject our custom job after the body pairs have been created
@@ -59,24 +59,22 @@ public class ModifyBroadphasePairsSystem : JobComponentSystem
             {
                 Bodies = m_PhysicsWorld.PhysicsWorld.Bodies,
                 Motions = m_PhysicsWorld.PhysicsWorld.MotionVelocities
-            }.Schedule(simulation, ref world, inputDeps);
+            }.Schedule(simulation, ref world, Dependency);
         };
         m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, callback);
-
-        return inputDeps;
     }
 
     [BurstCompile]
     struct DisablePairsJob : IBodyPairsJob
     {
-        public NativeSlice<RigidBody> Bodies;
-        [ReadOnly] public NativeSlice<MotionVelocity> Motions;
+        public NativeArray<RigidBody> Bodies;
+        [ReadOnly] public NativeArray<MotionVelocity> Motions;
 
         public unsafe void Execute(ref ModifiableBodyPair pair)
         {
             // Disable the pair if a box collides with a static object
-            int indexA = pair.BodyIndices.BodyAIndex;
-            int indexB = pair.BodyIndices.BodyBIndex;
+            int indexA = pair.BodyIndexA;
+            int indexB = pair.BodyIndexB;
             if ((Bodies[indexA].Collider != null && Bodies[indexA].Collider.Value.Type == ColliderType.Box && indexB >= Motions.Length)
                 || (Bodies[indexB].Collider != null && Bodies[indexB].Collider.Value.Type == ColliderType.Box && indexA >= Motions.Length))
             {

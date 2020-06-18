@@ -94,8 +94,9 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -127,10 +128,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1216604330}
     m_Modifications:
-    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
+    - target: {fileID: 2282677648345565154, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
-      propertyPath: m_Name
-      value: DynamicObjectWithGravityFactor (2)
+      propertyPath: m_GravityFactor
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8635060084102175819, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
@@ -187,10 +188,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2282677648345565154, guid: 5be7139216711f945a909818f08a3847,
+    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
-      propertyPath: m_GravityFactor
-      value: 0
+      propertyPath: m_Name
+      value: DynamicObjectWithGravityFactor (2)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5be7139216711f945a909818f08a3847, type: 3}
@@ -201,11 +202,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1216604330}
     m_Modifications:
-    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
-        type: 3}
-      propertyPath: m_Name
-      value: DynamicObjectWithGravityFactor (3)
-      objectReference: {fileID: 0}
     - target: {fileID: 8635060084102175819, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -260,6 +256,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
+        type: 3}
+      propertyPath: m_Name
+      value: DynamicObjectWithGravityFactor (3)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5be7139216711f945a909818f08a3847, type: 3}
@@ -336,16 +337,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 3526586516440528349, guid: a80eb84a9f4295748aa0030fb5cb27dc,
+        type: 3}
+      propertyPath: m_Material.m_CollisionResponse.m_Value
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4232172719513128438, guid: a80eb84a9f4295748aa0030fb5cb27dc,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 5f3b65e711b5c7b49a70ee0c89a78d64, type: 2}
-    - target: {fileID: 3526586516440528349, guid: a80eb84a9f4295748aa0030fb5cb27dc,
-        type: 3}
-      propertyPath: m_Material.m_IsTrigger.m_Value
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a80eb84a9f4295748aa0030fb5cb27dc, type: 3}
 --- !u!1 &375882342 stripped
@@ -387,10 +388,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1216604330}
     m_Modifications:
-    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
+    - target: {fileID: 2282677648345565154, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
-      propertyPath: m_Name
-      value: DynamicObjectWithGravityFactor (1)
+      propertyPath: m_GravityFactor
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8635060084102175819, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
@@ -447,10 +448,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2282677648345565154, guid: 5be7139216711f945a909818f08a3847,
+    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
-      propertyPath: m_GravityFactor
-      value: 0
+      propertyPath: m_Name
+      value: DynamicObjectWithGravityFactor (1)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5be7139216711f945a909818f08a3847, type: 3}
@@ -561,16 +562,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 3526586516440528349, guid: a80eb84a9f4295748aa0030fb5cb27dc,
+        type: 3}
+      propertyPath: m_Material.m_CollisionResponse.m_Value
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4232172719513128438, guid: a80eb84a9f4295748aa0030fb5cb27dc,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 5f3b65e711b5c7b49a70ee0c89a78d64, type: 2}
-    - target: {fileID: 3526586516440528349, guid: a80eb84a9f4295748aa0030fb5cb27dc,
-        type: 3}
-      propertyPath: m_Material.m_IsTrigger.m_Value
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a80eb84a9f4295748aa0030fb5cb27dc, type: 3}
 --- !u!1001 &1532016891
@@ -580,10 +581,55 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1357867726848807436, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
-      propertyPath: m_Name
-      value: Physics Scene Basic Elements
+      propertyPath: DrawTriggerEvents
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867725548836660, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.008641206
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9999627
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -0.99000007
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -20.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.8
       objectReference: {fileID: 0}
     - target: {fileID: 1357867726848807427, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
@@ -640,55 +686,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1357867725548836660, guid: c0ce7b3c74021e840a5995cf136ee0fe,
+    - target: {fileID: 1357867726848807436, guid: c0ce7b3c74021e840a5995cf136ee0fe,
         type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.008641206
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.9999627
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: -0.99000007
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -20.53
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1357867726654781254, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 5.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 1165604059612894560, guid: c0ce7b3c74021e840a5995cf136ee0fe,
-        type: 3}
-      propertyPath: DrawTriggerEvents
-      value: 1
+      propertyPath: m_Name
+      value: Physics Scene Basic Elements
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c0ce7b3c74021e840a5995cf136ee0fe, type: 3}
@@ -731,11 +732,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1216604330}
     m_Modifications:
-    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
-        type: 3}
-      propertyPath: m_Name
-      value: DynamicObjectWithGravityFactor
-      objectReference: {fileID: 0}
     - target: {fileID: 8635060084102175819, guid: 5be7139216711f945a909818f08a3847,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -790,6 +786,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8637366421716520939, guid: 5be7139216711f945a909818f08a3847,
+        type: 3}
+      propertyPath: m_Name
+      value: DynamicObjectWithGravityFactor
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5be7139216711f945a909818f08a3847, type: 3}

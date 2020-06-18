@@ -1,8 +1,6 @@
-﻿using System;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using UnityEngine;
@@ -38,20 +36,22 @@ public class TriggerGravityFactorAuthoring : MonoBehaviour, IConvertGameObjectTo
 // A Trigger Volume is defined by a PhysicsShapeAuthoring with the `Is Trigger` flag ticked and a
 // TriggerGravityFactor behaviour added.
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class TriggerGravityFactorSystem : JobComponentSystem
+public class TriggerGravityFactorSystem : SystemBase
 {
     BuildPhysicsWorld m_BuildPhysicsWorldSystem;
     StepPhysicsWorld m_StepPhysicsWorldSystem;
-
-    EntityQuery TriggerGroup;
+    EntityQuery m_TriggerGravityGroup;
 
     protected override void OnCreate()
     {
         m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
         m_StepPhysicsWorldSystem = World.GetOrCreateSystem<StepPhysicsWorld>();
-        TriggerGroup = GetEntityQuery(new EntityQueryDesc
+        m_TriggerGravityGroup = GetEntityQuery(new EntityQueryDesc
         {
-            All = new ComponentType[] { typeof(TriggerGravityFactor), }
+            All = new ComponentType[]
+            {
+                typeof(TriggerGravityFactor)
+            }
         });
     }
 
@@ -64,18 +64,18 @@ public class TriggerGravityFactorSystem : JobComponentSystem
 
         public void Execute(TriggerEvent triggerEvent)
         {
-            Entity entityA = triggerEvent.Entities.EntityA;
-            Entity entityB = triggerEvent.Entities.EntityB;
+            Entity entityA = triggerEvent.EntityA;
+            Entity entityB = triggerEvent.EntityB;
 
-            bool isBodyATrigger = TriggerGravityFactorGroup.Exists(entityA);
-            bool isBodyBTrigger = TriggerGravityFactorGroup.Exists(entityB);
+            bool isBodyATrigger = TriggerGravityFactorGroup.HasComponent(entityA);
+            bool isBodyBTrigger = TriggerGravityFactorGroup.HasComponent(entityB);
 
             // Ignoring Triggers overlapping other Triggers
             if (isBodyATrigger && isBodyBTrigger)
                 return;
 
-            bool isBodyADynamic = PhysicsVelocityGroup.Exists(entityA);
-            bool isBodyBDynamic = PhysicsVelocityGroup.Exists(entityB);
+            bool isBodyADynamic = PhysicsVelocityGroup.HasComponent(entityA);
+            bool isBodyBDynamic = PhysicsVelocityGroup.HasComponent(entityB);
 
             // Ignoring overlapping static bodies
             if ((isBodyATrigger && !isBodyBDynamic) ||
@@ -101,16 +101,19 @@ public class TriggerGravityFactorSystem : JobComponentSystem
         }
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
-        JobHandle jobHandle = new TriggerGravityFactorJob
+        if (m_TriggerGravityGroup.CalculateEntityCount() == 0)
+        {
+            return;
+        }
+
+        Dependency = new TriggerGravityFactorJob
         {
             TriggerGravityFactorGroup = GetComponentDataFromEntity<TriggerGravityFactor>(true),
             PhysicsGravityFactorGroup = GetComponentDataFromEntity<PhysicsGravityFactor>(),
             PhysicsVelocityGroup = GetComponentDataFromEntity<PhysicsVelocity>(),
-        }.Schedule(m_StepPhysicsWorldSystem.Simulation, 
-                    ref m_BuildPhysicsWorldSystem.PhysicsWorld, inputDeps);
-
-        return jobHandle;
+        }.Schedule(m_StepPhysicsWorldSystem.Simulation,
+            ref m_BuildPhysicsWorldSystem.PhysicsWorld, Dependency);
     }
 }

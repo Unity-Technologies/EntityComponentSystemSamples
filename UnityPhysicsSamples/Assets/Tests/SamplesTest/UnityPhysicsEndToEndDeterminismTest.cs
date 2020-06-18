@@ -11,14 +11,14 @@ using Unity.Jobs;
 
 namespace Unity.Physics.Samples.Test
 {
-    public interface IDeterminismTestSystem
+    interface IDeterminismTestSystem
     {
         void BeginTest();
         bool TestingFinished();
     }
 
     [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public class UnityPhysicsDeterminismTestSystem : JobComponentSystem, IDeterminismTestSystem
+    class UnityPhysicsDeterminismTestSystem : SystemBase, IDeterminismTestSystem
     {
         protected BuildPhysicsWorld m_BuildPhysicsWorld;
         protected StepPhysicsWorld m_StepPhysicsWorld;
@@ -60,24 +60,24 @@ namespace Unity.Physics.Samples.Test
             m_TestingFinished = true;
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             SimulatedFramesInCurrentTest++;
-            inputDeps = JobHandle.CombineDependencies(inputDeps, m_ExportPhysicsWorld.FinalJobHandle);
+            var handle = JobHandle.CombineDependencies(Dependency, m_ExportPhysicsWorld.GetOutputDependency());
 
             if (SimulatedFramesInCurrentTest == k_TestDurationInFrames)
             {
-                inputDeps.Complete();
+                handle.Complete();
                 FinishTesting();
             }
 
-            return inputDeps;
+            Dependency = handle;
         }
 
     }
 
     // Only works in standalone build, since it needs synchronous Burst compilation.
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS
     [TestFixture]
 #endif
     class UnityPhysicsEndToEndDeterminismTest
@@ -183,7 +183,7 @@ namespace Unity.Physics.Samples.Test
         }
 
         // Only works in standalone build, since it needs synchronous Burst compilation.
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS
         [UnityTest]
 #endif
         public virtual IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)

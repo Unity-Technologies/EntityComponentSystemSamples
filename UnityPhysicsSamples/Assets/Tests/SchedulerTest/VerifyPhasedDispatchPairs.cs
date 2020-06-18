@@ -20,7 +20,7 @@ namespace Unity.Physics
     }
 
     [UpdateAfter(typeof(StepPhysicsWorld))]
-    public class VerifyPhasedDispatchPairsSystem : JobComponentSystem
+    public class VerifyPhasedDispatchPairsSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;
@@ -48,23 +48,23 @@ namespace Unity.Physics
             {
                 if (IsUnityPhysics)
                 {
-                    int bodyAIndex = pair.BodyIndices.BodyAIndex;
-                    int bodyBIndex = pair.BodyIndices.BodyBIndex;
+                    int bodyIndexA = pair.BodyIndexA;
+                    int bodyIndexB = pair.BodyIndexB;
 
-                    bool bodyBIsDynamic = bodyBIndex < LastStaticPairPerDynamicBody.Length;
+                    bool bodyBIsDynamic = bodyIndexB < LastStaticPairPerDynamicBody.Length;
                     if (bodyBIsDynamic)
                     {
-                        Assert.IsTrue(LastStaticPairPerDynamicBody[bodyAIndex] <= bodyBIndex);
+                        Assert.IsTrue(LastStaticPairPerDynamicBody[bodyIndexA] <= bodyIndexB);
                     }
                     else
                     {
-                        LastStaticPairPerDynamicBody[bodyAIndex] = bodyBIndex;
+                        LastStaticPairPerDynamicBody[bodyIndexA] = bodyIndexB;
                     }
                 }
             }
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             SimulationCallbacks.Callback verifyPhasedDispatchPairsJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
             {
@@ -77,9 +77,7 @@ namespace Unity.Physics
                 }.Schedule(simulation, ref world, inDeps);
             };
 
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, verifyPhasedDispatchPairsJobCallback, inputDeps);
-
-            return inputDeps;
+            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, verifyPhasedDispatchPairsJobCallback, Dependency);
         }
     }
 }

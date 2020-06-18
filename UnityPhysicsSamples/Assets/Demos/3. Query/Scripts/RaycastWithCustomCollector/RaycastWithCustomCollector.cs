@@ -92,7 +92,7 @@ public class RaycastWithCustomCollectorSystem : SystemBase
     {
         CollisionWorld collisionWorld = m_BuildPhysicsWorld.PhysicsWorld.CollisionWorld;
         EntityCommandBuffer commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
-        Dependency = JobHandle.CombineDependencies(Dependency, m_EndFramePhysicsSystem.FinalJobHandle);
+        Dependency = JobHandle.CombineDependencies(Dependency, m_EndFramePhysicsSystem.GetOutputDependency());
 
         Entities
             .WithName("RaycastWithCustomCollector")

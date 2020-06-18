@@ -29,7 +29,7 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyJacobiansIteratorSystem : JobComponentSystem
+    public class VerifyJacobiansIteratorSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;
@@ -46,7 +46,7 @@ namespace Unity.Physics.Tests
         struct VerifyJacobiansIteratorJob : IJacobiansJob
         {
             [ReadOnly]
-            public NativeSlice<RigidBody> Bodies;
+            public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
             public ComponentDataFromEntity<VerifyJacobiansIteratorData> VerificationData;
@@ -55,11 +55,11 @@ namespace Unity.Physics.Tests
             {
                 // Header verification
                 Assert.IsFalse(header.AngularChanged);
-                Assert.AreNotEqual(header.BodyPair.BodyAIndex, header.BodyPair.BodyBIndex);
-                Assert.AreEqual(header.ColliderKeys.ColliderKeyA.Value, ColliderKey.Empty.Value);
-                Assert.AreEqual(header.ColliderKeys.ColliderKeyB.Value, ColliderKey.Empty.Value);
-                Assert.AreEqual(header.Entities.EntityA, Bodies[header.BodyPair.BodyAIndex].Entity);
-                Assert.AreEqual(header.Entities.EntityB, Bodies[header.BodyPair.BodyBIndex].Entity);
+                Assert.AreNotEqual(header.BodyIndexA, header.BodyIndexB);
+                Assert.AreEqual(header.ColliderKeyA.Value, ColliderKey.Empty.Value);
+                Assert.AreEqual(header.ColliderKeyB.Value, ColliderKey.Empty.Value);
+                Assert.AreEqual(header.EntityA, Bodies[header.BodyIndexA].Entity);
+                Assert.AreEqual(header.EntityB, Bodies[header.BodyIndexB].Entity);
                 Assert.AreEqual(header.Flags, (JacobianFlags)0);
                 Assert.IsFalse(header.HasColliderKeys);
                 Assert.IsFalse(header.HasMassFactors);
@@ -81,7 +81,7 @@ namespace Unity.Physics.Tests
             public void Execute(ref ModifiableJacobianHeader header, ref ModifiableTriggerJacobian jacobian) { }
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             SimulationCallbacks.Callback verifyJacobiansIteratorJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
             {
@@ -92,9 +92,7 @@ namespace Unity.Physics.Tests
                 }.Schedule(simulation, ref world, inDeps);
             };
 
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, verifyJacobiansIteratorJobCallback, inputDeps);
-
-            return inputDeps;
+            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, verifyJacobiansIteratorJobCallback, Dependency);
         }
     }
 }

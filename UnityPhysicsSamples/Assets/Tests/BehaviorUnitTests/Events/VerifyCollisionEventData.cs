@@ -30,7 +30,7 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyCollisionEventDataSystem : JobComponentSystem
+    public class VerifyCollisionEventDataSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;
@@ -50,7 +50,7 @@ namespace Unity.Physics.Tests
             public PhysicsWorld World;
 
             [ReadOnly]
-            public NativeSlice<RigidBody> Bodies;
+            public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
             public ComponentDataFromEntity<VerifyCollisionEventDataData> VerificationData;
@@ -62,18 +62,18 @@ namespace Unity.Physics.Tests
                 CollisionEvent.Details details = collisionEvent.CalculateDetails(ref World);
                 Assert.IsTrue(details.EstimatedImpulse >= 0.0f);
                 Assert.IsTrue(details.EstimatedContactPointPositions.Length == 4);
-                Assert.AreNotEqual(collisionEvent.BodyIndices.BodyAIndex, collisionEvent.BodyIndices.BodyBIndex);
-                Assert.AreEqual(collisionEvent.ColliderKeys.ColliderKeyA.Value, ColliderKey.Empty.Value);
-                Assert.AreEqual(collisionEvent.ColliderKeys.ColliderKeyB.Value, ColliderKey.Empty.Value);
-                Assert.AreEqual(collisionEvent.Entities.EntityA, Bodies[collisionEvent.BodyIndices.BodyAIndex].Entity);
-                Assert.AreEqual(collisionEvent.Entities.EntityB, Bodies[collisionEvent.BodyIndices.BodyBIndex].Entity);
+                Assert.AreNotEqual(collisionEvent.BodyIndexA, collisionEvent.BodyIndexB);
+                Assert.AreEqual(collisionEvent.ColliderKeyA.Value, ColliderKey.Empty.Value);
+                Assert.AreEqual(collisionEvent.ColliderKeyB.Value, ColliderKey.Empty.Value);
+                Assert.AreEqual(collisionEvent.EntityA, Bodies[collisionEvent.BodyIndexA].Entity);
+                Assert.AreEqual(collisionEvent.EntityB, Bodies[collisionEvent.BodyIndexB].Entity);
                 Assert.AreApproximatelyEqual(collisionEvent.Normal.x, 0.0f, 0.01f);
                 Assert.AreApproximatelyEqual(collisionEvent.Normal.y, 1.0f, 0.01f);
                 Assert.AreApproximatelyEqual(collisionEvent.Normal.z, 0.0f, 0.01f);
             }
         }
 
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        protected override void OnUpdate()
         {
             SimulationCallbacks.Callback testCollisionEventCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
             {
@@ -85,9 +85,7 @@ namespace Unity.Physics.Tests
                 }.Schedule(simulation, ref world, inDeps);
             };
 
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostSolveJacobians, testCollisionEventCallback, inputDeps);
-
-            return inputDeps;
+            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostSolveJacobians, testCollisionEventCallback, Dependency);
         }
     }
 }

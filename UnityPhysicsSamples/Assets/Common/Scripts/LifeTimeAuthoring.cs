@@ -1,5 +1,4 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 using UnityEngine;
 
 public struct LifeTime : IComponentData
@@ -25,7 +24,7 @@ public class LifeTimeSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        EntityCommandBuffer.Concurrent commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().ToConcurrent();
+        var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
         Entities
             .WithName("DestroyExpiredLifeTime")

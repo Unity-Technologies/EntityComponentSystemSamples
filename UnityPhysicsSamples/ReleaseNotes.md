@@ -1,4 +1,30 @@
-## [Samples Project for 0.3.2-preview] - 2020-04-20
+## [Samples Project for 0.4.0-preview.2] - 9999-12-31
+
+### Changes
+
+* Updated the following packages:
+    * Added Data Flow Graph `0.14.0-preview.2`
+    * Added DOTS Editor `0.7.0-preview.1`
+    * Hybrid Renderer from `0.4.0-preview.8` to `0.5.1-preview.18`
+* The `PrismaticJoint` example no longer includes `MinDistanceFromAxis` or `MaxDistanceFromAxis` parameters.
+* The `RagdollJoint` example now takes perpendicular limits in the range of (-90, 90) rather than (0, 180).
+* Added `5d. Kinematic Motion` to illustrate different ways of moving kinematic bodies.
+* Improved usability of trigger events and collision events:
+	* Events (StatefulTriggerEvent and StatefulCollisionEvent) have states indicating overlap or colliding state of two bodies:
+		* Enter - the bodies didn't overlap or collide in the previous frame, and they do in the current frame
+		* Stay - the bodies did overlap or collide in the previous frame, and they do in the current frame
+		* Exit - the bodies did overlap or collide in the previous frame, and they do not in the current frame
+	* Events (StatefulTriggerEvent and StatefulCollisionEvent) are stored in DynamicBuffers of entities that raise them
+	* Reworked following demos to demonstrate new trigger event approach:
+		* `2d1a. Triggers - Change Material`
+		* `2d1b. Triggers - Portals`
+		* `2d1c. Triggers - Force Field`
+	* `2d2a. Collision Events - Event States` added to demonstrate new collision event approach.
+* Exposed trigger events and collision events of CharacterController
+* CharacterController body is now using a `CollisionResponse.None` collision response on its body to avoid reporting duplicated collision/trigger events coming from the physics engine.
+* `Demos/2. Setup/2b. Motion Properties/2b1. Motion Properties - Mass`, `Tests/Pyramids` and a group of demos under `Tests/Stacking` now showcase new solver stabilization features/strengths and weaknesses/trade-offs.
+
+## [Samples Project for 0.3.2-preview] - 2020-04-16
 
 ### Changes
 

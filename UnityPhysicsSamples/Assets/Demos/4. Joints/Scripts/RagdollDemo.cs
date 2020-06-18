@@ -98,10 +98,9 @@ public class RagdollDemo : BasePhysicsDemo
             var perpendicularAngle = new FloatRange { Max = math.PI }; // unlimited
             var twistAngle = new FloatRange(-math.PI / 3f, math.PI / 3f);
 
-            var headFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHead };
-            var bodyFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
-            BlobAssetReference<JointData> ragdoll0, ragdoll1;
-            JointData.CreateRagdoll(headFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out ragdoll0, out ragdoll1);
+            var headFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHead };
+            var bodyFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
+            PhysicsJoint.CreateRagdoll(headFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
             CreateJoint(ragdoll0, head, torso);
             CreateJoint(ragdoll1, head, torso);
         }
@@ -162,10 +161,9 @@ public class RagdollDemo : BasePhysicsDemo
                     var perpendicularAngle = new FloatRange { Max = math.PI / 2f };
                     var twistAngle = new FloatRange(-math.PI / 4f, math.PI / 4f);
 
-                    var armFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotArm };
-                    var bodyFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
-                    BlobAssetReference<JointData> ragdoll0, ragdoll1;
-                    JointData.CreateRagdoll(armFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out ragdoll0, out ragdoll1);
+                    var armFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotArm };
+                    var bodyFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
+                    PhysicsJoint.CreateRagdoll(armFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
                     CreateJoint(ragdoll0, upperArm, torso);
                     CreateJoint(ragdoll1, upperArm, torso);
                 }
@@ -177,10 +175,10 @@ public class RagdollDemo : BasePhysicsDemo
                     float3 axis = new float3(0, -s, 0);
                     float3 perpendicular = new float3(s, 0, 0);
 
-                    var lowerArmFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
-                    var upperArmFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotUpper };
-                    BlobAssetReference<JointData> hinge =
-                        JointData.CreateLimitedHinge(lowerArmFrame, upperArmFrame, new FloatRange { Max = 3f });
+                    var lowerArmFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
+                    var upperArmFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotUpper };
+                    PhysicsJoint hinge =
+                        PhysicsJoint.CreateLimitedHinge(lowerArmFrame, upperArmFrame, new FloatRange { Max = 3f });
                     CreateJoint(hinge, foreArm, upperArm);
                 }
 
@@ -191,10 +189,10 @@ public class RagdollDemo : BasePhysicsDemo
                     float3 axis = new float3(0, -s, 0);
                     float3 perpendicular = new float3(s, 0, 0);
 
-                    var handFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHand };
-                    var forearmFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
-                    BlobAssetReference<JointData> hinge =
-                        JointData.CreateLimitedHinge(handFrame, forearmFrame, new FloatRange(-0.3f, 0.6f));
+                    var handFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHand };
+                    var forearmFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
+                    PhysicsJoint hinge =
+                        PhysicsJoint.CreateLimitedHinge(handFrame, forearmFrame, new FloatRange(-0.3f, 0.6f));
                     CreateJoint(hinge, hand, foreArm);
                 }
             }
@@ -227,10 +225,9 @@ public class RagdollDemo : BasePhysicsDemo
             var perpendicularAngle = new FloatRange(-0.1f, math.PI);
             var twistAngle = new FloatRange(-0.1f, 0.1f);
 
-            BlobAssetReference<JointData> ragdoll0, ragdoll1;
-            var pelvisFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotPelvis };
-            var torsoFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotTorso };
-            JointData.CreateRagdoll(pelvisFrame, torsoFrame, coneAngle, perpendicularAngle, twistAngle, out ragdoll0, out ragdoll1);
+            var pelvisFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotPelvis };
+            var torsoFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotTorso };
+            PhysicsJoint.CreateRagdoll(pelvisFrame, torsoFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
             CreateJoint(ragdoll0, pelvis, torso);
             CreateJoint(ragdoll1, pelvis, torso);
         }
@@ -293,10 +290,9 @@ public class RagdollDemo : BasePhysicsDemo
                     var perpendicularAngle = new FloatRange { Max = 0.2f + math.PI / 2.0f };
                     var twistAngle = new FloatRange(-0.2f, 0.2f);
 
-                    var upperLegFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotThigh };
-                    var bodyFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
-                    BlobAssetReference<JointData> ragdoll0, ragdoll1;
-                    JointData.CreateRagdoll(upperLegFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out ragdoll0, out ragdoll1);
+                    var upperLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotThigh };
+                    var bodyFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
+                    PhysicsJoint.CreateRagdoll(upperLegFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
                     CreateJoint(ragdoll0, thigh, torso);
                     CreateJoint(ragdoll1, thigh, torso);
                 }
@@ -308,10 +304,10 @@ public class RagdollDemo : BasePhysicsDemo
                     float3 axis = new float3(-1, 0, 0);
                     float3 perpendicular = new float3(0, 0, 1);
 
-                    var lowerLegFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotCalf };
-                    var upperLegFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotThigh };
-                    BlobAssetReference<JointData> hinge =
-                        JointData.CreateLimitedHinge(lowerLegFrame, upperLegFrame, new FloatRange { Min = -1.2f });
+                    var lowerLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotCalf };
+                    var upperLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotThigh };
+                    PhysicsJoint hinge =
+                        PhysicsJoint.CreateLimitedHinge(lowerLegFrame, upperLegFrame, new FloatRange { Min = -1.2f });
                     CreateJoint(hinge, calf, thigh);
                 }
 
@@ -322,10 +318,10 @@ public class RagdollDemo : BasePhysicsDemo
                     float3 axis = new float3(-1, 0, 0);
                     float3 perpendicular = new float3(0, 0, 1);
 
-                    var footFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFoot };
-                    var lowerLegFrame = new JointFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotCalf };
-                    BlobAssetReference<JointData> hinge =
-                        JointData.CreateLimitedHinge(footFrame, lowerLegFrame, new FloatRange(-0.4f, 0.1f));
+                    var footFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFoot };
+                    var lowerLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotCalf };
+                    PhysicsJoint hinge =
+                        PhysicsJoint.CreateLimitedHinge(footFrame, lowerLegFrame, new FloatRange(-0.4f, 0.1f));
                     CreateJoint(hinge, foot, calf);
                 }
             }

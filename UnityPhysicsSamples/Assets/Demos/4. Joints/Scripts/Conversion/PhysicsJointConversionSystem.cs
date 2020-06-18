@@ -1,10 +1,11 @@
 ﻿using Unity.Entities;
-using UnityEngine;
 
 namespace Unity.Physics.Authoring
 {
     [UpdateAfter(typeof(PhysicsBodyConversionSystem))]
     [UpdateAfter(typeof(LegacyRigidbodyConversionSystem))]
+    [UpdateAfter(typeof(BeginJointConversionSystem))]
+    [UpdateBefore(typeof(EndJointConversionSystem))]
     public class PhysicsJointConversionSystem : GameObjectConversionSystem
     {
         void CreateJoint(BaseJoint joint)
@@ -12,8 +13,8 @@ namespace Unity.Physics.Authoring
             if (!joint.enabled)
                 return;
 
-            joint.entityA = GetPrimaryEntity(joint.gameObject);
-            joint.entityB = joint.ConnectedBody == null ? Entity.Null : GetPrimaryEntity(joint.ConnectedBody);
+            joint.EntityA = GetPrimaryEntity(joint.LocalBody);
+            joint.EntityB = joint.ConnectedBody == null ? Entity.Null : GetPrimaryEntity(joint.ConnectedBody);
 
             joint.Create(DstEntityManager, this);
         }
@@ -21,14 +22,14 @@ namespace Unity.Physics.Authoring
         // Update is called once per frame
         protected override void OnUpdate()
         {
-            Entities.ForEach((BallAndSocketJoint joint) => { CreateJoint(joint); });
-            Entities.ForEach((FreeHingeJoint joint) => { CreateJoint(joint); });
-            Entities.ForEach((LimitedHingeJoint joint) => { CreateJoint(joint); });
-            Entities.ForEach((LimitedDistanceJoint joint) => { CreateJoint(joint); });
-            Entities.ForEach((PrismaticJoint joint) => { CreateJoint(joint); });
-            Entities.ForEach((RagdollJoint joint) => { CreateJoint(joint); }); // Note: RagdollJoint.Create add 2 entities
-            Entities.ForEach((RigidJoint joint) => { CreateJoint(joint); });
-            Entities.ForEach((LimitDOFJoint joint) => { CreateJoint(joint); });
+            Entities.ForEach((BallAndSocketJoint joint) => { foreach (var j in joint.GetComponents<BallAndSocketJoint>()) CreateJoint(j); });
+            Entities.ForEach((FreeHingeJoint joint) => { foreach (var j in joint.GetComponents<FreeHingeJoint>()) CreateJoint(j); });
+            Entities.ForEach((LimitedHingeJoint joint) => { foreach (var j in joint.GetComponents<LimitedHingeJoint>()) CreateJoint(j); });
+            Entities.ForEach((LimitedDistanceJoint joint) => { foreach (var j in joint.GetComponents<LimitedDistanceJoint>()) CreateJoint(j); });
+            Entities.ForEach((PrismaticJoint joint) => { foreach (var j in joint.GetComponents<PrismaticJoint>()) CreateJoint(j); });
+            Entities.ForEach((RagdollJoint joint) => { foreach (var j in joint.GetComponents<RagdollJoint>()) CreateJoint(j); }); // Note: RagdollJoint.Create add 2 entities
+            Entities.ForEach((RigidJoint joint) => { foreach (var j in joint.GetComponents<RigidJoint>()) CreateJoint(j); });
+            Entities.ForEach((LimitDOFJoint joint) => { foreach (var j in joint.GetComponents<LimitDOFJoint>()) CreateJoint(j); });
         }
     }
 }

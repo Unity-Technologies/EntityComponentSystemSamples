@@ -69,7 +69,7 @@ public class CameraSmoothTrack : MonoBehaviour
             // add velocity
             var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
             var goEntity = Target.GetComponent<GameObjectEntity>();
-            if ((entityManager != null) && (goEntity != null) && (goEntity.Entity != Entity.Null))
+            if ((entityManager != default) && (goEntity != null) && (goEntity.Entity != Entity.Null))
             {
                 Vector3 lv = world.GetLinearVelocity(world.GetRigidBodyIndex(goEntity.Entity));
                 lv *= Time.fixedDeltaTime;
