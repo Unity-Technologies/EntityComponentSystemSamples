@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -79,10 +80,6 @@ class AnimateKinematicBodySystem : SystemBase
     struct Initialized : ISystemStateComponentData { }
 
     float m_FixedTime;
-    EntityCommandBufferSystem m_EntityCommandBufferSystem;
-
-    protected override void OnCreate() =>
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
 
     // sample the animation curves to generate a new position and orientation
     // curves translate along the z-axis and set an orientation rotated about the y-axis
@@ -96,7 +93,7 @@ class AnimateKinematicBodySystem : SystemBase
     {
         m_FixedTime += UnityEngine.Time.fixedDeltaTime;
 
-        EntityCommandBuffer commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
+        var commandBuffer = new EntityCommandBuffer(Allocator.TempJob);
 
         // teleport all new bodies into place on the first frame
         // otherwise they may collide with things between their initial location and the first frame of animation
@@ -130,8 +127,6 @@ class AnimateKinematicBodySystem : SystemBase
                     Sample(curve, m_FixedTime, ref translation.Value, ref rotation.Value)
             ).Run();
 
-        m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
-
         var tickSpeed = 1f / UnityEngine.Time.fixedDeltaTime;
 
         // moving kinematic bodies via their PhysicsVelocity component will generate contact events with any bodies they pass through
@@ -155,5 +150,8 @@ class AnimateKinematicBodySystem : SystemBase
                 velocity = PhysicsVelocity.CalculateVelocityToTarget(mass, translation, rotation, targetTransform, tickSpeed);
             }
         ).Run();
-    }
+
+        commandBuffer.Playback(EntityManager);
+        commandBuffer.Dispose(); // Can't use using above as getting DCICE002 error
+    } 
 }

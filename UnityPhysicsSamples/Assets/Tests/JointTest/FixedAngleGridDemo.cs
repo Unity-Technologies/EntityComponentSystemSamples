@@ -9,12 +9,6 @@ public class FixedAngleGridDemo : BasePhysicsDemo
     {
         base.Start();
 
-        // Enable the joint viewer
-        SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayData
-        {
-            DrawJoints = 1
-        });
-
         BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
         {
             Center = float3.zero,

@@ -33,10 +33,9 @@ A lot of the demos display extra information as debug display gizmos in the Edit
 | Query | <sub>ClosestHitDistanceTest.unity</sub> | Demo showing results of distance queries | Introductory | ![Demo Image](images/closest_points.gif) |
 | Joints | <sub>4a. Joints Parade.unity</sub> | Demo showing a range of joint types | Introductory  | ![Ragdoll](images/joints_sample.png) |
 | Joints | <sub>Ragdoll.unity</sub> | Obligatory stack of ragdolls demo | Introductory  | ![Ragdoll](images/ragdolls.gif) |
-| Simulation | <sub>AddNarrowphaseContacts.unity</sub> | Dynamically add user generated contact points | Advanced | ![Modify broadphase Sample](images/add_contacts.gif) |
-| Simulation | <sub>ModifyBroadphasePairs.unity</sub> | Filter out collision by explicitly deleting pairs from broad phase | Advanced | ![Modify broadphase Sample](images/modify_broadphase.png) |
-| Simulation | <sub>ModifyContactJacobians.unity</sub> | Modify the results of contact generation to produce special effects | Advanced | ![Modify contacts](images/modify_contact.png) |
-| Simulation | <sub>ModifyNarrowphaseContacts.unity</sub> | Add new user contacts to simulation pipeline  | Advanced | No screenshot | 
+| Modify | <sub>ModifyBroadphasePairs.unity</sub> | Filter out collision by explicitly deleting pairs from broad phase | Advanced | ![Modify broadphase Sample](images/modify_broadphase.png) |
+| Modify | <sub>ModifyContactJacobians.unity</sub> | Modify the results of contact generation to produce special effects | Advanced | ![Modify contacts](images/modify_contact.png) |
+| Modify | <sub>ModifyNarrowphaseContacts.unity</sub> | Add new user contacts to simulation pipeline  | Advanced | No screenshot | 
 | Use Case | <sub>CharacterController.unity</sub> | User case demo showing a rudimentary FPS character controller | Intermediate | ![Character Control](images/character_control.png) |
 | Use Case | <sub>Pool.unity</sub> | Demonstration of calling immediate mode physics | Intermediate | ![Immediate physics](images/immediate_physics.png) |
 | Use Case | <sub>PlanetGravity.unity</sub> | Performance demo of asteroids around a planet using SP/HP | Introductory | ![Planet Gravity](images/planet_gravity.png) |

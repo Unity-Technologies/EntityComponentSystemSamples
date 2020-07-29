@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -20,24 +21,29 @@ public class UpdateBoxRampState : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
-public class EntityUpdaterSystem : ComponentSystem
+public class EntityUpdaterSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        Entities.ForEach(
-            (Entity entity, ref EntityUpdater updater, ref Translation position) =>
-            {
-                if (updater.TimeToDie-- == 0)
+        using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
+        {
+            Entities.ForEach(
+                (Entity entity, ref EntityUpdater updater, ref Translation position) =>
                 {
-                    PostUpdateCommands.DestroyEntity(entity);
-                }
+                    if (updater.TimeToDie-- == 0)
+                    {
+                        commandBuffer.DestroyEntity(entity);
+                    }
 
-                if (updater.TimeToMove-- == 0)
-                {
-                    position.Value += new float3(0, -2, 0);
-                    PostUpdateCommands.SetComponent(entity, position);
+                    if (updater.TimeToMove-- == 0)
+                    {
+                        position.Value += new float3(0, -2, 0);
+                        commandBuffer.SetComponent(entity, position);
+                    }
                 }
-            }
-        );
+            ).Run();
+
+            commandBuffer.Playback(EntityManager);
+        }
     }
 }

@@ -5,7 +5,9 @@ using System.Reflection;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Physics.Authoring;
 using Unity.Physics.Extensions;
+using Unity.Physics.Systems;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
@@ -23,7 +25,7 @@ public class BasePhysicsDemo : MonoBehaviour
     public static void ResetDefaultWorld()
     {
         DefaultWorld.EntityManager.CompleteAllJobs();
-        foreach(var system in DefaultWorld.Systems)
+        foreach (var system in DefaultWorld.Systems)
         {
             system.Enabled = false;
         }
@@ -32,41 +34,14 @@ public class BasePhysicsDemo : MonoBehaviour
         DefaultWorldInitialization.Initialize("Default World", false);
     }
 
-    protected Entity stepper;
-
     public Material dynamicMaterial;
     public Material staticMaterial;
 
-    public SimulationType StepType = SimulationType.UnityPhysics;
-
-    protected void init(float3 gravity)
+    protected void init()
     {
-        // Camera control
-        GameObject mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        CameraControl cameraControl = mainCamera.AddComponent<CameraControl>();
-        cameraControl.lookSpeedH = 0.6f;
-        cameraControl.lookSpeedV = 0.6f;
-        cameraControl.zoomSpeed = 1.0f;
-        cameraControl.dragSpeed = 4.0f;
-
-        // Create the stepper
-        var entityManager = DefaultWorld.EntityManager;
-        ComponentType[] componentTypes = {
-            typeof(PhysicsStep),
-            typeof(Unity.Physics.Authoring.PhysicsDebugDisplayData),
-            typeof(MousePick)
-        };
-        stepper = entityManager.CreateEntity(componentTypes);
-        entityManager.SetComponentData(stepper, new PhysicsStep
-        {
-            SimulationType = StepType,
-            Gravity = gravity,
-            SolverIterationCount = PhysicsStep.Default.SolverIterationCount,
-            SolverStabilizationHeuristicSettings = PhysicsStep.Default.SolverStabilizationHeuristicSettings,
-            ThreadCountHint = PhysicsStep.Default.ThreadCountHint
-        });
-        // Add options for visually debugging physics information
-        entityManager.SetComponentData(stepper, new Unity.Physics.Authoring.PhysicsDebugDisplayData { });
+        // Load assets
+        //dynamicMaterial = (Material)Resources.Load("Materials/PhysicsDynamicMaterial");
+        //staticMaterial = (Material)Resources.Load("Materials/PhysicsStaticMaterial");
     }
 
 #if !UNITY_EDITOR
@@ -93,7 +68,7 @@ public class BasePhysicsDemo : MonoBehaviour
 
     protected virtual void Start()
     {
-        init(new float3(0, -9.81f, 0));
+        init();
     }
 
     //
@@ -203,15 +178,6 @@ public class BasePhysicsDemo : MonoBehaviour
         return jointEntity;
     }
 
-    //
-    // Helper methods
-    //
-
-    protected void SetDebugDisplay(Unity.Physics.Authoring.PhysicsDebugDisplayData debugDisplay)
-    {
-        var entityManager = DefaultWorld.EntityManager;
-        entityManager.SetComponentData<Unity.Physics.Authoring.PhysicsDebugDisplayData>(stepper, debugDisplay);
-    }
 
     protected RigidTransform GetBodyTransform(Entity entity)
     {

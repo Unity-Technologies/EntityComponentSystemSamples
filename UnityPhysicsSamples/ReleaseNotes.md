@@ -1,4 +1,18 @@
-## [Samples Project for 0.4.0-preview.2] - 9999-12-31
+## [Samples Project for 0.4.1-preview] - 2020-07-28
+
+### Changes
+
+* Added simple `1b. Respresentations` sample highlighting graphical and physical representations of the world.
+* Added simple `1c. Conversion` sample, along with worked examples moving from GameObjects (Data & Logic) to DOTS.
+    * New `1c1. GameObjects GravityWell` sample - showing Data conversion working but not Logic conversion.
+    * New `1c2. Covertible GravityWell` sample - showing Data & Logic conversion.
+    * New `1c3. DOTS GravityWell` sample - showing same scene without GameObject conversion.
+* Updated `2a2. Collider Parade - Advanced` sample with extra setup samples involving multiple graphics mesh and/or multiple physics shapes.
+* Updated `4. Joints\Ragdoll` demo to use new ragdoll joint interface and allow modification of joint limits.
+* Added `5d. Change Velocity` demo showing a local velocity change.
+* Added `5f. Change Surface Velocity` sample highlighting a conveyor belt use case with no moving parts.
+
+## [Samples Project for 0.4.0-preview.5] - 2020-06-18
 
 ### Changes
 

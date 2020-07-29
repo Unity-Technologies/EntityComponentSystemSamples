@@ -276,7 +276,7 @@ namespace Unity.Physics.Samples.Test
         }
 
         [UpdateAfter(typeof(BuildPhysicsWorld))]
-        class BuildPhysicsWorldSampler : ComponentSystem
+        class BuildPhysicsWorldSampler : SystemBase
         {
             public bool FinishedSampling = false;
             public World DefaultWorld => World.DefaultGameObjectInjectionWorld;

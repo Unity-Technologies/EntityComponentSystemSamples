@@ -51,7 +51,7 @@ namespace Demos
 
     #region System
     [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VehicleMechanicsSystem : ComponentSystem
+    public class VehicleMechanicsSystem : SystemBase
     {
         BuildPhysicsWorld CreatePhysicsWorldSystem;
         private EntityQuery VehicleGroup;
@@ -105,7 +105,9 @@ namespace Demos
 
             PhysicsWorld world = CreatePhysicsWorldSystem.PhysicsWorld;
 
-            Entities.ForEach((VehicleMechanics mechanics) =>
+            Entities
+                .WithoutBurst()
+                .ForEach((in VehicleMechanics mechanics) =>
             {
                 if (mechanics.wheels.Count == 0) return;
 
@@ -155,7 +157,7 @@ namespace Demos
                     RaycastHit rayResult = rayResults[i];
 
                     rayVelocities[i] = float3.zero;
-                    if( rayResult.RigidBodyIndex != -1 )
+                    if (rayResult.RigidBodyIndex != -1)
                     {
                         float3 wheelPos = rayResult.Position;
                         wheelPos -= (cePosition - ceCenterOfMass);
@@ -168,11 +170,11 @@ namespace Demos
 
 
                 // Calculate a simple slip factor based on chassis tilt.
-                float slopeSlipFactor = math.pow( math.abs( math.dot(ceUp, math.up()) ), 4.0f );
+                float slopeSlipFactor = math.pow(math.abs(math.dot(ceUp, math.up())), 4.0f);
 
                 // Proportional apply velocity changes to each wheel
                 float invWheelCount = 1.0f / mechanics.wheels.Count;
-                for( int i = 0; i < mechanics.wheels.Count; i++ )
+                for (int i = 0; i < mechanics.wheels.Count; i++)
                 {
                     GameObject weGO = mechanics.wheels[i];
 
@@ -320,7 +322,7 @@ namespace Demos
 
                 rayResults.Dispose();
                 rayVelocities.Dispose();
-            });
+            }).Run();
         }
     }
 

@@ -6,7 +6,7 @@ using Unity.Physics.Extensions;
 using Unity.Physics.Stateful;
 using UnityEngine.Assertions;
 #if !UNITY_ENTITIES_0_12_OR_NEWER
-using UnsafeUtility = UnsafeUtility_BackwardCompatibility;
+using UnsafeUtility = UnsafeUtility_ForwardCompatibility;
 #else
 using Unity.Collections.LowLevel.Unsafe;
 #endif

@@ -58,10 +58,8 @@ public class CharacterGunOneToManyInputSystem : SystemBase
 {
     EntityCommandBufferSystem m_EntityCommandBufferSystem;
 
-    protected override void OnCreate()
-    {
+    protected override void OnCreate() =>
         m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-    }
 
     protected override void OnUpdate()
     {
@@ -111,6 +109,7 @@ public class CharacterGunOneToManyInputSystem : SystemBase
                 }
                 gun.WasFiring = 1;
             }).ScheduleParallel();
+
         m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
     }
 }

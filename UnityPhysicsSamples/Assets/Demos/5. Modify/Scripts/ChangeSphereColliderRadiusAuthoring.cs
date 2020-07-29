@@ -94,7 +94,7 @@ public class ChangeSphereColliderRadiusSystem : SystemBase
             {
                 newScale *= newRadius / oldRadius;
             }
-            scale = new Scale { Value = newScale };
+            scale.Value = newScale;
         }).Schedule();
     }
 }

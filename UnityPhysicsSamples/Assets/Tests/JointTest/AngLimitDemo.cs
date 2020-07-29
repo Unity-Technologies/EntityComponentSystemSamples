@@ -11,14 +11,8 @@ public class AngLimitDemo : BasePhysicsDemo
 {
     protected unsafe override void Start()
     {
-        float3 gravity = float3.zero;
-        base.init(gravity);
+        base.init();
 
-        // Enable the joint viewer
-        SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayData
-        {
-            DrawJoints = 1,
-        });
 
         // static body
         Entity staticEntity;
@@ -47,23 +41,35 @@ public class AngLimitDemo : BasePhysicsDemo
         }
 
         // 1D angular limit
-        //{
-        //    float3 pivotA = new float3(-0.5f, 0, 0);
-        //    float3 pivotB = GetBodyTransform(staticEntity).Inverse().TransformPoint(GetBodyTransform(dynamicEntity).TransformPoint(pivotA));
+        {
+            var limit = math.radians(45.0f);
 
-        //    BlobAssetReference<JointData> jointData;
-        //    using (var allocator = new BlobAllocator(-1))
-        //    {
-        //        Constraint angLimit = Constraint.Twist(0, -(float)math.PI / 4.0f, (float)math.PI / 4.0f);
-        //        ref JointData data = ref allocator.ConstructRoot<JointData>();
-        //        data.Init(
-        //            new MTransform(float3x3.identity, pivotA),
-        //            new MTransform(float3x3.identity, pivotB),
-        //            &angLimit, 1);
-        //        jointData = allocator.CreateBlobAssetReference<JointData>(Allocator.Persistent);
-        //    }
+            var worldFromStatic = GetBodyTransform(staticEntity);
+            var worldFromDynamic = GetBodyTransform(dynamicEntity);
+            var StaticFromDynamic = math.mul(math.inverse(worldFromStatic), worldFromDynamic);
 
-        //    CreateJoint(jointData, dynamicEntity, staticEntity);
-        //}
+            float3 pivotFromDynamic = new float3(0, 0, 0);
+            float3 pivotFromStatic = math.transform(StaticFromDynamic, pivotFromDynamic);
+
+            var jointData = new PhysicsJoint
+            {
+                BodyAFromJoint = new RigidTransform(quaternion.identity, pivotFromDynamic),
+                BodyBFromJoint = new RigidTransform(quaternion.identity, pivotFromStatic)
+            };
+            jointData.SetConstraints(new FixedList128<Constraint>
+            {
+                new Constraint
+                {
+                    ConstrainedAxes = new bool3(true, false, false),
+                    Type = ConstraintType.Angular,
+                    Min = -limit,
+                    Max = limit,
+                    SpringFrequency = Constraint.DefaultSpringFrequency,
+                    SpringDamping = Constraint.DefaultSpringDamping,
+                },
+                Constraint.BallAndSocket(),
+            });
+            CreateJoint(jointData, dynamicEntity, staticEntity);
+        }
     }
 }

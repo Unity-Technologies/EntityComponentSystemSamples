@@ -225,7 +225,7 @@ namespace Unity.Physics.Extensions
                     Near = Camera.main.nearClipPlane,
                     Forward = Camera.main.transform.forward,
                     IgnoreTriggers = IgnoreTriggers,
-                }.Schedule(JobHandle.CombineDependencies(handle, m_BuildPhysicsWorldSystem.GetOutputDependency()));
+                }.Schedule(handle);
 
                 PickJobHandle = handle;
 

@@ -8,14 +8,7 @@ public class SoftJointDemo : BasePhysicsDemo
 {
     protected override void Start()
     {
-        float3 gravity = float3.zero;
-        base.init(gravity);
-
-        // Enable the joint viewer
-        SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayData
-        {
-            DrawJoints = 1
-        });
+        base.init();
 
         // Make soft ball and sockets
         {

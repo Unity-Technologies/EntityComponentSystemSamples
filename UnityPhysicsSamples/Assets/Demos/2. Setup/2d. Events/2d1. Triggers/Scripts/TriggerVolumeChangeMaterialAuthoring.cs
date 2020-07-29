@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Physics.Stateful;
 using Unity.Rendering;
@@ -25,15 +26,12 @@ public class TriggerVolumeChangeMaterialAuthoring : MonoBehaviour, IConvertGameO
 [UpdateAfter(typeof(TriggerEventConversionSystem))]
 public class TriggerVolumeChangeMaterialSystem : SystemBase
 {
-    private EndSimulationEntityCommandBufferSystem m_EntityCommandBufferSystem;
     private TriggerEventConversionSystem m_TriggerSystem;
     private EntityQueryMask m_NonTriggerMask;
-    private EntityQuery m_TriggerVolumeQuery;
 
     protected override void OnCreate()
     {
         m_TriggerSystem = World.GetOrCreateSystem<TriggerEventConversionSystem>();
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         m_NonTriggerMask = EntityManager.GetEntityQueryMask(
                 GetEntityQuery(new EntityQueryDesc
                 {
@@ -56,50 +54,53 @@ public class TriggerVolumeChangeMaterialSystem : SystemBase
     {
         Dependency = JobHandle.CombineDependencies(m_TriggerSystem.OutDependency, Dependency);
 
-        var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
+        using (var commandBuffer = new EntityCommandBuffer(Allocator.Temp))
+        {
+            // Need this extra variable here so that it can
+            // be captured by Entities.ForEach loop below
+            var nonTriggerMask = m_NonTriggerMask;
 
-        // Need this extra variable here so that it can
-        // be captured by Entities.ForEach loop below
-        var nonTriggerMask = m_NonTriggerMask;
-
-        Entities
-            .WithName("ChangeMaterialOnTriggerEnter")
-            .WithoutBurst()
-            .ForEach((Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer, ref TriggerVolumeChangeMaterial changeMaterial) =>
-            {
-                for (int i = 0; i < triggerEventBuffer.Length; i++)
+            Entities
+                .WithName("ChangeMaterialOnTriggerEnter")
+                .WithoutBurst()
+                .ForEach((Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer, ref TriggerVolumeChangeMaterial changeMaterial) =>
                 {
-                    var triggerEvent = triggerEventBuffer[i];
-                    var otherEntity = triggerEvent.GetOtherEntity(e);
-
-                    // exclude other triggers and processed events
-                    if (triggerEvent.State == EventOverlapState.Stay || !nonTriggerMask.Matches(otherEntity))
+                    for (int i = 0; i < triggerEventBuffer.Length; i++)
                     {
-                        continue;
-                    }
+                        var triggerEvent = triggerEventBuffer[i];
+                        var otherEntity = triggerEvent.GetOtherEntity(e);
 
-                    if (triggerEvent.State == EventOverlapState.Enter)
-                    {
-                        var volumeRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
-                        var overlappingRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(otherEntity);
-                        overlappingRenderMesh.material = volumeRenderMesh.material;
-
-                        commandBuffer.SetSharedComponent(otherEntity, overlappingRenderMesh);
-                    }
-                    else
-                    {
-                        // State == PhysicsEventState.Exit
-                        if (changeMaterial.ReferenceEntity == Entity.Null)
+                        // exclude other triggers and processed events
+                        if (triggerEvent.State == EventOverlapState.Stay || !nonTriggerMask.Matches(otherEntity))
                         {
                             continue;
                         }
-                        var overlappingRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(otherEntity);
-                        var referenceRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(changeMaterial.ReferenceEntity);
-                        overlappingRenderMesh.material = referenceRenderMesh.material;
 
-                        commandBuffer.SetSharedComponent(otherEntity, overlappingRenderMesh);
+                        if (triggerEvent.State == EventOverlapState.Enter)
+                        {
+                            var volumeRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
+                            var overlappingRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(otherEntity);
+                            overlappingRenderMesh.material = volumeRenderMesh.material;
+
+                            commandBuffer.SetSharedComponent(otherEntity, overlappingRenderMesh);
+                        }
+                        else
+                        {
+                            // State == PhysicsEventState.Exit
+                            if (changeMaterial.ReferenceEntity == Entity.Null)
+                            {
+                                continue;
+                            }
+                            var overlappingRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(otherEntity);
+                            var referenceRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(changeMaterial.ReferenceEntity);
+                            overlappingRenderMesh.material = referenceRenderMesh.material;
+
+                            commandBuffer.SetSharedComponent(otherEntity, overlappingRenderMesh);
+                        }
                     }
-                }
-            }).Run();
+                }).Run();
+
+            commandBuffer.Playback(EntityManager);
+        }
     }
 }

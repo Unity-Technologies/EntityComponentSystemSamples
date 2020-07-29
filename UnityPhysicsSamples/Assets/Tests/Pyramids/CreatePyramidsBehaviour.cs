@@ -60,26 +60,31 @@ public class CreatePyramidsBehaviour : MonoBehaviour, IDeclareReferencedPrefabs,
 
 
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class CreatePyramidsSystem : ComponentSystem
+public class CreatePyramidsSystem : SystemBase
 {
-    EntityQuery m_MainGroup;
-
     protected override void OnCreate()
     {
-        m_MainGroup = GetEntityQuery(ComponentType.ReadOnly<CreatePyramids>());
+        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+        {
+            All = new ComponentType[]
+            {
+                typeof(CreatePyramids)
+            }
+        }));
     }
 
     protected override void OnUpdate()
     {
-        var groupEntities = m_MainGroup.ToEntityArray(Allocator.TempJob);
-        foreach (var entity in groupEntities)
+        Entities
+            .WithoutBurst()
+            .WithStructuralChanges()
+            .ForEach((Entity creatorEntity, in CreatePyramids creator) =>
         {
-            var creator = EntityManager.GetComponentData<CreatePyramids>(entity);
-
             float3 boxSize = creator.BoxSize;
             int boxCount = creator.Count * (creator.Height * (creator.Height + 1) / 2);
 
             var positions = new NativeArray<float3>(boxCount, Allocator.Temp);
+
             int boxIdx = 0;
             for (int p = 0; p < creator.Count; p++)
             {
@@ -97,21 +102,16 @@ public class CreatePyramidsSystem : ComponentSystem
                 }
             }
 
-            var entities = new NativeArray<Entity>(boxCount, Allocator.Temp);
-            EntityManager.Instantiate(creator.BoxEntity, entities);
-
             var pyramidComponent = new PhysicsPyramid();
-            for (boxIdx = 0; boxIdx < entities.Length; boxIdx++)
+            for (int i = 0; i < positions.Length; i++)
             {
-                EntityManager.AddComponentData<PhysicsPyramid>(entities[boxIdx], pyramidComponent);
-                EntityManager.SetComponentData<Translation>(entities[boxIdx], new Translation() { Value = positions[boxIdx] });
+                var entity = EntityManager.Instantiate(creator.BoxEntity);
+                EntityManager.AddComponentData(entity, pyramidComponent);
+                EntityManager.SetComponentData(entity, new Translation() { Value = positions[i] });
             }
 
-            entities.Dispose();
-            positions.Dispose();
+            EntityManager.DestroyEntity(creatorEntity);
 
-            PostUpdateCommands.DestroyEntity(entity);
-        }
-        groupEntities.Dispose();
+        }).Run();
     }
 }

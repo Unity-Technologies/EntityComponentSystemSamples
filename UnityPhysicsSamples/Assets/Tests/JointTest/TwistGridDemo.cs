@@ -10,13 +10,7 @@ public class TwistGridDemo : BasePhysicsDemo
 {
     protected override unsafe void Start()
     {
-        init(float3.zero);
-
-        // Enable the joint viewer
-        SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayData
-        {
-            DrawJoints = 1
-        });
+        init();
 
         BlobAssetReference<Collider> collider = BoxCollider.Create(new BoxGeometry
         {

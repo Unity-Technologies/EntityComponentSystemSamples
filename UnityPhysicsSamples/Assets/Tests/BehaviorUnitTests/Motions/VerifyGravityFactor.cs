@@ -36,17 +36,18 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
-            foreach (var entity in entities)
+            using (var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob))
             {
-                var translation = EntityManager.GetComponentData<Translation>(entity);
+                foreach (var entity in entities)
+                {
+                    var translation = EntityManager.GetComponentData<Translation>(entity);
 
-                // Sphere should never move due to gravity factor being 0
-                Assert.AreEqual(translation.Value.x, 0.0f);
-                Assert.AreEqual(translation.Value.y, 1.0f);
-                Assert.AreEqual(translation.Value.z, 0.0f);
+                    // Sphere should never move due to gravity factor being 0
+                    Assert.AreEqual(translation.Value.x, 0.0f);
+                    Assert.AreEqual(translation.Value.y, 1.0f);
+                    Assert.AreEqual(translation.Value.z, 0.0f);
+                }
             }
-            entities.Dispose();
         }
     }
 }

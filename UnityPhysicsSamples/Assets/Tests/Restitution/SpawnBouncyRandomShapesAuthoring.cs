@@ -5,7 +5,7 @@ using Unity.Physics;
 using UnityEngine.Assertions;
 using Collider = Unity.Physics.Collider;
 #if !UNITY_ENTITIES_0_12_OR_NEWER
-using UnsafeUtility = UnsafeUtility_BackwardCompatibility;
+using UnsafeUtility = UnsafeUtility_ForwardCompatibility;
 #else
 using Unity.Collections.LowLevel.Unsafe;
 #endif
@@ -21,6 +21,7 @@ struct BouncySpawnSettings : IComponentData, ISpawnSettings
 {
     public Entity Prefab { get; set; }
     public float3 Position { get; set; }
+    public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
     public float Restitution;

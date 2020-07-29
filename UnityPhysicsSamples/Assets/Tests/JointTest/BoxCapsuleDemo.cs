@@ -22,14 +22,6 @@ public class BoxCapsuleDemo : BasePhysicsDemo
     protected override void Start()
     {
         base.Start();
-        //base.init(float3.zero); // no gravity
-
-        // Enable the joint viewer
-        SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayData
-        {
-            DrawJoints = 1,
-            DrawContacts = 1
-        });
 
         const uint layerBody = (1 << 0);
         const uint layerHead = (1 << 1);

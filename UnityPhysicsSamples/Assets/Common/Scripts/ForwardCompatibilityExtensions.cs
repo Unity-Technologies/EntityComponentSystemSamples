@@ -30,7 +30,7 @@ static class EntityCommandBufferExtensions
     public static EntityCommandBuffer.Concurrent AsParallelWriter(this EntityCommandBuffer commandBuffer) => commandBuffer.ToConcurrent();
 }
 
-static class UnsafeUtility_BackwardCompatibility
+static class UnsafeUtility_ForwardCompatibility
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static unsafe ref T AsRef<T>(void* ptr) where T : struct => ref UnsafeUtilityEx.AsRef<T>(ptr);

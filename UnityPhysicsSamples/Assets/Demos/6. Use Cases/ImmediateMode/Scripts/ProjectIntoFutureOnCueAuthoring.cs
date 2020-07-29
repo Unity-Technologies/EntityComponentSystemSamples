@@ -331,6 +331,20 @@ public class ProjectIntoFutureOnCueSystem : SystemBase
 
         FinalJobHandle = Dependency;
     }
+
+    public void CullVelocity()
+    {
+        // Cull velocity on all the balls so that the simulation
+        // will match the local prediction
+        Entities
+            .WithName("CullVelocities")
+            .WithBurst()
+            .ForEach((ref PhysicsVelocity pv) =>
+            {
+                pv.Linear = float3.zero;
+                pv.Angular = float3.zero;
+            }).Run();
+    }
 }
 
 public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
@@ -377,23 +391,7 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
         if (System != null && System.IsInitialized)
         {
             System.WhiteBallVelocity = GetVelocityFromSliders();
-
-            // Cull velocity on all the balls so that the simulation
-            // will match the local prediction
-            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
-            using (var entities = entityManager.GetAllEntities())
-            {
-                foreach (var entity in entities)
-                {
-                    if (entityManager.HasComponent<PhysicsVelocity>(entity))
-                    {
-                        var velocity = entityManager.GetComponentData<PhysicsVelocity>(entity);
-                        velocity.Linear = float3.zero;
-                        velocity.Angular = float3.zero;
-                        entityManager.SetComponentData(entity, velocity);
-                    }
-                }
-            }
+            System.CullVelocity();
         }
     }
 

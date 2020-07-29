@@ -68,14 +68,14 @@ namespace Unity.Physics.Samples.Test
     }
 
     [UpdateBefore(typeof(BuildPhysicsWorld))]
-    class EnsureHavokSystem : ComponentSystem
+    class EnsureHavokSystem : SystemBase
     {
         protected override void OnCreate()
         {
             Enabled = false;
         }
 
-        public static void EnsureHavok(ComponentSystem system)
+        public static void EnsureHavok(SystemBase system)
         {
             if (system.HasSingleton<PhysicsStep>())
             {
@@ -97,7 +97,7 @@ namespace Unity.Physics.Samples.Test
 
     // Only works in standalone build, since it needs synchronous Burst compilation.
 #if !UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS
-    [TestFixture]
+    [NUnit.Framework.TestFixture]
 #endif
     class HavokPhysicsEndToEndDeterminismTest : UnityPhysicsEndToEndDeterminismTest
     {

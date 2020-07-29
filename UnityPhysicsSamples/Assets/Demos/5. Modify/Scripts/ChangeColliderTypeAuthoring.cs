@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -57,11 +58,8 @@ public class ChangeColliderTypeAuthoring : MonoBehaviour, IDeclareReferencedPref
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class ChangeColliderTypeSystem : SystemBase
 {
-    EntityCommandBufferSystem m_EntityCommandBufferSystem;
-
     protected override void OnCreate()
     {
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         RequireForUpdate(GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[]
@@ -74,33 +72,36 @@ public class ChangeColliderTypeSystem : SystemBase
     protected override unsafe void OnUpdate()
     {
         var deltaTime = UnityEngine.Time.deltaTime;
-        EntityCommandBuffer commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
 
-        Entities
-            .WithName("ChangeColliderType")
-            .WithAll<PhysicsCollider, RenderMesh>()
-            .WithoutBurst()
-            .ForEach((Entity entity, ref ChangeColliderType modifier) =>
+        using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            modifier.LocalTime -= deltaTime;
 
-            if (modifier.LocalTime > 0.0f) return;
-
-            modifier.LocalTime = modifier.TimeToSwap;
-            var collider = EntityManager.GetComponentData<PhysicsCollider>(entity);
-            if (collider.ColliderPtr->Type == modifier.ColliderA.ColliderPtr->Type)
+            Entities
+                .WithName("ChangeColliderType")
+                .WithAll<PhysicsCollider, RenderMesh>()
+                .WithoutBurst()
+                .ForEach((Entity entity, ref ChangeColliderType modifier) =>
             {
-                commandBuffer.SetComponent(entity, modifier.ColliderB);
-                commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityB));
-            }
-            else
-            {
-                commandBuffer.SetComponent(entity, modifier.ColliderA);
-                commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityA));
-            }
-        }).Run();
+                modifier.LocalTime -= deltaTime;
 
-        m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
+                if (modifier.LocalTime > 0.0f) return;
+
+                modifier.LocalTime = modifier.TimeToSwap;
+                var collider = EntityManager.GetComponentData<PhysicsCollider>(entity);
+                if (collider.ColliderPtr->Type == modifier.ColliderA.ColliderPtr->Type)
+                {
+                    commandBuffer.SetComponent(entity, modifier.ColliderB);
+                    commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityB));
+                }
+                else
+                {
+                    commandBuffer.SetComponent(entity, modifier.ColliderA);
+                    commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityA));
+                }
+            }).Run();
+
+            commandBuffer.Playback(EntityManager);
+        }
     }
 }
 

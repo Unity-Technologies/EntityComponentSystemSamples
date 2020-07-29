@@ -15,7 +15,7 @@ public class RotateSystem_DOTS : SystemBase
 
     protected override void OnUpdate()
     {
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = UnityEngine.Time.fixedDeltaTime;
         Entities
         .WithBurst()
         .ForEach((ref Rotation rotation, in RotateComponent_DOTS rotator) =>

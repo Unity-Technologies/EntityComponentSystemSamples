@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using UnityEngine;
 
 public struct LifeTime : IComponentData
@@ -17,27 +18,24 @@ public class LifeTimeAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
 public class LifeTimeSystem : SystemBase
 {
-    EntityCommandBufferSystem m_EntityCommandBufferSystem;
-
-    protected override void OnCreate() =>
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-
     protected override void OnUpdate()
     {
-        var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
-
-        Entities
-            .WithName("DestroyExpiredLifeTime")
-            .ForEach((Entity entity, int nativeThreadIndex, ref LifeTime timer) =>
+        using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            timer.Value -= 1;
 
-            if (timer.Value < 0f)
+            Entities
+                .WithName("DestroyExpiredLifeTime")
+                .ForEach((Entity entity, ref LifeTime timer) =>
             {
-                commandBuffer.DestroyEntity(nativeThreadIndex, entity);
-            }
-        }).ScheduleParallel();
+                timer.Value -= 1;
 
-        m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
+                if (timer.Value < 0f)
+                {
+                    commandBuffer.DestroyEntity(entity);
+                }
+            }).Run();
+
+            commandBuffer.Playback(EntityManager);
+        }
     }
 }

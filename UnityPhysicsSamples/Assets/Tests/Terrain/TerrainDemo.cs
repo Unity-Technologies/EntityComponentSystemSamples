@@ -15,8 +15,7 @@ public class TerrainDemo : BasePhysicsDemo
 
     protected override void Start()
     {
-        float3 gravity = new float3(0, -9.81f, 0);
-        base.init(gravity);
+        base.init();
 
         // Make heightfield data
         NativeArray<float> heights;

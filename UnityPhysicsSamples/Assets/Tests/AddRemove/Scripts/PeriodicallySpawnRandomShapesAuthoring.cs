@@ -21,6 +21,7 @@ struct PeriodicSpawnSettings : IComponentData, ISpawnSettings
 {
     public Entity Prefab { get; set; }
     public float3 Position { get; set; }
+    public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
 
@@ -56,9 +57,13 @@ class PeriodicallySpawnRandomShapeSystem : SpawnRandomObjectsSystemBase<Periodic
 
     protected override void OnUpdate()
     {
-        Entities.ForEach((Entity entity, ref PeriodicSpawnSettings spawnSettings) =>
+        var lFrameCount = FrameCount;
+        Entities
+            .WithStructuralChanges()
+            .WithoutBurst()
+            .ForEach((Entity entity, ref PeriodicSpawnSettings spawnSettings) =>
         {
-            if (FrameCount % spawnSettings.SpawnRate == 0)
+            if (lFrameCount % spawnSettings.SpawnRate == 0)
             {
                 var count = spawnSettings.Count;
 
@@ -69,7 +74,9 @@ class PeriodicallySpawnRandomShapeSystem : SpawnRandomObjectsSystemBase<Periodic
 
                 var positions = new NativeArray<float3>(count, Allocator.Temp);
                 var rotations = new NativeArray<quaternion>(count, Allocator.Temp);
-                RandomPointsOnCircle(spawnSettings.Position, spawnSettings.Range, ref positions, ref rotations, GetRandomSeed(spawnSettings));
+                RandomPointsInRange(
+                    spawnSettings.Position, spawnSettings.Rotation,
+                    spawnSettings.Range, ref positions, ref rotations, GetRandomSeed(spawnSettings));
 
                 for (int i = 0; i < count; i++)
                 {
@@ -79,7 +86,7 @@ class PeriodicallySpawnRandomShapeSystem : SpawnRandomObjectsSystemBase<Periodic
                     ConfigureInstance(instance, spawnSettings);
                 }
             }
-        });
+        }).Run();
         FrameCount++;
     }
 }

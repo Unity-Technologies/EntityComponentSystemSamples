@@ -12,7 +12,7 @@ namespace Unity.Physics.Samples.Test
     [DisableAutoCreation]
     [AlwaysUpdateSystem]
     [UpdateBefore(typeof(BuildPhysicsWorld))]
-    class EnsureSTSimulation : ComponentSystem
+    class EnsureSTSimulation : SystemBase
     {
         protected override void OnUpdate()
         {

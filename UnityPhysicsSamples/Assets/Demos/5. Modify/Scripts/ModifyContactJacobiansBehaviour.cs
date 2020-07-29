@@ -40,19 +40,37 @@ public class ModifyContactJacobiansBehaviour : MonoBehaviour, IConvertGameObject
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyContactJacobiansSystem : SystemBase
 {
-    EntityQuery m_ContactModifierGroup;
     StepPhysicsWorld m_StepPhysicsWorld;
+    SimulationCallbacks.Callback m_PreparationCallback;
+    SimulationCallbacks.Callback m_JacobianModificationCallback;
 
     protected override void OnCreate()
     {
         m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-        m_ContactModifierGroup = GetEntityQuery(new EntityQueryDesc
+
+        m_PreparationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
+        {
+            return new SetContactFlagsJob
+            {
+                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
+            }.Schedule(simulation, ref world, inDeps);
+        };
+
+        m_JacobianModificationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
+        {
+            return new ModifyJacobiansJob
+            {
+                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
+            }.Schedule(simulation, ref world, inDeps);
+        };
+
+        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(ModifyContactJacobians) }
-        });
+        }));
     }
 
-    // This job reads the modify component and sets some data on the contact, to get propogated to the jacobian
+    // This job reads the modify component and sets some data on the contact, to get propagated to the jacobian
     // for processing in our jacobian modifier job. This is necessary because some flags require extra data to
     // be allocated along with the jacobian (e.g., SurfaceVelocity data typically does not exist). We also set
     // user data bits in the jacobianFlags to save us from looking up the ComponentDataFromEntity later.
@@ -201,28 +219,9 @@ public class ModifyContactJacobiansSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics)
-        {
-            return;
-        }
+        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics) return;
 
-        SimulationCallbacks.Callback preparationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-        {
-            return new SetContactFlagsJob
-            {
-                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
-            }.Schedule(simulation, ref world, inDeps);
-        };
-
-        SimulationCallbacks.Callback jacobianModificationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-        {
-            return new ModifyJacobiansJob
-            {
-                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
-            }.Schedule(simulation, ref world, inDeps);
-        };
-
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, preparationCallback, Dependency);
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, jacobianModificationCallback, Dependency);
+        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, m_PreparationCallback, Dependency);
+        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, m_JacobianModificationCallback, Dependency);
     }
 }

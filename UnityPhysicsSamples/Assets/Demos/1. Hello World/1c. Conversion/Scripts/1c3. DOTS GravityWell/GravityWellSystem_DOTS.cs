@@ -46,7 +46,7 @@ public class GravityWellSystem_DOTS : SystemBase
 
         // Create local 'up' and 'deltaTime' variables so they are accessible inside the ForEach lambda
         var up = math.up();
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = UnityEngine.Time.fixedDeltaTime;
 
         // For each dynamic body apply the forces for all the gravity wells
         Entities

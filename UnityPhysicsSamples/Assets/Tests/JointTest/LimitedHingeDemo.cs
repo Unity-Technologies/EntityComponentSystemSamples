@@ -10,13 +10,7 @@ public class LimitedHingeDemo : BasePhysicsDemo
 {
     protected override unsafe void Start()
     {
-        init(float3.zero); // no gravity
-
-        // Enable the joint viewer
-        SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayData
-        {
-            DrawJoints = 1
-        });
+        init(); // no gravity
 
         Entity* entities = stackalloc Entity[2];
         entities[1] = Entity.Null;

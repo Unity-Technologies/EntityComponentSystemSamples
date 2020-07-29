@@ -24,6 +24,7 @@ abstract class SpawnRandomObjectsAuthoringBase<T> : MonoBehaviour, IConvertGameO
         {
             Prefab = conversionSystem.GetPrimaryEntity(prefab),
             Position = transform.position,
+            Rotation = transform.rotation,
             Range = range,
             Count = count
         };
@@ -40,6 +41,7 @@ interface ISpawnSettings
 {
     Entity Prefab { get; set; }
     float3 Position { get; set; }
+    quaternion Rotation { get; set; }
     float3 Range { get; set; }
     int Count { get; set; }
 }
@@ -48,6 +50,7 @@ struct SpawnSettings : IComponentData, ISpawnSettings
 {
     public Entity Prefab { get; set; }
     public float3 Position { get; set; }
+    public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
 }
@@ -56,7 +59,7 @@ class SpawnRandomObjectsSystem : SpawnRandomObjectsSystemBase<SpawnSettings>
 {
 }
 
-abstract class SpawnRandomObjectsSystemBase<T> : ComponentSystem where T : struct, IComponentData, ISpawnSettings
+abstract class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IComponentData, ISpawnSettings
 {
     internal virtual int GetRandomSeed(T spawnSettings)
     {
@@ -73,40 +76,49 @@ abstract class SpawnRandomObjectsSystemBase<T> : ComponentSystem where T : struc
 
     protected override void OnUpdate()
     {
-        Entities.ForEach((Entity entity, ref T spawnSettings) =>
+        // Entities.ForEach in generic system types are not supported
+        using (var entities = GetEntityQuery(new ComponentType[] { typeof(T) }).ToEntityArray(Allocator.TempJob))
         {
-            var count = spawnSettings.Count;
-
-            OnBeforeInstantiatePrefab(spawnSettings);
-
-            var instances = new NativeArray<Entity>(count, Allocator.Temp);
-            EntityManager.Instantiate(spawnSettings.Prefab, instances);
-
-            var positions = new NativeArray<float3>(count, Allocator.Temp);
-            var rotations = new NativeArray<quaternion>(count, Allocator.Temp);
-            RandomPointsOnCircle(spawnSettings.Position, spawnSettings.Range, ref positions, ref rotations, GetRandomSeed(spawnSettings));
-
-            for (int i = 0; i < count; i++)
+            for (int j = 0; j < entities.Length; j++)
             {
-                var instance = instances[i];
-                EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
-                EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
-                ConfigureInstance(instance, spawnSettings);
-            }
+                var entity = entities[j];
+                var spawnSettings = EntityManager.GetComponentData<T>(entity);
 
-            EntityManager.RemoveComponent<T>(entity);
-        });
+                var count = spawnSettings.Count;
+
+                OnBeforeInstantiatePrefab(spawnSettings);
+
+                var instances = new NativeArray<Entity>(count, Allocator.Temp);
+                EntityManager.Instantiate(spawnSettings.Prefab, instances);
+
+                var positions = new NativeArray<float3>(count, Allocator.Temp);
+                var rotations = new NativeArray<quaternion>(count, Allocator.Temp);
+                RandomPointsInRange(spawnSettings.Position, spawnSettings.Rotation, spawnSettings.Range, ref positions, ref rotations, GetRandomSeed(spawnSettings));
+
+                for (int i = 0; i < count; i++)
+                {
+                    var instance = instances[i];
+                    EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
+                    EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
+                    ConfigureInstance(instance, spawnSettings);
+                }
+
+                EntityManager.RemoveComponent<T>(entity);
+            }
+        }
     }
 
-    protected static void RandomPointsOnCircle(float3 center, float3 range, ref NativeArray<float3> positions, ref NativeArray<quaternion> rotations, int seed = 0)
+    protected static void RandomPointsInRange(
+        float3 center, quaternion orientation, float3 range, 
+        ref NativeArray<float3> positions, ref NativeArray<quaternion> rotations, int seed = 0)
     {
         var count = positions.Length;
         // initialize the seed of the random number generator
         var random = new Unity.Mathematics.Random((uint)seed);
         for (int i = 0; i < count; i++)
         {
-            positions[i] = center + random.NextFloat3(-range, range);
-            rotations[i] = random.NextQuaternionRotation();
+            positions[i] = center + math.mul(orientation, random.NextFloat3(-range, range));
+            rotations[i] = math.mul(random.NextQuaternionRotation(), orientation);
         }
     }
 }

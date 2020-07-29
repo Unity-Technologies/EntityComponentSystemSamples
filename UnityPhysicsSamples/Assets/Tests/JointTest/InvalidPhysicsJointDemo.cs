@@ -8,12 +8,6 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
     {
         base.Start();
 
-        // Enable the joint viewer
-        SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayData
-        {
-            DrawJoints = 1
-        });
-
         BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
         {
             Center = float3.zero,
@@ -30,6 +24,9 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             // Create a dynamic body
             float3 pivotWorld = new float3(-2f, 0, 0);
             Entity body = CreateDynamicBody(pivotWorld, quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
+
+            // create extra dynamic body to trigger havok sync after the first one is destroyed
+            CreateDynamicBody(pivotWorld * 2.0f, quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
 
             // add timeout on dynamic body after 15 frames.
             manager.AddComponentData(body, new LifeTime { Value = 15 });

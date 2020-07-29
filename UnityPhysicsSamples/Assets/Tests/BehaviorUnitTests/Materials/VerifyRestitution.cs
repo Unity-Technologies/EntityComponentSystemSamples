@@ -29,7 +29,7 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyRestitutionSystem : ComponentSystem
+    public class VerifyRestitutionSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         public int StepCounter;
@@ -45,30 +45,22 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            StepCounter++;
+            var stepCount = StepCounter++;
 
-            // Make sure we only collect max Y value when the body is bouncing back up
-            using (var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob))
+            Entities
+            .ForEach((Entity entity, ref VerifyRestitutionData verifyRestitution, in Translation translation, in PhysicsVelocity velocity) =>
             {
-                foreach (var entity in entities)
+                if (velocity.Linear.y > 0)
                 {
-                    var translation = EntityManager.GetComponentData<Translation>(entity);
-                    var velocity = EntityManager.GetComponentData<PhysicsVelocity>(entity).Linear;
-                    var verifyRestitution = EntityManager.GetComponentData<VerifyRestitutionData>(entity);
-                    if (velocity.y > 0)
+                    verifyRestitution.MaxY = math.max(verifyRestitution.MaxY, translation.Value.y);
+
+                    if (stepCount > 55)
                     {
-                        verifyRestitution.MaxY = math.max(verifyRestitution.MaxY, translation.Value.y);
-
-                        if (StepCounter > 55)
-                        {
-                            // Biggest bounce should be near the original height, which is 1
-                            Assert.IsTrue(verifyRestitution.MaxY > 0.9f);
-                        }
-
-                        PostUpdateCommands.SetComponent(entity, verifyRestitution);
+                        // Biggest bounce should be near the original height, which is 1
+                        Assert.IsTrue(verifyRestitution.MaxY > 0.9f);
                     }
                 }
-            }
+            }).Run();
         }
     }
 }

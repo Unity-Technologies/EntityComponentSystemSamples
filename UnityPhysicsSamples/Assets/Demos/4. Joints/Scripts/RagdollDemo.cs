@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using static Unity.Physics.Math;
@@ -9,7 +10,10 @@ using static Unity.Physics.Math;
 public class RagdollDemo : BasePhysicsDemo
 {
     public UnityEngine.Mesh torsoMesh;
+    public UnityEngine.Mesh renderMesh;
+
     public int numberOfRagdolls = 1;
+    [Range(0,1)] public float rangeGain = 1.0f;
 
     private enum layer
     {
@@ -44,22 +48,50 @@ public class RagdollDemo : BasePhysicsDemo
         };
     }
 
-    private void CreateRagdoll(float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false)
+    private void SwapRenderMesh(Entity entity, bool isTorso)
     {
+        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+
+        entityManager.RemoveComponent<RenderMesh>(entity);
+        entityManager.AddSharedComponentData(entity, new RenderMesh
+        {
+            mesh = isTorso ? torsoMesh : renderMesh,
+            material = dynamicMaterial
+        });
+        if (!isTorso)
+        {
+            var renderBounds = entityManager.GetComponentData<RenderBounds>(entity);
+            entityManager.AddComponentData<NonUniformScale>(entity, new NonUniformScale
+            {
+                Value = renderBounds.Value.Size,
+            });
+        }
+    }
+
+    private void CreateRagdoll(float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
+    {
+        CreateRagdoll(positionOffset, rotationOffset, float3.zero, ragdollIndex, internalCollisions, rangeGain);
+    }
+    private void CreateRagdoll(float3 positionOffset, quaternion rotationOffset, float3 initialVelocity, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
+    {
+        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+
         var entities = new NativeList<Entity>(Allocator.Temp);
+        var rangeModifier = new float2(math.max(0,math.min(rangeGain,1)));
 
         // Head
         float headRadius = 0.1f;
-        float3 headPosition = new float3(0, 1.8f, 0);
+        float3 headPosition = new float3(0, 1.8f, headRadius);
         Entity head;
         {
             CollisionFilter filter = internalCollisions ? layerFilter(layer.Head, layer.Torso) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.SphereCollider.Create(new SphereGeometry
+            BlobAssetReference<Unity.Physics.Collider> headCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
-                Center = float3.zero,
+                Vertex0 = new float3(0, 0, 0),
+                Vertex1 = new float3(0, 0, headRadius/4),
                 Radius = headRadius
             }, filter);
-            head = CreateDynamicBody(headPosition, quaternion.identity, collider, float3.zero, float3.zero, 5.0f);
+            head = CreateDynamicBody(headPosition, quaternion.identity, headCollider, float3.zero, float3.zero, 5.0f);
         }
         entities.Add(head);
 
@@ -91,16 +123,20 @@ public class RagdollDemo : BasePhysicsDemo
         // Neck
         {
             float3 pivotHead = new float3(0, -headRadius, 0);
-            float3 pivotBody = math.transform(math.inverse(GetBodyTransform(torso)), math.transform(GetBodyTransform(head), pivotHead));
-            float3 axis = new float3(0, 1, 0);
-            float3 perpendicular = new float3(0, 0, 1);
-            float coneAngle = (float)math.PI / 5.0f;
-            var perpendicularAngle = new FloatRange { Max = math.PI }; // unlimited
-            var twistAngle = new FloatRange(-math.PI / 3f, math.PI / 3f);
+            float3 pivotTorso = math.transform(math.inverse(GetBodyTransform(torso)), math.transform(GetBodyTransform(head), pivotHead));
+            float3 axisHead = new float3(0, 0, 1);
+            float3 perpendicular = new float3(1, 0, 0);
+            FloatRange coneAngle = new FloatRange(math.radians(0), math.radians(45)) * rangeModifier;
+            FloatRange perpendicularAngle = new FloatRange(math.radians(-30), math.radians(+30)) * rangeModifier; 
+            FloatRange twistAngle = new FloatRange(math.radians(-5),math.radians(5)) * rangeModifier;
 
-            var headFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHead };
-            var bodyFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
-            PhysicsJoint.CreateRagdoll(headFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
+            var axisTorso = math.rotate(math.inverse(GetBodyTransform(torso).rot), math.rotate(GetBodyTransform(head).rot, axisHead));
+            axisTorso = math.rotate(quaternion.AxisAngle(perpendicular,math.radians(10)),axisTorso);
+
+            var headFrame = new BodyFrame { Axis = axisHead, PerpendicularAxis = perpendicular, Position = pivotHead };
+            var torsoFrame = new BodyFrame { Axis = axisTorso, PerpendicularAxis = perpendicular, Position = pivotTorso };
+
+            PhysicsJoint.CreateRagdoll(headFrame, torsoFrame, coneAngle.Max, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
             CreateJoint(ragdoll0, head, torso);
             CreateJoint(ragdoll1, head, torso);
         }
@@ -154,16 +190,20 @@ public class RagdollDemo : BasePhysicsDemo
                 // shoulder
                 {
                     float3 pivotArm = new float3(-s * armLength / 2.0f, 0, 0);
-                    float3 pivotBody = math.transform(math.inverse(GetBodyTransform(torso)), math.transform(GetBodyTransform(upperArm), pivotArm));
-                    float3 axis = new float3(s, 0, 0);
-                    float3 perpendicular = new float3(0, 0, 1);
-                    float coneAngle = (float)math.PI / 2.0f;
-                    var perpendicularAngle = new FloatRange { Max = math.PI / 2f };
-                    var twistAngle = new FloatRange(-math.PI / 4f, math.PI / 4f);
+                    float3 pivotTorso = math.transform(math.inverse(GetBodyTransform(torso)), math.transform(GetBodyTransform(upperArm), pivotArm));
+                    float3 axisArm = new float3(-s, 0, 0);
+                    float3 perpendicularArm = new float3(0, 1, 0);
+                    FloatRange coneAngle = new FloatRange(math.radians(0), math.radians(80)) * rangeModifier;
+                    FloatRange perpendicularAngle = new FloatRange( math.radians(-70), math.radians(20) ) * rangeModifier;
+                    FloatRange twistAngle = new FloatRange(math.radians(-5), math.radians(5)) * rangeModifier;
 
-                    var armFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotArm };
-                    var bodyFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
-                    PhysicsJoint.CreateRagdoll(armFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
+                    var axisTorso = math.rotate(math.inverse(GetBodyTransform(torso).rot), math.rotate(GetBodyTransform(upperArm).rot, axisArm));
+                    axisTorso = math.rotate(quaternion.AxisAngle(perpendicularArm, math.radians(-s * 45.0f)), axisTorso);
+
+                    var armFrame = new BodyFrame { Axis = axisArm, PerpendicularAxis = perpendicularArm, Position = pivotArm };
+                    var bodyFrame = new BodyFrame { Axis = axisTorso, PerpendicularAxis = perpendicularArm, Position = pivotTorso };
+
+                    PhysicsJoint.CreateRagdoll(armFrame, bodyFrame, coneAngle.Max, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
                     CreateJoint(ragdoll0, upperArm, torso);
                     CreateJoint(ragdoll1, upperArm, torso);
                 }
@@ -173,12 +213,13 @@ public class RagdollDemo : BasePhysicsDemo
                     float3 pivotUpper = new float3(s * armLength / 2.0f, 0, 0);
                     float3 pivotFore = -pivotUpper;
                     float3 axis = new float3(0, -s, 0);
-                    float3 perpendicular = new float3(s, 0, 0);
+                    float3 perpendicular = new float3(-s, 0, 0);
 
                     var lowerArmFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
                     var upperArmFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotUpper };
-                    PhysicsJoint hinge =
-                        PhysicsJoint.CreateLimitedHinge(lowerArmFrame, upperArmFrame, new FloatRange { Max = 3f });
+                    var hingeRange = new FloatRange(math.radians(0), math.radians(100));
+                    hingeRange = (hingeRange - new float2(hingeRange.Mid)) * rangeModifier + hingeRange.Mid;
+                    PhysicsJoint hinge = PhysicsJoint.CreateLimitedHinge(lowerArmFrame, upperArmFrame, hingeRange);
                     CreateJoint(hinge, foreArm, upperArm);
                 }
 
@@ -186,13 +227,13 @@ public class RagdollDemo : BasePhysicsDemo
                 {
                     float3 pivotFore = new float3(s * armLength / 2.0f, 0, 0);
                     float3 pivotHand = new float3(-s * handLength / 2.0f, 0, 0);
-                    float3 axis = new float3(0, -s, 0);
-                    float3 perpendicular = new float3(s, 0, 0);
+                    float3 axis = new float3(0, 0, -s);
+                    float3 perpendicular = new float3(0, 0, 1);
 
                     var handFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotHand };
                     var forearmFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFore };
-                    PhysicsJoint hinge =
-                        PhysicsJoint.CreateLimitedHinge(handFrame, forearmFrame, new FloatRange(-0.3f, 0.6f));
+                    var hingeRange = new FloatRange(math.radians(0), math.radians(135)) * rangeModifier;
+                    PhysicsJoint hinge = PhysicsJoint.CreateLimitedHinge(handFrame, forearmFrame, hingeRange);
                     CreateJoint(hinge, hand, foreArm);
                 }
             }
@@ -219,15 +260,15 @@ public class RagdollDemo : BasePhysicsDemo
         {
             float3 pivotTorso = float3.zero;
             float3 pivotPelvis = math.transform(math.inverse(GetBodyTransform(pelvis)), math.transform(GetBodyTransform(torso), pivotTorso));
-            float3 axis = new float3(0, -1, 0);
+            float3 axis = new float3(0, 1, 0);
             float3 perpendicular = new float3(0, 0, 1);
-            float coneAngle = 0.1f;
-            var perpendicularAngle = new FloatRange(-0.1f, math.PI);
-            var twistAngle = new FloatRange(-0.1f, 0.1f);
+            FloatRange coneAngle = new FloatRange(math.radians(0), math.radians(5)) * rangeModifier;
+            FloatRange perpendicularAngle = new FloatRange(math.radians(-5), math.radians(90)) * rangeModifier;
+            FloatRange twistAngle = new FloatRange(-math.radians(-5), math.radians(5)) * rangeModifier;
 
             var pelvisFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotPelvis };
             var torsoFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotTorso };
-            PhysicsJoint.CreateRagdoll(pelvisFrame, torsoFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
+            PhysicsJoint.CreateRagdoll(pelvisFrame, torsoFrame, coneAngle.Max, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
             CreateJoint(ragdoll0, pelvis, torso);
             CreateJoint(ragdoll1, pelvis, torso);
         }
@@ -282,19 +323,22 @@ public class RagdollDemo : BasePhysicsDemo
                 // hip
                 {
                     float3 pivotThigh = new float3(0, thighLength / 2.0f, 0);
-                    float3 pivotBody = math.transform(math.inverse(GetBodyTransform(torso)), math.transform(GetBodyTransform(thigh), pivotThigh));
-                    float3 axis = new float3(0, -1, 0);
-                    float3 perpendicular = new float3(s, 0, 0);
-                    float coneAngle = (float)math.PI / 4.0f;
+                    float3 pivotPelvis = math.transform(math.inverse(GetBodyTransform(pelvis)), math.transform(GetBodyTransform(thigh), pivotThigh));
+                    float3 axisLeg = new float3(0, -1, 0);
+                    float3 perpendicularLeg = new float3(-s, 0, 0);
+                    FloatRange coneAngle = new FloatRange(math.radians(0), math.radians(60)) * rangeModifier;
+                    FloatRange perpendicularAngle = new FloatRange(math.radians(-10), math.radians(40)) * rangeModifier;
+                    FloatRange twistAngle = new FloatRange(-math.radians(5), math.radians(5)) * rangeModifier;
 
-                    var perpendicularAngle = new FloatRange { Max = 0.2f + math.PI / 2.0f };
-                    var twistAngle = new FloatRange(-0.2f, 0.2f);
+                    var axisPelvis = math.rotate(math.inverse(GetBodyTransform(pelvis).rot), math.rotate(GetBodyTransform(thigh).rot, axisLeg));
+                    axisPelvis = math.rotate(quaternion.AxisAngle(perpendicularLeg, math.radians(s * 45.0f)), axisPelvis);
 
-                    var upperLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotThigh };
-                    var bodyFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotBody };
-                    PhysicsJoint.CreateRagdoll(upperLegFrame, bodyFrame, coneAngle, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
-                    CreateJoint(ragdoll0, thigh, torso);
-                    CreateJoint(ragdoll1, thigh, torso);
+                    var upperLegFrame = new BodyFrame { Axis = axisLeg, PerpendicularAxis = perpendicularLeg, Position = pivotThigh };
+                    var pelvisFrame = new BodyFrame { Axis = axisPelvis, PerpendicularAxis = perpendicularLeg, Position = pivotPelvis };
+
+                    PhysicsJoint.CreateRagdoll(upperLegFrame, pelvisFrame, coneAngle.Max, perpendicularAngle, twistAngle, out var ragdoll0, out var ragdoll1);
+                    CreateJoint(ragdoll0, thigh, pelvis);
+                    CreateJoint(ragdoll1, thigh, pelvis);
                 }
 
                 // knee
@@ -306,8 +350,9 @@ public class RagdollDemo : BasePhysicsDemo
 
                     var lowerLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotCalf };
                     var upperLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotThigh };
-                    PhysicsJoint hinge =
-                        PhysicsJoint.CreateLimitedHinge(lowerLegFrame, upperLegFrame, new FloatRange { Min = -1.2f });
+                    var hingeRange = new FloatRange(math.radians(-90), math.radians(0));
+                    hingeRange = (hingeRange - new float2(hingeRange.Mid)) * rangeModifier + hingeRange.Mid;
+                    PhysicsJoint hinge = PhysicsJoint.CreateLimitedHinge(lowerLegFrame, upperLegFrame, hingeRange);
                     CreateJoint(hinge, calf, thigh);
                 }
 
@@ -320,43 +365,42 @@ public class RagdollDemo : BasePhysicsDemo
 
                     var footFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotFoot };
                     var lowerLegFrame = new BodyFrame { Axis = axis, PerpendicularAxis = perpendicular, Position = pivotCalf };
-                    PhysicsJoint hinge =
-                        PhysicsJoint.CreateLimitedHinge(footFrame, lowerLegFrame, new FloatRange(-0.4f, 0.1f));
+                    var hingeRange = new FloatRange(math.radians(-5), math.radians(5)) * rangeModifier;
+                    PhysicsJoint hinge = PhysicsJoint.CreateLimitedHinge(footFrame, lowerLegFrame, hingeRange);
                     CreateJoint(hinge, foot, calf);
                 }
             }
         }
 
-        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
-
         // reposition with offset information
         if (entities.Length > 0)
         {
-            float3 center = float3.zero;
             for (int i = 0; i < entities.Length; i++)
             {
                 var e = entities[i];
-                center += entityManager.GetComponentData<Translation>(e).Value;
-            }
-            center /= entities.Length;
-            for (int i = 0; i < entities.Length; i++)
-            {
-                var e = entities[i];
+
+                bool isTorso = (i == 1);
+                SwapRenderMesh(e, isTorso);
+
                 Translation positionComponent = entityManager.GetComponentData<Translation>(e);
                 Rotation rotationComponent = entityManager.GetComponentData<Rotation>(e);
+                PhysicsVelocity velocityComponent = entityManager.GetComponentData<PhysicsVelocity>(e);
 
                 float3 position = positionComponent.Value;
                 quaternion rotation = rotationComponent.Value;
 
-                float3 localPosition = position - center;
+                float3 localPosition = position - pelvisPosition;
                 localPosition = math.rotate(rotationOffset, localPosition);
 
-                position = localPosition + center + positionOffset;
+                position = localPosition + pelvisPosition + positionOffset;
                 rotation = math.mul(rotation, rotationOffset);
 
                 positionComponent.Value = position;
                 rotationComponent.Value = rotation;
 
+                velocityComponent.Linear = initialVelocity;
+
+                entityManager.SetComponentData<PhysicsVelocity>(e, velocityComponent);
                 entityManager.SetComponentData<Translation>(e, positionComponent);
                 entityManager.SetComponentData<Rotation>(e, rotationComponent);
             }
@@ -365,8 +409,7 @@ public class RagdollDemo : BasePhysicsDemo
 
     protected override void Start()
     {
-        init(new float3(0, -9.81f, 0));
-        //base.init(float3.zero); // no gravity
+        base.init();
 
         // Enable the joint viewer
         //         SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayComponentData
@@ -374,24 +417,24 @@ public class RagdollDemo : BasePhysicsDemo
         //             DrawJoints = 1
         //         });
 
-        // Floor
-        {
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(
-                new BoxGeometry
-                {
-                    Center = float3.zero,
-                    Orientation = quaternion.identity,
-                    Size = new float3(20.0f, 0.2f, 20.0f),
-                    BevelRadius = 0.01f
-                },
-                layerFilter(layer.Ground, 0)
-            );
-            CreateStaticBody(new float3(0, -0.1f, 0), quaternion.identity, collider);
-        }
 
         for (int i = 0; i < numberOfRagdolls; i++)
         {
-            CreateRagdoll(new float3(0, i, 0), quaternion.Euler(math.radians(90), math.radians(90), 0), i + 1);
+            int xOffset = (i % 2) == 0 ? -1 : 1;
+            int yOffset = 2 * (i / 2);
+            int xSpeed = -xOffset * 5;
+
+            var position = new float3(xOffset * 5, yOffset, xOffset * 0.1f);
+            var rotation = quaternion.Euler(math.radians(45), -xOffset * math.radians(90), 0);
+            var velocity = new float3(xSpeed, math.abs(xSpeed), 0);
+
+            position = math.transform(new RigidTransform(transform.rotation, transform.position), position);
+            rotation = math.mul(transform.rotation, rotation);
+            velocity = math.rotate(transform.rotation, velocity);
+
+            CreateRagdoll( 
+                positionOffset: position, rotationOffset: rotation, initialVelocity: velocity, 
+                ragdollIndex: i + 1, rangeGain: rangeGain);
         }
     }
 }
