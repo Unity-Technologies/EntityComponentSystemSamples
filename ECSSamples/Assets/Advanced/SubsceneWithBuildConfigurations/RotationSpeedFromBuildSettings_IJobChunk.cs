@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -12,11 +12,11 @@ public class RotationSpeedFromBuildSettings_IJobChunk : MonoBehaviour, IConvertG
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         var rotationSpeedSetting = conversionSystem.GetBuildConfigurationComponent<RotationSpeedSetting>();
-        
+
         // Change rotation speed
         var data = new RotationSpeed_IJobChunk { RadiansPerSecond = math.radians(rotationSpeedSetting.RotationSpeed) };
         dstManager.AddComponentData(entity, data);
-        
+
         // Offset the translation of the generated object
         var translation = dstManager.GetComponentData<Translation>(entity);
         translation.Value.y += rotationSpeedSetting.Offset;

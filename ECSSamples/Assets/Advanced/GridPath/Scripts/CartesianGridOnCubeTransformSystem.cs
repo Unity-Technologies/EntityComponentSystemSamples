@@ -31,16 +31,16 @@ public unsafe class CartesianGridOnCubeTransformSystem : JobComponentSystem
             .ForEach((ref LocalToWorld localToWorld,
                 in Translation translation,
                 in CartesianGridOnCubeFace cubeFace) =>
-            {
-                var cubeFaceIndex = cubeFace.Value;
-                var resultLocalToWorld = faceLocalToWorld[cubeFaceIndex];
-                resultLocalToWorld.c3 = math.mul(resultLocalToWorld, new float4(translation.Value, 1.0f));
-
-                localToWorld = new LocalToWorld
                 {
-                    Value = resultLocalToWorld
-                };
-            }).Schedule(lastJobHandle);
+                    var cubeFaceIndex = cubeFace.Value;
+                    var resultLocalToWorld = faceLocalToWorld[cubeFaceIndex];
+                    resultLocalToWorld.c3 = math.mul(resultLocalToWorld, new float4(translation.Value, 1.0f));
+
+                    localToWorld = new LocalToWorld
+                    {
+                        Value = resultLocalToWorld
+                    };
+                }).Schedule(lastJobHandle);
 
         return lastJobHandle;
     }

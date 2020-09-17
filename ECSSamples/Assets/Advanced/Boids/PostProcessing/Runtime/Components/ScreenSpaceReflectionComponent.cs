@@ -85,7 +85,7 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && context.isGBufferAvailable;
+                    && context.isGBufferAvailable;
             }
         }
 
@@ -153,11 +153,11 @@ namespace UnityEngine.PostProcessing
 
             var P = camera.projectionMatrix;
             var projInfo = new Vector4(
-                    -2f / (sWidth * P[0]),
-                    -2f / (sHeight * P[5]),
-                    (1f - P[2]) / P[0],
-                    (1f + P[6]) / P[5]
-                    );
+                -2f / (sWidth * P[0]),
+                -2f / (sHeight * P[5]),
+                (1f - P[2]) / P[0],
+                (1f + P[6]) / P[5]
+            );
 
             var cameraClipInfo = float.IsPositiveInfinity(camera.farClipPlane) ?
                 new Vector3(camera.nearClipPlane, -1f, 1f) :

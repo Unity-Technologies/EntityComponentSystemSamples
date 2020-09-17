@@ -137,9 +137,9 @@ namespace UnityEditor.PostProcessing
             void DrawArc(Vector2 center, float radius, float angle, Color fill)
             {
                 var start = new Vector2(
-                        -Mathf.Cos(Mathf.Deg2Rad * angle / 2f),
-                        Mathf.Sin(Mathf.Deg2Rad * angle / 2f)
-                        );
+                    -Mathf.Cos(Mathf.Deg2Rad * angle / 2f),
+                    Mathf.Sin(Mathf.Deg2Rad * angle / 2f)
+                );
 
                 Handles.color = fill;
                 Handles.DrawSolidArc(center, Vector3.forward, start, angle, radius);

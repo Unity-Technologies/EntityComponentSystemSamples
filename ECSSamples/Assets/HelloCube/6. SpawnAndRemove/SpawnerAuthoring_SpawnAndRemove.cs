@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
@@ -33,4 +33,3 @@ public class SpawnerAuthoring_SpawnAndRemove : MonoBehaviour, IDeclareReferenced
         dstManager.AddComponentData(entity, spawnerData);
     }
 }
-

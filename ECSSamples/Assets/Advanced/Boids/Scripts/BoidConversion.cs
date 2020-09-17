@@ -15,7 +15,7 @@ namespace Samples.Boids
             Entities.ForEach((BoidAuthoring boidAuthoring) =>
             {
                 var entity = GetPrimaryEntity(boidAuthoring);
-                
+
                 DstEntityManager.AddSharedComponentData(entity, new Boid
                 {
                     CellRadius = boidAuthoring.CellRadius,
@@ -25,7 +25,7 @@ namespace Samples.Boids
                     ObstacleAversionDistance = boidAuthoring.ObstacleAversionDistance,
                     MoveSpeed = boidAuthoring.MoveSpeed
                 });
-                
+
                 // Remove default transform system components
                 DstEntityManager.RemoveComponent<Translation>(entity);
                 DstEntityManager.RemoveComponent<Rotation>(entity);

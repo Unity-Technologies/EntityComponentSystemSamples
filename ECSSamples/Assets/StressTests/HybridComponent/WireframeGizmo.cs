@@ -1,4 +1,3 @@
-﻿#if UNITY_EDITOR
 using Unity.Entities;
 using System;
 using UnityEngine;
@@ -30,12 +29,12 @@ public class WireframeGizmo : MonoBehaviour
         DrawCircle(transform.position, Quaternion.LookRotation(transform.up, transform.forward));
         DrawCircle(transform.position, Quaternion.LookRotation(Vector3.Cross(transform.up, transform.forward), transform.forward));
     }
-    
+
     static void DrawCircle(Vector3 position, Quaternion rotation)
     {
         const float k_SphereSections = 32;
         const float k_Radius = 0.8f;
-        
+
         float angle = 0.0f;
         Vector3 pt1 = Vector3.zero, pt2 = Vector3.zero;
 
@@ -72,5 +71,3 @@ public class WireframeGizmoConversionSystem : GameObjectConversionSystem
         });
     }
 }
-
-#endif // UNITY_EDITOR

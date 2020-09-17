@@ -1,4 +1,4 @@
-﻿// NOTE: This is a per project ifdfef,
+// NOTE: This is a per project ifdfef,
 //       the samples in this project are run in both modes for testing purposes.
 //       In a normal game project this ifdef is not required.
 
@@ -19,11 +19,11 @@ class SimpleMeshRenderingAuthoring : MonoBehaviour, IConvertGameObjectToEntity
         var material = new Material(Shader.Find("Standard"));
         material.color = Color;
         // ... Or be an asset that is being referenced.
-        
+
         dstManager.AddComponentData(entity, new SimpleMeshRenderer
         {
             Mesh = Mesh,
-            Material = material, 
+            Material = material,
         });
     }
 }

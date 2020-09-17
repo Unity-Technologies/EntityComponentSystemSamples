@@ -12,14 +12,14 @@ public class RotationSpeedSystem_ForEach : SystemBase
     protected override void OnUpdate()
     {
         float deltaTime = Time.DeltaTime;
-        
+
         // Schedule job to rotate around up vector
         Entities
             .WithName("RotationSpeedSystem_ForEach")
             .ForEach((ref Rotation rotation, in RotationSpeed_ForEach rotationSpeed) =>
             {
                 rotation.Value = math.mul(
-                    math.normalize(rotation.Value), 
+                    math.normalize(rotation.Value),
                     quaternion.AxisAngle(math.up(), rotationSpeed.RadiansPerSecond * deltaTime));
             })
             .ScheduleParallel();

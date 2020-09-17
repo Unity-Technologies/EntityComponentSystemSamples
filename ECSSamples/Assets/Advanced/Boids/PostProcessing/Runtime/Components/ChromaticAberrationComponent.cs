@@ -15,7 +15,7 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && model.settings.intensity > 0f;
+                    && model.settings.intensity > 0f;
             }
         }
 

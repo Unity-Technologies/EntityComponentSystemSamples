@@ -21,22 +21,22 @@ namespace Samples.GridPath.Tests
             {
                 RowCount = rowCount;
                 ColCount = colCount;
-                
+
                 int wallRowStride = (colCount + 1) / 2;
                 int wallsSize = rowCount * wallRowStride;
 
-                Walls = (byte*) UnsafeUtility.Malloc(wallsSize, 16, Allocator.Temp);
+                Walls = (byte*)UnsafeUtility.Malloc(wallsSize, 16, Allocator.Temp);
                 UnsafeUtility.MemClear(Walls, wallsSize);
-                
+
                 // Add outer boundary walls.
                 for (var x = 0; x < colCount; x++)
-                    AddWallNorth(new CartesianGridCoordinates {x = (short) x, y = (short) (rowCount - 1)});
+                    AddWallNorth(new CartesianGridCoordinates {x = (short)x, y = (short)(rowCount - 1)});
                 for (var x = 0; x < colCount; x++)
-                    AddWallSouth(new CartesianGridCoordinates {x = (short) x, y = (short) 0});
+                    AddWallSouth(new CartesianGridCoordinates {x = (short)x, y = (short)0});
                 for (var y = 0; y < rowCount; y++)
-                    AddWallWest(new CartesianGridCoordinates {x = (short) 0, y = (short) y});
+                    AddWallWest(new CartesianGridCoordinates {x = (short)0, y = (short)y});
                 for (var y = 0; y < rowCount; y++)
-                    AddWallEast(new CartesianGridCoordinates {x = (short) (colCount-1), y = (short) y});
+                    AddWallEast(new CartesianGridCoordinates {x = (short)(colCount - 1), y = (short)y});
             }
 
             public void Dispose()
@@ -47,59 +47,62 @@ namespace Samples.GridPath.Tests
 
             public void SetWallBit(int x, int y, CartesianGridDirectionBit directionBit)
             {
-                if (new CartesianGridCoordinates { x=(short)x, y=(short)y}.OnGrid(RowCount,ColCount))
+                if (new CartesianGridCoordinates { x = (short)x, y = (short)y}.OnGrid(RowCount, ColCount))
                     Walls[y * WallRowStride + (x >> 1)] |= (byte)((byte)directionBit << (4 * (x & 1)));
             }
-            
+
             public bool TestWallBit(int x, int y, CartesianGridDirectionBit directionBit)
             {
-                if (!(new CartesianGridCoordinates {x = (short) x, y = (short) y}.OnGrid(RowCount, ColCount)))
+                if (!(new CartesianGridCoordinates {x = (short)x, y = (short)y}.OnGrid(RowCount, ColCount)))
                     return false;
-                
-                return (((Walls[y * WallRowStride + (x >> 1)] >> (4 * (x&1))) & (byte)directionBit) == (byte)directionBit);
+
+                return (((Walls[y * WallRowStride + (x >> 1)] >> (4 * (x & 1))) & (byte)directionBit) == (byte)directionBit);
             }
-                    
+
             public void AddWallNorth(CartesianGridCoordinates cellPosition)
             {
                 SetWallBit(cellPosition.x, cellPosition.y, CartesianGridDirectionBit.North);
-                SetWallBit(cellPosition.x, cellPosition.y+1, CartesianGridDirectionBit.South);
+                SetWallBit(cellPosition.x, cellPosition.y + 1, CartesianGridDirectionBit.South);
             }
+
             public void AddWallSouth(CartesianGridCoordinates cellPosition)
             {
                 SetWallBit(cellPosition.x, cellPosition.y, CartesianGridDirectionBit.South);
-                SetWallBit(cellPosition.x, cellPosition.y-1, CartesianGridDirectionBit.North);
+                SetWallBit(cellPosition.x, cellPosition.y - 1, CartesianGridDirectionBit.North);
             }
+
             public void AddWallWest(CartesianGridCoordinates cellPosition)
             {
                 SetWallBit(cellPosition.x, cellPosition.y, CartesianGridDirectionBit.West);
-                SetWallBit(cellPosition.x-1, cellPosition.y, CartesianGridDirectionBit.East);
+                SetWallBit(cellPosition.x - 1, cellPosition.y, CartesianGridDirectionBit.East);
             }
+
             public void AddWallEast(CartesianGridCoordinates cellPosition)
             {
                 SetWallBit(cellPosition.x, cellPosition.y, CartesianGridDirectionBit.East);
-                SetWallBit(cellPosition.x+1, cellPosition.y, CartesianGridDirectionBit.West);
+                SetWallBit(cellPosition.x + 1, cellPosition.y, CartesianGridDirectionBit.West);
             }
 
             int WalkPath(CartesianGridCoordinates startPosition, NativeArray<byte> targetDirections, int pathOffset)
             {
                 var validDirections = CartesianGridOnPlaneShortestPath.LookupDirectionToTarget(startPosition, RowCount, ColCount, targetDirections);
-                var direction = CartesianGridMovement.PathVariation[((pathOffset&3) * 16) + validDirections];
-                
+                var direction = CartesianGridMovement.PathVariation[((pathOffset & 3) * 16) + validDirections];
+
                 if (direction == 0xff) // No path
                     return 0;
 
                 var nextPosition = new CartesianGridCoordinates();
                 if (direction == 0)
-                    nextPosition = new CartesianGridCoordinates {x = startPosition.x, y = (short) (startPosition.y + 1)};
+                    nextPosition = new CartesianGridCoordinates {x = startPosition.x, y = (short)(startPosition.y + 1)};
                 else if (direction == 1)
-                    nextPosition = new CartesianGridCoordinates {x = startPosition.x, y = (short) (startPosition.y - 1)};
+                    nextPosition = new CartesianGridCoordinates {x = startPosition.x, y = (short)(startPosition.y - 1)};
                 else if (direction == 2)
-                    nextPosition = new CartesianGridCoordinates {x = (short)(startPosition.x-1), y = (short) startPosition.y};
+                    nextPosition = new CartesianGridCoordinates {x = (short)(startPosition.x - 1), y = (short)startPosition.y};
                 else if (direction == 3)
-                    nextPosition = new CartesianGridCoordinates {x = (short)(startPosition.x+1), y = (short) startPosition.y};
+                    nextPosition = new CartesianGridCoordinates {x = (short)(startPosition.x + 1), y = (short)startPosition.y};
                 else
                     Assert.Fail();
-                
+
                 // Test no wall in the direction given
                 if (direction == 0)
                     Assert.IsFalse(TestWallBit(startPosition.x, startPosition.y, CartesianGridDirectionBit.North));
@@ -117,21 +120,21 @@ namespace Samples.GridPath.Tests
             {
                 var directionsRowStride = (ColCount + 1) / 2;
                 var directionsSize = RowCount * directionsRowStride;
-                
+
                 var targetDirections = new NativeArray<byte>(directionsSize, Allocator.Temp);
-                var sourceDirections= new NativeArray<byte>(directionsSize, Allocator.Temp);
-                
+                var sourceDirections = new NativeArray<byte>(directionsSize, Allocator.Temp);
+
                 // For testing purposes, recalculate paths every time.
                 CartesianGridOnPlaneShortestPath.CalculateShortestPathsToTarget(targetDirections, RowCount, ColCount, targetPosition, Walls);
                 CartesianGridOnPlaneShortestPath.CalculateShortestPathsToTarget(sourceDirections, RowCount, ColCount, sourcePosition, Walls);
-                
+
                 // Test distance form source->target is same as target->source
                 var sourceToTargetDistance = WalkPath(sourcePosition, targetDirections, 0);
                 var targetToSourceDistance = WalkPath(targetPosition, sourceDirections, 0);
                 Assert.AreEqual(sourceToTargetDistance, targetToSourceDistance);
 
                 var expectedDistance = sourceToTargetDistance;
-                    
+
                 // Sample path variations (not exhaustive, always follow the variation path option)
                 for (int i = 1; i < 4; i++)
                 {
@@ -142,7 +145,7 @@ namespace Samples.GridPath.Tests
                     targetToSourceDistance = WalkPath(targetPosition, sourceDirections, i);
                     Assert.AreEqual(expectedDistance, targetToSourceDistance);
                 }
-                
+
                 targetDirections.Dispose();
                 sourceDirections.Dispose();
 
@@ -159,12 +162,12 @@ namespace Samples.GridPath.Tests
                 var dist = 0;
 
                 dist = grid.WalkPathDistance(new CartesianGridCoordinates {x = 0, y = 0}, targetPosition);
-                Assert.AreEqual(dist, 30 );
+                Assert.AreEqual(dist, 30);
                 dist = grid.WalkPathDistance(new CartesianGridCoordinates {x = 8, y = 7}, targetPosition);
-                Assert.AreEqual(dist, 15 );
+                Assert.AreEqual(dist, 15);
             }
         }
-        
+
         [Test]
         public void PathOnIsland()
         {
@@ -173,16 +176,16 @@ namespace Samples.GridPath.Tests
                 // create island left/right side
                 for (int y = 0; y < grid.RowCount; y++)
                     grid.AddWallWest(new CartesianGridCoordinates {x = 8, y = (short)y});
-               
+
                 var targetPosition = new CartesianGridCoordinates {x = 15, y = 15};
                 var dist = 0;
-                
+
                 // right side has open path
                 dist = grid.WalkPathDistance(new CartesianGridCoordinates {x = 8, y = 8}, targetPosition);
                 Assert.AreEqual(dist, 14);
                 dist = grid.WalkPathDistance(new CartesianGridCoordinates {x = 8, y = 0}, targetPosition);
                 Assert.AreEqual(dist, 22);
-                
+
                 // left side blocked
                 dist = grid.WalkPathDistance(new CartesianGridCoordinates {x = 0, y = 8}, targetPosition);
                 Assert.AreEqual(dist, 0);
@@ -190,7 +193,7 @@ namespace Samples.GridPath.Tests
                 Assert.AreEqual(dist, 0);
             }
         }
-        
+
         [Test]
         public void PathRandomObstacles()
         {

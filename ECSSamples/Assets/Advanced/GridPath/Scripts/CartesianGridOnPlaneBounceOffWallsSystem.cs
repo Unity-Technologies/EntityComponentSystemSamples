@@ -38,20 +38,20 @@ public unsafe class CartesianGridOnPlaneBounceOffWallsSystem : JobComponentSyste
             .ForEach((ref CartesianGridDirection gridDirection,
                 ref CartesianGridCoordinates gridCoordinates,
                 ref Translation translation) =>
-            {
-                var dir = gridDirection.Value;
-                var nextGridPosition = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[dir], rowCount, colCount);
-                if (gridCoordinates.Equals(nextGridPosition))
                 {
-                    // Don't allow translation to drift
-                    translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
-                    return; // Still in the same grid cell. No need to change direction.
-                }
-                
-                gridCoordinates = nextGridPosition;
-                gridDirection.Value = CartesianGridMovement.BounceDirectionOffWalls(gridCoordinates, dir, rowCount, colCount, gridWalls, pathOffset);
-            }).Schedule(lastJobHandle);
-        
+                    var dir = gridDirection.Value;
+                    var nextGridPosition = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[dir], rowCount, colCount);
+                    if (gridCoordinates.Equals(nextGridPosition))
+                    {
+                        // Don't allow translation to drift
+                        translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
+                        return; // Still in the same grid cell. No need to change direction.
+                    }
+
+                    gridCoordinates = nextGridPosition;
+                    gridDirection.Value = CartesianGridMovement.BounceDirectionOffWalls(gridCoordinates, dir, rowCount, colCount, gridWalls, pathOffset);
+                }).Schedule(lastJobHandle);
+
         return lastJobHandle;
     }
 }

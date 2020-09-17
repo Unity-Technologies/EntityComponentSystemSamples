@@ -13,7 +13,7 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && model.settings.intensity > 0f;
+                    && model.settings.intensity > 0f;
             }
         }
 
@@ -25,7 +25,7 @@ namespace UnityEngine.PostProcessing
                 settings.mode == GrainModel.Mode.Fast
                 ? "GRAIN_FAST"
                 : "GRAIN_FILMIC"
-                );
+            );
 
 #if POSTFX_DEBUG_STATIC_GRAIN
             float time = 4f;

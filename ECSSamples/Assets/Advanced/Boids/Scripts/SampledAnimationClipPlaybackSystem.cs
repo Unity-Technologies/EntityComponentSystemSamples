@@ -10,19 +10,19 @@ namespace Samples.Boids
     {
         protected override void OnUpdate()
         {
-            var deltaTime = math.min(0.05f,Time.DeltaTime);
-            
+            var deltaTime = math.min(0.05f, Time.DeltaTime);
+
             Entities.ForEach((ref Translation translation, ref Rotation rotation, in SampledAnimationClip sampledAnimationClip) =>
             {
                 var frameIndex = sampledAnimationClip.FrameIndex;
                 var timeOffset = sampledAnimationClip.TimeOffset;
-                
+
                 // Be careful not to cache Value (or any field in Value like Samples) inside of blob asset.
                 var prevTranslation = sampledAnimationClip.TransformSamplesBlob.Value.TranslationSamples[frameIndex];
-                var nextTranslation = sampledAnimationClip.TransformSamplesBlob.Value.TranslationSamples[frameIndex+1];
+                var nextTranslation = sampledAnimationClip.TransformSamplesBlob.Value.TranslationSamples[frameIndex + 1];
                 var prevRotation    = sampledAnimationClip.TransformSamplesBlob.Value.RotationSamples[frameIndex];
-                var nextRotation    = sampledAnimationClip.TransformSamplesBlob.Value.RotationSamples[frameIndex+1];
-                
+                var nextRotation    = sampledAnimationClip.TransformSamplesBlob.Value.RotationSamples[frameIndex + 1];
+
                 translation.Value = math.lerp(prevTranslation, nextTranslation, timeOffset);
                 rotation.Value = math.slerp(prevRotation, nextRotation, timeOffset);
             }).ScheduleParallel();

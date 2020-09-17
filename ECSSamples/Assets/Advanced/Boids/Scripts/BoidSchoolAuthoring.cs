@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace Samples.Boids
         public GameObject Prefab;
         public float InitialRadius;
         public int Count;
-        
+
         public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
         {
             referencedPrefabs.Add(Prefab);

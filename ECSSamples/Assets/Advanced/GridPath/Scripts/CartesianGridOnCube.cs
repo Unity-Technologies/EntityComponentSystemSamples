@@ -10,7 +10,7 @@ public struct CartesianGridOnCube : IComponentData
 public struct CartesianGridOnCubeBlob
 {
     public ushort RowCount;
-    
+
     // Offset vector for trailing edge of unit-size object.
     // Pre-added to grid center.
     //   [0] = ( cx +  0.0f, cz + -0.5f ); // North
@@ -18,7 +18,7 @@ public struct CartesianGridOnCubeBlob
     //   [2] = ( cx +  0.5f, cz +  0.0f ); // West
     //   [3] = ( cx + -0.5f, cz +  0.0f ); // East
     public BlobArray<float2> TrailingOffsets;
-    
+
     // [4bit x rowCount x colCount] of walls.
     //     0x01 = North
     //     0x02 = South
@@ -28,10 +28,10 @@ public struct CartesianGridOnCubeBlob
 
     // For each face[6], local to world transform. (Order as in CubeFace)
     public BlobArray<float4x4> FaceLocalToWorld;
-    
+
     // For each face[6], world to local transform. (Order as in CubeFace)
     public BlobArray<float4x4> FaceWorldToLocal;
-    
+
     // For each face by each face [6*6], local to local transform. (Order as in CubeFace)
     public BlobArray<float4x4> FaceLocalToLocal;
 }
@@ -49,4 +49,3 @@ public struct CartesianGridOnCubeFace : IComponentData
 {
     public byte Value;
 }
-

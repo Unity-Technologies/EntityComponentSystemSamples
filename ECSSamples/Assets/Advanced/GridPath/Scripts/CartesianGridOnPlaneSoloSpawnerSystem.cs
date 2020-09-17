@@ -18,20 +18,20 @@ public class CartesianGridOnPlaneSoloSpawnerSystem : JobComponentSystem
         m_GridQuery = GetEntityQuery(ComponentType.ReadOnly<CartesianGridOnPlane>());
         RequireForUpdate(m_GridQuery);
     }
-    
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         // Clamp delta time so you can't overshoot.
         var deltaTime = math.min(Time.DeltaTime, 0.05f);
-        
+
         var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
         var cartesianGridPlane = GetSingleton<CartesianGridOnPlane>();
         var rowCount = cartesianGridPlane.Blob.Value.RowCount;
         var colCount = cartesianGridPlane.Blob.Value.ColCount;
-        
+
         // Offset to center of board
         var cx = (float)colCount * 0.5f;
-        var cy = (float)rowCount * 0.5f;        
+        var cy = (float)rowCount * 0.5f;
 
         Entities.ForEach((ref SoloSpawner soloSpawner) =>
         {
@@ -42,8 +42,8 @@ public class CartesianGridOnPlaneSoloSpawnerSystem : JobComponentSystem
                 if (soloSpawner.GeneratedCount < soloSpawner.GenerateMaxCount)
                 {
                     var entity = commandBuffer.Instantiate(soloSpawner.Prefab);
-                    var u = soloSpawner.Random.NextInt(0, colCount-1);
-                    var v = soloSpawner.Random.NextInt(0, rowCount-1);
+                    var u = soloSpawner.Random.NextInt(0, colCount - 1);
+                    var v = soloSpawner.Random.NextInt(0, rowCount - 1);
                     var x = u - cx + 0.5f;
                     var z = v - cy + 0.5f;
                     var y = 1.0f;

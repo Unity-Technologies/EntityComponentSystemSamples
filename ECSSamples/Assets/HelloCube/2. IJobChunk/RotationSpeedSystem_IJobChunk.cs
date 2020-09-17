@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -23,13 +23,13 @@ public class RotationSpeedSystem_IJobChunk : SystemBase
     struct RotationSpeedJob : IJobChunk
     {
         public float DeltaTime;
-        public ArchetypeChunkComponentType<Rotation> RotationType;
-        [ReadOnly] public ArchetypeChunkComponentType<RotationSpeed_IJobChunk> RotationSpeedType;
+        public ComponentTypeHandle<Rotation> RotationTypeHandle;
+        [ReadOnly] public ComponentTypeHandle<RotationSpeed_IJobChunk> RotationSpeedTypeHandle;
 
         public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
         {
-            var chunkRotations = chunk.GetNativeArray(RotationType);
-            var chunkRotationSpeeds = chunk.GetNativeArray(RotationSpeedType);
+            var chunkRotations = chunk.GetNativeArray(RotationTypeHandle);
+            var chunkRotationSpeeds = chunk.GetNativeArray(RotationSpeedTypeHandle);
             for (var i = 0; i < chunk.Count; i++)
             {
                 var rotation = chunkRotations[i];
@@ -51,13 +51,13 @@ public class RotationSpeedSystem_IJobChunk : SystemBase
         // Explicitly declare:
         // - Read-Write access to Rotation
         // - Read-Only access to RotationSpeed_IJobChunk
-        var rotationType = GetArchetypeChunkComponentType<Rotation>();
-        var rotationSpeedType = GetArchetypeChunkComponentType<RotationSpeed_IJobChunk>(true);
+        var rotationType = GetComponentTypeHandle<Rotation>();
+        var rotationSpeedType = GetComponentTypeHandle<RotationSpeed_IJobChunk>(true);
 
         var job = new RotationSpeedJob()
         {
-            RotationType = rotationType,
-            RotationSpeedType = rotationSpeedType,
+            RotationTypeHandle = rotationType,
+            RotationSpeedTypeHandle = rotationSpeedType,
             DeltaTime = Time.DeltaTime
         };
 

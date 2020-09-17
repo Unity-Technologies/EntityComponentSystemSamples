@@ -30,7 +30,7 @@ public class CartesianGridMovementAuthoring : MonoBehaviour, IConvertGameObjectT
         dstManager.AddComponentData(entity, new CartesianGridCoordinates
         {
             x = 0,
-            y = 0 
+            y = 0
         });
 
         if (Movement == MovementOptions.FollowTarget)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Entities;
 
 // Serializable attribute is for editor support.

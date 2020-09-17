@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Entities;
 
 // ReSharper disable once InconsistentNaming

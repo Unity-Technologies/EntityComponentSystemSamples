@@ -33,7 +33,7 @@ public unsafe class CartesianGridOnPlaneFollowTargetSystem : JobComponentSystem
         }
         return targetEntity;
     }
-    
+
     protected override JobHandle OnUpdate(JobHandle lastJobHandle)
     {
         int pathOffset = m_PathVariationOffset;
@@ -63,35 +63,35 @@ public unsafe class CartesianGridOnPlaneFollowTargetSystem : JobComponentSystem
             .ForEach((ref CartesianGridDirection gridDirection,
                 ref CartesianGridCoordinates gridCoordinates,
                 ref Translation translation) =>
-            {
-                var dir = gridDirection.Value;
-                if (dir != 0xff) // If moving, update grid based on trailing direction.
                 {
-                    var nextGridPosition = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[dir], rowCount, colCount);
-                    if (gridCoordinates.Equals(nextGridPosition))
+                    var dir = gridDirection.Value;
+                    if (dir != 0xff) // If moving, update grid based on trailing direction.
                     {
-                        // Don't allow translation to drift
-                        translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
-                        return; // Still in the same grid cell. No need to change direction.
+                        var nextGridPosition = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[dir], rowCount, colCount);
+                        if (gridCoordinates.Equals(nextGridPosition))
+                        {
+                            // Don't allow translation to drift
+                            translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
+                            return; // Still in the same grid cell. No need to change direction.
+                        }
+
+                        gridCoordinates = nextGridPosition;
                     }
 
-                    gridCoordinates = nextGridPosition;
-                }
+                    var targetEntity = FindTargetShortestManhattanDistance(gridCoordinates, rowCount, colCount, targetCoordinates, targetEntities);
+                    if (targetEntity == Entity.Null)
+                    {
+                        // No target for whatever reason, don't move.
+                        gridDirection.Value = 0xff;
+                        return;
+                    }
 
-                var targetEntity = FindTargetShortestManhattanDistance(gridCoordinates, rowCount, colCount, targetCoordinates, targetEntities);
-                if (targetEntity == Entity.Null)
-                {
-                    // No target for whatever reason, don't move.
-                    gridDirection.Value = 0xff;
-                    return;
-                }
-
-                // Lookup next direction along shortest path to target from table stored in CartesianGridTargetDirection 
-                // - When multiple shortest path available, use pathOffset to select which option.
-                var targetDirections = getCartesianGridTargetDirectionFromEntity[targetEntity].Reinterpret<byte>().AsNativeArray();
-                var validDirections = CartesianGridOnPlaneShortestPath.LookupDirectionToTarget(gridCoordinates, rowCount, colCount, targetDirections);
-                gridDirection.Value = CartesianGridMovement.PathVariation[(pathOffset * 16) + validDirections];
-            }).Schedule(lastJobHandle);
+                    // Lookup next direction along shortest path to target from table stored in CartesianGridTargetDirection
+                    // - When multiple shortest path available, use pathOffset to select which option.
+                    var targetDirections = getCartesianGridTargetDirectionFromEntity[targetEntity].Reinterpret<byte>().AsNativeArray();
+                    var validDirections = CartesianGridOnPlaneShortestPath.LookupDirectionToTarget(gridCoordinates, rowCount, colCount, targetDirections);
+                    gridDirection.Value = CartesianGridMovement.PathVariation[(pathOffset * 16) + validDirections];
+                }).Schedule(lastJobHandle);
 
         lastJobHandle = targetEntities.Dispose(lastJobHandle);
         lastJobHandle = targetCoordinates.Dispose(lastJobHandle);

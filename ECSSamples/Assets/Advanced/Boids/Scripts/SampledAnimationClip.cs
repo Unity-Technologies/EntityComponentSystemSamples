@@ -8,7 +8,7 @@ namespace Samples.Boids
     {
         public float SampleRate;
         public int FrameCount;
-        
+
         // Playback State
         public float CurrentTime;
         public int FrameIndex;

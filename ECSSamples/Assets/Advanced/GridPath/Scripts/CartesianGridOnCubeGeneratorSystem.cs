@@ -39,7 +39,7 @@ public unsafe class CartesianGridOnCubeSystemGeneratorSystem : JobComponentSyste
             var faceLocalToLocal = blobBuilder.Allocate(ref cartesianGridOnCubeBlob.FaceLocalToLocal, 36);
 
             cartesianGridOnCubeBlob.RowCount = (ushort)rowCount;
-            
+
             CartesianGridGeneratorUtility.FillCubeFaceTransforms(rowCount, (float4x4*)faceLocalToWorld.GetUnsafePtr(), (float4x4*)faceWorldToLocal.GetUnsafePtr(), (float4x4*)faceLocalToLocal.GetUnsafePtr());
 
             for (int faceIndex = 0; faceIndex < 6; faceIndex++)
@@ -52,26 +52,26 @@ public unsafe class CartesianGridOnCubeSystemGeneratorSystem : JobComponentSyste
 
                 // Create visible geometry
                 for (int y = 0; y < rowCount; y++)
-                for (int x = 0; x < rowCount; x++)
-                {
-                    var prefabIndex = (x + y) % floorPrefabCount;
-                    var tx = ((float)x) - cx;
-                    var tz = ((float)y) - cz;
+                    for (int x = 0; x < rowCount; x++)
+                    {
+                        var prefabIndex = (x + y) % floorPrefabCount;
+                        var tx = ((float)x) - cx;
+                        var tz = ((float)y) - cz;
 
-                    CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefab[prefabIndex], faceLocalToWorld[faceIndex], tx, tz);
+                        CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefab[prefabIndex], faceLocalToWorld[faceIndex], tx, tz);
 
-                    var gridWallsIndex = faceGridWallsOffset + ((y * ((rowCount + 1) / 2)) + (x / 2));
-                    var walls = (gridWalls[gridWallsIndex] >> ((x & 1) * 4)) & 0x0f;
-                    
-                    if ((walls & 0x02) != 0) // South wall
-                        CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx, tz);
-                    if ((walls & 0x04) != 0) // West wall
-                        CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx, tz);
-                    if ((y == (rowCount - 1)) && ((walls & 0x01) != 0)) // North wall
-                        CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx, tz + 1.0f);
-                    if ((x == (rowCount - 1)) && ((walls & 0x08) != 0))// East wall
-                        CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx + 1.0f, tz);
-                }
+                        var gridWallsIndex = faceGridWallsOffset + ((y * ((rowCount + 1) / 2)) + (x / 2));
+                        var walls = (gridWalls[gridWallsIndex] >> ((x & 1) * 4)) & 0x0f;
+
+                        if ((walls & 0x02) != 0) // South wall
+                            CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx, tz);
+                        if ((walls & 0x04) != 0) // West wall
+                            CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx, tz);
+                        if ((y == (rowCount - 1)) && ((walls & 0x01) != 0)) // North wall
+                            CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx, tz + 1.0f);
+                        if ((x == (rowCount - 1)) && ((walls & 0x08) != 0)) // East wall
+                            CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, faceLocalToWorld[faceIndex], tx + 1.0f, tz);
+                    }
             }
 
             trailingOffsets[0] = new float2(cx + 0.0f, cz + -0.5f); // North
@@ -87,9 +87,8 @@ public unsafe class CartesianGridOnCubeSystemGeneratorSystem : JobComponentSyste
             blobBuilder.Dispose();
 
             EntityManager.RemoveComponent<CartesianGridOnCubeGenerator>(entity);
-
         }).Run();
-        
+
         return new JobHandle();
     }
 }

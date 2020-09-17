@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Unity.Entities;
 using Unity.Scenes;
@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using Hash128 = Unity.Entities.Hash128;
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
 using Unity.Build;
 #endif
 #pragma warning disable 649
@@ -14,13 +14,13 @@ using Unity.Build;
 [ExecuteAlways]
 public class SetBuildConfigurationComponent : MonoBehaviour
 {
-#if UNITY_EDITOR 
-    [SerializeField] 
+#if UNITY_EDITOR
+    [SerializeField]
     public BuildConfiguration _BuildConfigurationA;
     [SerializeField]
     public BuildConfiguration _BuildConfigurationB;
 #endif
-    
+
     [SerializeField]
     [HideInInspector]
     Hash128 _BuildConfigurationGUIDA;
@@ -28,8 +28,8 @@ public class SetBuildConfigurationComponent : MonoBehaviour
     [SerializeField]
     [HideInInspector]
     Hash128 _BuildConfigurationGUIDB;
-    
-    
+
+
     private World worldA;
     private World worldB;
 
@@ -55,20 +55,25 @@ public class SetBuildConfigurationComponent : MonoBehaviour
     {
         var worldNameA = "BuildConfiguration Test World A";
         var worldNameB = "BuildConfiguration Test World B";
-        
+
         World.DisposeAllWorlds();
         DefaultWorldInitialization.Initialize(worldNameA, !Application.isPlaying);
         DefaultWorldInitialization.Initialize(worldNameB, !Application.isPlaying);
 
-        worldA = World.AllWorlds.First(w => w.Name == worldNameA);
-        worldB = World.AllWorlds.First(w => w.Name == worldNameB);
+        foreach (var world in World.All)
+        {
+            if (worldA == null && world.Name == worldNameA)
+                worldA = world;
+            else if (worldB == null && world.Name == worldNameB)
+                worldB = world;
+        }
 
         OnValidate();
-                
-        //@TODO: This API is confusing. Should be way more explicit.
-        //       Current API makes it very easy to have the same system injected multiple times
-        ScriptBehaviourUpdateOrder.UpdatePlayerLoop(worldA, null);
-        ScriptBehaviourUpdateOrder.UpdatePlayerLoop(worldB, PlayerLoop.GetCurrentPlayerLoop());
+
+        var playerLoop = PlayerLoop.GetDefaultPlayerLoop(); // TODO(DOTS-2283): shouldn't stomp the default player loop here
+        ScriptBehaviourUpdateOrder.AddWorldToPlayerLoop(worldA, ref playerLoop);
+        ScriptBehaviourUpdateOrder.AddWorldToPlayerLoop(worldB, ref playerLoop);
+        PlayerLoop.SetPlayerLoop(playerLoop);
     }
 
     private void OnDisable()

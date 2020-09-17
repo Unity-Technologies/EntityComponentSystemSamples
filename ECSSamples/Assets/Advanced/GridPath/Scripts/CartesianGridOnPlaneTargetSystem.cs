@@ -5,13 +5,13 @@ using Unity.Jobs;
 public unsafe class CartesianGridOnPlaneTargetSystem : JobComponentSystem
 {
     EntityQuery m_GridQuery;
-    
+
     protected override void OnCreate()
     {
         m_GridQuery = GetEntityQuery(ComponentType.ReadOnly<CartesianGridOnPlane>());
         RequireForUpdate(m_GridQuery);
-    } 
-    
+    }
+
     protected override JobHandle OnUpdate(JobHandle lastJobHandle)
     {
         // Get component data from the GridPlane
@@ -32,7 +32,7 @@ public unsafe class CartesianGridOnPlaneTargetSystem : JobComponentSystem
                 var buffer = EntityManager.AddBuffer<CartesianGridTargetDirection>(entity);
                 buffer.ResizeUninitialized(targetDirectionsBufferCapacity);
             }).Run();
-        
+
         // Rebuild all the paths to the target *only* when the target's grid position changes.
         Entities
             .WithName("UpdateTargetPaths")
@@ -41,7 +41,7 @@ public unsafe class CartesianGridOnPlaneTargetSystem : JobComponentSystem
             {
                 if (prevTargetPosition.Equals(targetPosition))
                     return;
-                
+
                 prevTargetPosition = new CartesianGridTargetCoordinates(targetPosition);
                 CartesianGridOnPlaneShortestPath.CalculateShortestPathsToTarget(targetDirections.Reinterpret<byte>().AsNativeArray(), rowCount, colCount, targetPosition, gridWalls);
             }).Run();

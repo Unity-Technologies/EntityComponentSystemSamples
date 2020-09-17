@@ -110,10 +110,10 @@ namespace UnityEditor.PostProcessing
                     : r.height;
 
                 m_MonitorAreaRect = new Rect(
-                        Mathf.Floor(r.x + r.width / 2f - width / 2f),
-                        Mathf.Floor(r.y + r.height / 2f - height / 2f - 5f),
-                        width, height
-                        );
+                    Mathf.Floor(r.x + r.width / 2f - width / 2f),
+                    Mathf.Floor(r.y + r.height / 2f - height / 2f - 5f),
+                    width, height
+                );
 
                 if (m_WaveformTexture != null)
                 {

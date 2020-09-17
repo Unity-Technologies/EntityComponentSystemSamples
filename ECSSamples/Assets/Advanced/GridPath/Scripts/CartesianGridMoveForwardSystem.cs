@@ -19,26 +19,26 @@ public class CartesianGridMoveForwardSystem : JobComponentSystem
                 in CartesianGridDirection gridDirection,
                 in CartesianGridSpeed gridSpeed,
                 in CartesianGridCoordinates gridPosition) =>
-            {
-                var dir = gridDirection.Value;
-                if (dir == 0xff)
-                    return;
-                
-                var pos = translation.Value;
+                {
+                    var dir = gridDirection.Value;
+                    if (dir == 0xff)
+                        return;
 
-                // Speed adjusted to float m/s from fixed point 6:10 m/s
-                var speed = deltaTime * ((float)gridSpeed.Value) * (1.0f / 1024.0f);
+                    var pos = translation.Value;
 
-                // Write: add unit vector offset scaled by speed and deltaTime to current position
-                var dx = CartesianGridMovement.UnitMovement[(dir * 2) + 0] * speed;
-                var dz = CartesianGridMovement.UnitMovement[(dir * 2) + 1] * speed;
-                
-                // Smooth y changes when transforming between cube faces. 
-                var dy = math.min(speed, 1.0f - pos.y); 
+                    // Speed adjusted to float m/s from fixed point 6:10 m/s
+                    var speed = deltaTime * ((float)gridSpeed.Value) * (1.0f / 1024.0f);
 
-                translation.Value = new float3(pos.x + dx, pos.y + dy, pos.z + dz);
-            }).Schedule(lastJobHandle);
-        
+                    // Write: add unit vector offset scaled by speed and deltaTime to current position
+                    var dx = CartesianGridMovement.UnitMovement[(dir * 2) + 0] * speed;
+                    var dz = CartesianGridMovement.UnitMovement[(dir * 2) + 1] * speed;
+
+                    // Smooth y changes when transforming between cube faces.
+                    var dy = math.min(speed, 1.0f - pos.y);
+
+                    translation.Value = new float3(pos.x + dx, pos.y + dy, pos.z + dz);
+                }).Schedule(lastJobHandle);
+
         return lastJobHandle;
     }
 }

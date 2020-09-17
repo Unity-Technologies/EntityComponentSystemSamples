@@ -11,7 +11,7 @@ namespace UnityEngine.PostProcessing
     [ImageEffectAllowedInSceneView]
 #endif
     [RequireComponent(typeof(Camera)), DisallowMultipleComponent, ExecuteInEditMode]
-	[AddComponentMenu("Effects/Post-Processing Behaviour", -1)]
+    [AddComponentMenu("Effects/Post-Processing Behaviour", -1)]
     public class PostProcessingBehaviour : MonoBehaviour
     {
         // Inspector fields
@@ -148,7 +148,7 @@ namespace UnityEngine.PostProcessing
 
             // Temporal antialiasing jittering, needs to happen before culling
 #if UNITY_EDITOR
-            if(!m_RenderingInSceneView)
+            if (!m_RenderingInSceneView)
 #endif
             if (m_Taa.active && !profile.debugViews.willInterrupt)
                 m_Taa.SetProjectionMatrix();

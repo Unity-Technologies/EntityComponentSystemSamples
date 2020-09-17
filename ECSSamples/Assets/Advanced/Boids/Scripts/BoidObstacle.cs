@@ -6,4 +6,4 @@ namespace Samples.Boids
     public struct BoidObstacle : IComponentData
     {
     }
-} 
+}

@@ -28,7 +28,7 @@ public static unsafe class CartesianGridMovement
         0xe4, 0xe6, 0xe8, 0xea, 0xd4, 0xd7, 0xcc, 0xff,
         0x64, 0x66, 0x28, 0xaa, 0x54, 0x55, 0x00, 0xe4,
 
-        // Path (rare) variations below    
+        // Path (rare) variations below
         // Very occasionally, move without bouncing off wall.
 
         // Assume north wall
@@ -47,12 +47,12 @@ public static unsafe class CartesianGridMovement
         0x64, 0x66, 0x28, 0xaa, 0x54, 0x55, 0x00, 0xff,
         0x64, 0x66, 0x28, 0xaa, 0x54, 0x55, 0x00, 0xe4,
     };
-    
+
     public static readonly byte[] ReverseDirection =
     {
         1, 0, 3, 2 // N=S, S=N, W=E, E=W
     };
-    
+
     // Rotate through variations of shortest paths.
     // - Note: Biased on first available if there are three available. But meh.
     public static readonly byte[] PathVariation =
@@ -68,23 +68,22 @@ public static unsafe class CartesianGridMovement
     {
         var isRandomVariation = (pathCounter & 0x0f) == 0;
         var nextPathIndex = 0;
-        
+
         // Once every 16 frames, select an arbitrary variation (if happen to be crossing threshold)
         // Both crossing a threshold and hitting a variation at the same time is a very rare event.
         // The purpose of these variations is to occasionally kick things out that are caught in a
         // movement loop.
         if (isRandomVariation)
         {
-            nextPathIndex = 2+(pathCounter >> 4);
+            nextPathIndex = 2 + (pathCounter >> 4);
         }
-
         // Otherwise select one of two global variations of paths divided by 0.5 probability.
         else
         {
             nextPathIndex = pathCounter & 1;
         }
 
-        
+
         pathCounter = (pathCounter + 1) & 0x003f;
         return nextPathIndex;
     }
@@ -125,7 +124,7 @@ public static unsafe class CartesianGridMovement
     }
 
     /// <summary>
-    /// Pick valid direction to "bounce" off (move along) walls. 
+    /// Pick valid direction to "bounce" off (move along) walls.
     /// </summary>
     /// <param name="cellPosition">Position to test (must be valid on grid)</param>
     /// <param name="dir">Current movement direction</param>
@@ -139,13 +138,13 @@ public static unsafe class CartesianGridMovement
     {
         var pathOffset = pathIndex * 16;
         var walls = LookupWalls(cellPosition, rowCount, colCount, gridWalls);
-        
+
         // New direction = f( grid index, movement direction )
         return (byte)((m_NextDirection[pathOffset + walls] >> (dir * 2)) & 0x03);
     }
 
     /// <summary>
-    /// Return directions from cellPosition which are not blocked by walls. 
+    /// Return directions from cellPosition which are not blocked by walls.
     /// </summary>
     /// <param name="cellPosition">Position to test</param>
     /// <param name="rowCount">Height of grid</param>
@@ -168,7 +167,7 @@ public static unsafe class CartesianGridMovement
         // Which edge of GridCube face is being exited (if any)
         var edge = -1;
 
-        // Edge is in order specified in m_NextFaceIndex and m_NextFaceDirection 
+        // Edge is in order specified in m_NextFaceIndex and m_NextFaceDirection
         // - Matches GridDirection values.
         edge = math.select(edge, 0, cellPosition.y >= rowCount);
         edge = math.select(edge, 1, cellPosition.y < 0);

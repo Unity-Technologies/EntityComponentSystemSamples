@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 
 // ReSharper disable once InconsistentNaming
 public class SpawnerSystem_HybridComponent : ComponentSystem

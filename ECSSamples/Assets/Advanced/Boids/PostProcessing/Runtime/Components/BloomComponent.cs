@@ -25,7 +25,7 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && model.settings.bloom.intensity > 0f;
+                    && model.settings.bloom.intensity > 0f;
             }
         }
 
@@ -87,8 +87,8 @@ namespace UnityEngine.PostProcessing
             for (int level = 0; level < iterations; level++)
             {
                 m_BlurBuffer1[level] = context.renderTextureFactory.Get(
-                        last.width / 2, last.height / 2, 0, rtFormat
-                        );
+                    last.width / 2, last.height / 2, 0, rtFormat
+                );
 
                 int pass = (level == 0) ? 1 : 2;
                 Graphics.Blit(last, m_BlurBuffer1[level], material, pass);
@@ -103,8 +103,8 @@ namespace UnityEngine.PostProcessing
                 material.SetTexture(Uniforms._BaseTex, baseTex);
 
                 m_BlurBuffer2[level] = context.renderTextureFactory.Get(
-                        baseTex.width, baseTex.height, 0, rtFormat
-                        );
+                    baseTex.width, baseTex.height, 0, rtFormat
+                );
 
                 Graphics.Blit(last, m_BlurBuffer2[level], material, 3);
                 last = m_BlurBuffer2[level];

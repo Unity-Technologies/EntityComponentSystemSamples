@@ -18,19 +18,19 @@ public class CartesianGridOnCubeSoloSpawnerSystem : JobComponentSystem
         m_GridQuery = GetEntityQuery(ComponentType.ReadOnly<CartesianGridOnCube>());
         RequireForUpdate(m_GridQuery);
     }
-    
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         // Clamp delta time so you can't overshoot.
         var deltaTime = math.min(Time.DeltaTime, 0.05f);
-        
+
         var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
         var cartesianGridCube = GetSingleton<CartesianGridOnCube>();
         var rowCount = cartesianGridCube.Blob.Value.RowCount;
-        
+
         // Offset to center of board
         var cx = (float)rowCount * 0.5f;
-        var cy = (float)rowCount * 0.5f;        
+        var cy = (float)rowCount * 0.5f;
 
         Entities.ForEach((ref SoloSpawner soloSpawner) =>
         {
@@ -41,15 +41,15 @@ public class CartesianGridOnCubeSoloSpawnerSystem : JobComponentSystem
                 if (soloSpawner.GeneratedCount < soloSpawner.GenerateMaxCount)
                 {
                     var entity = commandBuffer.Instantiate(soloSpawner.Prefab);
-                    var u = soloSpawner.Random.NextInt(0, rowCount-1);
-                    var v = soloSpawner.Random.NextInt(0, rowCount-1);
+                    var u = soloSpawner.Random.NextInt(0, rowCount - 1);
+                    var v = soloSpawner.Random.NextInt(0, rowCount - 1);
                     var x = u - cx + 0.5f;
                     var z = v - cy + 0.5f;
                     var y = 1.0f;
                     var faceIndex = soloSpawner.Random.NextInt(0, 6);
 
                     commandBuffer.SetComponent(entity, new Translation { Value = new float3(x, y, z) });
-                    commandBuffer.AddComponent(entity, new CartesianGridOnCubeFace { Value = (byte)faceIndex }); 
+                    commandBuffer.AddComponent(entity, new CartesianGridOnCubeFace { Value = (byte)faceIndex });
                     soloSpawner.GeneratedCount++;
                 }
                 secondsUntilGenerate = soloSpawner.CoolDownSeconds;
@@ -61,4 +61,3 @@ public class CartesianGridOnCubeSoloSpawnerSystem : JobComponentSystem
         return inputDeps;
     }
 }
-

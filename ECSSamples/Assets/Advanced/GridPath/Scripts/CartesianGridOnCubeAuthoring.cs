@@ -17,14 +17,14 @@ public class CartesianGridOnCubeAuthoring : MonoBehaviour, IConvertGameObjectToE
     // Specific wall probability, given PotentialWallProbability
     public float WallSProbability = 0.5f;
     public float WallWProbability = 0.5f;
-    
+
     // Referenced prefabs have to be declared so that the conversion system knows about them ahead of time
     public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
     {
         referencedPrefabs.Add(WallPrefab);
         referencedPrefabs.AddRange(FloorPrefab);
     }
-    
+
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         var floorPrefabCount = FloorPrefab.Length;
@@ -43,12 +43,12 @@ public class CartesianGridOnCubeAuthoring : MonoBehaviour, IConvertGameObjectToE
         {
             floorPrefab[i] = conversionSystem.GetPrimaryEntity(FloorPrefab[i]);
         }
-        
+
         dstManager.AddComponentData(entity, new CartesianGridOnCubeGenerator
         {
             Blob = blobBuilder.CreateBlobAssetReference<CartesianGridOnCubeGeneratorBlob>(Allocator.Persistent)
         });
-        
+
         blobBuilder.Dispose();
     }
 }

@@ -7,7 +7,7 @@ public struct SoloSpawner : IComponentData
     public float CoolDownSeconds;
     public float SecondsUntilGenerate;
     public int GenerateMaxCount;
-    
+
     public int GeneratedCount;
     public Random Random;
 }

@@ -35,7 +35,7 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && GraphicsUtils.supportsDX11;
+                    && GraphicsUtils.supportsDX11;
             }
         }
 

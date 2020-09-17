@@ -13,7 +13,7 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && model.settings.method == AntialiasingModel.Method.Fxaa;
+                    && model.settings.method == AntialiasingModel.Method.Fxaa;
             }
         }
 
@@ -29,8 +29,8 @@ namespace UnityEngine.PostProcessing
                     qualitySettings.subpixelAliasingRemovalAmount,
                     qualitySettings.edgeDetectionThreshold,
                     qualitySettings.minimumRequiredLuminance
-                    )
-                );
+                )
+            );
 
             material.SetVector(Uniforms._ConsoleSettings,
                 new Vector4(
@@ -38,8 +38,8 @@ namespace UnityEngine.PostProcessing
                     consoleSettings.edgeSharpnessAmount,
                     consoleSettings.edgeDetectionThreshold,
                     consoleSettings.minimumRequiredLuminance
-                    )
-                );
+                )
+            );
 
             Graphics.Blit(source, destination, material, 0);
         }

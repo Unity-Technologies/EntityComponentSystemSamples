@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 
 #if UNITY_EDITOR
 public class RotationSpeedSetting : Unity.Build.IBuildComponent

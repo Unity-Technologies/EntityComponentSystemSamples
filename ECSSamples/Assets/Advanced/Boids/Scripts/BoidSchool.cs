@@ -24,20 +24,20 @@ namespace Samples.Boids
             [NativeDisableContainerSafetyRestriction]
             [NativeDisableParallelForRestriction]
             public ComponentDataFromEntity<LocalToWorld> LocalToWorldFromEntity;
-            
+
             public NativeArray<Entity> Entities;
             public float3 Center;
             public float Radius;
-            
+
             public void Execute(int i)
             {
                 var entity = Entities[i];
                 var random = new Random(((uint)(entity.Index + i + 1) * 0x9F6ABC1));
-                var dir = math.normalizesafe(random.NextFloat3() - new float3(0.5f,0.5f,0.5f));
+                var dir = math.normalizesafe(random.NextFloat3() - new float3(0.5f, 0.5f, 0.5f));
                 var pos = Center + (dir * Radius);
                 var localToWorld = new LocalToWorld
                 {
-                  Value = float4x4.TRS(pos, quaternion.LookRotationSafe(dir, math.up()), new float3(1.0f, 1.0f, 1.0f))
+                    Value = float4x4.TRS(pos, quaternion.LookRotationSafe(dir, math.up()), new float3(1.0f, 1.0f, 1.0f))
                 };
                 LocalToWorldFromEntity[entity] = localToWorld;
             }
@@ -48,11 +48,11 @@ namespace Samples.Boids
             Entities.WithStructuralChanges().ForEach((Entity entity, int entityInQueryIndex, in BoidSchool boidSchool, in LocalToWorld boidSchoolLocalToWorld) =>
             {
                 var boidEntities = new NativeArray<Entity>(boidSchool.Count, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                
+
                 Profiler.BeginSample("Instantiate");
                 EntityManager.Instantiate(boidSchool.Prefab, boidEntities);
                 Profiler.EndSample();
-                
+
                 var localToWorldFromEntity = GetComponentDataFromEntity<LocalToWorld>();
                 var setBoidLocalToWorldJob = new SetBoidLocalToWorld
                 {
@@ -63,7 +63,7 @@ namespace Samples.Boids
                 };
                 Dependency = setBoidLocalToWorldJob.Schedule(boidSchool.Count, 64, Dependency);
                 Dependency = boidEntities.Dispose(Dependency);
-                
+
                 EntityManager.DestroyEntity(entity);
             }).Run();
         }

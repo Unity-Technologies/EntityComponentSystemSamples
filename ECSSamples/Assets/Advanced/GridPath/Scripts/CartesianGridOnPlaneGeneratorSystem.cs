@@ -42,26 +42,26 @@ public unsafe class CartesianGridOnPlaneSystemGeneratorSystem : JobComponentSyst
 
             // Create visible geometry
             for (int y = 0; y < rowCount; y++)
-            for (int x = 0; x < colCount; x++)
-            {
-                var prefabIndex = (x+y) % floorPrefabCount; 
-                var tx = ((float)x) - cx;
-                var tz = ((float)y) - cz;
+                for (int x = 0; x < colCount; x++)
+                {
+                    var prefabIndex = (x + y) % floorPrefabCount;
+                    var tx = ((float)x) - cx;
+                    var tz = ((float)y) - cz;
 
-                CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefab[prefabIndex], float4x4.identity, tx, tz);
-            
-                var gridWallsIndex = (y * ((colCount + 1) / 2)) + (x / 2);
-                var walls = (gridWalls[gridWallsIndex] >> ((x & 1) * 4)) & 0x0f;
+                    CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefab[prefabIndex], float4x4.identity, tx, tz);
 
-                if ((walls & 0x02) != 0) // South wall
-                    CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, float4x4.identity, tx, tz);
-                if ((walls & 0x04) != 0) // West wall
-                    CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, float4x4.identity, tx, tz);
-                if (y == (rowCount - 1)) // North wall
-                    CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, float4x4.identity, tx, tz + 1.0f);
-                if (x == (colCount - 1)) // East wall
-                    CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, float4x4.identity, tx + 1.0f, tz);
-            }
+                    var gridWallsIndex = (y * ((colCount + 1) / 2)) + (x / 2);
+                    var walls = (gridWalls[gridWallsIndex] >> ((x & 1) * 4)) & 0x0f;
+
+                    if ((walls & 0x02) != 0) // South wall
+                        CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, float4x4.identity, tx, tz);
+                    if ((walls & 0x04) != 0) // West wall
+                        CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, float4x4.identity, tx, tz);
+                    if (y == (rowCount - 1)) // North wall
+                        CartesianGridGeneratorUtility.CreateWallS(EntityManager, wallPrefab, float4x4.identity, tx, tz + 1.0f);
+                    if (x == (colCount - 1)) // East wall
+                        CartesianGridGeneratorUtility.CreateWallW(EntityManager, wallPrefab, float4x4.identity, tx + 1.0f, tz);
+                }
 
 
             trailingOffsets[0] = new float2(cx + 0.0f, cz + -0.5f); // North
@@ -77,9 +77,8 @@ public unsafe class CartesianGridOnPlaneSystemGeneratorSystem : JobComponentSyst
             blobBuilder.Dispose();
 
             EntityManager.RemoveComponent<CartesianGridOnPlaneGenerator>(entity);
-
         }).Run();
-        
+
         return new JobHandle();
     }
 }

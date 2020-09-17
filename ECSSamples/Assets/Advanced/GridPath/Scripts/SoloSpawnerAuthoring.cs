@@ -10,7 +10,7 @@ public class SoloSpawnerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, I
 {
     public GameObject Prefab;
     public float CoolDownSeconds;
-    [Range(0,64*1024)]
+    [Range(0, 64 * 1024)]
     public int GenerateMaxCount;
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
@@ -22,7 +22,7 @@ public class SoloSpawnerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, I
             SecondsUntilGenerate = 0.0f,
             GenerateMaxCount = GenerateMaxCount,
             GeneratedCount = 0,
-            Random = new Random(0xDBC19 * (uint)entity.Index )
+            Random = new Random(0xDBC19 * (uint)entity.Index)
         });
     }
 

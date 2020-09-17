@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -17,11 +17,11 @@ public class LifeTimeSystem : SystemBase
     {
         m_Barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
-    
+
     // OnUpdate runs on the main thread.
     protected override void OnUpdate()
     {
-        var commandBuffer = m_Barrier.CreateCommandBuffer().ToConcurrent();
+        var commandBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter();
 
         var deltaTime = Time.DeltaTime;
         Entities.ForEach((Entity entity, int nativeThreadIndex, ref LifeTime lifetime) =>
@@ -33,7 +33,7 @@ public class LifeTimeSystem : SystemBase
                 commandBuffer.DestroyEntity(nativeThreadIndex, entity);
             }
         }).ScheduleParallel();
-            
+
         m_Barrier.AddJobHandleForProducer(Dependency);
     }
 }

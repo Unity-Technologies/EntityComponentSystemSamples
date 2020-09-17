@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -14,14 +14,14 @@ public class RotationSpeedSystem_SpawnAndRemove : SystemBase
     protected override void OnUpdate()
     {
         var deltaTime = Time.DeltaTime;
-        
+
         // The in keyword on the RotationSpeed_SpawnAndRemove component tells the job scheduler that this job will not write to rotSpeedSpawnAndRemove
         Entities
             .WithName("RotationSpeedSystem_SpawnAndRemove")
             .ForEach((ref Rotation rotation, in RotationSpeed_SpawnAndRemove rotSpeedSpawnAndRemove) =>
-        {
-            // Rotate something about its up vector at the speed given by RotationSpeed_SpawnAndRemove.
-            rotation.Value = math.mul(math.normalize(rotation.Value), quaternion.AxisAngle(math.up(), rotSpeedSpawnAndRemove.RadiansPerSecond * deltaTime));
-        }).ScheduleParallel();
+            {
+                // Rotate something about its up vector at the speed given by RotationSpeed_SpawnAndRemove.
+                rotation.Value = math.mul(math.normalize(rotation.Value), quaternion.AxisAngle(math.up(), rotSpeedSpawnAndRemove.RadiansPerSecond * deltaTime));
+            }).ScheduleParallel();
     }
 }

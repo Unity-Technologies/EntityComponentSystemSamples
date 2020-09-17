@@ -14,9 +14,9 @@ namespace UnityEngine.PostProcessing
             {
                 var settings = model.settings;
                 return model.enabled
-                       && settings.lut != null
-                       && settings.contribution > 0f
-                       && settings.lut.height == (int)Mathf.Sqrt(settings.lut.width);
+                    && settings.lut != null
+                    && settings.contribution > 0f
+                    && settings.lut.height == (int)Mathf.Sqrt(settings.lut.width);
             }
         }
 

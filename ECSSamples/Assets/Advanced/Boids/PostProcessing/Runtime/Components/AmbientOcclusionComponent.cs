@@ -59,7 +59,7 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && model.settings.intensity > 0f;
+                    && model.settings.intensity > 0f;
             }
         }
 
@@ -84,8 +84,8 @@ namespace UnityEngine.PostProcessing
         public override CameraEvent GetCameraEvent()
         {
             return ambientOnlySupported && !context.profile.debugViews.IsModeActive(DebugMode.AmbientOcclusion)
-                   ? CameraEvent.BeforeReflections
-                   : CameraEvent.BeforeImageEffectsOpaque;
+                ? CameraEvent.BeforeReflections
+                : CameraEvent.BeforeImageEffectsOpaque;
         }
 
         public override void PopulateCommandBuffer(CommandBuffer cb)

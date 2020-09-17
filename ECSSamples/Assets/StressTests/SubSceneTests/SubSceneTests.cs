@@ -1,8 +1,10 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Unity.Entities;
 using Unity.Entities.Hybrid.EndToEnd.Tests;
 using Unity.Entities.Tests;
+using Unity.Mathematics;
 using Unity.Scenes;
+using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
 
@@ -32,4 +34,37 @@ public class SubSceneTests : ECSTestsFixture
         // 6. RetainBlobAssets
         Assert.AreEqual(6, m_Manager.UniversalQuery.CalculateEntityCount());
     }
+
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
+    [Test]
+    public void SimpleHybridComponent()
+    {
+        TestUtilities.RegisterSystems(World, TestUtilities.SystemCategories.Streaming | TestUtilities.SystemCategories.HybridComponents);
+
+        var loadParams = new SceneSystem.LoadParameters
+        {
+            Flags = SceneLoadFlags.BlockOnImport | SceneLoadFlags.BlockOnStreamIn
+        };
+
+        var sceneGUID = new GUID(AssetDatabase.AssetPathToGUID("Assets/StressTests/HybridLights/HybridLights/SubScene.unity"));
+
+        World.GetExistingSystem<SceneSystem>().LoadSceneAsync(sceneGUID, loadParams);
+        World.Update();
+
+
+        var entity = EmptySystem.GetSingletonEntity<Light>();
+        var companion = m_Manager.GetComponentObject<Light>(entity).gameObject;
+
+        void MoveAndCheck(float3 testpos)
+        {
+            m_Manager.SetComponentData(entity, new LocalToWorld { Value = float4x4.Translate(testpos) });
+            World.Update();
+            Assert.AreEqual(testpos, (float3)companion.transform.position);
+        }
+
+        MoveAndCheck(new float3(1, 2, 3));
+        MoveAndCheck(new float3(2, 3, 4));
+    }
+
+#endif
 }

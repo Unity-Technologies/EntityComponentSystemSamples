@@ -20,7 +20,12 @@ namespace UnityEngine.PostProcessing
 
             if (!m_Materials.TryGetValue(shaderName, out material))
             {
+                #if ENABLE_INCREMENTAL_PIPELINE
+                //Shader.Find() is not supported in incremental buildpipeline
+                var shader = Resources.Load<Shader>(shaderName);
+                #else
                 var shader = Shader.Find(shaderName);
+                #endif
 
                 if (shader == null)
                     throw new ArgumentException(string.Format("Shader not found ({0})", shaderName));

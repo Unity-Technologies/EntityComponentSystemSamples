@@ -17,7 +17,7 @@ using UnityEngine;
 [ConverterVersion("macton", 2)]
 public class TransformRecorderAuthoring : MonoBehaviour,  IConvertGameObjectToEntity
 {
-    [Range(2,120)]
+    [Range(2, 120)]
     public int SamplesPerSecond = 60;
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
@@ -58,7 +58,7 @@ public class TransformRecorderAuthoring : MonoBehaviour,  IConvertGameObjectToEn
             TimeOffset = 0,
             TransformSamplesBlob = blobBuilder.CreateBlobAssetReference<TransformSamples>(Allocator.Persistent)
         });
-        
+
         blobBuilder.Dispose();
     }
 }

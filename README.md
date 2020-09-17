@@ -41,14 +41,17 @@ Burst is a new LLVM-based, math-aware backend compiler. It compiles C# jobs into
 [Watch Joachim Ante present these systems at Unite Austin](https://youtu.be/tGmnZdY5Y-E)
 
 
-## Installation guide
+## Installation guide for new projects
 
-1. Create or open a project with the Unity Editor (`2019.3.0f1` or later to use the latest DOTS packages).
+1. Create or open a project with the Unity Editor (`2020.1.0b15` or later to use the latest DOTS packages).
 2. Open the Package Manager (menu: **Window** > **Package Manager**).
-3. Open the **Advanced** menu at the top of the window and turn on the **Show preview packages** option.
-4. Add the **Hybrid Renderer** package to the project.
+3. Click the small gear icon on the upper right and select the **Advanced Project Settings** menu item.
+4. Check **Enable Preview Packages** in the Project Settings window.
+5. In the Package Manager window, click the small `+` icon in the upper left and select **Add package from git URL...**
+6. Find the version of the DOTS packages you want to use, i.e. check https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@latest
+7. Enter the package followed by the version number, e.g. `com.unity.rendering.hybrid@0.7.0-preview.24` and confirm. 
 
-This will add the **Entities** package as a dependency which will add the related packages it depends on recursively (e.g. **Burst**, **Collections**, **Jobs** and **Mathematics**). Now you can start to use DOTS in you project.
+This will add the **Hybrid Renderer** package and all its dependencies, e.g. **Entities**, **Burst**, **Collections**, **Jobs** and **Mathematics**. Now you can start to use DOTS in you project.
 
 **Note:** You can use the [Unity Hub](https://unity3d.com/get-unity/download) to install multiple versions of Unity on the same computer.
 

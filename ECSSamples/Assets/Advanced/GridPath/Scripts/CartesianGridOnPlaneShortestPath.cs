@@ -158,7 +158,7 @@ public static unsafe class CartesianGridOnPlaneShortestPath
         var cellCount = rowCount * colCount;
         var rowStride = ((colCount + 1) / 2);
 
-        for (var i = 0; i < (rowStride*rowCount); i++)
+        for (var i = 0; i < (rowStride * rowCount); i++)
             targetDirections[i] = 0;
 
         for (var cellIndex = 0; cellIndex < cellCount; cellIndex++)

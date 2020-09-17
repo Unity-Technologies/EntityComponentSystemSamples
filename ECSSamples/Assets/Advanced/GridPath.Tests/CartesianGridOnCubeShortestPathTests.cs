@@ -17,29 +17,29 @@ namespace Samples.GridPath.Tests
             public float4x4* FaceLocalToWorld;
             public float4x4* FaceWorldToLocal;
             public float4x4* FaceLocalToLocal;
-            
+
             public TestGrid(int rowCount)
             {
                 RowCount = rowCount;
-                
+
                 int wallRowStride = (rowCount + 1) / 2;
                 int wallFaceStride = rowCount * wallRowStride;
                 int wallsSize = 6 * wallFaceStride;
 
-                Walls = (byte*) UnsafeUtility.Malloc(wallsSize, 16, Allocator.Temp);
+                Walls = (byte*)UnsafeUtility.Malloc(wallsSize, 16, Allocator.Temp);
                 UnsafeUtility.MemClear(Walls, wallsSize);
                 for (int i = 0; i < wallsSize; i++)
                 {
-                    Assert.AreEqual(Walls[i],0);
+                    Assert.AreEqual(Walls[i], 0);
                 }
 
-                FaceWorldToLocal = (float4x4*) UnsafeUtility.Malloc(sizeof(float4x4) * 6, 16, Allocator.Temp);
-                FaceLocalToWorld = (float4x4*) UnsafeUtility.Malloc(sizeof(float4x4) * 6, 16, Allocator.Temp);
-                FaceLocalToLocal = (float4x4*) UnsafeUtility.Malloc(sizeof(float4x4) * 6 * 6, 16, Allocator.Temp);
+                FaceWorldToLocal = (float4x4*)UnsafeUtility.Malloc(sizeof(float4x4) * 6, 16, Allocator.Temp);
+                FaceLocalToWorld = (float4x4*)UnsafeUtility.Malloc(sizeof(float4x4) * 6, 16, Allocator.Temp);
+                FaceLocalToLocal = (float4x4*)UnsafeUtility.Malloc(sizeof(float4x4) * 6 * 6, 16, Allocator.Temp);
 
                 CartesianGridGeneratorUtility.FillCubeFaceTransforms(rowCount, FaceLocalToWorld, FaceWorldToLocal, FaceLocalToLocal);
             }
-            
+
             public void Dispose()
             {
                 if (Walls != null)
@@ -62,12 +62,12 @@ namespace Samples.GridPath.Tests
                 var x = cellPosition.x;
                 var y = cellPosition.y;
                 var gridWallsIndex = faceGridWallsOffset + ((y * ((RowCount + 1) / 2)) + (x / 2));
-                
-                Assert.IsTrue(cellPosition.OnGrid(RowCount,RowCount));
-                
+
+                Assert.IsTrue(cellPosition.OnGrid(RowCount, RowCount));
+
                 Walls[gridWallsIndex] |= (byte)((byte)directionBit << (4 * (x & 1)));
             }
-            
+
             public bool TestWallBit(int cellIndex, CartesianGridDirectionBit directionBit)
             {
                 var cellPosition = CartesianGridOnCubeUtility.CellFaceCoordinates(cellIndex, RowCount);
@@ -78,23 +78,24 @@ namespace Samples.GridPath.Tests
                 var x = cellPosition.x;
                 var y = cellPosition.y;
                 var gridWallsIndex = faceGridWallsOffset + ((y * ((RowCount + 1) / 2)) + (x / 2));
-                
-                Assert.IsTrue(cellPosition.OnGrid(RowCount,RowCount));
-                
-                return (((Walls[gridWallsIndex] >> (4 * (x&1))) & (byte)directionBit) == (byte)directionBit);
+
+                Assert.IsTrue(cellPosition.OnGrid(RowCount, RowCount));
+
+                return (((Walls[gridWallsIndex] >> (4 * (x & 1))) & (byte)directionBit) == (byte)directionBit);
             }
-                    
+
             public void AddWallSouth(int cellIndex)
             {
                 SetWallBit(cellIndex, CartesianGridDirectionBit.South);
-                
+
                 var cellIndexSouth = CartesianGridOnCubeUtility.CellIndexSouth(cellIndex, RowCount, FaceLocalToLocal);
                 SetWallBit(cellIndexSouth, CartesianGridDirectionBit.North);
             }
+
             public void AddWallWest(int cellIndex)
             {
                 SetWallBit(cellIndex, CartesianGridDirectionBit.West);
-                
+
                 var cellIndexWest = CartesianGridOnCubeUtility.CellIndexWest(cellIndex, RowCount, FaceLocalToLocal);
                 SetWallBit(cellIndexWest, CartesianGridDirectionBit.East);
             }
@@ -103,10 +104,10 @@ namespace Samples.GridPath.Tests
             {
                 var cellPosition = CartesianGridOnCubeUtility.CellFaceCoordinates(cellIndex, RowCount);
                 var faceIndex = CartesianGridOnCubeUtility.CellFaceIndex(cellIndex, RowCount);
-                
+
                 var validDirections = CartesianGridOnCubeShortestPath.LookupDirectionToTarget(cellPosition.x, cellPosition.y, faceIndex, RowCount, targetDirections);
-                var direction = CartesianGridMovement.PathVariation[((pathOffset&3) * 16) + validDirections];
-                
+                var direction = CartesianGridMovement.PathVariation[((pathOffset & 3) * 16) + validDirections];
+
                 if (direction == 0xff) // No path
                     return 0;
 
@@ -121,7 +122,7 @@ namespace Samples.GridPath.Tests
                     nextCellIndex = CartesianGridOnCubeUtility.CellIndexEast(cellIndex, RowCount, FaceLocalToLocal);
                 else
                     Assert.Fail();
-                
+
                 // Test no wall in the direction given
                 if (direction == 0)
                     Assert.IsFalse(TestWallBit(cellIndex, CartesianGridDirectionBit.North));
@@ -140,31 +141,31 @@ namespace Samples.GridPath.Tests
                 var directionsRowStride = (RowCount + 1) / 2;
                 var directionsSize = 6 * RowCount * directionsRowStride;
                 var distancesSize = RowCount * RowCount * 6;
-                
+
                 var targetDirections = new NativeArray<byte>(directionsSize, Allocator.Temp);
                 var sourceDirections = new NativeArray<byte>(directionsSize, Allocator.Temp);
                 var targetDistances = new NativeArray<int>(distancesSize, Allocator.Temp);
                 var sourceDistances = new NativeArray<int>(distancesSize, Allocator.Temp);
-                
+
                 // For testing purposes, recalculate paths every time.
                 CartesianGridOnCubeShortestPath.CalculateShortestPathsToTarget(targetDirections, targetDistances, RowCount, targetPosition, targetCubeFace, Walls, FaceLocalToLocal);
                 CartesianGridOnCubeShortestPath.CalculateShortestPathsToTarget(sourceDirections, sourceDistances, RowCount, sourcePosition, sourceCubeFace, Walls, FaceLocalToLocal);
-                
+
                 // Test distance form source->target is same as target->source
                 var sourceCellIndex = CartesianGridOnCubeUtility.CellIndex(sourcePosition, sourceCubeFace, RowCount);
                 var targetCellIndex = CartesianGridOnCubeUtility.CellIndex(targetPosition, targetCubeFace, RowCount);
-                
+
                 var sourceToTargetDistance = WalkPath(sourceCellIndex, targetDirections, 0);
                 var targetToSourceDistance = WalkPath(targetCellIndex, sourceDirections, 0);
-                
+
                 Assert.AreEqual(sourceToTargetDistance, targetToSourceDistance);
 
                 var expectedDistance = sourceToTargetDistance;
-                
+
                 // No surprises on stored distances
-                Assert.AreEqual( sourceToTargetDistance, sourceDistances[targetCellIndex] );
-                Assert.AreEqual( sourceToTargetDistance, targetDistances[sourceCellIndex] );
-                    
+                Assert.AreEqual(sourceToTargetDistance, sourceDistances[targetCellIndex]);
+                Assert.AreEqual(sourceToTargetDistance, targetDistances[sourceCellIndex]);
+
                 // Sample path variations (not exhaustive, always follow the variation path option)
                 for (int i = 1; i < 4; i++)
                 {
@@ -172,11 +173,11 @@ namespace Samples.GridPath.Tests
                     // Test distance is same for all variations
                     sourceToTargetDistance = WalkPath(sourceCellIndex, targetDirections, i);
                     Assert.AreEqual(expectedDistance, sourceToTargetDistance);
-                    
+
                     targetToSourceDistance = WalkPath(targetCellIndex, sourceDirections, i);
                     Assert.AreEqual(expectedDistance, targetToSourceDistance);
                 }
-                
+
                 targetDirections.Dispose();
                 sourceDirections.Dispose();
                 targetDistances.Dispose();
@@ -190,43 +191,43 @@ namespace Samples.GridPath.Tests
         {
             int x;
             int y;
-            
+
             for (int faceIndex = 0; faceIndex < 6; faceIndex++)
             {
                 y = grid.RowCount - 1;
                 for (x = 0; x < grid.RowCount; x++)
                 {
-                    var sourcePosition = new CartesianGridCoordinates {x = (short) x, y = (short) y};
-                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte) faceIndex};
+                    var sourcePosition = new CartesianGridCoordinates {x = (short)x, y = (short)y};
+                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte)faceIndex};
                     var sourceCellIndex = CartesianGridOnCubeUtility.CellIndex(sourcePosition, sourceCubeFace, grid.RowCount);
-                    var exitPosition = new CartesianGridCoordinates {x = (short) x, y = (short) (y + 1)};
+                    var exitPosition = new CartesianGridCoordinates {x = (short)x, y = (short)(y + 1)};
                     var edge = CartesianGridMovement.CubeExitEdge(exitPosition, grid.RowCount);
                     Assert.AreEqual(edge, 0);
-                    
+
                     var nextCellIndex = CartesianGridOnCubeUtility.CellIndexNorth(sourceCellIndex, grid.RowCount, grid.FaceLocalToLocal);
                     var nextDirection = CartesianGridOnCubeUtility.NextFaceDirection[(edge * 6) + faceIndex];
                     var reverseDirection = CartesianGridMovement.ReverseDirection[nextDirection];
                     var returnCellIndex = CartesianGridOnCubeUtility.CellIndexFromExitEdge(reverseDirection, nextCellIndex, grid.RowCount);
-                    
+
                     Assert.AreEqual(returnCellIndex, sourceCellIndex);
                 }
             }
         }
-        
+
         void TestWrappingEdgeSouth(TestGrid grid)
         {
             int x;
             int y;
-            
+
             for (int faceIndex = 0; faceIndex < 6; faceIndex++)
             {
                 y = 0;
                 for (x = 0; x < grid.RowCount; x++)
                 {
-                    var sourcePosition = new CartesianGridCoordinates {x = (short) x, y = (short) y};
-                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte) faceIndex};
+                    var sourcePosition = new CartesianGridCoordinates {x = (short)x, y = (short)y};
+                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte)faceIndex};
                     var sourceCellIndex = CartesianGridOnCubeUtility.CellIndex(sourcePosition, sourceCubeFace, grid.RowCount);
-                    var exitPosition = new CartesianGridCoordinates {x = (short) x, y = (short) (y - 1)};
+                    var exitPosition = new CartesianGridCoordinates {x = (short)x, y = (short)(y - 1)};
                     var edge = CartesianGridMovement.CubeExitEdge(exitPosition, grid.RowCount);
                     Assert.AreEqual(edge, 1);
 
@@ -234,39 +235,39 @@ namespace Samples.GridPath.Tests
                     var nextDirection = CartesianGridOnCubeUtility.NextFaceDirection[(edge * 6) + faceIndex];
                     var reverseDirection = CartesianGridMovement.ReverseDirection[nextDirection];
                     var returnCellIndex = CartesianGridOnCubeUtility.CellIndexFromExitEdge(reverseDirection, nextCellIndex, grid.RowCount);
-                    
+
                     Assert.AreEqual(returnCellIndex, sourceCellIndex);
                 }
             }
         }
-        
+
         void TestWrappingEdgeWest(TestGrid grid)
         {
             int x;
             int y;
-            
+
             for (int faceIndex = 0; faceIndex < 6; faceIndex++)
             {
                 x = 0;
                 for (y = 0; y < grid.RowCount; y++)
                 {
-                    var sourcePosition = new CartesianGridCoordinates {x = (short) x, y = (short) y};
-                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte) faceIndex};
+                    var sourcePosition = new CartesianGridCoordinates {x = (short)x, y = (short)y};
+                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte)faceIndex};
                     var sourceCellIndex = CartesianGridOnCubeUtility.CellIndex(sourcePosition, sourceCubeFace, grid.RowCount);
-                    var exitPosition = new CartesianGridCoordinates {x = (short) (x-1), y = (short) y};
+                    var exitPosition = new CartesianGridCoordinates {x = (short)(x - 1), y = (short)y};
                     var edge = CartesianGridMovement.CubeExitEdge(exitPosition, grid.RowCount);
                     Assert.AreEqual(edge, 2);
-                    
+
                     var nextCellIndex = CartesianGridOnCubeUtility.CellIndexWest(sourceCellIndex, grid.RowCount, grid.FaceLocalToLocal);
                     var nextDirection = CartesianGridOnCubeUtility.NextFaceDirection[(edge * 6) + faceIndex];
                     var reverseDirection = CartesianGridMovement.ReverseDirection[nextDirection];
                     var returnCellIndex = CartesianGridOnCubeUtility.CellIndexFromExitEdge(reverseDirection, nextCellIndex, grid.RowCount);
-                    
+
                     Assert.AreEqual(returnCellIndex, sourceCellIndex);
                 }
             }
         }
-        
+
         void TestWrappingEdgeEast(TestGrid grid)
         {
             int x;
@@ -274,21 +275,21 @@ namespace Samples.GridPath.Tests
 
             for (int faceIndex = 0; faceIndex < 6; faceIndex++)
             {
-                x = grid.RowCount-1;
+                x = grid.RowCount - 1;
                 for (y = 0; y < grid.RowCount; y++)
                 {
-                    var sourcePosition = new CartesianGridCoordinates {x = (short) x, y = (short) y};
-                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte) faceIndex};
+                    var sourcePosition = new CartesianGridCoordinates {x = (short)x, y = (short)y};
+                    var sourceCubeFace = new CartesianGridOnCubeFace {Value = (byte)faceIndex};
                     var sourceCellIndex = CartesianGridOnCubeUtility.CellIndex(sourcePosition, sourceCubeFace, grid.RowCount);
-                    var exitPosition = new CartesianGridCoordinates {x = (short) (x+1), y = (short) y};
+                    var exitPosition = new CartesianGridCoordinates {x = (short)(x + 1), y = (short)y};
                     var edge = CartesianGridMovement.CubeExitEdge(exitPosition, grid.RowCount);
                     Assert.AreEqual(edge, 3);
-                    
+
                     var nextCellIndex = CartesianGridOnCubeUtility.CellIndexEast(sourceCellIndex, grid.RowCount, grid.FaceLocalToLocal);
                     var nextDirection = CartesianGridOnCubeUtility.NextFaceDirection[(edge * 6) + faceIndex];
                     var reverseDirection = CartesianGridMovement.ReverseDirection[nextDirection];
                     var returnCellIndex = CartesianGridOnCubeUtility.CellIndexFromExitEdge(reverseDirection, nextCellIndex, grid.RowCount);
-                    
+
                     Assert.AreEqual(returnCellIndex, sourceCellIndex);
                 }
             }
@@ -305,7 +306,7 @@ namespace Samples.GridPath.Tests
                 TestWrappingEdgeEast(grid);
             }
         }
-        
+
         [Test]
         public void MatchingEdgesOddSize()
         {
@@ -334,25 +335,25 @@ namespace Samples.GridPath.Tests
                 var sourceCubeFace5 = new CartesianGridOnCubeFace {Value = 5};
 
                 var dist0 = grid.WalkPathDistance(sourcePosition, sourceCubeFace0, targetPosition, targetCubeFace);
-                Assert.AreEqual(dist0, 14 );
-                
+                Assert.AreEqual(dist0, 14);
+
                 var dist1 = grid.WalkPathDistance(sourcePosition, sourceCubeFace1, targetPosition, targetCubeFace);
                 Assert.AreEqual(dist1, 32);
-                
+
                 var dist2 = grid.WalkPathDistance(sourcePosition, sourceCubeFace2, targetPosition, targetCubeFace);
                 Assert.AreEqual(dist2, 30);
-                
+
                 var dist3 = grid.WalkPathDistance(sourcePosition, sourceCubeFace3, targetPosition, targetCubeFace);
                 Assert.AreEqual(dist3, 16);
-                
+
                 var dist4 = grid.WalkPathDistance(sourcePosition, sourceCubeFace4, targetPosition, targetCubeFace);
-                Assert.AreEqual(dist4, 17 );
-                
+                Assert.AreEqual(dist4, 17);
+
                 var dist5 = grid.WalkPathDistance(sourcePosition, sourceCubeFace5, targetPosition, targetCubeFace);
                 Assert.AreEqual(dist5, 31);
             }
         }
-  
+
         [Test]
         public void PathRandomObstacles()
         {
@@ -380,12 +381,12 @@ namespace Samples.GridPath.Tests
                     var sourceFaceIndex = rand.NextInt(0, 6);
                     var sourceCubeFace = new CartesianGridOnCubeFace { Value = (byte)sourceFaceIndex};
                     var sourcePosition = new CartesianGridCoordinates {x = (short)sourceXY.x, y = (short)sourceXY.y};
-                    
+
                     var targetXY = rand.NextInt2(new int2(grid.RowCount, grid.RowCount));
                     var targetFaceIndex = rand.NextInt(0, 6);
                     var targetCubeFace = new CartesianGridOnCubeFace { Value = (byte)targetFaceIndex};
                     var targetPosition = new CartesianGridCoordinates {x = (short)targetXY.x, y = (short)targetXY.y};
-                    
+
                     grid.WalkPathDistance(sourcePosition, sourceCubeFace, targetPosition, targetCubeFace);
                 }
             }

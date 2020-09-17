@@ -3,5 +3,5 @@ using UnityEngine;
 
 namespace Samples.Boids
 {
-    public struct BoidTarget : IComponentData { }
+    public struct BoidTarget : IComponentData {}
 }

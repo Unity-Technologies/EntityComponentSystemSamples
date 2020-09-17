@@ -119,7 +119,7 @@ namespace UnityEditor.PostProcessing
                 m_RectVertices,
                 fill < 0 ? Color.clear : Color.white * fill,
                 line < 0 ? Color.clear : Color.white * line
-                );
+            );
         }
 
         // Update internal state with a given bloom instance
@@ -163,7 +163,7 @@ namespace UnityEditor.PostProcessing
             Handles.Label(
                 PointInRect(0, m_RangeY) + Vector3.right,
                 "Brightness Response (linear)", EditorStyles.miniLabel
-                );
+            );
 
             // Threshold line
             DrawLine(m_GraphThreshold, 0, m_GraphThreshold, m_RangeY, 0.6f);

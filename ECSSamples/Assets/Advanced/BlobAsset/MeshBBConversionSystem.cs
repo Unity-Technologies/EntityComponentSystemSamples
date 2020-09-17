@@ -34,7 +34,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
         int curPointIndex = 0;
         var vertices = new List<Vector3>(4096);
         var processBlobAssets = new NativeList<Hash128>(32, Allocator.Temp);
-    
+
         Profiler.BeginSample("Conv_BuildHashAndPush");
 
         using (var context = new BlobAssetComputationContext<MeshBBFactorySettings, MeshBBBlobAsset>(BlobAssetStore, 128, Allocator.Temp))
@@ -56,7 +56,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
 
                     float xp = float.MinValue, yp = float.MinValue, zp = float.MinValue;
                     float xn = float.MaxValue, yn = float.MaxValue, zn = float.MaxValue;
-                    
+
                     // Copy the mesh vertices into the point array
                     if (hasMesh)
                     {
@@ -120,7 +120,7 @@ public class MeshBBConversionSystem : GameObjectConversionSystem
                 var entity = GetPrimaryEntity(auth);
 
                 DstEntityManager.AddComponentData(entity, new MeshBBComponent(blob));
-                DstEntityManager.AddComponentData(entity,new Translation{Value=auth.transform.position});                
+                DstEntityManager.AddComponentData(entity, new Translation {Value = auth.transform.position});
             });
 
             Profiler.EndSample();
@@ -156,13 +156,13 @@ public struct ComputeMeshBBAssetJob : IJobParallelFor
         root.MeshScale = s;
         root.MinBoundingBox = settings.MinBoundingBox * s;
         root.MaxBoundingBox = settings.MaxBoundingBox * s;
-        
+
         for (int i = 0; i < array.Length; i++)
         {
             var v1 = Vertices[settings.PointStartIndex + i];
             array[i] = new float3(v1.x * s, v1.y * s, v1.z * s);
         }
-        
+
         BlobAssets[index] = builder.CreateBlobAssetReference<MeshBBBlobAsset>(Allocator.Persistent);
         builder.Dispose();
     }

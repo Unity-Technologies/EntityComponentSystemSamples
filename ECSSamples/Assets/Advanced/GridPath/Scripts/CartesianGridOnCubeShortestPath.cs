@@ -10,9 +10,9 @@ public static unsafe class CartesianGridOnCubeShortestPath
     static void CalculateShortestWalkableDistancesToTarget(NativeArray<int> targetDistances, int rowCount, byte* gridWalls, CartesianGridCoordinates targetPosition, CartesianGridOnCubeFace cubeFace, float4x4* faceLocalToLocal)
     {
         var cellCount = rowCount * rowCount;
-        var closed = new UnsafeBitArray(6*cellCount, Allocator.Temp, NativeArrayOptions.ClearMemory);
-        var pending = new UnsafeBitArray(6*cellCount, Allocator.Temp, NativeArrayOptions.ClearMemory);
-        var open = new UnsafeRingQueue<int>(6*cellCount, Allocator.Temp);
+        var closed = new UnsafeBitArray(6 * cellCount, Allocator.Temp, NativeArrayOptions.ClearMemory);
+        var pending = new UnsafeBitArray(6 * cellCount, Allocator.Temp, NativeArrayOptions.ClearMemory);
+        var open = new UnsafeRingQueue<int>(6 * cellCount, Allocator.Temp);
 
         var faceIndex = cubeFace.Value;
         var faceTargetCellIndex = (targetPosition.y * rowCount) + targetPosition.x;
@@ -75,7 +75,7 @@ public static unsafe class CartesianGridOnCubeShortestPath
     static void CalculateShortestWalkableDistancesToTargetInner(NativeArray<int> targetDistances, int rowCount, byte* gridWalls, float4x4* faceLocalToLocal, UnsafeBitArray pending, UnsafeBitArray closed, UnsafeRingQueue<int> open)
     {
         var cellCount = rowCount * rowCount;
-        var maxPathLength = 6*(cellCount + 1);
+        var maxPathLength = 6 * (cellCount + 1);
 
         while (open.Length > 0)
         {
@@ -182,12 +182,12 @@ public static unsafe class CartesianGridOnCubeShortestPath
     static void CalculateShortestPathGivenDistancesToTarget(NativeArray<byte> targetDirections, int rowCount, NativeArray<int> cellDistances, byte* gridWalls, float4x4* faceLocalToLocal)
     {
         var cellCount = rowCount * rowCount;
-        var maxPathLength = 6*(cellCount + 1);
+        var maxPathLength = 6 * (cellCount + 1);
 
         for (int i = 0; i < targetDirections.Length; i++)
             targetDirections[i] = 0;
 
-        for (var cellIndex = 0; cellIndex < (6*cellCount); cellIndex++)
+        for (var cellIndex = 0; cellIndex < (6 * cellCount); cellIndex++)
         {
             var cellPosition = CartesianGridOnCubeUtility.CellFaceCoordinates(cellIndex, rowCount);
             var faceIndex = CartesianGridOnCubeUtility.CellFaceIndex(cellIndex, rowCount);
@@ -252,7 +252,7 @@ public static unsafe class CartesianGridOnCubeShortestPath
     /// <param name="gridWalls">Table representing walls/obstacles in grid. See: CartesianGridMovement</param>
     public static void CalculateShortestPathsToTarget(NativeArray<byte> targetDirections, NativeArray<int> targetDistances, int rowCount, CartesianGridCoordinates targetPosition, CartesianGridOnCubeFace cubeFace, byte* gridWalls, float4x4* faceLocalToLocal)
     {
-        CalculateShortestWalkableDistancesToTarget(targetDistances, rowCount, gridWalls, targetPosition, cubeFace, faceLocalToLocal );
+        CalculateShortestWalkableDistancesToTarget(targetDistances, rowCount, gridWalls, targetPosition, cubeFace, faceLocalToLocal);
         CalculateShortestPathGivenDistancesToTarget(targetDirections, rowCount, targetDistances, gridWalls, faceLocalToLocal);
     }
 
@@ -299,5 +299,4 @@ public static unsafe class CartesianGridOnCubeShortestPath
     {
         return LookupDistanceToTarget(cellPosition.x, cellPosition.y, cubeFace.Value, rowCount, targetDistances);
     }
-
 }

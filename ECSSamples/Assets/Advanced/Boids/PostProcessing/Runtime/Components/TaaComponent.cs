@@ -28,8 +28,8 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && model.settings.method == AntialiasingModel.Method.Taa
-                       && SystemInfo.supportsMotionVectors;
+                    && model.settings.method == AntialiasingModel.Method.Taa
+                    && SystemInfo.supportsMotionVectors;
             }
         }
 
@@ -46,8 +46,8 @@ namespace UnityEngine.PostProcessing
         public override CameraEvent GetCameraEvent()
         {
             return model.settings.taaSettings.renderQueue == AntialiasingModel.TaaQueue.BeforeTransparent
-                   ? CameraEvent.BeforeImageEffectsOpaque
-                   : CameraEvent.BeforeImageEffects;
+                ? CameraEvent.BeforeImageEffectsOpaque
+                : CameraEvent.BeforeImageEffects;
         }
 
         public override void OnEnable()
@@ -148,8 +148,8 @@ namespace UnityEngine.PostProcessing
         Vector2 GenerateRandomOffset()
         {
             var offset = new Vector2(
-                    GetHaltonValue(m_SampleIndex & 1023, 2),
-                    GetHaltonValue(m_SampleIndex & 1023, 3));
+                GetHaltonValue(m_SampleIndex & 1023, 2),
+                GetHaltonValue(m_SampleIndex & 1023, 3));
 
             if (++m_SampleIndex >= model.settings.taaSettings.sampleCount)
                 m_SampleIndex = 0;

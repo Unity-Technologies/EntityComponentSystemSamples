@@ -59,9 +59,9 @@ namespace UnityEngine.PostProcessing
                     for (int ix = 0; ix < columns; ix++)
                     {
                         var uv = new Vector2(
-                                (0.5f + ix) / columns,
-                                (0.5f + iy) / rows
-                                );
+                            (0.5f + ix) / columns,
+                            (0.5f + iy) / rows
+                        );
 
                         for (int i = 0; i < 6; i++)
                         {
@@ -101,8 +101,8 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.IsModeActive(BuiltinDebugViewsModel.Mode.Depth)
-                       || model.IsModeActive(BuiltinDebugViewsModel.Mode.Normals)
-                       || model.IsModeActive(BuiltinDebugViewsModel.Mode.MotionVectors);
+                    || model.IsModeActive(BuiltinDebugViewsModel.Mode.Normals)
+                    || model.IsModeActive(BuiltinDebugViewsModel.Mode.MotionVectors);
             }
         }
 
@@ -130,8 +130,8 @@ namespace UnityEngine.PostProcessing
         public override CameraEvent GetCameraEvent()
         {
             return model.settings.mode == BuiltinDebugViewsModel.Mode.MotionVectors
-                   ? CameraEvent.BeforeImageEffects
-                   : CameraEvent.BeforeImageEffectsOpaque;
+                ? CameraEvent.BeforeImageEffects
+                : CameraEvent.BeforeImageEffectsOpaque;
         }
 
         public override string GetName()

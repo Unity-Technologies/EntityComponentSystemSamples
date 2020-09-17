@@ -9,11 +9,11 @@ using UnityEngine;
 [ConverterVersion("macton", 10)]
 public class CartesianGridOnPlaneAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
 {
-    [Range(2,512)] public int ColumnCount;
-    [Range(2,512)] public int RowCount;
+    [Range(2, 512)] public int ColumnCount;
+    [Range(2, 512)] public int RowCount;
     public GameObject[] FloorPrefab;
     public GameObject WallPrefab;
-    
+
     // Specific wall probability, given PotentialWallProbability
     public float WallSProbability = 0.5f;
     public float WallWProbability = 0.5f;
@@ -44,12 +44,12 @@ public class CartesianGridOnPlaneAuthoring : MonoBehaviour, IConvertGameObjectTo
         {
             floorPrefab[i] = conversionSystem.GetPrimaryEntity(FloorPrefab[i]);
         }
-        
+
         dstManager.AddComponentData(entity, new CartesianGridOnPlaneGenerator
         {
             Blob = blobBuilder.CreateBlobAssetReference<CartesianGridOnPlaneGeneratorBlob>(Allocator.Persistent)
         });
-        
+
         blobBuilder.Dispose();
     }
 }

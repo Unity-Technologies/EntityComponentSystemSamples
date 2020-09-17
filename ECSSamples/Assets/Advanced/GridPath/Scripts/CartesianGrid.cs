@@ -34,7 +34,7 @@ public struct CartesianGridDirection : IComponentData
 /// </summary>
 public struct CartesianGridSpeed : IComponentData
 {
-    public ushort Value; 
+    public ushort Value;
 }
 
 
@@ -45,7 +45,7 @@ public struct CartesianGridCoordinates : IComponentData, IEquatable<CartesianGri
 {
     public short x;
     public short y;
-    
+
     public CartesianGridCoordinates(float2 pos, int rowCount, int colCount)
     {
         // Quantized grid coordinates from position in grid space
@@ -57,7 +57,7 @@ public struct CartesianGridCoordinates : IComponentData, IEquatable<CartesianGri
         x = (short)math.clamp(((int)(pos.x + 1.0f)) - 1, -1, colCount);
         y = (short)math.clamp(((int)(pos.y + 1.0f)) - 1, -1, rowCount);
     }
-    
+
     public bool Equals(CartesianGridCoordinates other)
     {
         return ((other.x == x) && (other.y == y));
@@ -78,7 +78,7 @@ public struct CartesianGridTarget : IComponentData
 }
 
 /// <summary>
-/// Follow nearest CartesianGridTarget 
+/// Follow nearest CartesianGridTarget
 /// </summary>
 [WriteGroup(typeof(CartesianGridDirection))]
 public struct CartesianGridFollowTarget : IComponentData
@@ -114,9 +114,9 @@ public struct CartesianGridTargetCoordinates : IComponentData, IEquatable<Cartes
         x = other.x;
         y = other.y;
     }
-    
+
     public bool Equals(CartesianGridCoordinates other)
     {
         return ((other.x == x) && (other.y == y));
-    } 
+    }
 }

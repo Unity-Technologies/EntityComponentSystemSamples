@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -37,8 +37,8 @@ public class SpawnerSystem_SpawnAndRemove : SystemBase
         // perform such changes on the main thread after the Job has finished. Command buffers allow you to perform
         // any, potentially costly, calculations on a worker thread, while queuing up the actual insertions and
         // deletions for later.
-        var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().ToConcurrent();
-        
+        var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+
         // Schedule the job that will add Instantiate commands to the EntityCommandBuffer.
         // Since this job only runs on the first frame, we want to ensure Burst compiles it before running to get the best performance (3rd parameter of WithBurst)
         // The actual job will be cached once it is compiled (it will only get Burst compiled once).
@@ -46,25 +46,25 @@ public class SpawnerSystem_SpawnAndRemove : SystemBase
             .WithName("SpawnerSystem_SpawnAndRemove")
             .WithBurst(FloatMode.Default, FloatPrecision.Standard, true)
             .ForEach((Entity entity, int entityInQueryIndex, in Spawner_SpawnAndRemove spawner, in LocalToWorld location) =>
-        {
-            var random = new Random(1);
-
-            for (var x = 0; x < spawner.CountX; x++)
             {
-                for (var y = 0; y < spawner.CountY; y++)
+                var random = new Random(1);
+
+                for (var x = 0; x < spawner.CountX; x++)
                 {
-                    var instance = commandBuffer.Instantiate(entityInQueryIndex, spawner.Prefab);
+                    for (var y = 0; y < spawner.CountY; y++)
+                    {
+                        var instance = commandBuffer.Instantiate(entityInQueryIndex, spawner.Prefab);
 
-                    // Place the instantiated in a grid with some noise
-                    var position = math.transform(location.Value, new float3(x * 1.3F, noise.cnoise(new float2(x, y) * 0.21F) * 2, y * 1.3F));
-                    commandBuffer.SetComponent(entityInQueryIndex, instance, new Translation { Value = position });
-                    commandBuffer.SetComponent(entityInQueryIndex, instance, new LifeTime { Value = random.NextFloat(10.0F, 100.0F) });
-                    commandBuffer.SetComponent(entityInQueryIndex, instance, new RotationSpeed_SpawnAndRemove { RadiansPerSecond = math.radians(random.NextFloat(25.0F, 90.0F)) });
+                        // Place the instantiated in a grid with some noise
+                        var position = math.transform(location.Value, new float3(x * 1.3F, noise.cnoise(new float2(x, y) * 0.21F) * 2, y * 1.3F));
+                        commandBuffer.SetComponent(entityInQueryIndex, instance, new Translation { Value = position });
+                        commandBuffer.SetComponent(entityInQueryIndex, instance, new LifeTime { Value = random.NextFloat(10.0F, 100.0F) });
+                        commandBuffer.SetComponent(entityInQueryIndex, instance, new RotationSpeed_SpawnAndRemove { RadiansPerSecond = math.radians(random.NextFloat(25.0F, 90.0F)) });
+                    }
                 }
-            }
 
-            commandBuffer.DestroyEntity(entityInQueryIndex, entity);
-        }).ScheduleParallel();
+                commandBuffer.DestroyEntity(entityInQueryIndex, entity);
+            }).ScheduleParallel();
 
         // SpawnJob runs in parallel with no sync point until the barrier system executes.
         // When the barrier system executes we want to complete the SpawnJob and then play back the commands

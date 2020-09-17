@@ -89,10 +89,10 @@ namespace UnityEditor.PostProcessing
                 }
 
                 m_MonitorAreaRect = new Rect(
-                        Mathf.Floor(r.x + r.width / 2f - size / 2f),
-                        Mathf.Floor(r.y + r.height / 2f - size / 2f - 5f),
-                        size, size
-                        );
+                    Mathf.Floor(r.x + r.width / 2f - size / 2f),
+                    Mathf.Floor(r.y + r.height / 2f - size / 2f - 5f),
+                    size, size
+                );
 
                 if (m_VectorscopeTexture != null)
                 {

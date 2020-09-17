@@ -104,8 +104,8 @@ namespace UnityEditor.PostProcessing
             }
 
             return baseType == null
-                   ? null
-                   : srcObject;
+                ? null
+                : srcObject;
         }
 
         public static object GetParentObject(string path, object obj)

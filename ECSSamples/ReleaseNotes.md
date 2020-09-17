@@ -1,3 +1,13 @@
+# Samples Version 33
+
+## Changes
+
+* Updated minimum Unity Editor version to `2020.1.0b15`.
+* The `FixedTimestepWorkaround` sample now demonstrates the use of `FixedRateUtils` to control a `ComponentSystemGroup`'s update frequency.
+  * Since this no longer relies on a `MonoBehaviour.FixedUpdate()`-based workaround, the sample has been renamed to `FixedTimestepSystemUpdate`.
+* Improvements and fixes for the `Fixed Timestep` Sample.
+
+
 # Samples Version 32
 
 ## New Samples
@@ -11,11 +21,11 @@
 
 # Samples Version 31
 
-To view the changelog for a specific package, go to **Package Manager** and click on **View changelog** or open the respective `CHANGELOG.md` file inside the package folder. 
+To view the changelog for a specific package, go to **Package Manager** and click on **View changelog** or open the respective `CHANGELOG.md` file inside the package folder.
 
 ## New Samples
 
-* Added the `Advanced/GridPath` sample which showcases how to build a grid-based level using the conversion workflow and how to implement simple actor movement. You can find more information in the `Assets/Advanced/GridPath/Scripts/README.md` file. 
+* Added the `Advanced/GridPath` sample which showcases how to build a grid-based level using the conversion workflow and how to implement simple actor movement. You can find more information in the `Assets/Advanced/GridPath/Scripts/README.md` file.
 
 ## Changes
 
@@ -46,7 +56,7 @@ To view the changelog for a specific package, go to **Package Manager** and clic
 # 0.0.28
 
 Please note that the version of the Samples (`0.0.28`) is not related to the preview version of entities (`preview.31`).
-To view the changelog for a the package, go to **Package Manager** and click on **View changelog**. 
+To view the changelog for a the package, go to **Package Manager** and click on **View changelog**.
 
 ## New Samples
 
@@ -252,7 +262,7 @@ these functions will take an optimized path that migrates the chunks to new arch
   * `Scale`-\>`NonUniformScale`
 * Attach, Attached components removed. (No transform hierarchy)
 * `ComponentDataArray`, `BufferArray`, `SharedComponentDataArray`, and `EntityArray` have been deprecated. Please use `ForEach`, `IJobProcessComponentData`, `IJobChunk`, and `ComponentGroup` APIs to access component data.
-* `[Inject]` has been deprecated. 
+* `[Inject]` has been deprecated.
 * Component system update ordering is now hierarchical. A forthcoming document will cover this feature in detail. Key changes:
   * Added `ComponentSystemGroup` class, representing a group of systems (and system groups) to update in a fixed order.
   * The following `ComponentSystemGroup`s are added to the Unity player loop by default:
