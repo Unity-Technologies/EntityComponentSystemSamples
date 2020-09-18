@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -19,7 +19,7 @@ public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObj
 {
     public GameObject surfaceMesh = null;
 
-    void OnEnable() { }
+    void OnEnable() {}
 
     void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
@@ -35,6 +35,7 @@ public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObj
 }
 
 // A system which configures the simulation step to rotate certain contact normals
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyNarrowphaseContactsSystem : SystemBase
 {

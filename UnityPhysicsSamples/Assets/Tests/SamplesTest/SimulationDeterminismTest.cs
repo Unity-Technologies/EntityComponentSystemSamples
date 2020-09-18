@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -59,6 +59,7 @@ namespace Unity.Physics.Samples.Test
             scenes.Sort();
             return scenes;
         }
+
 #if !UNITY_EDITOR
         [UnityTest]
         [Timeout(240000)]
@@ -124,7 +125,7 @@ namespace Unity.Physics.Samples.Test
                 NumSolverIterations = stepComponent.SolverIterationCount,
                 SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
                 SynchronizeCollisionWorld = true,
-                TimeStep = Time.fixedDeltaTime
+                TimeStep = DefaultWorld.Time.DeltaTime
             };
 
             // Step the simulation on all worlds
@@ -275,6 +276,7 @@ namespace Unity.Physics.Samples.Test
             }
         }
 
+        [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
         [UpdateAfter(typeof(BuildPhysicsWorld))]
         class BuildPhysicsWorldSampler : SystemBase
         {

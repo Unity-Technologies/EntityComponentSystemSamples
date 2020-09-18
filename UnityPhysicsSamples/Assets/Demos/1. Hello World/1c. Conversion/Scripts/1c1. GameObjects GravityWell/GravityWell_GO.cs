@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Profiling;
 
 public class GravityWell_GO : MonoBehaviour

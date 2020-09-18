@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -74,18 +74,19 @@ public struct IgnoreTransparentClosestHitCollector : ICollector<RaycastHit>
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class RaycastWithCustomCollectorSystem : SystemBase
 {
     BuildPhysicsWorld m_BuildPhysicsWorld;
     EndFramePhysicsSystem m_EndFramePhysicsSystem;
-    EntityCommandBufferSystem m_EntityCommandBufferSystem;
+    EndFixedStepSimulationEntityCommandBufferSystem m_EntityCommandBufferSystem;
 
     protected override void OnCreate()
     {
-        m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-        m_EndFramePhysicsSystem = World.GetOrCreateSystem<EndFramePhysicsSystem>();
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EntityCommandBufferSystem>();
+        m_BuildPhysicsWorld = World.GetExistingSystem<BuildPhysicsWorld>();
+        m_EndFramePhysicsSystem = World.GetExistingSystem<EndFramePhysicsSystem>();
+        m_EntityCommandBufferSystem = World.GetExistingSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
@@ -98,38 +99,38 @@ public class RaycastWithCustomCollectorSystem : SystemBase
             .WithName("RaycastWithCustomCollector")
             .WithBurst()
             .ForEach((Entity entity, ref Translation position, ref Rotation rotation, ref VisualizedRaycast visualizedRaycast) =>
-        {
-            var raycastLength = visualizedRaycast.RayLength;
-            
-            // Perform the Raycast
-            var raycastInput = new RaycastInput
             {
-                Start = position.Value,
-                End = position.Value + (math.forward(rotation.Value) * visualizedRaycast.RayLength),
-                Filter = CollisionFilter.Default
-            };
+                var raycastLength = visualizedRaycast.RayLength;
 
-            var collector = new IgnoreTransparentClosestHitCollector(collisionWorld);
+                // Perform the Raycast
+                var raycastInput = new RaycastInput
+                {
+                    Start = position.Value,
+                    End = position.Value + (math.forward(rotation.Value) * visualizedRaycast.RayLength),
+                    Filter = CollisionFilter.Default
+                };
 
-            collisionWorld.CastRay(raycastInput, ref collector);
+                var collector = new IgnoreTransparentClosestHitCollector(collisionWorld);
 
-            var hit = collector.ClosestHit;
-            var hitDistance = raycastLength * hit.Fraction;
+                collisionWorld.CastRay(raycastInput, ref collector);
 
-            // position the entities and scale based on the ray length and hit distance
-            // visualization elements are scaled along the z-axis aka math.forward
-            var newFullRayPosition = new float3(0, 0, raycastLength * 0.5f);
-            var newFullRayScale = new float3(1f, 1f, raycastLength);
-            var newHitPosition = new float3(0, 0, hitDistance);
-            var newHitRayPosition = new float3(0, 0, hitDistance * 0.5f);
-            var newHitRayScale = new float3(1f, 1f, raycastLength * hit.Fraction);
+                var hit = collector.ClosestHit;
+                var hitDistance = raycastLength * hit.Fraction;
 
-            commandBuffer.SetComponent(visualizedRaycast.HitPositionEntity, new Translation { Value = newHitPosition });
-            commandBuffer.SetComponent(visualizedRaycast.HitRayEntity, new Translation { Value = newHitRayPosition });
-            commandBuffer.SetComponent(visualizedRaycast.HitRayEntity, new NonUniformScale { Value = newHitRayScale });
-            commandBuffer.SetComponent(visualizedRaycast.FullRayEntity, new Translation { Value = newFullRayPosition });
-            commandBuffer.SetComponent(visualizedRaycast.FullRayEntity, new NonUniformScale { Value = newFullRayScale });
-        }).Schedule();
+                // position the entities and scale based on the ray length and hit distance
+                // visualization elements are scaled along the z-axis aka math.forward
+                var newFullRayPosition = new float3(0, 0, raycastLength * 0.5f);
+                var newFullRayScale = new float3(1f, 1f, raycastLength);
+                var newHitPosition = new float3(0, 0, hitDistance);
+                var newHitRayPosition = new float3(0, 0, hitDistance * 0.5f);
+                var newHitRayScale = new float3(1f, 1f, raycastLength * hit.Fraction);
+
+                commandBuffer.SetComponent(visualizedRaycast.HitPositionEntity, new Translation { Value = newHitPosition });
+                commandBuffer.SetComponent(visualizedRaycast.HitRayEntity, new Translation { Value = newHitRayPosition });
+                commandBuffer.SetComponent(visualizedRaycast.HitRayEntity, new NonUniformScale { Value = newHitRayScale });
+                commandBuffer.SetComponent(visualizedRaycast.FullRayEntity, new Translation { Value = newFullRayPosition });
+                commandBuffer.SetComponent(visualizedRaycast.FullRayEntity, new NonUniformScale { Value = newFullRayScale });
+            }).Schedule();
 
         m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
     }

@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -41,7 +41,7 @@ public class EntityUpdaterSystem : SystemBase
                         commandBuffer.SetComponent(entity, position);
                     }
                 }
-            ).Run();
+                ).Run();
 
             commandBuffer.Playback(EntityManager);
         }

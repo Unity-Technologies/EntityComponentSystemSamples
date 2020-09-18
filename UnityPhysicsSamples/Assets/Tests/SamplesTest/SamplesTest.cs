@@ -11,6 +11,7 @@ namespace Unity.Physics.Samples.Test
 {
     [DisableAutoCreation]
     [AlwaysUpdateSystem]
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(BuildPhysicsWorld))]
     class EnsureSTSimulation : SystemBase
     {
@@ -43,10 +44,16 @@ namespace Unity.Physics.Samples.Test
         {
             var sceneCount = SceneManager.sceneCountInBuildSettings;
             var scenes = new List<string>();
-            for(int sceneIndex = 0; sceneIndex < sceneCount; ++sceneIndex)
+            for (int sceneIndex = 0; sceneIndex < sceneCount; ++sceneIndex)
             {
                 var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
-                if (scenePath.Contains("InitTestScene"))
+                if (scenePath.Contains("InitTestScene")
+                    // in order to circumvent API breakages that do not affect physics, some packages are removed from the project on CI
+                    // any scenes referencing asset types in com.unity.inputsystem must be guarded behind UNITY_INPUT_SYSTEM_EXISTS
+#if !UNITY_INPUT_SYSTEM_EXISTS
+                    || scenePath.Contains("LoaderScene")
+#endif
+                )
                     continue;
 #if UNITY_ANDROID && !UNITY_64
                 // Terrain scene needs a lot of memory, skip it on Android armv7
@@ -131,7 +138,7 @@ namespace Unity.Physics.Samples.Test
 
                 stSystem = new EnsureSTSimulation();
                 world.AddSystem(stSystem);
-                world.GetExistingSystem<SimulationSystemGroup>().AddSystemToUpdateList(stSystem);
+                world.GetExistingSystem<FixedStepSimulationSystemGroup>().AddSystemToUpdateList(stSystem);
             }
 
             SceneManager.LoadScene(scenePath);

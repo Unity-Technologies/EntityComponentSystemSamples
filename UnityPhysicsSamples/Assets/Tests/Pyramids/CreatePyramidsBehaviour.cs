@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 using Unity.Collections;
@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Physics.Systems;
 
-public struct PhysicsPyramid : IComponentData { }
+public struct PhysicsPyramid : IComponentData {}
 
 public struct CreatePyramids : IComponentData
 {
@@ -59,7 +59,7 @@ public class CreatePyramidsBehaviour : MonoBehaviour, IDeclareReferencedPrefabs,
 }
 
 
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 public class CreatePyramidsSystem : SystemBase
 {
     protected override void OnCreate()
@@ -79,39 +79,38 @@ public class CreatePyramidsSystem : SystemBase
             .WithoutBurst()
             .WithStructuralChanges()
             .ForEach((Entity creatorEntity, in CreatePyramids creator) =>
-        {
-            float3 boxSize = creator.BoxSize;
-            int boxCount = creator.Count * (creator.Height * (creator.Height + 1) / 2);
-
-            var positions = new NativeArray<float3>(boxCount, Allocator.Temp);
-
-            int boxIdx = 0;
-            for (int p = 0; p < creator.Count; p++)
             {
-                for (int i = 0; i < creator.Height; i++)
+                float3 boxSize = creator.BoxSize;
+                int boxCount = creator.Count * (creator.Height * (creator.Height + 1) / 2);
+
+                var positions = new NativeArray<float3>(boxCount, Allocator.Temp);
+
+                int boxIdx = 0;
+                for (int p = 0; p < creator.Count; p++)
                 {
-                    int rowSize = creator.Height - i;
-                    float3 start = new float3(-rowSize * boxSize.x * 0.5f + boxSize.x * 0.5f, i * boxSize.y, 0);
-                    for (int j = 0; j < rowSize; j++)
+                    for (int i = 0; i < creator.Height; i++)
                     {
-                        float3 shift = new float3(j * boxSize.x, 0f, p * boxSize.z * creator.Space);
-                        positions[boxIdx] = creator.StartPosition;
-                        positions[boxIdx] += start + shift;
-                        boxIdx++;
+                        int rowSize = creator.Height - i;
+                        float3 start = new float3(-rowSize * boxSize.x * 0.5f + boxSize.x * 0.5f, i * boxSize.y, 0);
+                        for (int j = 0; j < rowSize; j++)
+                        {
+                            float3 shift = new float3(j * boxSize.x, 0f, p * boxSize.z * creator.Space);
+                            positions[boxIdx] = creator.StartPosition;
+                            positions[boxIdx] += start + shift;
+                            boxIdx++;
+                        }
                     }
                 }
-            }
 
-            var pyramidComponent = new PhysicsPyramid();
-            for (int i = 0; i < positions.Length; i++)
-            {
-                var entity = EntityManager.Instantiate(creator.BoxEntity);
-                EntityManager.AddComponentData(entity, pyramidComponent);
-                EntityManager.SetComponentData(entity, new Translation() { Value = positions[i] });
-            }
+                var pyramidComponent = new PhysicsPyramid();
+                for (int i = 0; i < positions.Length; i++)
+                {
+                    var entity = EntityManager.Instantiate(creator.BoxEntity);
+                    EntityManager.AddComponentData(entity, pyramidComponent);
+                    EntityManager.SetComponentData(entity, new Translation() { Value = positions[i] });
+                }
 
-            EntityManager.DestroyEntity(creatorEntity);
-
-        }).Run();
+                EntityManager.DestroyEntity(creatorEntity);
+            }).Run();
     }
 }

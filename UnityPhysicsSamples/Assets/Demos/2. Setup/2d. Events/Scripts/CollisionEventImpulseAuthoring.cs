@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -16,7 +16,7 @@ public class CollisionEventImpulseAuthoring : MonoBehaviour, IConvertGameObjectT
     public float Magnitude = 1.0f;
     public float3 Direction = math.up();
 
-    void OnEnable() { }
+    void OnEnable() {}
 
     void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
@@ -33,6 +33,7 @@ public class CollisionEventImpulseAuthoring : MonoBehaviour, IConvertGameObjectT
 // This system applies an impulse to any dynamic that collides with a Repulsor.
 // A Repulsor is defined by a PhysicsShapeAuthoring with the `Raise Collision Events` flag ticked and a
 // CollisionEventImpulse behaviour added.
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class CollisionEventImpulseSystem : SystemBase
 {

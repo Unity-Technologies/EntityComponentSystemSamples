@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 
 namespace Unity.Physics.Authoring
 {
@@ -19,7 +19,6 @@ namespace Unity.Physics.Authoring
             joint.Create(DstEntityManager, this);
         }
 
-        // Update is called once per frame
         protected override void OnUpdate()
         {
             Entities.ForEach((BallAndSocketJoint joint) => { foreach (var j in joint.GetComponents<BallAndSocketJoint>()) CreateJoint(j); });

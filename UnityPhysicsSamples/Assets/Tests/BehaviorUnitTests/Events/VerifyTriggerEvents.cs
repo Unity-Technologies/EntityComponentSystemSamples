@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -10,15 +10,17 @@ namespace Unity.Physics.Tests
 {
     public struct VerifyTriggerEventsData : IComponentData
     {
-
+        public int ExpectedValue;
     }
 
     [Serializable]
     public class VerifyTriggerEvents : MonoBehaviour, IConvertGameObjectToEntity
     {
+        public int ExpectedValue = 4;
+
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
-            dstManager.AddComponentData(entity, new VerifyTriggerEventsData());
+            dstManager.AddComponentData(entity, new VerifyTriggerEventsData() { ExpectedValue = ExpectedValue });
 
 #if HAVOK_PHYSICS_EXISTS
             Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
@@ -28,13 +30,14 @@ namespace Unity.Physics.Tests
         }
     }
 
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(StepPhysicsWorld))]
     public class VerifyTriggerEventsSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;
 
-        public NativeArray<int> NumEvents;
+        public NativeReference<int> NumEvents;
 
         protected override void OnCreate()
         {
@@ -43,7 +46,7 @@ namespace Unity.Physics.Tests
             {
                 All = new ComponentType[] { typeof(VerifyTriggerEventsData) }
             });
-            NumEvents = new NativeArray<int>(1, Allocator.Persistent);
+            NumEvents = new NativeReference<int>(Allocator.Persistent);
         }
 
         protected override void OnDestroy()
@@ -55,7 +58,7 @@ namespace Unity.Physics.Tests
         {
             private bool m_Initialized;
 
-            public NativeArray<int> NumEvents;
+            public NativeReference<int> NumEvents;
 
             [ReadOnly]
             public ComponentDataFromEntity<VerifyTriggerEventsData> VerificationData;
@@ -65,25 +68,28 @@ namespace Unity.Physics.Tests
                 if (!m_Initialized)
                 {
                     m_Initialized = true;
-                    NumEvents[0] = 0;
+                    NumEvents.Value = 0;
                 }
 
-                NumEvents[0]++;
+                NumEvents.Value++;
             }
         }
 
         struct VerifyTriggerEventsPostJob : IJob
         {
-            public NativeArray<int> NumEvents;
+            public NativeReference<int> NumEvents;
 
             public SimulationType SimulationType;
 
             [ReadOnly]
             public ComponentDataFromEntity<VerifyTriggerEventsData> VerificationData;
 
+            [DeallocateOnJobCompletion]
+            public NativeArray<Entity> Entities;
+
             public void Execute()
             {
-                Assert.AreEqual(NumEvents[0], 4);
+                Assert.AreEqual(NumEvents.Value, VerificationData[Entities[0]].ExpectedValue);
             }
         }
 
@@ -104,7 +110,8 @@ namespace Unity.Physics.Tests
                 {
                     NumEvents = NumEvents,
                     SimulationType = simulation.Type,
-                    VerificationData = GetComponentDataFromEntity<VerifyTriggerEventsData>(true)
+                    VerificationData = GetComponentDataFromEntity<VerifyTriggerEventsData>(true),
+                    Entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob)
                 }.Schedule(inDeps);
             };
 

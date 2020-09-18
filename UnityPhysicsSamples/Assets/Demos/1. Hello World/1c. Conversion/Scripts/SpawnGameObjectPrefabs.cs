@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class SpawnGameObjectPrefabs : MonoBehaviour
 {
@@ -16,7 +16,7 @@ public class SpawnGameObjectPrefabs : MonoBehaviour
 
         RandomPointsOnCircle(transform.position, range, ref positions, ref rotations);
 
-        for( int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             var instance = Instantiate(prefab);
             instance.transform.parent = this.transform;
@@ -24,7 +24,6 @@ public class SpawnGameObjectPrefabs : MonoBehaviour
             instance.transform.rotation = rotations[i];
         }
     }
-
 
     protected static void RandomPointsOnCircle(Vector3 center, Vector3 range, ref Vector3[] positions, ref Quaternion[] rotations, int seed = 0)
     {

@@ -1,15 +1,11 @@
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Extensions;
 using Unity.Physics.Stateful;
 using UnityEngine.Assertions;
-#if !UNITY_ENTITIES_0_12_OR_NEWER
-using UnsafeUtility = UnsafeUtility_ForwardCompatibility;
-#else
-using Unity.Collections.LowLevel.Unsafe;
-#endif
 
 // Stores the impulse to be applied by the character controller body
 public struct DeferredCharacterControllerImpulse
@@ -66,7 +62,7 @@ public static class CharacterControllerUtilities
         private PhysicsWorld m_world;
 
         public CharacterControllerAllHitsCollector(int rbIndex, float maxFraction, ref NativeList<T> allHits, PhysicsWorld world,
-            NativeList<T> triggerHits = default)
+                                                   NativeList<T> triggerHits = default)
         {
             MaxFraction = maxFraction;
             AllHits = allHits;
@@ -102,7 +98,6 @@ public static class CharacterControllerUtilities
         }
 
         #endregion
-
     }
 
     // A collector which stores only the closest hit different from itself, the triggers, and predefined list of values it hit.
@@ -162,7 +157,6 @@ public static class CharacterControllerUtilities
         }
 
         #endregion
-
     }
 
     public static unsafe void CheckSupport(
@@ -673,7 +667,7 @@ public static class CharacterControllerUtilities
         }
     }
 
-    private static void UpdateTriggersSeen<T> (CharacterControllerStepInput stepInput, NativeList<T> triggerHits,
+    private static void UpdateTriggersSeen<T>(CharacterControllerStepInput stepInput, NativeList<T> triggerHits,
         NativeList<StatefulTriggerEvent> currentFrameTriggerEvents, float maxFraction) where T : struct, IQueryResult
     {
         var world = stepInput.World;

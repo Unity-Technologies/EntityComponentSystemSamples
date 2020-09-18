@@ -1,21 +1,22 @@
-﻿using System;
-using Demos;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-struct Vehicle : IComponentData { }
+struct Vehicle : IComponentData {}
 
 struct VehicleSpeed : IComponentData
 {
     public float TopSpeed;
     public float DesiredSpeed;
+    public float Damping;
+    public byte DriveEngaged;
 }
 
 struct VehicleSteering : IComponentData
 {
     public float MaxSteeringAngle;
     public float DesiredSteeringAngle;
+    public float Damping;
 }
 
 enum VehicleCameraOrientation
@@ -30,14 +31,12 @@ struct VehicleCameraSettings : IComponentData
     public float OrbitAngularSpeed;
 }
 
-// TODO: entities currently only supports component objects inheriting UnityEngine.Component
-class VehicleReferences : Component
+struct VehicleCameraReferences : IComponentData
 {
-    public VehicleMechanics Mechanics;
-    public Transform CameraOrbit;
-    public Transform CameraTarget;
-    public Transform CameraTo;
-    public Transform CameraFrom;
+    public Entity CameraOrbit;
+    public Entity CameraTarget;
+    public Entity CameraTo;
+    public Entity CameraFrom;
 }
 
 class VehicleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
@@ -45,11 +44,11 @@ class VehicleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     #pragma warning disable 649
     public bool ActiveAtStart;
 
-    public VehicleMechanics Mechanics;
-
     [Header("Handling")]
     public float TopSpeed = 10.0f;
     public float MaxSteeringAngle = 30.0f;
+    [Range(0f, 1f)] public float SteeringDamping = 0.1f;
+    [Range(0f, 1f)] public float SpeedDamping = 0.01f;
 
     [Header("Camera Settings")]
     public Transform CameraOrbit;
@@ -64,35 +63,41 @@ class VehicleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     {
         TopSpeed = math.max(0f, TopSpeed);
         MaxSteeringAngle = math.max(0f, MaxSteeringAngle);
+        SteeringDamping = math.clamp(SteeringDamping, 0f, 1f);
+        SpeedDamping = math.clamp(SpeedDamping, 0f, 1f);
     }
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         if (ActiveAtStart)
-            dstManager.AddComponent(entity, typeof(ActiveVehicle));
+            dstManager.AddComponent<ActiveVehicle>(entity);
 
-        dstManager.AddComponent(entity, typeof(Vehicle));
+        dstManager.AddComponent<Vehicle>(entity);
 
-        dstManager.AddComponent(entity, typeof(VehicleCameraSettings));
-        dstManager.SetComponentData(entity, new VehicleCameraSettings
+        dstManager.AddComponentData(entity, new VehicleCameraSettings
         {
             OrientationType = CameraOrientation,
             OrbitAngularSpeed = math.radians(CameraOrbitAngularSpeed)
         });
 
-        dstManager.AddComponent(entity, typeof(VehicleSpeed));
-        dstManager.SetComponentData(entity, new VehicleSpeed { TopSpeed = TopSpeed });
-
-        dstManager.AddComponent(entity, typeof(VehicleSteering));
-        dstManager.SetComponentData(entity, new VehicleSteering { MaxSteeringAngle = MaxSteeringAngle });
-
-        dstManager.AddComponentObject(entity, new VehicleReferences
+        dstManager.AddComponentData(entity, new VehicleSpeed
         {
-            Mechanics = Mechanics,
-            CameraOrbit = CameraOrbit,
-            CameraTarget = CameraTarget,
-            CameraTo = CameraTo,
-            CameraFrom = CameraFrom
+            TopSpeed = TopSpeed,
+            Damping = SpeedDamping
+        });
+
+        dstManager.AddComponentData(entity, new VehicleSteering
+        {
+            MaxSteeringAngle = math.radians(MaxSteeringAngle),
+            Damping = SteeringDamping
+        });
+
+        dstManager.AddComponentData(entity, new VehicleCameraReferences
+        {
+            CameraOrbit = conversionSystem.GetPrimaryEntity(CameraOrbit),
+            CameraTarget = conversionSystem.GetPrimaryEntity(CameraTarget),
+            CameraTo = conversionSystem.GetPrimaryEntity(CameraTo),
+            CameraFrom = conversionSystem.GetPrimaryEntity(CameraFrom)
         });
     }
 }

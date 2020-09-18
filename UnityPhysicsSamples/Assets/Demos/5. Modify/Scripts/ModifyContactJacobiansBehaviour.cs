@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -29,14 +29,14 @@ public class ModifyContactJacobiansBehaviour : MonoBehaviour, IConvertGameObject
 {
     void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        dstManager.AddComponentData(entity, new ModifyContactJacobians { type = ModificationType } );
+        dstManager.AddComponentData(entity, new ModifyContactJacobians { type = ModificationType });
     }
-
 
     public ModifyContactJacobians.ModificationType ModificationType;
 }
 
 // A system which configures the simulation step to modify contact jacobains in various ways
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyContactJacobiansSystem : SystemBase
 {
@@ -86,13 +86,13 @@ public class ModifyContactJacobiansSystem : SystemBase
             Entity entityB = manifold.EntityB;
 
             ModifyContactJacobians.ModificationType typeA = ModifyContactJacobians.ModificationType.None;
-            if(modificationData.HasComponent(entityA))
+            if (modificationData.HasComponent(entityA))
             {
                 typeA = modificationData[entityA].type;
             }
 
             ModifyContactJacobians.ModificationType typeB = ModifyContactJacobians.ModificationType.None;
-            if(modificationData.HasComponent(entityB))
+            if (modificationData.HasComponent(entityB))
             {
                 typeB = modificationData[entityB].type;
             }
@@ -115,7 +115,7 @@ public class ModifyContactJacobiansSystem : SystemBase
         public ComponentDataFromEntity<ModifyContactJacobians> modificationData;
 
         // Don't do anything for triggers
-        public void Execute(ref ModifiableJacobianHeader h, ref ModifiableTriggerJacobian j){ }
+        public void Execute(ref ModifiableJacobianHeader h, ref ModifiableTriggerJacobian j) {}
 
         public void Execute(ref ModifiableJacobianHeader jacHeader, ref ModifiableContactJacobian contactJacobian)
         {

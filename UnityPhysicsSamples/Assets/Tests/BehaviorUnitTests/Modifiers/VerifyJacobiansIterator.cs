@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -10,7 +10,6 @@ namespace Unity.Physics.Tests
 {
     public struct VerifyJacobiansIteratorData : IComponentData
     {
-
     }
 
     [Serializable]
@@ -28,6 +27,7 @@ namespace Unity.Physics.Tests
         }
     }
 
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(StepPhysicsWorld))]
     public class VerifyJacobiansIteratorSystem : SystemBase
     {
@@ -78,7 +78,7 @@ namespace Unity.Physics.Tests
                 }
             }
 
-            public void Execute(ref ModifiableJacobianHeader header, ref ModifiableTriggerJacobian jacobian) { }
+            public void Execute(ref ModifiableJacobianHeader header, ref ModifiableTriggerJacobian jacobian) {}
         }
 
         protected override void OnUpdate()

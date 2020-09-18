@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +22,7 @@ class LoaderScene : MonoBehaviour
             m_SceneData.Add(new SceneData { Name = Path.GetFileNameWithoutExtension(scenes[i].path), Index = i });
         }
     }
+
     #endif
 
 #pragma warning disable 649
@@ -31,7 +32,7 @@ class LoaderScene : MonoBehaviour
         public string Name;
         public int Index;
     }
-    
+
     [SerializeField, HideInInspector]
     List<SceneData> m_SceneData;
 
@@ -76,7 +77,7 @@ class LoaderScene : MonoBehaviour
             m_Selected = firstEntry;
         }
 
-        Application.targetFrameRate = (int)(1f / Time.fixedDeltaTime);
+        Application.targetFrameRate = (int)(1f / BasePhysicsDemo.DefaultWorld.GetExistingSystem<FixedStepSimulationSystemGroup>().Timestep);
     }
 
     internal void LoadLevel(int indexOffset)
@@ -87,6 +88,7 @@ class LoaderScene : MonoBehaviour
         i = (i % m_SceneData.Count + m_SceneData.Count) % m_SceneData.Count;
         SceneManager.LoadScene(m_SceneData[i].Index, LoadSceneMode.Single);
     }
+
     void Update()
     {
         // update the scroll rect position if selection is outside current viewport

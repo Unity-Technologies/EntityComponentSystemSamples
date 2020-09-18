@@ -1,9 +1,9 @@
-﻿using Unity.Entities;
-using Unity.Physics.Systems;
+using Unity.Entities;
 
-// This input system simply applies the same character input 
+// This input system simply applies the same character input
 // information to every character controller in the scene
-[UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(CharacterControllerSystem))]
+[UpdateInGroup(typeof(InitializationSystemGroup))]
+[UpdateAfter(typeof(DemoInputGatheringSystem))]
 public class CharacterControllerOneToManyInputSystem : SystemBase
 {
     protected override void OnUpdate()
@@ -17,8 +17,10 @@ public class CharacterControllerOneToManyInputSystem : SystemBase
             {
                 ccData.Input.Movement = input.Movement;
                 ccData.Input.Looking = input.Looking;
-                ccData.Input.Jumped = input.Jumped;
+                // jump request may not be processed on this frame, so record it rather than matching input state
+                if (input.Jumped != 0)
+                    ccData.Input.Jumped = 1;
             }
-        ).ScheduleParallel();
+            ).ScheduleParallel();
     }
 }

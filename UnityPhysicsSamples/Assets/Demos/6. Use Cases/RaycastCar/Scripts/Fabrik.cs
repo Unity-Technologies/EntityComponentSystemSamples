@@ -1,21 +1,14 @@
-﻿//From: https://github.com/stonneau/fabrik
+//From: https://github.com/stonneau/fabrik
 
+using System;
 using System.Collections.Generic;
-using Unity.Entities;
-using Unity.Transforms;
 using UnityEngine;
 
-public class Fabrik : MonoBehaviour, IReceiveEntity
+public class Fabrik : MonoBehaviour
 {
-    private List<Entity> targetEntities = new List<Entity>();
-    public void SetReceivedEntity(Entity entity)
-    {
-        targetEntities.Add(entity);
-    }
-
     /*Constant object maintaining the relation between joints of a skeleton
-	 * iterating through the transforms in a depth-first order.
-	 * */
+     * iterating through the transforms in a depth-first order.
+     * */
     public class JointInfo
     {
         public readonly float distanceToParent_; // if 0, no parent
@@ -28,7 +21,7 @@ public class Fabrik : MonoBehaviour, IReceiveEntity
 
         public JointInfo(Transform joint, ref int id) : this(joint, ref id, null, null)
         {
-            // NOTHING	
+            // NOTHING
         }
 
         private JointInfo(Transform joint, ref int id, JointInfo parent, JointInfo fork)
@@ -80,6 +73,7 @@ public class Fabrik : MonoBehaviour, IReceiveEntity
                 }
             }
         }
+
         public bool Equals(JointInfo jInfo)
         {
             return jInfo != null && id_ == jInfo.id_;
@@ -115,44 +109,24 @@ public class Fabrik : MonoBehaviour, IReceiveEntity
         }
     }
 
-    void Update()
+    Vector3[] m_TargetPositions = new Vector3[0];
+
+    unsafe void Update()
     {
         Vector3 rootPos = ikChain.position;
-        Vector3[] positionTargets;
-        if (targetEntities.Count > 0)
-        {
-            positionTargets = new Vector3[targetEntities.Count];
-            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
-            for (int i = 0; i < targetEntities.Count; ++i)
-            {
-                try
-                {
-                    var component = entityManager.GetComponentData<Translation>(targetEntities[i]);
-                    positionTargets[i] = component.Value;
-                }
-                catch
-                {
-                    targetEntities.Clear();
-                }
-            }
-        }
-        else
-        {
-            positionTargets = new Vector3[targets.Length];
-            for (int i = 0; i < targetEntities.Count; ++i)
-            {
-                positionTargets[i] = targets[i].position;
-            }
-        }
-        ForwardStep(jointInfo_.effectors_, positionTargets);
+        if (m_TargetPositions.Length != targets.Length)
+            Array.Resize(ref m_TargetPositions, targets.Length);
+        for (var i = 0; i < m_TargetPositions.Length; ++i)
+            m_TargetPositions[i] = targets[i].position;
+        ForwardStep(jointInfo_.effectors_, m_TargetPositions);
         ikChain.position = rootPos;
         BackwardStep(jointInfo_);
     }
 
     /*
-	 * Structure allowing to compute the Centroid between different points
-	 * TODO : Target prioritization ?
-	 */
+     * Structure allowing to compute the Centroid between different points
+     * TODO : Target prioritization ?
+     */
     private class TargetCentroid
     {
         private int nbMatches_;

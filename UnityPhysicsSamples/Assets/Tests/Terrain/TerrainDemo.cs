@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Collections;
@@ -21,7 +21,7 @@ public class TerrainDemo : BasePhysicsDemo
         NativeArray<float> heights;
         int2 size;
         float3 scale;
-        bool simple = false; 
+        bool simple = false;
 #if UNITY_ANDROID || UNITY_IOS
         simple = true;
 #endif
@@ -98,27 +98,27 @@ public class TerrainDemo : BasePhysicsDemo
         var triangles = new NativeList<int3>(Allocator.Temp);
         var vertexIndex = 0;
         for (int i = 0; i < size.x - 1; i++)
-        for (int j = 0; j < size.y - 1; j++)
-        {
-            int i0 = i;
-            int i1 = i + 1;
-            int j0 = j;
-            int j1 = j + 1;
-            float3 v0 = new float3(i0, heights[i0 + size.x * j0], j0) * scale;
-            float3 v1 = new float3(i1, heights[i1 + size.x * j0], j0) * scale;
-            float3 v2 = new float3(i0, heights[i0 + size.x * j1], j1) * scale;
-            float3 v3 = new float3(i1, heights[i1 + size.x * j1], j1) * scale;
+            for (int j = 0; j < size.y - 1; j++)
+            {
+                int i0 = i;
+                int i1 = i + 1;
+                int j0 = j;
+                int j1 = j + 1;
+                float3 v0 = new float3(i0, heights[i0 + size.x * j0], j0) * scale;
+                float3 v1 = new float3(i1, heights[i1 + size.x * j0], j0) * scale;
+                float3 v2 = new float3(i0, heights[i0 + size.x * j1], j1) * scale;
+                float3 v3 = new float3(i1, heights[i1 + size.x * j1], j1) * scale;
 
-            vertices.Add(v1);
-            vertices.Add(v0);
-            vertices.Add(v2);
-            vertices.Add(v1);
-            vertices.Add(v2);
-            vertices.Add(v3);
+                vertices.Add(v1);
+                vertices.Add(v0);
+                vertices.Add(v2);
+                vertices.Add(v1);
+                vertices.Add(v2);
+                vertices.Add(v3);
 
-            triangles.Add(new int3(vertexIndex++, vertexIndex++, vertexIndex++));
-            triangles.Add(new int3(vertexIndex++, vertexIndex++, vertexIndex++));
-        }
+                triangles.Add(new int3(vertexIndex++, vertexIndex++, vertexIndex++));
+                triangles.Add(new int3(vertexIndex++, vertexIndex++, vertexIndex++));
+            }
 
         return MeshCollider.Create(vertices, triangles);
     }

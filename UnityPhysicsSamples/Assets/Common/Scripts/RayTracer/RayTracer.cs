@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Entities;
@@ -65,8 +65,7 @@ namespace Unity.Physics.Extensions
             imageDisplay.transform.localScale = Vector3.one;
         }
 
-        // Update is called once per frame
-        private void Update()
+        void Update()
         {
             Vector3 imageCenter = transform.TransformPoint(new Vector3(0, 0, -ImagePlane));
 

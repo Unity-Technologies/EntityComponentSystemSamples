@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -14,8 +14,9 @@ using Material = UnityEngine.Material;
 using Mesh = UnityEngine.Mesh;
 using Slider = UnityEngine.UI.Slider;
 
-public struct ProjectIntoFutureTrail : IComponentData { }
+public struct ProjectIntoFutureTrail : IComponentData {}
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class ProjectIntoFutureOnCueSystem : SystemBase
 {
@@ -126,7 +127,7 @@ public class ProjectIntoFutureOnCueSystem : SystemBase
             {
                 TrailPositions[b * NumSteps + StepIndex] = StepInput.World.DynamicBodies[b].WorldFromBody.pos;
             }
-            
+
             // Step the local world
             Simulation.StepImmediate(StepInput, ref SimulationContext);
         }
@@ -173,7 +174,7 @@ public class ProjectIntoFutureOnCueSystem : SystemBase
     {
         if (Positions.IsCreated) Positions.Dispose();
         if (LocalWorld.NumBodies != 0) LocalWorld.Dispose();
-        
+
         SimulationContext.Dispose();
 #if HAVOK_PHYSICS_EXISTS
         HavokSimulationContext.Dispose();
@@ -209,11 +210,7 @@ public class ProjectIntoFutureOnCueSystem : SystemBase
         }
         LocalWorld = world.Clone();
 
-#if !UNITY_DOTSPLAYER
-        float timeStep = UnityEngine.Time.fixedDeltaTime;
-#else
         float timeStep = Time.DeltaTime;
-#endif
 
         PhysicsStep stepComponent = PhysicsStep.Default;
         if (HasSingleton<PhysicsStep>())
@@ -234,13 +231,13 @@ public class ProjectIntoFutureOnCueSystem : SystemBase
         // Assign the requested cue ball velocity to the local simulation
         LocalWorld.SetLinearVelocity(LocalWorld.GetRigidBodyIndex(WhiteBallEntity), WhiteBallVelocity);
 
-        // Sync the CollisionWorld before the initial step. 
+        // Sync the CollisionWorld before the initial step.
         // As stepInput.SynchronizeCollisionWorld is true the simulation will
         // automatically sync the CollisionWorld on subsequent steps.
         // This is only needed as we have modified the cue ball velocity.
         jobHandle = LocalWorld.CollisionWorld.ScheduleUpdateDynamicTree(
             ref LocalWorld, stepInput.TimeStep, stepInput.Gravity, jobHandle);
-        
+
         // NOTE: Currently the advice is to not chain local simulation steps.
         // Therefore we complete necessary work here and at each step.
         jobHandle.Complete();
@@ -256,7 +253,7 @@ public class ProjectIntoFutureOnCueSystem : SystemBase
                 // Dispose and reallocate input velocity buffer, if dynamic body count has increased.
                 // Dispose previous collision and trigger event streams and allocator new streams.
                 SimulationContext.Reset(stepInput);
-                
+
                 new StepLocalWorldJob()
                 {
                     StepInput = stepInput,
@@ -372,7 +369,6 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
         System = BasePhysicsDemo.DefaultWorld.GetOrCreateSystem<ProjectIntoFutureOnCueSystem>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!System.IsInitialized && !WhiteBallEntity.Equals(Entity.Null))

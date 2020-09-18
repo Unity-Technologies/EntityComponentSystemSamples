@@ -66,7 +66,7 @@ namespace Unity.Physics.Samples.Test
 
                 stSystem = new EnsureSTSimulation();
                 world.AddSystem(stSystem);
-                world.GetExistingSystem<SimulationSystemGroup>().AddSystemToUpdateList(stSystem);
+                world.GetExistingSystem<FixedStepSimulationSystemGroup>().AddSystemToUpdateList(stSystem);
             }
 
             SceneManager.LoadScene(scenePath);

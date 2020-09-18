@@ -1,15 +1,14 @@
-﻿using System;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Authoring;
-using Unity.Physics.Extensions;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
 
-struct TeleportKinematicBody : IComponentData { }
+struct TeleportKinematicBody : IComponentData {}
 
 struct AnimateKinematicBodyCurve : ISharedComponentData, IEquatable<AnimateKinematicBodyCurve>
 {
@@ -73,13 +72,12 @@ class AnimateKinematicBodyAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 class AnimateKinematicBodySystem : SystemBase
 {
     // system state component used to identify new animated bodies on their first frame
-    struct Initialized : ISystemStateComponentData { }
-
-    float m_FixedTime;
+    struct Initialized : ISystemStateComponentData {}
 
     // sample the animation curves to generate a new position and orientation
     // curves translate along the z-axis and set an orientation rotated about the y-axis
@@ -91,7 +89,7 @@ class AnimateKinematicBodySystem : SystemBase
 
     protected override void OnUpdate()
     {
-        m_FixedTime += UnityEngine.Time.fixedDeltaTime;
+        float elapsedTime = (float)Time.ElapsedTime;
 
         var commandBuffer = new EntityCommandBuffer(Allocator.TempJob);
 
@@ -108,7 +106,7 @@ class AnimateKinematicBodySystem : SystemBase
                 ) =>
                 {
                     // sample curves and apply results directly to Translation and Rotation
-                    Sample(curve, m_FixedTime, ref translation.Value, ref rotation.Value);
+                    Sample(curve, elapsedTime, ref translation.Value, ref rotation.Value);
                     commandBuffer.AddComponent<Initialized>(entity);
                 }
             ).Run();
@@ -124,34 +122,36 @@ class AnimateKinematicBodySystem : SystemBase
                     in PhysicsMass mass, in AnimateKinematicBodyCurve curve
                 ) =>
                     // sample curves and apply results directly to Translation and Rotation
-                    Sample(curve, m_FixedTime, ref translation.Value, ref rotation.Value)
+                    Sample(curve, elapsedTime, ref translation.Value, ref rotation.Value)
             ).Run();
 
-        var tickSpeed = 1f / UnityEngine.Time.fixedDeltaTime;
+        var tickSpeed = 1f / Time.DeltaTime;
 
         // moving kinematic bodies via their PhysicsVelocity component will generate contact events with any bodies they pass through
         // use PhysicsVelocity.CalculateVelocityToTarget() to compute the velocity required to move to a desired target position
+        // NOTE: if you want to avoid incorrect contact events, you can teleport kinematic bodies only on frames when there is discontinuity in their motion
+        // if you do so, make sure you also set PhysicsGraphicalSmoothing.ApplySmoothing = 0 on that frame if using it, to prevent incorrect interpolation
         Entities
             .WithName("SimulateAnimatedKinematicBodiesJob")
             .WithoutBurst()
             .WithAll<Initialized>()
             .WithNone<TeleportKinematicBody>()
             .ForEach(
-            (
-                ref PhysicsVelocity velocity,
-                in Translation translation, in Rotation rotation, in PhysicsMass mass, in AnimateKinematicBodyCurve curve
-            ) =>
-            {
-                // sample curves to determine target position and orientation
-                var targetTransform = new RigidTransform(rotation.Value, translation.Value);
-                Sample(curve, m_FixedTime, ref targetTransform.pos, ref targetTransform.rot);
+                (
+                    ref PhysicsVelocity velocity,
+                    in Translation translation, in Rotation rotation, in PhysicsMass mass, in AnimateKinematicBodyCurve curve
+                ) =>
+                {
+                    // sample curves to determine target position and orientation
+                    var targetTransform = new RigidTransform(rotation.Value, translation.Value);
+                    Sample(curve, elapsedTime, ref targetTransform.pos, ref targetTransform.rot);
 
-                // modify PhysicsVelocity to move to the target location
-                velocity = PhysicsVelocity.CalculateVelocityToTarget(mass, translation, rotation, targetTransform, tickSpeed);
-            }
-        ).Run();
+                    // modify PhysicsVelocity to move to the target location
+                    velocity = PhysicsVelocity.CalculateVelocityToTarget(mass, translation, rotation, targetTransform, tickSpeed);
+                }
+            ).Run();
 
         commandBuffer.Playback(EntityManager);
         commandBuffer.Dispose(); // Can't use using above as getting DCICE002 error
-    } 
+    }
 }

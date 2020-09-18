@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class Pauser : MonoBehaviour
 {
-	void FixedUpdate()
+    void FixedUpdate()
     {
     }
 

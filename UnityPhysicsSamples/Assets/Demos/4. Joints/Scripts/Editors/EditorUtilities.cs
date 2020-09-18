@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Mathematics;
 using static Unity.Physics.Math;
 
@@ -9,7 +9,7 @@ using UnityEditor.IMGUI.Controls;
 namespace Unity.Physics.Editor
 {
     /// <summary>
-    /// Provides utilities that use Handles to set positions and axes, 
+    /// Provides utilities that use Handles to set positions and axes,
     /// </summary>
     public class EditorUtilities
     {
@@ -20,7 +20,7 @@ namespace Unity.Physics.Editor
             EditorGUI.BeginChangeCheck();
             float3 pivotAinW = Handles.PositionHandle(math.transform(worldFromA, pivotA), quaternion.identity);
             float3 pivotBinW;
-            
+
             if (lockBtoA)
             {
                 pivotBinW = pivotAinW;
@@ -30,7 +30,7 @@ namespace Unity.Physics.Editor
             {
                 pivotBinW = Handles.PositionHandle(math.transform(worldFromB, pivotB), quaternion.identity);
             }
-            
+
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(target, "Edit joint pivot");

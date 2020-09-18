@@ -1,3 +1,17 @@
+## [Samples Project for 0.5.0-preview] - 2020-09-15
+
+### Changes
+
+* Moved `LimitDOF` joint into core Unity Physics package
+
+### Fixes
+
+* Fixed issue with the `FreeHingeJoint.Create` authoring script not setting the `BodyFrame.PerpendicularAxis`
+
+### Known Issues
+
+* `RaycastCar` demo has issues that sometimes produce NaN values.
+
 ## [Samples Project for 0.4.1-preview] - 2020-07-28
 
 ### Changes

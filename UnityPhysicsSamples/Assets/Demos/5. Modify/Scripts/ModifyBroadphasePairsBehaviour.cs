@@ -1,4 +1,4 @@
-﻿using Unity.Physics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Collections;
 using Unity.Entities;
@@ -8,7 +8,7 @@ using System;
 using Unity.Burst;
 
 //<todo.eoin.usermod Rename to ModifyOverlappingBodyPairsComponentData?
-public struct ModifyBroadphasePairs : IComponentData { }
+public struct ModifyBroadphasePairs : IComponentData {}
 
 public class ModifyBroadphasePairsBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 {
@@ -19,6 +19,7 @@ public class ModifyBroadphasePairsBehaviour : MonoBehaviour, IConvertGameObjectT
 }
 
 // A system which configures the simulation step to disable certain broad phase pairs
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyBroadphasePairsSystem : SystemBase
 {
@@ -45,7 +46,7 @@ public class ModifyBroadphasePairsSystem : SystemBase
             return;
         }
 
-        if( m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics )
+        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics)
         {
             return;
         }

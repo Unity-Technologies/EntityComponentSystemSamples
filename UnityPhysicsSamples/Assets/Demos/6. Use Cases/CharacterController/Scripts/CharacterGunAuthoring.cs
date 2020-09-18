@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Physics;
 using UnityEngine;
 
-public struct CharacterGun: IComponentData
+public struct CharacterGun : IComponentData
 {
     public Entity Bullet;
     public float Strength;
@@ -53,19 +53,20 @@ public class CharacterGunAuthoring : MonoBehaviour, IDeclareReferencedPrefabs, I
 #region System
 // Update before physics gets going so that we don't have hazard warnings.
 // This assumes that all gun are being controlled from the same single input system
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(CharacterControllerSystem))]
 public class CharacterGunOneToManyInputSystem : SystemBase
 {
     EntityCommandBufferSystem m_EntityCommandBufferSystem;
 
     protected override void OnCreate() =>
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
 
     protected override void OnUpdate()
     {
         var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
         var input = GetSingleton<CharacterGunInput>();
-        float dt = UnityEngine.Time.fixedDeltaTime;
+        float dt = Time.DeltaTime;
 
         Entities
             .WithName("CharacterControllerGunToManyInputJob")

@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -44,6 +44,7 @@ public class TriggerVolumeForceFieldAuthoring : MonoBehaviour, IConvertGameObjec
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(ExportPhysicsWorld))]
 [UpdateAfter(typeof(TriggerEventConversionSystem))]
 public class TriggerVolumeForceFieldSystem : SystemBase
@@ -127,7 +128,7 @@ public class TriggerVolumeForceFieldSystem : SystemBase
         Dependency = JobHandle.CombineDependencies(Dependency, m_ExportPhysicsWorld.GetOutputDependency());
         Dependency = JobHandle.CombineDependencies(Dependency, m_TriggerSystem.OutDependency);
 
-        float dt = UnityEngine.Time.fixedDeltaTime;
+        float dt = Time.DeltaTime;
 
         // Need extra variables here so that they can be
         // captured by the Entities.Foreach loop below

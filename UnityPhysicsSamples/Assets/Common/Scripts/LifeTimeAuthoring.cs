@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -22,18 +22,17 @@ public class LifeTimeSystem : SystemBase
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-
             Entities
                 .WithName("DestroyExpiredLifeTime")
                 .ForEach((Entity entity, ref LifeTime timer) =>
-            {
-                timer.Value -= 1;
-
-                if (timer.Value < 0f)
                 {
-                    commandBuffer.DestroyEntity(entity);
-                }
-            }).Run();
+                    timer.Value -= 1;
+
+                    if (timer.Value < 0f)
+                    {
+                        commandBuffer.DestroyEntity(entity);
+                    }
+                }).Run();
 
             commandBuffer.Playback(EntityManager);
         }

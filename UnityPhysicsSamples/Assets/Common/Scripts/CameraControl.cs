@@ -1,4 +1,4 @@
-﻿using UnityEngine; 
+using UnityEngine;
 
 public class CameraControl : MonoBehaviour
 {
@@ -10,7 +10,7 @@ public class CameraControl : MonoBehaviour
     private float yaw;
     private float pitch;
 
-    
+
     private void Start()
     {
         // x - right    pitch

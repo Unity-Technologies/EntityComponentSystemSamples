@@ -1,3 +1,4 @@
+#if UNITY_INPUT_SYSTEM_EXISTS
 // GENERATED AUTOMATICALLY FROM 'Assets/Common/InputActions.inputactions'
 
 using System;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-public class @InputActions : IInputActionCollection, IDisposable
+public class @InputActions: IInputActionCollection, IDisposable
 {
     public InputActionAsset asset { get; }
     public @InputActions()
@@ -1112,3 +1113,4 @@ public class @InputActions : IInputActionCollection, IDisposable
         void OnLook(InputAction.CallbackContext context);
     }
 }
+#endif

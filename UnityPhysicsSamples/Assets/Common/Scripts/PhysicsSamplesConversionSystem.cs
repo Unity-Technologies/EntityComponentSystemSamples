@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 
 namespace Unity.Physics.Authoring
 {
@@ -12,7 +12,6 @@ namespace Unity.Physics.Authoring
     [UpdateAfter(typeof(EndJointConversionSystem))]
     public class PhysicsSamplesConversionSystem : GameObjectConversionSystem
     {
-        // Update is called once per frame
         protected override void OnUpdate()
         {
             Entities.ForEach((SetInertiaInverseBehaviour behaviour) => { behaviour.Convert(GetPrimaryEntity(behaviour), DstEntityManager, this); });

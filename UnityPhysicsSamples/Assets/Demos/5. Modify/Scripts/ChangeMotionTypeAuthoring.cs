@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -66,13 +66,13 @@ public class ChangeMotionTypeAuthoring : MonoBehaviour//, IConvertGameObjectToEn
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class ChangeMotionTypeSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var deltaTime = UnityEngine.Time.fixedDeltaTime;
-
+        var deltaTime = Time.DeltaTime;
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
             Entities

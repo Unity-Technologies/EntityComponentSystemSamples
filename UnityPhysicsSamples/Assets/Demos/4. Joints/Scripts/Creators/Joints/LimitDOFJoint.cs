@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -6,7 +6,7 @@ namespace Unity.Physics.Authoring
 {
     // This Joint allows you to lock one or more of the 6 degrees of freedom of a constrained body.
     // This is achieved by combining the appropriate lower level 'constraint atoms' to form the higher level Joint.
-    // In this case Linear and Angular constraint atoms are combined. 
+    // In this case Linear and Angular constraint atoms are combined.
     // One use-case for this Joint could be to restrict a 3d simulation to a 2d plane.
     public class LimitDOFJoint : BaseJoint
     {

@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -19,7 +19,6 @@ namespace Unity.Physics.Authoring
             if (AutoSetConnected)
             {
                 RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
-                PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
                 HingeAxisInConnectedEntity = math.mul(bFromA.rot, HingeAxisLocal);
             }
         }
@@ -27,12 +26,14 @@ namespace Unity.Physics.Authoring
         public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             UpdateAuto();
+            Math.CalculatePerpendicularNormalized(HingeAxisLocal, out var perpendicularLocal, out _);
+            Math.CalculatePerpendicularNormalized(HingeAxisInConnectedEntity, out var perpendicularConnected, out _);
             conversionSystem.World.GetOrCreateSystem<EndJointConversionSystem>().CreateJointEntity(
                 this,
                 GetConstrainedBodyPair(conversionSystem),
                 PhysicsJoint.CreateHinge(
-                    new BodyFrame { Axis = HingeAxisLocal, Position = PositionLocal },
-                    new BodyFrame { Axis = HingeAxisInConnectedEntity, Position = PositionInConnectedEntity }
+                    new BodyFrame { Axis = HingeAxisLocal, Position = PositionLocal, PerpendicularAxis = perpendicularLocal },
+                    new BodyFrame { Axis = HingeAxisInConnectedEntity, Position = PositionInConnectedEntity, PerpendicularAxis = perpendicularConnected }
                 )
             );
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 
 namespace Unity.Physics
 {
-    public struct VerifyPhasedDispatchPairsData : IComponentData { }
+    public struct VerifyPhasedDispatchPairsData : IComponentData {}
 
     [Serializable]
     public class VerifyPhasedDispatchPairs : MonoBehaviour, IConvertGameObjectToEntity
@@ -19,6 +19,7 @@ namespace Unity.Physics
         }
     }
 
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(StepPhysicsWorld))]
     public class VerifyPhasedDispatchPairsSystem : SystemBase
     {
@@ -73,7 +74,6 @@ namespace Unity.Physics
                     VerificationData = GetComponentDataFromEntity<VerifyPhasedDispatchPairsData>(true),
                     LastStaticPairPerDynamicBody = new NativeArray<int>(world.NumDynamicBodies, Allocator.TempJob),
                     IsUnityPhysics = simulation.Type == SimulationType.UnityPhysics
-
                 }.Schedule(simulation, ref world, inDeps);
             };
 

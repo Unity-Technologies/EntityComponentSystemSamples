@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Unity.Physics.Extensions
 {
-    [UpdateAfter(typeof(BuildPhysicsWorld))]
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
     public class RayTracerSystem : SystemBase
     {
         BuildPhysicsWorld m_BuildPhysicsWorldSystem;

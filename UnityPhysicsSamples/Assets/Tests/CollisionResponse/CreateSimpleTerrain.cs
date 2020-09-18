@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -40,9 +40,9 @@ public class CreateSimpleTerrain : MonoBehaviour
     {
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        Entity entity = entityManager.CreateEntity(new ComponentType[] { });
+        Entity entity = entityManager.CreateEntity(new ComponentType[] {});
 
-        entityManager.AddComponentData(entity, new LocalToWorld { });
+        entityManager.AddComponentData(entity, new LocalToWorld {});
         entityManager.AddComponentData(entity, new Translation { Value = position });
         entityManager.AddComponentData(entity, new Rotation { Value = quaternion.identity });
 

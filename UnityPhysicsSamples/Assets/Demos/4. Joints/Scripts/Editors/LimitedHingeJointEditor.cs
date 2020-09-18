@@ -44,19 +44,19 @@ namespace Unity.Physics.Editor
             }
             if (limitedHinge.EditAxes)
             {
-                m_AxisEditor.Update(limitedHinge.worldFromA, limitedHinge.worldFromB, 
-                    limitedHinge.AutoSetConnected, 
+                m_AxisEditor.Update(limitedHinge.worldFromA, limitedHinge.worldFromB,
+                    limitedHinge.AutoSetConnected,
                     limitedHinge.PositionLocal, limitedHinge.PositionInConnectedEntity,
-                    ref limitedHinge.HingeAxisLocal, ref limitedHinge.HingeAxisInConnectedEntity, 
-                    ref limitedHinge.PerpendicularAxisLocal, ref limitedHinge.PerpendicularAxisInConnectedEntity, 
+                    ref limitedHinge.HingeAxisLocal, ref limitedHinge.HingeAxisInConnectedEntity,
+                    ref limitedHinge.PerpendicularAxisLocal, ref limitedHinge.PerpendicularAxisInConnectedEntity,
                     limitedHinge);
             }
             if (limitedHinge.EditLimits)
             {
-                EditorUtilities.EditLimits(limitedHinge.worldFromA, limitedHinge.worldFromB, 
-                    limitedHinge.PositionLocal, 
+                EditorUtilities.EditLimits(limitedHinge.worldFromA, limitedHinge.worldFromB,
+                    limitedHinge.PositionLocal,
                     limitedHinge.HingeAxisLocal, limitedHinge.HingeAxisInConnectedEntity,
-                    limitedHinge.PerpendicularAxisLocal, limitedHinge.PerpendicularAxisInConnectedEntity, 
+                    limitedHinge.PerpendicularAxisLocal, limitedHinge.PerpendicularAxisInConnectedEntity,
                     ref limitedHinge.MinAngle, ref limitedHinge.MaxAngle, m_LimitHandle, limitedHinge);
             }
         }

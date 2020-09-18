@@ -1,14 +1,10 @@
-﻿using Unity.Collections;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using UnityEngine.Assertions;
 using Collider = Unity.Physics.Collider;
-#if !UNITY_ENTITIES_0_12_OR_NEWER
-using UnsafeUtility = UnsafeUtility_ForwardCompatibility;
-#else
-using Unity.Collections.LowLevel.Unsafe;
-#endif
 
 class SpawnBouncyRandomShapesAuthoring : SpawnRandomObjectsAuthoringBase<BouncySpawnSettings>
 {
@@ -46,7 +42,7 @@ class SpawnBouncyRandomShapesSystem : SpawnRandomObjectsSystemBase<BouncySpawnSe
         {
             var oldCollider = component.ColliderPtr;
             var newCollider = (Collider*)UnsafeUtility.Malloc(oldCollider->MemorySize, 16, Allocator.Temp);
-            
+
             UnsafeUtility.MemCpy(newCollider, oldCollider, oldCollider->MemorySize);
 
             var material = ((ConvexColliderHeader*)newCollider)->Material;
@@ -69,4 +65,3 @@ class SpawnBouncyRandomShapesSystem : SpawnRandomObjectsSystemBase<BouncySpawnSe
         EntityManager.SetComponentData(instance, collider);
     }
 }
-

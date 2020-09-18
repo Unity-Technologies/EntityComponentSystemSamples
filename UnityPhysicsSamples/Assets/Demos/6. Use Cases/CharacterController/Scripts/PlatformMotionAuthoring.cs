@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -35,25 +35,26 @@ public class PlatformMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class PlatformMotionSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var deltaTime = UnityEngine.Time.fixedDeltaTime;
+        var deltaTime = Time.DeltaTime;
 
         Entities
             .WithName("MovePlatforms")
             .WithBurst()
             .ForEach((ref PlatformMotion motion, ref PhysicsVelocity velocity, in Translation position) =>
-        {
-            motion.CurrentTime += deltaTime;
+            {
+                motion.CurrentTime += deltaTime;
 
-            var desiredOffset = motion.Height * math.sin(motion.CurrentTime * motion.Speed);
-            var currentOffset = math.dot(position.Value - motion.InitialPosition, motion.Direction);
-            velocity.Linear = motion.Direction * (desiredOffset - currentOffset);
+                var desiredOffset = motion.Height * math.sin(motion.CurrentTime * motion.Speed);
+                var currentOffset = math.dot(position.Value - motion.InitialPosition, motion.Direction);
+                velocity.Linear = motion.Direction * (desiredOffset - currentOffset);
 
-            velocity.Angular = motion.Rotation;
-        }).Schedule();
+                velocity.Angular = motion.Rotation;
+            }).Schedule();
     }
 }

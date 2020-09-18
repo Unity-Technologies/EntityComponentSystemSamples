@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -13,7 +13,7 @@ public class RagdollDemo : BasePhysicsDemo
     public UnityEngine.Mesh renderMesh;
 
     public int numberOfRagdolls = 1;
-    [Range(0,1)] public float rangeGain = 1.0f;
+    [Range(0, 1)] public float rangeGain = 1.0f;
 
     private enum layer
     {
@@ -38,6 +38,7 @@ public class RagdollDemo : BasePhysicsDemo
             GroupIndex = 0
         };
     }
+
     private static CollisionFilter groupFilter(int groupIndex)
     {
         return new CollisionFilter
@@ -72,12 +73,13 @@ public class RagdollDemo : BasePhysicsDemo
     {
         CreateRagdoll(positionOffset, rotationOffset, float3.zero, ragdollIndex, internalCollisions, rangeGain);
     }
+
     private void CreateRagdoll(float3 positionOffset, quaternion rotationOffset, float3 initialVelocity, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
     {
         var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
 
         var entities = new NativeList<Entity>(Allocator.Temp);
-        var rangeModifier = new float2(math.max(0,math.min(rangeGain,1)));
+        var rangeModifier = new float2(math.max(0, math.min(rangeGain, 1)));
 
         // Head
         float headRadius = 0.1f;
@@ -88,7 +90,7 @@ public class RagdollDemo : BasePhysicsDemo
             BlobAssetReference<Unity.Physics.Collider> headCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(0, 0, 0),
-                Vertex1 = new float3(0, 0, headRadius/4),
+                Vertex1 = new float3(0, 0, headRadius / 4),
                 Radius = headRadius
             }, filter);
             head = CreateDynamicBody(headPosition, quaternion.identity, headCollider, float3.zero, float3.zero, 5.0f);
@@ -127,11 +129,11 @@ public class RagdollDemo : BasePhysicsDemo
             float3 axisHead = new float3(0, 0, 1);
             float3 perpendicular = new float3(1, 0, 0);
             FloatRange coneAngle = new FloatRange(math.radians(0), math.radians(45)) * rangeModifier;
-            FloatRange perpendicularAngle = new FloatRange(math.radians(-30), math.radians(+30)) * rangeModifier; 
-            FloatRange twistAngle = new FloatRange(math.radians(-5),math.radians(5)) * rangeModifier;
+            FloatRange perpendicularAngle = new FloatRange(math.radians(-30), math.radians(+30)) * rangeModifier;
+            FloatRange twistAngle = new FloatRange(math.radians(-5), math.radians(5)) * rangeModifier;
 
             var axisTorso = math.rotate(math.inverse(GetBodyTransform(torso).rot), math.rotate(GetBodyTransform(head).rot, axisHead));
-            axisTorso = math.rotate(quaternion.AxisAngle(perpendicular,math.radians(10)),axisTorso);
+            axisTorso = math.rotate(quaternion.AxisAngle(perpendicular, math.radians(10)), axisTorso);
 
             var headFrame = new BodyFrame { Axis = axisHead, PerpendicularAxis = perpendicular, Position = pivotHead };
             var torsoFrame = new BodyFrame { Axis = axisTorso, PerpendicularAxis = perpendicular, Position = pivotTorso };
@@ -194,7 +196,7 @@ public class RagdollDemo : BasePhysicsDemo
                     float3 axisArm = new float3(-s, 0, 0);
                     float3 perpendicularArm = new float3(0, 1, 0);
                     FloatRange coneAngle = new FloatRange(math.radians(0), math.radians(80)) * rangeModifier;
-                    FloatRange perpendicularAngle = new FloatRange( math.radians(-70), math.radians(20) ) * rangeModifier;
+                    FloatRange perpendicularAngle = new FloatRange(math.radians(-70), math.radians(20)) * rangeModifier;
                     FloatRange twistAngle = new FloatRange(math.radians(-5), math.radians(5)) * rangeModifier;
 
                     var axisTorso = math.rotate(math.inverse(GetBodyTransform(torso).rot), math.rotate(GetBodyTransform(upperArm).rot, axisArm));
@@ -432,8 +434,8 @@ public class RagdollDemo : BasePhysicsDemo
             rotation = math.mul(transform.rotation, rotation);
             velocity = math.rotate(transform.rotation, velocity);
 
-            CreateRagdoll( 
-                positionOffset: position, rotationOffset: rotation, initialVelocity: velocity, 
+            CreateRagdoll(
+                positionOffset: position, rotationOffset: rotation, initialVelocity: velocity,
                 ragdollIndex: i + 1, rangeGain: rangeGain);
         }
     }

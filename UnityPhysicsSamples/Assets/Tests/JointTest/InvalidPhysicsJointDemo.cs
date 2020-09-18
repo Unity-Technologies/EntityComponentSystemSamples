@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 
@@ -54,6 +54,17 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
 
             // add timeout on joint entity after 15 frames.
             manager.AddComponentData(jointEntity, new LifeTime { Value = 15 });
+        }
+
+        // Add two dynamic bodies constrained together with 0 dimension
+        {
+            // Create a body
+            Entity bodyA = CreateDynamicBody(new float3(0, 5.0f, 0), quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
+            Entity bodyB = CreateDynamicBody(new float3(0, 6.0f, 0), quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
+
+            // Create the joint
+            var joint = PhysicsJoint.CreateLimitedDOF(RigidTransform.identity, new bool3(false), new bool3(false));
+            CreateJoint(joint, bodyA, bodyB);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 class SpawnCopiesAsChildren : MonoBehaviour
 {

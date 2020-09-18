@@ -6,7 +6,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using static RagdollDemoUtilities;
@@ -87,7 +86,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
         SimulationStepInput input = new SimulationStepInput
         {
             World = PhysicsWorld,
-            TimeStep = Time.fixedDeltaTime,
+            TimeStep = BasePhysicsDemo.DefaultWorld.GetExistingSystem<FixedStepSimulationSystemGroup>().Timestep,
             NumSolverIterations = PhysicsStep.Default.SolverIterationCount,
             SolverStabilizationHeuristicSettings = PhysicsStep.Default.SolverStabilizationHeuristicSettings,
             Gravity = PhysicsStep.Default.Gravity
@@ -97,7 +96,6 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
         using (var indexMap = new NativeHashMap<int, int>(m_BodyInfos.Length, Allocator.TempJob))
         {
-
 #if HAVOK_PHYSICS_EXISTS
             if (SimulateHavok)
             {
@@ -156,7 +154,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
         public NativeHashMap<int, int> BodyInfoToBodiesIndexMap;
 
-        internal static void CreateBodies(SimulationStepInput input, 
+        internal static void CreateBodies(SimulationStepInput input,
             NativeList<BodyInfo> bodyInfos, NativeHashMap<int, int> bodyInfoToBodiesIndexMap)
         {
             NativeArray<RigidBody> dynamicBodies = input.World.DynamicBodies;
@@ -185,7 +183,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
                         WorldFromMotion = new RigidTransform(
                             math.mul(bodyInfo.Orientation, collider.Value.MassProperties.MassDistribution.Transform.rot),
                             math.rotate(bodyInfo.Orientation, collider.Value.MassProperties.MassDistribution.Transform.pos) + bodyInfo.Position
-                        ),
+                            ),
                         BodyFromMotion = new RigidTransform(collider.Value.MassProperties.MassDistribution.Transform.rot, collider.Value.MassProperties.MassDistribution.Transform.pos),
                         LinearDamping = 0.0f,
                         AngularDamping = 0.0f
@@ -235,7 +233,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
             };
         }
 
-        internal static void CreateJoints(SimulationStepInput input, 
+        internal static void CreateJoints(SimulationStepInput input,
             NativeList<JointInfo> jointInfos, NativeHashMap<int, int> bodyInfoToBodiesIndexMap)
         {
             NativeArray<Unity.Physics.Joint> joints = input.World.Joints;
@@ -274,7 +272,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
                 MotionData md = input.World.MotionDatas[dynamicBodyIndex];
                 RigidTransform worldFromBody = math.mul(md.WorldFromMotion, math.inverse(md.BodyFromMotion));
-                
+
                 BodyInfo bodyInfo = bodyInfos[i];
                 bodyInfo.Position = worldFromBody.pos;
                 bodyInfo.Orientation = worldFromBody.rot;
@@ -411,7 +409,6 @@ public class SingleThreadedRagdoll : MonoBehaviour
             }
         }
     }
-
 
     private void OnDestroy()
     {

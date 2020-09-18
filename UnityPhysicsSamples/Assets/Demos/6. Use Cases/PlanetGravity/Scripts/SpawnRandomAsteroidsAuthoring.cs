@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Mathematics;
@@ -24,7 +24,6 @@ struct AsteroidSpawnSettings : IComponentData, ISpawnSettings
 
 class SpawnRandomAsteroidsSystem : SpawnRandomObjectsSystemBase<AsteroidSpawnSettings>
 {
-
     Random m_RandomMass;
 
     internal override int GetRandomSeed(AsteroidSpawnSettings spawnSettings)

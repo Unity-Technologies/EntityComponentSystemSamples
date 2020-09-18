@@ -64,6 +64,7 @@ public class BasePhysicsDemo : MonoBehaviour
     {
         Application.logMessageReceivedThreaded -= HandleLogEntry;
     }
+
 #endif
 
     protected virtual void Start()
@@ -121,9 +122,9 @@ public class BasePhysicsDemo : MonoBehaviour
     {
         var entityManager = DefaultWorld.EntityManager;
 
-        Entity entity = entityManager.CreateEntity(new ComponentType[] { });
+        Entity entity = entityManager.CreateEntity(new ComponentType[] {});
 
-        entityManager.AddComponentData(entity, new LocalToWorld { });
+        entityManager.AddComponentData(entity, new LocalToWorld {});
         entityManager.AddComponentData(entity, new Translation { Value = position });
         entityManager.AddComponentData(entity, new Rotation { Value = orientation });
 
@@ -166,7 +167,8 @@ public class BasePhysicsDemo : MonoBehaviour
     protected Entity CreateJoint(PhysicsJoint joint, Entity entityA, Entity entityB, bool enableCollision = false)
     {
         var entityManager = DefaultWorld.EntityManager;
-        ComponentType[] componentTypes = {
+        ComponentType[] componentTypes =
+        {
             typeof(PhysicsConstrainedBodyPair),
             typeof(PhysicsJoint)
         };
@@ -177,7 +179,6 @@ public class BasePhysicsDemo : MonoBehaviour
 
         return jointEntity;
     }
-
 
     protected RigidTransform GetBodyTransform(Entity entity)
     {

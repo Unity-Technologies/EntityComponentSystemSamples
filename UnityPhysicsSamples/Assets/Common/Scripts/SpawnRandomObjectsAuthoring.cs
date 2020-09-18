@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -32,7 +32,7 @@ abstract class SpawnRandomObjectsAuthoringBase<T> : MonoBehaviour, IConvertGameO
         dstManager.AddComponentData(entity, spawnSettings);
     }
 
-    internal virtual void Configure(ref T spawnSettings) { }
+    internal virtual void Configure(ref T spawnSettings) {}
 
     public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs) => referencedPrefabs.Add(prefab);
 }
@@ -70,9 +70,9 @@ abstract class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IC
         return seed;
     }
 
-    internal virtual void OnBeforeInstantiatePrefab(T spawnSettings) { }
+    internal virtual void OnBeforeInstantiatePrefab(T spawnSettings) {}
 
-    internal virtual void ConfigureInstance(Entity instance, T spawnSettings) { }
+    internal virtual void ConfigureInstance(Entity instance, T spawnSettings) {}
 
     protected override void OnUpdate()
     {
@@ -109,7 +109,7 @@ abstract class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IC
     }
 
     protected static void RandomPointsInRange(
-        float3 center, quaternion orientation, float3 range, 
+        float3 center, quaternion orientation, float3 range,
         ref NativeArray<float3> positions, ref NativeArray<quaternion> rotations, int seed = 0)
     {
         var count = positions.Length;

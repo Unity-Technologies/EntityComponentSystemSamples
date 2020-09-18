@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Physics.Systems;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -13,7 +13,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Unity.Physics.Extensions
 {
-    /// Simple Behaviour for testing broadphase raycasts. Provides a 
+    /// Simple Behaviour for testing broadphase raycasts. Provides a
     /// gizmo which can be manipulated to cast a ray during simulation.
     /// Displays hit positions or the tested line segment.
     public unsafe class QueryTester : MonoBehaviour
@@ -104,7 +104,6 @@ namespace Unity.Physics.Extensions
 
             public void Execute()
             {
-
                 var colliderDistanceInput = new ColliderDistanceInput
                 {
                     Collider = Collider,

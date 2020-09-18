@@ -1,34 +1,52 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Jobs;
 
-public class EntityTracker : MonoBehaviour, IReceiveEntity
+public class EntityTracker : MonoBehaviour {}
+
+[UpdateInGroup(typeof(TransformSystemGroup))]
+[UpdateAfter(typeof(EndFrameLocalToParentSystem))]
+class SynchronizeGameObjectTransformsWithEntities : SystemBase
 {
-    private Entity EntityToTrack = Entity.Null;
-    public void SetReceivedEntity(Entity entity)
+    EntityQuery m_Query;
+
+    protected override void OnCreate()
     {
-        EntityToTrack = entity;
+        base.OnCreate();
+        m_Query = GetEntityQuery(new EntityQueryDesc
+        {
+            All = new ComponentType[]
+            {
+                typeof(EntityTracker),
+                typeof(Transform),
+                typeof(LocalToWorld)
+            }
+        });
     }
 
-    // Update is called once per frame
-    void LateUpdate()
+    protected override void OnUpdate()
     {
-        if (EntityToTrack != Entity.Null)
+        var localToWorlds = m_Query.ToComponentDataArrayAsync<LocalToWorld>(Allocator.TempJob, out var jobHandle);
+        Dependency = new SyncTransforms
         {
-            try
-            {
-                var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+            LocalToWorlds = localToWorlds
+        }.Schedule(m_Query.GetTransformAccessArray(), JobHandle.CombineDependencies(Dependency, jobHandle));
+    }
 
-                transform.position = entityManager.GetComponentData<Translation>(EntityToTrack).Value;
-                transform.rotation = entityManager.GetComponentData<Rotation>(EntityToTrack).Value;
-            }
-            catch
-            {
-                // Dirty way to check for an Entity that no longer exists.
-                EntityToTrack = Entity.Null;
-            }
+    [BurstCompile]
+    struct SyncTransforms : IJobParallelForTransform
+    {
+        [DeallocateOnJobCompletion]
+        [ReadOnly] public NativeArray<LocalToWorld> LocalToWorlds;
+
+        public void Execute(int index, TransformAccess transform)
+        {
+            transform.position = LocalToWorlds[index].Position;
+            transform.rotation = LocalToWorlds[index].Rotation;
         }
     }
 }

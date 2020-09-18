@@ -1,29 +1,26 @@
 using Unity.Entities;
-using UnityEngine;
 
 [UpdateAfter(typeof(ChangeActiveVehicleSystem))]
 class CameraFollowActiveVehicleSystem : SystemBase
 {
-    CameraSmoothTrack m_CameraTracker;
-
     protected override void OnUpdate()
     {
-        // TODO: implement camera tracker using entities
-        if (m_CameraTracker == null)
-            m_CameraTracker = GameObject.FindObjectOfType<CameraSmoothTrack>();
-
-        if (m_CameraTracker == null)
+        if (!HasSingleton<CameraSmoothTrackSettings>())
             return;
+
+        var cameraSettings = GetSingleton<CameraSmoothTrackSettings>();
 
         Entities
             .WithName("CameraFollowActiveVehicleJob")
-            .WithoutBurst()
+            .WithBurst()
             .WithAll<ActiveVehicle>()
-            .ForEach((in VehicleReferences vehicle) =>
+            .ForEach((in VehicleCameraReferences vehicle) =>
             {
-                m_CameraTracker.Target = vehicle.CameraTarget.gameObject;
-                m_CameraTracker.LookTo = vehicle.CameraTo.gameObject;
-                m_CameraTracker.LookFrom = vehicle.CameraFrom.gameObject;
+                cameraSettings.Target = vehicle.CameraTarget;
+                cameraSettings.LookTo = vehicle.CameraTo;
+                cameraSettings.LookFrom = vehicle.CameraFrom;
             }).Run();
+
+        SetSingleton(cameraSettings);
     }
 }

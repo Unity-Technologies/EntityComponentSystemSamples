@@ -46,6 +46,7 @@ public class SingleThreadedPhysics : MonoBehaviour
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(StepPhysicsWorld))]
 public class SingleThreadedPhysicsSystem : SystemBase
 {
@@ -175,7 +176,7 @@ public class SingleThreadedPhysicsSystem : SystemBase
                 WorldFromMotion = new RigidTransform(
                     math.mul(rotations[i].Value, masses[i].InertiaOrientation),
                     math.rotate(rotations[i].Value, masses[i].CenterOfMass) + positions[i].Value
-                ),
+                    ),
                 BodyFromMotion = new RigidTransform(masses[i].InertiaOrientation, masses[i].CenterOfMass),
                 LinearDamping = dampings[i].Linear,
                 AngularDamping = dampings[i].Angular
@@ -259,10 +260,10 @@ public class SingleThreadedPhysicsSystem : SystemBase
         EntityQuery query = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[]
-                {
-                    typeof(Translation),
-                    typeof(Rotation),
-                }
+            {
+                typeof(Translation),
+                typeof(Rotation),
+            }
         });
 
         var entities = query.ToEntityArray(Allocator.TempJob);
@@ -465,7 +466,7 @@ public class SingleThreadedPhysicsSystem : SystemBase
             SimulationStepInput input = new SimulationStepInput
             {
                 World = PhysicsWorld,
-                TimeStep = UnityEngine.Time.fixedDeltaTime,
+                TimeStep = Time.DeltaTime,
                 SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
                 NumSolverIterations = stepComponent.SolverIterationCount,
                 Gravity = stepComponent.Gravity

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -11,7 +11,6 @@ namespace Unity.Physics.Tests
 {
     public struct VerifyCollisionEventDataData : IComponentData
     {
-
     }
 
     [Serializable]
@@ -29,6 +28,7 @@ namespace Unity.Physics.Tests
         }
     }
 
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(StepPhysicsWorld))]
     public class VerifyCollisionEventDataSystem : SystemBase
     {

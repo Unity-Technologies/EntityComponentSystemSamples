@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -34,6 +34,7 @@ public class TriggerVolumePortalAuthoring : MonoBehaviour, IConvertGameObjectToE
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(ExportPhysicsWorld))]
 [UpdateAfter(typeof(TriggerEventConversionSystem))]
 public class TriggerVolumePortalSystem : SystemBase
@@ -52,30 +53,30 @@ public class TriggerVolumePortalSystem : SystemBase
         m_EndFramePhysicsSystem = World.GetOrCreateSystem<EndFramePhysicsSystem>();
 
         m_HierarchyChildMask = EntityManager.GetEntityQueryMask(
-                GetEntityQuery(new EntityQueryDesc
+            GetEntityQuery(new EntityQueryDesc
+            {
+                All = new ComponentType[]
                 {
-                    All = new ComponentType[]
-                    {
-                        typeof(Parent),
-                        typeof(LocalToWorld)
-                    }
-                })
-            );
+                    typeof(Parent),
+                    typeof(LocalToWorld)
+                }
+            })
+        );
         m_NonTriggerDynamicBodyMask = EntityManager.GetEntityQueryMask(
-                GetEntityQuery(new EntityQueryDesc
+            GetEntityQuery(new EntityQueryDesc
+            {
+                All = new ComponentType[]
                 {
-                    All = new ComponentType[]
-                    {
-                        typeof(Translation),
-                        typeof(Rotation),
-                        typeof(PhysicsVelocity)
-                    },
-                    None = new ComponentType[]
-                    {
-                        typeof(StatefulTriggerEvent)
-                    }
-                })
-            );
+                    typeof(Translation),
+                    typeof(Rotation),
+                    typeof(PhysicsVelocity)
+                },
+                None = new ComponentType[]
+                {
+                    typeof(StatefulTriggerEvent)
+                }
+            })
+        );
     }
 
     protected override void OnUpdate()
@@ -83,7 +84,7 @@ public class TriggerVolumePortalSystem : SystemBase
         Dependency = JobHandle.CombineDependencies(m_ExportPhysicsWorld.GetOutputDependency(), Dependency);
         Dependency = JobHandle.CombineDependencies(m_TriggerSystem.OutDependency, Dependency);
 
-        var deltaTime = UnityEngine.Time.fixedDeltaTime;
+        var deltaTime = Time.DeltaTime;
 
         // Need extra variables here so that they can be
         // captured by the Entities.Foreach loop below
@@ -146,7 +147,6 @@ public class TriggerVolumePortalSystem : SystemBase
 
                 SetComponent(portalEntity, triggerVolumePortal);
                 SetComponent(companionEntity, companionTriggerVolumePortal);
-
             }).Schedule();
         m_EndFramePhysicsSystem.AddInputDependency(Dependency);
     }

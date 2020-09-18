@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -114,40 +114,40 @@ public static class RagdollDemoUtilities
         switch (jointType)
         {
             case BasicJointInfo.BasicJointType.BallAndSocket:
-                {
-                    var pivotP = math.transform(math.inverse(bodyPTransform), pointConPWorld);
-                    var pivotC = math.transform(math.inverse(bodyCTransform), pointConPWorld);
-                    jointData = PhysicsJoint.CreateBallAndSocket(pivotP, pivotC);
-                }
-                break;
+            {
+                var pivotP = math.transform(math.inverse(bodyPTransform), pointConPWorld);
+                var pivotC = math.transform(math.inverse(bodyCTransform), pointConPWorld);
+                jointData = PhysicsJoint.CreateBallAndSocket(pivotP, pivotC);
+            }
+            break;
             case BasicJointInfo.BasicJointType.Distance:
-                {
-                    var pivotP = math.transform(math.inverse(bodyPTransform), pointConPWorld);
-                    var pivotC = math.transform(math.inverse(bodyCTransform), pointPonCWorld);
-                    var range = new FloatRange(0, math.distance(pointConPWorld, pointPonCWorld));
-                    jointData = PhysicsJoint.CreateLimitedDistance(pivotP, pivotC, range);
-                }
-                break;
+            {
+                var pivotP = math.transform(math.inverse(bodyPTransform), pointConPWorld);
+                var pivotC = math.transform(math.inverse(bodyCTransform), pointPonCWorld);
+                var range = new FloatRange(0, math.distance(pointConPWorld, pointPonCWorld));
+                jointData = PhysicsJoint.CreateLimitedDistance(pivotP, pivotC, range);
+            }
+            break;
             case BasicJointInfo.BasicJointType.Hinge:
-                {
-                    var commonPivotPointWorld = math.lerp(pointConPWorld, pointPonCWorld, 0.5f);
+            {
+                var commonPivotPointWorld = math.lerp(pointConPWorld, pointPonCWorld, 0.5f);
 
-                    // assume a vertical hinge joint
-                    var axisP = math.rotate(math.inverse(bodyPTransform.rot), math.up());
-                    var axisC = math.rotate(math.inverse(bodyCTransform.rot), math.up());
+                // assume a vertical hinge joint
+                var axisP = math.rotate(math.inverse(bodyPTransform.rot), math.up());
+                var axisC = math.rotate(math.inverse(bodyCTransform.rot), math.up());
 
-                    float3 perpendicularAxisA, perpendicularAxisB;
-                    Math.CalculatePerpendicularNormalized(axisP, out perpendicularAxisA, out _);
-                    Math.CalculatePerpendicularNormalized(axisC, out perpendicularAxisB, out _);
+                float3 perpendicularAxisA, perpendicularAxisB;
+                Math.CalculatePerpendicularNormalized(axisP, out perpendicularAxisA, out _);
+                Math.CalculatePerpendicularNormalized(axisC, out perpendicularAxisB, out _);
 
-                    var pivotP = math.transform(math.inverse(bodyPTransform), commonPivotPointWorld);
-                    var pivotC = math.transform(math.inverse(bodyCTransform), commonPivotPointWorld);
-                    var jointFrameP = new BodyFrame { Axis = axisP, PerpendicularAxis = perpendicularAxisA, Position = pivotP };
-                    var jointFrameC = new BodyFrame { Axis = axisC, PerpendicularAxis = perpendicularAxisB, Position = pivotC };
-                    var range = new FloatRange(math.radians(-90), math.radians(90.0f));
-                    jointData = PhysicsJoint.CreateLimitedHinge(jointFrameP, jointFrameC, range);
-                }
-                break;
+                var pivotP = math.transform(math.inverse(bodyPTransform), commonPivotPointWorld);
+                var pivotC = math.transform(math.inverse(bodyCTransform), commonPivotPointWorld);
+                var jointFrameP = new BodyFrame { Axis = axisP, PerpendicularAxis = perpendicularAxisA, Position = pivotP };
+                var jointFrameC = new BodyFrame { Axis = axisC, PerpendicularAxis = perpendicularAxisB, Position = pivotC };
+                var range = new FloatRange(math.radians(-90), math.radians(90.0f));
+                jointData = PhysicsJoint.CreateLimitedHinge(jointFrameP, jointFrameC, range);
+            }
+            break;
             default:
                 break;
         }

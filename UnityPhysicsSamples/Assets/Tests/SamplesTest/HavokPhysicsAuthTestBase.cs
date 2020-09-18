@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System.Collections;
 using Unity.Entities;
 using Unity.Physics.Samples.Test;

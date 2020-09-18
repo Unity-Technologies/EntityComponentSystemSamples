@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -38,6 +38,7 @@ public class RandomMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 }
 
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class RandomMotionSystem : SystemBase
 {
@@ -55,34 +56,34 @@ public class RandomMotionSystem : SystemBase
     protected override void OnUpdate()
     {
         var random = new Random();
-        float deltaTime = UnityEngine.Time.fixedDeltaTime;
+        float deltaTime = Time.DeltaTime;
         var stepComponent = HasSingleton<PhysicsStep>() ? GetSingleton<PhysicsStep>() : PhysicsStep.Default;
 
         Entities
             .WithName("ApplyRandomMotion")
             .WithBurst()
             .ForEach((ref RandomMotion motion, ref PhysicsVelocity velocity, in Translation position, in PhysicsMass mass) =>
-        {
-            motion.CurrentTime += deltaTime;
+            {
+                motion.CurrentTime += deltaTime;
 
-            random.InitState((uint)(motion.CurrentTime * 1000));
-            var currentOffset = position.Value - motion.InitialPosition;
-            var desiredOffset = motion.DesiredPosition - motion.InitialPosition;
-            // If we are close enough to the destination pick a new destination
-            if (math.lengthsq(position.Value - motion.DesiredPosition) < motion.Tolerance)
-            {
-                var min = new float3(-math.abs(motion.Range));
-                var max = new float3(math.abs(motion.Range));
-                desiredOffset = random.NextFloat3(min, max);
-                motion.DesiredPosition = desiredOffset + motion.InitialPosition;
-            }
-            var offset = desiredOffset - currentOffset;
-            // Smoothly change the linear velocity
-            velocity.Linear = math.lerp(velocity.Linear, offset, motion.Speed);
-            if (mass.InverseMass != 0)
-            {
-                velocity.Linear -= stepComponent.Gravity * deltaTime;
-            }
-        }).Schedule();
+                random.InitState((uint)(motion.CurrentTime * 1000));
+                var currentOffset = position.Value - motion.InitialPosition;
+                var desiredOffset = motion.DesiredPosition - motion.InitialPosition;
+                // If we are close enough to the destination pick a new destination
+                if (math.lengthsq(position.Value - motion.DesiredPosition) < motion.Tolerance)
+                {
+                    var min = new float3(-math.abs(motion.Range));
+                    var max = new float3(math.abs(motion.Range));
+                    desiredOffset = random.NextFloat3(min, max);
+                    motion.DesiredPosition = desiredOffset + motion.InitialPosition;
+                }
+                var offset = desiredOffset - currentOffset;
+                // Smoothly change the linear velocity
+                velocity.Linear = math.lerp(velocity.Linear, offset, motion.Speed);
+                if (mass.InverseMass != 0)
+                {
+                    velocity.Linear -= stepComponent.Gravity * deltaTime;
+                }
+            }).Schedule();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
@@ -16,7 +16,7 @@ public class TriggerGravityFactorAuthoring : MonoBehaviour, IConvertGameObjectTo
     public float GravityFactor = 0f;
     public float DampingFactor = 0.9f;
 
-    void OnEnable() { }
+    void OnEnable() {}
 
     void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
@@ -35,6 +35,7 @@ public class TriggerGravityFactorAuthoring : MonoBehaviour, IConvertGameObjectTo
 // This system sets the PhysicsGravityFactor of any dynamic body that enters a Trigger Volume.
 // A Trigger Volume is defined by a PhysicsShapeAuthoring with the `Is Trigger` flag ticked and a
 // TriggerGravityFactor behaviour added.
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class TriggerGravityFactorSystem : SystemBase
 {

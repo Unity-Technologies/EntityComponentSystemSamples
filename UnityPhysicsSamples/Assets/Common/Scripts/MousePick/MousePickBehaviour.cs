@@ -69,7 +69,7 @@ namespace Unity.Physics.Extensions
             Assert.IsTrue(hit.Fraction < MaxFraction);
 
             var isAcceptable = (hit.RigidBodyIndex >= 0) && (hit.RigidBodyIndex < NumDynamicBodies);
-            if(IgnoreTriggers)
+            if (IgnoreTriggers)
             {
                 var body = Bodies[hit.RigidBodyIndex];
                 isAcceptable = isAcceptable && !ColliderUtils.IsTrigger(body.Collider, hit.ColliderKey);
@@ -87,7 +87,6 @@ namespace Unity.Physics.Extensions
         }
 
         #endregion
-
     }
 
     public struct MousePick : IComponentData
@@ -109,7 +108,7 @@ namespace Unity.Physics.Extensions
     }
 
     // Attaches a virtual spring to the picked entity
-    [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
     public class MousePickSystem : SystemBase
     {
         const float k_MaxDistance = 100.0f;
@@ -243,6 +242,7 @@ namespace Unity.Physics.Extensions
     }
 
     // Applies any mouse spring as a change in velocity on the entity's motion component
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(BuildPhysicsWorld))]
     public class MouseSpringSystem : SystemBase
     {
@@ -318,7 +318,7 @@ namespace Unity.Physics.Extensions
 
                     const float elasticity = 0.1f;
                     const float damping = 0.5f;
-                    deltaVelocity = -pointDiff * (elasticity / UnityEngine.Time.fixedDeltaTime) - damping * relativeVelocityInWorld;
+                    deltaVelocity = -pointDiff * (elasticity / Time.DeltaTime) - damping * relativeVelocityInWorld;
                 }
 
                 // Build effective mass matrix in world space
@@ -354,7 +354,7 @@ namespace Unity.Physics.Extensions
 
                 // Clip the impulse
                 const float maxAcceleration = 250.0f;
-                float maxImpulse = math.rcp(massComponent.InverseMass) * UnityEngine.Time.fixedDeltaTime * maxAcceleration;
+                float maxImpulse = math.rcp(massComponent.InverseMass) * Time.DeltaTime * maxAcceleration;
                 impulse *= math.min(1.0f, math.sqrt((maxImpulse * maxImpulse) / math.lengthsq(impulse)));
 
                 // Apply the impulse

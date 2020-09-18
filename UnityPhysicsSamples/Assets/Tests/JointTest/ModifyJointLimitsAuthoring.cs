@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -94,8 +94,8 @@ class ModifyJointLimitsConversionSystem : GameObjectConversionSystem
                 {
                     var angularModification = new ParticleSystem.MinMaxCurve(
                         multiplier: math.radians(modifyJointLimits.AngularRangeScalar.curveMultiplier),
-                        min:modifyJointLimits.AngularRangeScalar.curveMin,
-                        max:modifyJointLimits.AngularRangeScalar.curveMax
+                        min: modifyJointLimits.AngularRangeScalar.curveMin,
+                        max: modifyJointLimits.AngularRangeScalar.curveMax
                     );
                     DstEntityManager.AddSharedComponentData(jointEntity, new ModifyJointLimits
                     {
@@ -110,6 +110,7 @@ class ModifyJointLimitsConversionSystem : GameObjectConversionSystem
 }
 
 // apply an animated effect to the limits on supported types of joints
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 class ModifyJointLimitsSystem : SystemBase
 {

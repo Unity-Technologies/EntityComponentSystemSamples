@@ -1,4 +1,4 @@
-﻿using Unity.Physics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Collections;
 using Unity.Entities;
@@ -103,13 +103,14 @@ public class ConveyorBeltAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
 public struct ConveyorBelt : IComponentData
 {
-    public float3 LocalDirection; 
+    public float3 LocalDirection;
     public float Speed;
-    public bool IsAngular; 
+    public bool IsAngular;
 }
 
 
 // A system which configures the simulation step to modify contact jacobains in various ways
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(StepPhysicsWorld))]
 public class ConveyorBeltSystem : SystemBase
 {
@@ -148,7 +149,7 @@ public class ConveyorBeltSystem : SystemBase
 
     // This job reads the modify component and sets some data on the contact, to get propagated to the jacobian
     // for processing in our jacobian modifier job. This is necessary because some flags require extra data to
-    // be allocated along with the jacobian (e.g., SurfaceVelocity data typically does not exist). 
+    // be allocated along with the jacobian (e.g., SurfaceVelocity data typically does not exist).
     [BurstCompile]
     struct SetConveyorBeltFlagJob : IContactsJob
     {
@@ -157,7 +158,7 @@ public class ConveyorBeltSystem : SystemBase
 
         public void Execute(ref ModifiableContactHeader manifold, ref ModifiableContactPoint contact)
         {
-            if (ConveyorBelts.Exists(manifold.EntityA) || ConveyorBelts.Exists(manifold.EntityB))
+            if (ConveyorBelts.HasComponent(manifold.EntityA) || ConveyorBelts.HasComponent(manifold.EntityB))
             {
                 manifold.JacobianFlags |= JacobianFlags.EnableSurfaceVelocity;
             }
@@ -172,7 +173,7 @@ public class ConveyorBeltSystem : SystemBase
         public NativeArray<RigidBody> Bodies;
 
         // Don't do anything for triggers
-        public void Execute(ref ModifiableJacobianHeader h, ref ModifiableTriggerJacobian j) { }
+        public void Execute(ref ModifiableJacobianHeader h, ref ModifiableTriggerJacobian j) {}
 
         public void Execute(ref ModifiableJacobianHeader jacHeader, ref ModifiableContactJacobian contactJacobian)
         {
@@ -185,7 +186,7 @@ public class ConveyorBeltSystem : SystemBase
             for (int i = 0; i < 2; i++)
             {
                 var entity = (i == 0) ? jacHeader.EntityA : jacHeader.EntityB;
-                if (!ConveyorBelts.Exists(entity)) continue;
+                if (!ConveyorBelts.HasComponent(entity)) continue;
 
                 var index = (i == 0) ? jacHeader.BodyIndexA : jacHeader.BodyIndexB;
                 var rotation = Bodies[index].WorldFromBody.rot;
@@ -210,7 +211,7 @@ public class ConveyorBeltSystem : SystemBase
                 }
             }
 
-            // Add the extra velocities 
+            // Add the extra velocities
             jacHeader.SurfaceVelocity = new SurfaceVelocity
             {
                 LinearVelocity = jacHeader.SurfaceVelocity.LinearVelocity + linearVelocity,
@@ -226,5 +227,4 @@ public class ConveyorBeltSystem : SystemBase
         m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, m_PreparationCallback, Dependency);
         m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, m_JacobianModificationCallback, Dependency);
     }
-
 }

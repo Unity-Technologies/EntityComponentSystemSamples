@@ -1,44 +1,67 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using UnityEngine;
+// in order to circumvent API breakages that do not affect physics, some packages are removed from the project on CI
+// any code referencing APIs in com.unity.inputsystem must be guarded behind UNITY_INPUT_SYSTEM_EXISTS
+#if UNITY_INPUT_SYSTEM_EXISTS
 using UnityEngine.InputSystem;
+#endif
 
 [AlwaysUpdateSystem]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-class DemoInputGatheringSystem : SystemBase,
+class DemoInputGatheringSystem : SystemBase
+#if UNITY_INPUT_SYSTEM_EXISTS
+    ,
     InputActions.ICharacterControllerActions,
     InputActions.IVehicleActions
+#endif
 {
-    InputActions m_InputActions;
-
     EntityQuery m_CharacterControllerInputQuery;
     EntityQuery m_CharacterGunInputQuery;
+    EntityQuery m_VehicleInputQuery;
 
+#pragma warning disable 649
     Vector2 m_CharacterMovement;
     Vector2 m_CharacterLooking;
     float m_CharacterFiring;
     bool m_CharacterJumped;
 
-    EntityQuery m_VehicleInputQuery;
-
     Vector2 m_VehicleLooking;
     Vector2 m_VehicleSteering;
     float m_VehicleThrottle;
     int m_VehicleChanged;
+#pragma warning restore 649
 
     protected override void OnCreate()
     {
+#if UNITY_INPUT_SYSTEM_EXISTS
         m_InputActions = new InputActions();
         m_InputActions.CharacterController.SetCallbacks(this);
         m_InputActions.Vehicle.SetCallbacks(this);
+#endif
 
         m_CharacterControllerInputQuery = GetEntityQuery(typeof(CharacterControllerInput));
         m_CharacterGunInputQuery = GetEntityQuery(typeof(CharacterGunInput));
         m_VehicleInputQuery = GetEntityQuery(typeof(VehicleInput));
     }
 
+#if UNITY_INPUT_SYSTEM_EXISTS
+    InputActions m_InputActions;
+
     protected override void OnStartRunning() => m_InputActions.Enable();
 
     protected override void OnStopRunning() => m_InputActions.Disable();
+
+    void InputActions.ICharacterControllerActions.OnMove(InputAction.CallbackContext context) => m_CharacterMovement = context.ReadValue<Vector2>();
+    void InputActions.ICharacterControllerActions.OnLook(InputAction.CallbackContext context) => m_CharacterLooking = context.ReadValue<Vector2>();
+    void InputActions.ICharacterControllerActions.OnFire(InputAction.CallbackContext context) => m_CharacterFiring = context.ReadValue<float>();
+    void InputActions.ICharacterControllerActions.OnJump(InputAction.CallbackContext context) { if (context.started) m_CharacterJumped = true; }
+
+    void InputActions.IVehicleActions.OnLook(InputAction.CallbackContext context) => m_VehicleLooking = context.ReadValue<Vector2>();
+    void InputActions.IVehicleActions.OnSteering(InputAction.CallbackContext context) => m_VehicleSteering = context.ReadValue<Vector2>();
+    void InputActions.IVehicleActions.OnThrottle(InputAction.CallbackContext context) => m_VehicleThrottle = context.ReadValue<float>();
+    void InputActions.IVehicleActions.OnPrevious(InputAction.CallbackContext context) { if (context.started) m_VehicleChanged = -1; }
+    void InputActions.IVehicleActions.OnNext(InputAction.CallbackContext context) { if (context.started) m_VehicleChanged = 1; }
+#endif
 
     protected override void OnUpdate()
     {
@@ -78,15 +101,4 @@ class DemoInputGatheringSystem : SystemBase,
 
         m_VehicleChanged = 0;
     }
-
-    void InputActions.ICharacterControllerActions.OnMove(InputAction.CallbackContext context) => m_CharacterMovement = context.ReadValue<Vector2>();
-    void InputActions.ICharacterControllerActions.OnLook(InputAction.CallbackContext context) => m_CharacterLooking = context.ReadValue<Vector2>();
-    void InputActions.ICharacterControllerActions.OnFire(InputAction.CallbackContext context) => m_CharacterFiring = context.ReadValue<float>();
-    void InputActions.ICharacterControllerActions.OnJump(InputAction.CallbackContext context) { if (context.started) m_CharacterJumped = true; }
-
-    void InputActions.IVehicleActions.OnLook(InputAction.CallbackContext context) => m_VehicleLooking = context.ReadValue<Vector2>();
-    void InputActions.IVehicleActions.OnSteering(InputAction.CallbackContext context) => m_VehicleSteering = context.ReadValue<Vector2>();
-    void InputActions.IVehicleActions.OnThrottle(InputAction.CallbackContext context) => m_VehicleThrottle = context.ReadValue<float>();
-    void InputActions.IVehicleActions.OnPrevious(InputAction.CallbackContext context) { if (context.started) m_VehicleChanged = -1; }
-    void InputActions.IVehicleActions.OnNext(InputAction.CallbackContext context) { if (context.started) m_VehicleChanged = 1; }
 }

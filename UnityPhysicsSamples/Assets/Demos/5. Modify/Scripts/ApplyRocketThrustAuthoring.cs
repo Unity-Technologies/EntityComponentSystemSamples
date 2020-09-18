@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -50,7 +50,7 @@ public class ApplyRocketThrustAuthoring : MonoBehaviour, IConvertGameObjectToEnt
         Gizmos.matrix = worldFromThrust;
 
         float Shift = Magnitude * 0.1f;
-        Gizmos.DrawFrustum(new Vector3(0,0,-Shift), UnityEngine.Random.Range(1.0f, 2.5f), Magnitude, Shift, 1.0f);
+        Gizmos.DrawFrustum(new Vector3(0, 0, -Shift), UnityEngine.Random.Range(1.0f, 2.5f), Magnitude, Shift, 1.0f);
 
         Gizmos.matrix = originalMatrix;
         Gizmos.color = originalColor;
@@ -65,27 +65,28 @@ public struct ApplyRocketThrust : IComponentData
 }
 
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class ApplyRocketThrustSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var deltaTime = UnityEngine.Time.fixedDeltaTime;
-        
+        var deltaTime = Time.DeltaTime;
+
         Entities
             .WithName("ApplyRocketThrust")
             .WithBurst()
             .ForEach((ref ApplyRocketThrust rocket, ref Translation t, ref Rotation r, ref PhysicsVelocity pv, ref PhysicsMass pm) =>
-        {
-            // Newton's 3rd law states that for every action there is an equal and opposite reaction.
-            // As this is a rocket thrust the impulse applied with therefore use negative Direction.
-            float3 impulse = -rocket.Direction * rocket.Magnitude;
-            impulse = math.rotate(r.Value, impulse);
-            impulse *= deltaTime;
+            {
+                // Newton's 3rd law states that for every action there is an equal and opposite reaction.
+                // As this is a rocket thrust the impulse applied with therefore use negative Direction.
+                float3 impulse = -rocket.Direction * rocket.Magnitude;
+                impulse = math.rotate(r.Value, impulse);
+                impulse *= deltaTime;
 
-            float3 offset = math.rotate(r.Value, rocket.Offset) + t.Value;
+                float3 offset = math.rotate(r.Value, rocket.Offset) + t.Value;
 
-            pv.ApplyImpulse(pm, t, r, impulse, offset);
-        }).Schedule();
+                pv.ApplyImpulse(pm, t, r, impulse, offset);
+            }).Schedule();
     }
 }

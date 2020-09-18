@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Assertions;
 using Unity.Burst;
 using Unity.Collections;
@@ -43,7 +43,7 @@ namespace Unity.Physics.Stateful
         public float3 Normal;
 
         public StatefulCollisionEvent(Entity entityA, Entity entityB, int bodyIndexA, int bodyIndexB,
-            ColliderKey colliderKeyA, ColliderKey colliderKeyB, float3 normal)
+                                      ColliderKey colliderKeyA, ColliderKey colliderKeyB, float3 normal)
         {
             Entities = new EntityPair
             {
@@ -87,7 +87,7 @@ namespace Unity.Physics.Stateful
             // Average contact point position
             public float3 AverageContactPointPosition;
 
-            public Details (int numberOfContactPoints, float estimatedImpulse, float3 averageContactPosition)
+            public Details(int numberOfContactPoints, float estimatedImpulse, float3 averageContactPosition)
             {
                 IsValid = 1;
                 NumberOfContactPoints = numberOfContactPoints;
@@ -116,7 +116,7 @@ namespace Unity.Physics.Stateful
             return math.select(-Normal, Normal, entity == EntityB);
         }
 
-        public bool TryGetDetails (out Details details)
+        public bool TryGetDetails(out Details details)
         {
             details = CollisionDetails;
             return CollisionDetails.IsValid != 0;
@@ -160,6 +160,7 @@ namespace Unity.Physics.Stateful
     //    1) Tick Raises Collision Events on PhysicsShapeAuthoring on the entity that should raise collision events
     //    2) Add a DynamicBufferCollisionEventAuthoring component to that entity (and select if details should be calculated or not)
     //    3) If this is desired on a Character Controller, tick RaiseCollisionEvents flag on CharacterControllerAuthoring (skip 1) and 2)),
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(StepPhysicsWorld))]
     [UpdateBefore(typeof(EndFramePhysicsSystem))]
     public class CollisionEventConversionSystem : SystemBase
@@ -240,7 +241,6 @@ namespace Unity.Physics.Stateful
                     resultList.Add(previousFrameCollisionEvent);
                     j++;
                 }
-
             }
 
             if (i == currentFrameCollisionEvents.Length)

@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -37,7 +37,7 @@ public class TwistGridDemo : BasePhysicsDemo
 
                 // Choose the limited axis
                 quaternion q2 = quaternion.AxisAngle(math.mul(q1, new float3(0, 1, 0)),
-                    (float) math.PI * ((float) j / size));
+                    (float)math.PI * ((float)j / size));
 
                 // Create a body with some angular velocity about the axis
                 float3 pos = new float3(i - (size - 1) / 2.0f, 0, j - (size - 1) / 2.0f);

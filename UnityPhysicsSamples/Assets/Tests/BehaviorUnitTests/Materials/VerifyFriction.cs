@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Physics.Systems;
@@ -10,7 +10,6 @@ namespace Unity.Physics.Tests
 {
     public struct VerifyFrictionData : IComponentData
     {
-
     }
 
     public class VerifyFriction : MonoBehaviour, IConvertGameObjectToEntity
@@ -21,6 +20,7 @@ namespace Unity.Physics.Tests
         }
     }
 
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(StepPhysicsWorld))]
     public class VerifyFrictionSystem : SystemBase
     {

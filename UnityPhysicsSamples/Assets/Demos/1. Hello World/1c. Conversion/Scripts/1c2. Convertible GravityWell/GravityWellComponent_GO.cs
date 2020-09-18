@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -17,6 +17,7 @@ public class GravityWellComponent_GO : MonoBehaviour, IConvertGameObjectToEntity
             Position = gameObject.transform.position
         });
     }
+
     #endregion
 }
 
@@ -29,4 +30,3 @@ public struct GravityWellComponent_GO_ECS : IComponentData
     public float3 Position;
 }
 #endregion
-

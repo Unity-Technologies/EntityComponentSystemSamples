@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -46,6 +46,7 @@ public class PlanetGravityAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class PlanetGravitySystem : SystemBase
 {
@@ -53,26 +54,26 @@ public class PlanetGravitySystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var dt = UnityEngine.Time.fixedDeltaTime;
+        var dt = Time.DeltaTime;
 
         Entities
             .WithName("ApplyGravityFromPlanet")
             .WithBurst()
             .ForEach((ref PhysicsMass bodyMass, ref PhysicsVelocity bodyVelocity, in Translation pos, in PlanetGravity gravity) =>
-        {
-            float mass = math.rcp(bodyMass.InverseMass);
-
-            float3 dir = (gravity.GravitationalCenter - pos.Value);
-            float dist = math.length(dir);
-            float invDist = 1.0f / dist;
-            dir = math.normalize(dir);
-            float3 xtraGravity = (gravity.GravitationalConstant * (gravity.GravitationalMass * mass) * dir) * invDist * invDist;
-            bodyVelocity.Linear += xtraGravity * dt;
-            if (dist < gravity.EventHorizonDistance)
             {
-                xtraGravity = (gravity.RotationMultiplier * gravity.GravitationalConstant * gravity.GravitationalMass * dir) * invDist;
-                bodyVelocity.Linear += math.rotate(k_GravityOrientation, xtraGravity) * gravity.RotationMultiplier * dt;
-            }
-        }).Schedule();
+                float mass = math.rcp(bodyMass.InverseMass);
+
+                float3 dir = (gravity.GravitationalCenter - pos.Value);
+                float dist = math.length(dir);
+                float invDist = 1.0f / dist;
+                dir = math.normalize(dir);
+                float3 xtraGravity = (gravity.GravitationalConstant * (gravity.GravitationalMass * mass) * dir) * invDist * invDist;
+                bodyVelocity.Linear += xtraGravity * dt;
+                if (dist < gravity.EventHorizonDistance)
+                {
+                    xtraGravity = (gravity.RotationMultiplier * gravity.GravitationalConstant * gravity.GravitationalMass * dir) * invDist;
+                    bodyVelocity.Linear += math.rotate(k_GravityOrientation, xtraGravity) * gravity.RotationMultiplier * dt;
+                }
+            }).Schedule();
     }
 }

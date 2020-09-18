@@ -1,4 +1,4 @@
-﻿using Unity.Physics;
+using Unity.Physics;
 using Unity.Entities;
 using Unity.Mathematics;
 using BoxCollider = Unity.Physics.BoxCollider;

@@ -1,10 +1,11 @@
-﻿#if HAVOK_PHYSICS_EXISTS
+#if HAVOK_PHYSICS_EXISTS
 using Unity.Entities;
 using Unity.Physics.Systems;
 using Unity.Jobs;
 
 namespace Unity.Physics.Samples.Test
 {
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
     class HavokPhysicsDeterminismTestSystem : SystemBase, IDeterminismTestSystem
     {
@@ -67,6 +68,7 @@ namespace Unity.Physics.Samples.Test
         }
     }
 
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(BuildPhysicsWorld))]
     class EnsureHavokSystem : SystemBase
     {
@@ -101,8 +103,7 @@ namespace Unity.Physics.Samples.Test
 #endif
     class HavokPhysicsEndToEndDeterminismTest : UnityPhysicsEndToEndDeterminismTest
     {
-        protected override IDeterminismTestSystem GetTestSystem() => DefaultWorld.GetOrCreateSystem<HavokPhysicsDeterminismTestSystem>();
+        protected override IDeterminismTestSystem GetTestSystem() => DefaultWorld.GetExistingSystem<HavokPhysicsDeterminismTestSystem>();
     }
-
 }
 #endif

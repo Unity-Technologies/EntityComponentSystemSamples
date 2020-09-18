@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -42,7 +42,7 @@ namespace Unity.Physics.Stateful
         public ColliderKey ColliderKeyB => ColliderKeys.ColliderKeyB;
 
         public StatefulTriggerEvent(Entity entityA, Entity entityB, int bodyIndexA, int bodyIndexB,
-            ColliderKey colliderKeyA, ColliderKey colliderKeyB)
+                                    ColliderKey colliderKeyA, ColliderKey colliderKeyB)
         {
             Entities = new EntityPair
             {
@@ -107,7 +107,7 @@ namespace Unity.Physics.Stateful
     // of that entity by TriggerEventConversionSystem. This component is by default added to
     // CharacterController entity, so that CharacterControllerSystem can add trigger events to
     // CharacterController on its own, without TriggerEventConversionSystem interference.
-    public struct ExcludeFromTriggerEventConversion : IComponentData { }
+    public struct ExcludeFromTriggerEventConversion : IComponentData {}
 
     // This system converts stream of TriggerEvents to StatefulTriggerEvents that are stored in a Dynamic Buffer.
     // In order for TriggerEvents to be transformed to StatefulTriggerEvents and stored in a Dynamic Buffer, it is required to:
@@ -115,6 +115,7 @@ namespace Unity.Physics.Stateful
     //    2) Add a DynamicBufferTriggerEventAuthoring component to that entity
     //    3) If this is desired on a Character Controller, tick RaiseTriggerEvents on CharacterControllerAuthoring (skip 1) and 2)),
     //    note that Character Controller will not become a trigger, it will raise events when overlapping with one
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(StepPhysicsWorld))]
     [UpdateBefore(typeof(EndFramePhysicsSystem))]
     public class TriggerEventConversionSystem : SystemBase
