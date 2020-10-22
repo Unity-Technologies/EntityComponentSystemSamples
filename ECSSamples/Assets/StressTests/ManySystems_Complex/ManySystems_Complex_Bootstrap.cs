@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -15,21 +16,31 @@ namespace StressTests.ManySystems
     /// </summary>
     public class ManySystems_Complex_Bootstrap : MonoBehaviour
     {
+        [Range(1, 1000)]
         public int NumSystems = 1000;
         public int NumEntities = 1000;
         public bool UseSchedule = true;
         public float ReadOnlyProbability = .5f;
         public float ComponentIncludeProbability = .5f;
+        public int SettleCount = 1000;
+        public int TargetCount = 10000;
 
         TestSystem_Complex[] m_Systems;
+        readonly FloatStatistic m_Stats = new FloatStatistic();
+        readonly Stopwatch m_StopWatch = new Stopwatch();
+        int m_Count;
 
         // Start is called before the first frame update
         void Start()
         {
+            m_Count = -SettleCount;
             m_Systems = new TestSystem_Complex[NumSystems];
+            string systemName = "TestSystem_Complex";
             for (int i = 0; i < NumSystems; i++)
             {
-                m_Systems[i] = new TestSystem_Complex();
+                var typeName = $"StressTests.ManySystems.{systemName}_{i:0000}";
+                var type = Type.GetType(typeName);
+                m_Systems[i] = (TestSystem_Complex)Activator.CreateInstance(type);
                 m_Systems[i].UseRun = !UseSchedule;
                 m_Systems[i].Types = RandomTypes();
             }
@@ -73,8 +84,26 @@ namespace StressTests.ManySystems
 
         void Update()
         {
+            ++m_Count;
+            m_StopWatch.Reset();
+            m_StopWatch.Start();
             foreach (var s in m_Systems)
                 s.Update();
+            m_StopWatch.Stop();
+
+            if ((m_Count >= 0) && (m_Count <= TargetCount))
+            {
+                m_Stats.AddValue(m_StopWatch.ElapsedMilliseconds);
+
+                if ((m_Stats.Count % 1000) == 0)
+                {
+                    UnityEngine.Debug.Log($"{m_Stats.Count} samples Mean {m_Stats.Mean}ms +/- {m_Stats.Sigma}ms");
+                }
+            }
+            if (m_Stats.Count == TargetCount)
+            {
+                UnityEngine.Debug.Log($"{m_Stats.Count} samples Mean {m_Stats.Mean}ms +/- {m_Stats.Sigma}ms");
+            }
         }
     }
 
