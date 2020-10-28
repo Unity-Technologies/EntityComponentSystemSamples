@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -9,33 +11,44 @@ namespace StressTests.ManySystems
     /// </summary>
     public class ManySystems_Linear_Bootstrap : MonoBehaviour
     {
+        [Range(1, 1000)]
         public int NumSystems = 1000;
         public int NumEntities = 1000;
         public bool UseSchedule = true;
         public bool ReadOnly = false;
+        public int SettleCount = 1000;
+        public int TargetCount = 10000;
 
         SystemBase[] m_Systems;
+        readonly FloatStatistic m_Stats = new FloatStatistic();
+        readonly Stopwatch m_StopWatch = new Stopwatch();
+        int m_Count;
 
         // Start is called before the first frame update
         void Start()
         {
+            m_Count = -SettleCount;
             m_Systems = new SystemBase[NumSystems];
+            string systemName;
+            if (UseSchedule)
+            {
+                if (ReadOnly)
+                    systemName = "TestSystem_ScheduleReader";
+                else
+                    systemName = "TestSystem_Schedule";
+            }
+            else
+            {
+                if (ReadOnly)
+                    systemName = "TestSystem_RunReader";
+                else
+                    systemName = "TestSystem_Run";
+            }
             for (int i = 0; i < NumSystems; i++)
             {
-                if (UseSchedule)
-                {
-                    if (ReadOnly)
-                        m_Systems[i] = new TestSystem_ScheduleReader();
-                    else
-                        m_Systems[i] = new TestSystem_Schedule();
-                }
-                else
-                {
-                    if (ReadOnly)
-                        m_Systems[i] = new TestSystem_RunReader();
-                    else
-                        m_Systems[i] = new TestSystem_Run();
-                }
+                var typeName = $"StressTests.ManySystems.{systemName}_{i:0000}";
+                var type = Type.GetType(typeName);
+                m_Systems[i] = (SystemBase)Activator.CreateInstance(type);
             }
 
             var world = World.DefaultGameObjectInjectionWorld;
@@ -48,8 +61,26 @@ namespace StressTests.ManySystems
 
         void Update()
         {
+            ++m_Count;
+            m_StopWatch.Reset();
+            m_StopWatch.Start();
             foreach (var s in m_Systems)
                 s.Update();
+            m_StopWatch.Stop();
+
+            if ((m_Count >= 0) && (m_Count <= TargetCount))
+            {
+                m_Stats.AddValue(m_StopWatch.ElapsedMilliseconds);
+
+                if ((m_Stats.Count % 1000) == 0)
+                {
+                    UnityEngine.Debug.Log($"{m_Stats.Count} samples Mean {m_Stats.Mean}ms +/- {m_Stats.Sigma}ms");
+                }
+            }
+            if (m_Stats.Count == TargetCount)
+            {
+                UnityEngine.Debug.Log($"{m_Stats.Count} samples Mean {m_Stats.Mean}ms +/- {m_Stats.Sigma}ms");
+            }
         }
     }
 

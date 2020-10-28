@@ -69,11 +69,6 @@ public class SetBuildConfigurationComponent : MonoBehaviour
         }
 
         OnValidate();
-
-        var playerLoop = PlayerLoop.GetDefaultPlayerLoop(); // TODO(DOTS-2283): shouldn't stomp the default player loop here
-        ScriptBehaviourUpdateOrder.AddWorldToPlayerLoop(worldA, ref playerLoop);
-        ScriptBehaviourUpdateOrder.AddWorldToPlayerLoop(worldB, ref playerLoop);
-        PlayerLoop.SetPlayerLoop(playerLoop);
     }
 
     private void OnDisable()
