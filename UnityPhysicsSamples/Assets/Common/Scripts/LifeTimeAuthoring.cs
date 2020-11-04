@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Physics.Systems;
 using UnityEngine;
 
 public struct LifeTime : IComponentData
@@ -16,6 +17,8 @@ public class LifeTimeAuthoring : MonoBehaviour, IConvertGameObjectToEntity
         dstManager.AddComponentData(entity, new LifeTime { Value = Value });
 }
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+[UpdateBefore(typeof(BuildPhysicsWorld))]
 public class LifeTimeSystem : SystemBase
 {
     protected override void OnUpdate()

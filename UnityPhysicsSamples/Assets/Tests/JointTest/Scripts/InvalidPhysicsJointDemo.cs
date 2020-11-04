@@ -2,12 +2,14 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 
-public class InvalidPhysicsJointDemo : BasePhysicsDemo
-{
-    protected override void Start()
-    {
-        base.Start();
+public class InvalidPhysicsJointDemoScene : SceneCreationSettings {}
 
+public class InvalidPhysicsJointDemo : SceneCreationAuthoring<InvalidPhysicsJointDemoScene> {}
+
+public class InvalidPhyiscsJointDemoSystem : SceneCreationSystem<InvalidPhysicsJointDemoScene>
+{
+    public override void CreateScene(InvalidPhysicsJointDemoScene sceneSettings)
+    {
         BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
         {
             Center = float3.zero,
@@ -15,8 +17,7 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             Size = new float3(0.25f),
             BevelRadius = 0.0f
         });
-
-        var manager = DefaultWorld.EntityManager;
+        CreatedColliders.Add(collider);
 
         // Add a dynamic body constrained to the world that will die
         // Once the dynamic body is destroyed the joint will be invalid
@@ -25,11 +26,11 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             float3 pivotWorld = new float3(-2f, 0, 0);
             Entity body = CreateDynamicBody(pivotWorld, quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
 
-            // create extra dynamic body to trigger havok sync after the first one is destroyed
+            // create extra dynamic body to trigger Havok sync after the first one is destroyed
             CreateDynamicBody(pivotWorld * 2.0f, quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
 
             // add timeout on dynamic body after 15 frames.
-            manager.AddComponentData(body, new LifeTime { Value = 15 });
+            EntityManager.AddComponentData(body, new LifeTime { Value = 15 });
 
             // Create the joint
             float3 pivotLocal = float3.zero;
@@ -37,7 +38,7 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             var jointEntity = CreateJoint(joint, body, Entity.Null);
 
             // add timeout on joint entity after 30 frames.
-            manager.AddComponentData(jointEntity, new LifeTime { Value = 30 });
+            EntityManager.AddComponentData(jointEntity, new LifeTime { Value = 30 });
         }
 
         // Add two static bodies constrained together
@@ -53,7 +54,7 @@ public class InvalidPhysicsJointDemo : BasePhysicsDemo
             var jointEntity = CreateJoint(joint, bodyA, bodyB);
 
             // add timeout on joint entity after 15 frames.
-            manager.AddComponentData(jointEntity, new LifeTime { Value = 15 });
+            EntityManager.AddComponentData(jointEntity, new LifeTime { Value = 15 });
         }
 
         // Add two dynamic bodies constrained together with 0 dimension

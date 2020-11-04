@@ -4,7 +4,17 @@ using Unity.Physics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-public class TerrainDemo : BasePhysicsDemo
+public class TerrainDemoScene : SceneCreationSettings
+{
+    public int SizeX;
+    public int SizeZ;
+    public float ScaleX;
+    public float ScaleY;
+    public float ScaleZ;
+    public TerrainCollider.CollisionMethod Method;
+}
+
+public class TerrainDemo : SceneCreationAuthoring<TerrainDemoScene>
 {
     public int SizeX;
     public int SizeZ;
@@ -13,10 +23,26 @@ public class TerrainDemo : BasePhysicsDemo
     public float ScaleZ;
     public TerrainCollider.CollisionMethod Method;
 
-    protected override void Start()
+    public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        base.init();
+        dstManager.AddComponentData(entity, new TerrainDemoScene
+        {
+            DynamicMaterial = DynamicMaterial,
+            StaticMaterial = StaticMaterial,
+            Method = Method,
+            SizeX = SizeX,
+            SizeZ = SizeZ,
+            ScaleX = ScaleX,
+            ScaleY = ScaleY,
+            ScaleZ = ScaleZ
+        });
+    }
+}
 
+public class TerrainDemoSystem : SceneCreationSystem<TerrainDemoScene>
+{
+    public override void CreateScene(TerrainDemoScene sceneSettings)
+    {
         // Make heightfield data
         NativeArray<float> heights;
         int2 size;
@@ -39,8 +65,8 @@ public class TerrainDemo : BasePhysicsDemo
         }
         else
         {
-            size = new int2(SizeX, SizeZ);
-            scale = new float3(ScaleX, ScaleY, ScaleZ);
+            size = new int2(sceneSettings.SizeX, sceneSettings.SizeZ);
+            scale = new float3(sceneSettings.ScaleX, sceneSettings.ScaleY, sceneSettings.ScaleZ);
             float period = 50.0f;
             heights = new NativeArray<float>(size.x * size.y * UnsafeUtility.SizeOf<float>(), Allocator.Temp);
             for (int j = 0; j < size.y; j++)
@@ -64,8 +90,9 @@ public class TerrainDemo : BasePhysicsDemo
         {
             bool createMesh = false;
             var collider = createMesh
-                ? CreateMeshTerrain(heights, new int2(SizeX, SizeZ), new float3(ScaleX, ScaleY, ScaleZ))
-                : TerrainCollider.Create(heights, size, scale, Method);
+                ? CreateMeshTerrain(heights, new int2(sceneSettings.SizeX, sceneSettings.SizeZ), new float3(sceneSettings.ScaleX, sceneSettings.ScaleY, sceneSettings.ScaleZ))
+                : TerrainCollider.Create(heights, size, scale, sceneSettings.Method);
+            CreatedColliders.Add(collider);
 
             bool compound = false;
             if (compound)
@@ -84,6 +111,7 @@ public class TerrainDemo : BasePhysicsDemo
                     };
                 }
                 collider = Unity.Physics.CompoundCollider.Create(instances);
+                CreatedColliders.Add(collider);
                 instances.Dispose();
             }
 

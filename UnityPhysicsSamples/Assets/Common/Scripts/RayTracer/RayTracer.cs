@@ -90,12 +90,12 @@ namespace Unity.Physics.Extensions
                 ExpectingResults = false;
             }
 
-            if (BasePhysicsDemo.DefaultWorld == null)
+            if (World.DefaultGameObjectInjectionWorld == null)
             {
                 return;
             }
 
-            RayTracerSystem rbs = BasePhysicsDemo.DefaultWorld.GetExistingSystem<RayTracerSystem>();
+            RayTracerSystem rbs = World.DefaultGameObjectInjectionWorld.GetExistingSystem<RayTracerSystem>();
             if (rbs == null || !rbs.IsEnabled)
             {
                 return;

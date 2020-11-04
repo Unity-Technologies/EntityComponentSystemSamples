@@ -29,19 +29,19 @@ public class SingleThreadedPhysics : MonoBehaviour
 
     private void Start()
     {
-        var system = BasePhysicsDemo.DefaultWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
+        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
         system.Initialize(ReferenceMaterial);
     }
 
     private void OnEnable()
     {
-        var system = BasePhysicsDemo.DefaultWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
+        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
         system.Enabled = true;
     }
 
     private void OnDestroy()
     {
-        var system = BasePhysicsDemo.DefaultWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
+        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
         system.Enabled = false;
     }
 }
@@ -60,6 +60,7 @@ public class SingleThreadedPhysicsSystem : SystemBase
     private NativeHashMap<Entity, int> EntityToBodyIndexMap;
 
     private StepPhysicsWorld m_StepPhysicsWorld;
+    private NativeList<BlobAssetReference<Collider>> m_CreatedColliders;
 
     private SimulationContext SimulationContext;
 #if HAVOK_PHYSICS_EXISTS
@@ -341,6 +342,7 @@ public class SingleThreadedPhysicsSystem : SystemBase
                         customCollider.ColliderRef = BlobAssetReference<Collider>.Create(
                             EntityManager.GetComponentData<PhysicsCollider>(entities[i]).ColliderPtr,
                             EntityManager.GetComponentData<PhysicsCollider>(entities[i]).ColliderPtr->MemorySize);
+                        m_CreatedColliders.Add(customCollider.ColliderRef);
                     }
                 }
                 else
@@ -430,6 +432,7 @@ public class SingleThreadedPhysicsSystem : SystemBase
 
         m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
         EntityMap = new NativeHashMap<Entity, Entity>(0, Allocator.Persistent);
+        m_CreatedColliders = new NativeList<BlobAssetReference<Collider>>(Allocator.Persistent);
     }
 
     protected override void OnUpdate()
@@ -547,5 +550,10 @@ public class SingleThreadedPhysicsSystem : SystemBase
 #if HAVOK_PHYSICS_EXISTS
         HavokSimulationContext.Dispose();
 #endif
+        for (int i = 0; i < m_CreatedColliders.Length; i++)
+        {
+            m_CreatedColliders[i].Dispose();
+        }
+        m_CreatedColliders.Dispose();
     }
 }

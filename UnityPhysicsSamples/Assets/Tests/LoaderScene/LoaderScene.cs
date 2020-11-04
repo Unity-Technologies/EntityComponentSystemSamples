@@ -64,6 +64,7 @@ class LoaderScene : MonoBehaviour
             button.onClick.AddListener(() =>
             {
                 m_Navigation.gameObject.SetActive(true);
+                ResetDefaultWorld();
                 SceneManager.LoadScene(scene.Index, LoadSceneMode.Single);
             });
             entry.GetComponentInChildren<Text>().text = scene.Name;
@@ -77,12 +78,25 @@ class LoaderScene : MonoBehaviour
             m_Selected = firstEntry;
         }
 
-        Application.targetFrameRate = (int)(1f / BasePhysicsDemo.DefaultWorld.GetExistingSystem<FixedStepSimulationSystemGroup>().Timestep);
+        Application.targetFrameRate = (int)(1f / World.DefaultGameObjectInjectionWorld.GetExistingSystem<FixedStepSimulationSystemGroup>().Timestep);
+    }
+
+    public static void ResetDefaultWorld()
+    {
+        var defaultWorld = World.DefaultGameObjectInjectionWorld;
+        defaultWorld.EntityManager.CompleteAllJobs();
+        foreach (var system in defaultWorld.Systems)
+        {
+            system.Enabled = false;
+        }
+
+        defaultWorld.Dispose();
+        DefaultWorldInitialization.Initialize("Default World", false);
     }
 
     internal void LoadLevel(int indexOffset)
     {
-        BasePhysicsDemo.ResetDefaultWorld();
+        ResetDefaultWorld();
         var i = m_SceneData.FindIndex(s => s.Index == SceneManager.GetActiveScene().buildIndex);
         i += indexOffset;
         i = (i % m_SceneData.Count + m_SceneData.Count) % m_SceneData.Count;

@@ -185,6 +185,9 @@ namespace Unity.Physics.Extensions
                     }
                 }
 
+                if (sphere.IsCreated)
+                    sphere.Dispose();
+
                 Results.EndForEachIndex();
             }
         }

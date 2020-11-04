@@ -42,8 +42,11 @@ public class RandomMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 [UpdateBefore(typeof(BuildPhysicsWorld))]
 public class RandomMotionSystem : SystemBase
 {
+    private BuildPhysicsWorld m_BuildPhysicsWorld;
+
     protected override void OnCreate()
     {
+        m_BuildPhysicsWorld = World.GetExistingSystem<BuildPhysicsWorld>();
         RequireForUpdate(GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[]
@@ -85,5 +88,6 @@ public class RandomMotionSystem : SystemBase
                     velocity.Linear -= stepComponent.Gravity * deltaTime;
                 }
             }).Schedule();
+        m_BuildPhysicsWorld.AddInputDependency(Dependency);
     }
 }

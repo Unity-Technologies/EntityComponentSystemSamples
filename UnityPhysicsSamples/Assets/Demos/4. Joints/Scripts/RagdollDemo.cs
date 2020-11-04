@@ -6,15 +6,41 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using static Unity.Physics.Math;
+using Collider = Unity.Physics.Collider;
 
-public class RagdollDemo : BasePhysicsDemo
+public class RagdollDemoScene : SceneCreationSettings
 {
-    public UnityEngine.Mesh torsoMesh;
-    public UnityEngine.Mesh renderMesh;
+    public Mesh TorsoMesh;
+    public Mesh RenderMesh;
+    public int NumberOfRagdolls;
+    public float RangeGain;
+    public RigidTransform Transform;
+}
 
-    public int numberOfRagdolls = 1;
-    [Range(0, 1)] public float rangeGain = 1.0f;
+public class RagdollDemo : SceneCreationAuthoring<RagdollDemoScene>
+{
+    public Mesh TorsoMesh;
+    public Mesh RenderMesh;
+    public int NumberOfRagdolls = 1;
+    [Range(0, 1)] public float RangeGain = 1.0f;
 
+    public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    {
+        dstManager.AddComponentData(entity, new RagdollDemoScene
+        {
+            DynamicMaterial = DynamicMaterial,
+            StaticMaterial = StaticMaterial,
+            RenderMesh = RenderMesh,
+            TorsoMesh = TorsoMesh,
+            NumberOfRagdolls = NumberOfRagdolls,
+            RangeGain = RangeGain,
+            Transform = new RigidTransform(transform.rotation, transform.position)
+        });
+    }
+}
+
+public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
+{
     private enum layer
     {
         Torso = (1 << 0),
@@ -49,35 +75,35 @@ public class RagdollDemo : BasePhysicsDemo
         };
     }
 
-    private void SwapRenderMesh(Entity entity, bool isTorso)
+    private void SwapRenderMesh(Entity entity, bool isTorso, Mesh torsoMesh, Mesh renderMesh)
     {
-        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
-
-        entityManager.RemoveComponent<RenderMesh>(entity);
-        entityManager.AddSharedComponentData(entity, new RenderMesh
+        EntityManager.RemoveComponent<RenderMesh>(entity);
+        EntityManager.AddSharedComponentData(entity, new RenderMesh
         {
             mesh = isTorso ? torsoMesh : renderMesh,
-            material = dynamicMaterial
+            material = DynamicMaterial
         });
         if (!isTorso)
         {
-            var renderBounds = entityManager.GetComponentData<RenderBounds>(entity);
-            entityManager.AddComponentData<NonUniformScale>(entity, new NonUniformScale
+            var renderBounds = EntityManager.GetComponentData<RenderBounds>(entity);
+            EntityManager.AddComponentData<NonUniformScale>(entity, new NonUniformScale
             {
                 Value = renderBounds.Value.Size,
             });
         }
     }
 
-    private void CreateRagdoll(float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
+    private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
+        float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
     {
-        CreateRagdoll(positionOffset, rotationOffset, float3.zero, ragdollIndex, internalCollisions, rangeGain);
+        CreateRagdoll(torsoMesh, renderMesh, positionOffset,
+            rotationOffset, float3.zero, ragdollIndex, internalCollisions, rangeGain);
     }
 
-    private void CreateRagdoll(float3 positionOffset, quaternion rotationOffset, float3 initialVelocity, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
+    private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
+        float3 positionOffset, quaternion rotationOffset, float3 initialVelocity,
+        int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
     {
-        var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
-
         var entities = new NativeList<Entity>(Allocator.Temp);
         var rangeModifier = new float2(math.max(0, math.min(rangeGain, 1)));
 
@@ -87,12 +113,13 @@ public class RagdollDemo : BasePhysicsDemo
         Entity head;
         {
             CollisionFilter filter = internalCollisions ? layerFilter(layer.Head, layer.Torso) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> headCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> headCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(0, 0, 0),
                 Vertex1 = new float3(0, 0, headRadius / 4),
                 Radius = headRadius
             }, filter);
+            CreatedColliders.Add(headCollider);
             head = CreateDynamicBody(headPosition, quaternion.identity, headCollider, float3.zero, float3.zero, 5.0f);
         }
         entities.Add(head);
@@ -113,9 +140,10 @@ public class RagdollDemo : BasePhysicsDemo
             {
                 points[i] = torsoMesh.vertices[i];
             }
-            BlobAssetReference<Unity.Physics.Collider> collider = ConvexCollider.Create(
+            BlobAssetReference<Collider> collider = ConvexCollider.Create(
                 points, ConvexHullGenerationParameters.Default, CollisionFilter.Default
             );
+            CreatedColliders.Add(collider);
             points.Dispose();
             collider.Value.Filter = filter;
             torso = CreateDynamicBody(torsoPosition, quaternion.identity, collider, float3.zero, float3.zero, 20.0f);
@@ -150,13 +178,13 @@ public class RagdollDemo : BasePhysicsDemo
             CollisionFilter armUpperFilter = internalCollisions ? layerFilter(layer.UpperArm, layer.Torso | layer.Forearm) : groupFilter(-ragdollIndex);
             CollisionFilter armLowerFilter = internalCollisions ? layerFilter(layer.Forearm, layer.UpperArm | layer.Hand) : groupFilter(-ragdollIndex);
 
-            BlobAssetReference<Unity.Physics.Collider> upperArmCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> upperArmCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(-armLength / 2, 0, 0),
                 Vertex1 = new float3(armLength / 2, 0, 0),
                 Radius = armRadius
             }, armUpperFilter);
-            BlobAssetReference<Unity.Physics.Collider> foreArmCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> foreArmCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(-armLength / 2, 0, 0),
                 Vertex1 = new float3(armLength / 2, 0, 0),
@@ -167,12 +195,17 @@ public class RagdollDemo : BasePhysicsDemo
             float handRadius = 0.055f;
             CollisionFilter handFilter = internalCollisions ? layerFilter(layer.Hand, layer.Forearm) : groupFilter(-ragdollIndex);
 
-            BlobAssetReference<Unity.Physics.Collider> handCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> handCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(-handLength / 2, 0, 0),
                 Vertex1 = new float3(handLength / 2, 0, 0),
                 Radius = handRadius
             }, handFilter);
+
+            CreatedColliders.Add(upperArmCollider);
+            CreatedColliders.Add(foreArmCollider);
+            CreatedColliders.Add(handCollider);
+
 
             for (int i = 0; i < 2; i++)
             {
@@ -248,13 +281,14 @@ public class RagdollDemo : BasePhysicsDemo
         Entity pelvis;
         {
             CollisionFilter filter = internalCollisions ? layerFilter(layer.Pelvis, layer.Torso | layer.Thigh) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> collider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(-pelvisLength / 2, 0, 0),
                 Vertex1 = new float3(pelvisLength / 2, 0, 0),
                 Radius = pelvisRadius
             }, filter);
             pelvis = CreateDynamicBody(pelvisPosition, quaternion.identity, collider, float3.zero, float3.zero, 15.0f);
+            CreatedColliders.Add(collider);
         }
         entities.Add(pelvis);
 
@@ -280,7 +314,7 @@ public class RagdollDemo : BasePhysicsDemo
             float thighLength = 0.32f;
             float thighRadius = 0.08f;
             CollisionFilter thighFilter = internalCollisions ? layerFilter(layer.Thigh, layer.Pelvis | layer.Calf) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> thighCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> thighCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(0, -thighLength / 2, 0),
                 Vertex1 = new float3(0, thighLength / 2, 0),
@@ -290,7 +324,7 @@ public class RagdollDemo : BasePhysicsDemo
             float calfLength = 0.32f;
             float calfRadius = 0.06f;
             CollisionFilter calfFilter = internalCollisions ? layerFilter(layer.Calf, layer.Thigh | layer.Foot) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> calfCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> calfCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(0, -calfLength / 2, 0),
                 Vertex1 = new float3(0, calfLength / 2, 0),
@@ -300,12 +334,16 @@ public class RagdollDemo : BasePhysicsDemo
             float footLength = 0.08f;
             float footRadius = 0.06f;
             CollisionFilter footFilter = internalCollisions ? layerFilter(layer.Foot, layer.Calf) : groupFilter(-ragdollIndex);
-            BlobAssetReference<Unity.Physics.Collider> footCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
+            BlobAssetReference<Collider> footCollider = Unity.Physics.CapsuleCollider.Create(new CapsuleGeometry
             {
                 Vertex0 = new float3(0),
                 Vertex1 = new float3(0, 0, footLength),
                 Radius = footRadius
             }, footFilter);
+
+            CreatedColliders.Add(thighCollider);
+            CreatedColliders.Add(calfCollider);
+            CreatedColliders.Add(footCollider);
 
             for (int i = 0; i < 2; i++)
             {
@@ -382,11 +420,11 @@ public class RagdollDemo : BasePhysicsDemo
                 var e = entities[i];
 
                 bool isTorso = (i == 1);
-                SwapRenderMesh(e, isTorso);
+                SwapRenderMesh(e, isTorso, torsoMesh, renderMesh);
 
-                Translation positionComponent = entityManager.GetComponentData<Translation>(e);
-                Rotation rotationComponent = entityManager.GetComponentData<Rotation>(e);
-                PhysicsVelocity velocityComponent = entityManager.GetComponentData<PhysicsVelocity>(e);
+                Translation positionComponent = EntityManager.GetComponentData<Translation>(e);
+                Rotation rotationComponent = EntityManager.GetComponentData<Rotation>(e);
+                PhysicsVelocity velocityComponent = EntityManager.GetComponentData<PhysicsVelocity>(e);
 
                 float3 position = positionComponent.Value;
                 quaternion rotation = rotationComponent.Value;
@@ -402,25 +440,16 @@ public class RagdollDemo : BasePhysicsDemo
 
                 velocityComponent.Linear = initialVelocity;
 
-                entityManager.SetComponentData<PhysicsVelocity>(e, velocityComponent);
-                entityManager.SetComponentData<Translation>(e, positionComponent);
-                entityManager.SetComponentData<Rotation>(e, rotationComponent);
+                EntityManager.SetComponentData<PhysicsVelocity>(e, velocityComponent);
+                EntityManager.SetComponentData<Translation>(e, positionComponent);
+                EntityManager.SetComponentData<Rotation>(e, rotationComponent);
             }
         }
     }
 
-    protected override void Start()
+    public override void CreateScene(RagdollDemoScene sceneSettings)
     {
-        base.init();
-
-        // Enable the joint viewer
-        //         SetDebugDisplay(new Unity.Physics.Authoring.PhysicsDebugDisplayComponentData
-        //         {
-        //             DrawJoints = 1
-        //         });
-
-
-        for (int i = 0; i < numberOfRagdolls; i++)
+        for (int i = 0; i < sceneSettings.NumberOfRagdolls; i++)
         {
             int xOffset = (i % 2) == 0 ? -1 : 1;
             int yOffset = 2 * (i / 2);
@@ -430,13 +459,14 @@ public class RagdollDemo : BasePhysicsDemo
             var rotation = quaternion.Euler(math.radians(45), -xOffset * math.radians(90), 0);
             var velocity = new float3(xSpeed, math.abs(xSpeed), 0);
 
-            position = math.transform(new RigidTransform(transform.rotation, transform.position), position);
-            rotation = math.mul(transform.rotation, rotation);
-            velocity = math.rotate(transform.rotation, velocity);
+            position = math.transform(sceneSettings.Transform, position);
+            rotation = math.mul(sceneSettings.Transform.rot, rotation);
+            velocity = math.rotate(sceneSettings.Transform.rot, velocity);
 
             CreateRagdoll(
                 positionOffset: position, rotationOffset: rotation, initialVelocity: velocity,
-                ragdollIndex: i + 1, rangeGain: rangeGain);
+                ragdollIndex: i + 1, rangeGain: sceneSettings.RangeGain,
+                renderMesh: sceneSettings.RenderMesh, torsoMesh: sceneSettings.TorsoMesh);
         }
     }
 }

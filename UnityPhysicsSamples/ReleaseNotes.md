@@ -1,3 +1,16 @@
+## [Samples Project for 0.5.1-preview.2] - 2020-10-14
+
+### Changes
+
+* Dependencies
+  * Updated Hybrid Renderer from `0.7.0-preview.24` to `0.10.0-preview.21`
+  * Updated Data Flow Graph from `0.16.0-preview.3` to `0.18.0-preview.1`
+* All demos now have a target frame rate of 60HZ.
+
+### Fixes
+
+### Known Issues
+
 ## [Samples Project for 0.5.0-preview] - 2020-09-15
 
 ### Changes

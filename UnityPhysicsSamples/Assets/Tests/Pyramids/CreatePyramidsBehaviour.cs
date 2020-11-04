@@ -4,7 +4,6 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Unity.Physics.Systems;
 
 public struct PhysicsPyramid : IComponentData {}
 

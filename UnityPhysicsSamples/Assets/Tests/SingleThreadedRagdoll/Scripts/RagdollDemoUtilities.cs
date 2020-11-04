@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -28,7 +29,7 @@ public static class RagdollDemoUtilities
         public bool EnableCollision;
     }
 
-    public static BodyInfo CreateBody(GameObject gameObject)
+    public static BodyInfo CreateBody(GameObject gameObject, List<BlobAssetReference<Unity.Physics.Collider>> createdColliders)
     {
         var bounds = gameObject.GetComponent<MeshRenderer>().bounds;
         var basicBodyInfo = gameObject.GetComponent<BasicBodyInfo>();
@@ -85,6 +86,8 @@ public static class RagdollDemoUtilities
                 break;
         }
 
+
+        createdColliders.Add(collider);
         bool isDynamic = !gameObject.GetComponent<BasicBodyInfo>().IsStatic;
 
         return new BodyInfo

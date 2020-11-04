@@ -24,7 +24,10 @@ namespace Unity.Physics.Samples.Test
         protected BuildPhysicsWorld m_BuildPhysicsWorld;
         protected StepPhysicsWorld m_StepPhysicsWorld;
         protected ExportPhysicsWorld m_ExportPhysicsWorld;
+        protected FixedStepSimulationSystemGroup m_FixedStepGroup;
+
         protected bool m_TestingFinished = false;
+        protected bool m_RecordingBegan = false;
 
         public int SimulatedFramesInCurrentTest = 0;
         public const int k_TestDurationInFrames = 100;
@@ -36,6 +39,7 @@ namespace Unity.Physics.Samples.Test
             m_ExportPhysicsWorld.Enabled = true;
             m_StepPhysicsWorld.Enabled = true;
             m_BuildPhysicsWorld.Enabled = true;
+            m_FixedStepGroup.Enabled = true;
             m_TestingFinished = false;
         }
 
@@ -48,11 +52,13 @@ namespace Unity.Physics.Samples.Test
             m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
             m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
             m_ExportPhysicsWorld = World.GetOrCreateSystem<ExportPhysicsWorld>();
+            m_FixedStepGroup = World.GetOrCreateSystem<FixedStepSimulationSystemGroup>();
         }
 
         protected void FinishTesting()
         {
             SimulatedFramesInCurrentTest = 0;
+            m_FixedStepGroup.Enabled = false;
             m_ExportPhysicsWorld.Enabled = false;
             m_StepPhysicsWorld.Enabled = false;
             m_BuildPhysicsWorld.Enabled = false;
@@ -63,16 +69,24 @@ namespace Unity.Physics.Samples.Test
 
         protected override void OnUpdate()
         {
-            SimulatedFramesInCurrentTest++;
-            var handle = JobHandle.CombineDependencies(Dependency, m_ExportPhysicsWorld.GetOutputDependency());
-
-            if (SimulatedFramesInCurrentTest == k_TestDurationInFrames)
+            if (!m_RecordingBegan)
             {
-                handle.Complete();
-                FinishTesting();
+                // > 1 because of default static body, logically should be > 0
+                m_RecordingBegan = m_BuildPhysicsWorld.PhysicsWorld.NumBodies > 1;
             }
+            else
+            {
+                SimulatedFramesInCurrentTest++;
+                var handle = JobHandle.CombineDependencies(Dependency, m_ExportPhysicsWorld.GetOutputDependency());
 
-            Dependency = handle;
+                if (SimulatedFramesInCurrentTest == k_TestDurationInFrames)
+                {
+                    handle.Complete();
+                    FinishTesting();
+                }
+
+                Dependency = handle;
+            }
         }
     }
 
@@ -82,10 +96,6 @@ namespace Unity.Physics.Samples.Test
 #endif
     class UnityPhysicsEndToEndDeterminismTest
     {
-        private BuildPhysicsWorld m_BuildPhysicsWorld;
-        private StepPhysicsWorld m_StepPhysicsWorld;
-        private ExportPhysicsWorld m_ExportPhysicsWorld;
-
         protected static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
         protected const int k_BusyWaitPeriodInSeconds = 1;
 
@@ -93,29 +103,24 @@ namespace Unity.Physics.Samples.Test
 
         protected static void SwitchWorlds()
         {
-            var entityManager = DefaultWorld.EntityManager;
-            var entities = entityManager.GetAllEntities();
-            entityManager.DestroyEntity(entities);
-            entities.Dispose();
-
-            if (DefaultWorld.IsCreated)
+            var defaultWorld = World.DefaultGameObjectInjectionWorld;
+            defaultWorld.EntityManager.CompleteAllJobs();
+            foreach (var system in defaultWorld.Systems)
             {
-                var systems = DefaultWorld.Systems;
-                foreach (var s in systems)
-                {
-                    s.Enabled = false;
-                }
-                ScriptBehaviourUpdateOrder.RemoveWorldFromCurrentPlayerLoop(DefaultWorld);
-                DefaultWorld.Dispose();
+                system.Enabled = false;
             }
 
+            defaultWorld.Dispose();
             DefaultWorldInitialization.Initialize("Default World", false);
         }
 
         // Demos that make no sense to be tested for determinism
         private static string[] s_FilteredOutDemos =
         {
-            "InitTestScene", "LoaderScene", "SingleThreadedRagdoll"
+            "InitTestScene", "LoaderScene", "SingleThreadedRagdoll",
+
+            // Removing 1c. Conversion since it has no ECS data, it would cause timeouts in EndToEndDeterminismTest
+            "1c. Conversion"
         };
 
         protected static IEnumerable GetScenes()
@@ -148,30 +153,15 @@ namespace Unity.Physics.Samples.Test
             return scenes;
         }
 
-        protected IEnumerator LoadSceneWithDeferredSwitchWorlds(string scenePath)
+        protected void LoadSceneIntoNewWorld(string scenePath)
         {
-            // Load the scene asynchronously and defer the SwitchWorlds() call until
-            // just before the Scene is activated, to guarantee that GameObject-to-Entity
-            // conversion happens at a predictable time.
-            LoadSceneParameters loadParameters = new LoadSceneParameters(LoadSceneMode.Single);
-            var sceneLoadOp = SceneManager.LoadSceneAsync(scenePath, loadParameters);
-            sceneLoadOp.allowSceneActivation = false;
-            while (!sceneLoadOp.isDone)
-            {
-                if (sceneLoadOp.progress >= 0.9f)
-                {
-                    SwitchWorlds();
-                    sceneLoadOp.allowSceneActivation = true;
-                }
-                yield return null;
-            }
-        }
+            SwitchWorlds();
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>().Enabled = false;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<StepPhysicsWorld>().Enabled = false;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<ExportPhysicsWorld>().Enabled = false;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<FixedStepSimulationSystemGroup>().Enabled = false;
 
-        protected void DisablePhysicsSystems()
-        {
-            m_BuildPhysicsWorld.Enabled = false;
-            m_StepPhysicsWorld.Enabled = false;
-            m_ExportPhysicsWorld.Enabled = false;
+            SceneManager.LoadScene(scenePath, LoadSceneMode.Single);
         }
 
         public void StartTest()
@@ -181,7 +171,7 @@ namespace Unity.Physics.Samples.Test
 
         public List<RigidTransform> EndTest()
         {
-            var world = m_BuildPhysicsWorld.PhysicsWorld;
+            var world = DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
 
             List<RigidTransform> results = new List<RigidTransform>();
 
@@ -214,21 +204,16 @@ namespace Unity.Physics.Samples.Test
 
             // First run
             {
-                m_BuildPhysicsWorld = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorld>();
-                m_StepPhysicsWorld = DefaultWorld.GetOrCreateSystem<StepPhysicsWorld>();
-                m_ExportPhysicsWorld = DefaultWorld.GetOrCreateSystem<ExportPhysicsWorld>();
+                // Load scene
+                LoadSceneIntoNewWorld(scenePath);
 
-                // Disable the systems
-                DisablePhysicsSystems();
+                // Wait for ECS to finish distributing entities on chunks
+                // Todo: find a better solution for this
+                yield return new WaitForSeconds(1);
 
-                // Wait for running systems to finish
-                yield return null;
-
-                // Load the scene (and wait for it to load)
-                yield return LoadSceneWithDeferredSwitchWorlds(scenePath);
+                StartTest();
 
                 var testSystem = GetTestSystem();
-                StartTest();
 
                 while (!testSystem.TestingFinished())
                 {
@@ -240,18 +225,16 @@ namespace Unity.Physics.Samples.Test
 
             // Second run
             {
-                m_BuildPhysicsWorld = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorld>();
-                m_StepPhysicsWorld = DefaultWorld.GetOrCreateSystem<StepPhysicsWorld>();
-                m_ExportPhysicsWorld = DefaultWorld.GetOrCreateSystem<ExportPhysicsWorld>();
-                DisablePhysicsSystems();
+                //Load scene
+                LoadSceneIntoNewWorld(scenePath);
 
-                yield return null;
+                // Wait for ECS to finish distributing entities on chunks
+                // Todo: find a better solution for this
+                yield return new WaitForSeconds(1);
 
-                // Load the scene (and wait for it to load)
-                yield return LoadSceneWithDeferredSwitchWorlds(scenePath);
+                StartTest();
 
                 var testSystem = GetTestSystem();
-                StartTest();
 
                 while (!testSystem.TestingFinished())
                 {
@@ -264,6 +247,11 @@ namespace Unity.Physics.Samples.Test
             // Compare results
             {
                 // Verification
+
+                Assert.IsTrue(expected.Count > 0);
+                Assert.IsTrue(actual.Count > 0);
+                Assert.IsTrue(expected.Count == actual.Count);
+
                 int numSame = 0;
                 int numBodies = expected.Count;
                 for (int i = 0; i < numBodies; i++)

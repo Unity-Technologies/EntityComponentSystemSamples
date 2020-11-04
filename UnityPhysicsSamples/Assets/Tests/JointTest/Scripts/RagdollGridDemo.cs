@@ -4,12 +4,14 @@ using Unity.Physics;
 using UnityEngine;
 using static Unity.Physics.Math;
 
-public class RagdollGridDemo : BasePhysicsDemo
-{
-    protected override void Start()
-    {
-        base.Start();
+public class RagdollGridDemoScene : SceneCreationSettings {}
 
+public class RagdollGridDemo : SceneCreationAuthoring<RagdollGridDemoScene> {}
+
+public class RagdollGridDemoSceneSystem : SceneCreationSystem<RagdollGridDemoScene>
+{
+    public override void CreateScene(RagdollGridDemoScene sceneSettings)
+    {
         BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
         {
             Center = float3.zero,
@@ -17,6 +19,7 @@ public class RagdollGridDemo : BasePhysicsDemo
             Size = new float3(0.2f, 1.0f, 0.2f),
             BevelRadius = 0.0f
         });
+        CreatedColliders.Add(collider);
 
         // Make some ragdoll joints
         for (int i = 0; i < 10; i++)

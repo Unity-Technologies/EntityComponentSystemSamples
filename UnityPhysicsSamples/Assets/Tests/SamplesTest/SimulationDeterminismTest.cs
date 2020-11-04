@@ -30,7 +30,11 @@ namespace Unity.Physics.Samples.Test
         private static string[] s_FilteredOutDemos =
         {
             "SingleThreadedRagdoll", "LoaderScene",
-            "InitTestScene"
+            "InitTestScene",
+
+            // Following demos are removed from SimulationDeterminism because they take
+            // too long to complete, and bring no special value
+            "PlanetGravity", "LargeMesh", "Force Field", "ComplexStacking"
         };
 
         protected static IEnumerable GetScenes()

@@ -17,7 +17,9 @@ namespace Unity.Physics.Tests
         public int NewCollider;
     }
 
-    public class VerifyActivation : BasePhysicsDemo, IConvertGameObjectToEntity
+    public class VerifyActivationScene : SceneCreationSettings {}
+
+    public class VerifyActivation : SceneCreationAuthoring<VerifyActivationScene>
     {
         public bool PureFilter = true;
         public bool Remove = true;
@@ -26,8 +28,9 @@ namespace Unity.Physics.Tests
         public bool ColliderChange = true;
         public bool NewCollider = true;
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
+            base.Convert(entity, dstManager, conversionSystem);
             dstManager.AddComponentData(entity, new VerifyActivationData
             {
                 PureFilter = PureFilter ? 1 : 0,
@@ -38,68 +41,90 @@ namespace Unity.Physics.Tests
                 NewCollider = NewCollider ? 1 : 0
             });
         }
+    }
 
-        protected override void Start()
+    public class VerifyActivationSystem : SceneCreationSystem<VerifyActivationScene>
+    {
+        public override void CreateScene(VerifyActivationScene sceneSettings)
         {
-            base.init();
-
             // Common params
             float3 groundSize = new float3(5.0f, 1.0f, 5.0f);
             float3 boxSize = new float3(1.0f, 1.0f, 1.0f);
             float mass = 1.0f;
 
+            Entity e = GetSingletonEntity<VerifyActivationScene>();
+            VerifyActivationData data = GetComponent<VerifyActivationData>(e);
+
             // Ground to do nothing on (other than filter change) and dynamic box over it
-            if (PureFilter)
+            if (data.PureFilter == 1)
             {
                 var groundCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = groundSize });
                 CreateStaticBody(new float3(-30.0f, 0.0f, 0.0f), quaternion.identity, groundCollider);
                 var boxCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = boxSize });
                 CreateDynamicBody(new float3(-30.0f, 1.0f, 0.0f), quaternion.identity, boxCollider, float3.zero, float3.zero, mass);
+
+                CreatedColliders.Add(groundCollider);
+                CreatedColliders.Add(boxCollider);
             }
 
             // Ground to remove and dynamic box over it
-            if (Remove)
+            if (data.Remove == 1)
             {
                 var groundCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = groundSize });
                 CreateStaticBody(new float3(-20.0f, 0.0f, 0.0f), quaternion.identity, groundCollider);
                 var boxCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = boxSize });
                 CreateDynamicBody(new float3(-20.0f, 1.0f, 0.0f), quaternion.identity, boxCollider, float3.zero, float3.zero, mass);
+
+                CreatedColliders.Add(groundCollider);
+                CreatedColliders.Add(boxCollider);
             }
 
             // Ground to convert to dynamic and dynamic box over it
-            if (MotionChange)
+            if (data.MotionChange == 1)
             {
                 var groundCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = groundSize });
                 CreateStaticBody(new float3(-10.0f, 0.0f, 0.0f), quaternion.identity, groundCollider);
                 var boxCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = boxSize });
                 CreateDynamicBody(new float3(-10.0f, 1.0f, 0.0f), quaternion.identity, boxCollider, float3.zero, float3.zero, mass);
+
+                CreatedColliders.Add(groundCollider);
+                CreatedColliders.Add(boxCollider);
             }
 
             // Ground to teleport and dynamic box over it
-            if (Teleport)
+            if (data.Teleport == 1)
             {
                 var groundCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = groundSize });
                 CreateStaticBody(new float3(0.0f, 0.0f, 0.0f), quaternion.identity, groundCollider);
                 var boxCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = boxSize });
                 CreateDynamicBody(new float3(0.0f, 1.0f, 0.0f), quaternion.identity, boxCollider, float3.zero, float3.zero, mass);
+
+                CreatedColliders.Add(groundCollider);
+                CreatedColliders.Add(boxCollider);
             }
 
             // Ground to change collider of and dynamic box over it
-            if (ColliderChange)
+            if (data.ColliderChange == 1)
             {
                 var groundCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = groundSize });
                 CreateStaticBody(new float3(10.0f, 0.0f, 0.0f), quaternion.identity, groundCollider);
                 var boxCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = boxSize });
                 CreateDynamicBody(new float3(10.0f, 1.0f, 0.0f), quaternion.identity, boxCollider, float3.zero, float3.zero, mass);
+
+                CreatedColliders.Add(groundCollider);
+                CreatedColliders.Add(boxCollider);
             }
 
             // Ground to set new collider on and dynamic box over it
-            if (NewCollider)
+            if (data.NewCollider == 1)
             {
                 var groundCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = groundSize });
                 CreateStaticBody(new float3(20.0f, 0.0f, 0.0f), quaternion.identity, groundCollider);
                 var boxCollider = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = boxSize });
                 CreateDynamicBody(new float3(20.0f, 1.0f, 0.0f), quaternion.identity, boxCollider, float3.zero, float3.zero, mass);
+
+                CreatedColliders.Add(groundCollider);
+                CreatedColliders.Add(boxCollider);
             }
         }
     }
@@ -113,6 +138,8 @@ namespace Unity.Physics.Tests
         EntityQuery m_VerificationGroup;
 
         BuildPhysicsWorld m_BuildPhysicsWorld;
+        ExportPhysicsWorld m_ExportPhysicsWorld;
+        VerifyActivationSystem m_VerifyActivationSystem;
 
         protected override void OnCreate()
         {
@@ -124,15 +151,18 @@ namespace Unity.Physics.Tests
             RequireForUpdate(m_VerificationGroup);
 
             m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
+            m_ExportPhysicsWorld = World.GetOrCreateSystem<ExportPhysicsWorld>();
+            m_VerifyActivationSystem = World.GetOrCreateSystem<VerifyActivationSystem>();
 
             m_Counter = 0;
         }
 
-        protected unsafe override void OnUpdate()
+        protected override void OnUpdate()
         {
             m_Counter++;
             if (m_Counter == 30)
             {
+                m_ExportPhysicsWorld.GetOutputDependency().Complete();
                 // First change filter of all ground colliders to collide with nothing
                 var staticEntities = m_BuildPhysicsWorld.StaticEntityGroup.ToEntityArray(Allocator.TempJob);
                 for (int i = 0; i < staticEntities.Length; i++)
@@ -144,6 +174,7 @@ namespace Unity.Physics.Tests
                         CollidesWith = ~CollisionFilter.Default.CollidesWith,
                         GroupIndex = 1
                     };
+                    EntityManager.SetComponentData(staticEntities[i], colliderComponent);
                 }
 
                 var verificationData = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
@@ -189,7 +220,11 @@ namespace Unity.Physics.Tests
                 if (verificationComponentData.ColliderChange > 0)
                 {
                     var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
+                    var oldFilter = colliderComponent.Value.Value.Filter;
                     colliderComponent.Value = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = new float3(5.0f, 1.0f, 50.0f) });
+                    colliderComponent.Value.Value.Filter = oldFilter;
+                    m_VerifyActivationSystem.CreatedColliders.Add(colliderComponent.Value);
+                    EntityManager.SetComponentData(staticEntities[counter], colliderComponent);
                     counter++;
                 }
 
@@ -198,6 +233,7 @@ namespace Unity.Physics.Tests
                 {
                     var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
                     var newColliderComponent = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = new float3(5.0f, 1.0f, 50.0f) });
+                    m_VerifyActivationSystem.CreatedColliders.Add(newColliderComponent);
                     newColliderComponent.Value.Filter = colliderComponent.Value.Value.Filter;
                     EntityManager.SetComponentData(staticEntities[counter], new PhysicsCollider { Value = newColliderComponent });
                     counter++;

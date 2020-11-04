@@ -36,7 +36,7 @@ public class SceneNavigation : MonoBehaviour
 
         m_MenuButton.onClick.AddListener(() =>
         {
-            BasePhysicsDemo.ResetDefaultWorld();
+            LoaderScene.ResetDefaultWorld();
             SceneManager.LoadScene(0, LoadSceneMode.Single);
             Destroy(gameObject);
             Destroy(m_EventSystem.gameObject);

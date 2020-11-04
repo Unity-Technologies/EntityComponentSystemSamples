@@ -366,14 +366,14 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
 
     void Start()
     {
-        System = BasePhysicsDemo.DefaultWorld.GetOrCreateSystem<ProjectIntoFutureOnCueSystem>();
+        System = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<ProjectIntoFutureOnCueSystem>();
     }
 
     void Update()
     {
         if (!System.IsInitialized && !WhiteBallEntity.Equals(Entity.Null))
         {
-            var physicsWorld = BasePhysicsDemo.DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+            var physicsWorld = World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
             if (physicsWorld.NumDynamicBodies > 0)
             {
                 System.Initialize(WhiteBallEntity, NumSteps, ReferenceMesh, ReferenceMaterial, ref physicsWorld);
@@ -395,7 +395,7 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
     {
         if (System.IsInitialized)
         {
-            var entityManager = BasePhysicsDemo.DefaultWorld.EntityManager;
+            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
             // assign the required velocity to the white ball in the main simulation
             var velocity = entityManager.GetComponentData<PhysicsVelocity>(WhiteBallEntity);

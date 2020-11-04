@@ -1,15 +1,16 @@
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using static Unity.Physics.Math;
 
-public class SoftJointDemo : BasePhysicsDemo
-{
-    protected override void Start()
-    {
-        base.init();
+public class SoftJointDemoScene : SceneCreationSettings {}
 
+public class SoftJointDemo : SceneCreationAuthoring<SoftJointDemoScene> {}
+
+public class SoftJointDemoCreationSystem : SceneCreationSystem<SoftJointDemoScene>
+{
+    public override void CreateScene(SoftJointDemoScene sceneSettings)
+    {
         // Make soft ball and sockets
         {
             BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
@@ -19,6 +20,7 @@ public class SoftJointDemo : BasePhysicsDemo
                 Size = new float3(0.2f, 0.2f, 0.2f),
                 BevelRadius = 0.0f
             });
+            CreatedColliders.Add(collider);
 
             // Make joints with different spring frequency.  The leftmost joint should oscillate at 0.5hz, the next at 1hz, the next at 1.5hz, etc.
             for (int i = 0; i < 10; i++)
@@ -46,7 +48,7 @@ public class SoftJointDemo : BasePhysicsDemo
             }
         }
 
-        // Make soft limited hinges
+        //Make soft limited hinges
         {
             BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
             {
@@ -55,6 +57,7 @@ public class SoftJointDemo : BasePhysicsDemo
                 Size = new float3(0.4f, 0.1f, 0.6f),
                 BevelRadius = 0.0f
             });
+            CreatedColliders.Add(collider);
 
             // First row has soft limit with hard hinge + pivot, second row has everything soft
             for (int j = 0; j < 2; j++)
@@ -106,6 +109,7 @@ public class SoftJointDemo : BasePhysicsDemo
                 Size = new float3(0.2f, 0.2f, 0.2f),
                 BevelRadius = 0.0f
             });
+            CreatedColliders.Add(collider);
 
             // Create a body
             float3 position = new float3(0, 0, 9.0f);
