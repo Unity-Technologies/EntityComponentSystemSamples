@@ -12,7 +12,6 @@ class StateTransitionMaterials : IComponentData
 #endif
 
 [DisallowMultipleComponent]
-[RequiresEntityConversion]
 public class MaterialSingletonAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public Material m_IdleMaterial;

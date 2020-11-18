@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Samples.FixedTimestepSystem.Authoring
 {
-    [RequiresEntityConversion]
     [AddComponentMenu("DOTS Samples/FixedTimestepWorkaround/Projectile Spawn Time")]
     [ConverterVersion("joe", 1)]
     public class ProjectileAuthoring : MonoBehaviour, IConvertGameObjectToEntity

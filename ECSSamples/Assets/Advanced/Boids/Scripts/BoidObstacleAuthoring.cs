@@ -5,7 +5,6 @@ using Samples.Boids;
 using Unity.Entities;
 using UnityEngine;
 
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/Boids/BoidObstacle")]
 [ConverterVersion("joe", 1)]
 public class BoidObstacleAuthoring : MonoBehaviour, IConvertGameObjectToEntity

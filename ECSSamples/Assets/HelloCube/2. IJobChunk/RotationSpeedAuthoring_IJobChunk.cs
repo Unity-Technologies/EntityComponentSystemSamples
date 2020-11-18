@@ -3,7 +3,6 @@ using Unity.Mathematics;
 using UnityEngine;
 
 // ReSharper disable once InconsistentNaming
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/IJobChunk/Rotation Speed")]
 [ConverterVersion("joe", 1)]
 public class RotationSpeedAuthoring_IJobChunk : MonoBehaviour, IConvertGameObjectToEntity

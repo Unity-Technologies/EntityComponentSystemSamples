@@ -3,7 +3,6 @@ using Unity.Entities;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/GridPath/Solo Spawner")]
 [ConverterVersion("macton", 2)]
 public class SoloSpawnerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs

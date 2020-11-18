@@ -2,7 +2,6 @@ using Unity.Entities;
 using Unity.Rendering;
 using UnityEngine;
 
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/GridPath/Cartesian Grid Movement")]
 [ConverterVersion("macton", 4)]
 public class CartesianGridMovementAuthoring : MonoBehaviour, IConvertGameObjectToEntity

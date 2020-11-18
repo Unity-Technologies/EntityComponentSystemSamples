@@ -25,7 +25,7 @@ namespace Samples.GridPath.Tests
                 int wallRowStride = (colCount + 1) / 2;
                 int wallsSize = rowCount * wallRowStride;
 
-                Walls = (byte*)UnsafeUtility.Malloc(wallsSize, 16, Allocator.Temp);
+                Walls = (byte*)Memory.Unmanaged.Allocate(wallsSize, 16, Allocator.Temp);
                 UnsafeUtility.MemClear(Walls, wallsSize);
 
                 // Add outer boundary walls.
@@ -42,7 +42,7 @@ namespace Samples.GridPath.Tests
             public void Dispose()
             {
                 if (Walls != null)
-                    UnsafeUtility.Free(Walls, Allocator.Temp);
+                    Memory.Unmanaged.Free(Walls, Allocator.Temp);
             }
 
             public void SetWallBit(int x, int y, CartesianGridDirectionBit directionBit)

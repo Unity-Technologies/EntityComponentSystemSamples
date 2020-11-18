@@ -26,16 +26,16 @@ namespace Samples.GridPath.Tests
                 int wallFaceStride = rowCount * wallRowStride;
                 int wallsSize = 6 * wallFaceStride;
 
-                Walls = (byte*)UnsafeUtility.Malloc(wallsSize, 16, Allocator.Temp);
+                Walls = (byte*)Memory.Unmanaged.Allocate(wallsSize, 16, Allocator.Temp);
                 UnsafeUtility.MemClear(Walls, wallsSize);
                 for (int i = 0; i < wallsSize; i++)
                 {
                     Assert.AreEqual(Walls[i], 0);
                 }
 
-                FaceWorldToLocal = (float4x4*)UnsafeUtility.Malloc(sizeof(float4x4) * 6, 16, Allocator.Temp);
-                FaceLocalToWorld = (float4x4*)UnsafeUtility.Malloc(sizeof(float4x4) * 6, 16, Allocator.Temp);
-                FaceLocalToLocal = (float4x4*)UnsafeUtility.Malloc(sizeof(float4x4) * 6 * 6, 16, Allocator.Temp);
+                FaceWorldToLocal = (float4x4*)Memory.Unmanaged.Allocate(UnsafeUtility.SizeOf<float4x4>() * 6, 16, Allocator.Temp);
+                FaceLocalToWorld = (float4x4*)Memory.Unmanaged.Allocate(UnsafeUtility.SizeOf<float4x4>() * 6, 16, Allocator.Temp);
+                FaceLocalToLocal = (float4x4*)Memory.Unmanaged.Allocate(UnsafeUtility.SizeOf<float4x4>() * 6 * 6, 16, Allocator.Temp);
 
                 CartesianGridGeneratorUtility.FillCubeFaceTransforms(rowCount, FaceLocalToWorld, FaceWorldToLocal, FaceLocalToLocal);
             }
@@ -43,13 +43,13 @@ namespace Samples.GridPath.Tests
             public void Dispose()
             {
                 if (Walls != null)
-                    UnsafeUtility.Free(Walls, Allocator.Temp);
+                    Memory.Unmanaged.Free(Walls, Allocator.Temp);
                 if (FaceLocalToLocal != null)
-                    UnsafeUtility.Free(FaceLocalToLocal, Allocator.Temp);
+                    Memory.Unmanaged.Free(FaceLocalToLocal, Allocator.Temp);
                 if (FaceLocalToWorld != null)
-                    UnsafeUtility.Free(FaceLocalToWorld, Allocator.Temp);
+                    Memory.Unmanaged.Free(FaceLocalToWorld, Allocator.Temp);
                 if (FaceWorldToLocal != null)
-                    UnsafeUtility.Free(FaceWorldToLocal, Allocator.Temp);
+                    Memory.Unmanaged.Free(FaceWorldToLocal, Allocator.Temp);
             }
 
             public void SetWallBit(int cellIndex, CartesianGridDirectionBit directionBit)

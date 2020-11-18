@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace Samples.Boids
 {
-    [RequiresEntityConversion]
     [AddComponentMenu("DOTS Samples/Boids/BoidSchool")]
     [ConverterVersion("macton", 4)]
     public class BoidSchoolAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs

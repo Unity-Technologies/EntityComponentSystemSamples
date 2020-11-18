@@ -3,7 +3,6 @@ using Unity.Entities;
 using UnityEngine;
 
 // ReSharper disable once InconsistentNaming
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/SpawnAndRemove/Spawner")]
 [ConverterVersion("joe", 1)]
 public class SpawnerAuthoring_SpawnAndRemove : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity

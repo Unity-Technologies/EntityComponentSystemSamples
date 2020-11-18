@@ -9,7 +9,6 @@ struct PlayerTag : IComponentData {}
 /// Allows us to edit GameObjects in the Editor and convert those GameObjects to the optimized Entity representation
 /// </summary>
 [DisallowMultipleComponent]
-[RequiresEntityConversion]
 public class PlayerAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float MovementSpeedMetersPerSecond = 5.0f;

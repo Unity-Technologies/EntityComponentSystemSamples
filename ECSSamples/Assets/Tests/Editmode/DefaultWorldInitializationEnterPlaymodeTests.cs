@@ -45,7 +45,7 @@ namespace EnterPlayModeTests
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
         }
 
-        [UnityTest]
+        [UnityTest, Ignore("Unstable, CI Editor Crash - DOTS-1872")]
         public IEnumerator DefaultBootstrappedWorld_OnSecondEnterPlayMode_ProducesOneWorld([ValueSource(nameof(TestEnterPlayModeOptions))] EnterPlayModeOptions enterPlayModeOptions)
         {
             // Set editor settings

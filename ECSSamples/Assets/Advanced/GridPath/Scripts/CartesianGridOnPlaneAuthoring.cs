@@ -4,7 +4,6 @@ using Unity.Entities;
 using UnityEngine;
 
 // ReSharper disable once InconsistentNaming
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/GridPath/Cartesian Grid on Plane")]
 [ConverterVersion("macton", 10)]
 public class CartesianGridOnPlaneAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs

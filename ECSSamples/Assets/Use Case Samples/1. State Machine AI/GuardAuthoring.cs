@@ -55,7 +55,6 @@ public struct IsInTransitionTag : IComponentData
 /// Allows us to edit GameObjects in the Editor and convert those GameObjects to the optimized Entity representation
 /// </summary>
 [DisallowMultipleComponent]
-[RequiresEntityConversion]
 public class GuardAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     /// <summary>

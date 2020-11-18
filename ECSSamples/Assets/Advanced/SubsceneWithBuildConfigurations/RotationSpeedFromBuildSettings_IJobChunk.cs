@@ -5,7 +5,6 @@ using Unity.Transforms;
 using UnityEngine;
 
 #if UNITY_EDITOR
-[RequiresEntityConversion]
 [ConverterVersion("joe", 1)]
 public class RotationSpeedFromBuildSettings_IJobChunk : MonoBehaviour, IConvertGameObjectToEntity
 {

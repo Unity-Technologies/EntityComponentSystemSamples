@@ -4,7 +4,6 @@ using Unity.Mathematics;
 using UnityEngine;
 
 // ReSharper disable once InconsistentNaming
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/HybridComponent/Rotation Speed")]
 [ConverterVersion("joe", 1)]
 public class RotationSpeedAuthoring_HybridComponent : MonoBehaviour, IConvertGameObjectToEntity

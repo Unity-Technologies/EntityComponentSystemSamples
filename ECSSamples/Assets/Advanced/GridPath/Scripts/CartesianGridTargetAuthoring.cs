@@ -1,7 +1,6 @@
 using Unity.Entities;
 using UnityEngine;
 
-[RequiresEntityConversion]
 [AddComponentMenu("DOTS Samples/GridPath/Cartesian Grid Target")]
 [ConverterVersion("macton", 1)]
 public class CartesianGridTargetAuthoring : MonoBehaviour, IConvertGameObjectToEntity
