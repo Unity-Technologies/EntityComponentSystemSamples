@@ -66,6 +66,15 @@ The ECSSamples project contains samples to help you get started with DOTS. The p
 Unity Physics is a deterministic, rigid-body dynamics system and spatial query system written from the ground up using the Unity data oriented tech stack.
 You can find an [overview of the samples](UnityPhysicsSamples/Documentation/samples.md) and the [release notes](UnityPhysicsSamples/ReleaseNotes.md) in this repository.
 
+## Hybrid HDRP Samples
+
+The HybridHDRPSamples contains feature sample Scenes, stress test Scenes for the HDRP Hybrid Renderer.
+You can find the [overview](HybridHDRPSamples/README.md) and the [release notes](HybridHDRPSamples/ReleaseNotes.md) in this repository.
+
+## Hybrid URP Samples
+
+The HybridURPSamples contains feature sample Scenes, stress test Scenes for the URP Hybrid Renderer.
+You can find the [overview](HybridURPSamples/README.md) and the [release notes](HybridURPSamples/ReleaseNotes.md) in this repository.
 
 ## Documentation
 

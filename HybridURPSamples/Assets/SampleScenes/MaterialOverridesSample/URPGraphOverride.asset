@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1c49a92ef1771844b9c93a4037158cd, type: 3}
+  m_Name: URPGraphOverride
+  m_EditorClassIdentifier: 
+  overrideList:
+  - name: _URPMyColor
+    displayName: _URPMyColor
+    shaderName: Assets/SampleScenes/MaterialOverridesSample/URPShaderGraph.shadergraph
+    materialName: URPGraphMaterial
+    type: 0
+    value: {x: 0, y: 1, z: 0.5137255, w: 1}
+    instanceOverride: 0
+  - name: _URPMyMetallic
+    displayName: _URPMyMetallic
+    shaderName: Assets/SampleScenes/MaterialOverridesSample/URPShaderGraph.shadergraph
+    materialName: URPGraphMaterial
+    type: 2
+    value: {x: 0.5, y: 0, z: 0, w: 0}
+    instanceOverride: 0
+  - name: _URPMySmoothness
+    displayName: _URPMySmoothness
+    shaderName: Assets/SampleScenes/MaterialOverridesSample/URPShaderGraph.shadergraph
+    materialName: URPGraphMaterial
+    type: 2
+    value: {x: 0.5, y: 0, z: 0, w: 0}
+    instanceOverride: 0
+  material: {fileID: 2100000, guid: 70aa96a5c489d7f47b274f9a4e3f11da, type: 2}
