@@ -91,13 +91,17 @@ namespace Unity.Physics.Samples.Test
     }
 
     // Only works in standalone build, since it needs synchronous Burst compilation.
-#if !UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS
+#if (!UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS) || UNITY_PHYSICS_INCLUDE_END2END_TESTS
     [TestFixture]
 #endif
     class UnityPhysicsEndToEndDeterminismTest
     {
         protected static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
         protected const int k_BusyWaitPeriodInSeconds = 1;
+
+        // Disposing the world before the first scene is loaded causes problems as of Entities 0.17.0-preview.35
+        // The workaround is to avoid calling SwitchWorld() when the first scene is being loaded
+        protected bool FirstSceneLoad = true;
 
         protected virtual IDeterminismTestSystem GetTestSystem() => DefaultWorld.GetExistingSystem<UnityPhysicsDeterminismTestSystem>();
 
@@ -155,7 +159,11 @@ namespace Unity.Physics.Samples.Test
 
         protected void LoadSceneIntoNewWorld(string scenePath)
         {
-            SwitchWorlds();
+            if (!FirstSceneLoad)
+            {
+                SwitchWorlds();
+            }
+            FirstSceneLoad = false;
             World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>().Enabled = false;
             World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<StepPhysicsWorld>().Enabled = false;
             World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<ExportPhysicsWorld>().Enabled = false;
@@ -190,7 +198,7 @@ namespace Unity.Physics.Samples.Test
         }
 
         // Only works in standalone build, since it needs synchronous Burst compilation.
-#if !UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS
+#if (!UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS) || UNITY_PHYSICS_INCLUDE_END2END_TESTS
         [UnityTest]
 #endif
         public virtual IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)

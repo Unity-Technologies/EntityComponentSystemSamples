@@ -37,7 +37,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
         // Debug draw the colliders
         for (int i = 0; i < m_BodyInfos.Length; i++)
         {
-            m_BodyInfoIndexToGameObjectMapping.TryGetValue(i, out GameObject g);
+            GameObject g = m_BodyInfoIndexToGameObjectMapping[i];
 
             var collider = m_BodyInfos[i].Collider;
             var transform = new RigidTransform(m_BodyInfos[i].Orientation, m_BodyInfos[i].Position);
@@ -133,7 +133,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
         {
             if (!m_BodyInfos[i].IsDynamic) continue;
 
-            m_BodyInfoIndexToGameObjectMapping.TryGetValue(i, out GameObject g);
+            GameObject g = m_BodyInfoIndexToGameObjectMapping[i];
             g.transform.position = m_BodyInfos[i].Position;
             g.transform.rotation = m_BodyInfos[i].Orientation;
         }
@@ -143,7 +143,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
     private NativeList<BodyInfo> m_BodyInfos;
     private NativeList<JointInfo> m_JointInfos;
-    private Dictionary<int, GameObject> m_BodyInfoIndexToGameObjectMapping;
+    private List<GameObject> m_BodyInfoIndexToGameObjectMapping;
 
     [BurstCompile]
     private struct SingleThreadedPhysicsSimulationJob : IJob
@@ -349,7 +349,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
         }
 #endif
 
-        m_BodyInfoIndexToGameObjectMapping = new Dictionary<int, GameObject>();
+        m_BodyInfoIndexToGameObjectMapping = new List<GameObject>();
         m_BodyInfos = new NativeList<BodyInfo>(Allocator.Persistent);
         m_JointInfos = new NativeList<JointInfo>(Allocator.Persistent);
         PhysicsWorld = new PhysicsWorld(0, 0, 0);
@@ -364,7 +364,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
             {
                 m_NumDynamicBodies++;
             }
-            m_BodyInfoIndexToGameObjectMapping.Add(i, basicBodyInfo.gameObject);
+            m_BodyInfoIndexToGameObjectMapping.Add(basicBodyInfo.gameObject);
             m_BodyInfos.Add(body);
         }
 
@@ -398,7 +398,8 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
         for (int i = 0; i < m_BodyInfos.Length; i++)
         {
-            if (m_BodyInfoIndexToGameObjectMapping.TryGetValue(i, out GameObject go))
+            GameObject go = m_BodyInfoIndexToGameObjectMapping[i];
+            if (go)
             {
                 if (go == bodyA)
                 {

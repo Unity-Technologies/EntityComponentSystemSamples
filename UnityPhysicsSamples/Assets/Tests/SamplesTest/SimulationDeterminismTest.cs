@@ -15,7 +15,7 @@ namespace Unity.Physics.Samples.Test
     // Runs all simulation types on the same cloned physics world for a
     // predefined number of steps and compares results.
     // Only works in standalone build, since it needs synchronous Burst compilation.
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR || UNITY_PHYSICS_INCLUDE_END2END_TESTS
     [TestFixture]
 #endif
     class UnityPhysicsSimulationDeterminismTest
@@ -64,7 +64,7 @@ namespace Unity.Physics.Samples.Test
             return scenes;
         }
 
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR || UNITY_PHYSICS_INCLUDE_END2END_TESTS
         [UnityTest]
         [Timeout(240000)]
 #endif
@@ -81,14 +81,13 @@ namespace Unity.Physics.Samples.Test
             const int k_StopAfterStep = 100;
 
             // Number of worlds to simulate
-            const int k_NumWorlds = 4;
+            const int k_NumWorlds = 3;
 
-            // Number of threads in each of the runs (3rd run is single threaded simulation)
+            // Number of threads in each of the runs (2nd run is immediate mode simulation)
             NativeArray<int> numThreadsPerRun = new NativeArray<int>(k_NumWorlds, Allocator.Persistent);
-            numThreadsPerRun[0] = 8;
-            numThreadsPerRun[1] = 4;
-            numThreadsPerRun[2] = 0;
-            numThreadsPerRun[3] = -1;
+            numThreadsPerRun[0] = 4;
+            numThreadsPerRun[1] = 0;
+            numThreadsPerRun[2] = -1;
 
             // Load the scene and wait 2 frames
             SceneManager.LoadScene(scenePath);
@@ -114,10 +113,8 @@ namespace Unity.Physics.Samples.Test
             // Extract original world and make copies
             List<PhysicsWorld> physicsWorlds = new List<PhysicsWorld>(k_NumWorlds);
             physicsWorlds.Add(sampler.PhysicsWorld.Clone());
-
             physicsWorlds.Add(physicsWorlds[0].Clone());
             physicsWorlds.Add(physicsWorlds[1].Clone());
-            physicsWorlds.Add(physicsWorlds[2].Clone());
 
             NativeArray<int> buildStaticTree = new NativeArray<int>(1, Allocator.Persistent);
             buildStaticTree[0] = 1;
@@ -177,16 +174,17 @@ namespace Unity.Physics.Samples.Test
                 }
                 else
                 {
+                    bool multiThreaded = threadCountHint > 0 ? true : false;
 #if HAVOK_PHYSICS_EXISTS
                     if (SimulateHavok)
                     {
                         var simulation = new Havok.Physics.HavokSimulation(Havok.Physics.HavokConfiguration.Default);
                         stepInput.World = physicsWorlds[i];
                         stepInput.World.CollisionWorld.ScheduleBuildBroadphaseJobs(
-                            ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, threadCountHint).Complete();
+                            ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, multiThreaded).Complete();
                         for (int step = 0; step < k_StopAfterStep; step++)
                         {
-                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, threadCountHint);
+                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, multiThreaded);
                             handles.FinalExecutionHandle.Complete();
                             handles.FinalDisposeHandle.Complete();
                         }
@@ -198,10 +196,10 @@ namespace Unity.Physics.Samples.Test
                         var simulation = new Simulation();
                         stepInput.World = physicsWorlds[i];
                         stepInput.World.CollisionWorld.ScheduleBuildBroadphaseJobs(
-                            ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, threadCountHint).Complete();
+                            ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, multiThreaded).Complete();
                         for (int step = 0; step < k_StopAfterStep; step++)
                         {
-                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, threadCountHint);
+                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, multiThreaded);
                             handles.FinalExecutionHandle.Complete();
                             handles.FinalDisposeHandle.Complete();
                         }
@@ -337,7 +335,7 @@ namespace Unity.Physics.Samples.Test
     }
 
 #if HAVOK_PHYSICS_EXISTS
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR || UNITY_PHYSICS_INCLUDE_END2END_TESTS
     [TestFixture]
 #endif
     class HavokPhysicsSimulationDeterminismTest : UnityPhysicsSimulationDeterminismTest

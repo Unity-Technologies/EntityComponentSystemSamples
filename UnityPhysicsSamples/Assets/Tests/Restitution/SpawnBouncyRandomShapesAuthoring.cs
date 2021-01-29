@@ -34,32 +34,29 @@ class SpawnBouncyRandomShapesSystem : SpawnRandomObjectsSystemBase<BouncySpawnSe
         return seed;
     }
 
-    internal override void OnBeforeInstantiatePrefab(BouncySpawnSettings spawnSettings)
+    internal override void OnBeforeInstantiatePrefab(ref BouncySpawnSettings spawnSettings)
     {
-        base.OnBeforeInstantiatePrefab(spawnSettings);
+        base.OnBeforeInstantiatePrefab(ref spawnSettings);
+
         var component = EntityManager.GetComponentData<PhysicsCollider>(spawnSettings.Prefab);
+        TweakedCollider = component.Value.Value.Clone();
+        Assert.IsTrue(TweakedCollider.Value.CollisionType == CollisionType.Convex);
         unsafe
         {
-            var oldCollider = component.ColliderPtr;
-            var newCollider = (Collider*)UnsafeUtility.Malloc(oldCollider->MemorySize, 16, Allocator.Temp);
-
-            UnsafeUtility.MemCpy(newCollider, oldCollider, oldCollider->MemorySize);
-
-            var material = ((ConvexColliderHeader*)newCollider)->Material;
-            material.Restitution = spawnSettings.Restitution;
-            ((ConvexColliderHeader*)newCollider)->Material = material;
-
-            Assert.IsTrue(oldCollider->MemorySize == newCollider->MemorySize, "Error when cloning Collider!");
-
-            TweakedCollider = BlobAssetReference<Collider>.Create(newCollider, newCollider->MemorySize);
-
-            UnsafeUtility.Free(newCollider, Allocator.Temp);
+            // TODO: remove when we have Material accessors
+            unsafe
+            {
+                var header = (ConvexColliderHeader*)TweakedCollider.GetUnsafePtr();
+                var material = header->Material;
+                material.Restitution = spawnSettings.Restitution;
+                header->Material = material;
+            }
         }
     }
 
-    internal override void ConfigureInstance(Entity instance, BouncySpawnSettings spawnSettings)
+    internal override void ConfigureInstance(Entity instance, ref BouncySpawnSettings spawnSettings)
     {
-        base.ConfigureInstance(instance, spawnSettings);
+        base.ConfigureInstance(instance, ref spawnSettings);
         var collider = EntityManager.GetComponentData<PhysicsCollider>(instance);
         collider.Value = TweakedCollider;
         EntityManager.SetComponentData(instance, collider);

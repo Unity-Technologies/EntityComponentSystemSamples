@@ -57,7 +57,6 @@ public class SingleThreadedPhysicsSystem : SystemBase
     public EntityQuery JointEntityGroup;
 
     private NativeHashMap<Entity, Entity> EntityMap;
-    private NativeHashMap<Entity, int> EntityToBodyIndexMap;
 
     private StepPhysicsWorld m_StepPhysicsWorld;
     private NativeList<BlobAssetReference<Collider>> m_CreatedColliders;
@@ -90,7 +89,6 @@ public class SingleThreadedPhysicsSystem : SystemBase
                     Entity = entities[i],
                     CustomTags = customTags[i].Value
                 };
-                EntityToBodyIndexMap.Add(entities[i], i);
             }
 
             colliders.Dispose();
@@ -117,7 +115,6 @@ public class SingleThreadedPhysicsSystem : SystemBase
                     Entity = entities[i],
                     CustomTags = customTags[i].Value
                 };
-                EntityToBodyIndexMap.Add(entities[i], i + dynamicBodies.Length);
             }
 
             // default static body
@@ -135,6 +132,8 @@ public class SingleThreadedPhysicsSystem : SystemBase
             customTags.Dispose();
             entities.Dispose();
         }
+
+        PhysicsWorld.CollisionWorld.UpdateBodyIndexMap();
     }
 
     public void CreateMotionVelocities()
@@ -200,29 +199,10 @@ public class SingleThreadedPhysicsSystem : SystemBase
         {
             EntityMap.TryGetValue(constrainedBodyPairs[i].EntityA, out Entity entityA);
             EntityMap.TryGetValue(constrainedBodyPairs[i].EntityB, out Entity entityB);
-            int bodyIndexA = -1;
-            if (entityA != Entity.Null)
-            {
-                EntityToBodyIndexMap.TryGetValue(entityA, out bodyIndexA);
-            }
-            else
-            {
-                bodyIndexA = PhysicsWorld.NumBodies - 1;
-            }
-            int bodyIndexB = -1;
-            if (entityB != Entity.Null)
-            {
-                EntityToBodyIndexMap.TryGetValue(entityB, out bodyIndexB);
-            }
-            else
-            {
-                bodyIndexB = PhysicsWorld.NumBodies - 1;
-            }
-
             var pair = new BodyIndexPair
             {
-                BodyIndexA = bodyIndexA,
-                BodyIndexB = bodyIndexB
+                BodyIndexA = PhysicsWorld.GetRigidBodyIndex(entityA),
+                BodyIndexB = PhysicsWorld.GetRigidBodyIndex(entityB)
             };
             var jointData = physicsJoints[i];
             joints[i] = new Joint
@@ -239,6 +219,8 @@ public class SingleThreadedPhysicsSystem : SystemBase
 
         physicsJoints.Dispose();
         constrainedBodyPairs.Dispose();
+
+        PhysicsWorld.DynamicsWorld.UpdateJointIndexMap();
     }
 
     public void ExportMotions(NativeArray<RigidBody> dynamicBodies, NativeArray<MotionData> motionDatas, NativeArray<MotionVelocity> motionVelocities)
@@ -444,7 +426,6 @@ public class SingleThreadedPhysicsSystem : SystemBase
         int numStaticBodies = CustomStaticEntityGroup.CalculateEntityCount();
         int numJoints = JointEntityGroup.CalculateEntityCount();
 
-        EntityToBodyIndexMap = new NativeHashMap<Entity, int>(numStaticBodies + numDynamicBodies, Allocator.Temp);
         numStaticBodies++; // + 1 for default static body
 
         // Build the world

@@ -13,30 +13,6 @@ using static Unity.Physics.Math;
 
 namespace Unity.Physics.Extensions
 {
-    public class ColliderUtils
-    {
-        [BurstCompile]
-        public static bool IsTrigger(BlobAssetReference<Collider> collider, ColliderKey key)
-        {
-            bool bIsTrigger = false;
-            unsafe
-            {
-                var c = (Collider*)collider.GetUnsafePtr();
-                {
-                    var cc = ((ConvexCollider*)c);
-                    if (cc->CollisionType != CollisionType.Convex)
-                    {
-                        c->GetLeaf(key, out ChildCollider child);
-                        cc = (ConvexCollider*)child.Collider;
-                        Assert.IsTrue(cc->CollisionType == CollisionType.Convex);
-                    }
-                    bIsTrigger = cc->Material.CollisionResponse == CollisionResponsePolicy.RaiseTriggerEvents;
-                }
-            }
-            return bIsTrigger;
-        }
-    }
-
     // A mouse pick collector which stores every hit. Based off the ClosestHitCollector
     [BurstCompile]
     public struct MousePickCollector : ICollector<RaycastHit>
@@ -71,8 +47,7 @@ namespace Unity.Physics.Extensions
             var isAcceptable = (hit.RigidBodyIndex >= 0) && (hit.RigidBodyIndex < NumDynamicBodies);
             if (IgnoreTriggers)
             {
-                var body = Bodies[hit.RigidBodyIndex];
-                isAcceptable = isAcceptable && !ColliderUtils.IsTrigger(body.Collider, hit.ColliderKey);
+                isAcceptable = isAcceptable && hit.Material.CollisionResponse != CollisionResponsePolicy.RaiseTriggerEvents;
             }
 
             if (!isAcceptable)

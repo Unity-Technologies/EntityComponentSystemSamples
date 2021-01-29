@@ -3,6 +3,10 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using TerrainCollider = Unity.Physics.TerrainCollider;
+using Collider = Unity.Physics.Collider;
+using MeshCollider = Unity.Physics.MeshCollider;
 
 public class TerrainDemoScene : SceneCreationSettings
 {
@@ -11,6 +15,9 @@ public class TerrainDemoScene : SceneCreationSettings
     public float ScaleX;
     public float ScaleY;
     public float ScaleZ;
+    public bool BuildCompoundTerrain;
+    public int NumChildren;
+    public bool BuildTerrainMesh;
     public TerrainCollider.CollisionMethod Method;
 }
 
@@ -21,6 +28,11 @@ public class TerrainDemo : SceneCreationAuthoring<TerrainDemoScene>
     public float ScaleX;
     public float ScaleY;
     public float ScaleZ;
+    public bool BuildCompoundTerrain = false;
+    public bool BuildTerrainMesh = false;
+
+    [Tooltip("Valid if BuildCompoundTerrain is set to true")]
+    public int NumChildren = 0;
     public TerrainCollider.CollisionMethod Method;
 
     public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
@@ -34,7 +46,10 @@ public class TerrainDemo : SceneCreationAuthoring<TerrainDemoScene>
             SizeZ = SizeZ,
             ScaleX = ScaleX,
             ScaleY = ScaleY,
-            ScaleZ = ScaleZ
+            ScaleZ = ScaleZ,
+            BuildCompoundTerrain = BuildCompoundTerrain,
+            NumChildren = NumChildren,
+            BuildTerrainMesh = BuildTerrainMesh
         });
     }
 }
@@ -88,17 +103,16 @@ public class TerrainDemoSystem : SceneCreationSystem<TerrainDemoScene>
         // static terrain
         Entity staticEntity;
         {
-            bool createMesh = false;
-            var collider = createMesh
+            var collider = sceneSettings.BuildTerrainMesh
                 ? CreateMeshTerrain(heights, new int2(sceneSettings.SizeX, sceneSettings.SizeZ), new float3(sceneSettings.ScaleX, sceneSettings.ScaleY, sceneSettings.ScaleZ))
                 : TerrainCollider.Create(heights, size, scale, sceneSettings.Method);
             CreatedColliders.Add(collider);
 
-            bool compound = false;
-            if (compound)
+            if (sceneSettings.BuildCompoundTerrain)
             {
-                var instances = new NativeArray<CompoundCollider.ColliderBlobInstance>(4, Allocator.Temp);
-                for (int i = 0; i < 4; i++)
+                var numChildren = sceneSettings.NumChildren;
+                var instances = new NativeArray<CompoundCollider.ColliderBlobInstance>(numChildren, Allocator.Temp);
+                for (int i = 0; i < numChildren; i++)
                 {
                     instances[i] = new CompoundCollider.ColliderBlobInstance
                     {

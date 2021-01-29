@@ -9,10 +9,14 @@ using UnityEngine;
 
 namespace Unity.Physics.Extensions
 {
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+    [UpdateAfter(typeof(BuildPhysicsWorld))]
     public class RayTracerSystem : SystemBase
     {
         BuildPhysicsWorld m_BuildPhysicsWorldSystem;
+        JobHandle m_OutputDependency;
+
+        public JobHandle GetOutputDependency() => m_OutputDependency;
 
         public struct RayRequest
         {
@@ -34,6 +38,12 @@ namespace Unity.Physics.Extensions
         public struct RayResult
         {
             public NativeStream PixelData;
+            public void Dispose()
+            {
+                PixelData.Dispose();
+                // setting default will reset PixelData.IsCreated
+                PixelData = default;
+            }
         }
 
         public RayResult AddRequest(RayRequest req)
@@ -206,9 +216,9 @@ namespace Unity.Physics.Extensions
                 return;
             }
 
-            var handle = JobHandle.CombineDependencies(Dependency, m_BuildPhysicsWorldSystem.GetOutputDependency());
+            Dependency = JobHandle.CombineDependencies(Dependency, m_BuildPhysicsWorldSystem.GetOutputDependency());
 
-            JobHandle combinedJobs = handle;
+            JobHandle combinedJobs = Dependency;
             for (int i = 0; i < m_Requests.Count; i++)
             {
                 JobHandle rcj = new RaycastJob
@@ -217,8 +227,7 @@ namespace Unity.Physics.Extensions
                     Request = m_Requests[0],
                     World = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld,
                     NumDynamicBodies = m_BuildPhysicsWorldSystem.PhysicsWorld.NumDynamicBodies
-                }.Schedule(m_Results[0].PixelData.ForEachCount, 1, handle);
-                rcj.Complete(); //<todo.eoin How can we properly wait on this task when reading results?
+                }.Schedule(m_Results[0].PixelData.ForEachCount, 1, Dependency);
                 combinedJobs = JobHandle.CombineDependencies(combinedJobs, rcj);
             }
 
@@ -226,6 +235,10 @@ namespace Unity.Physics.Extensions
             m_Results.Clear();
 
             Dependency = combinedJobs;
+
+            m_OutputDependency = Dependency;
+            // Inform next system in the pipeline of its dependency
+            m_BuildPhysicsWorldSystem.AddInputDependencyToComplete(m_OutputDependency);
         }
     }
 }

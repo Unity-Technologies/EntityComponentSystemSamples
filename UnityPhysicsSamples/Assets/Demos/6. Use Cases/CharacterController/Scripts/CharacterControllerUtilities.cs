@@ -83,7 +83,7 @@ public static class CharacterControllerUtilities
                 return false;
             }
 
-            if (IsTrigger(m_world.Bodies, hit.RigidBodyIndex, hit.ColliderKey))
+            if (hit.Material.CollisionResponse == CollisionResponsePolicy.RaiseTriggerEvents)
             {
                 if (TriggerHits.IsCreated)
                 {
@@ -132,7 +132,7 @@ public static class CharacterControllerUtilities
             Assert.IsTrue(hit.Fraction <= MaxFraction);
 
             // Check self hits and trigger hits
-            if ((hit.RigidBodyIndex == m_selfRBIndex) || IsTrigger(m_world.Bodies, hit.RigidBodyIndex, hit.ColliderKey))
+            if ((hit.RigidBodyIndex == m_selfRBIndex) || (hit.Material.CollisionResponse == CollisionResponsePolicy.RaiseTriggerEvents))
             {
                 return false;
             }
@@ -697,14 +697,6 @@ public static class CharacterControllerUtilities
                     stepInput.RigidBodyIndex, hit.RigidBodyIndex, ColliderKey.Empty, hit.ColliderKey));
             }
         }
-    }
-
-    private static unsafe bool IsTrigger(NativeArray<RigidBody> bodies, int rigidBodyIndex, ColliderKey colliderKey)
-    {
-        RigidBody hitBody = bodies[rigidBodyIndex];
-        hitBody.Collider.Value.GetLeaf(colliderKey, out ChildCollider leafCollider);
-        Unity.Physics.Material material = UnsafeUtility.AsRef<ConvexColliderHeader>(leafCollider.Collider).Material;
-        return material.CollisionResponse == CollisionResponsePolicy.RaiseTriggerEvents;
     }
 
     static float GetInvMassAtPoint(float3 point, float3 normal, RigidBody body, MotionVelocity mv)

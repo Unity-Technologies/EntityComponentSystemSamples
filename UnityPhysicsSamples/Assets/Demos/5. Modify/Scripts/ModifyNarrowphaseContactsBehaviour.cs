@@ -1,13 +1,16 @@
 using System;
+using Unity.Assertions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Physics.Authoring;
 using Unity.Physics.Extensions;
 using Unity.Physics.Systems;
 using UnityEngine;
+using MeshCollider = Unity.Physics.MeshCollider;
 
 public struct ModifyNarrowphaseContacts : IComponentData
 {
@@ -15,9 +18,13 @@ public struct ModifyNarrowphaseContacts : IComponentData
     public float3 surfaceNormal;
 }
 
+[RequireComponent(typeof(PhysicsBodyAuthoring))]
+[DisallowMultipleComponent]
 public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 {
-    public GameObject surfaceMesh = null;
+    // SurfaceUpNormal used for non-mesh surfaces.
+    // For mesh surface we get the normal from the individual polygon
+    public Vector3 SurfaceUpNormal = Vector3.up;
 
     void OnEnable() {}
 
@@ -25,21 +32,21 @@ public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObj
     {
         if (enabled)
         {
-            dstManager.AddComponentData(entity, new ModifyNarrowphaseContacts
+            var component = new ModifyNarrowphaseContacts
             {
                 surfaceEntity = entity,
-                surfaceNormal = surfaceMesh.transform.up
-            });
+                surfaceNormal = transform.rotation * SurfaceUpNormal
+            };
+            dstManager.AddComponentData(entity, component);
         }
     }
 }
 
 // A system which configures the simulation step to rotate certain contact normals
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(StepPhysicsWorld))]
+[UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(StepPhysicsWorld))]
 public class ModifyNarrowphaseContactsSystem : SystemBase
 {
-    EntityQuery m_ContactModifierGroup;
     StepPhysicsWorld m_StepPhysicsWorld;
     BuildPhysicsWorld m_BuildPhysicsWorld;
 
@@ -48,63 +55,67 @@ public class ModifyNarrowphaseContactsSystem : SystemBase
         m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
         m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
 
-        m_ContactModifierGroup = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[] { typeof(ModifyNarrowphaseContacts) }
-        });
+        RequireForUpdate(GetEntityQuery(new ComponentType[] { typeof(ModifyNarrowphaseContacts) }));
     }
 
     protected override void OnUpdate()
     {
-        if (m_ContactModifierGroup.CalculateEntityCount() == 0)
-        {
-            return;
-        }
+        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics) return;
 
-        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics)
-        {
-            return;
-        }
+        var modifier = GetSingleton<ModifyNarrowphaseContacts>();
 
-        var modifiers = m_ContactModifierGroup.ToComponentDataArray<ModifyNarrowphaseContacts>(Allocator.TempJob);
-        var surfaceNormal = modifiers[0].surfaceNormal;
-        var surfaceRBIdx = m_BuildPhysicsWorld.PhysicsWorld.GetRigidBodyIndex(modifiers[0].surfaceEntity);
+        var surfaceNormal = modifier.surfaceNormal;
+        var surfaceEntity = modifier.surfaceEntity;
 
         SimulationCallbacks.Callback callback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
         {
             return new ModifyNormalsJob
             {
-                m_SurfaceRBIdx = surfaceRBIdx,
-                m_SurfaceNormal = surfaceNormal
+                SurfaceEntity = surfaceEntity,
+                SurfaceNormal = surfaceNormal,
+                CollisionWorld = world.CollisionWorld,
             }.Schedule(simulation, ref world, inDeps);
         };
-
-        modifiers.Dispose();
-
         m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, callback);
     }
 
     [BurstCompile]
     struct ModifyNormalsJob : IContactsJob
     {
-        public int m_SurfaceRBIdx;
-        public float3 m_SurfaceNormal;
+        public Entity SurfaceEntity;
+        public float3 SurfaceNormal;
+        [ReadOnly] public CollisionWorld CollisionWorld;
         float distanceScale;
 
         public void Execute(ref ModifiableContactHeader contactHeader, ref ModifiableContactPoint contactPoint)
         {
-            bool bUpdateNormal = (contactHeader.BodyIndexA == m_SurfaceRBIdx) || (contactHeader.BodyIndexB == m_SurfaceRBIdx);
-
-            if (bUpdateNormal && contactPoint.Index == 0)
+            bool isBodyA = (contactHeader.EntityA == SurfaceEntity);
+            bool isBodyB = (contactHeader.EntityB == SurfaceEntity);
+            if (isBodyA || isBodyB)
             {
-                var newNormal = m_SurfaceNormal;
-                distanceScale = math.dot(newNormal, contactHeader.Normal);
+                if (contactPoint.Index == 0)
+                {
+                    var surfaceNormal = SurfaceNormal;
 
-                contactHeader.Normal = newNormal;
-            }
+                    // if we have a mesh surface we can get the surface normal from the plane of the polygon
+                    var rbIdx = CollisionWorld.GetRigidBodyIndex(SurfaceEntity);
+                    var body = CollisionWorld.Bodies[rbIdx];
+                    if (body.Collider.Value.Type == ColliderType.Mesh)
+                    {
+                        unsafe
+                        {
+                            var meshColliderPtr = (MeshCollider*)body.Collider.GetUnsafePtr();
+                            meshColliderPtr->GetLeaf(isBodyA ? contactHeader.ColliderKeyA : contactHeader.ColliderKeyB, out var leafCollider);
+                            var polygonCollider = (PolygonCollider*)leafCollider.Collider;
+                            surfaceNormal = math.rotate(body.WorldFromBody.rot, polygonCollider->Planes[0].Normal);
+                        }
+                    }
 
-            if (bUpdateNormal)
-            {
+                    var newNormal = surfaceNormal;
+                    distanceScale = math.dot(newNormal, contactHeader.Normal);
+
+                    contactHeader.Normal = newNormal;
+                }
                 contactPoint.Distance *= distanceScale;
             }
         }

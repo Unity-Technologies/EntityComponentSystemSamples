@@ -236,7 +236,7 @@ public class ProjectIntoFutureOnCueSystem : SystemBase
         // automatically sync the CollisionWorld on subsequent steps.
         // This is only needed as we have modified the cue ball velocity.
         jobHandle = LocalWorld.CollisionWorld.ScheduleUpdateDynamicTree(
-            ref LocalWorld, stepInput.TimeStep, stepInput.Gravity, jobHandle);
+            ref LocalWorld, stepInput.TimeStep, stepInput.Gravity, jobHandle, false);
 
         // NOTE: Currently the advice is to not chain local simulation steps.
         // Therefore we complete necessary work here and at each step.

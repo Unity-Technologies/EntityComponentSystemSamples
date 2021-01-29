@@ -16,6 +16,7 @@ public struct ModifyContactJacobians : IComponentData
         SoftContact,
         SurfaceVelocity,
         InfiniteInertia,
+        BiggerInertia,
         NoAngularEffects,
         DisabledContact,
         DisabledAngularFriction,
@@ -43,6 +44,9 @@ public class ModifyContactJacobiansSystem : SystemBase
     StepPhysicsWorld m_StepPhysicsWorld;
     SimulationCallbacks.Callback m_PreparationCallback;
     SimulationCallbacks.Callback m_JacobianModificationCallback;
+
+    private static bool IsModificationType(ModifyContactJacobians.ModificationType typeToCheck,
+        ModifyContactJacobians.ModificationType typeOfA, ModifyContactJacobians.ModificationType typeOfB) => typeOfA == typeToCheck || typeOfB == typeToCheck;
 
     protected override void OnCreate()
     {
@@ -97,11 +101,13 @@ public class ModifyContactJacobiansSystem : SystemBase
                 typeB = modificationData[entityB].type;
             }
 
-            if (typeA == ModifyContactJacobians.ModificationType.SurfaceVelocity || typeB == ModifyContactJacobians.ModificationType.SurfaceVelocity)
+            if (IsModificationType(ModifyContactJacobians.ModificationType.SurfaceVelocity, typeA, typeB))
             {
                 manifold.JacobianFlags |= JacobianFlags.EnableSurfaceVelocity;
             }
-            if (typeA == ModifyContactJacobians.ModificationType.InfiniteInertia || typeB == ModifyContactJacobians.ModificationType.InfiniteInertia)
+
+            if (IsModificationType(ModifyContactJacobians.ModificationType.InfiniteInertia, typeA, typeB) ||
+                IsModificationType(ModifyContactJacobians.ModificationType.BiggerInertia, typeA, typeB))
             {
                 manifold.JacobianFlags |= JacobianFlags.EnableMassFactors;
             }
@@ -136,14 +142,14 @@ public class ModifyContactJacobiansSystem : SystemBase
 
             {
                 // Check for jacobians we want to ignore:
-                if (typeA == ModifyContactJacobians.ModificationType.DisabledContact || typeB == ModifyContactJacobians.ModificationType.DisabledContact)
+                if (IsModificationType(ModifyContactJacobians.ModificationType.DisabledContact, typeA, typeB))
                 {
                     jacHeader.Flags = jacHeader.Flags | JacobianFlags.Disabled;
                 }
 
                 // Check if NoTorque modifier, or friction should be disabled through jacobian
-                if (typeA == ModifyContactJacobians.ModificationType.NoAngularEffects || typeB == ModifyContactJacobians.ModificationType.NoAngularEffects ||
-                    typeA == ModifyContactJacobians.ModificationType.DisabledAngularFriction || typeB == ModifyContactJacobians.ModificationType.DisabledAngularFriction)
+                if (IsModificationType(ModifyContactJacobians.ModificationType.NoAngularEffects, typeA, typeB) ||
+                    IsModificationType(ModifyContactJacobians.ModificationType.DisabledAngularFriction, typeA, typeB))
                 {
                     // Disable all friction angular effects
                     var friction0 = contactJacobian.Friction0;
@@ -163,8 +169,7 @@ public class ModifyContactJacobiansSystem : SystemBase
                 }
 
                 // Check if SurfaceVelocity present
-                if (jacHeader.HasSurfaceVelocity &&
-                    (typeA == ModifyContactJacobians.ModificationType.SurfaceVelocity || typeB == ModifyContactJacobians.ModificationType.SurfaceVelocity))
+                if (jacHeader.HasSurfaceVelocity && IsModificationType(ModifyContactJacobians.ModificationType.SurfaceVelocity, typeA, typeB))
                 {
                     // Since surface normal can change, make sure angular velocity is always relative to it, not independent
                     jacHeader.SurfaceVelocity = new SurfaceVelocity
@@ -174,9 +179,8 @@ public class ModifyContactJacobiansSystem : SystemBase
                     };
                 }
 
-                // Check if MassFactors present
-                if (jacHeader.HasMassFactors &&
-                    (typeA == ModifyContactJacobians.ModificationType.InfiniteInertia || typeB == ModifyContactJacobians.ModificationType.InfiniteInertia))
+                // Check if MassFactors present and we should make inertia infinite
+                if (jacHeader.HasMassFactors && IsModificationType(ModifyContactJacobians.ModificationType.InfiniteInertia, typeA, typeB))
                 {
                     // Give both bodies infinite inertia
                     jacHeader.MassFactors = new MassFactors
@@ -184,6 +188,19 @@ public class ModifyContactJacobiansSystem : SystemBase
                         InverseInertiaFactorA = float3.zero,
                         InverseMassFactorA = 1.0f,
                         InverseInertiaFactorB = float3.zero,
+                        InverseMassFactorB = 1.0f
+                    };
+                }
+
+                // Check if MassFactors present and we should make inertia 10x bigger
+                if (jacHeader.HasMassFactors && IsModificationType(ModifyContactJacobians.ModificationType.BiggerInertia, typeA, typeB))
+                {
+                    // Give both bodies 10x bigger inertia
+                    jacHeader.MassFactors = new MassFactors
+                    {
+                        InverseInertiaFactorA = new float3(0.1f),
+                        InverseMassFactorA = 1.0f,
+                        InverseInertiaFactorB = new float3(0.1f),
                         InverseMassFactorB = 1.0f
                     };
                 }
@@ -195,7 +212,7 @@ public class ModifyContactJacobiansSystem : SystemBase
                 ContactJacAngAndVelToReachCp jacobianAngular = jacHeader.GetAngularJacobian(i);
 
                 // Check if NoTorque modifier
-                if (typeA == ModifyContactJacobians.ModificationType.NoAngularEffects || typeB == ModifyContactJacobians.ModificationType.NoAngularEffects)
+                if (IsModificationType(ModifyContactJacobians.ModificationType.NoAngularEffects, typeA, typeB))
                 {
                     // Disable all angular effects
                     jacobianAngular.Jac.AngularA = 0.0f;
@@ -203,7 +220,7 @@ public class ModifyContactJacobiansSystem : SystemBase
                 }
 
                 // Check if SoftContact modifier
-                if (typeA == ModifyContactJacobians.ModificationType.SoftContact || typeB == ModifyContactJacobians.ModificationType.SoftContact)
+                if (IsModificationType(ModifyContactJacobians.ModificationType.SoftContact, typeA, typeB))
                 {
                     jacobianAngular.Jac.EffectiveMass *= 0.1f;
                     if (jacobianAngular.VelToReachCp > 0.0f)

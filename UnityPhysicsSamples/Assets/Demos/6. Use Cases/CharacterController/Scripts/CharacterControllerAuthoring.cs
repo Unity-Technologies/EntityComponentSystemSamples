@@ -187,7 +187,7 @@ public class CharacterControllerSystem : SystemBase
         m_InputDependency = JobHandle.CombineDependencies(m_InputDependency, inputDep);
 
     [BurstCompile]
-    struct CharacterControllerJob : IJobChunk
+    struct CharacterControllerJob : IJobEntityBatch
     {
         public float DeltaTime;
 
@@ -207,31 +207,31 @@ public class CharacterControllerSystem : SystemBase
         // same body at the same time.
         [NativeDisableParallelForRestriction] public NativeStream.Writer DeferredImpulseWriter;
 
-        public unsafe void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
+        public unsafe void Execute(ArchetypeChunk batchInChunk, int batchIndex)
         {
-            var chunkCCData = chunk.GetNativeArray(CharacterControllerComponentType);
-            var chunkCCInternalData = chunk.GetNativeArray(CharacterControllerInternalType);
-            var chunkPhysicsColliderData = chunk.GetNativeArray(PhysicsColliderType);
-            var chunkTranslationData = chunk.GetNativeArray(TranslationType);
-            var chunkRotationData = chunk.GetNativeArray(RotationType);
+            var chunkCCData = batchInChunk.GetNativeArray(CharacterControllerComponentType);
+            var chunkCCInternalData = batchInChunk.GetNativeArray(CharacterControllerInternalType);
+            var chunkPhysicsColliderData = batchInChunk.GetNativeArray(PhysicsColliderType);
+            var chunkTranslationData = batchInChunk.GetNativeArray(TranslationType);
+            var chunkRotationData = batchInChunk.GetNativeArray(RotationType);
 
-            var hasChunkCollisionEventBufferType = chunk.Has(CollisionEventBufferType);
-            var hasChunkTriggerEventBufferType = chunk.Has(TriggerEventBufferType);
+            var hasChunkCollisionEventBufferType = batchInChunk.Has(CollisionEventBufferType);
+            var hasChunkTriggerEventBufferType = batchInChunk.Has(TriggerEventBufferType);
 
             BufferAccessor<StatefulCollisionEvent> collisionEventBuffers = default;
             BufferAccessor<StatefulTriggerEvent> triggerEventBuffers = default;
             if (hasChunkCollisionEventBufferType)
             {
-                collisionEventBuffers = chunk.GetBufferAccessor(CollisionEventBufferType);
+                collisionEventBuffers = batchInChunk.GetBufferAccessor(CollisionEventBufferType);
             }
             if (hasChunkTriggerEventBufferType)
             {
-                triggerEventBuffers = chunk.GetBufferAccessor(TriggerEventBufferType);
+                triggerEventBuffers = batchInChunk.GetBufferAccessor(TriggerEventBufferType);
             }
 
-            DeferredImpulseWriter.BeginForEachIndex(chunkIndex);
+            DeferredImpulseWriter.BeginForEachIndex(batchIndex);
 
-            for (int i = 0; i < chunk.Count; i++)
+            for (int i = 0; i < batchInChunk.Count; i++)
             {
                 var ccComponentData = chunkCCData[i];
                 var ccInternalData = chunkCCInternalData[i];
@@ -565,17 +565,17 @@ public class CharacterControllerSystem : SystemBase
 
     // override the behavior of CopyPhysicsVelocityToSmoothing
     [BurstCompile]
-    struct CopyVelocityToGraphicalSmoothingJob : IJobChunk
+    struct CopyVelocityToGraphicalSmoothingJob : IJobEntityBatch
     {
         [ReadOnly] public ComponentTypeHandle<CharacterControllerInternalData> CharacterControllerInternalType;
         public ComponentTypeHandle<PhysicsGraphicalSmoothing> PhysicsGraphicalSmoothingType;
 
-        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
+        public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
         {
-            NativeArray<CharacterControllerInternalData> ccInternalDatas = chunk.GetNativeArray(CharacterControllerInternalType);
-            NativeArray<PhysicsGraphicalSmoothing> physicsGraphicalSmoothings = chunk.GetNativeArray(PhysicsGraphicalSmoothingType);
+            NativeArray<CharacterControllerInternalData> ccInternalDatas = batchInChunk.GetNativeArray(CharacterControllerInternalType);
+            NativeArray<PhysicsGraphicalSmoothing> physicsGraphicalSmoothings = batchInChunk.GetNativeArray(PhysicsGraphicalSmoothingType);
 
-            for (int i = 0, count = chunk.Count; i < count; ++i)
+            for (int i = 0, count = batchInChunk.Count; i < count; ++i)
             {
                 var smoothing = physicsGraphicalSmoothings[i];
                 smoothing.CurrentVelocity = ccInternalDatas[i].Velocity;
@@ -657,13 +657,13 @@ public class CharacterControllerSystem : SystemBase
         };
 
         Dependency = JobHandle.CombineDependencies(Dependency, m_ExportPhysicsWorldSystem.GetOutputDependency());
-        Dependency = ccJob.Schedule(m_CharacterControllersGroup, Dependency);
+        Dependency = ccJob.ScheduleParallel(m_CharacterControllersGroup, 1, Dependency);
 
         var copyVelocitiesHandle = new CopyVelocityToGraphicalSmoothingJob
         {
             CharacterControllerInternalType = GetComponentTypeHandle<CharacterControllerInternalData>(true),
             PhysicsGraphicalSmoothingType = GetComponentTypeHandle<PhysicsGraphicalSmoothing>()
-        }.ScheduleParallel(m_SmoothedCharacterControllersGroup, Dependency);
+        }.ScheduleParallel(m_SmoothedCharacterControllersGroup, 1, Dependency);
 
         var applyJob = new ApplyDefferedPhysicsUpdatesJob()
         {

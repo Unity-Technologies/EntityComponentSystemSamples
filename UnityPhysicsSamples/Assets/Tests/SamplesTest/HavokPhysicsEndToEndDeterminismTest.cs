@@ -112,7 +112,7 @@ namespace Unity.Physics.Samples.Test
     }
 
     // Only works in standalone build, since it needs synchronous Burst compilation.
-#if !UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS
+#if (!UNITY_EDITOR && UNITY_PHYSICS_INCLUDE_SLOW_TESTS) || UNITY_PHYSICS_INCLUDE_END2END_TESTS
     [NUnit.Framework.TestFixture]
 #endif
     class HavokPhysicsEndToEndDeterminismTest : UnityPhysicsEndToEndDeterminismTest

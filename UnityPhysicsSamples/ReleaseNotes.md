@@ -1,3 +1,19 @@
+# Release Notes
+All notable changes to this project will be documented in this file.
+
+## [Samples Project for 0.6.0-preview.3] - 2021-01-18
+
+### Changes
+* Dependencies
+  * Updated Data Flow Graph from `0.18.0-preview.3` to `0.19.0-preview.5`
+  * Updated DOTS Editor from `0.9.0-preview.1` to `0.12.0-preview.4`
+  * Updated Hybrid Renderer from `0.10.0-preview.21` to `0.11.0-preview.40`
+* Added `5g. Change Collider Filter` sample showing explosion use case and the importance of collision filters in that case. Setting the force to 0 in `SpawnExplosionAuthoring` causes a performance spike because when the filters get set to default, a lot of bodies are pentetrating each other.
+
+### Fixes
+
+### Known Issues
+
 ## [Samples Project for 0.5.1-preview.2] - 2020-10-14
 
 ### Changes

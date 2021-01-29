@@ -10,11 +10,13 @@ public class InvalidPhyiscsJointDemoSystem : SceneCreationSystem<InvalidPhysicsJ
 {
     public override void CreateScene(InvalidPhysicsJointDemoScene sceneSettings)
     {
-        BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.BoxCollider.Create(new BoxGeometry
+        float colliderSize = 0.25f;
+
+        BlobAssetReference<Collider> collider = BoxCollider.Create(new BoxGeometry
         {
             Center = float3.zero,
             Orientation = quaternion.identity,
-            Size = new float3(0.25f),
+            Size = new float3(colliderSize),
             BevelRadius = 0.0f
         });
         CreatedColliders.Add(collider);

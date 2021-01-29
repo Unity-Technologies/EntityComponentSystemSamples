@@ -20,9 +20,9 @@ namespace Unity.Physics.Samples.Test
             if (HasSingleton<PhysicsStep>())
             {
                 var component = GetSingleton<PhysicsStep>();
-                if (component.ThreadCountHint != 0)
+                if (component.MultiThreaded > 0)
                 {
-                    component.ThreadCountHint = 0;
+                    component.MultiThreaded = 0;
                     SetSingleton(component);
                 }
             }

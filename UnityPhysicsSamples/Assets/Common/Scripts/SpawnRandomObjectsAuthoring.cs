@@ -73,9 +73,9 @@ abstract class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IC
         return seed;
     }
 
-    internal virtual void OnBeforeInstantiatePrefab(T spawnSettings) {}
+    internal virtual void OnBeforeInstantiatePrefab(ref T spawnSettings) {}
 
-    internal virtual void ConfigureInstance(Entity instance, T spawnSettings) {}
+    internal virtual void ConfigureInstance(Entity instance, ref T spawnSettings) {}
 
     protected override void OnUpdate()
     {
@@ -89,7 +89,7 @@ abstract class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IC
 
                 var count = spawnSettings.Count;
 
-                OnBeforeInstantiatePrefab(spawnSettings);
+                OnBeforeInstantiatePrefab(ref spawnSettings);
 
                 var instances = new NativeArray<Entity>(count, Allocator.Temp);
                 EntityManager.Instantiate(spawnSettings.Prefab, instances);
@@ -103,7 +103,7 @@ abstract class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IC
                     var instance = instances[i];
                     EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
                     EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
-                    ConfigureInstance(instance, spawnSettings);
+                    ConfigureInstance(instance, ref spawnSettings);
                 }
 
                 EntityManager.RemoveComponent<T>(entity);

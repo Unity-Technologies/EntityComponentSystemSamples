@@ -1,10 +1,15 @@
-using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
-using UnityEngine;
+
+public interface IPeriodicSpawnSettings
+{
+    int SpawnRate { get; set; }
+    int DeathRate { get; set; }
+}
+
 
 class PeriodicallySpawnRandomShapesAuthoring : SpawnRandomObjectsAuthoringBase<PeriodicSpawnSettings>
 {
@@ -18,7 +23,7 @@ class PeriodicallySpawnRandomShapesAuthoring : SpawnRandomObjectsAuthoringBase<P
     }
 }
 
-struct PeriodicSpawnSettings : IComponentData, ISpawnSettings
+struct PeriodicSpawnSettings : IComponentData, ISpawnSettings, IPeriodicSpawnSettings
 {
     public Entity Prefab { get; set; }
     public float3 Position { get; set; }
@@ -26,19 +31,15 @@ struct PeriodicSpawnSettings : IComponentData, ISpawnSettings
     public float3 Range { get; set; }
     public int Count { get; set; }
 
-    // Every SpawnRate frames, Count new Prefabs will spawned.
-    public int SpawnRate;
-    // Spawned Prefabs will be removed after DeathRate frames.
-    public int DeathRate;
+    public int SpawnRate { get; set; }
+    public int DeathRate { get; set; }
 }
 
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
-class PeriodicallySpawnRandomShapeSystem : SpawnRandomObjectsSystemBase<PeriodicSpawnSettings>
+abstract class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjectsSystemBase<T> where T : struct, ISpawnSettings, IPeriodicSpawnSettings, IComponentData
 {
     public int FrameCount = 0;
 
-    internal override int GetRandomSeed(PeriodicSpawnSettings spawnSettings)
+    internal override int GetRandomSeed(T spawnSettings)
     {
         int seed = base.GetRandomSeed(spawnSettings);
         seed = (seed * 397) ^ spawnSettings.Prefab.GetHashCode();
@@ -48,7 +49,7 @@ class PeriodicallySpawnRandomShapeSystem : SpawnRandomObjectsSystemBase<Periodic
         return seed;
     }
 
-    internal override void OnBeforeInstantiatePrefab(PeriodicSpawnSettings spawnSettings)
+    internal override void OnBeforeInstantiatePrefab(ref T spawnSettings)
     {
         if (!EntityManager.HasComponent<LifeTime>(spawnSettings.Prefab))
         {
@@ -60,35 +61,45 @@ class PeriodicallySpawnRandomShapeSystem : SpawnRandomObjectsSystemBase<Periodic
     protected override void OnUpdate()
     {
         var lFrameCount = FrameCount;
-        Entities
-            .WithStructuralChanges()
-            .WithoutBurst()
-            .ForEach((Entity entity, ref PeriodicSpawnSettings spawnSettings) =>
+
+        // Entities.ForEach in generic system types are not supported
+        using (var entities = GetEntityQuery(new ComponentType[] { typeof(T) }).ToEntityArray(Allocator.TempJob))
+        {
+            for (int j = 0; j < entities.Length; j++)
             {
+                var entity = entities[j];
+                var spawnSettings = EntityManager.GetComponentData<T>(entity);
+
                 if (lFrameCount % spawnSettings.SpawnRate == 0)
                 {
                     var count = spawnSettings.Count;
 
-                    OnBeforeInstantiatePrefab(spawnSettings);
+                    OnBeforeInstantiatePrefab(ref spawnSettings);
 
                     var instances = new NativeArray<Entity>(count, Allocator.Temp);
                     EntityManager.Instantiate(spawnSettings.Prefab, instances);
 
                     var positions = new NativeArray<float3>(count, Allocator.Temp);
                     var rotations = new NativeArray<quaternion>(count, Allocator.Temp);
-                    RandomPointsInRange(
-                        spawnSettings.Position, spawnSettings.Rotation,
-                        spawnSettings.Range, ref positions, ref rotations, GetRandomSeed(spawnSettings));
+                    RandomPointsInRange(spawnSettings.Position, spawnSettings.Rotation, spawnSettings.Range, ref positions, ref rotations, GetRandomSeed(spawnSettings));
 
                     for (int i = 0; i < count; i++)
                     {
                         var instance = instances[i];
                         EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
                         EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
-                        ConfigureInstance(instance, spawnSettings);
+                        ConfigureInstance(instance, ref spawnSettings);
                     }
                 }
-            }).Run();
+
+                EntityManager.SetComponentData<T>(entity, spawnSettings);
+            }
+        }
         FrameCount++;
     }
 }
+
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+[UpdateBefore(typeof(BuildPhysicsWorld))]
+class PeriodicallySpawnRandomShapeSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicSpawnSettings>
+{}

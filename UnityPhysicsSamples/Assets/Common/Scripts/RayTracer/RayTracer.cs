@@ -18,18 +18,24 @@ namespace Unity.Physics.Extensions
         public float RayLength = 100.0f;
         public float AmbientLight = 0.2f;
         public GameObject DisplayTarget;
-        int ImageRes = 100;
+
+        int imageRes = 100;
         float planeHalfExtents = 5.0f; /// Half extents of the created primitive plane
 
-        RayTracerSystem.RayResult lastResults;
-        bool ExpectingResults;
+        RayTracerSystem.RayResult nextResults;
 
         private void OnDisable()
         {
-            if (ExpectingResults)
+            if (nextResults.PixelData.IsCreated)
             {
-                lastResults.PixelData.Dispose();
-                ExpectingResults = false;
+                RayTracerSystem rbs;
+                var world = World.DefaultGameObjectInjectionWorld;
+                if (world != null && null != (rbs = world.GetExistingSystem<RayTracerSystem>()))
+                {
+                    // Needed before calling PixelData.Dispose()
+                    rbs.GetOutputDependency().Complete();
+                }
+                nextResults.Dispose();
             }
         }
 
@@ -50,8 +56,7 @@ namespace Unity.Physics.Extensions
 
             imageDisplay.GetComponent<MeshRenderer>().shadowCastingMode = ShadowCastingMode.Off;
 
-            // For 2019.1: // blasterTexture = new Texture2D(ImageRes, ImageRes, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_UInt , UnityEngine.Experimental.Rendering.TextureCreationFlags.None);
-            blasterTexture = new Texture2D(ImageRes, ImageRes);
+            blasterTexture = new Texture2D(imageRes, imageRes);
             blasterTexture.filterMode = FilterMode.Point;
 
             blasterMaterial = new UnityEngine.Material(imageDisplay.GetComponent<MeshRenderer>().materials[0]);
@@ -67,12 +72,19 @@ namespace Unity.Physics.Extensions
 
         void Update()
         {
-            Vector3 imageCenter = transform.TransformPoint(new Vector3(0, 0, -ImagePlane));
+            if (World.DefaultGameObjectInjectionWorld == null) return;
 
-            if (ExpectingResults)
+            RayTracerSystem rbs = World.DefaultGameObjectInjectionWorld.GetExistingSystem<RayTracerSystem>();
+            if (rbs == null || !rbs.IsEnabled || !rbs.GetOutputDependency().IsCompleted) return;
+
+            if (nextResults.PixelData.IsCreated)
             {
-                NativeStream.Reader reader = lastResults.PixelData.AsReader();
-                for (int i = 0; i < lastResults.PixelData.ForEachCount; i++)
+                // rbs.GetOutputDependency().IsCompleted is true here
+                // so this is only needed to quieten the JobsDebugger?
+                rbs.GetOutputDependency().Complete();
+
+                NativeStream.Reader reader = nextResults.PixelData.AsReader();
+                for (int i = 0; i < nextResults.PixelData.ForEachCount; i++)
                 {
                     reader.BeginForEachIndex(i);
                     while (reader.RemainingItemCount > 0)
@@ -86,20 +98,13 @@ namespace Unity.Physics.Extensions
                 }
 
                 blasterTexture.Apply();
-                lastResults.PixelData.Dispose();
-                ExpectingResults = false;
+
+                // NOTE: If this logic is moved to the likes of LateUpdate there will be order issues
+                // with the RayTracerSystem.OnUpdate function as PixelData will be invalid.
+                nextResults.Dispose();
             }
 
-            if (World.DefaultGameObjectInjectionWorld == null)
-            {
-                return;
-            }
-
-            RayTracerSystem rbs = World.DefaultGameObjectInjectionWorld.GetExistingSystem<RayTracerSystem>();
-            if (rbs == null || !rbs.IsEnabled)
-            {
-                return;
-            }
+            Vector3 imageCenter = transform.TransformPoint(new Vector3(0, 0, -ImagePlane));
 
             Vector3 lightDir = new Vector3(0, 0, -1);
             GameObject sceneLight = GameObject.Find("Directional Light");
@@ -111,7 +116,7 @@ namespace Unity.Physics.Extensions
             Vector3 up = transform.rotation * new Vector3(0, 1, 0);
             Vector3 right = transform.rotation * new Vector3(1, 0, 0);
 
-            lastResults = rbs.AddRequest(new RayTracerSystem.RayRequest
+            nextResults = rbs.AddRequest(new RayTracerSystem.RayRequest
             {
                 PinHole = transform.position,
                 ImageCenter = imageCenter,
@@ -121,13 +126,12 @@ namespace Unity.Physics.Extensions
                 RayLength = RayLength,
                 PlaneHalfExtents = planeHalfExtents,
                 AmbientLight = AmbientLight,
-                ImageResolution = ImageRes,
+                ImageResolution = imageRes,
                 AlternateKeys = AlternateKeys,
                 CastSphere = CastSphere,
                 Shadows = Shadows,
                 CollisionFilter = CollisionFilter.Default
             });
-            ExpectingResults = true;
         }
     }
 }
