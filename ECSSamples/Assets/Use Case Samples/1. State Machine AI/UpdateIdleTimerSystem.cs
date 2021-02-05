@@ -1,7 +1,7 @@
 using Unity.Entities;
 using Unity.Jobs;
 
-public class UpdateIdleTimerSystem : SystemBase
+public partial class UpdateIdleTimerSystem : SystemBase
 {
     // Cache a reference to this system in OnCreate() to prevent World.GetExistingSystem being called every frame
     private EndSimulationEntityCommandBufferSystem m_EndSimECBSystem;

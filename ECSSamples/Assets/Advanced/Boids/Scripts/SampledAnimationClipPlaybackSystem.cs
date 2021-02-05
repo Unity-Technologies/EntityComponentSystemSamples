@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Samples.Boids
 {
-    public class SampledAnimationClipPlaybackSystem : SystemBase
+    public partial class SampledAnimationClipPlaybackSystem : SystemBase
     {
         protected override void OnUpdate()
         {

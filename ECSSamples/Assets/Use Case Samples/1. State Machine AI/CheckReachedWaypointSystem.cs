@@ -3,7 +3,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-public class CheckedReachedWaypointSystem : SystemBase
+public partial class CheckedReachedWaypointSystem : SystemBase
 {
     // Cache a reference to this system in OnCreate() to prevent World.GetExistingSystem being called every frame
     private EndSimulationEntityCommandBufferSystem m_EndSimECBSystem;

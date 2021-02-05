@@ -5,11 +5,11 @@ using Unity.Mathematics;
 
 [ConverterVersion("macton", 4)]
 [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.EntitySceneOptimizations)]
-public unsafe class CartesianGridOnPlaneSystemGeneratorSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnPlaneSystemGeneratorSystem : SystemBase
 {
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
-        inputDeps.Complete();
+        Dependency.Complete();
         Entities.WithStructuralChanges().ForEach((Entity entity, ref CartesianGridOnPlaneGenerator cartesianGridOnPlaneGenerator) =>
         {
             ref var floorPrefab = ref cartesianGridOnPlaneGenerator.Blob.Value.FloorPrefab;
@@ -78,7 +78,5 @@ public unsafe class CartesianGridOnPlaneSystemGeneratorSystem : JobComponentSyst
 
             EntityManager.RemoveComponent<CartesianGridOnPlaneGenerator>(entity);
         }).Run();
-
-        return new JobHandle();
     }
 }

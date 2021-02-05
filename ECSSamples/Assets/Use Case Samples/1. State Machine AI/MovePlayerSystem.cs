@@ -11,7 +11,7 @@ struct MovementSpeed : IComponentData
 
 // System for moving the player based on keyboard input
 [UpdateAfter(typeof(GatherInputSystem))]
-public class MovePlayerSystem : SystemBase
+public partial class MovePlayerSystem : SystemBase
 {
     protected override void OnUpdate()
     {

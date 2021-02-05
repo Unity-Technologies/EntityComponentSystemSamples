@@ -4,16 +4,16 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateBefore(typeof(TransformSystemGroup))]
-public class CartesianGridMoveForwardSystem : JobComponentSystem
+public partial class CartesianGridMoveForwardSystem : SystemBase
 {
-    protected override JobHandle OnUpdate(JobHandle lastJobHandle)
+    protected override void OnUpdate()
     {
         // Clamp delta time so you can't overshoot.
         var deltaTime = math.min(Time.DeltaTime, 0.05f);
 
         // Move forward along direction in grid-space given speed.
         // - This is the same for Plane or Cube and is the core of the movement code. Simply "move forward" along direction.
-        lastJobHandle = Entities
+        Entities
             .WithName("CartesianGridMoveForward")
             .ForEach((ref Translation translation,
                 in CartesianGridDirection gridDirection,
@@ -37,8 +37,6 @@ public class CartesianGridMoveForwardSystem : JobComponentSystem
                     var dy = math.min(speed, 1.0f - pos.y);
 
                     translation.Value = new float3(pos.x + dx, pos.y + dy, pos.z + dz);
-                }).Schedule(lastJobHandle);
-
-        return lastJobHandle;
+                }).Schedule();
     }
 }

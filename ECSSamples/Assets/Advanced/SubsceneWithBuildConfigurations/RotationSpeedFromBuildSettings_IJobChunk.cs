@@ -13,7 +13,7 @@ public class RotationSpeedFromBuildSettings_IJobChunk : MonoBehaviour, IConvertG
         var rotationSpeedSetting = conversionSystem.GetBuildConfigurationComponent<RotationSpeedSetting>();
 
         // Change rotation speed
-        var data = new RotationSpeed_IJobChunk { RadiansPerSecond = math.radians(rotationSpeedSetting.RotationSpeed) };
+        var data = new RotationSpeed_IJobEntityBatch { RadiansPerSecond = math.radians(rotationSpeedSetting.RotationSpeed) };
         dstManager.AddComponentData(entity, data);
 
         // Offset the translation of the generated object

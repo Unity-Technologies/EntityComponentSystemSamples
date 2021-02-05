@@ -2,7 +2,7 @@ using Unity.Entities;
 using Unity.Jobs;
 
 [UpdateBefore(typeof(CartesianGridChangeDirectionSystemGroup))]
-public unsafe class CartesianGridOnPlaneTargetSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnPlaneTargetSystem : JobComponentSystem
 {
     EntityQuery m_GridQuery;
 

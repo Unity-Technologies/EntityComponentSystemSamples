@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateAfter(typeof(CartesianGridMoveForwardSystem))]
-public unsafe class CartesianGridOnCubeTransformSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnCubeTransformSystem : JobComponentSystem
 {
     EntityQuery m_GridQuery;
 

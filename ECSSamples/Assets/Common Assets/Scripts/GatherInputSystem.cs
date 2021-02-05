@@ -8,7 +8,7 @@ struct UserInputData : IComponentData
     public float2 Move;
 }
 
-public class GatherInputSystem : SystemBase
+public partial class GatherInputSystem : SystemBase
 {
     protected override void OnUpdate()
     {

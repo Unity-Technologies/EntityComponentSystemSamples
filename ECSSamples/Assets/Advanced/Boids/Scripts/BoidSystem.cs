@@ -19,7 +19,7 @@ namespace Samples.Boids
 {
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [UpdateBefore(typeof(TransformSystemGroup))]
-    public class BoidSystem : SystemBase
+    public partial class BoidSystem : SystemBase
     {
         EntityQuery  m_BoidQuery;
         EntityQuery  m_TargetQuery;

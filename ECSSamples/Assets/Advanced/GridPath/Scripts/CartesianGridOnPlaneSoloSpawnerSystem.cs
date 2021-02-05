@@ -6,7 +6,7 @@ using Unity.Transforms;
 /// <summary>
 /// Spawn one prefab entity at a time at a random position on grid at the given frequency.
 /// </summary>
-public class CartesianGridOnPlaneSoloSpawnerSystem : JobComponentSystem
+public partial class CartesianGridOnPlaneSoloSpawnerSystem : JobComponentSystem
 {
     BeginInitializationEntityCommandBufferSystem m_EntityCommandBufferSystem;
     EntityQuery m_GridQuery;

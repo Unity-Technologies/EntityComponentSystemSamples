@@ -92,7 +92,7 @@ namespace StressTests.ManySystems
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
     [AlwaysUpdateSystem]
-    class TestSystem_Schedule : SystemBase
+    partial class TestSystem_Schedule : SystemBase
     {
         protected override void OnUpdate()
         {
@@ -106,7 +106,7 @@ namespace StressTests.ManySystems
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
     [AlwaysUpdateSystem]
-    class TestSystem_Run : SystemBase
+    partial class TestSystem_Run : SystemBase
     {
         protected override void OnUpdate()
         {
@@ -120,7 +120,7 @@ namespace StressTests.ManySystems
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
     [AlwaysUpdateSystem]
-    class TestSystem_ScheduleReader : SystemBase
+    partial class TestSystem_ScheduleReader : SystemBase
     {
         protected override void OnUpdate()
         {
@@ -131,7 +131,7 @@ namespace StressTests.ManySystems
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
     [AlwaysUpdateSystem]
-    class TestSystem_RunReader : SystemBase
+    partial class TestSystem_RunReader : SystemBase
     {
         protected override void OnUpdate()
         {

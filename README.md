@@ -43,7 +43,7 @@ Burst is a new LLVM-based, math-aware backend compiler. It compiles C# jobs into
 
 ## Installation guide for new projects
 
-1. Create or open a project with the Unity Editor (`2020.1.0b15` or later to use the latest DOTS packages).
+1. Create or open a project with the Unity Editor (`2020.1.9f1` or later to use the latest DOTS packages).
 2. Open the Package Manager (menu: **Window** > **Package Manager**).
 3. Click the small gear icon on the upper right and select the **Advanced Project Settings** menu item.
 4. Check **Enable Preview Packages** in the Project Settings window.

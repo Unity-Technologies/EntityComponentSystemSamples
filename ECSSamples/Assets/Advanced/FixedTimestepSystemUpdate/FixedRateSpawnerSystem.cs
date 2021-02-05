@@ -13,7 +13,7 @@ namespace Samples.FixedTimestepSystem
     // This system is virtually identical to VariableRateSpawner; the key difference is that it updates in the
     // FixedStepSimulationSystemGroup instead of the default SimulationSystemGroup.
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    public class FixedRateSpawnerSystem : SystemBase
+    public partial class FixedRateSpawnerSystem : SystemBase
     {
         private EndFixedStepSimulationEntityCommandBufferSystem ecbSystem;
         protected override void OnCreate()

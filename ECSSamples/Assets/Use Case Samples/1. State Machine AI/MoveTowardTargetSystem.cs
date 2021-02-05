@@ -7,7 +7,7 @@ using Unity.Transforms;
 /// Moves any guards that have a TargetPosition towards their target
 /// A Target can be either a waypoint or a player (though here all we know is the position of the target)
 /// </summary>
-public class MoveTowardTargetSystem : SystemBase
+public partial class MoveTowardTargetSystem : SystemBase
 {
     protected override void OnUpdate()
     {

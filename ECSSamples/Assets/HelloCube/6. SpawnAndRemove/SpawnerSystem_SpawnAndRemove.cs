@@ -12,7 +12,7 @@ using Random = Unity.Mathematics.Random;
 
 // ReSharper disable once InconsistentNaming
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-public class SpawnerSystem_SpawnAndRemove : SystemBase
+public partial class SpawnerSystem_SpawnAndRemove : SystemBase
 {
     // BeginInitializationEntityCommandBufferSystem is used to create a command buffer which will then be played back
     // when that barrier system executes.
