@@ -9,7 +9,7 @@ namespace Samples.FixedTimestepSystem
         public float SpawnTime;
         public float3 SpawnPos;
     }
-    public class MoveProjectilesSystem : SystemBase
+    public partial class MoveProjectilesSystem : SystemBase
     {
         BeginSimulationEntityCommandBufferSystem m_beginSimEcbSystem;
         protected override void OnCreate()

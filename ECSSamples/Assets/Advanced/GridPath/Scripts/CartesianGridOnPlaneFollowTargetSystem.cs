@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(CartesianGridChangeDirectionSystemGroup))]
-public unsafe class CartesianGridOnPlaneFollowTargetSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnPlaneFollowTargetSystem : JobComponentSystem
 {
     EntityQuery m_GridQuery;
     EntityQuery m_TargetQuery;

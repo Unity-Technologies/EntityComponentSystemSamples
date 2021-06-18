@@ -1,3 +1,15 @@
+# Samples Version 35
+
+## Changes
+
+* Updated minimum Unity Editor version to `2020.1.9f1`.
+
+# Samples Version 34
+
+## Changes
+
+* Updated minimum Unity Editor version to `2020.1.2f1`.
+
 # Samples Version 33
 
 ## Changes
@@ -5,7 +17,8 @@
 * Updated minimum Unity Editor version to `2020.1.0b15`.
 * The `FixedTimestepWorkaround` sample now demonstrates the use of `FixedRateUtils` to control a `ComponentSystemGroup`'s update frequency.
   * Since this no longer relies on a `MonoBehaviour.FixedUpdate()`-based workaround, the sample has been renamed to `FixedTimestepSystemUpdate`.
-  
+* Improvements and fixes for the `Fixed Timestep` Sample.
+
 
 # Samples Version 32
 

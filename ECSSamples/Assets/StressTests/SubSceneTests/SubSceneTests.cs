@@ -4,12 +4,29 @@ using Unity.Entities.Hybrid.EndToEnd.Tests;
 using Unity.Entities.Tests;
 using Unity.Mathematics;
 using Unity.Scenes;
+using Unity.Scenes.Tests;
 using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
 
 public class SubSceneTests : ECSTestsFixture
 {
+    [Test]
+    [Ignore("Hybrid conversion doesn't appear to be deterministic")]
+    public void CheckEntitySceneImporterDeterminism_HybridLight()
+    {
+        EntitySceneImporterDeterminismChecker.Check("Assets/StressTests/HybridLights/HybridLights/SubScene.unity");
+    }
+
+    [Test]
+    public void CheckEntitySceneImporterDeterminism([Values(
+        "Assets/StressTests/LODSubSceneTest/LodSubSceneDynamicAndStatic.unity",
+        "Assets/Advanced/BlobAssetScalable/BlobAsset/Subscene.unity"
+    )]string path)
+    {
+        EntitySceneImporterDeterminismChecker.Check(path);
+    }
+
     [Test]
     public void SynchronousLoad()
     {

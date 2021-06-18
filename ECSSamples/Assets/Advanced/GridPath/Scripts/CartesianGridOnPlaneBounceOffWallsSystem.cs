@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(CartesianGridChangeDirectionSystemGroup))]
-public unsafe class CartesianGridOnPlaneBounceOffWallsSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnPlaneBounceOffWallsSystem : JobComponentSystem
 {
     EntityQuery m_GridQuery;
 

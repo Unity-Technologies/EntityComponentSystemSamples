@@ -16,7 +16,7 @@ namespace Samples.Boids
         public int Count;
     }
 
-    public class BoidSchoolSpawnSystem : SystemBase
+    public partial class BoidSchoolSpawnSystem : SystemBase
     {
         [BurstCompile]
         struct SetBoidLocalToWorld : IJobParallelFor

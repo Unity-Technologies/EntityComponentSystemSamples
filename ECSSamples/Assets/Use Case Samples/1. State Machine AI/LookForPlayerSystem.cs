@@ -8,7 +8,7 @@ using Unity.Transforms;
 /// Checks whether the player is within guard vision cones
 /// If the player is seen, chase the player
 /// </summary>
-public class LookForPlayerSystem : SystemBase
+public partial class LookForPlayerSystem : SystemBase
 {
     // Cache a reference to this system in OnCreate() to prevent World.GetExistingSystem being called every frame
     private EndSimulationEntityCommandBufferSystem m_EndSimECBSystem;

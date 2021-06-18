@@ -9,7 +9,7 @@ public struct LifeTime : IComponentData
 }
 
 // This system updates all entities in the scene with both a RotationSpeed_SpawnAndRemove and Rotation component.
-public class LifeTimeSystem : SystemBase
+public partial class LifeTimeSystem : SystemBase
 {
     EntityCommandBufferSystem m_Barrier;
 

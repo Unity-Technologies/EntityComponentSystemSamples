@@ -10,7 +10,7 @@ namespace Samples.FixedTimestepSystem
         public float3 SpawnPos;
     }
 
-    public class VariableRateSpawnerSystem : SystemBase
+    public partial class VariableRateSpawnerSystem : SystemBase
     {
         private BeginSimulationEntityCommandBufferSystem ecbSystem;
         protected override void OnCreate()

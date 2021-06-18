@@ -8,7 +8,7 @@ using Unity.Transforms;
 // This system updates all entities in the scene with both a RotationSpeed_SpawnAndRemove and Rotation component.
 
 // ReSharper disable once InconsistentNaming
-public class RotationSpeedSystem_SpawnAndRemove : SystemBase
+public partial class RotationSpeedSystem_SpawnAndRemove : SystemBase
 {
     // OnUpdate runs on the main thread.
     protected override void OnUpdate()

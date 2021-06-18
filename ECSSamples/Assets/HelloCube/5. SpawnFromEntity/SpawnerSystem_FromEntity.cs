@@ -11,7 +11,7 @@ using Unity.Transforms;
 
 // ReSharper disable once InconsistentNaming
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-public class SpawnerSystem_FromEntity : SystemBase
+public partial class SpawnerSystem_FromEntity : SystemBase
 {
     // BeginInitializationEntityCommandBufferSystem is used to create a command buffer which will then be played back
     // when that barrier system executes.

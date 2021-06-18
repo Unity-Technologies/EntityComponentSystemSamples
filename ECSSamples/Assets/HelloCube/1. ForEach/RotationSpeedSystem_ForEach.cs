@@ -6,7 +6,7 @@ using Unity.Transforms;
 // This system updates all entities in the scene with both a RotationSpeed_ForEach and Rotation component.
 
 // ReSharper disable once InconsistentNaming
-public class RotationSpeedSystem_ForEach : SystemBase
+public partial class RotationSpeedSystem_ForEach : SystemBase
 {
     // OnUpdate runs on the main thread.
     protected override void OnUpdate()
