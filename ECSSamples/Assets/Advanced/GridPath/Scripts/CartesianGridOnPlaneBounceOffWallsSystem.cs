@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(CartesianGridChangeDirectionSystemGroup))]
-public unsafe partial class CartesianGridOnPlaneBounceOffWallsSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnPlaneBounceOffWallsSystem : SystemBase
 {
     EntityQuery m_GridQuery;
 
@@ -16,7 +16,7 @@ public unsafe partial class CartesianGridOnPlaneBounceOffWallsSystem : JobCompon
         RequireForUpdate(m_GridQuery);
     }
 
-    protected override JobHandle OnUpdate(JobHandle lastJobHandle)
+    protected override void OnUpdate()
     {
         int pathOffset = CartesianGridMovement.NextPathIndex(ref m_NextPathCounter);
 
@@ -30,7 +30,7 @@ public unsafe partial class CartesianGridOnPlaneBounceOffWallsSystem : JobCompon
         // Offset center to grid cell
         var cellCenterOffset = new float2(((float)colCount * 0.5f) - 0.5f, ((float)rowCount * 0.5f) - 0.5f);
 
-        lastJobHandle = Entities
+        Entities
             .WithName("CartesianGridPlaneChangeDirection")
             .WithNativeDisableUnsafePtrRestriction(trailingOffsets)
             .WithNativeDisableUnsafePtrRestriction(gridWalls)
@@ -50,8 +50,6 @@ public unsafe partial class CartesianGridOnPlaneBounceOffWallsSystem : JobCompon
 
                     gridCoordinates = nextGridPosition;
                     gridDirection.Value = CartesianGridMovement.BounceDirectionOffWalls(gridCoordinates, dir, rowCount, colCount, gridWalls, pathOffset);
-                }).Schedule(lastJobHandle);
-
-        return lastJobHandle;
+                }).Schedule();
     }
 }

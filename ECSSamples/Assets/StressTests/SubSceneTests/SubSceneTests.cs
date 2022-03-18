@@ -8,6 +8,7 @@ using Unity.Scenes.Tests;
 using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 public class SubSceneTests : ECSTestsFixture
 {
@@ -19,6 +20,7 @@ public class SubSceneTests : ECSTestsFixture
     }
 
     [Test]
+    [Ignore("Instability - https://jira.unity3d.com/browse/DOTS-4581")]
     public void CheckEntitySceneImporterDeterminism([Values(
         "Assets/StressTests/LODSubSceneTest/LodSubSceneDynamicAndStatic.unity",
         "Assets/Advanced/BlobAssetScalable/BlobAsset/Subscene.unity"
@@ -28,6 +30,8 @@ public class SubSceneTests : ECSTestsFixture
     }
 
     [Test]
+    // Disabled on Linux because it hangs during asset import - likely related to https://jira.unity3d.com/browse/DOTS-4581 and running on the latest Ubuntu Bokken VM
+    [UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
     public void SynchronousLoad()
     {
         TestUtilities.RegisterSystems(World, TestUtilities.SystemCategories.Streaming);
@@ -54,9 +58,11 @@ public class SubSceneTests : ECSTestsFixture
 
 #if !UNITY_DISABLE_MANAGED_COMPONENTS
     [Test]
-    public void SimpleHybridComponent()
+    // Disabled on Linux because it hangs during asset import - likely related to https://jira.unity3d.com/browse/DOTS-4581 and running on the latest Ubuntu Bokken VM
+    [UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
+    public void SimpleCompanionComponent()
     {
-        TestUtilities.RegisterSystems(World, TestUtilities.SystemCategories.Streaming | TestUtilities.SystemCategories.HybridComponents);
+        TestUtilities.RegisterSystems(World, TestUtilities.SystemCategories.Streaming | TestUtilities.SystemCategories.CompanionComponents);
 
         var loadParams = new SceneSystem.LoadParameters
         {

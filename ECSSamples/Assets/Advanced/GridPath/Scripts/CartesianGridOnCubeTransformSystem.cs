@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateAfter(typeof(CartesianGridMoveForwardSystem))]
-public unsafe partial class CartesianGridOnCubeTransformSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnCubeTransformSystem : SystemBase
 {
     EntityQuery m_GridQuery;
 
@@ -14,7 +14,7 @@ public unsafe partial class CartesianGridOnCubeTransformSystem : JobComponentSys
         RequireForUpdate(m_GridQuery);
     }
 
-    protected override JobHandle OnUpdate(JobHandle lastJobHandle)
+    protected override void OnUpdate()
     {
         var cartesianGridOnCube = GetSingleton<CartesianGridOnCube>();
         var faceLocalToWorld = (float4x4*)cartesianGridOnCube.Blob.Value.FaceLocalToWorld.GetUnsafePtr();
@@ -25,7 +25,7 @@ public unsafe partial class CartesianGridOnCubeTransformSystem : JobComponentSys
         //   part of the query in order to write to LocalToWorld. Since the transform system doesn't know anything
         //   about CubeFace, it will never be present in those default transformations. So it can be handled custom
         //   here.
-        lastJobHandle = Entities
+        Entities
             .WithName("CartesianGridOnCubeTransform")
             .WithNativeDisableUnsafePtrRestriction(faceLocalToWorld)
             .ForEach((ref LocalToWorld localToWorld,
@@ -40,8 +40,6 @@ public unsafe partial class CartesianGridOnCubeTransformSystem : JobComponentSys
                     {
                         Value = resultLocalToWorld
                     };
-                }).Schedule(lastJobHandle);
-
-        return lastJobHandle;
+                }).Schedule();
     }
 }

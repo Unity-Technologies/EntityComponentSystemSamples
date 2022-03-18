@@ -21,8 +21,4 @@ When it finds one, the System instantiates the prefabs in a grid and then destro
 
 The SpawnerSystem_FromEntity uses an Entities.ForEach, which is very similar to the those demonstrated in earlier examples. The difference is that this Entities.ForEach provides the Entity object (and the entity index in query) to your lambda. The Entity object is required so that the System can destroy the Spawner Entity once it has been processed.
 
-Another important concept that SpawnerSystem_FromEntity illustrates is the use of an EntityCommandBuffer and a EntityCommandBufferSystem. To prevent race conditions, you cannot make _structural changes_ inside a Job. Structural changes include anything that changes the structure of your data, such as creating/destroying Entities or adding/removing Components. To overcome this limitation, ECS provides the EntityCommandBuffer.
-
-Instead of performing structural changes directly, a Job can add a command to an EntityCommandBuffer to perform such changes on the main thread after the Job has finished. Command buffers allow you to perform any, potentially costly, calculations on a worker thread, while queuing up the actual insertions and deletions for later.
-
-The EndSimulationBarrier is a standard ECS System that provides an EntityCommandBuffer for any System to use. EndSimulationBarrier automatically executes any commands in this buffer when the System runs at the end of a frame.
+Currently, the most efficient way to batch create a large number of entities is to batch-instantiate all copies of the prefab using EntityManager.Instantiate(), and then use a parallel job to provide the initial per-instance component values.

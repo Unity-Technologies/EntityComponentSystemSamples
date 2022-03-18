@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(CartesianGridChangeDirectionSystemGroup))]
-public unsafe partial class CartesianGridOnCubeBounceOffWallsSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnCubeBounceOffWallsSystem : SystemBase
 {
     EntityQuery m_GridQuery;
 
@@ -17,7 +17,7 @@ public unsafe partial class CartesianGridOnCubeBounceOffWallsSystem : JobCompone
         RequireForUpdate(m_GridQuery);
     }
 
-    protected override JobHandle OnUpdate(JobHandle lastJobHandle)
+    protected override void OnUpdate()
     {
         int pathOffset = CartesianGridMovement.NextPathIndex(ref m_NextPathCounter);
 
@@ -31,7 +31,7 @@ public unsafe partial class CartesianGridOnCubeBounceOffWallsSystem : JobCompone
         // Offset center to grid cell
         var cellCenterOffset = new float2(((float)rowCount * 0.5f) - 0.5f, ((float)rowCount * 0.5f) - 0.5f);
 
-        lastJobHandle = Entities
+        Entities
             .WithName("CartesianGridOnCubeChangeDirection")
             .WithNativeDisableUnsafePtrRestriction(gridWalls)
             .WithNativeDisableUnsafePtrRestriction(faceLocalToLocal)
@@ -90,8 +90,6 @@ public unsafe partial class CartesianGridOnCubeBounceOffWallsSystem : JobCompone
                         // Update gridPosition relative to new face.
                         gridCoordinates = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[nextDir], rowCount, rowCount);
                     }
-                }).Schedule(lastJobHandle);
-
-        return lastJobHandle;
+                }).Schedule();
     }
 }
