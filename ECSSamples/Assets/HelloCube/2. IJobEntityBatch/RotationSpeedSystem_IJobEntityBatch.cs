@@ -61,6 +61,6 @@ public partial class RotationSpeedSystem_IJobChunk : SystemBase
             DeltaTime = Time.DeltaTime
         };
 
-        Dependency = job.ScheduleParallel(m_Query, 1, Dependency);
+        Dependency = job.ScheduleParallel(m_Query, Dependency);
     }
 }

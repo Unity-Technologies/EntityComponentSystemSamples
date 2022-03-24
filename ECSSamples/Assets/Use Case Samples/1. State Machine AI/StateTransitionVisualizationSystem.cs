@@ -10,7 +10,7 @@ using static Unity.Mathematics.math;
 
 #if !UNITY_DISABLE_MANAGED_COMPONENTS
 [UpdateInGroup(typeof(PresentationSystemGroup))]
-[UpdateBefore(typeof(RenderMeshSystemV2))]
+[UpdateBefore(typeof(HybridRendererSystem))]
 public partial class StateTransitionVisualizationSystem : SystemBase
 {
     private EntityQuery m_StateTransitionMaterialSingletonQuery;

@@ -160,7 +160,7 @@ namespace StressTests.ManySystems
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
     [AlwaysUpdateSystem]
-    class TestSystem_Complex : SystemBase
+    partial class TestSystem_Complex : SystemBase
     {
         EntityQuery m_Query;
         public ComponentType[] Types;

@@ -7,7 +7,7 @@ using Unity.Entities;
 using UnityEngine;
 using Unity.Transforms;
 
-[ConverterVersion("joe", 2)]
+[ConverterVersion("joe", 4)]
 class SimpleMeshRenderingAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public Mesh Mesh = null;
@@ -16,7 +16,7 @@ class SimpleMeshRenderingAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         // Assets in subscenes can either be created during conversion and embedded in the scene
-        var material = new Material(Shader.Find("Standard"));
+        var material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         material.color = Color;
         // ... Or be an asset that is being referenced.
 

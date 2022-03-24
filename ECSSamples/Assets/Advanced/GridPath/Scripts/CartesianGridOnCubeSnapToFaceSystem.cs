@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateBefore(typeof(CartesianGridMoveForwardSystem))]
-public unsafe partial class CartesianGridOnCubeSnapToFaceSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnCubeSnapToFaceSystem : SystemBase
 {
     EntityQuery m_GridQuery;
 
@@ -17,7 +17,7 @@ public unsafe partial class CartesianGridOnCubeSnapToFaceSystem : JobComponentSy
         RequireForUpdate(m_GridQuery);
     }
 
-    protected override JobHandle OnUpdate(JobHandle lastJobHandle)
+    protected override void OnUpdate()
     {
         // Get component data from the Grid (GridCube or GridCube)
         var cartesianGridCube = GetSingleton<CartesianGridOnCube>();
@@ -60,7 +60,5 @@ public unsafe partial class CartesianGridOnCubeSnapToFaceSystem : JobComponentSy
                     translation.Value = math.mul(faceWorldToLocal[bestCubeFace], new float4(translation.Value.xyz, 1.0f)).xyz;
                     EntityManager.AddComponentData(entity, new CartesianGridOnCubeFace { Value = (byte)bestCubeFace });
                 }).Run();
-
-        return lastJobHandle;
     }
 }
