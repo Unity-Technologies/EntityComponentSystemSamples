@@ -45,7 +45,7 @@ public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObj
 // A system which configures the simulation step to rotate certain contact normals
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(StepPhysicsWorld))]
-public class ModifyNarrowphaseContactsSystem : SystemBase
+public partial class ModifyNarrowphaseContactsSystem : SystemBase
 {
     StepPhysicsWorld m_StepPhysicsWorld;
     BuildPhysicsWorld m_BuildPhysicsWorld;

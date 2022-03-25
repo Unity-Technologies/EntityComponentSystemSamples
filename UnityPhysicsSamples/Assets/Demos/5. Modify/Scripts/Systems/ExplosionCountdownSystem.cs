@@ -16,7 +16,7 @@ public struct ExplosionCountdown : IComponentData
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ExplosionCountdownSystem : SystemBase
+public partial class ExplosionCountdownSystem : SystemBase
 {
     private BuildPhysicsWorld m_BuildPhysicsWorld;
     private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;

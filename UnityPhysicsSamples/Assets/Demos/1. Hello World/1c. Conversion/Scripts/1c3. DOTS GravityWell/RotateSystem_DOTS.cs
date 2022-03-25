@@ -4,7 +4,7 @@ using Unity.Mathematics;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(GravityWellSystem_DOTS))]
-public class RotateSystem_DOTS : SystemBase
+public partial class RotateSystem_DOTS : SystemBase
 {
     protected override void OnCreate()
     {

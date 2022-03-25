@@ -37,7 +37,7 @@ public class PlatformMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class PlatformMotionSystem : SystemBase
+public partial class PlatformMotionSystem : SystemBase
 {
     protected override void OnUpdate()
     {

@@ -76,7 +76,7 @@ public struct IgnoreTransparentClosestHitCollector : ICollector<RaycastHit>
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class RaycastWithCustomCollectorSystem : SystemBase
+public partial class RaycastWithCustomCollectorSystem : SystemBase
 {
     BuildPhysicsWorld m_BuildPhysicsWorld;
     EndFramePhysicsSystem m_EndFramePhysicsSystem;

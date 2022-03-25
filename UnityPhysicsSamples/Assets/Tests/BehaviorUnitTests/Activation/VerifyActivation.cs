@@ -43,7 +43,7 @@ namespace Unity.Physics.Tests
         }
     }
 
-    public class VerifyActivationSystem : SceneCreationSystem<VerifyActivationScene>
+    public partial class VerifyActivationSystem : SceneCreationSystem<VerifyActivationScene>
     {
         public override void CreateScene(VerifyActivationScene sceneSettings)
         {
@@ -131,7 +131,7 @@ namespace Unity.Physics.Tests
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public class TestSystem : SystemBase
+    public partial class TestSystem : SystemBase
     {
         private int m_Counter;
 

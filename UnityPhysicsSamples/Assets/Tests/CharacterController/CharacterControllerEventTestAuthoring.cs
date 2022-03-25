@@ -25,7 +25,7 @@ public class CharacterControllerEventTestAuthoring : MonoBehaviour, IConvertGame
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(TriggerEventConversionSystem))]
 [UpdateAfter(typeof(CollisionEventConversionSystem))]
-public class CharacterControllerEventTestStstem : SystemBase
+public partial class CharacterControllerEventTestStstem : SystemBase
 {
     private CharacterControllerSystem m_CCSystem;
 

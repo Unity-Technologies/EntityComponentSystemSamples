@@ -4,7 +4,7 @@ using Unity.Entities;
 // information to every character controller in the scene
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 [UpdateAfter(typeof(DemoInputGatheringSystem))]
-public class CharacterControllerOneToManyInputSystem : SystemBase
+public partial class CharacterControllerOneToManyInputSystem : SystemBase
 {
     protected override void OnUpdate()
     {

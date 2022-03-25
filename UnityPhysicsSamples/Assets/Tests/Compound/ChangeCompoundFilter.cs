@@ -99,7 +99,7 @@ namespace Unity.Physics.Tests
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public class UpdateFilterSystem : SystemBase
+    public partial class UpdateFilterSystem : SystemBase
     {
         private int m_Counter;
 

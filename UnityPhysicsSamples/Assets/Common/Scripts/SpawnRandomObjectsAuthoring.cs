@@ -62,7 +62,7 @@ class SpawnRandomObjectsSystem : SpawnRandomObjectsSystemBase<SpawnSettings>
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-abstract class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IComponentData, ISpawnSettings
+abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IComponentData, ISpawnSettings
 {
     internal virtual int GetRandomSeed(T spawnSettings)
     {

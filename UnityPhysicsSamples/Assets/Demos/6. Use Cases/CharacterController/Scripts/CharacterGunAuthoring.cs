@@ -55,7 +55,7 @@ public class CharacterGunAuthoring : MonoBehaviour, IDeclareReferencedPrefabs, I
 // This assumes that all gun are being controlled from the same single input system
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(CharacterControllerSystem))]
-public class CharacterGunOneToManyInputSystem : SystemBase
+public partial class CharacterGunOneToManyInputSystem : SystemBase
 {
     EntityCommandBufferSystem m_EntityCommandBufferSystem;
 

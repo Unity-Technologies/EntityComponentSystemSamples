@@ -4,7 +4,7 @@ using UnityEngine;
 
 struct ActiveVehicle : IComponentData {}
 
-class ChangeActiveVehicleSystem : SystemBase
+partial class ChangeActiveVehicleSystem : SystemBase
 {
     struct AvailableVehicle : ISystemStateComponentData {}
 

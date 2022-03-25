@@ -47,7 +47,7 @@ public class TriggerVolumeForceFieldAuthoring : MonoBehaviour, IConvertGameObjec
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(ExportPhysicsWorld))]
 [UpdateAfter(typeof(TriggerEventConversionSystem))]
-public class TriggerVolumeForceFieldSystem : SystemBase
+public partial class TriggerVolumeForceFieldSystem : SystemBase
 {
     private TriggerEventConversionSystem m_TriggerSystem;
     private ExportPhysicsWorld m_ExportPhysicsWorld;

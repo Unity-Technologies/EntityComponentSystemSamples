@@ -32,7 +32,7 @@ public class GravityWellSystem_GO : MonoBehaviour
 #region ECS
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class GravityWellSystem_GO_ECS : SystemBase
+public partial class GravityWellSystem_GO_ECS : SystemBase
 {
     private EntityQuery GravityWellQuery;
 

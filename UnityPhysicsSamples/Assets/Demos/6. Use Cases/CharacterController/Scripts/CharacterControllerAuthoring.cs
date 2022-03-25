@@ -144,7 +144,7 @@ public class CharacterControllerAuthoring : MonoBehaviour, IConvertGameObjectToE
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(ExportPhysicsWorld))]
 [UpdateAfter(typeof(BufferInterpolatedRigidBodiesMotion)), UpdateBefore(typeof(CharacterControllerSystem))]
-public class BufferInterpolatedCharacterControllerMotion : SystemBase
+public partial class BufferInterpolatedCharacterControllerMotion : SystemBase
 {
     CharacterControllerSystem m_CharacterControllerSystem;
 
@@ -175,7 +175,7 @@ public class BufferInterpolatedCharacterControllerMotion : SystemBase
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
-public class CharacterControllerSystem : SystemBase
+public partial class CharacterControllerSystem : SystemBase
 {
     const float k_DefaultTau = 0.4f;
     const float k_DefaultDamping = 0.9f;

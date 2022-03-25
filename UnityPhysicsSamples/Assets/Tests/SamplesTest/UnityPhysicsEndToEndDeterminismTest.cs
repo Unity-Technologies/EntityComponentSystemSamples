@@ -19,7 +19,7 @@ namespace Unity.Physics.Samples.Test
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
-    class UnityPhysicsDeterminismTestSystem : SystemBase, IDeterminismTestSystem
+    partial class UnityPhysicsDeterminismTestSystem : SystemBase, IDeterminismTestSystem
     {
         protected BuildPhysicsWorld m_BuildPhysicsWorld;
         protected StepPhysicsWorld m_StepPhysicsWorld;

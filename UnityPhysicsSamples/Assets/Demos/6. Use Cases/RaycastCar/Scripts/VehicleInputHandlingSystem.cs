@@ -11,7 +11,7 @@ struct VehicleInput : IComponentData
 }
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-class VehicleInputHandlingSystem : SystemBase
+partial class VehicleInputHandlingSystem : SystemBase
 {
     protected override void OnUpdate()
     {

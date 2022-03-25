@@ -112,7 +112,7 @@ class ModifyJointLimitsConversionSystem : GameObjectConversionSystem
 // apply an animated effect to the limits on supported types of joints
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-class ModifyJointLimitsSystem : SystemBase
+partial class ModifyJointLimitsSystem : SystemBase
 {
     EndFramePhysicsSystem m_EndFramePhysicsSystem;
 

@@ -40,7 +40,7 @@ public class RandomMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class RandomMotionSystem : SystemBase
+public partial class RandomMotionSystem : SystemBase
 {
     private BuildPhysicsWorld m_BuildPhysicsWorld;
 

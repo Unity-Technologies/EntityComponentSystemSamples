@@ -18,7 +18,7 @@ public struct ProjectIntoFutureTrail : IComponentData {}
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class ProjectIntoFutureOnCueSystem : SystemBase
+public partial class ProjectIntoFutureOnCueSystem : SystemBase
 {
     private bool NeedsUpdate = true;
     private int m_NumSteps = 0;

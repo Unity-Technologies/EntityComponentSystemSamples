@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 [AlwaysUpdateSystem]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-class DemoInputGatheringSystem : SystemBase
+partial class DemoInputGatheringSystem : SystemBase
 #if UNITY_INPUT_SYSTEM_EXISTS
     ,
     InputActions.ICharacterControllerActions,

@@ -84,7 +84,7 @@ namespace Unity.Physics.Extensions
 
     // Attaches a virtual spring to the picked entity
     [UpdateInGroup(typeof(SimulationSystemGroup))]
-    public class MousePickSystem : SystemBase
+    public partial class MousePickSystem : SystemBase
     {
         const float k_MaxDistance = 100.0f;
 
@@ -219,7 +219,7 @@ namespace Unity.Physics.Extensions
     // Applies any mouse spring as a change in velocity on the entity's motion component
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(BuildPhysicsWorld))]
-    public class MouseSpringSystem : SystemBase
+    public partial class MouseSpringSystem : SystemBase
     {
         EntityQuery m_MouseGroup;
         MousePickSystem m_PickSystem;

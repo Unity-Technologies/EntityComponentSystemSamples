@@ -37,7 +37,7 @@ public class TriggerGravityFactorAuthoring : MonoBehaviour, IConvertGameObjectTo
 // TriggerGravityFactor behaviour added.
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class TriggerGravityFactorSystem : SystemBase
+public partial class TriggerGravityFactorSystem : SystemBase
 {
     BuildPhysicsWorld m_BuildPhysicsWorldSystem;
     StepPhysicsWorld m_StepPhysicsWorldSystem;

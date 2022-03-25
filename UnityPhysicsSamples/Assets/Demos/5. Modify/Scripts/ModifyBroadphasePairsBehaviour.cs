@@ -21,7 +21,7 @@ public class ModifyBroadphasePairsBehaviour : MonoBehaviour, IConvertGameObjectT
 // A system which configures the simulation step to disable certain broad phase pairs
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(StepPhysicsWorld))]
-public class ModifyBroadphasePairsSystem : SystemBase
+public partial class ModifyBroadphasePairsSystem : SystemBase
 {
     EntityQuery m_PairModifierGroup;
 

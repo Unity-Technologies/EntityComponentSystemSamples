@@ -35,7 +35,7 @@ public class CollisionEventImpulseAuthoring : MonoBehaviour, IConvertGameObjectT
 // CollisionEventImpulse behaviour added.
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class CollisionEventImpulseSystem : SystemBase
+public partial class CollisionEventImpulseSystem : SystemBase
 {
     BuildPhysicsWorld m_BuildPhysicsWorldSystem;
     StepPhysicsWorld m_StepPhysicsWorldSystem;

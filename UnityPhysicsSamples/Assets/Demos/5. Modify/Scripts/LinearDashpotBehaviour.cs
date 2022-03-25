@@ -72,7 +72,7 @@ public class LinearDashpotBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 #region System
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class LinearDashpotSystem : SystemBase
+public partial class LinearDashpotSystem : SystemBase
 {
     BuildPhysicsWorld m_BuildPhysicsWorldSystem;
 

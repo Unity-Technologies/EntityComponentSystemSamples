@@ -163,7 +163,7 @@ namespace Unity.Physics.Stateful
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(StepPhysicsWorld))]
     [UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public class CollisionEventConversionSystem : SystemBase
+    public partial class CollisionEventConversionSystem : SystemBase
     {
         public JobHandle OutDependency => Dependency;
 

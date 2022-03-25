@@ -280,7 +280,7 @@ namespace Unity.Physics.Samples.Test
 
         [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
         [UpdateAfter(typeof(BuildPhysicsWorld))]
-        class BuildPhysicsWorldSampler : SystemBase
+        partial class BuildPhysicsWorldSampler : SystemBase
         {
             public bool FinishedSampling = false;
             public World DefaultWorld => World.DefaultGameObjectInjectionWorld;

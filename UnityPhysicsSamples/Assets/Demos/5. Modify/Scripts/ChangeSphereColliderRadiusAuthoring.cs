@@ -44,7 +44,7 @@ public class ChangeSphereColliderRadiusAuthoring : MonoBehaviour//, IConvertGame
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ChangeSphereColliderRadiusSystem : SystemBase
+public partial class ChangeSphereColliderRadiusSystem : SystemBase
 {
     protected override void OnUpdate()
     {

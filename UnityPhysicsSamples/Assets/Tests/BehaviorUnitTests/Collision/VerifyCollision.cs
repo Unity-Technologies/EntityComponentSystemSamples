@@ -22,7 +22,7 @@ namespace Unity.Physics.Tests
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyCollisionSystem : SystemBase
+    public partial class VerifyCollisionSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
 

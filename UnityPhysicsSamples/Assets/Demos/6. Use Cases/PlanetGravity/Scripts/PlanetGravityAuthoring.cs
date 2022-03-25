@@ -48,7 +48,7 @@ public class PlanetGravityAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class PlanetGravitySystem : SystemBase
+public partial class PlanetGravitySystem : SystemBase
 {
     static readonly quaternion k_GravityOrientation = quaternion.RotateY(math.PI / 2f);
 

@@ -9,8 +9,8 @@ using UnityEngine.Jobs;
 public class EntityTracker : MonoBehaviour {}
 
 [UpdateInGroup(typeof(TransformSystemGroup))]
-[UpdateAfter(typeof(EndFrameLocalToParentSystem))]
-class SynchronizeGameObjectTransformsWithEntities : SystemBase
+[UpdateAfter(typeof(LocalToParentSystem))]
+partial class SynchronizeGameObjectTransformsWithEntities : SystemBase
 {
     EntityQuery m_Query;
 

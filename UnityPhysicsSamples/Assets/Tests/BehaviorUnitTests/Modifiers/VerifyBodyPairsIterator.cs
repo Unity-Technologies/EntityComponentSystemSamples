@@ -23,7 +23,7 @@ namespace Unity.Physics.Tests
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyBodyPairsIteratorSystem : SystemBase
+    public partial class VerifyBodyPairsIteratorSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;

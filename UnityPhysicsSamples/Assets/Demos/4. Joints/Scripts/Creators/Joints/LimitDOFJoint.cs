@@ -15,7 +15,7 @@ namespace Unity.Physics.Authoring
 
         public static PhysicsJoint CreateLimitDOFJoint(RigidTransform offset, bool3 linearLocks, bool3 angularLocks)
         {
-            var constraints = new FixedList128<Constraint>();
+            var constraints = new FixedList128Bytes<Constraint>();
             if (math.any(linearLocks))
             {
                 constraints.Add(new Constraint

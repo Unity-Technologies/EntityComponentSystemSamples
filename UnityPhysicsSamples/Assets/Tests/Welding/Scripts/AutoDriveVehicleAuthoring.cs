@@ -34,7 +34,7 @@ namespace Demos
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [UpdateAfter(typeof(DemoInputGatheringSystem))]
     [UpdateBefore(typeof(VehicleInputHandlingSystem))]
-    class AutoDriveVehicle : SystemBase
+    partial class AutoDriveVehicle : SystemBase
     {
         protected override void OnUpdate()
         {

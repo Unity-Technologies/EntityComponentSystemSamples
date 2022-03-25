@@ -13,7 +13,7 @@ namespace Unity.Physics.Samples.Test
     [AlwaysUpdateSystem]
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(BuildPhysicsWorld))]
-    class EnsureSTSimulation : SystemBase
+    partial class EnsureSTSimulation : SystemBase
     {
         protected override void OnUpdate()
         {

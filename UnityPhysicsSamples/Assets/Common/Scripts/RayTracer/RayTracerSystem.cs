@@ -11,7 +11,7 @@ namespace Unity.Physics.Extensions
 {
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(BuildPhysicsWorld))]
-    public class RayTracerSystem : SystemBase
+    public partial class RayTracerSystem : SystemBase
     {
         BuildPhysicsWorld m_BuildPhysicsWorldSystem;
         JobHandle m_OutputDependency;

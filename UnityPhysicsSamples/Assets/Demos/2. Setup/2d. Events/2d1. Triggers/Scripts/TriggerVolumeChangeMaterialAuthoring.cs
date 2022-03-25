@@ -25,7 +25,7 @@ public class TriggerVolumeChangeMaterialAuthoring : MonoBehaviour, IConvertGameO
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(TriggerEventConversionSystem))]
-public class TriggerVolumeChangeMaterialSystem : SystemBase
+public partial class TriggerVolumeChangeMaterialSystem : SystemBase
 {
     private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;
     private TriggerEventConversionSystem m_TriggerSystem;

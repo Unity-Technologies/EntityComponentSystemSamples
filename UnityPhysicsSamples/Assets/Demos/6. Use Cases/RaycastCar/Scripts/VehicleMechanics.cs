@@ -131,7 +131,7 @@ namespace Demos
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VehicleMechanicsSystem : SystemBase
+    public partial class VehicleMechanicsSystem : SystemBase
     {
         BuildPhysicsWorld m_BuildPhysicsWorldSystem;
 

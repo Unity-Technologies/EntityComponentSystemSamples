@@ -74,7 +74,7 @@ class AnimateKinematicBodyAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-class AnimateKinematicBodySystem : SystemBase
+partial class AnimateKinematicBodySystem : SystemBase
 {
     // system state component used to identify new animated bodies on their first frame
     struct Initialized : ISystemStateComponentData {}

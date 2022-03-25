@@ -67,7 +67,7 @@ public struct ApplyRocketThrust : IComponentData
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ApplyRocketThrustSystem : SystemBase
+public partial class ApplyRocketThrustSystem : SystemBase
 {
     protected override void OnUpdate()
     {

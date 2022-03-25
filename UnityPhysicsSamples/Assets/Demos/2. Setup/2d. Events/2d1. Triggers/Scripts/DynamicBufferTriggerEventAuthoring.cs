@@ -118,7 +118,7 @@ namespace Unity.Physics.Stateful
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(StepPhysicsWorld))]
     [UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public class TriggerEventConversionSystem : SystemBase
+    public partial class TriggerEventConversionSystem : SystemBase
     {
         public JobHandle OutDependency => Dependency;
 

@@ -68,7 +68,7 @@ public class ChangeMotionTypeAuthoring : MonoBehaviour//, IConvertGameObjectToEn
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ChangeMotionTypeSystem : SystemBase
+public partial class ChangeMotionTypeSystem : SystemBase
 {
     protected override void OnUpdate()
     {

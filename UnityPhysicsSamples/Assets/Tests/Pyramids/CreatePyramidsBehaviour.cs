@@ -59,7 +59,7 @@ public class CreatePyramidsBehaviour : MonoBehaviour, IDeclareReferencedPrefabs,
 
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-public class CreatePyramidsSystem : SystemBase
+public partial class CreatePyramidsSystem : SystemBase
 {
     protected override void OnCreate()
     {

@@ -30,7 +30,7 @@ namespace Unity.Physics.Tests
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(StepPhysicsWorld))]
-    public class VerifyRestitutionSystem : SystemBase
+    public partial class VerifyRestitutionSystem : SystemBase
     {
         double m_StartSeconds;
         const double kCheckSeconds = 0.9;

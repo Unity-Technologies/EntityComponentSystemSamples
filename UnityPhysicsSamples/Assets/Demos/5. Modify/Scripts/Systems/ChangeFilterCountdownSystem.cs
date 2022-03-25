@@ -10,7 +10,7 @@ public struct ChangeFilterCountdown : IComponentData
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ChangeFilterCountdownSystem : SystemBase
+public partial class ChangeFilterCountdownSystem : SystemBase
 {
     private BuildPhysicsWorld m_BuildPhysicsWorld;
     private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;

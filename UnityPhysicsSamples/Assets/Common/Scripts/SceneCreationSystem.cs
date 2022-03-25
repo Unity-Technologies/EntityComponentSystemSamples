@@ -41,7 +41,7 @@ public abstract class SceneCreationAuthoring<T> : MonoBehaviour, IConvertGameObj
 }
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-public abstract class SceneCreationSystem<T> : SystemBase
+public abstract partial class SceneCreationSystem<T> : SystemBase
     where T : SceneCreationSettings
 {
     private EntityQuery m_ScenesToCreateQuery;

@@ -1,7 +1,7 @@
 using Unity.Entities;
 
 [UpdateAfter(typeof(ChangeActiveVehicleSystem))]
-class CameraFollowActiveVehicleSystem : SystemBase
+partial class CameraFollowActiveVehicleSystem : SystemBase
 {
     protected override void OnUpdate()
     {

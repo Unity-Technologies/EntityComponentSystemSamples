@@ -34,7 +34,7 @@ struct SetFixedTimestep : IComponentData
 }
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-class SetFixedTimestepSystem : SystemBase
+partial class SetFixedTimestepSystem : SystemBase
 {
     FixedStepSimulationSystemGroup m_FixedStepSimulationSystemGroup;
 

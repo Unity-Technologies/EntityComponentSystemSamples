@@ -50,7 +50,7 @@ public class FixAngleGridDemoSystem : SceneCreationSystem<FixedAngleGridScene>
                 BodyAFromJoint = new RigidTransform(orientationA, pivotLocal),
                 BodyBFromJoint = new RigidTransform(orientationB, pivotInWorld)
             };
-            jointData.SetConstraints(new FixedList128<Constraint>
+            jointData.SetConstraints(new FixedList128Bytes<Constraint>
             {
                 Length = 2,
                 [0] = Constraint.BallAndSocket(),

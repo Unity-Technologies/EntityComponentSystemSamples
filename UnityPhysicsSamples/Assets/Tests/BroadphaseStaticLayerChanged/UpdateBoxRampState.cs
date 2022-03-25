@@ -24,7 +24,7 @@ public class UpdateBoxRampState : MonoBehaviour, IConvertGameObjectToEntity
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class EntityUpdaterSystem : SystemBase
+public partial class EntityUpdaterSystem : SystemBase
 {
     protected override void OnUpdate()
     {

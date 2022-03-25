@@ -52,7 +52,7 @@ struct CameraSmoothTrackSettings : IComponentData
 }
 
 [UpdateAfter(typeof(TransformSystemGroup))]
-class SmoothlyTrackCameraTarget : SystemBase
+partial class SmoothlyTrackCameraTarget : SystemBase
 {
     struct Initialized : ISystemStateComponentData {}
 

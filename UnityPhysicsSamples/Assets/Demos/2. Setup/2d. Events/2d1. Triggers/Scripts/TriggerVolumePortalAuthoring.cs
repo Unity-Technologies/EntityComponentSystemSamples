@@ -37,7 +37,7 @@ public class TriggerVolumePortalAuthoring : MonoBehaviour, IConvertGameObjectToE
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(ExportPhysicsWorld))]
 [UpdateAfter(typeof(TriggerEventConversionSystem))]
-public class TriggerVolumePortalSystem : SystemBase
+public partial class TriggerVolumePortalSystem : SystemBase
 {
     private ExportPhysicsWorld m_ExportPhysicsWorld;
     private TriggerEventConversionSystem m_TriggerSystem;

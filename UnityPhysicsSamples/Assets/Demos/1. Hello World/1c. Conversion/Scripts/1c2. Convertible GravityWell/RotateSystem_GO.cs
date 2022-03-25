@@ -20,7 +20,7 @@ public class RotateSystem_GO : MonoBehaviour
 #region ECS
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(GravityWellSystem_GO_ECS))]
-public class RotateSystem_GO_ECS : SystemBase
+public partial class RotateSystem_GO_ECS : SystemBase
 {
     protected override void OnUpdate()
     {

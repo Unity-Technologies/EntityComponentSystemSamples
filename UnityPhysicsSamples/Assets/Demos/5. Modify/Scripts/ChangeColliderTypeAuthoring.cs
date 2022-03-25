@@ -57,7 +57,7 @@ public class ChangeColliderTypeAuthoring : MonoBehaviour, IDeclareReferencedPref
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class ChangeColliderTypeSystem : SystemBase
+public partial class ChangeColliderTypeSystem : SystemBase
 {
     protected override void OnCreate()
     {

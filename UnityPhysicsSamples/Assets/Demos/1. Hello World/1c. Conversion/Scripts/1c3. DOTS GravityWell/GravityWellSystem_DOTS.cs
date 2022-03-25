@@ -8,7 +8,7 @@ using Unity.Collections;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class GravityWellSystem_DOTS : SystemBase
+public partial class GravityWellSystem_DOTS : SystemBase
 {
     private EntityQuery GravityWellQuery;
     private BuildPhysicsWorld BuildPhysicsWorldSystem;

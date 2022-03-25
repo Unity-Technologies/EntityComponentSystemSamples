@@ -4,7 +4,7 @@ using UnityEngine;
 // This class sets the upper limit of FPS of a demo that is being run.
 // It is used as a workaround for JobTempAlloc issues on CI and to make
 // measuring performance easier.
-public class InitializeSamplesSystem : SystemBase
+public partial class InitializeSamplesSystem : SystemBase
 {
     protected override void OnCreate()
     {

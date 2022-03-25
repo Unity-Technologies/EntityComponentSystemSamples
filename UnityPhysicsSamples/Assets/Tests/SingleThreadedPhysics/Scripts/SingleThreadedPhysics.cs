@@ -48,7 +48,7 @@ public class SingleThreadedPhysics : MonoBehaviour
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(StepPhysicsWorld))]
-public class SingleThreadedPhysicsSystem : SystemBase
+public partial class SingleThreadedPhysicsSystem : SystemBase
 {
     public PhysicsWorld PhysicsWorld = new PhysicsWorld(0, 0, 0);
 

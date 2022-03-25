@@ -21,7 +21,7 @@ namespace Unity.Physics
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(StepPhysicsWorld))]
-    public class VerifyPhasedDispatchPairsSystem : SystemBase
+    public partial class VerifyPhasedDispatchPairsSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
         StepPhysicsWorld m_StepPhysicsWorld;

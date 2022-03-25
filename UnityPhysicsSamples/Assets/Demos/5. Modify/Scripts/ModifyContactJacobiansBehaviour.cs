@@ -39,7 +39,7 @@ public class ModifyContactJacobiansBehaviour : MonoBehaviour, IConvertGameObject
 // A system which configures the simulation step to modify contact jacobains in various ways
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(StepPhysicsWorld))]
-public class ModifyContactJacobiansSystem : SystemBase
+public partial class ModifyContactJacobiansSystem : SystemBase
 {
     StepPhysicsWorld m_StepPhysicsWorld;
     SimulationCallbacks.Callback m_PreparationCallback;

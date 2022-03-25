@@ -35,7 +35,7 @@ public struct InvalidPhysicsJointSwapMotionType : IComponentData
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class InvalidPhysicsJointSwapDemoSystem : SystemBase
+public partial class InvalidPhysicsJointSwapDemoSystem : SystemBase
 {
     protected override void OnUpdate()
     {

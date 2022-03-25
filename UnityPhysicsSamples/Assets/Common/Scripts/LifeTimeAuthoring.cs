@@ -19,7 +19,7 @@ public class LifeTimeAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(BuildPhysicsWorld))]
-public class LifeTimeSystem : SystemBase
+public partial class LifeTimeSystem : SystemBase
 {
     protected override void OnUpdate()
     {

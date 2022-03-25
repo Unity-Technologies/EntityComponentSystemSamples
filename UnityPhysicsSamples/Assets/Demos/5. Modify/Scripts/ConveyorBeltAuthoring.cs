@@ -112,7 +112,7 @@ public struct ConveyorBelt : IComponentData
 // A system which configures the simulation step to modify contact jacobains in various ways
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(StepPhysicsWorld))]
-public class ConveyorBeltSystem : SystemBase
+public partial class ConveyorBeltSystem : SystemBase
 {
     StepPhysicsWorld m_StepPhysicsWorld;
     SimulationCallbacks.Callback m_PreparationCallback;
