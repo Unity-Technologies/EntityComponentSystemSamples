@@ -12,7 +12,7 @@ public class MeshChanger : IComponentData
     public uint active;
 }
 
-public class MeshChangerSystem : SystemBase
+public partial class MeshChangerSystem : SystemBase
 {
     protected override void OnUpdate()
     {

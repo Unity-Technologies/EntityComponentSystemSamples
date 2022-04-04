@@ -1,3 +1,15 @@
+# HybridURPSamples Version 4
+
+## Changes
+* Updated minimum Unity Editor version to `2020.3.30f1`.
+* Updated URP version to `10.8.1`.
+* Removed `ENABLE_HYBRID_RENDERER_V2` from ProjectSettings.
+* Updated screenshot for BuiltinProperties scene.
+* Fixed SceneManager.LoadScene() warning.
+* Removed BrokenShader to reduce confusion.
+* Removed unsupported Matrix4x4 override sphere in GraphicsTest_001 scene.
+* Added scene list table in Readme.
+
 # HybridURPSamples Version 3
 
 ## Changes
