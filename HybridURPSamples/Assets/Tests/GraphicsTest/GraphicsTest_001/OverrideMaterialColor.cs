@@ -5,9 +5,7 @@ using Unity.Rendering;
 using UnityEngine;
 
 [Serializable]
-#if ENABLE_HYBRID_RENDERER_V2
 [MaterialProperty("_Color", MaterialPropertyFormat.Float4)]
-#endif
 public struct OverrideMaterialColorData : IComponentData
 {
     public float4 Value;

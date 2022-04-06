@@ -4,7 +4,7 @@ using Unity.Rendering;
 using Unity.Transforms;
 using static Unity.Mathematics.math;
 
-public class StressTestAnimationSystem : SystemBase
+public partial class StressTestAnimationSystem : SystemBase
 {
     void AnimateColors(SimulationMode.Mode mode)
     {
@@ -64,7 +64,7 @@ public class StressTestAnimationSystem : SystemBase
                 AnimatePositions(mode);
                 break;
             default:
-                break;        
+                break;
         }
     }
 }

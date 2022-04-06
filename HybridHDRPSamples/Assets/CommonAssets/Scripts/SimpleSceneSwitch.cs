@@ -10,10 +10,6 @@ public class SimpleSceneSwitch : MonoBehaviour
     public void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
-    }
-
-    public void Start()
-    {
         NextScene();
     }
 
