@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-public class JumpingSpherePSSystem : SystemBase
+public partial class JumpingSpherePSSystem : SystemBase
 {
     protected override void OnUpdate()
     {      
@@ -19,7 +19,7 @@ public class JumpingSpherePSSystem : SystemBase
         }).ScheduleParallel();
 
         //Play ParticleSystem when the sphere is touching the ground
-        Entities.WithoutBurst().WithAll<JumpingSpherePSTag>().ForEach((UnityEngine.VFX.VisualEffect ps ) => 
+        Entities.WithoutBurst().WithAll<JumpingSpherePSTag>().ForEach((UnityEngine.VFX.VisualEffect ps ) =>
         {
             if(y < 0.05f) ps.Play();
 

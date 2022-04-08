@@ -6,7 +6,7 @@ using Unity.Transforms;
 /// <summary>
 /// Spawn one prefab entity at a time at a random position on grid at the given frequency.
 /// </summary>
-public partial class CartesianGridOnCubeSoloSpawnerSystem : JobComponentSystem
+public partial class CartesianGridOnCubeSoloSpawnerSystem : SystemBase
 {
     BeginInitializationEntityCommandBufferSystem m_EntityCommandBufferSystem;
     EntityQuery m_GridQuery;
@@ -19,7 +19,7 @@ public partial class CartesianGridOnCubeSoloSpawnerSystem : JobComponentSystem
         RequireForUpdate(m_GridQuery);
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         // Clamp delta time so you can't overshoot.
         var deltaTime = math.min(Time.DeltaTime, 0.05f);
@@ -57,7 +57,5 @@ public partial class CartesianGridOnCubeSoloSpawnerSystem : JobComponentSystem
 
             soloSpawner.SecondsUntilGenerate = secondsUntilGenerate;
         }).Run();
-
-        return inputDeps;
     }
 }

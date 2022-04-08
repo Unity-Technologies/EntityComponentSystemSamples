@@ -14,7 +14,7 @@ public struct BallOriginalTranslation : IComponentData
     public float3 Value;
 }
 
-public class MoveBallsSystem : JobComponentSystem
+public partial class MoveBallsSystem : SystemBase
 {
     private EntityQuery m_Group;
 
@@ -55,7 +55,7 @@ public class MoveBallsSystem : JobComponentSystem
         });
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         EntityCommandBuffer entityOriginsCommandBuffer = new EntityCommandBuffer(Allocator.TempJob, PlaybackPolicy.SinglePlayback );
         Entities.WithNone<BallOriginalTranslation>().ForEach((Entity entity, in Translation translation, in SphereId sphereId) =>
@@ -64,7 +64,7 @@ public class MoveBallsSystem : JobComponentSystem
         }).Run();
         entityOriginsCommandBuffer.Playback(EntityManager);
         entityOriginsCommandBuffer.Dispose();
-        
+
         var moveBallJob = new MoveBall
         {
             TranslationType = GetComponentTypeHandle<Translation>(),
@@ -72,7 +72,6 @@ public class MoveBallsSystem : JobComponentSystem
             LastSystemVersion = LastSystemVersion,
             ElapsedTime = Time.ElapsedTime
         };
-        var moveBallJobHandle = moveBallJob.Schedule(m_Group, inputDeps);
-        return moveBallJobHandle;
+        Dependency = moveBallJob.Schedule(m_Group, Dependency);
     }
 }

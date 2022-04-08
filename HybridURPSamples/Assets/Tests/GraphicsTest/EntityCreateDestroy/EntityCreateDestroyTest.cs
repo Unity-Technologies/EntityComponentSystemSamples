@@ -1,6 +1,4 @@
-﻿#if ENABLE_HYBRID_RENDERER_V2
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -136,5 +134,3 @@ public class EntityCreateDestroyTest : MonoBehaviour
     }
 
 }
-
-#endif // ENABLE_HYBRID_RENDERER_V2

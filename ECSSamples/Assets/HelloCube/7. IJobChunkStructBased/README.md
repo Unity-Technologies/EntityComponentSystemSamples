@@ -6,7 +6,7 @@ block of memory containing Entities that all have the same Archetype — that is
 they all have the same set of Components.)
 
 It is the same example as we have seen previously in "2. IJobChunk", however
-this time we are using `ISystemBase` which makes it possible to burst compile
+this time we are using `ISystem` which makes it possible to burst compile
 the main thread update function as well.
 
 ## What does it show?
