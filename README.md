@@ -64,7 +64,7 @@ The ECSSamples project contains samples to help you get started with DOTS. The p
 ## Physics Samples
 
 The PhysicsSamples project contains wide range of physics samples to help you get started with DOTS Physics. The new physics engine is a deterministic, rigid-body dynamics system and spatial query system written from the ground up using the Unity data oriented tech stack.
-You can find an [overview of the samples](UnityPhysicsSamples/Documentation/samples.md) and the [release notes](UnityPhysicsSamples/ReleaseNotes.md) in this repository.
+You can find an [overview of the samples](PhysicsSamples/Documentation/samples.md) and the [release notes](PhysicsSamples/ReleaseNotes.md) in this repository.
 
 DOTS Physics supports macOS/Windows/Linux. Android ARMv7 still might experience craches due to memory restrictions on some devices.
 
