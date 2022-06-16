@@ -11,7 +11,7 @@ internal class UnsafeHashMapPerformanceTests
     [Category("Performance")]
     public void UnsafeHashMap_Performance_IsEmpty([Values(10, 100, 1000, 10000, 100000, 1000000, 2500000, 10000000)] int capacity)
     {
-        using (var container = new UnsafeHashMap<int, int>(capacity, Allocator.Persistent))
+        using (var container = new UnsafeParallelHashMap<int, int>(capacity, Allocator.Persistent))
         {
             container.Add(1, 1);
 
@@ -29,7 +29,7 @@ internal class UnsafeHashMapPerformanceTests
     [Category("Performance")]
     public void UnsafeHashMap_Performance_Count([Values(10, 100, 1000, 10000, 100000, 1000000, 2500000, 10000000)] int capacity)
     {
-        using (var container = new UnsafeHashMap<int, int>(capacity, Allocator.Persistent))
+        using (var container = new UnsafeParallelHashMap<int, int>(capacity, Allocator.Persistent))
         {
             container.Add(1, 1);
 
@@ -47,7 +47,7 @@ internal class UnsafeHashMapPerformanceTests
     [Category("Performance")]
     public void UnsafeHashMap_Performance_GetKeyArray([Values(10, 100, 1000, 10000, 100000, 1000000, 2500000, 10000000)] int capacity)
     {
-        using (var container = new UnsafeHashMap<int, int>(capacity, Allocator.Persistent))
+        using (var container = new UnsafeParallelHashMap<int, int>(capacity, Allocator.Persistent))
         {
             container.Add(1, 1);
 
@@ -66,7 +66,7 @@ internal class UnsafeHashMapPerformanceTests
     [Category("Performance")]
     public void UnsafeHashMap_Performance_RepeatInsert([Values(10, 100, 1000, 10000, 100000, 1000000, 2500000)] int insertions)
     {
-        using (var container = new UnsafeHashMap<int, int>(insertions, Allocator.Persistent))
+        using (var container = new UnsafeParallelHashMap<int, int>(insertions, Allocator.Persistent))
         {
             Random.InitState(0);
             Measure.Method(() =>
@@ -88,7 +88,7 @@ internal class UnsafeHashMapPerformanceTests
     [Category("Performance")]
     public void UnsafeHashMap_Performance_RepeatLookup([Values(10, 100, 1000, 10000, 100000)] int insertions)
     {
-        using (var container = new UnsafeHashMap<int, int>(insertions, Allocator.Persistent))
+        using (var container = new UnsafeParallelHashMap<int, int>(insertions, Allocator.Persistent))
         {
             using (var addedKeys = new NativeList<int>(insertions, Allocator.Persistent))
             {
@@ -120,7 +120,7 @@ internal class UnsafeHashMapPerformanceTests
     [Category("Performance")]
     public void UnsafeHashMap_Performance_RepeatInsertAndLookup([Values(10, 100, 1000, 10000, 100000, 1000000, 2500000)] int insertions)
     {
-        using (var container = new UnsafeHashMap<int, int>(insertions, Allocator.Persistent))
+        using (var container = new UnsafeParallelHashMap<int, int>(insertions, Allocator.Persistent))
         {
             Random.InitState(0);
             Measure.Method(() =>

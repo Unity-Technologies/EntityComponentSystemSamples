@@ -1,3 +1,9 @@
+# Samples Version 39
+
+## Changes
+
+* Update sample to com.unity.entities 0.51.0-preview.32.
+
 # Samples Version 38
 
 ## Changes
