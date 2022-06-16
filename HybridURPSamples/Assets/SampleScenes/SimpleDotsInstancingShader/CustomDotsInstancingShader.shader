@@ -52,13 +52,15 @@
 			CBUFFER_END
 
 			#if defined(UNITY_DOTS_INSTANCING_ENABLED)
-				UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
-					UNITY_DOTS_INSTANCED_PROP(float4, _Color)
-					UNITY_DOTS_INSTANCED_PROP(float4, _MainTex_ST)
-				UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
-
-				#define _Color UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float4, Metadata__Color)
-				#define _MainTex_ST UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float4, Metadata__MainTex_ST)
+			// DOTS instancing definitions
+			UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
+				UNITY_DOTS_INSTANCED_PROP(float4, _Color)
+				UNITY_DOTS_INSTANCED_PROP(float4, _MainTex_ST)
+			UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
+			// DOTS instancing usage macros
+			#define UNITY_ACCESS_HYBRID_INSTANCED_PROP(var, type) UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(type, Metadata##var)
+			#else
+			#define UNITY_ACCESS_HYBRID_INSTANCED_PROP(var, type) var
 			#endif
 
 			sampler2D _MainTex;
@@ -72,7 +74,8 @@
 
 				float3 positionWS = TransformObjectToWorld(v.positionOS);
 				output.positionCS = TransformWorldToHClip(positionWS);
-				output.uv0 = v.uv0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float4 mainTex_st = UNITY_ACCESS_HYBRID_INSTANCED_PROP(_MainTex_ST, float4);
+				output.uv0 = v.uv0.xy * mainTex_st.xy + mainTex_st.zw;
 
 				#if UNITY_ANY_INSTANCING_ENABLED
 				output.instanceID = v.instanceID;
@@ -84,7 +87,7 @@
 			half4 frag(v2f i) : SV_TARGET 
 			{    
 				UNITY_SETUP_INSTANCE_ID(i);
-				float4 color = tex2D(_MainTex,i.uv0.xy) * _Color;
+				float4 color = tex2D(_MainTex,i.uv0.xy) * UNITY_ACCESS_HYBRID_INSTANCED_PROP(_Color, float4);
 				return color;
 			}
 

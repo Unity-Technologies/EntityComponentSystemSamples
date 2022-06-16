@@ -1,5 +1,3 @@
-#if ENABLE_HYBRID_RENDERER_V2
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -136,5 +134,3 @@ public class EntityCreateDestroy : MonoBehaviour
     }
 
 }
-
-#endif // ENABLE_HYBRID_RENDERER_V2

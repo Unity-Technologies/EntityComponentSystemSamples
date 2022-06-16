@@ -1,3 +1,8 @@
+# HybridURPSamples Version 5
+
+## Changes
+* Updated minimum Unity Editor version to `2021.3.4f1`.
+
 # HybridURPSamples Version 4
 
 ## Changes

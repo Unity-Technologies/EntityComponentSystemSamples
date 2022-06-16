@@ -30,7 +30,7 @@ partial class CalculateSkinMatrixSystemBase : SystemBase
     protected override void OnUpdate()
     {
         var boneCount = m_BoneEntityQuery.CalculateEntityCount();
-        var bonesLocalToWorld = new NativeHashMap<Entity, float4x4>(boneCount, Allocator.TempJob);
+        var bonesLocalToWorld = new NativeParallelHashMap<Entity, float4x4>(boneCount, Allocator.TempJob);
         var bonesLocalToWorldParallel = bonesLocalToWorld.AsParallelWriter();
 
         var dependency = Dependency;
@@ -44,7 +44,7 @@ partial class CalculateSkinMatrixSystemBase : SystemBase
         }).ScheduleParallel(dependency);
 
         var rootCount = m_RootEntityQuery.CalculateEntityCount();
-        var rootWorldToLocal = new NativeHashMap<Entity, float4x4>(rootCount, Allocator.TempJob);
+        var rootWorldToLocal = new NativeParallelHashMap<Entity, float4x4>(rootCount, Allocator.TempJob);
         var rootWorldToLocalParallel = rootWorldToLocal.AsParallelWriter();
 
         var root = Entities

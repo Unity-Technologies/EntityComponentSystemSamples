@@ -43,4 +43,4 @@ The stress test scene contains 100,000 spawned boxes. They cycle though four dif
 _StressTestGameObjects_ has two variants: one that includes the color overrides, and one that does not incude color overrides. This is because modifying GameObject color requires Material changes per GameObject, which causes material replication per object and has a large performance impact. Providing a variant without color overrides demonstrates more realistic performance for cases where you only modify position.
 
 ## Compatibility
-Compatible with Unity 2020.3.30f1 and URP 10.8.1 or later.
+Compatible with Unity 2021.3.4f1 and URP 12.1.7 or later.
