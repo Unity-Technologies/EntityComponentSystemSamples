@@ -13,64 +13,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   active: 1
-  m_AdvancedMode: 0
   colorMode:
     m_OverrideState: 1
     m_Value: 1
   color:
     m_OverrideState: 0
     m_Value: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    hdr: 1
-    showAlpha: 0
-    showEyeDropper: 1
+  tint:
+    m_OverrideState: 0
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
   density:
     m_OverrideState: 0
     m_Value: 1
-    min: 0
-    max: 1
   maxFogDistance:
     m_OverrideState: 0
     m_Value: 5000
-    min: 0
   mipFogMaxMip:
     m_OverrideState: 0
     m_Value: 0.5
-    min: 0
-    max: 1
   mipFogNear:
     m_OverrideState: 0
     m_Value: 0
-    min: 0
   mipFogFar:
     m_OverrideState: 0
     m_Value: 1000
-    min: 0
   albedo:
     m_OverrideState: 0
     m_Value: {r: 1, g: 1, b: 1, a: 1}
-    hdr: 0
-    showAlpha: 1
-    showEyeDropper: 1
   meanFreePath:
     m_OverrideState: 1
     m_Value: 250
-    min: 1
   baseHeight:
     m_OverrideState: 0
     m_Value: 0
-  maxHeight:
+  maximumHeight:
     m_OverrideState: 0
     m_Value: 10
   anisotropy:
     m_OverrideState: 1
     m_Value: 0.6
-    min: -1
-    max: 1
   globalLightProbeDimmer:
     m_OverrideState: 0
     m_Value: 1
-    min: 0
-    max: 1
   enableDistantFog:
     m_OverrideState: 1
     m_Value: 1
@@ -87,12 +71,9 @@ MonoBehaviour:
   m_Name: HDRISky
   m_EditorClassIdentifier: 
   active: 1
-  m_AdvancedMode: 0
   rotation:
     m_OverrideState: 0
     m_Value: 0
-    min: 0
-    max: 360
   skyIntensityMode:
     m_OverrideState: 0
     m_Value: 0
@@ -102,11 +83,12 @@ MonoBehaviour:
   multiplier:
     m_OverrideState: 0
     m_Value: 1
-    min: 0
   upperHemisphereLuxValue:
     m_OverrideState: 0
     m_Value: 0.46608552
-    min: 0
+  upperHemisphereLuxColor:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0, z: 0}
   desiredLuxValue:
     m_OverrideState: 0
     m_Value: 20000
@@ -116,13 +98,87 @@ MonoBehaviour:
   updatePeriod:
     m_OverrideState: 0
     m_Value: 0
-    min: 0
   includeSunInBaking:
     m_OverrideState: 0
     m_Value: 0
   hdriSky:
     m_OverrideState: 1
     m_Value: {fileID: 8900000, guid: 54a3a0570aebe8949bec4966f1376581, type: 3}
+  distortionMode:
+    m_OverrideState: 0
+    m_Value: 0
+  flowmap:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+  upperHemisphereOnly:
+    m_OverrideState: 0
+    m_Value: 1
+  scrollOrientation:
+    m_OverrideState: 0
+    m_Value:
+      mode: 1
+      customValue: 0
+      additiveValue: 0
+      multiplyValue: 1
+  scrollSpeed:
+    m_OverrideState: 0
+    m_Value:
+      mode: 1
+      customValue: 100
+      additiveValue: 0
+      multiplyValue: 1
+  enableBackplate:
+    m_OverrideState: 0
+    m_Value: 0
+  backplateType:
+    m_OverrideState: 0
+    m_Value: 0
+  groundLevel:
+    m_OverrideState: 0
+    m_Value: 0
+  scale:
+    m_OverrideState: 0
+    m_Value: {x: 32, y: 32}
+  projectionDistance:
+    m_OverrideState: 0
+    m_Value: 16
+  plateRotation:
+    m_OverrideState: 0
+    m_Value: 0
+  plateTexRotation:
+    m_OverrideState: 0
+    m_Value: 0
+  plateTexOffset:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0}
+  blendAmount:
+    m_OverrideState: 0
+    m_Value: 0
+  shadowTint:
+    m_OverrideState: 0
+    m_Value: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  pointLightShadow:
+    m_OverrideState: 0
+    m_Value: 0
+  dirLightShadow:
+    m_OverrideState: 0
+    m_Value: 0
+  rectLightShadow:
+    m_OverrideState: 0
+    m_Value: 0
+  m_SkyVersion: 1
+  enableDistortion:
+    m_OverrideState: 0
+    m_Value: 0
+  procedural:
+    m_OverrideState: 0
+    m_Value: 1
+  scrollDirection:
+    m_OverrideState: 0
+    m_Value: 0
+  m_ObsoleteScrollSpeed:
+    m_OverrideState: 0
+    m_Value: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,13 +208,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   active: 1
-  m_AdvancedMode: 0
   skyType:
     m_OverrideState: 1
     m_Value: 1
+  cloudType:
+    m_OverrideState: 0
+    m_Value: 0
   skyAmbientMode:
     m_OverrideState: 0
     m_Value: 0
+  windOrientation:
+    m_OverrideState: 0
+    m_Value: 0
+  windSpeed:
+    m_OverrideState: 0
+    m_Value: 100
   fogType:
     m_OverrideState: 1
     m_Value: 3
