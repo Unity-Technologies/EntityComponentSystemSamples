@@ -132,7 +132,7 @@ namespace Samples.Boids
                 // are no predefined borders of the space.
 
                 var world                     = World.Unmanaged;
-                var hashMap                   = new NativeMultiHashMap<int, int>(boidCount, world.UpdateAllocator.ToAllocator);
+                var hashMap                   = new NativeParallelMultiHashMap<int, int>(boidCount, world.UpdateAllocator.ToAllocator);
                 var cellIndices               = CollectionHelper.CreateNativeArray<int, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
                 var cellObstaclePositionIndex = CollectionHelper.CreateNativeArray<int, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
                 var cellTargetPositionIndex   = CollectionHelper.CreateNativeArray<int, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
