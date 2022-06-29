@@ -32,7 +32,7 @@ A lot of the demos display extra information as debug display gizmos in the Edit
 | Query | <sub>CastTest.unity</sub> | Demo showing the results of collider casting and ray casting | Introductory | ![Demo Image](READMEimages/collider_cast_queries.gif) |
 | Query | <sub>ClosestHitDistanceTest.unity</sub> | Demo showing results of distance queries | Introductory | ![Demo Image](READMEimages/closest_points.gif) |
 | Joints | <sub>4a. Joints Parade.unity</sub> | Demo showing a range of joint types | Introductory  | ![Ragdoll](READMEimages/joints_sample.png) |
-| Joints | <sub>Ragdoll.unity</sub> | Obligatory stack of ragdolls demo | Introductory  | ![Ragdoll](images/ragdolls.gif) |
+| Joints | <sub>Ragdoll.unity</sub> | Obligatory stack of ragdolls demo | Introductory  | ![Ragdoll](READMEimages/ragdolls.gif) |
 | Modify | <sub>ModifyBroadphasePairs.unity</sub> | Filter out collision by explicitly deleting pairs from broad phase | Advanced | ![Modify broadphase Sample](READMEimages/modify_broadphase.png) |
 | Modify | <sub>ModifyContactJacobians.unity</sub> | Modify the results of contact generation to produce special effects | Advanced | ![Modify contacts](READMEimages/modify_contact.png) |
 | Modify | <sub>ModifyNarrowphaseContacts.unity</sub> | Add new user contacts to simulation pipeline  | Advanced | No screenshot | 
