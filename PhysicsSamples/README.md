@@ -12,7 +12,7 @@ In the *Game* window:
 
 A lot of the demos display extra information as debug display gizmos in the Editor, for example the Query demos (ray cast, distance cast, etc). This display for these gizmos is in the *Scene* not the *Game* window. So keep an eye on both if in doubt:
 
-![Game window](images/LookInSceneWindow.png)
+![Game window](READMEimages/LookInSceneWindow.png)
 
 ## Scene List
 
