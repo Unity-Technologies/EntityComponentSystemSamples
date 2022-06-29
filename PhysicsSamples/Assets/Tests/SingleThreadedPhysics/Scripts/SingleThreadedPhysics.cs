@@ -57,7 +57,7 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
     public EntityQuery CustomStaticEntityGroup;
     public EntityQuery JointEntityGroup;
 
-    private NativeHashMap<Entity, Entity> EntityMap;
+    private NativeParallelHashMap<Entity, Entity> EntityMap;
 
     private StepPhysicsWorld m_StepPhysicsWorld;
     private NativeList<BlobAssetReference<Collider>> m_CreatedColliders;
@@ -254,7 +254,7 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
         if (EntityMap.IsCreated)
             EntityMap.Dispose();
 
-        EntityMap = new NativeHashMap<Entity, Entity>(entities.Length, Allocator.Persistent);
+        EntityMap = new NativeParallelHashMap<Entity, Entity>(entities.Length, Allocator.Persistent);
 
         for (int i = 0; i < entities.Length; i++)
         {
@@ -408,7 +408,7 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
         });
 
         m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-        EntityMap = new NativeHashMap<Entity, Entity>(0, Allocator.Persistent);
+        EntityMap = new NativeParallelHashMap<Entity, Entity>(0, Allocator.Persistent);
         m_CreatedColliders = new NativeList<BlobAssetReference<Collider>>(Allocator.Persistent);
     }
 
