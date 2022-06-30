@@ -1,7 +1,50 @@
 # Release Notes
 All notable changes to this project will be documented in this file.
 
-## [Samples Project for 0.10.0-preview] - 9999-12-31
+## [Samples Project for 0.51.0-preview.32] - 2022-06-30
+### Changes
+* Packages:
+  * Updated com.unity.physics from `0.50.0-preview.24` to `0.51.0-preview.32`  
+  * Updated com.havok.physics from `0.50.0-preview.24` to `0.51.0-preview.32`  
+  * Updated com.unity.collections from `1.2.3-pre.24` to `1.3.1`
+  * Updated com.unity.entities from `0.50.0-preview.24` to `0.51.0-preview.32`
+  * Updated com.unity.jobs from `0.50.0-preview.8` to `0.51.0-preview.32`
+  * Updated com.unity.rendering.hybrid from `0.50.0-preview.24` to `0.51.0-preview.32`
+  * Updated com.unity.render-pipelines.universal from `10.8.1` to `12.1.7`
+* Editor:
+  * Updated Editor version from `2020.3.30f1` to `2021.3.4f1`  
+* Documentation:
+  * Updated Documentation folder has been renamed to READMEimages and Samples.md has been renamed to README.md.  
+* Shader PhysicsStatic material has been disabled due to some rendering errors with `2021.3.4f1` a new material substitutes the shader while the errors gets fixed.
+* Updated NativeHashMap to NativeParallelHashMap.
+
+### Fixes
+### Known Issues
+
+## [Samples Project for 0.50.0-preview.24] - 2022-03-25
+### Changes
+* Project:
+  * Updated project name from UnityPhysicsSamples to PhysicsSamples.   
+  * add urp to the project.
+  * upgrade shaders so they are urp compatible.
+  * cleanup Shaders/PhysicsStaticInputs.hlsl and Shaders/PhysicsStatic.shader + add materials.
+* Packages:
+  * Updated com.unity.physics to `0.50.0-preview.24`  
+  * Updated com.havok.physics  to `0.50.0-preview.24`  
+  * Updated com.unity.collections to `1.2.3-pre.24`
+  * Updated com.unity.entities to `0.50.0-preview.24`
+  * Updated com.unity.jobs to `0.50.0-preview.8`
+  * Updated com.unity.rendering.hybrid to `0.50.0-preview.24`
+  * Updated com.unity.render-pipelines.universal to `10.8.1` 
+
+### Fixes
+  * fixed materials for all demos
+  * fixed up ragdoll parts scale based on collider mesh bounds
+  * fixed material colors
+  
+### Known Issues
+
+## [Samples Project for 0.10.0-preview] - 2021-12-31
 ### Changes
 * Added `ImmediatePhysicsWorldStepper` utility class for running physics simulation immediately on the current thread.
 * Changed `ProjectIntoFutureOnCueSystem` in Pool demo to use `ImmediatePhysicsWorldStepper`.
