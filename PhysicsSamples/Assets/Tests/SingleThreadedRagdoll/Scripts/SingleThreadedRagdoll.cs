@@ -98,7 +98,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
         int numOfBodies = m_NumDynamicBodies + NumStaticBodies;
 
-        using (var indexMap = new NativeHashMap<int, int>(m_BodyInfos.Length, Allocator.TempJob))
+        using (var indexMap = new NativeParallelHashMap<int, int>(m_BodyInfos.Length, Allocator.TempJob))
         {
 #if HAVOK_PHYSICS_EXISTS
             if (SimulateHavok)
@@ -156,10 +156,10 @@ public class SingleThreadedRagdoll : MonoBehaviour
         public NativeList<BodyInfo> BodyInfos;
         public NativeList<JointInfo> JointInfos;
 
-        public NativeHashMap<int, int> BodyInfoToBodiesIndexMap;
+        public NativeParallelHashMap<int, int> BodyInfoToBodiesIndexMap;
 
         internal static void CreateBodies(SimulationStepInput input,
-            NativeList<BodyInfo> bodyInfos, NativeHashMap<int, int> bodyInfoToBodiesIndexMap)
+            NativeList<BodyInfo> bodyInfos, NativeParallelHashMap<int, int> bodyInfoToBodiesIndexMap)
         {
             NativeArray<RigidBody> dynamicBodies = input.World.DynamicBodies;
             NativeArray<RigidBody> staticBodies = input.World.StaticBodies;
@@ -238,7 +238,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
         }
 
         internal static void CreateJoints(SimulationStepInput input,
-            NativeList<JointInfo> jointInfos, NativeHashMap<int, int> bodyInfoToBodiesIndexMap)
+            NativeList<JointInfo> jointInfos, NativeParallelHashMap<int, int> bodyInfoToBodiesIndexMap)
         {
             NativeArray<Unity.Physics.Joint> joints = input.World.Joints;
 
@@ -314,7 +314,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
         public NativeList<BodyInfo> Bodies;
         public NativeList<JointInfo> Joints;
 
-        public NativeHashMap<int, int> BodyInfoToBodiesIndexMap;
+        public NativeParallelHashMap<int, int> BodyInfoToBodiesIndexMap;
 
         public void Execute()
         {
