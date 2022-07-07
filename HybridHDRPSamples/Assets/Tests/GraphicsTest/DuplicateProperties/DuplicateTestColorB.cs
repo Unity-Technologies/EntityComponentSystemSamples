@@ -2,7 +2,6 @@
 using Unity.Mathematics;
 using Unity.Rendering;
 
-#if ENABLE_HYBRID_RENDERER_V2
 namespace Scenes.TestDuplicateProperties
 {
     [GenerateAuthoringComponent]
@@ -12,4 +11,3 @@ namespace Scenes.TestDuplicateProperties
         public float4 Value;
     }
 }
-#endif
