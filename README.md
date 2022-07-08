@@ -4,8 +4,8 @@ This repository contains sample projects to help illustrate the following DOTS f
 
 - The ECSSamples project contains samples to help you get started with DOTS Entities.
 - The PhysicsSamples project contains a wide range of physics samples to help you get started with DOTS Physics.
-- The HybridHDRPSamples project contains sample scenes and stress test scenes to use with the HDRP features in the Entities Graphics package.
-- The HybridURPSamples project contains sample scenes and stress test scenes to use with the URP features in the Entities Graphics package.
+- The HybridHDRPSamples project contains sample scenes and stress test scenes to use with the HDRP features in the Hybrid Renderer package.
+- The HybridURPSamples project contains sample scenes and stress test scenes to use with the URP features in the Hybrid Renderer package.
 
 Check each sample project folder for more information (README.md).
 
