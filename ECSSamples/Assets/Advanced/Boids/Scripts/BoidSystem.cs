@@ -131,17 +131,18 @@ namespace Samples.Boids
                 // note: working with a sparse grid and not a dense bounded grid so there
                 // are no predefined borders of the space.
 
-                var hashMap                   = new NativeMultiHashMap<int, int>(boidCount, Allocator.TempJob);
-                var cellIndices               = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var cellObstaclePositionIndex = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var cellTargetPositionIndex   = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var cellCount                 = new NativeArray<int>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var cellObstacleDistance      = new NativeArray<float>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var cellAlignment             = new NativeArray<float3>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var cellSeparation            = new NativeArray<float3>(boidCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                var world                     = World.Unmanaged;
+                var hashMap                   = new NativeParallelMultiHashMap<int, int>(boidCount, world.UpdateAllocator.ToAllocator);
+                var cellIndices               = CollectionHelper.CreateNativeArray<int, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
+                var cellObstaclePositionIndex = CollectionHelper.CreateNativeArray<int, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
+                var cellTargetPositionIndex   = CollectionHelper.CreateNativeArray<int, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
+                var cellCount                 = CollectionHelper.CreateNativeArray<int, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
+                var cellObstacleDistance      = CollectionHelper.CreateNativeArray<float, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
+                var cellAlignment             = CollectionHelper.CreateNativeArray<float3, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
+                var cellSeparation            = CollectionHelper.CreateNativeArray<float3, RewindableAllocator>(boidCount, ref world.UpdateAllocator);
 
-                var copyTargetPositions       = new NativeArray<float3>(targetCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var copyObstaclePositions     = new NativeArray<float3>(obstacleCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                var copyTargetPositions       = CollectionHelper.CreateNativeArray<float3, RewindableAllocator>(targetCount, ref world.UpdateAllocator);
+                var copyObstaclePositions     = CollectionHelper.CreateNativeArray<float3, RewindableAllocator>(obstacleCount, ref world.UpdateAllocator);
 
                 // The following jobs all run in parallel because the same JobHandle is passed for their
                 // input dependencies when the jobs are scheduled; thus, they can run in any order (or concurrently).
@@ -311,17 +312,6 @@ namespace Samples.Boids
 
                 // Dispose allocated containers with dispose jobs.
                 Dependency = steerJobHandle;
-                var disposeJobHandle = hashMap.Dispose(Dependency);
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, cellIndices.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, cellObstaclePositionIndex.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, cellTargetPositionIndex.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, cellCount.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, cellObstacleDistance.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, cellAlignment.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, cellSeparation.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, copyObstaclePositions.Dispose(Dependency));
-                disposeJobHandle = JobHandle.CombineDependencies(disposeJobHandle, copyTargetPositions.Dispose(Dependency));
-                Dependency = disposeJobHandle;
 
                 // We pass the job handle and add the dependency so that we keep the proper ordering between the jobs
                 // as the looping iterates. For our purposes of execution, this ordering isn't necessary; however, without

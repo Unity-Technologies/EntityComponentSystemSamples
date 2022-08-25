@@ -3,7 +3,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 
 [UpdateBefore(typeof(CartesianGridChangeDirectionSystemGroup))]
-public unsafe partial class CartesianGridOnCubeTargetSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnCubeTargetSystem : SystemBase
 {
     EntityQuery m_GridQuery;
 
@@ -13,7 +13,7 @@ public unsafe partial class CartesianGridOnCubeTargetSystem : JobComponentSystem
         RequireForUpdate(m_GridQuery);
     }
 
-    protected override JobHandle OnUpdate(JobHandle lastJobHandle)
+    protected override void OnUpdate()
     {
         // Get component data from the GridPlane
         var cartesianGridCube = GetSingleton<CartesianGridOnCube>();
@@ -55,7 +55,5 @@ public unsafe partial class CartesianGridOnCubeTargetSystem : JobComponentSystem
                     CartesianGridOnCubeShortestPath.CalculateShortestPathsToTarget(targetDirections.Reinterpret<byte>().AsNativeArray(), targetDistances.Reinterpret<int>().AsNativeArray(), rowCount, targetPosition, cubeFace, gridWalls, faceLocalToLocal);
                 }
             }).Run();
-
-        return lastJobHandle;
     }
 }

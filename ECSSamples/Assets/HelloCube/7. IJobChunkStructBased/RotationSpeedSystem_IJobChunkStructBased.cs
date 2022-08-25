@@ -10,7 +10,7 @@ using Unity.Transforms;
 
 // ReSharper disable once InconsistentNaming
 [BurstCompile]
-public struct RotationSpeedSystem_IJobChunkStructBased : ISystemBase
+public struct RotationSpeedSystem_IJobChunkStructBased : ISystem
 {
     EntityQuery m_Group;
 

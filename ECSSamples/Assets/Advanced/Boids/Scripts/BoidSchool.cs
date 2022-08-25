@@ -47,7 +47,8 @@ namespace Samples.Boids
         {
             Entities.WithStructuralChanges().ForEach((Entity entity, int entityInQueryIndex, in BoidSchool boidSchool, in LocalToWorld boidSchoolLocalToWorld) =>
             {
-                var boidEntities = new NativeArray<Entity>(boidSchool.Count, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                var world = World.Unmanaged;
+                var boidEntities = CollectionHelper.CreateNativeArray<Entity, RewindableAllocator>(boidSchool.Count, ref world.UpdateAllocator);
 
                 Profiler.BeginSample("Instantiate");
                 EntityManager.Instantiate(boidSchool.Prefab, boidEntities);
@@ -62,7 +63,6 @@ namespace Samples.Boids
                     Radius = boidSchool.InitialRadius
                 };
                 Dependency = setBoidLocalToWorldJob.Schedule(boidSchool.Count, 64, Dependency);
-                Dependency = boidEntities.Dispose(Dependency);
 
                 EntityManager.DestroyEntity(entity);
             }).Run();

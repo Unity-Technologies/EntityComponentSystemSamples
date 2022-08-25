@@ -31,7 +31,7 @@ namespace Samples.Boids
         internal struct JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob>
             where TJob : struct, IJobNativeMultiHashMapMergedSharedKeyIndices
         {
-            [ReadOnly] public NativeMultiHashMap<int, int> HashMap;
+            [ReadOnly] public NativeParallelMultiHashMap<int, int> HashMap;
             internal TJob JobData;
 
             private static IntPtr s_JobReflectionData;
@@ -80,7 +80,7 @@ namespace Samples.Boids
                             var value = UnsafeUtility.ReadArrayElement<int>(values, entryIndex);
                             int firstValue;
 
-                            NativeMultiHashMapIterator<int> it;
+                            NativeParallelMultiHashMapIterator<int> it;
                             jobProducer.HashMap.TryGetFirstValue(key, out firstValue, out it);
 
                             // [macton] Didn't expect a usecase for this with multiple same values
@@ -112,7 +112,7 @@ namespace Samples.Boids
             }
         }
 
-        public static unsafe JobHandle Schedule<TJob>(this TJob jobData, NativeMultiHashMap<int, int> hashMap, int minIndicesPerJobCount, JobHandle dependsOn = new JobHandle())
+        public static unsafe JobHandle Schedule<TJob>(this TJob jobData, NativeParallelMultiHashMap<int, int> hashMap, int minIndicesPerJobCount, JobHandle dependsOn = new JobHandle())
             where TJob : struct, IJobNativeMultiHashMapMergedSharedKeyIndices
         {
             var jobProducer = new JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob>

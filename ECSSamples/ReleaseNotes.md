@@ -1,3 +1,28 @@
+# Samples Version 39
+
+## Changes
+
+* Update sample to com.unity.entities 0.51.0-preview.32.
+
+# Samples Version 38
+
+## Changes
+
+* Update sample to com.unity.entities 0.50.0-preview.24.
+* Updated minimum Unity Editor version to `2020.3.30f1 (1fb1bf06830e)`.
+
+# Samples Version 37
+
+## Changes
+
+* Updated minimum Unity Editor version to `2020.2.4f1-dots.5 (c35160b712fe)`.
+
+# Samples Version 36
+
+## Changes
+
+* Updated minimum Unity Editor version to `2020.2.2f1-dots.4 (dc87a2330712)`.
+
 # Samples Version 35
 
 ## Changes

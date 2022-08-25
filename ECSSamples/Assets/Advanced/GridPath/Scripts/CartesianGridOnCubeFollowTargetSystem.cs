@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(CartesianGridChangeDirectionSystemGroup))]
-public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : JobComponentSystem
+public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
 {
     EntityQuery m_GridQuery;
     EntityQuery m_TargetQuery;
@@ -42,7 +42,7 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : JobComponen
         return targetEntity;
     }
 
-    protected override JobHandle OnUpdate(JobHandle lastJobHandle)
+    protected override void OnUpdate()
     {
         int pathOffset = m_PathVariationOffset;
         m_PathVariationOffset = (m_PathVariationOffset + 1) & 3;
@@ -63,13 +63,14 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : JobComponen
         var cellCenterOffset = new float2(((float)rowCount * 0.5f) - 0.5f, ((float)rowCount * 0.5f) - 0.5f);
 
         // Whenever a CartesianGridFollowTarget reaches a new grid cell, make a decision about what next direction to turn.
-        lastJobHandle = Entities
+        Entities
             .WithName("ChangeDirectionTowardNearestTarget")
             .WithNativeDisableUnsafePtrRestriction(trailingOffsets)
             .WithNativeDisableUnsafePtrRestriction(faceLocalToLocal)
             .WithNativeDisableUnsafePtrRestriction(gridWalls)
             .WithEntityQueryOptions(EntityQueryOptions.FilterWriteGroup)
             .WithReadOnly(targetCoordinates)
+            .WithReadOnly(targetEntities)
             .WithReadOnly(getCartesianGridTargetDirectionFromEntity)
             .WithReadOnly(getCartesianGridTargetDistanceFromEntity)
             .WithAll<CartesianGridFollowTarget>()
@@ -142,11 +143,9 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : JobComponen
                     var targetDirections = getCartesianGridTargetDirectionFromEntity[targetEntity].Reinterpret<byte>().AsNativeArray();
                     var validDirections = CartesianGridOnCubeShortestPath.LookupDirectionToTarget(gridCoordinates, cubeFace, rowCount, targetDirections);
                     gridDirection.Value = CartesianGridMovement.PathVariation[(pathOffset * 16) + validDirections];
-                }).Schedule(lastJobHandle);
+                }).Schedule();
 
-        lastJobHandle = targetEntities.Dispose(lastJobHandle);
-        lastJobHandle = targetCoordinates.Dispose(lastJobHandle);
-
-        return lastJobHandle;
+        Dependency = targetEntities.Dispose(Dependency);
+        Dependency = targetCoordinates.Dispose(Dependency);
     }
 }

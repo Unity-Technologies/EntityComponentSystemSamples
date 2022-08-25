@@ -1,12 +1,28 @@
+# HybridHDRPSamples Version 5
+
+## Changes
+* Updated minimum Unity Editor version to `2021.3.4f1`.
+
+# HybridHDRPSamples Version 4
+
+## Changes
+* Updated minimum Unity Editor version to `2020.3.30f1`.
+* Updated HDRP version to `10.8.1`.
+* Updated screenshot for BuiltinProperties scene.
+* Fixed SceneManager.LoadScene() warning.
+* Removed BrokenShader to reduce confusion.
+* Added scene list table in Readme.
+Removed ENABLE_HYBRID_RENDERER_V2 from ProjectSettings.
+
 # HybridHDRPSamples Version 3
 
-##
+## Changes
 * Updated minimum Unity Editor version to `2020.2.3f1`.
 * Updated HDRP version to `10.2.2`.
 
 # HybridHDRPSamples Version 2
 
-##
+## Changes
 * Updated minimum Unity Editor version to `2020.2.0b15`.
 
 # HybridHDRPSamples Version 1

@@ -9,12 +9,10 @@ using Unity.Entities;
 
 public class GraphicsTests
 {
-    #if UNITY_ANDROID
-        static bool wasFirstSceneRan = false;
-        const int firstSceneAdditionalFrames = 3;
-    #endif
-
     [UnityTest, Category("GraphicsTest")]
+    #if UNITY_2021_2_OR_NEWER
+    [Ignore("https://fogbugz.unity3d.com/f/cases/1311376/")]
+    #endif
     [PrebuildSetup("SetupGraphicsTestCases")]
     [UseGraphicsTestCases]
     public IEnumerator Run(GraphicsTestCase testCase)
@@ -56,19 +54,6 @@ public class GraphicsTests
         for (int i = 0; i < waitFrames; i++)
             yield return new WaitForEndOfFrame();
 
-        #if UNITY_ANDROID
-        // On Android first scene often needs a bit more frames to load all the assets
-        // otherwise the screenshot is just a black screen
-        if (!wasFirstSceneRan)
-        {
-            for(int i = 0; i < firstSceneAdditionalFrames; i++)
-            {
-                yield return null;
-            }
-            wasFirstSceneRan = true;
-        }
-        #endif
-
         ImageAssert.AreEqual(testCase.ReferenceImage, cameras.Where(x => x != null), settings.ImageComparisonSettings);
     }
 
@@ -93,5 +78,4 @@ public class GraphicsTests
         EntityManager m_Manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         m_Manager.DestroyEntity(m_Manager.GetAllEntities());
     }
-
 }

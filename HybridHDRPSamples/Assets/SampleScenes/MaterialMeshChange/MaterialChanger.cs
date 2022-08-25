@@ -1,7 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
- 
+
 [GenerateAuthoringComponent]
 public class MaterialChanger : IComponentData
 {
@@ -12,7 +12,7 @@ public class MaterialChanger : IComponentData
     public uint active;
 }
 
-public class MaterialChangerSystem : SystemBase
+public partial class MaterialChangerSystem : SystemBase
 {
     protected override void OnUpdate()
     {

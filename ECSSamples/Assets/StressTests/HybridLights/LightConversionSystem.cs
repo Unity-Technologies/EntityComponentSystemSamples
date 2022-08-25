@@ -6,7 +6,8 @@ public class LightConversionSystem : GameObjectConversionSystem
     {
         Entities.WithAll<LightConversionOptIn>().ForEach((Light light) =>
         {
-            AddHybridComponent(light);
+            var entity = GetPrimaryEntity(light);
+            DstEntityManager.AddComponentObject(entity, light);
         });
     }
 }
