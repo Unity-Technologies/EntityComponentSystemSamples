@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -15,46 +16,70 @@ public struct PlatformMotion : IComponentData
     public float3 Rotation;
 }
 
-public class PlatformMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class PlatformMotionAuthoring : MonoBehaviour
 {
     public float Height = 1f;
     public float Speed = 1f;
     public float3 Direction = math.up();
     public float3 Rotation = float3.zero;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class PlatformMotionBaker : Baker<PlatformMotionAuthoring>
+{
+    public override void Bake(PlatformMotionAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new PlatformMotion
+        AddComponent(new PlatformMotion
         {
-            InitialPosition = transform.position,
-            Height = Height,
-            Speed = Speed,
-            Direction = math.normalizesafe(Direction),
-            Rotation = Rotation,
+            InitialPosition = authoring.transform.position,
+            Height = authoring.Height,
+            Speed = authoring.Speed,
+            Direction = math.normalizesafe(authoring.Direction),
+            Rotation = authoring.Rotation,
         });
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
-public partial class PlatformMotionSystem : SystemBase
+[UpdateBefore(typeof(PhysicsSystemGroup))]
+[BurstCompile]
+public partial struct PlatformMotionSystem : ISystem
 {
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        var deltaTime = Time.DeltaTime;
+    }
 
-        Entities
-            .WithName("MovePlatforms")
-            .WithBurst()
-            .ForEach((ref PlatformMotion motion, ref PhysicsVelocity velocity, in Translation position) =>
-            {
-                motion.CurrentTime += deltaTime;
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
 
-                var desiredOffset = motion.Height * math.sin(motion.CurrentTime * motion.Speed);
-                var currentOffset = math.dot(position.Value - motion.InitialPosition, motion.Direction);
-                velocity.Linear = motion.Direction * (desiredOffset - currentOffset);
+    [BurstCompile]
+    public partial struct MovePlatformsJob : IJobEntity
+    {
+        public float DeltaTime;
 
-                velocity.Angular = motion.Rotation;
-            }).Schedule();
+        [BurstCompile]
+        public void Execute(ref PlatformMotion motion, ref PhysicsVelocity velocity, in Translation position)
+        {
+            motion.CurrentTime += DeltaTime;
+
+            var desiredOffset = motion.Height * math.sin(motion.CurrentTime * motion.Speed);
+            var currentOffset = math.dot(position.Value - motion.InitialPosition, motion.Direction);
+            velocity.Linear = motion.Direction * (desiredOffset - currentOffset);
+            velocity.Angular = motion.Rotation;
+        }
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
+        float dt = SystemAPI.Time.DeltaTime;
+        state.Dependency = new MovePlatformsJob()
+        {
+            DeltaTime = dt,
+        }.Schedule(state.Dependency);
     }
 }

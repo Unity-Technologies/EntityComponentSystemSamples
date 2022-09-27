@@ -30,13 +30,13 @@ namespace Unity.Entities.Tests
         [Test]
         public void Systems_WithoutDisableAutoCreation_AreAutoCreated()
         {
-            Assert.IsNotNull(m_World.GetExistingSystem<SystemShouldBeCreated>(), $"{nameof(SystemShouldBeCreated)} was not automatically created");
+            Assert.IsNotNull(m_World.GetExistingSystemManaged<SystemShouldBeCreated>(), $"{nameof(SystemShouldBeCreated)} was not automatically created");
         }
 
         [Test]
         public void Systems_WithDisableAutoCreation_AreNotCreated()
         {
-            Assert.IsNull(m_World.GetExistingSystem<SystemShouldNotBeCreated>(), $"{nameof(SystemShouldNotBeCreated)} was created even though it was marked with [{nameof(DisableAutoCreationAttribute)}].");
+            Assert.IsNull(m_World.GetExistingSystemManaged<SystemShouldNotBeCreated>(), $"{nameof(SystemShouldNotBeCreated)} was created even though it was marked with [{nameof(DisableAutoCreationAttribute)}].");
         }
 
         [Test]
@@ -45,18 +45,14 @@ namespace Unity.Entities.Tests
 #if UNITY_EDITOR
             Assert.DoesNotThrow(() => m_World.GetExistingSystem<ISystemShouldBeCreated>(), $"{nameof(ISystemShouldBeCreated)} was not automatically created");
 #else
-            Assert.IsTrue(m_World.GetExistingSystem<ISystemShouldBeCreated>().Handle.UntypedHandle != default, $"{nameof(ISystemShouldBeCreated)} was not automatically created");
+            Assert.IsTrue(m_World.GetExistingSystem<ISystemShouldBeCreated>() != default, $"{nameof(ISystemShouldBeCreated)} was not automatically created");
 #endif
         }
 
         [Test]
         public void ISystems_WithDisableAutoCreation_AreNotCreated()
         {
-#if UNITY_EDITOR
-            Assert.Throws<InvalidOperationException>(() => m_World.GetExistingSystem<ISystemShouldNotBeCreated>(), $"{nameof(ISystemShouldNotBeCreated)} was created even though it was marked with [{nameof(DisableAutoCreationAttribute)}].");
-#else
-            Assert.IsTrue(m_World.GetExistingSystem<ISystemShouldNotBeCreated>().Handle.UntypedHandle == default, $"{nameof(ISystemShouldNotBeCreated)} was created even though it was marked with [{nameof(DisableAutoCreationAttribute)}].");
-#endif
+            Assert.IsTrue(m_World.GetExistingSystem<ISystemShouldNotBeCreated>() == default, $"{nameof(ISystemShouldNotBeCreated)} was created even though it was marked with [{nameof(DisableAutoCreationAttribute)}].");
         }
 
         partial class SystemShouldBeCreated : SystemBase

@@ -18,7 +18,7 @@ Unity renders GameObjects with the Hybrid Renderer when a coresponding DOTS enti
 | HybridEntitiesConversion | Demonstrates the graphics related Hybrid entities that you can put in a Subscene | ![](READMEimages/HybridEntitiesConversion.PNG) |
 | Lightmaps | Demonstrates lightmap support for Entities | ![](READMEimages/Lightmaps.PNG) |
 | Lightprobes | Demonstrates lightprobe support for Entities | ![](READMEimages/Lightprobes.PNG) |
-| LODs | Demonstrates LODs and HLODs in Hybrid Renderer | ![](READMEimages/LODs.PNG) |
+| LODs | Demonstrates LODs in Hybrid Renderer | ![](READMEimages/LODs.PNG) |
 | LODsStatic | Demonstrates static optimized LOD hierarchies | ![](READMEimages/LODs.PNG) |
 | MaterialMeshChange | Demonstrates how to change a Material and Mesh on Entities at runtime | ![](READMEimages/MaterialMeshChange.PNG) |
 | MaterialOverridesSample | Demonstrates the setup of overriding a material's properties without having to write code | ![](READMEimages/MaterialOverridesSample.PNG) |
@@ -42,4 +42,6 @@ The stress test scene contains 100,000 spawned boxes. They cycle though four dif
 _StressTestGameObjects_ has two variants: one that includes the color overrides, and one that does not incude color overrides. This is because modifying GameObject color requires Material changes per GameObject, which causes material replication per object and has a large performance impact. Providing a variant without color overrides demonstrates more realistic performance for cases where you only modify position.
 
 ## Compatibility
-Compatible with Unity 2021.3.4f1 and HDRP 12.1.7 or later.
+Compatible with Unity 2020.3.0f1-dots and HDRP 10.4.0 or later.\
+Requires Hybrid Renderer V2.\
+For instructions of Enabling Hybrid Renderer V2, see the [documentation](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@latest/index.html).

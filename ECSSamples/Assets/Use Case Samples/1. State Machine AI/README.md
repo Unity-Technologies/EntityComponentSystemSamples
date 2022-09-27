@@ -87,11 +87,11 @@ In all states, the guard needs to check to see if the Player is in range (**Look
 * Translation
 * Rotation
 * VisionCone
-* ComponentDataFromEntity \<TargetPosition\>
-* ComponentDataFromEntity \<IsChasingTag\>
-* ComponentDataFromEntity \<IdleTimer\>
+* ComponentLookup \<TargetPosition\>
+* ComponentLookup \<IsChasingTag\>
+* ComponentLookup \<IdleTimer\>
 #### Outputs
-* ComponentDataFromEntity <TargetPosition> update TargetPosition if the guard is in Chase state
+* ComponentLookup <TargetPosition> update TargetPosition if the guard is in Chase state
 * Add IsChasingTag if Player is in range and guard is not already in Chase state
 * Remove IdleTimer if Player is in range and guard was in Idle state
 * Remove IsChasingTag, Remove TargetPosition, Add IdleTimer if guard was Chasing and can no longer see the Player

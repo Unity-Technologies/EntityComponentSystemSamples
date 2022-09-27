@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 // this script forces a lower fixed time step for both GO and DOTS physics to demonstrate motion smoothing
-class MotionSmoothingSetup : MonoBehaviour, IConvertGameObjectToEntity
+class MotionSmoothingSetup : MonoBehaviour
 {
     // default to a low tick rate for demonstration purposes
     [Min(0)]
@@ -21,10 +21,13 @@ class MotionSmoothingSetup : MonoBehaviour, IConvertGameObjectToEntity
 
     void OnValidate() => StepsPerSecond = math.max(0, StepsPerSecond);
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class MotionSmoothingSetupBaker : Baker<MotionSmoothingSetup>
     {
-        var e = conversionSystem.CreateAdditionalEntity(this);
-        dstManager.AddComponentData(e, new SetFixedTimestep { Timestep = 1f / StepsPerSecond });
+        public override void Bake(MotionSmoothingSetup authoring)
+        {
+            var e = CreateAdditionalEntity();
+            AddComponent(e, new SetFixedTimestep { Timestep = 1f / authoring.StepsPerSecond });
+        }
     }
 }
 
@@ -41,10 +44,8 @@ partial class SetFixedTimestepSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        m_FixedStepSimulationSystemGroup = World.GetOrCreateSystem<FixedStepSimulationSystemGroup>();
-        RequireForUpdate(
-            GetEntityQuery(new EntityQueryDesc { All = new ComponentType[] { typeof(SetFixedTimestep) } })
-        );
+        m_FixedStepSimulationSystemGroup = World.GetOrCreateSystemManaged<FixedStepSimulationSystemGroup>();
+        RequireForUpdate<SetFixedTimestep>();
     }
 
     protected override void OnUpdate()

@@ -10,8 +10,8 @@ class SpawnRandomObjectsAuthoring : SpawnRandomObjectsAuthoringBase<SpawnSetting
 {
 }
 
-abstract class SpawnRandomObjectsAuthoringBase<T> : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
-    where T : struct, IComponentData, ISpawnSettings
+abstract class SpawnRandomObjectsAuthoringBase<T> : MonoBehaviour
+    where T : unmanaged, IComponentData, ISpawnSettings
 {
     #pragma warning disable 649
     public GameObject prefab;
@@ -20,26 +20,38 @@ abstract class SpawnRandomObjectsAuthoringBase<T> : MonoBehaviour, IConvertGameO
     public int count;
     #pragma warning restore 649
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-    {
-        var spawnSettings = new T
-        {
-            Prefab = conversionSystem.GetPrimaryEntity(prefab),
-            Position = transform.position,
-            Rotation = transform.rotation,
-            Range = range,
-            Count = count
-        };
-        Configure(ref spawnSettings, entity, dstManager, conversionSystem);
-        Configure(ref spawnSettings);
-        dstManager.AddComponentData(entity, spawnSettings);
-    }
-
     internal virtual void Configure(ref T spawnSettings) {}
     internal virtual void Configure(ref T spawnSettings, Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem) {}
     internal virtual void Configure(List<GameObject> referencedPrefabs) { referencedPrefabs.Add(prefab); }
+}
 
-    public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs) => Configure(referencedPrefabs);
+class SpawnRandomObjectsAuthoringBaker : SpawnRandomObjectsAuthoringBaseBaker<SpawnRandomObjectsAuthoring, SpawnSettings>
+{
+}
+
+abstract class SpawnRandomObjectsAuthoringBaseBaker<T, U> : Baker<T> where T : SpawnRandomObjectsAuthoringBase<U>
+    where U : unmanaged, IComponentData, ISpawnSettings
+{
+    public override void Bake(T authoring)
+    {
+        var transform = GetComponent<Transform>();
+        var spawnSettings = new U
+        {
+            Prefab = GetEntity(authoring.prefab),
+            Position = transform.position,
+            Rotation = transform.rotation,
+            Range = authoring.range,
+            Count = authoring.count
+        };
+        Configure(authoring, ref spawnSettings, GetEntity(), this);
+        Configure(authoring, ref spawnSettings);
+        Configure(authoring, this);
+        AddComponent(spawnSettings);
+    }
+
+    internal virtual void Configure(T authoring, ref U spawnSettings) {}
+    internal virtual void Configure(T authoring, ref U spawnSettings, Entity entity, IBaker baker) {}
+    internal virtual void Configure(T authoring, IBaker baker) { GetEntity(authoring.prefab); }
 }
 
 interface ISpawnSettings
@@ -65,8 +77,8 @@ class SpawnRandomObjectsSystem : SpawnRandomObjectsSystemBase<SpawnSettings>
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
-abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : struct, IComponentData, ISpawnSettings
+[UpdateBefore(typeof(PhysicsSystemGroup))]
+abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : unmanaged, IComponentData, ISpawnSettings
 {
     internal virtual int GetRandomSeed(T spawnSettings)
     {

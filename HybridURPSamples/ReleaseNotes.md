@@ -1,3 +1,10 @@
+# HybridURPSamples Version 6
+
+## Changes
+* Removed usage of ConvertToEntity.
+* Removed usage of GenerateAuthoringComponent.
+* Update the project to com.unity.entities 1.0.0-exp.8.
+
 # HybridURPSamples Version 5
 
 ## Changes

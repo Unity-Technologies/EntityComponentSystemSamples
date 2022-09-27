@@ -10,6 +10,7 @@ struct VehicleInput : IComponentData
     public int Change; // positive to change to a subsequent vehicle, negative to change to a previous one
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 partial class VehicleInputHandlingSystem : SystemBase
 {
@@ -41,7 +42,7 @@ partial class VehicleInputHandlingSystem : SystemBase
                     switch (cameraSettings.OrientationType)
                     {
                         case VehicleCameraOrientation.Relative:
-                            orientation.Value = math.mul(orientation.Value, quaternion.Euler(0f, z * Time.DeltaTime * cameraSettings.OrbitAngularSpeed, 0f));
+                            orientation.Value = math.mul(orientation.Value, quaternion.Euler(0f, z * SystemAPI.Time.DeltaTime * cameraSettings.OrbitAngularSpeed, 0f));
                             break;
                         case VehicleCameraOrientation.Absolute:
                             float4x4 worldFromLocal = HasComponent<LocalToWorld>(references.CameraOrbit)

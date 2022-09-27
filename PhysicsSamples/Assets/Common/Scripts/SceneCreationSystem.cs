@@ -22,21 +22,11 @@ public abstract class SceneCreationSettings : IComponentData
 public class SceneCreatedTag : IComponentData {};
 
 // Base class of authoring components that create scene from code, using SceneCreationSystem
-public abstract class SceneCreationAuthoring<T> : MonoBehaviour, IConvertGameObjectToEntity
+public abstract class SceneCreationAuthoring<T> : MonoBehaviour
     where T : SceneCreationSettings, new()
 {
     public Material DynamicMaterial;
     public Material StaticMaterial;
-
-    public virtual void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-    {
-        T sceneSettings = new T
-        {
-            DynamicMaterial = DynamicMaterial,
-            StaticMaterial = StaticMaterial
-        };
-        dstManager.AddComponentData(entity, sceneSettings);
-    }
 }
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -59,7 +49,7 @@ public abstract partial class SceneCreationSystem<T> : SystemBase
             All = new ComponentType[] { typeof(T) },
             None = new ComponentType[] { typeof(SceneCreatedTag) },
         });
-        RequireForUpdate(GetEntityQuery(new ComponentType[] { typeof(T) }));
+        RequireForUpdate<T>();
     }
 
     protected override void OnUpdate()
@@ -100,12 +90,12 @@ public abstract partial class SceneCreationSystem<T> : SystemBase
     )
     {
         var mesh = SceneCreationUtilities.CreateMeshFromCollider(collider);
-        entityManager.AddSharedComponentData(entity, new RenderMesh
-        {
-            mesh = mesh,
-            material = material
-        });
-        entityManager.AddComponentData(entity, new RenderBounds { Value = mesh.bounds.ToAABB() });
+        var renderMesh = new RenderMeshArray(
+            new[] { material },
+            new[] { mesh });
+        var renderMeshDescription = new RenderMeshDescription(UnityEngine.Rendering.ShadowCastingMode.Off);
+        RenderMeshUtility.AddComponents(entity, entityManager, renderMeshDescription, renderMesh, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
+        entityManager.AddComponentData(entity, new LocalToWorld());
     }
 
     public Entity CreateBody(float3 position, quaternion orientation, BlobAssetReference<Collider> collider,
@@ -122,7 +112,7 @@ public abstract partial class SceneCreationSystem<T> : SystemBase
         var colliderComponent = new PhysicsCollider { Value = collider };
         entityManager.AddComponentData(entity, colliderComponent);
 
-        EntityManager.AddSharedComponentData(entity, new PhysicsWorldIndex());
+        EntityManager.AddSharedComponent(entity, new PhysicsWorldIndex());
 
         CreateRenderMeshForCollider(entityManager, entity, collider, isDynamic ? DynamicMaterial : StaticMaterial);
 
@@ -170,7 +160,7 @@ public abstract partial class SceneCreationSystem<T> : SystemBase
         entityManager.SetComponentData(jointEntity, new PhysicsConstrainedBodyPair(entityA, entityB, enableCollision));
         entityManager.SetComponentData(jointEntity, joint);
 
-        EntityManager.AddSharedComponentData(jointEntity, new PhysicsWorldIndex());
+        EntityManager.AddSharedComponent(jointEntity, new PhysicsWorldIndex());
 
         return jointEntity;
     }
@@ -188,11 +178,11 @@ public abstract partial class SceneCreationSystem<T> : SystemBase
 
 public static class SceneCreationUtilities
 {
-    static readonly Type k_DrawComponent = typeof(Unity.Physics.Authoring.DisplayBodyColliders)
-        .GetNestedType("DrawComponent", BindingFlags.NonPublic);
+    static readonly Type k_DrawComponent = Type.GetType(Assembly.CreateQualifiedName("Unity.Physics.Hybrid", "Unity.Physics.Authoring.AppendMeshColliders"))
+        .GetNestedType("GetMeshes", BindingFlags.Public);
 
     static readonly MethodInfo k_DrawComponent_BuildDebugDisplayMesh = k_DrawComponent
-        .GetMethod("BuildDebugDisplayMesh", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(BlobAssetReference<Collider>) }, null);
+        .GetMethod("BuildDebugDisplayMesh", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(BlobAssetReference<Collider>), typeof(float) }, null);
 
     static readonly Type k_DisplayResult = k_DrawComponent.GetNestedType("DisplayResult");
 
@@ -204,7 +194,7 @@ public static class SceneCreationUtilities
         var mesh = new Mesh { hideFlags = HideFlags.DontSave };
         var instances = new List<CombineInstance>(8);
         var numVertices = 0;
-        foreach (var displayResult in (IEnumerable)k_DrawComponent_BuildDebugDisplayMesh.Invoke(null, new object[] { collider }))
+        foreach (var displayResult in (IEnumerable)k_DrawComponent_BuildDebugDisplayMesh.Invoke(null, new object[] { collider, 1.0f }))
         {
             var instance = new CombineInstance
             {

@@ -5,12 +5,16 @@ using UnityEngine;
 using Hash128 = Unity.Entities.Hash128;
 
 #if UNITY_EDITOR
-public class TestSceneReferenceAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class TestSceneReferenceAuthoring : MonoBehaviour
 {
     public SceneAsset _SceneAsset;
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+
+    class Baker : Baker<TestSceneReferenceAuthoring>
     {
-        dstManager.AddComponentData(entity, new TestSceneReference {SceneReference = new EntitySceneReference(_SceneAsset)});
+        public override void Bake(TestSceneReferenceAuthoring authoring)
+        {
+            AddComponent( new TestSceneReference {SceneReference = new EntitySceneReference(authoring._SceneAsset)});
+        }
     }
 }
 

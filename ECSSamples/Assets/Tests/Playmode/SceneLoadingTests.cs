@@ -41,9 +41,9 @@ public class SceneLoadingTests
         GameObject.DontDestroyOnLoad(sceneSwitcherDummy);
     }
 
-    // This test is disabled due to hybrid renderer C++ backend issuing errors if shaders have not yet loaded.
-    // When the new hybrid renderer backend is landed this test should be enabled as well.
-    [UnityTest, Ignore("Hybrid Renderer might log")]
+    // This test is disabled due to Entities Graphics C++ backend issuing errors if shaders have not yet loaded.
+    // When the new Entities Graphics backend is landed this test should be enabled as well.
+    [UnityTest, Ignore("Entities Graphics might log")]
     public IEnumerator LoadScenes_NoScenesShouldLog([ValueSource(nameof(GetScenes))] string scenePath)
     {
         SceneManager.LoadScene(scenePath);

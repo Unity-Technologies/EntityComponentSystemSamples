@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
@@ -33,20 +34,107 @@ namespace Demos
         public bool drawDebugInformation = false;
     }
 
-    // ensure built-in physics conversion systems have run
-    [UpdateAfter(typeof(EndColliderConversionSystem))]
-    [UpdateAfter(typeof(PhysicsBodyConversionSystem))]
-    class VehicleMechanicsConversionSystem : GameObjectConversionSystem
+    struct WheelBakingInfo
+    {
+        public Entity Wheel;
+        public Entity GraphicalRepresentation;
+        public RigidTransform WorldFromSuspension;
+        public RigidTransform WorldFromChassis;
+    }
+
+    [TemporaryBakingType]
+    struct VehicleMechanicsForBaking : IComponentData
+    {
+        public NativeArray<WheelBakingInfo> Wheels;
+        public NativeArray<Entity> steeringWheels;
+        public NativeArray<Entity> driveWheels;
+    }
+
+    partial class VehicleMechanicsBaker : Baker<VehicleMechanics>
+    {
+        public override void Bake(VehicleMechanics authoring)
+        {
+            AddComponent<VehicleBody>();
+            AddComponent(new VehicleConfiguration
+            {
+                wheelBase = authoring.wheelBase,
+                wheelFrictionRight = authoring.wheelFrictionRight,
+                wheelFrictionForward = authoring.wheelFrictionForward,
+                wheelMaxImpulseRight = authoring.wheelMaxImpulseRight,
+                wheelMaxImpulseForward = authoring.wheelMaxImpulseForward,
+                suspensionLength = authoring.suspensionLength,
+                suspensionStrength = authoring.suspensionStrength,
+                suspensionDamping = authoring.suspensionDamping,
+                invWheelCount = 1f / authoring.wheels.Count,
+                drawDebugInformation = (byte)(authoring.drawDebugInformation ? 1 : 0)
+            });
+            AddComponent(new VehicleMechanicsForBaking()
+            {
+                Wheels = GetWheelInfo(authoring.wheels, Allocator.Temp),
+                steeringWheels = ToNativeArray(authoring.steeringWheels, Allocator.Temp),
+                driveWheels = ToNativeArray(authoring.driveWheels, Allocator.Temp)
+            });
+        }
+
+        NativeArray<WheelBakingInfo> GetWheelInfo(List<GameObject> wheels, Allocator allocator)
+        {
+            if (wheels == null)
+                return default;
+
+            var array = new NativeArray<WheelBakingInfo>(wheels.Count, allocator);
+            int i = 0;
+            foreach (var wheel in wheels)
+            {
+                RigidTransform worldFromSuspension = new RigidTransform
+                {
+                    pos = wheel.transform.parent.position,
+                    rot = wheel.transform.parent.rotation
+                };
+
+                RigidTransform worldFromChassis = new RigidTransform
+                {
+                    pos = wheel.transform.parent.parent.parent.position,
+                    rot = wheel.transform.parent.parent.parent.rotation
+                };
+
+                array[i++] = new WheelBakingInfo()
+                {
+                    Wheel = GetEntity(wheel),
+                    GraphicalRepresentation = GetEntity(wheel.transform.GetChild(0)),
+                    WorldFromSuspension = worldFromSuspension,
+                    WorldFromChassis = worldFromChassis,
+                };
+            }
+
+            return array;
+        }
+
+        NativeArray<Entity> ToNativeArray(List<GameObject> list, Allocator allocator)
+        {
+            if (list == null)
+                return default;
+
+            var array = new NativeArray<Entity>(list.Count, allocator);
+            for (int i = 0; i < list.Count; ++i)
+                array[i] = GetEntity(list[i]);
+
+            return array;
+        }
+    }
+
+    [RequireMatchingQueriesForUpdate]
+    [UpdateAfter(typeof(EndColliderBakingSystem))]
+    [UpdateAfter(typeof(PhysicsBodyBakingSystem))]
+    [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
+    partial class VehicleMechanicsBakingSystem : SystemBase
     {
         protected override void OnUpdate()
         {
-            Entities.ForEach((VehicleMechanics m) =>
+            Entities.ForEach((Entity vehicleEntity, in VehicleMechanicsForBaking m) =>
             {
-                var entity = GetPrimaryEntity(m);
-
-                foreach (var wheel in m.wheels)
+                foreach (var wheel in m.Wheels)
                 {
-                    var wheelEntity = GetPrimaryEntity(wheel);
+                    var wheelEntity = wheel.Wheel;
 
                     // Assumed hierarchy:
                     // - chassis
@@ -55,46 +143,23 @@ namespace Demos
                     //    - wheel (rotates about yaw axis and translates along suspension up)
                     //     - graphic (rotates about pitch axis)
 
-                    RigidTransform worldFromSuspension = new RigidTransform
-                    {
-                        pos = wheel.transform.parent.position,
-                        rot = wheel.transform.parent.rotation
-                    };
+                    RigidTransform worldFromSuspension = wheel.WorldFromSuspension;
 
-                    RigidTransform worldFromChassis = new RigidTransform
-                    {
-                        pos = wheel.transform.parent.parent.parent.position,
-                        rot = wheel.transform.parent.parent.parent.rotation
-                    };
+                    RigidTransform worldFromChassis = wheel.WorldFromChassis;
 
                     var chassisFromSuspension = math.mul(math.inverse(worldFromChassis), worldFromSuspension);
 
-                    DstEntityManager.AddComponentData(wheelEntity, new Wheel
+                    EntityManager.AddComponentData(wheelEntity, new Wheel
                     {
-                        Vehicle = entity,
-                        GraphicalRepresentation = GetPrimaryEntity(wheel.transform.GetChild(0)), // assume wheel has a single child with rotating graphic
+                        Vehicle = vehicleEntity,
+                        GraphicalRepresentation = wheel.GraphicalRepresentation, // assume wheel has a single child with rotating graphic
                         // TODO assume for now that driving/steering wheels also appear in this list
-                        UsedForSteering = (byte)(m.steeringWheels.Contains(wheel) ? 1 : 0),
-                        UsedForDriving = (byte)(m.driveWheels.Contains(wheel) ? 1 : 0),
+                        UsedForSteering = (byte)(m.steeringWheels.Contains(wheelEntity) ? 1 : 0),
+                        UsedForDriving = (byte)(m.driveWheels.Contains(wheelEntity) ? 1 : 0),
                         ChassisFromSuspension = chassisFromSuspension
                     });
                 }
-
-                DstEntityManager.AddComponent<VehicleBody>(entity);
-                DstEntityManager.AddComponentData(entity, new VehicleConfiguration
-                {
-                    wheelBase = m.wheelBase,
-                    wheelFrictionRight = m.wheelFrictionRight,
-                    wheelFrictionForward = m.wheelFrictionForward,
-                    wheelMaxImpulseRight = m.wheelMaxImpulseRight,
-                    wheelMaxImpulseForward = m.wheelMaxImpulseForward,
-                    suspensionLength = m.suspensionLength,
-                    suspensionStrength = m.suspensionStrength,
-                    suspensionDamping = m.suspensionDamping,
-                    invWheelCount = 1f / m.wheels.Count,
-                    drawDebugInformation = (byte)(m.drawDebugInformation ? 1 : 0)
-                });
-            });
+            }).WithStructuralChanges().Run();
         }
     }
 
@@ -129,25 +194,16 @@ namespace Demos
         public RigidTransform ChassisFromSuspension;
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsInitializeGroup)), UpdateBefore(typeof(PhysicsSimulationGroup))]
     public partial class VehicleMechanicsSystem : SystemBase
     {
-        BuildPhysicsWorld m_BuildPhysicsWorldSystem;
-
         protected override void OnCreate()
         {
-            m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
             RequireForUpdate(GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VehicleConfiguration) }
             }));
-        }
-
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadWrite();
         }
 
         protected override void OnUpdate()
@@ -171,9 +227,9 @@ namespace Demos
 
             Dependency.Complete();
 
-            // this sample makes direct modifications to impulses between BuildPhysicsWorld and StepPhysicsWorld
+            // this sample makes direct modifications to impulses between PhysicsInitializeWorldGroup and StepPhysicsSimulationGroup
             // we thus use PhysicsWorldExtensions rather than modifying component data, since they have already been consumed by BuildPhysicsWorld
-            PhysicsWorld world = m_BuildPhysicsWorldSystem.PhysicsWorld;
+            PhysicsWorld world = GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
 
             // update each wheel
             var commandBuffer = new EntityCommandBuffer(Allocator.TempJob);

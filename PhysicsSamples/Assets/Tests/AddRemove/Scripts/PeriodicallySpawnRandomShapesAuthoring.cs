@@ -1,6 +1,7 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 
@@ -23,6 +24,16 @@ class PeriodicallySpawnRandomShapesAuthoring : SpawnRandomObjectsAuthoringBase<P
     }
 }
 
+class PeriodicallySpawnRandomShapesAuthoringBaker : SpawnRandomObjectsAuthoringBaseBaker<PeriodicallySpawnRandomShapesAuthoring, PeriodicSpawnSettings>
+{
+    internal override void Configure(PeriodicallySpawnRandomShapesAuthoring authoring,
+        ref PeriodicSpawnSettings spawnSettings)
+    {
+        spawnSettings.SpawnRate = authoring.SpawnRate;
+        spawnSettings.DeathRate = authoring.DeathRate;
+    }
+}
+
 struct PeriodicSpawnSettings : IComponentData, ISpawnSettings, IPeriodicSpawnSettings
 {
     public Entity Prefab { get; set; }
@@ -34,9 +45,11 @@ struct PeriodicSpawnSettings : IComponentData, ISpawnSettings, IPeriodicSpawnSet
     public int DeathRate { get; set; }
 }
 
-abstract class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjectsSystemBase<T> where T : struct, ISpawnSettings, IPeriodicSpawnSettings, IComponentData
+abstract partial class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjectsSystemBase<T> where T : unmanaged, ISpawnSettings, IPeriodicSpawnSettings, IComponentData
 {
     public int FrameCount = 0;
+
+    EntityQuery _Query;
 
     internal override int GetRandomSeed(T spawnSettings)
     {
@@ -46,6 +59,13 @@ abstract class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjectsSystem
         seed = (seed * 397) ^ spawnSettings.SpawnRate;
         seed = (seed * 397) ^ FrameCount;
         return seed;
+    }
+
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+        _Query = GetEntityQuery(typeof(T));
+        RequireForUpdate(_Query);
     }
 
     internal override void OnBeforeInstantiatePrefab(ref T spawnSettings)
@@ -62,7 +82,7 @@ abstract class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjectsSystem
         var lFrameCount = FrameCount;
 
         // Entities.ForEach in generic system types are not supported
-        using (var entities = GetEntityQuery(new ComponentType[] { typeof(T) }).ToEntityArray(Allocator.TempJob))
+        using (var entities = _Query.ToEntityArray(Allocator.TempJob))
         {
             for (int j = 0; j < entities.Length; j++)
             {
@@ -104,6 +124,6 @@ abstract class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjectsSystem
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 class PeriodicallySpawnRandomShapeSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicSpawnSettings>
 {}

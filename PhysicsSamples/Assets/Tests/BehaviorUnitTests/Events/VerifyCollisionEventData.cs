@@ -12,36 +12,31 @@ namespace Unity.Physics.Tests
     }
 
     [Serializable]
-    public class VerifyCollisionEventData : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyCollisionEventData : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyCollisionEventDataBaker : Baker<VerifyCollisionEventData>
         {
-            dstManager.AddComponentData(entity, new VerifyCollisionEventDataData());
+            public override void Bake(VerifyCollisionEventData authoring)
+            {
+                AddComponent(new VerifyCollisionEventDataData());
 
 #if HAVOK_PHYSICS_EXISTS
-            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
-            config.EnableSleeping = 0;
-            dstManager.AddComponentData(entity, config);
+                Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+                config.EnableSleeping = 0;
+                AddComponent(config);
 #endif
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
     public partial class VerifyCollisionEventDataSystem : SystemBase
     {
-        BuildPhysicsWorld m_BuildPhysicsWorld;
-        StepPhysicsWorld m_StepPhysicsWorld;
-
         protected override void OnCreate()
         {
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(VerifyCollisionEventDataData) }
-            }));
+            RequireForUpdate<VerifyCollisionEventDataData>();
         }
 
         struct VerifyCollisionEventDataJob : ICollisionEventsJob
@@ -50,7 +45,7 @@ namespace Unity.Physics.Tests
             public PhysicsWorld World;
 
             [ReadOnly]
-            public ComponentDataFromEntity<VerifyCollisionEventDataData> VerificationData;
+            public ComponentLookup<VerifyCollisionEventDataData> VerificationData;
 
             public void Execute(CollisionEvent collisionEvent)
             {
@@ -70,19 +65,13 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
-        }
-
         protected override void OnUpdate()
         {
             Dependency = new VerifyCollisionEventDataJob
             {
-                World = m_BuildPhysicsWorld.PhysicsWorld,
-                VerificationData = GetComponentDataFromEntity<VerifyCollisionEventDataData>(true)
-            }.Schedule(m_StepPhysicsWorld.Simulation, Dependency);
+                World = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld,
+                VerificationData = GetComponentLookup<VerifyCollisionEventDataData>(true)
+            }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
         }
     }
 }

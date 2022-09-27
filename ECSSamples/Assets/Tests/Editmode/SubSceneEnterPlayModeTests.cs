@@ -13,8 +13,10 @@ namespace EnterPlayModeTests
 {
     public class SubSceneEnterPlayModeTests : BaseEnterPlayModeTest
     {
+        const string k_SubscenePath = "Assets/HelloCube/1. MainThread/HelloCube_MainThread.unity";
+
         [UnityTest]
-        [Ignore("https://unity3d.atlassian.net/browse/DOTS-3424")]
+        [Ignore("DOTS-3424")]
         public IEnumerator SubScene_OpenedForEdit_RemainsOpenInPlayMode([Values(EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload)] EnterPlayModeOptions enterPlayModeOptions)
         {
             // Set editor settings
@@ -24,10 +26,10 @@ namespace EnterPlayModeTests
 
             DisableSetupAndTearDown();
 
-            EditorSceneManager.OpenScene("Assets/HelloCube/3. SubScene/SubScene.unity", OpenSceneMode.Single);
+            EditorSceneManager.OpenScene(k_SubscenePath, OpenSceneMode.Single);
             var subScene = Object.FindObjectOfType<SubScene>();
             Assert.NotNull(subScene);
-            SubSceneInspectorUtility.EditScene(subScene);
+            SubSceneUtility.EditScene(subScene);
             Assert.IsTrue(subScene.IsLoaded);
             Assert.AreEqual(2, SceneManager.sceneCount);
 
@@ -46,7 +48,7 @@ namespace EnterPlayModeTests
         }
 
         [UnityTest]
-        // Disabled on Linux because it hangs during asset import - likely related to https://unity3d.atlassian.net/browse/DOTS-3424 and running on the latest Ubuntu Bokken VM
+        // Disabled on Linux because it hangs during asset import - likely related to DOTS-3424 and running on the latest Ubuntu Bokken VM
         [UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
         public IEnumerator SubScene_NotOpenedForEdit_RemainsClosedInPlayMode([Values(EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload)] EnterPlayModeOptions enterPlayModeOptions)
         {
@@ -57,7 +59,7 @@ namespace EnterPlayModeTests
 
             DisableSetupAndTearDown();
 
-            EditorSceneManager.OpenScene("Assets/HelloCube/3. SubScene/SubScene.unity", OpenSceneMode.Single);
+            EditorSceneManager.OpenScene(k_SubscenePath, OpenSceneMode.Single);
             var subScene = Object.FindObjectOfType<SubScene>();
             Assert.NotNull(subScene);
             Assert.IsFalse(subScene.IsLoaded);
@@ -78,14 +80,14 @@ namespace EnterPlayModeTests
         }
 
         [UnityTest]
-        // Disabled on Linux because it hangs during asset import - likely related to https://unity3d.atlassian.net/browse/DOTS-3424 and running on the latest Ubuntu Bokken VM
+        // Disabled on Linux because it hangs during asset import - likely related to DOTS-3424 and running on the latest Ubuntu Bokken VM
         [UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
         public IEnumerator SubScene_OpenedForEdit_UnloadsSceneOnDestroyImmediate()
         {
-            EditorSceneManager.OpenScene("Assets/HelloCube/3. SubScene/SubScene.unity", OpenSceneMode.Single);
+            EditorSceneManager.OpenScene(k_SubscenePath, OpenSceneMode.Single);
             var subScene = Object.FindObjectOfType<SubScene>();
             Assert.NotNull(subScene);
-            SubSceneInspectorUtility.EditScene(subScene);
+            SubSceneUtility.EditScene(subScene);
             Assert.IsTrue(subScene.IsLoaded);
             Assert.AreEqual(2, SceneManager.sceneCount);
 

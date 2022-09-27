@@ -18,6 +18,7 @@ public class RotateSystem_GO : MonoBehaviour
 
 
 #region ECS
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(GravityWellSystem_GO_ECS))]
 public partial class RotateSystem_GO_ECS : SystemBase
@@ -25,7 +26,7 @@ public partial class RotateSystem_GO_ECS : SystemBase
     protected override void OnUpdate()
     {
         // Create local deltaTime so it is accessible inside the ForEach lambda
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = SystemAPI.Time.DeltaTime;
 
         Entities
             .WithBurst()

@@ -2,14 +2,16 @@ using Unity.Entities;
 
 public struct CartesianGridOnCubeGenerator : IComponentData
 {
-    public BlobAssetReference<CartesianGridOnCubeGeneratorBlob> Blob;
-}
-
-public struct CartesianGridOnCubeGeneratorBlob
-{
     public int RowCount;
     public Entity WallPrefab;
-    public BlobArray<Entity> FloorPrefab;
     public float WallSProbability;
     public float WallWProbability;
+}
+
+public struct CartesianGridOnCubeGeneratorFloorPrefab : IBufferElementData
+{
+    public Entity Value;
+
+    public static implicit operator CartesianGridOnCubeGeneratorFloorPrefab(Entity entity) => new() { Value = entity };
+    public static implicit operator Entity(CartesianGridOnCubeGeneratorFloorPrefab element) => element.Value;
 }

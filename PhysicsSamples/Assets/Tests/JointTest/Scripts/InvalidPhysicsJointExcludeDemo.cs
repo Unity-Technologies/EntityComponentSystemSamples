@@ -14,14 +14,17 @@ public class InvalidPhysicsJointExcludeDemo : SceneCreationAuthoring<InvalidPhys
 {
     public float TimeToSwap = 0.5f;
 
-    public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class InvalidPhysicsJointExcludeDemoBaker : Baker<InvalidPhysicsJointExcludeDemo>
     {
-        dstManager.AddComponentData(entity, new InvalidPhysicsJointExcludeDemoScene
+        public override void Bake(InvalidPhysicsJointExcludeDemo authoring)
         {
-            DynamicMaterial = DynamicMaterial,
-            StaticMaterial = StaticMaterial,
-            TimeToSwap = TimeToSwap
-        });
+            AddComponentObject(new InvalidPhysicsJointExcludeDemoScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial,
+                TimeToSwap = authoring.TimeToSwap
+            });
+        }
     }
 }
 
@@ -43,14 +46,14 @@ public struct InvalidPhysicsJointExcludeTimerEvent : IComponentData
 
 public struct InvalidPhysicsJointExcludeBodies : IComponentData {}
 
-
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class InvalidPhysicsJointExcludeDemoSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = SystemAPI.Time.DeltaTime;
 
         Entities
             .WithName("InvalidPhysicsJointExcludeTimerEvent")

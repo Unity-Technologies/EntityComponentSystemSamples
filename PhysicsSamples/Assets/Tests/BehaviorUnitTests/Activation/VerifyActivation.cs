@@ -1,4 +1,5 @@
 using Unity.Assertions;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -29,18 +30,25 @@ namespace Unity.Physics.Tests
         public bool ColliderChange = true;
         public bool NewCollider = true;
 
-        public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyActivationBaker : Baker<VerifyActivation>
         {
-            base.Convert(entity, dstManager, conversionSystem);
-            dstManager.AddComponentData(entity, new VerifyActivationData
+            public override void Bake(VerifyActivation authoring)
             {
-                PureFilter = PureFilter ? 1 : 0,
-                Remove = Remove ? 1 : 0,
-                MotionChange = MotionChange ? 1 : 0,
-                Teleport = Teleport ? 1 : 0,
-                ColliderChange = ColliderChange ? 1 : 0,
-                NewCollider = NewCollider ? 1 : 0
-            });
+                AddComponentObject(new VerifyActivationScene()
+                {
+                    DynamicMaterial = authoring.DynamicMaterial,
+                    StaticMaterial = authoring.StaticMaterial
+                });
+                AddComponent(new VerifyActivationData
+                {
+                    PureFilter = authoring.PureFilter ? 1 : 0,
+                    Remove = authoring.Remove ? 1 : 0,
+                    MotionChange = authoring.MotionChange ? 1 : 0,
+                    Teleport = authoring.Teleport ? 1 : 0,
+                    ColliderChange = authoring.ColliderChange ? 1 : 0,
+                    NewCollider = authoring.NewCollider ? 1 : 0
+                });
+            }
         }
     }
 
@@ -131,52 +139,60 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(ExportPhysicsWorld))]
-    public partial class TestSystem : SystemBase
+    [UpdateAfter(typeof(PhysicsSystemGroup))]
+    [BurstCompile]
+    public partial struct TestSystem : ISystem
     {
         private int m_Counter;
 
         EntityQuery m_VerificationGroup;
+        ComponentLookup<VerifyActivationData> m_ActivationData;
 
-        BuildPhysicsWorld m_BuildPhysicsWorld;
-        VerifyActivationSystem m_VerifyActivationSystem;
-
-        protected override void OnCreate()
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
         {
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(VerifyActivationData) }
-            });
-
-            RequireForUpdate(m_VerificationGroup);
-
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            m_VerifyActivationSystem = World.GetOrCreateSystem<VerifyActivationSystem>();
-
+            m_VerificationGroup = state.GetEntityQuery(ComponentType.ReadWrite<VerifyActivationData>());
+            state.RequireForUpdate(m_VerificationGroup);
             m_Counter = 0;
+
+            m_ActivationData = state.GetComponentLookup<VerifyActivationData>(true);
         }
 
-        protected override void OnUpdate()
+        [BurstCompile]
+        public void OnDestroy(ref SystemState state)
+        {
+        }
+
+        public void OnUpdate(ref SystemState state)
+        {
+            HandleUpdate(ref state);
+        }
+
+        internal void HandleUpdate(ref SystemState state)
         {
             m_Counter++;
+            m_ActivationData.Update(ref state);
             if (m_Counter == 30)
             {
+                VerifyActivationSystem system = state.World.GetExistingSystemManaged<VerifyActivationSystem>();
+
                 // First change filter of all ground colliders to collide with nothing
-                var staticEntities = m_BuildPhysicsWorld.PhysicsData.StaticEntityGroup.ToEntityArray(Allocator.TempJob);
+                var bpwData = state.EntityManager.GetComponentData<BuildPhysicsWorldData>(state.World.GetExistingSystem<BuildPhysicsWorld>());
+                var staticEntities = bpwData.StaticEntityGroup.ToEntityArray(Allocator.TempJob);
                 for (int i = 0; i < staticEntities.Length; i++)
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[i]);
-                    colliderComponent.Value.Value.Filter = new CollisionFilter
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[i]);
+                    colliderComponent.Value.Value.SetCollisionFilter(new CollisionFilter
                     {
                         BelongsTo = ~CollisionFilter.Default.BelongsTo,
                         CollidesWith = ~CollisionFilter.Default.CollidesWith,
                         GroupIndex = 1
-                    };
-                    EntityManager.SetComponentData(staticEntities[i], colliderComponent);
+                    });
+                    state.EntityManager.SetComponentData(staticEntities[i], colliderComponent);
                 }
 
                 var verificationData = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
-                var verificationComponentData = GetComponentDataFromEntity<VerifyActivationData>(true)[verificationData[0]];
+                var verificationComponentData = m_ActivationData[verificationData[0]];
 
                 // Do nothing for ground 0 (other than filter change)
                 int counter = 0;
@@ -188,16 +204,16 @@ namespace Unity.Physics.Tests
                 // Completely remove one ground (1)
                 if (verificationComponentData.Remove > 0)
                 {
-                    EntityManager.DestroyEntity(staticEntities[counter]);
+                    state.EntityManager.DestroyEntity(staticEntities[counter]);
                     counter++;
                 }
 
                 // Convert one ground to dynamic object (2)
                 if (verificationComponentData.MotionChange > 0)
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
-                    EntityManager.AddComponentData(staticEntities[counter], PhysicsMass.CreateDynamic(colliderComponent.MassProperties, 1.0f));
-                    EntityManager.AddComponentData(staticEntities[counter], new PhysicsVelocity
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
+                    state.EntityManager.AddComponentData(staticEntities[counter], PhysicsMass.CreateDynamic(colliderComponent.MassProperties, 1.0f));
+                    state.EntityManager.AddComponentData(staticEntities[counter], new PhysicsVelocity
                     {
                         Linear = new float3(0.0f, -1.0f, 0.0f),
                         Angular = float3.zero
@@ -208,32 +224,32 @@ namespace Unity.Physics.Tests
                 // Teleport one ground (3)
                 if (verificationComponentData.Teleport > 0)
                 {
-                    var translationComponent = EntityManager.GetComponentData<Translation>(staticEntities[counter]);
+                    var translationComponent = state.EntityManager.GetComponentData<Translation>(staticEntities[counter]);
                     translationComponent.Value.y = -10.0f;
-                    EntityManager.SetComponentData(staticEntities[counter], translationComponent);
+                    state.EntityManager.SetComponentData(staticEntities[counter], translationComponent);
                     counter++;
                 }
 
                 // Change collider of one ground (4)
                 if (verificationComponentData.ColliderChange > 0)
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
-                    var oldFilter = colliderComponent.Value.Value.Filter;
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
+                    var oldFilter = colliderComponent.Value.Value.GetCollisionFilter();
                     colliderComponent.Value = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = new float3(5.0f, 1.0f, 50.0f) });
-                    colliderComponent.Value.Value.Filter = oldFilter;
-                    m_VerifyActivationSystem.CreatedColliders.Add(colliderComponent.Value);
-                    EntityManager.SetComponentData(staticEntities[counter], colliderComponent);
+                    colliderComponent.Value.Value.SetCollisionFilter(oldFilter);
+                    system.CreatedColliders.Add(colliderComponent.Value);
+                    state.EntityManager.SetComponentData(staticEntities[counter], colliderComponent);
                     counter++;
                 }
 
                 // Set new collider of one ground (5)
                 if (verificationComponentData.NewCollider > 0)
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[counter]);
                     var newColliderComponent = BoxCollider.Create(new BoxGeometry { Orientation = quaternion.identity, Size = new float3(5.0f, 1.0f, 50.0f) });
-                    m_VerifyActivationSystem.CreatedColliders.Add(newColliderComponent);
-                    newColliderComponent.Value.Filter = colliderComponent.Value.Value.Filter;
-                    EntityManager.SetComponentData(staticEntities[counter], newColliderComponent.AsComponent());
+                    system.CreatedColliders.Add(newColliderComponent);
+                    newColliderComponent.Value.SetCollisionFilter(colliderComponent.Value.Value.GetCollisionFilter());
+                    state.EntityManager.SetComponentData(staticEntities[counter], newColliderComponent.AsComponent());
                     counter++;
                 }
 
@@ -243,10 +259,11 @@ namespace Unity.Physics.Tests
             else if (m_Counter == 40)
             {
                 // Verify that all boxes started falling after the ground was changed
-                var dynamicEntities = m_BuildPhysicsWorld.PhysicsData.DynamicEntityGroup.ToEntityArray(Allocator.TempJob);
+                var bpwData = state.EntityManager.GetComponentData<BuildPhysicsWorldData>(state.World.GetExistingSystem<BuildPhysicsWorld>());
+                var dynamicEntities = bpwData.DynamicEntityGroup.ToEntityArray(Allocator.TempJob);
                 for (int i = 0; i < dynamicEntities.Length; i++)
                 {
-                    var translation = EntityManager.GetComponentData<Translation>(dynamicEntities[i]);
+                    var translation = state.EntityManager.GetComponentData<Translation>(dynamicEntities[i]);
                     Assert.IsTrue(translation.Value.y < 0.99f, "Box didn't start falling!");
                 }
 

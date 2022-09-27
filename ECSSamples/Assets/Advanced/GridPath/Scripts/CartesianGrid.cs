@@ -68,6 +68,14 @@ public struct CartesianGridCoordinates : IComponentData, IEquatable<CartesianGri
             (x <= (colCount - 1)) &&
             (y >= 0) &&
             (y <= (rowCount - 1)));
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            return (x.GetHashCode() * 397) ^ y.GetHashCode();
+        }
+    }
 }
 
 /// <summary>

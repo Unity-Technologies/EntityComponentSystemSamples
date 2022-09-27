@@ -29,13 +29,20 @@ public unsafe partial class CartesianGridOnCubeTransformSystem : SystemBase
             .WithName("CartesianGridOnCubeTransform")
             .WithNativeDisableUnsafePtrRestriction(faceLocalToWorld)
             .ForEach((ref LocalToWorld localToWorld,
+#if !ENABLE_TRANSFORM_V1
+                in LocalToWorldTransform transform,
+#else
                 in Translation translation,
+#endif
                 in CartesianGridOnCubeFace cubeFace) =>
                 {
                     var cubeFaceIndex = cubeFace.Value;
                     var resultLocalToWorld = faceLocalToWorld[cubeFaceIndex];
+#if !ENABLE_TRANSFORM_V1
+                    resultLocalToWorld.c3 = math.mul(resultLocalToWorld, new float4(transform.Value.Position, 1.0f));
+#else
                     resultLocalToWorld.c3 = math.mul(resultLocalToWorld, new float4(translation.Value, 1.0f));
-
+#endif
                     localToWorld = new LocalToWorld
                     {
                         Value = resultLocalToWorld

@@ -1,63 +1,57 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using UnityEngine;
 
 public struct DoubleModifyBroadphasePairs : IComponentData {}
 
-public class DoubleModifyBroadphasePairsBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class DoubleModifyBroadphasePairsBehaviour : MonoBehaviour
 {
-    void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class DoubleModifyBroadphasePairsBaker : Baker<DoubleModifyBroadphasePairsBehaviour>
     {
-        dstManager.AddComponentData(entity, new DoubleModifyBroadphasePairs());
+        public override void Bake(DoubleModifyBroadphasePairsBehaviour authoring)
+        {
+            AddComponent<DoubleModifyBroadphasePairs>();
+        }
     }
 }
 
 // A system which configures the simulation step to disable certain broad phase pairs
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(StepPhysicsWorld))]
+[UpdateInGroup(typeof(PhysicsSimulationGroup))]
+[UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
+[UpdateBefore(typeof(PhysicsCreateContactsGroup))]
 public partial class DoubleModifyBroadphasePairsSystem : SystemBase
 {
-    StepPhysicsWorld m_StepPhysicsWorld;
-
     protected override void OnCreate()
     {
-        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-
-        var pairModifierGroup = GetEntityQuery(new EntityQueryDesc
+        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(DoubleModifyBroadphasePairs) }
-        });
-
-        RequireForUpdate(pairModifierGroup);
+        }));
     }
 
     protected override void OnUpdate()
     {
-        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics)
+        SimulationSingleton simSingleton = GetSingleton<SimulationSingleton>();
+
+        if (simSingleton.Type == SimulationType.NoPhysics)
         {
             return;
         }
 
+        PhysicsWorldSingleton worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+
         // Add a custom callback to the simulation, which will inject our custom job after the body pairs have been created
-        SimulationCallbacks.Callback callback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
+        Dependency = new DisableDynamicDynamicPairsJob
         {
-            inDeps = new DisableDynamicDynamicPairsJob
-            {
-                NumDynamicBodies = world.NumDynamicBodies
-            }.Schedule(m_StepPhysicsWorld.Simulation, ref world, inDeps);
+            NumDynamicBodies = worldSingleton.PhysicsWorld.NumDynamicBodies
+        }.Schedule(simSingleton, ref worldSingleton.PhysicsWorld, Dependency);
 
-            inDeps = new DisableDynamicStaticPairsJob
-            {
-                NumDynamicBodies = world.NumDynamicBodies
-            }.Schedule(m_StepPhysicsWorld.Simulation, ref world, inDeps);
-
-            return inDeps;
-        };
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, callback);
+        Dependency = new DisableDynamicStaticPairsJob
+        {
+            NumDynamicBodies = worldSingleton.PhysicsWorld.NumDynamicBodies
+        }.Schedule(simSingleton, ref worldSingleton.PhysicsWorld, Dependency);
     }
 
     [BurstCompile]

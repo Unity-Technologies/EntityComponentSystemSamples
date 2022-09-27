@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Assertions;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -19,34 +20,36 @@ public struct PeriodicallySpawnExplosionComponent : IComponentData, ISpawnSettin
     public int Id;
 }
 
-public class PeriodicallySpawnExplosionAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+public class PeriodicallySpawnExplosionAuthoring : MonoBehaviour
 {
     public float3 Range;
     public int SpawnRate;
     public GameObject Prefab;
     public int Count = 1;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class PeriodicallySpawnExplosionAuthoringBaking : Baker<PeriodicallySpawnExplosionAuthoring>
+{
+    public override void Bake(PeriodicallySpawnExplosionAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new PeriodicallySpawnExplosionComponent
+        var transform = GetComponent<Transform>();
+        AddComponent(new PeriodicallySpawnExplosionComponent
         {
-            Count = Count,
+            Count = authoring.Count,
             DeathRate = 10,
             Position = transform.position,
-            Prefab = conversionSystem.GetPrimaryEntity(Prefab),
-            Range = Range,
+            Prefab = GetEntity(authoring.Prefab),
+            Range = authoring.Range,
             Rotation = quaternion.identity,
-            SpawnRate = SpawnRate,
+            SpawnRate = authoring.SpawnRate,
             Id = 0,
         });
     }
-
-    public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs) => referencedPrefabs.Add(Prefab);
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
-class PeriodicallySpawnExplosionsSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicallySpawnExplosionComponent>
+[UpdateBefore(typeof(PhysicsSystemGroup))]
+partial class PeriodicallySpawnExplosionsSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicallySpawnExplosionComponent>
 {
     internal override void ConfigureInstance(Entity instance, ref PeriodicallySpawnExplosionComponent spawnSettings)
     {

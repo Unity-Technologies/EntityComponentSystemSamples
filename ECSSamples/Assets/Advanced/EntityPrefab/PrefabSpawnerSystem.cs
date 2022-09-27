@@ -17,13 +17,14 @@ public struct PrefabSpawnerBufferElement : IBufferElementData
     public EntityPrefabReference Prefab;
 }
 
+[RequireMatchingQueriesForUpdate]
 public partial class PrefabSpawnerSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem m_BeginSimECBSystem;
 
     protected override void OnCreate()
     {
-        m_BeginSimECBSystem = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+        m_BeginSimECBSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
@@ -36,7 +37,7 @@ public partial class PrefabSpawnerSystem : SystemBase
             ecb.AddComponent(entityInQueryIndex, entity, new RequestEntityPrefabLoaded {Prefab = prefabs[rnd.NextInt(prefabs.Length)].Prefab});
         }).ScheduleParallel();
 
-        var dt = Time.DeltaTime;
+        var dt = SystemAPI.Time.DeltaTime;
         Entities.ForEach((Entity entity, int entityInQueryIndex, ref PrefabSpawner spawner, in PrefabLoadResult prefab) =>
         {
             var remaining = spawner.SpawnsRemaining;
@@ -52,7 +53,11 @@ public partial class PrefabSpawnerSystem : SystemBase
             {
                 var instance = ecb.Instantiate(entityInQueryIndex, prefab.PrefabRoot);
                 int index = i + (int) remaining;
+#if !ENABLE_TRANSFORM_V1
+                ecb.SetComponent(entityInQueryIndex, instance, new LocalToWorldTransform {Value = UniformScaleTransform.FromPosition(new float3(index*((index&1)*2-1), 0, 0))});
+#else
                 ecb.SetComponent(entityInQueryIndex, instance, new Translation {Value = new float3(index*((index&1)*2-1), 0, 0)});
+#endif
             }
             spawner.SpawnsRemaining = newRemaining;
         }).ScheduleParallel();

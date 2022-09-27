@@ -1,24 +1,24 @@
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 
-[ConverterVersion("macton", 5)]
-[WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.EntitySceneOptimizations)]
+[RequireMatchingQueriesForUpdate]
 public unsafe partial class CartesianGridOnCubeSystemGeneratorSystem : SystemBase
 {
     protected override void OnUpdate()
     {
         Dependency.Complete();
-        Entities.WithStructuralChanges().ForEach((Entity entity, ref CartesianGridOnCubeGenerator cartesianGridOnCubeGenerator) =>
+        Entities.WithStructuralChanges().ForEach((Entity entity, ref CartesianGridOnCubeGenerator cartesianGridOnCubeGenerator, in DynamicBuffer<CartesianGridOnCubeGeneratorFloorPrefab> floorPrefabsBuffer) =>
         {
-            ref var floorPrefab = ref cartesianGridOnCubeGenerator.Blob.Value.FloorPrefab;
-            var wallPrefab = cartesianGridOnCubeGenerator.Blob.Value.WallPrefab;
-            var rowCount = cartesianGridOnCubeGenerator.Blob.Value.RowCount;
-            var wallSProbability = cartesianGridOnCubeGenerator.Blob.Value.WallSProbability;
-            var wallWProbability = cartesianGridOnCubeGenerator.Blob.Value.WallWProbability;
+            var floorPrefabs = new NativeArray<Entity>(floorPrefabsBuffer.Length, Allocator.Temp);
+            floorPrefabs.CopyFrom(floorPrefabsBuffer.Reinterpret<Entity>().AsNativeArray());
 
-            var floorPrefabCount = floorPrefab.Length;
+            var wallPrefab = cartesianGridOnCubeGenerator.WallPrefab;
+            var rowCount = cartesianGridOnCubeGenerator.RowCount;
+            var wallSProbability = cartesianGridOnCubeGenerator.WallSProbability;
+            var wallWProbability = cartesianGridOnCubeGenerator.WallWProbability;
+
+            var floorPrefabCount = floorPrefabs.Length;
             if (floorPrefabCount == 0)
                 return;
 
@@ -58,7 +58,7 @@ public unsafe partial class CartesianGridOnCubeSystemGeneratorSystem : SystemBas
                         var tx = ((float)x) - cx;
                         var tz = ((float)y) - cz;
 
-                        CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefab[prefabIndex], faceLocalToWorld[faceIndex], tx, tz);
+                        CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefabs[prefabIndex], faceLocalToWorld[faceIndex], tx, tz);
 
                         var gridWallsIndex = faceGridWallsOffset + ((y * ((rowCount + 1) / 2)) + (x / 2));
                         var walls = (gridWalls[gridWallsIndex] >> ((x & 1) * 4)) & 0x0f;

@@ -9,18 +9,15 @@ public struct ChangeFilterCountdown : IComponentData
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class ChangeFilterCountdownSystem : SystemBase
 {
     private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;
 
     protected override void OnCreate()
     {
-        m_CommandBufferSystem = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[] { typeof(ChangeFilterCountdown) }
-        }));
+        m_CommandBufferSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
+        RequireForUpdate<ChangeFilterCountdown>();
     }
 
     protected override void OnUpdate()
@@ -36,7 +33,7 @@ public partial class ChangeFilterCountdownSystem : SystemBase
             {
                 if (--tag.Countdown > 0) return;
 
-                collider.Value.Value.Filter = tag.Filter;
+                collider.Value.Value.SetCollisionFilter(tag.Filter);
                 commandBuffer.RemoveComponent<ChangeFilterCountdown>(entity);
             }).Schedule();
     }

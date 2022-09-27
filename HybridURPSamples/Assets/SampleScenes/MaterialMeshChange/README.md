@@ -10,6 +10,8 @@ The scene contains two entities. One changes it's Mesh and another changes it's 
 
 ## How to use this sample scene?
 
-1. In the Hierarchy, select the **MeshChange** or **MaterialChange** GameObject
-2. In the Inspector, note that ConvertToEntity and the Authoring components are attached
-3. Enter Play mode. These two GameObjects convert to Entities and change their mesh and material using the ECS System
+1. In the Hierarchy, select the Subscene
+2. In the Inspector, click Open
+3. In the Hierarchy, select the **MeshChange** or **MaterialChange** GameObject
+4. In the Inspector, note that the Authoring components is attached
+5. Close the Subscene and enter Play mode. These two GameObjects convert to Entities and change their mesh and material using the ECS System

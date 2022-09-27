@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -14,7 +15,7 @@ using Collider = Unity.Physics.Collider;
 public class SingleThreadedRagdoll : MonoBehaviour
 {
     public PhysicsWorld PhysicsWorld;
-    public NativeArray<int> HaveStaticBodiesChanged;
+    public NativeReference<int> HaveStaticBodiesChanged;
 
     private SimulationContext SimulationContext;
 #if HAVOK_PHYSICS_EXISTS
@@ -26,8 +27,8 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
     private List<BlobAssetReference<Collider>> m_CreatedColliders = null;
 
-    static readonly System.Type k_DrawComponent = typeof(Unity.Physics.Authoring.DisplayBodyColliders)
-        .GetNestedType("DrawComponent", BindingFlags.NonPublic);
+    static readonly System.Type k_DrawComponent = System.Type.GetType(Assembly.CreateQualifiedName("Unity.Physics.Hybrid", "Unity.Physics.Authoring.DisplayGizmoColliderEdges"))
+        .GetNestedType("DrawWithGizmos", BindingFlags.NonPublic);
     static readonly MethodInfo k_DrawComponent_DrawColliderEdges = k_DrawComponent
         .GetMethod("DrawColliderEdges", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(BlobAssetReference<Collider>), typeof(RigidTransform), typeof(bool) }, null);
 
@@ -35,7 +36,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
     {
         if (!DrawDebugInformation || !m_BodyInfos.IsCreated || !m_JointInfos.IsCreated) return;
 
-        // Debug draw the colliders
+        // Gizmo Draw the colliders
         for (int i = 0; i < m_BodyInfos.Length; i++)
         {
             GameObject g = m_BodyInfoIndexToGameObjectMapping[i];
@@ -46,7 +47,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
             k_DrawComponent_DrawColliderEdges.Invoke(null, new object[] { collider, transform, false });
         }
 
-        // Debug draw the joints
+        // Gizmo Draw the joints
         {
             Color originalColor = Gizmos.color;
 
@@ -89,7 +90,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
         SimulationStepInput input = new SimulationStepInput
         {
             World = PhysicsWorld,
-            TimeStep = World.DefaultGameObjectInjectionWorld.GetExistingSystem<FixedStepSimulationSystemGroup>().Timestep,
+            TimeStep = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().Timestep,
             NumSolverIterations = PhysicsStep.Default.SolverIterationCount,
             SolverStabilizationHeuristicSettings = PhysicsStep.Default.SolverStabilizationHeuristicSettings,
             Gravity = PhysicsStep.Default.Gravity,
@@ -180,7 +181,8 @@ public class SingleThreadedRagdoll : MonoBehaviour
                         WorldFromBody = new RigidTransform(bodyInfo.Orientation, bodyInfo.Position),
                         Collider = bodyInfo.Collider,
                         Entity = Entity.Null,
-                        CustomTags = 0
+                        CustomTags = 0,
+                        Scale = 1
                     };
                     motionDatas[dynamicBodyIndex] = new MotionData
                     {
@@ -199,7 +201,7 @@ public class SingleThreadedRagdoll : MonoBehaviour
                         InverseInertia = math.rcp(collider.Value.MassProperties.MassDistribution.InertiaTensor * bodyInfo.Mass),
                         InverseMass = math.rcp(bodyInfo.Mass),
                         AngularExpansionFactor = collider.Value.MassProperties.AngularExpansionFactor,
-                        GravityFactor = 1.0f
+                        GravityFactor = 1.0f,
                     };
                     bodyInfoToBodiesIndexMap.Add(i, dynamicBodyIndex);
                     dynamicBodyIndex++;
@@ -211,7 +213,8 @@ public class SingleThreadedRagdoll : MonoBehaviour
                         WorldFromBody = new RigidTransform(bodyInfo.Orientation, bodyInfo.Position),
                         Collider = bodyInfo.Collider,
                         Entity = Entity.Null,
-                        CustomTags = 0
+                        CustomTags = 0,
+                        Scale = 1
                     };
                     staticBodyIndex++;
                     bodyInfoToBodiesIndexMap.Add(i, -staticBodyIndex);
@@ -233,7 +236,8 @@ public class SingleThreadedRagdoll : MonoBehaviour
                 WorldFromBody = new RigidTransform(quaternion.identity, float3.zero),
                 Collider = default,
                 Entity = Entity.Null,
-                CustomTags = 0
+                CustomTags = 0,
+                Scale = 1
             };
         }
 
@@ -254,16 +258,29 @@ public class SingleThreadedRagdoll : MonoBehaviour
                     BodyIndexB = bodyIndexB,
                 };
 
-                joints[i] = new Unity.Physics.Joint
+                var joint = new Unity.Physics.Joint
                 {
                     BodyPair = pair,
                     Entity = Entity.Null,
                     AFromJoint = new Math.MTransform(jointInfo.JointData.BodyAFromJoint.AsRigidTransform()),
                     BFromJoint = new Math.MTransform(jointInfo.JointData.BodyBFromJoint.AsRigidTransform()),
                     EnableCollision = (byte)(jointInfo.EnableCollision ? 1 : 0),
-                    Version = jointInfo.JointData.Version,
-                    Constraints = jointInfo.JointData.GetConstraints()
+                    Version = jointInfo.JointData.Version
                 };
+                // We have to memcopy the data over to convert it to the internal container
+                // as we do not have access to this internal container in the samples
+                unsafe
+                {
+                    ref var constraintsRef = ref joint.Constraints;
+                    var jointList = jointInfo.JointData.GetConstraints();
+                    ref var listRef = ref jointList.ElementAt(0);
+                    fixed(void* constraintPtr = &constraintsRef, constraintListPtr = &listRef)
+                    {
+                        UnsafeUtility.MemCpy(constraintPtr, constraintListPtr, jointList.Length * sizeof(Constraint));
+                    }
+                    constraintsRef.Length = (byte)jointList.Length;
+                }
+                joints[i] = joint;
             }
         }
 
@@ -341,21 +358,13 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
 #if HAVOK_PHYSICS_EXISTS
         HavokSimulationContext = new Havok.Physics.SimulationContext(Havok.Physics.HavokConfiguration.Default);
-
-        PhysicsStep stepComponent = PhysicsStep.Default;
-        var buildPhysicsWorld = World.DefaultGameObjectInjectionWorld.GetExistingSystem<Unity.Physics.Systems.BuildPhysicsWorld>();
-        if (buildPhysicsWorld.HasSingleton<PhysicsStep>())
-        {
-            stepComponent = buildPhysicsWorld.GetSingleton<PhysicsStep>();
-            SimulateHavok = (stepComponent.SimulationType == SimulationType.HavokPhysics);
-        }
 #endif
 
         m_BodyInfoIndexToGameObjectMapping = new List<GameObject>();
         m_BodyInfos = new NativeList<BodyInfo>(Allocator.Persistent);
         m_JointInfos = new NativeList<JointInfo>(Allocator.Persistent);
         PhysicsWorld = new PhysicsWorld(0, 0, 0);
-        HaveStaticBodiesChanged = new NativeArray<int>(new int[1] { 1 }, Allocator.Persistent);
+        HaveStaticBodiesChanged = new NativeReference<int>(1, Allocator.Persistent);
 
         // Create all the Bodies
         var basicBodyInfos = GameObject.FindObjectsOfType<BasicBodyInfo>();
@@ -393,6 +402,23 @@ public class SingleThreadedRagdoll : MonoBehaviour
             };
             m_JointInfos.Add(joint);
         }
+
+#if HAVOK_PHYSICS_EXISTS
+
+        if (!World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().TryGetSingleton<PhysicsStep>(out PhysicsStep stepComponent))
+        {
+            stepComponent = PhysicsStep.Default;
+        }
+
+        if (stepComponent.SimulationType == SimulationType.HavokPhysics)
+        {
+            SimulateHavok = true;
+        }
+        else
+        {
+            SimulateHavok = false;
+        }
+#endif
     }
 
     private void GetBodyIndices(GameObject bodyA, GameObject bodyB, out int bodyIndexA, out int bodyIndexB)

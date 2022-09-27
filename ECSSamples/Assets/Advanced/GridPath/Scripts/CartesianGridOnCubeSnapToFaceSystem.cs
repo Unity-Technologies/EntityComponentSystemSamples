@@ -37,7 +37,11 @@ public unsafe partial class CartesianGridOnCubeSnapToFaceSystem : SystemBase
             .WithNone<CartesianGridOnCubeFace>()
             .WithAll<CartesianGridDirection>()
             .ForEach((Entity entity,
+#if !ENABLE_TRANSFORM_V1
+                ref LocalToWorldTransform transform,
+#else
                 ref Translation translation,
+#endif
                 ref CartesianGridCoordinates gridCoordinates) =>
                 {
                     // Find closest GridFace
@@ -48,7 +52,11 @@ public unsafe partial class CartesianGridOnCubeSnapToFaceSystem : SystemBase
                         var n = faceLocalToWorld[i].c1.xyz;
                         var p = faceLocalToWorld[i].c3.xyz;
                         var d = -math.dot(n, p);
+#if !ENABLE_TRANSFORM_V1
+                        var dist = math.dot(transform.Value.Position.xyz, n) + d;
+#else
                         var dist = math.dot(translation.Value.xyz, n) + d;
+#endif
                         if (math.abs(dist) < bestDist)
                         {
                             bestDist = dist;
@@ -57,7 +65,11 @@ public unsafe partial class CartesianGridOnCubeSnapToFaceSystem : SystemBase
                     }
 
                     // Put translation in GridFace space
+#if !ENABLE_TRANSFORM_V1
+                    transform.Value.Position = math.mul(faceWorldToLocal[bestCubeFace], new float4(transform.Value.Position.xyz, 1.0f)).xyz;
+#else
                     translation.Value = math.mul(faceWorldToLocal[bestCubeFace], new float4(translation.Value.xyz, 1.0f)).xyz;
+#endif
                     EntityManager.AddComponentData(entity, new CartesianGridOnCubeFace { Value = (byte)bestCubeFace });
                 }).Run();
     }

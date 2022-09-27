@@ -3,6 +3,7 @@ using Unity.Jobs;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Collections;
+using Unity.Burst;
 
 namespace Unity.Physics.Stateful
 {
@@ -15,102 +16,89 @@ namespace Unity.Physics.Stateful
     ///    1) Tick the 'Raise Trigger Events' flag on the <see cref="CharacterControllerAuthoring"/> component.
     ///       Note: the Character Controller will not become a trigger, it will raise events when overlapping with one
     /// </summary>
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(StepPhysicsWorld))]
-    [UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public partial class StatefulTriggerEventBufferSystem : SystemBase
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsSimulationGroup))]
+    [BurstCompile]
+    public partial struct StatefulTriggerEventBufferSystem : ISystem
     {
-        private StepPhysicsWorld m_StepPhysicsWorld = default;
-        private EntityQuery m_Query = default;
-
         private StatefulSimulationEventBuffers<StatefulTriggerEvent> m_StateFulEventBuffers;
+        private ComponentHandles m_ComponentHandles;
+        private EntityQuery m_TriggerEventQuery;
 
-        protected override void OnCreate()
+        struct ComponentHandles
         {
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            m_Query = GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[]
-                {
-                    typeof(StatefulTriggerEvent)
-                },
-                None = new ComponentType[]
-                {
-                    typeof(StatefulTriggerEventExclude)
-                }
-            });
+            public ComponentLookup<StatefulTriggerEventExclude> EventExcludes;
+            public BufferLookup<StatefulTriggerEvent> EventBuffers;
 
-            m_StateFulEventBuffers = new StatefulSimulationEventBuffers<StatefulTriggerEvent>();
+            public ComponentHandles(ref SystemState systemState)
+            {
+                EventExcludes = systemState.GetComponentLookup<StatefulTriggerEventExclude>(true);
+                EventBuffers = systemState.GetBufferLookup<StatefulTriggerEvent>();
+            }
+
+            public void Update(ref SystemState systemState)
+            {
+                EventExcludes.Update(ref systemState);
+                EventBuffers.Update(ref systemState);
+            }
         }
 
-        protected override void OnDestroy()
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
+                .WithAllRW<StatefulTriggerEvent>()
+                .WithNone<StatefulTriggerEventExclude>();
+
+            m_StateFulEventBuffers = new StatefulSimulationEventBuffers<StatefulTriggerEvent>();
+            m_StateFulEventBuffers.AllocateBuffers();
+
+            m_TriggerEventQuery = state.GetEntityQuery(builder);
+            state.RequireForUpdate(m_TriggerEventQuery);
+
+            m_ComponentHandles = new ComponentHandles(ref state);
+        }
+
+        [BurstCompile]
+        public void OnDestroy(ref SystemState state)
         {
             m_StateFulEventBuffers.Dispose();
         }
 
-        protected override void OnStartRunning()
+        [BurstCompile]
+        public partial struct ClearTriggerEventDynamicBufferJob : IJobEntity
         {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
+            public void Execute(ref DynamicBuffer<StatefulTriggerEvent> eventBuffer) => eventBuffer.Clear();
         }
 
-        protected override void OnUpdate()
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
         {
-            if (m_Query.CalculateEntityCount() == 0)
-            {
-                return;
-            }
+            m_ComponentHandles.Update(ref state);
 
-            Entities
-                .WithName("ClearTriggerEventDynamicBuffersJobParallel")
-                .WithBurst()
-                .WithNone<StatefulTriggerEventExclude>()
-                .ForEach((ref DynamicBuffer<StatefulTriggerEvent> buffer) =>
-                {
-                    buffer.Clear();
-                }).ScheduleParallel();
+            state.Dependency = new ClearTriggerEventDynamicBufferJob()
+                .ScheduleParallel(m_TriggerEventQuery, state.Dependency);
 
             m_StateFulEventBuffers.SwapBuffers();
 
             var currentEvents = m_StateFulEventBuffers.Current;
             var previousEvents = m_StateFulEventBuffers.Previous;
 
-            var eventExcludes = GetComponentDataFromEntity<StatefulTriggerEventExclude>(true);
-            var eventBuffers = GetBufferFromEntity<StatefulTriggerEvent>();
-
-            Dependency = new StatefulEventCollectionJobs.CollectTriggerEvents
+            state.Dependency = new StatefulEventCollectionJobs.CollectTriggerEvents
             {
                 TriggerEvents = currentEvents
-            }.Schedule(m_StepPhysicsWorld.Simulation, Dependency);
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
 
-            Job
-                .WithName("ConvertTriggerEventStreamToDynamicBufferJob")
-                .WithBurst()
-                .WithReadOnly(eventExcludes)
-                .WithCode(() =>
-                {
-                    var statefulEvents = new NativeList<StatefulTriggerEvent>(currentEvents.Length, Allocator.Temp);
+            state.Dependency = new StatefulEventCollectionJobs
+                .ConvertEventStreamToDynamicBufferJob<StatefulTriggerEvent, StatefulTriggerEventExclude>
+            {
+                CurrentEvents = currentEvents,
+                PreviousEvents = previousEvents,
+                EventBuffers = m_ComponentHandles.EventBuffers,
 
-                    StatefulSimulationEventBuffers<StatefulTriggerEvent>.GetStatefulEvents(previousEvents, currentEvents, statefulEvents, true);
-
-                    for (int i = 0; i < statefulEvents.Length; i++)
-                    {
-                        var statefulEvent = statefulEvents[i];
-
-                        // Only add if the Entity has the Buffer and is not excluded
-                        var addToEntityA = eventBuffers.HasComponent(statefulEvent.EntityA) && !eventExcludes.HasComponent(statefulEvent.EntityA);
-                        var addToEntityB = eventBuffers.HasComponent(statefulEvent.EntityB) && !eventExcludes.HasComponent(statefulEvent.EntityB);
-
-                        if (addToEntityA)
-                        {
-                            eventBuffers[statefulEvent.EntityA].Add(statefulEvent);
-                        }
-                        if (addToEntityB)
-                        {
-                            eventBuffers[statefulEvent.EntityB].Add(statefulEvent);
-                        }
-                    }
-                }).Schedule();
+                UseExcludeComponent = true,
+                EventExcludeLookup = m_ComponentHandles.EventExcludes
+            }.Schedule(state.Dependency);
         }
     }
 }

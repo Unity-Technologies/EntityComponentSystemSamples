@@ -1,7 +1,6 @@
 using System;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics.Systems;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -13,34 +12,34 @@ namespace Unity.Physics.Tests
     }
 
     [Serializable]
-    public class VerifyJacobiansIterator : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyJacobiansIterator : MonoBehaviour
     {
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyJacobiansIteratorBaker : Baker<VerifyJacobiansIterator>
         {
-            dstManager.AddComponentData(entity, new VerifyJacobiansIteratorData());
+            public override void Bake(VerifyJacobiansIterator authoring)
+            {
+                AddComponent<VerifyJacobiansIteratorData>();
 
 #if HAVOK_PHYSICS_EXISTS
-            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
-            config.EnableSleeping = 0;
-            dstManager.AddComponentData(entity, config);
+                Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+                config.EnableSleeping = 0;
+                AddComponent(config);
 #endif
+            }
         }
     }
-
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSimulationGroup))]
+    [UpdateAfter(typeof(PhysicsCreateJacobiansGroup))]
+    [UpdateBefore(typeof(PhysicsSolveAndIntegrateGroup))]
+    [RequireMatchingQueriesForUpdate]
     public partial class VerifyJacobiansIteratorSystem : SystemBase
     {
-        EntityQuery m_VerificationGroup;
-        StepPhysicsWorld m_StepPhysicsWorld;
-
         protected override void OnCreate()
         {
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyJacobiansIteratorData) }
-            });
+            }));
         }
 
         struct VerifyJacobiansIteratorJob : IJacobiansJob
@@ -49,7 +48,7 @@ namespace Unity.Physics.Tests
             public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
-            public ComponentDataFromEntity<VerifyJacobiansIteratorData> VerificationData;
+            public ComponentLookup<VerifyJacobiansIteratorData> VerificationData;
 
             public void Execute(ref ModifiableJacobianHeader header, ref ModifiableContactJacobian jacobian)
             {
@@ -80,16 +79,12 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            SimulationCallbacks.Callback verifyJacobiansIteratorJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
+            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+            Dependency = new VerifyJacobiansIteratorJob
             {
-                return new VerifyJacobiansIteratorJob
-                {
-                    Bodies = world.Bodies,
-                    VerificationData = GetComponentDataFromEntity<VerifyJacobiansIteratorData>(true)
-                }.Schedule(simulation, ref world, inDeps);
-            };
-
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, verifyJacobiansIteratorJobCallback, Dependency);
+                Bodies = worldSingleton.PhysicsWorld.Bodies,
+                VerificationData = GetComponentLookup<VerifyJacobiansIteratorData>(true)
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
         }
     }
 }

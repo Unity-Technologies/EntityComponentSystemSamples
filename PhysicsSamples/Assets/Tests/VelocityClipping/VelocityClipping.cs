@@ -11,31 +11,28 @@ namespace Unity.Physics.Tests
     public struct ClipVelocitiesData : IComponentData {}
 
     [Serializable]
-    public class VelocityClipping : MonoBehaviour, IConvertGameObjectToEntity
+    public class VelocityClipping : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VelocityClippingBaker : Baker<VelocityClipping>
         {
-            dstManager.AddComponentData(entity, new ClipVelocitiesData());
+            public override void Bake(VelocityClipping authoring)
+            {
+                AddComponent<ClipVelocitiesData>();
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
     public partial class VelocityClippingSystem : SystemBase
     {
-        EntityQuery m_VerificationGroup;
-        BuildPhysicsWorld m_BuildPhysicsWorld;
-
         protected override void OnCreate()
         {
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(ClipVelocitiesData) }
-            });
-
-            RequireForUpdate(m_VerificationGroup);
+            }));
         }
 
         struct ClipVelocitiesJob : IJob
@@ -72,12 +69,6 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadWrite();
-        }
-
         protected override void OnUpdate()
         {
             var physicsStep = PhysicsStep.Default;
@@ -86,14 +77,16 @@ namespace Unity.Physics.Tests
                 physicsStep = GetSingleton<PhysicsStep>();
             }
 
+            //var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+            var world = GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
             // No need for clipping if Havok is used
             if (physicsStep.SimulationType == SimulationType.UnityPhysics)
             {
                 Dependency = new ClipVelocitiesJob
                 {
-                    MotionVelocities = m_BuildPhysicsWorld.PhysicsWorld.MotionVelocities,
-                    MotionDatas = m_BuildPhysicsWorld.PhysicsWorld.MotionDatas,
-                    TimeStep = Time.DeltaTime,
+                    MotionVelocities = world.MotionVelocities,
+                    MotionDatas = world.MotionDatas,
+                    TimeStep = SystemAPI.Time.DeltaTime,
                     Gravity = physicsStep.Gravity
                 }.Schedule(Dependency);
             }

@@ -10,17 +10,18 @@ namespace Samples.FixedTimestepSystem
         public float3 SpawnPos;
     }
 
+    [RequireMatchingQueriesForUpdate]
     public partial class VariableRateSpawnerSystem : SystemBase
     {
         private BeginSimulationEntityCommandBufferSystem ecbSystem;
         protected override void OnCreate()
         {
-            ecbSystem = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+            ecbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
         }
 
         protected override void OnUpdate()
         {
-            float spawnTime = (float)Time.ElapsedTime;
+            float spawnTime = (float)SystemAPI.Time.ElapsedTime;
             var ecb = ecbSystem.CreateCommandBuffer();
             Entities
                 .WithName("VariableRateSpawner")
@@ -29,7 +30,11 @@ namespace Samples.FixedTimestepSystem
                     var projectileEntity = ecb.Instantiate(spawner.Prefab);
                     var spawnPos = spawner.SpawnPos;
                     spawnPos.y += 0.3f * math.sin(5.0f * spawnTime);
+#if !ENABLE_TRANSFORM_V1
+                    ecb.SetComponent(projectileEntity, new LocalToWorldTransform {Value = UniformScaleTransform.FromPosition(spawnPos)});
+#else
                     ecb.SetComponent(projectileEntity, new Translation {Value = spawnPos});
+#endif
                     ecb.SetComponent(projectileEntity, new Projectile
                     {
                         SpawnTime = spawnTime,

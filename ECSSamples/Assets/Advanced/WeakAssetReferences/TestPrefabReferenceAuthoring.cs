@@ -5,12 +5,15 @@ using UnityEngine;
 using Hash128 = Unity.Entities.Hash128;
 
 #if UNITY_EDITOR
-public class TestPrefabReferenceAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class TestPrefabReferenceAuthoring : MonoBehaviour
 {
     public GameObject _Prefab;
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class Baker : Baker<TestPrefabReferenceAuthoring>
     {
-        dstManager.AddComponentData(entity, new TestPrefabReference {PrefabReference = new EntityPrefabReference(_Prefab)});
+        public override void Bake(TestPrefabReferenceAuthoring authoring)
+        {
+            GetEntity(authoring._Prefab);
+        }
     }
 }
 

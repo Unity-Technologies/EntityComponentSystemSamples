@@ -45,8 +45,8 @@ namespace UnityEngine.Experimental.Rendering
 			// Warning: Keep that list in the exact same order than SRPBMarkers enum
             new RecorderEntry() { name="RenderLoop.Draw" },
             new RecorderEntry() { name="Shadows.Draw" },
-            new RecorderEntry() { name="SRPBatcher.Draw", oldName="RenderLoopNewBatcher.Draw" },
-            new RecorderEntry() { name="SRPBatcherShadow.Draw", oldName="ShadowLoopNewBatcher.Draw" },
+            new RecorderEntry() { name="RenderLoop.DrawSRPBatcher", oldName="RenderLoopNewBatcher.Draw" },
+            new RecorderEntry() { name="Shadows.DrawSRPBatcher", oldName="ShadowLoopNewBatcher.Draw" },
             new RecorderEntry() { name="RenderLoopDevice.Idle" },
             new RecorderEntry() { name="StdRender.ApplyShader" },
             new RecorderEntry() { name="StdShadow.ApplyShader" },

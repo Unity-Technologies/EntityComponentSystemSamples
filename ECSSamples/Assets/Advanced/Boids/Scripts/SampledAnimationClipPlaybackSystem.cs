@@ -6,13 +6,18 @@ using UnityEngine;
 
 namespace Samples.Boids
 {
+    [RequireMatchingQueriesForUpdate]
     public partial class SampledAnimationClipPlaybackSystem : SystemBase
     {
         protected override void OnUpdate()
         {
-            var deltaTime = math.min(0.05f, Time.DeltaTime);
+            var deltaTime = math.min(0.05f, SystemAPI.Time.DeltaTime);
 
+#if !ENABLE_TRANSFORM_V1
+            Entities.ForEach((ref LocalToWorldTransform transform, in SampledAnimationClip sampledAnimationClip) =>
+#else
             Entities.ForEach((ref Translation translation, ref Rotation rotation, in SampledAnimationClip sampledAnimationClip) =>
+#endif
             {
                 var frameIndex = sampledAnimationClip.FrameIndex;
                 var timeOffset = sampledAnimationClip.TimeOffset;
@@ -23,8 +28,13 @@ namespace Samples.Boids
                 var prevRotation    = sampledAnimationClip.TransformSamplesBlob.Value.RotationSamples[frameIndex];
                 var nextRotation    = sampledAnimationClip.TransformSamplesBlob.Value.RotationSamples[frameIndex + 1];
 
+#if !ENABLE_TRANSFORM_V1
+                transform.Value.Position = math.lerp(prevTranslation, nextTranslation, timeOffset);
+                transform.Value.Rotation = math.slerp(prevRotation, nextRotation, timeOffset);
+#else
                 translation.Value = math.lerp(prevTranslation, nextTranslation, timeOffset);
                 rotation.Value = math.slerp(prevRotation, nextRotation, timeOffset);
+#endif
             }).ScheduleParallel();
 
             Entities.ForEach((ref SampledAnimationClip sampledAnimationClip) =>

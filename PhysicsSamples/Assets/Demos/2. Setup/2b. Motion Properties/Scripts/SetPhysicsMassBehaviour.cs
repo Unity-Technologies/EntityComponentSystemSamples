@@ -1,14 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Authoring;
 using UnityEngine;
+using LegacyRigidBody = UnityEngine.Rigidbody;
 
-// IConvertGameObjectToEntity pipeline is called *before* the Physics Body & Shape Conversion Systems
-// This means that there would be no PhysicsMass component to tweak when Convert is called.
-// Instead Convert is called from the PhysicsSamplesConversionSystem instead.
-public class SetPhysicsMassBehaviour : MonoBehaviour/*, IConvertGameObjectToEntity*/
+public class SetPhysicsMassBehaviour : MonoBehaviour
 {
     [Header("Physics Mass")]
     public bool InfiniteInertiaX = false;
@@ -19,28 +15,64 @@ public class SetPhysicsMassBehaviour : MonoBehaviour/*, IConvertGameObjectToEnti
     public bool IsKinematic = false;
     public bool SetVelocityToZero = false;
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    [TemporaryBakingType]
+    public struct SetPhysicsMassAuthoring : IComponentData
     {
-        if (dstManager.HasComponent<PhysicsMass>(entity))
-        {
-            if (IsKinematic || SetVelocityToZero)
-            {
-                if (!dstManager.HasComponent<PhysicsMassOverride>(entity))
-                {
-                    dstManager.AddComponentData(entity, new PhysicsMassOverride());
-                }
-                var massOverride = dstManager.GetComponentData<PhysicsMassOverride>(entity);
-                massOverride.IsKinematic = (byte)(IsKinematic ? 1 : 0);
-                massOverride.SetVelocityToZero = (byte)(SetVelocityToZero ? 1 : 0);
-                dstManager.SetComponentData(entity, massOverride);
-            }
+        public bool InfiniteInertiaX;
+        public bool InfiniteInertiaY;
+        public bool InfiniteInertiaZ;
+        public bool InfiniteMass;
+    }
 
-            var mass = dstManager.GetComponentData<PhysicsMass>(entity);
-            mass.InverseInertia[0] = InfiniteInertiaX ? 0 : mass.InverseInertia[0];
-            mass.InverseInertia[1] = InfiniteInertiaY ? 0 : mass.InverseInertia[1];
-            mass.InverseInertia[2] = InfiniteInertiaZ ? 0 : mass.InverseInertia[2];
-            mass.InverseMass = InfiniteMass ? 0 : mass.InverseMass;
-            dstManager.SetComponentData<PhysicsMass>(entity, mass);
+    class SetPhysicsMassBehaviourBaker : Baker<SetPhysicsMassBehaviour>
+    {
+        private bool HasPhysics()
+        {
+            return (GetComponent<LegacyRigidBody>() != null || GetComponent<PhysicsBodyAuthoring>() != null);
         }
+
+        public override void Bake(SetPhysicsMassBehaviour authoring)
+        {
+            if (HasPhysics())
+            {
+                if (authoring.IsKinematic || authoring.SetVelocityToZero)
+                {
+                    AddComponent(new PhysicsMassOverride()
+                    {
+                        IsKinematic = (byte)(authoring.IsKinematic ? 1 : 0),
+                        SetVelocityToZero = (byte)(authoring.SetVelocityToZero ? 1 : 0)
+                    });
+                }
+
+                AddComponent(new SetPhysicsMassAuthoring()
+                {
+                    InfiniteInertiaX = authoring.InfiniteInertiaX,
+                    InfiniteInertiaY = authoring.InfiniteInertiaY,
+                    InfiniteInertiaZ = authoring.InfiniteInertiaZ,
+                    InfiniteMass = authoring.InfiniteMass
+                });
+            }
+        }
+    }
+}
+
+[UpdateAfter(typeof(PhysicsBodyBakingSystem))]
+[UpdateAfter(typeof(LegacyRigidbodyBakingSystem))]
+[UpdateAfter(typeof(EndJointBakingSystem))]
+[WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
+public partial class SetPhysicsMassBehaviourSystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+        // Fill in the MassProperties based on the potential calculated value by BuildCompoundColliderBakingSystem
+        Entities
+            .ForEach(
+            (ref PhysicsMass mass, in SetPhysicsMassBehaviour.SetPhysicsMassAuthoring setPhysicsMass) =>
+            {
+                mass.InverseInertia[0] = setPhysicsMass.InfiniteInertiaX ? 0 : mass.InverseInertia[0];
+                mass.InverseInertia[1] = setPhysicsMass.InfiniteInertiaY ? 0 : mass.InverseInertia[1];
+                mass.InverseInertia[2] = setPhysicsMass.InfiniteInertiaZ ? 0 : mass.InverseInertia[2];
+                mass.InverseMass = setPhysicsMass.InfiniteMass ? 0 : mass.InverseMass;
+            }).Run();
     }
 }

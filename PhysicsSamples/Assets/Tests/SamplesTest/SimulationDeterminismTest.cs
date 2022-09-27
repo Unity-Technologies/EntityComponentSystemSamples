@@ -1,3 +1,7 @@
+#if UNITY_ANDROID && !UNITY_64
+#define UNITY_ANDROID_ARM7V
+#endif
+
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,7 +22,7 @@ namespace Unity.Physics.Samples.Test
 #if !UNITY_EDITOR || UNITY_PHYSICS_INCLUDE_END2END_TESTS
     [TestFixture]
 #endif
-    class UnityPhysicsSimulationDeterminismTest
+    partial class UnityPhysicsSimulationDeterminismTest
     {
 #if HAVOK_PHYSICS_EXISTS
         public bool SimulateHavok = false;
@@ -34,7 +38,27 @@ namespace Unity.Physics.Samples.Test
 
             // Following demos are removed from SimulationDeterminism because they take
             // too long to complete, and bring no special value
-            "PlanetGravity", "LargeMesh", "Force Field", "ComplexStacking"
+            "PlanetGravity", "LargeMesh", "Force Field", "ComplexStacking",
+
+            // Removed as long as Havok plugins are not build with -strict floating point mode
+            "RaycastCar", "Joints Parade",
+
+            // Apparently we need a new way of testing to deal with subscenes
+            "ClientServerScene",
+
+#if UNITY_ANDROID_ARM7V
+            // disabled due to sigbuss crashes, something is defo corrupting memory in the allocators
+            "CharacterController",
+            "Animation",
+            "ClientServer",
+            "DeactivatedBodiesTriggerTest",
+#endif
+#if !(UNITY_EDITOR || UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX)
+            "SimpleStacking", //disabled due to being unstable on some console devices
+#endif
+#if UNITY_GAMECORE
+            "SoftJoint" // disabled on Xbox Series X as it fails.  Jira ticket: https://jira.unity3d.com/browse/DOTS-6520
+#endif
         };
 
         protected static IEnumerable GetScenes()
@@ -67,6 +91,10 @@ namespace Unity.Physics.Samples.Test
 #if !UNITY_EDITOR || UNITY_PHYSICS_INCLUDE_END2END_TESTS
         [UnityTest]
         [Timeout(240000)]
+#if HAVOK_PHYSICS_EXISTS
+        // "https://jira.unity3d.com/browse/DOTS-6835"
+        [UnityPlatform(exclude = new[] {RuntimePlatform.GameCoreXboxSeries, RuntimePlatform.GameCoreXboxOne})]
+#endif
 #endif
         public virtual IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
         {
@@ -95,7 +123,7 @@ namespace Unity.Physics.Samples.Test
             yield return null;
             yield return null;
 
-            var sampler = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorldSampler>();
+            var sampler = DefaultWorld.GetOrCreateSystemManaged<BuildPhysicsWorldSampler>();
             sampler.BeginSampling();
 
             while (!sampler.FinishedSampling)
@@ -103,21 +131,27 @@ namespace Unity.Physics.Samples.Test
                 yield return new WaitForSeconds(0.05f);
             }
 
-            var buildPhysicsWorld = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorld>();
             var stepComponent = PhysicsStep.Default;
-            if (buildPhysicsWorld.HasSingleton<PhysicsStep>())
+            if (sampler.HasSingleton<PhysicsStep>())
             {
-                stepComponent = buildPhysicsWorld.GetSingleton<PhysicsStep>();
+                stepComponent = sampler.GetSingleton<PhysicsStep>();
             }
 
             // Extract original world and make copies
             List<PhysicsWorld> physicsWorlds = new List<PhysicsWorld>(k_NumWorlds);
-            physicsWorlds.Add(sampler.PhysicsWorld.Clone());
-            physicsWorlds.Add(physicsWorlds[0].Clone());
-            physicsWorlds.Add(physicsWorlds[1].Clone());
+            for (int i = 0; i < k_NumWorlds; i++)
+            {
+                if (i == 0)
+                {
+                    physicsWorlds.Add(sampler.PhysicsWorld.Clone());
+                }
+                else
+                {
+                    physicsWorlds.Add(physicsWorlds[0].Clone());
+                }
+            }
 
-            NativeArray<int> buildStaticTree = new NativeArray<int>(1, Allocator.Persistent);
-            buildStaticTree[0] = 1;
+            var buildStaticTree = new NativeReference<int>(1, Allocator.Persistent);
 
             // Simulation step input
             var stepInput = new SimulationStepInput()
@@ -127,7 +161,7 @@ namespace Unity.Physics.Samples.Test
                 SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
                 SynchronizeCollisionWorld = true,
                 TimeStep = DefaultWorld.Time.DeltaTime,
-                HaveStaticBodiesChanged = buildStaticTree
+                HaveStaticBodiesChanged = buildStaticTree,
             };
 
             // Step the simulation on all worlds
@@ -185,7 +219,8 @@ namespace Unity.Physics.Samples.Test
                             ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, multiThreaded).Complete();
                         for (int step = 0; step < k_StopAfterStep; step++)
                         {
-                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, multiThreaded);
+                            var handles = new SimulationJobHandles(new JobHandle());
+                            handles = simulation.ScheduleStepJobs(stepInput, default, multiThreaded);
                             handles.FinalExecutionHandle.Complete();
                             handles.FinalDisposeHandle.Complete();
                         }
@@ -194,13 +229,15 @@ namespace Unity.Physics.Samples.Test
                     else
 #endif
                     {
-                        var simulation = new Simulation();
+                        var simulation = Simulation.Create();
                         stepInput.World = physicsWorlds[i];
                         stepInput.World.CollisionWorld.ScheduleBuildBroadphaseJobs(
                             ref stepInput.World, stepInput.TimeStep, stepInput.Gravity, buildStaticTree, default, multiThreaded).Complete();
                         for (int step = 0; step < k_StopAfterStep; step++)
                         {
-                            var handles = simulation.ScheduleStepJobs(stepInput, null, default, multiThreaded);
+                            var handles = new SimulationJobHandles(new JobHandle());
+
+                            handles = simulation.ScheduleStepJobs(stepInput, default, multiThreaded);
                             handles.FinalExecutionHandle.Complete();
                             handles.FinalDisposeHandle.Complete();
                         }
@@ -254,7 +291,7 @@ namespace Unity.Physics.Samples.Test
         protected static void SwitchWorlds()
         {
             var entityManager = DefaultWorld.EntityManager;
-            entityManager.CompleteAllJobs();
+            entityManager.CompleteAllTrackedJobs();
             var entities = entityManager.GetAllEntities();
             entityManager.DestroyEntity(entities);
             entities.Dispose();
@@ -280,14 +317,13 @@ namespace Unity.Physics.Samples.Test
         }
 
         [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-        [UpdateAfter(typeof(BuildPhysicsWorld))]
+        [UpdateAfter(typeof(PhysicsSystemGroup))]
         partial class BuildPhysicsWorldSampler : SystemBase
         {
             public bool FinishedSampling = false;
             public World DefaultWorld => World.DefaultGameObjectInjectionWorld;
             public PhysicsWorld PhysicsWorld;
-
-            public BuildPhysicsWorld BuildPhysicWorldSystem;
+            public EntityQuery PhysicsWorldSingletonQuery;
 
             public void BeginSampling()
             {
@@ -298,23 +334,20 @@ namespace Unity.Physics.Samples.Test
             {
                 Enabled = false;
                 PhysicsWorld = new PhysicsWorld(0, 0, 0);
-                BuildPhysicWorldSystem = DefaultWorld.GetOrCreateSystem<BuildPhysicsWorld>();
-            }
-
-            protected override void OnStartRunning()
-            {
-                base.OnStartRunning();
-                this.RegisterPhysicsRuntimeSystemReadOnly();
+                PhysicsWorldSingletonQuery = GetEntityQuery(
+                    new EntityQueryBuilder(Allocator.Temp).WithAll<PhysicsWorldSingleton>());
             }
 
             protected override void OnUpdate()
             {
-                Dependency.Complete();
-                if (BuildPhysicWorldSystem.PhysicsWorld.NumBodies != 0)
+                CompleteDependency();
+                var world = PhysicsWorldSingletonQuery.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+
+                if (world.NumBodies != 0)
                 {
-                    EntityManager.CompleteAllJobs();
+                    EntityManager.CompleteAllTrackedJobs();
                     PhysicsWorld.Dispose();
-                    PhysicsWorld = BuildPhysicWorldSystem.PhysicsWorld.Clone();
+                    PhysicsWorld = world.Clone();
                     Enabled = false;
                     FinishedSampling = true;
                 }

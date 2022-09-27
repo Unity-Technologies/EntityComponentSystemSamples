@@ -1,26 +1,38 @@
+using Unity.Burst;
 using Unity.Entities;
 
+[RequireMatchingQueriesForUpdate]
 [UpdateAfter(typeof(ChangeActiveVehicleSystem))]
-partial class CameraFollowActiveVehicleSystem : SystemBase
+[BurstCompile]
+partial struct CameraFollowActiveVehicleSystem : ISystem
 {
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        if (!HasSingleton<CameraSmoothTrackSettings>())
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        if (!SystemAPI.HasSingleton<CameraSmoothTrackSettings>())
+        {
             return;
+        }
 
-        var cameraSettings = GetSingleton<CameraSmoothTrackSettings>();
+        var cameraSettings = SystemAPI.GetSingleton<CameraSmoothTrackSettings>();
 
-        Entities
-            .WithName("CameraFollowActiveVehicleJob")
-            .WithBurst()
-            .WithAll<ActiveVehicle>()
-            .ForEach((in VehicleCameraReferences vehicle) =>
-            {
-                cameraSettings.Target = vehicle.CameraTarget;
-                cameraSettings.LookTo = vehicle.CameraTo;
-                cameraSettings.LookFrom = vehicle.CameraFrom;
-            }).Run();
+        foreach (var vehicle in SystemAPI.Query<RefRO<VehicleCameraReferences>>().WithAll<ActiveVehicle>())
+        {
+            cameraSettings.Target = vehicle.ValueRO.CameraTarget;
+            cameraSettings.LookTo = vehicle.ValueRO.CameraTo;
+            cameraSettings.LookFrom = vehicle.ValueRO.CameraFrom;
+        }
 
-        SetSingleton(cameraSettings);
+        SystemAPI.SetSingleton(cameraSettings);
     }
 }

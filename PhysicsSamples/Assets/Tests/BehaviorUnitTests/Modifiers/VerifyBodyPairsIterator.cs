@@ -1,7 +1,6 @@
 using System;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics.Systems;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -13,28 +12,28 @@ namespace Unity.Physics.Tests
     }
 
     [Serializable]
-    public class VerifyBodyPairsIterator : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyBodyPairsIterator : MonoBehaviour
     {
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyBodyPairsIteratorBaker : Baker<VerifyBodyPairsIterator>
         {
-            dstManager.AddComponentData(entity, new VerifyBodyPairsIteratorData());
+            public override void Bake(VerifyBodyPairsIterator authoring)
+            {
+                AddComponent<VerifyBodyPairsIteratorData>();
+            }
         }
     }
-
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSimulationGroup))]
+    [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
+    [UpdateBefore(typeof(PhysicsCreateContactsGroup))]
+    [RequireMatchingQueriesForUpdate]
     public partial class VerifyBodyPairsIteratorSystem : SystemBase
     {
-        EntityQuery m_VerificationGroup;
-        StepPhysicsWorld m_StepPhysicsWorld;
-
         protected override void OnCreate()
         {
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyBodyPairsIteratorData) }
-            });
+            }));
         }
 
         struct VerifyBodyPairsIteratorJob : IBodyPairsJob
@@ -43,7 +42,7 @@ namespace Unity.Physics.Tests
             public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
-            public ComponentDataFromEntity<VerifyBodyPairsIteratorData> VerificationData;
+            public ComponentLookup<VerifyBodyPairsIteratorData> VerificationData;
 
             public void Execute(ref ModifiableBodyPair pair)
             {
@@ -55,16 +54,12 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            SimulationCallbacks.Callback verifyBodyPairsIteratorJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
+            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+            Dependency = new VerifyBodyPairsIteratorJob
             {
-                return new VerifyBodyPairsIteratorJob
-                {
-                    Bodies = world.Bodies,
-                    VerificationData = GetComponentDataFromEntity<VerifyBodyPairsIteratorData>(true)
-                }.Schedule(simulation, ref world, inDeps);
-            };
-
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, verifyBodyPairsIteratorJobCallback, Dependency);
+                Bodies = worldSingleton.PhysicsWorld.Bodies,
+                VerificationData = GetComponentLookup<VerifyBodyPairsIteratorData>(true)
+            }.Schedule(GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
         }
     }
 }

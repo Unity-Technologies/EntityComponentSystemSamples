@@ -194,8 +194,12 @@ public static  unsafe class CartesianGridGeneratorUtility
     {
         var panelEntity = dstManager.Instantiate(prefab);
 
+#if !ENABLE_TRANSFORM_V1
+        dstManager.RemoveComponent<LocalToWorldTransform>(panelEntity);
+#else
         dstManager.RemoveComponent<Translation>(panelEntity);
         dstManager.RemoveComponent<Rotation>(panelEntity);
+#endif
         dstManager.SetComponentData(panelEntity, localToWorld);
     }
 

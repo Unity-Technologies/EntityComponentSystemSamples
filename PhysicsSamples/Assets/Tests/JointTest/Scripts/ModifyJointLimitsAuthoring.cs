@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -74,49 +75,98 @@ public class ModifyJointLimitsAuthoring : MonoBehaviour
     );
 }
 
-// after joints have been converted, find the entities they produced and add ModifyJointLimits to them
-[UpdateAfter(typeof(EndJointConversionSystem))]
-class ModifyJointLimitsConversionSystem : GameObjectConversionSystem
+[BakingType]
+public class ModifyJointLimitsBakingData : IComponentData
 {
-    protected override void OnUpdate()
-    {
-        Entities.ForEach((ModifyJointLimitsAuthoring modifyJointLimits) =>
-        {
-            foreach (var jointAuthoringComponent in modifyJointLimits.GetComponents<Component>())
-            {
-                // apply modification to joints produced by legacy Joint and BaseJoint
-                if (jointAuthoringComponent as LegacyJoint == null && jointAuthoringComponent as BaseJoint == null)
-                    continue;
+    public ParticleSystem.MinMaxCurve AngularRangeScalar;
+    public ParticleSystem.MinMaxCurve LinearRangeScalar;
+}
 
-                var jointEntities = new NativeList<Entity>(16, Allocator.Temp);
-                World.GetOrCreateSystem<EndJointConversionSystem>().GetJointEntities(jointAuthoringComponent, jointEntities);
-                foreach (var jointEntity in jointEntities)
-                {
-                    var angularModification = new ParticleSystem.MinMaxCurve(
-                        multiplier: math.radians(modifyJointLimits.AngularRangeScalar.curveMultiplier),
-                        min: modifyJointLimits.AngularRangeScalar.curveMin,
-                        max: modifyJointLimits.AngularRangeScalar.curveMax
-                    );
-                    DstEntityManager.AddSharedComponentData(jointEntity, new ModifyJointLimits
-                    {
-                        InitialValue = DstEntityManager.GetComponentData<PhysicsJoint>(jointEntity),
-                        AngularRangeScalar = angularModification,
-                        LinearRangeScalar = modifyJointLimits.LinearRangeScalar
-                    });
-                }
-            }
+class ModifyJointLimitsBaker : Baker<ModifyJointLimitsAuthoring>
+{
+    public override void Bake(ModifyJointLimitsAuthoring authoring)
+    {
+        AddComponentObject(new ModifyJointLimitsBakingData
+        {
+            AngularRangeScalar = authoring.AngularRangeScalar,
+            LinearRangeScalar = authoring.LinearRangeScalar
         });
     }
 }
 
+// after joints have been converted, find the entities they produced and add ModifyJointLimits to them
+[UpdateAfter(typeof(EndJointBakingSystem))]
+[WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
+partial class ModifyJointLimitsBakingSystem : SystemBase
+{
+    private EntityQuery _ModifyJointLimitsBakingDataQuery;
+    private EntityQuery _JointEntityBakingQuery;
+
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+        _ModifyJointLimitsBakingDataQuery = GetEntityQuery(new EntityQueryDesc
+        {
+            All = new[] { ComponentType.ReadOnly<ModifyJointLimitsBakingData>() },
+            Options = EntityQueryOptions.IncludeDisabledEntities
+        });
+
+        _JointEntityBakingQuery = GetEntityQuery(new EntityQueryDesc
+        {
+            All = new[] { ComponentType.ReadOnly<JointEntityBaking>() },
+            Options = EntityQueryOptions.IncludeDisabledEntities
+        });
+
+        _ModifyJointLimitsBakingDataQuery.AddChangedVersionFilter(typeof(ModifyJointLimitsBakingData));
+        _JointEntityBakingQuery.AddChangedVersionFilter(typeof(JointEntityBaking));
+    }
+
+    protected override void OnUpdate()
+    {
+        if (_ModifyJointLimitsBakingDataQuery.IsEmpty && _JointEntityBakingQuery.IsEmpty)
+        {
+            return;
+        }
+
+        // Collect all the joints
+        NativeMultiHashMap<Entity, (Entity, PhysicsJoint)> jointsLookUp = new NativeMultiHashMap<Entity, (Entity, PhysicsJoint)>(10, Allocator.TempJob);
+        Entities.ForEach((Entity entity, in JointEntityBaking jointEntity, in PhysicsJoint physicsJoint) =>
+        {
+            jointsLookUp.Add(jointEntity.Entity, (entity, physicsJoint));
+        }).Run();
+
+        Entities.ForEach((Entity entity, ModifyJointLimitsBakingData modifyJointLimits) =>
+        {
+            var angularModification = new ParticleSystem.MinMaxCurve(
+                multiplier: math.radians(modifyJointLimits.AngularRangeScalar.curveMultiplier),
+                min: modifyJointLimits.AngularRangeScalar.curveMin,
+                max: modifyJointLimits.AngularRangeScalar.curveMax
+            );
+
+            foreach (var joint in jointsLookUp.GetValuesForKey(entity))
+            {
+                EntityManager.SetSharedComponentManaged(joint.Item1, new ModifyJointLimits
+                {
+                    InitialValue = joint.Item2,
+                    AngularRangeScalar = angularModification,
+                    LinearRangeScalar = modifyJointLimits.LinearRangeScalar
+                });
+            }
+        }).WithStructuralChanges().Run();
+
+        jointsLookUp.Dispose();
+    }
+}
+
 // apply an animated effect to the limits on supported types of joints
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(EndFramePhysicsSystem))]
+[UpdateAfter(typeof(PhysicsSystemGroup))]
 partial class ModifyJointLimitsSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var time = (float)Time.ElapsedTime;
+        var time = (float)SystemAPI.Time.ElapsedTime;
 
         Entities
             .WithName("ModifyJointLimitsJob")

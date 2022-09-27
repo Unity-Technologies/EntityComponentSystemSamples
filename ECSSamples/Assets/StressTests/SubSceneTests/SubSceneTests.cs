@@ -20,7 +20,7 @@ public class SubSceneTests : ECSTestsFixture
     }
 
     [Test]
-    [Ignore("Instability - https://jira.unity3d.com/browse/DOTS-4581")]
+    [Ignore("Instability - DOTS-4581")]
     public void CheckEntitySceneImporterDeterminism([Values(
         "Assets/StressTests/LODSubSceneTest/LodSubSceneDynamicAndStatic.unity",
         "Assets/Advanced/BlobAssetScalable/BlobAsset/Subscene.unity"
@@ -30,7 +30,7 @@ public class SubSceneTests : ECSTestsFixture
     }
 
     [Test]
-    // Disabled on Linux because it hangs during asset import - likely related to https://jira.unity3d.com/browse/DOTS-4581 and running on the latest Ubuntu Bokken VM
+    // Disabled on Linux because it hangs during asset import - likely related to DOTS-4581 and running on the latest Ubuntu Bokken VM
     [UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
     public void SynchronousLoad()
     {
@@ -43,7 +43,7 @@ public class SubSceneTests : ECSTestsFixture
 
         var sceneGUID = new GUID(AssetDatabase.AssetPathToGUID("Assets/StressTests/SubSceneTests/SubSceneHost/SubSceneA.unity"));
 
-        World.GetExistingSystem<SceneSystem>().LoadSceneAsync(sceneGUID, loadParams);
+        SceneSystem.LoadSceneAsync(World.Unmanaged, sceneGUID, loadParams);
         World.Update();
 
         // Expected entities:
@@ -58,7 +58,7 @@ public class SubSceneTests : ECSTestsFixture
 
 #if !UNITY_DISABLE_MANAGED_COMPONENTS
     [Test]
-    // Disabled on Linux because it hangs during asset import - likely related to https://jira.unity3d.com/browse/DOTS-4581 and running on the latest Ubuntu Bokken VM
+    // Disabled on Linux because it hangs during asset import - likely related to DOTS-4581 and running on the latest Ubuntu Bokken VM
     [UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
     public void SimpleCompanionComponent()
     {
@@ -71,7 +71,7 @@ public class SubSceneTests : ECSTestsFixture
 
         var sceneGUID = new GUID(AssetDatabase.AssetPathToGUID("Assets/StressTests/HybridLights/HybridLights/SubScene.unity"));
 
-        World.GetExistingSystem<SceneSystem>().LoadSceneAsync(sceneGUID, loadParams);
+        SceneSystem.LoadSceneAsync(World.Unmanaged, sceneGUID, loadParams);
         World.Update();
 
 

@@ -1,7 +1,6 @@
 using System;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics.Systems;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -11,34 +10,35 @@ namespace Unity.Physics
     public struct VerifyPhasedDispatchPairsData : IComponentData {}
 
     [Serializable]
-    public class VerifyPhasedDispatchPairs : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyPhasedDispatchPairs : MonoBehaviour
     {
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyPhasedDispatchPairsBaker : Baker<VerifyPhasedDispatchPairs>
         {
-            dstManager.AddComponentData(entity, new VerifyPhasedDispatchPairsData());
+            public override void Bake(VerifyPhasedDispatchPairs authoring)
+            {
+                AddComponent<VerifyPhasedDispatchPairsData>();
+            }
         }
     }
-
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    
+    [RequireMatchingQueriesForUpdate]
+    [UpdateInGroup(typeof(PhysicsSimulationGroup))]
+    [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
+    [UpdateBefore(typeof(PhysicsCreateContactsGroup))]
     public partial class VerifyPhasedDispatchPairsSystem : SystemBase
     {
-        EntityQuery m_VerificationGroup;
-        StepPhysicsWorld m_StepPhysicsWorld;
-
         protected override void OnCreate()
         {
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyPhasedDispatchPairsData) }
-            });
+            }));
         }
 
         struct VerifyPhasedDispatchPairsJob : IBodyPairsJob
         {
             [ReadOnly]
-            public ComponentDataFromEntity<VerifyPhasedDispatchPairsData> VerificationData;
+            public ComponentLookup<VerifyPhasedDispatchPairsData> VerificationData;
 
             [DeallocateOnJobCompletion]
             public NativeArray<int> LastStaticPairPerDynamicBody;
@@ -67,17 +67,15 @@ namespace Unity.Physics
 
         protected override void OnUpdate()
         {
-            SimulationCallbacks.Callback verifyPhasedDispatchPairsJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-            {
-                return new VerifyPhasedDispatchPairsJob
-                {
-                    VerificationData = GetComponentDataFromEntity<VerifyPhasedDispatchPairsData>(true),
-                    LastStaticPairPerDynamicBody = new NativeArray<int>(world.NumDynamicBodies, Allocator.TempJob),
-                    IsUnityPhysics = simulation.Type == SimulationType.UnityPhysics
-                }.Schedule(simulation, ref world, inDeps);
-            };
+            var simulationSingleton = GetSingleton<SimulationSingleton>();
+            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
 
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateDispatchPairs, verifyPhasedDispatchPairsJobCallback, Dependency);
+            Dependency = new VerifyPhasedDispatchPairsJob
+            {
+                VerificationData = GetComponentLookup<VerifyPhasedDispatchPairsData>(true),
+                LastStaticPairPerDynamicBody = new NativeArray<int>(worldSingleton.PhysicsWorld.NumDynamicBodies, Allocator.TempJob),
+                IsUnityPhysics = simulationSingleton.Type == SimulationType.UnityPhysics
+            }.Schedule(simulationSingleton, ref worldSingleton.PhysicsWorld, Dependency);
         }
     }
 }

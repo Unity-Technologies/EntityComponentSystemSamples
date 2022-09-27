@@ -78,13 +78,13 @@ class LoaderScene : MonoBehaviour
             m_Selected = firstEntry;
         }
 
-        Application.targetFrameRate = (int)(1f / World.DefaultGameObjectInjectionWorld.GetExistingSystem<FixedStepSimulationSystemGroup>().Timestep);
+        Application.targetFrameRate = (int)(1f / World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().Timestep);
     }
 
     public static void ResetDefaultWorld()
     {
         var defaultWorld = World.DefaultGameObjectInjectionWorld;
-        defaultWorld.EntityManager.CompleteAllJobs();
+        defaultWorld.EntityManager.CompleteAllTrackedJobs();
         foreach (var system in defaultWorld.Systems)
         {
             system.Enabled = false;

@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Unity.Rendering
 {
-    [MaterialProperty("_URPMyColor", MaterialPropertyFormat.Float4)]
+    [MaterialProperty("_URPMyColor")]
     struct URPMyColorVector4Override : IComponentData
     {
         public float4 Value;

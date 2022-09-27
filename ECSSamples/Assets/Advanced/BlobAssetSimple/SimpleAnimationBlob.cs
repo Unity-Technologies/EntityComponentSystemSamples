@@ -35,9 +35,9 @@ public struct SimpleAnimationBlob
         return math.lerp(Keys[index], Keys[index+1], interp);
     }
 
-    public static BlobAssetReference<SimpleAnimationBlob> CreateBlob(AnimationCurve curve, Allocator allocator)
+    public static BlobAssetReference<SimpleAnimationBlob> CreateBlob(AnimationCurve curve, Allocator allocator, Allocator allocatorForTemp = Allocator.TempJob)
     {
-        using (var blob = new BlobBuilder(Allocator.TempJob))
+        using (var blob = new BlobBuilder(allocatorForTemp))
         {
             ref var anim = ref blob.ConstructRoot<SimpleAnimationBlob>();
             int keyCount = 12;

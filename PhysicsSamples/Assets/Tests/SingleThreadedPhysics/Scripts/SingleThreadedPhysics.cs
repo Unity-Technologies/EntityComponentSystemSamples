@@ -1,5 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -29,29 +30,23 @@ public class SingleThreadedPhysics : MonoBehaviour
 
     private void Start()
     {
-        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
+        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<SingleThreadedPhysicsSystem>();
         system.Initialize(ReferenceMaterial);
     }
 
     private void OnEnable()
     {
-        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
+        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<SingleThreadedPhysicsSystem>();
         system.Enabled = true;
     }
-
-    private void OnDestroy()
-    {
-        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<SingleThreadedPhysicsSystem>();
-        system.Enabled = false;
-    }
 }
-
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(StepPhysicsWorld))]
+[RequireMatchingQueriesForUpdate]
+[UpdateInGroup(typeof(PhysicsSystemGroup))]
+[UpdateAfter(typeof(PhysicsSimulationGroup))]
 public partial class SingleThreadedPhysicsSystem : SystemBase
 {
     public PhysicsWorld PhysicsWorld = new PhysicsWorld(0, 0, 0);
-    public NativeArray<int> HaveStaticBodiesChanged = new NativeArray<int>(new int[1] { 1 }, Allocator.Persistent);
+    public NativeReference<int> HaveStaticBodiesChanged = new NativeReference<int>(1, Allocator.Persistent);
 
     public EntityQuery CustomDynamicEntityGroup;
     public EntityQuery CustomStaticEntityGroup;
@@ -59,7 +54,6 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
 
     private NativeParallelHashMap<Entity, Entity> EntityMap;
 
-    private StepPhysicsWorld m_StepPhysicsWorld;
     private NativeList<BlobAssetReference<Collider>> m_CreatedColliders;
 
     private SimulationContext SimulationContext;
@@ -88,7 +82,8 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
                     WorldFromBody = new RigidTransform(rotations[i].Value, positions[i].Value),
                     Collider = colliders[i].ColliderRef,
                     Entity = entities[i],
-                    CustomTags = customTags[i].Value
+                    CustomTags = customTags[i].Value,
+                    Scale = 1
                 };
             }
 
@@ -114,7 +109,8 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
                     WorldFromBody = new RigidTransform(rotations[i].Value, positions[i].Value),
                     Collider = colliders[i].ColliderRef,
                     Entity = entities[i],
-                    CustomTags = customTags[i].Value
+                    CustomTags = customTags[i].Value,
+                    Scale = 1
                 };
             }
 
@@ -124,7 +120,8 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
                 WorldFromBody = new RigidTransform(quaternion.identity, float3.zero),
                 Collider = default,
                 Entity = Entity.Null,
-                CustomTags = 0
+                CustomTags = 0,
+                Scale = 1
             };
 
             colliders.Dispose();
@@ -206,7 +203,7 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
                 BodyIndexB = PhysicsWorld.GetRigidBodyIndex(entityB)
             };
             var jointData = physicsJoints[i];
-            joints[i] = new Joint
+            var joint = new Joint
             {
                 BodyPair = pair,
                 Entity = Entity.Null,
@@ -214,8 +211,21 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
                 BFromJoint = new Math.MTransform(jointData.BodyBFromJoint.AsRigidTransform()),
                 EnableCollision = (byte)constrainedBodyPairs[i].EnableCollision,
                 Version = jointData.Version,
-                Constraints = jointData.GetConstraints()
             };
+            // We have to memcopy the data over to convert it to the internal container
+            // as we do not have access to this internal container in the samples
+            unsafe
+            {
+                ref var constraintsRef = ref joint.Constraints;
+                var jointList = jointData.GetConstraints();
+                ref var listRef = ref jointList.ElementAt(0);
+                fixed(void* constraintPtr = &constraintsRef, constraintListPtr = &listRef)
+                {
+                    UnsafeUtility.MemCpy(constraintPtr, constraintListPtr, jointList.Length * sizeof(Constraint));
+                }
+                constraintsRef.Length = (byte)jointList.Length;
+            }
+            joints[i] = joint;
         }
 
         physicsJoints.Dispose();
@@ -264,7 +274,7 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             }
             var ghostMaterial = new RenderMesh
             {
-                mesh = EntityManager.GetSharedComponentData<RenderMesh>(entities[i]).mesh,
+                mesh = EntityManager.GetSharedComponentManaged<RenderMesh>(entities[i]).mesh,
                 material = referenceMaterial
             };
 
@@ -351,7 +361,7 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             EntityManager.SetComponentData(ghost, position);
             EntityManager.RemoveComponent<PhysicsVelocity>(ghost);
 
-            EntityManager.SetSharedComponentData(ghost, ghostMaterial);
+            EntityManager.SetSharedComponentManaged(ghost, ghostMaterial);
         }
 
         entities.Dispose();
@@ -407,15 +417,8 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             }
         });
 
-        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
         EntityMap = new NativeParallelHashMap<Entity, Entity>(0, Allocator.Persistent);
         m_CreatedColliders = new NativeList<BlobAssetReference<Collider>>(Allocator.Persistent);
-    }
-
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-        this.RegisterPhysicsRuntimeSystemReadOnly();
     }
 
     protected override void OnUpdate()
@@ -451,7 +454,7 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             SimulationStepInput input = new SimulationStepInput
             {
                 World = PhysicsWorld,
-                TimeStep = Time.DeltaTime,
+                TimeStep = SystemAPI.Time.DeltaTime,
                 SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
                 NumSolverIterations = stepComponent.SolverIterationCount,
                 Gravity = stepComponent.Gravity,

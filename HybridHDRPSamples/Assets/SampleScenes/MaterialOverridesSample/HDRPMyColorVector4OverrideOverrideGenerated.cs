@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Unity.Rendering
 {
-    [MaterialProperty("_HDRPMyColor", MaterialPropertyFormat.Float4)]
+    [MaterialProperty("_HDRPMyColor")]
     struct HDRPMyColorVector4Override : IComponentData
     {
         public float4 Value;

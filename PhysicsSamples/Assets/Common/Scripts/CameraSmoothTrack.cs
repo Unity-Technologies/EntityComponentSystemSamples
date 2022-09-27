@@ -4,14 +4,13 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Extensions;
 using Unity.Physics.GraphicsIntegration;
-using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
 using RaycastHit = Unity.Physics.RaycastHit;
 
 // Camera Utility to smoothly track a specified target from a specified location
 // Camera location and target are interpolated each frame to remove overly sharp transitions
-public class CameraSmoothTrack : MonoBehaviour, IConvertGameObjectToEntity
+public class CameraSmoothTrack : MonoBehaviour
 {
 #pragma warning disable 649
     public GameObject Target;
@@ -22,23 +21,58 @@ public class CameraSmoothTrack : MonoBehaviour, IConvertGameObjectToEntity
     [Range(0, 1)] public float LookFromInterpolateFactor = 0.9f;
 #pragma warning restore 649
 
+    EntityQuery _CameraProxyQuery;
+
     void OnValidate()
     {
         LookToInterpolateFactor = math.clamp(LookToInterpolateFactor, 0f, 1f);
         LookFromInterpolateFactor = math.clamp(LookFromInterpolateFactor, 0f, 1f);
     }
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    void Start()
     {
-        dstManager.AddComponentData(entity, new CameraSmoothTrackSettings
-        {
-            Target = conversionSystem.GetPrimaryEntity(Target),
-            LookTo = conversionSystem.GetPrimaryEntity(LookTo),
-            LookToInteroplateFactor = LookToInterpolateFactor,
-            LookFrom = conversionSystem.GetPrimaryEntity(LookFrom),
-            LookFromInterpolateFactor = LookFromInterpolateFactor
-        });
+        _CameraProxyQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(
+            new EntityQueryBuilder(Allocator.Temp)
+                .WithAll<CameraTargetProxy>()
+                .WithNone<MainCamera, CameraSmoothTrackSettings>());
     }
+
+    void OnDestroy()
+    {
+        if (World.DefaultGameObjectInjectionWorld?.IsCreated == true &&
+            World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(_CameraProxyQuery))
+            _CameraProxyQuery.Dispose();
+    }
+
+    void Update()
+    {
+        if (World.DefaultGameObjectInjectionWorld?.IsCreated == true &&
+            World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(_CameraProxyQuery) &&
+            !_CameraProxyQuery.IsEmpty)
+        {
+            var cameraEntity = _CameraProxyQuery.GetSingletonEntity();
+            var proxyComponent = _CameraProxyQuery.GetSingleton<CameraTargetProxy>();
+
+            World.DefaultGameObjectInjectionWorld.EntityManager.AddComponentData(cameraEntity, new MainCamera()
+            {
+                Transform = transform
+            });
+            World.DefaultGameObjectInjectionWorld.EntityManager.AddComponentData(cameraEntity, new CameraSmoothTrackSettings
+            {
+                Target = proxyComponent.Target,
+                LookTo = proxyComponent.LookTo,
+                LookToInteroplateFactor = LookToInterpolateFactor,
+                LookFrom = proxyComponent.LookFrom,
+                LookFromInterpolateFactor = LookFromInterpolateFactor
+            });
+            World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<CameraTargetProxy>(cameraEntity);
+        }
+    }
+}
+
+public class MainCamera : IComponentData
+{
+    public Transform Transform;
 }
 
 struct CameraSmoothTrackSettings : IComponentData
@@ -51,26 +85,11 @@ struct CameraSmoothTrackSettings : IComponentData
     public float3 OldPositionTo;
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateAfter(typeof(TransformSystemGroup))]
 partial class SmoothlyTrackCameraTarget : SystemBase
 {
-    struct Initialized : ISystemStateComponentData {}
-
-    BuildPhysicsWorld m_BuildPhysicsWorld;
-    RecordMostRecentFixedTime m_RecordMostRecentFixedTime;
-
-    protected override void OnCreate()
-    {
-        base.OnCreate();
-        m_BuildPhysicsWorld = World.GetExistingSystem<BuildPhysicsWorld>();
-        m_RecordMostRecentFixedTime = World.GetExistingSystem<RecordMostRecentFixedTime>();
-    }
-
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-        this.RegisterPhysicsRuntimeSystemReadOnly();
-    }
+    struct Initialized : ICleanupComponentData {}
 
     protected override void OnUpdate()
     {
@@ -89,18 +108,19 @@ partial class SmoothlyTrackCameraTarget : SystemBase
         commandBuffer.Playback(EntityManager);
         commandBuffer.Dispose();
 
-        PhysicsWorld world = m_BuildPhysicsWorld.PhysicsWorld;
+        PhysicsWorld world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
 
-        var timeAhead = (float)(Time.ElapsedTime - m_RecordMostRecentFixedTime.MostRecentElapsedTime);
+        var mostRecentTime = GetBuffer<MostRecentFixedTime>(GetSingletonEntity<MostRecentFixedTime>());
+        var timeAhead = (float)(SystemAPI.Time.ElapsedTime - mostRecentTime[0].ElapsedTime);
 
         Entities
             .WithName("SmoothlyTrackCameraTargetsJob")
             .WithoutBurst()
             .WithAll<Initialized>()
             .WithReadOnly(world)
-            .ForEach((CameraSmoothTrack monoBehaviour, ref CameraSmoothTrackSettings cameraSmoothTrack, in LocalToWorld localToWorld) =>
+            .ForEach((MainCamera mainCamera, ref CameraSmoothTrackSettings cameraSmoothTrack, in LocalToWorld localToWorld) =>
             {
-                var worldPosition = (float3)monoBehaviour.transform.position;
+                var worldPosition = (float3)mainCamera.Transform.position;
 
                 float3 newPositionFrom = HasComponent<LocalToWorld>(cameraSmoothTrack.LookFrom)
                     ? GetComponent<LocalToWorld>(cameraSmoothTrack.LookFrom).Position
@@ -139,7 +159,7 @@ partial class SmoothlyTrackCameraTarget : SystemBase
                 newForward = math.normalizesafe(newForward);
                 quaternion newRotation = quaternion.LookRotation(newForward, math.up());
 
-                monoBehaviour.transform.SetPositionAndRotation(newPositionFrom, newRotation);
+                mainCamera.Transform.SetPositionAndRotation(newPositionFrom, newRotation);
                 cameraSmoothTrack.OldPositionTo = newPositionTo;
             }).Run();
     }

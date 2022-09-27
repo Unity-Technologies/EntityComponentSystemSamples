@@ -1,7 +1,11 @@
+using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Physics;
 using Unity.Physics.Stateful;
+using Unity.Physics.Systems;
 using Unity.Rendering;
 using UnityEngine;
 
@@ -10,54 +14,57 @@ public struct TriggerVolumeChangeMaterial : IComponentData
     public Entity ReferenceEntity;
 }
 
-public class TriggerVolumeChangeMaterialAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class TriggerVolumeChangeMaterialAuthoring : MonoBehaviour
 {
     public GameObject ReferenceGameObject = null;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class TriggerVolumeChangeMaterialAuthoringBaker : Baker<TriggerVolumeChangeMaterialAuthoring>
+{
+    public override void Bake(TriggerVolumeChangeMaterialAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new TriggerVolumeChangeMaterial
+        AddComponent(new TriggerVolumeChangeMaterial
         {
-            ReferenceEntity = ReferenceGameObject != null ? conversionSystem.GetPrimaryEntity(ReferenceGameObject) : Entity.Null
+            ReferenceEntity = GetEntity(authoring.ReferenceGameObject)
         });
     }
 }
 
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+[UpdateInGroup(typeof(PhysicsSystemGroup))]
 [UpdateAfter(typeof(StatefulTriggerEventBufferSystem))]
 public partial class TriggerVolumeChangeMaterialSystem : SystemBase
 {
     private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;
+    private EntityQuery m_NonTriggerQuery;
     private EntityQueryMask m_NonTriggerMask;
 
     protected override void OnCreate()
     {
-        m_CommandBufferSystem = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
-        m_NonTriggerMask = EntityManager.GetEntityQueryMask(
+        m_CommandBufferSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
+
+        m_NonTriggerQuery =
             GetEntityQuery(new EntityQueryDesc
             {
                 None = new ComponentType[]
                 {
                     typeof(StatefulTriggerEvent)
                 }
-            })
-        );
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[]
-            {
-                typeof(TriggerVolumeChangeMaterial)
-            }
-        }));
+            });
+        Assert.IsFalse(m_NonTriggerQuery.HasFilter(), "The use of EntityQueryMask in this system will not respect the query's active filter settings.");
+        m_NonTriggerMask = m_NonTriggerQuery.GetEntityQueryMask();
+
+        RequireForUpdate<TriggerVolumeChangeMaterial>();
     }
 
     protected override void OnUpdate()
     {
-        var commandBuffer = m_CommandBufferSystem.CreateCommandBuffer();
+        EntityCommandBuffer commandBuffer = m_CommandBufferSystem.CreateCommandBuffer();
 
         // Need this extra variable here so that it can
         // be captured by Entities.ForEach loop below
         var nonTriggerMask = m_NonTriggerMask;
+
+        ComponentLookup<MaterialMeshInfo> materialMeshInfoFromEntity = GetComponentLookup<MaterialMeshInfo>();
 
         Entities
             .WithName("ChangeMaterialOnTriggerEnter")
@@ -70,18 +77,21 @@ public partial class TriggerVolumeChangeMaterialSystem : SystemBase
                     var otherEntity = triggerEvent.GetOtherEntity(e);
 
                     // exclude other triggers and processed events
-                    if (triggerEvent.State == StatefulEventState.Stay || !nonTriggerMask.Matches(otherEntity))
+                    if (triggerEvent.State == StatefulEventState.Stay || !nonTriggerMask.MatchesIgnoreFilter(otherEntity))
                     {
                         continue;
                     }
 
                     if (triggerEvent.State == StatefulEventState.Enter)
                     {
-                        var volumeRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
-                        var overlappingRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(otherEntity);
-                        overlappingRenderMesh.material = volumeRenderMesh.material;
+                        MaterialMeshInfo volumeMaterialInfo = materialMeshInfoFromEntity[e];
+                        RenderMeshArray volumeRenderMeshArray = EntityManager.GetSharedComponentManaged<RenderMeshArray>(e);
 
-                        commandBuffer.SetSharedComponent(otherEntity, overlappingRenderMesh);
+                        MaterialMeshInfo otherMaterialMeshInfo = materialMeshInfoFromEntity[otherEntity];
+
+                        otherMaterialMeshInfo.Material = volumeMaterialInfo.Material;
+
+                        commandBuffer.SetComponent(otherEntity, otherMaterialMeshInfo);
                     }
                     else
                     {
@@ -90,11 +100,14 @@ public partial class TriggerVolumeChangeMaterialSystem : SystemBase
                         {
                             continue;
                         }
-                        var overlappingRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(otherEntity);
-                        var referenceRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(changeMaterial.ReferenceEntity);
-                        overlappingRenderMesh.material = referenceRenderMesh.material;
 
-                        commandBuffer.SetSharedComponent(otherEntity, overlappingRenderMesh);
+                        MaterialMeshInfo otherMaterialMeshInfo = materialMeshInfoFromEntity[otherEntity];
+                        MaterialMeshInfo referenceMaterialMeshInfo = materialMeshInfoFromEntity[changeMaterial.ReferenceEntity];
+                        RenderMeshArray referenceRenderMeshArray = EntityManager.GetSharedComponentManaged<RenderMeshArray>(changeMaterial.ReferenceEntity);
+
+                        otherMaterialMeshInfo.Material = referenceMaterialMeshInfo.Material;
+
+                        commandBuffer.SetComponent(otherEntity, otherMaterialMeshInfo);
                     }
                 }
             }).Run();

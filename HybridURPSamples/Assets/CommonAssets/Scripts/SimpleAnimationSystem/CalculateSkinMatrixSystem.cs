@@ -6,7 +6,8 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 
-[UnityEngine.ExecuteAlways]
+[RequireMatchingQueriesForUpdate]
+[WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor)]
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [UpdateBefore(typeof(DeformationsInPresentation))]
 partial class CalculateSkinMatrixSystemBase : SystemBase

@@ -5,7 +5,20 @@ using Unity.Physics;
 
 public class FixedAngleGridScene : SceneCreationSettings {};
 
-public class FixedAngleGridDemo : SceneCreationAuthoring<FixedAngleGridScene> {}
+public class FixedAngleGridDemo : SceneCreationAuthoring<FixedAngleGridScene>
+{
+    class FixedAngleGridDemoBaker : Baker<FixedAngleGridDemo>
+    {
+        public override void Bake(FixedAngleGridDemo authoring)
+        {
+            AddComponentObject(new FixedAngleGridScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial
+            });
+        }
+    }
+}
 
 public class FixAngleGridDemoSystem : SceneCreationSystem<FixedAngleGridScene>
 {
@@ -50,7 +63,7 @@ public class FixAngleGridDemoSystem : SceneCreationSystem<FixedAngleGridScene>
                 BodyAFromJoint = new RigidTransform(orientationA, pivotLocal),
                 BodyBFromJoint = new RigidTransform(orientationB, pivotInWorld)
             };
-            jointData.SetConstraints(new FixedList128Bytes<Constraint>
+            jointData.SetConstraints(new FixedList512Bytes<Constraint>
             {
                 Length = 2,
                 [0] = Constraint.BallAndSocket(),
@@ -61,7 +74,8 @@ public class FixAngleGridDemoSystem : SceneCreationSystem<FixedAngleGridScene>
                     Min = math.max(i - 5, 0) * 0.1f,
                     Max = i * 0.1f,
                     SpringDamping = Constraint.DefaultSpringDamping,
-                    SpringFrequency = Constraint.DefaultSpringFrequency
+                    SpringFrequency = Constraint.DefaultSpringFrequency,
+                    MaxImpulse = Constraint.DefaultMaxImpulse
                 }
             });
             CreateJoint(jointData, body, Entity.Null);

@@ -8,7 +8,7 @@ namespace Unity.Entities.Tests
         public int i;
     }
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     public struct BlobStorageRef
     {
         private static readonly BlobAssetReference<ShouldOnlyLiveInBlobStorage> Blob;
@@ -22,7 +22,7 @@ namespace Unity.Entities.Tests
         public ref ShouldOnlyLiveInBlobStorage Method() => ref Blob.Value;
     }
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     public struct BlobStorageRefReadonly
     {
         private static readonly BlobAssetReference<ShouldOnlyLiveInBlobStorage> Blob;

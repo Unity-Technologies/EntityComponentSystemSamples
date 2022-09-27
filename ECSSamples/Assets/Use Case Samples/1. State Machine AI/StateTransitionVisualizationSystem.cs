@@ -9,8 +9,9 @@ using UnityEngine;
 using static Unity.Mathematics.math;
 
 #if !UNITY_DISABLE_MANAGED_COMPONENTS
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(PresentationSystemGroup))]
-[UpdateBefore(typeof(HybridRendererSystem))]
+[UpdateBefore(typeof(EntitiesGraphicsSystem))]
 public partial class StateTransitionVisualizationSystem : SystemBase
 {
     private EntityQuery m_StateTransitionMaterialSingletonQuery;
@@ -30,7 +31,7 @@ public partial class StateTransitionVisualizationSystem : SystemBase
             .WithAll<IsInTransitionTag>()
             .ForEach((Entity e) =>
             {
-                var meshRenderer = EntityManager.GetSharedComponentData<RenderMesh>(e);
+                var meshRenderer = EntityManager.GetSharedComponentManaged<RenderMesh>(e);
 
                 if (HasComponent<IdleTimer>(e))
                     meshRenderer.material = materials.m_IdleMaterial;
@@ -39,7 +40,7 @@ public partial class StateTransitionVisualizationSystem : SystemBase
                 else
                     meshRenderer.material = materials.m_PatrollingMaterial;
 
-                EntityManager.SetSharedComponentData(e, meshRenderer);
+                EntityManager.SetSharedComponentManaged(e, meshRenderer);
                 EntityManager.RemoveComponent<IsInTransitionTag>(e);
             }).Run();
     }

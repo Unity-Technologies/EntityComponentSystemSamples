@@ -153,11 +153,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EntityCount: 10000
-  MainThreadEntityCount: 500
   ObjectScale: 0.1
   Radius: 10
   Twists: 16
-  Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  Meshes:
+  - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  - {fileID: 4300000, guid: 9e0af751bc36ea146940ba245193e28c, type: 3}
+  - {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  - {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
   Material: {fileID: 2100000, guid: b20699fe50accdf4e81b3ab0c8752fee, type: 2}
 --- !u!4 &628708254
 Transform:
@@ -486,6 +489,7 @@ MonoBehaviour:
   m_VolumetricDimmer: 1
   m_LightUnit: 2
   m_FadeDistance: 10000
+  m_VolumetricFadeDistance: 10000
   m_AffectDiffuse: 1
   m_AffectSpecular: 1
   m_NonLightmappedOnly: 0
@@ -502,6 +506,7 @@ MonoBehaviour:
   m_AreaLightCookie: {fileID: 0}
   m_IESPoint: {fileID: 0}
   m_IESSpot: {fileID: 0}
+  m_IncludeForRayTracing: 1
   m_AreaLightShadowCone: 120
   m_UseScreenSpaceShadows: 0
   m_InteractsWithSky: 1
@@ -577,11 +582,11 @@ MonoBehaviour:
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
   m_AreaLightEmissiveMeshLayer: -1
+  m_PointlightHDType: 0
+  m_SpotLightShape: 0
+  m_AreaLightShape: 0
   m_Version: 11
   m_ObsoleteShadowResolutionTier: 1
   m_ObsoleteUseShadowQualitySettings: 0
   m_ObsoleteCustomShadowResolution: 512
   m_ObsoleteContactShadows: 0
-  m_PointlightHDType: 0
-  m_SpotLightShape: 0
-  m_AreaLightShape: 0

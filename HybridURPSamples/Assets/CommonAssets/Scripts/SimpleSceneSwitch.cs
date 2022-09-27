@@ -1,16 +1,42 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
+using Unity.Scenes;
 using UnityEngine.SceneManagement;
 
 public class SimpleSceneSwitch : MonoBehaviour
 {
     public float scale = 1f;
+    public bool useInputButton = false;
+
     public void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
-        NextScene();
+    }
+
+    public void Start()
+    {
+        if(SceneManager.GetActiveScene().buildIndex ==0)
+        {
+            NextScene();
+        }
+    }
+
+    void Update()
+    {       
+        if(useInputButton)
+        {
+            if (Input.GetButtonDown("Fire1"))
+            {
+                NextScene();
+            }
+
+            if (Input.GetButtonDown("Fire2"))
+            {
+                PrevScene();
+            }
+        }
     }
 
     void OnGUI()
@@ -24,8 +50,15 @@ public class SimpleSceneSwitch : MonoBehaviour
         GUILayout.BeginHorizontal();
         GUIStyle customButton = new GUIStyle("button");
         customButton.fontSize = GUI.skin.label.fontSize;
-        if(GUILayout.Button("\n Prev \n",customButton,GUILayout.Width(200 * scale), GUILayout.Height(50 * scale))) PrevScene();
-        if(GUILayout.Button("\n Next \n",customButton,GUILayout.Width(200 * scale), GUILayout.Height(50 * scale))) NextScene();
+        if(useInputButton)
+        {
+            GUILayout.Label("Press Fire1 / Fire2 to switch scene",GUILayout.Height(50 * scale));
+        }
+        else
+        {
+            if(GUILayout.Button("\n Prev \n",customButton,GUILayout.Width(200 * scale), GUILayout.Height(50 * scale))) PrevScene();
+            if(GUILayout.Button("\n Next \n",customButton,GUILayout.Width(200 * scale), GUILayout.Height(50 * scale))) NextScene();
+        }
         GUILayout.EndHorizontal();
 
         int currentpage = SceneManager.GetActiveScene().buildIndex;
@@ -38,30 +71,49 @@ public class SimpleSceneSwitch : MonoBehaviour
     public void NextScene()
     {
         int sceneIndex = SceneManager.GetActiveScene().buildIndex;
-        
-        CleanUp();
+        int loadIndex = sceneIndex+1;
 
-        if (sceneIndex < SceneManager.sceneCountInBuildSettings - 1)
-            SceneManager.LoadScene(sceneIndex + 1);
-        else
-            SceneManager.LoadScene(1);
+        if (loadIndex >= SceneManager.sceneCountInBuildSettings)
+        {
+            loadIndex = 1;
+        }
+
+        SwitchScene(loadIndex);
     }
 
     public void PrevScene()
     {
         int sceneIndex = SceneManager.GetActiveScene().buildIndex;
-        
-        CleanUp();
+        int loadIndex = sceneIndex-1;
 
-        if (sceneIndex > 1)
-            SceneManager.LoadScene(sceneIndex - 1);
-        else
-            SceneManager.LoadScene(SceneManager.sceneCountInBuildSettings - 1);
+        if (loadIndex <= 0)
+        {
+            loadIndex = SceneManager.sceneCountInBuildSettings-1;
+        }
+
+        SwitchScene(loadIndex);
     }
 
-    public void CleanUp()
+    public void SwitchScene(int loadIndex)
     {
-        EntityManager m_Manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        m_Manager.DestroyEntity(m_Manager.GetAllEntities());
+        var world = World.DefaultGameObjectInjectionWorld;
+        var entityManager = world.EntityManager;
+        var entities = entityManager.GetAllEntities();
+
+        for (int i = 0; i < entities.Length; i++)
+        {
+            string ename = entityManager.GetName(entities[i]);
+            bool isSubscene = entityManager.HasComponent<SubScene>(entities[i]);
+            bool isSceneSection = entityManager.HasComponent<SceneSection>(entities[i]);
+
+            //Runtime generated entities requires manual deletion, 
+            //but we need to skip for some specific entities otherwise there will be spamming error
+            if( ename != "SceneSectionStreamingSingleton" && !isSubscene && !isSceneSection && !ename.Contains("GameObject Scene:") )
+            {
+                entityManager.DestroyEntity(entities[i]);
+            }
+        }
+
+        SceneManager.LoadScene(loadIndex);
     }
 }

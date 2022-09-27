@@ -56,7 +56,7 @@ namespace StressTests.ManySystems
             arr.Dispose();
 
             for (int i = 0; i < m_Systems.Length; i++)
-                world.AddSystem((m_Systems[i]));
+                world.AddSystemManaged((m_Systems[i]));
         }
 
         void Update()
@@ -91,7 +91,6 @@ namespace StressTests.ManySystems
 
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
-    [AlwaysUpdateSystem]
     partial class TestSystem_Schedule : SystemBase
     {
         protected override void OnUpdate()
@@ -105,7 +104,6 @@ namespace StressTests.ManySystems
 
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
-    [AlwaysUpdateSystem]
     partial class TestSystem_Run : SystemBase
     {
         protected override void OnUpdate()
@@ -119,7 +117,6 @@ namespace StressTests.ManySystems
 
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
-    [AlwaysUpdateSystem]
     partial class TestSystem_ScheduleReader : SystemBase
     {
         protected override void OnUpdate()
@@ -130,7 +127,6 @@ namespace StressTests.ManySystems
 
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
-    [AlwaysUpdateSystem]
     partial class TestSystem_RunReader : SystemBase
     {
         protected override void OnUpdate()

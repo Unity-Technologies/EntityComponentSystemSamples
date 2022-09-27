@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Unity.Rendering
 {
-    [MaterialProperty("_URPMySmoothness", MaterialPropertyFormat.Float)]
+    [MaterialProperty("_URPMySmoothness")]
     struct URPMySmoothnessFloatOverride : IComponentData
     {
         public float Value;

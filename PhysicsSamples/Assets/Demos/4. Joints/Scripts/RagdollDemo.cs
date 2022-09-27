@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -24,18 +25,23 @@ public class RagdollDemo : SceneCreationAuthoring<RagdollDemoScene>
     public Mesh RenderMesh;
     public int NumberOfRagdolls = 1;
     [Range(0, 1)] public float RangeGain = 1.0f;
+}
 
-    public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class RagdollDemoBaker : Baker<RagdollDemo>
+{
+    public override void Bake(RagdollDemo authoring)
     {
-        dstManager.AddComponentData(entity, new RagdollDemoScene
+        DependsOn(authoring.RenderMesh);
+        DependsOn(authoring.TorsoMesh);
+        AddComponentObject(new RagdollDemoScene
         {
-            DynamicMaterial = DynamicMaterial,
-            StaticMaterial = StaticMaterial,
-            RenderMesh = RenderMesh,
-            TorsoMesh = TorsoMesh,
-            NumberOfRagdolls = NumberOfRagdolls,
-            RangeGain = RangeGain,
-            Transform = new RigidTransform(transform.rotation, transform.position)
+            DynamicMaterial = authoring.DynamicMaterial,
+            StaticMaterial = authoring.StaticMaterial,
+            RenderMesh = authoring.RenderMesh,
+            TorsoMesh = authoring.TorsoMesh,
+            NumberOfRagdolls = authoring.NumberOfRagdolls,
+            RangeGain = authoring.RangeGain,
+            Transform = new RigidTransform(authoring.transform.rotation, authoring.transform.position)
         });
     }
 }
@@ -78,20 +84,32 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
 
     private void SwapRenderMesh(Entity entity, bool isTorso, Mesh torsoMesh, Mesh mesh)
     {
-        var origMeshData = EntityManager.GetSharedComponentData<RenderMesh>(entity);
         EntityManager.RemoveComponent<RenderMesh>(entity);
 
-        var renderMeshDescription = new RenderMeshDescription(isTorso ? torsoMesh : mesh, DynamicMaterial, ShadowCastingMode.On);
-        RenderMeshUtility.AddComponents(entity, EntityManager, renderMeshDescription);
+        var renderMesh = new RenderMeshArray(
+            new [] { DynamicMaterial },
+            new [] { isTorso? torsoMesh: mesh });
+
+        var renderMeshDescription = new RenderMeshDescription(ShadowCastingMode.On);
+
+        RenderMeshUtility.AddComponents(entity, EntityManager, renderMeshDescription, renderMesh, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
         EntityManager.AddComponentData(entity, new LocalToWorld());
 
         if (!isTorso)
         {
-            EntityManager.AddComponentData(entity, new NonUniformScale
+            var renderBounds = EntityManager.GetComponentData<RenderBounds>(entity);
+            EntityManager.AddComponentData<NonUniformScale>(entity, new NonUniformScale
             {
-                Value = origMeshData.mesh.bounds.size,
+                Value = renderBounds.Value.Size,
             });
         }
+    }
+
+    private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
+        float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
+    {
+        CreateRagdoll(torsoMesh, renderMesh, positionOffset,
+            rotationOffset, float3.zero, ragdollIndex, internalCollisions, rangeGain);
     }
 
     private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
@@ -118,7 +136,6 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
         }
         entities.Add(head);
 
-
         // Torso
         float3 torsoSize;
         float3 torsoPosition;
@@ -140,7 +157,7 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
             );
             CreatedColliders.Add(collider);
             points.Dispose();
-            collider.Value.Filter = filter;
+            collider.Value.SetCollisionFilter(filter);
             torso = CreateDynamicBody(torsoPosition, quaternion.identity, collider, float3.zero, float3.zero, 20.0f);
         }
         entities.Add(torso);

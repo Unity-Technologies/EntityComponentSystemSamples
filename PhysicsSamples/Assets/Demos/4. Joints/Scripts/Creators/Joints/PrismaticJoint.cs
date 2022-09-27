@@ -27,25 +27,62 @@ namespace Unity.Physics.Authoring
         public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             UpdateAuto();
-            conversionSystem.World.GetOrCreateSystem<EndJointConversionSystem>().CreateJointEntity(
+            PhysicsJoint joint = PhysicsJoint.CreatePrismatic(
+                new BodyFrame
+                {
+                    Axis = AxisLocal,
+                    PerpendicularAxis = PerpendicularAxisLocal,
+                    Position = PositionLocal
+                },
+                new BodyFrame
+                {
+                    Axis = AxisInConnectedEntity,
+                    PerpendicularAxis = PerpendicularAxisInConnectedEntity,
+                    Position = PositionInConnectedEntity
+                },
+                new FloatRange(MinDistanceOnAxis, MaxDistanceOnAxis)
+            );
+            var constraints = joint.GetConstraints();
+            for (int i = 0; i < constraints.Length; ++i)
+            {
+                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
+                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
+            }
+            joint.SetConstraints(constraints);
+
+            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
                 this,
                 GetConstrainedBodyPair(conversionSystem),
-                PhysicsJoint.CreatePrismatic(
-                    new BodyFrame
-                    {
-                        Axis = AxisLocal,
-                        PerpendicularAxis = PerpendicularAxisLocal,
-                        Position = PositionLocal
-                    },
-                    new BodyFrame
-                    {
-                        Axis = AxisInConnectedEntity,
-                        PerpendicularAxis = PerpendicularAxisInConnectedEntity,
-                        Position = PositionInConnectedEntity
-                    },
-                    new FloatRange(MinDistanceOnAxis, MaxDistanceOnAxis)
-                )
+                joint
             );
+        }
+    }
+
+    class PrismaticJointBaker : JointBaker<PrismaticJoint>
+    {
+        public override void Bake(PrismaticJoint authoring)
+        {
+            authoring.UpdateAuto();
+
+            var physicsJoint = PhysicsJoint.CreatePrismatic(
+                new BodyFrame
+                {
+                    Axis = authoring.AxisLocal,
+                    PerpendicularAxis = authoring.PerpendicularAxisLocal,
+                    Position = authoring.PositionLocal
+                },
+                new BodyFrame
+                {
+                    Axis = authoring.AxisInConnectedEntity,
+                    PerpendicularAxis = authoring.PerpendicularAxisInConnectedEntity,
+                    Position = authoring.PositionInConnectedEntity
+                },
+                new FloatRange(authoring.MinDistanceOnAxis, authoring.MaxDistanceOnAxis)
+            );
+            var constraintBodyPair = GetConstrainedBodyPair(authoring);
+
+            uint worldIndex = GetWorldIndexFromBaseJoint(authoring);
+            CreateJointEntity(worldIndex, constraintBodyPair, physicsJoint);
         }
     }
 }

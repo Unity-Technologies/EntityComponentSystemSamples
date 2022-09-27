@@ -5,24 +5,26 @@ using UnityEngine;
 namespace Demos
 {
     [RequireComponent(typeof(VehicleAuthoring))]
-    class AutoDriveVehicleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    class AutoDriveVehicleAuthoring : MonoBehaviour
     {
         public float DesiredSpeed = 40f;
         public float DesiredSteeringAngle = 10f;
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class AutoDriveVehicleBaker : Baker<AutoDriveVehicleAuthoring>
         {
-            var vehicle = GetComponent<VehicleAuthoring>();
-
-            dstManager.AddComponent(entity, typeof(VehicleInputOverride));
-            dstManager.SetComponentData(entity, new VehicleInputOverride
+            public override void Bake(AutoDriveVehicleAuthoring authoring)
             {
-                Value = new VehicleInput
+                var vehicle = GetComponent<VehicleAuthoring>();
+
+                AddComponent(new VehicleInputOverride
                 {
-                    Steering = new float2(DesiredSteeringAngle / vehicle.MaxSteeringAngle, 0f),
-                    Throttle = DesiredSpeed / vehicle.TopSpeed
-                }
-            });
+                    Value = new VehicleInput
+                    {
+                        Steering = new float2(authoring.DesiredSteeringAngle / vehicle.MaxSteeringAngle, 0f),
+                        Throttle = authoring.DesiredSpeed / vehicle.TopSpeed
+                    }
+                });
+            }
         }
     }
 
@@ -31,6 +33,7 @@ namespace Demos
         public VehicleInput Value;
     }
 
+    [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [UpdateAfter(typeof(DemoInputGatheringSystem))]
     [UpdateBefore(typeof(VehicleInputHandlingSystem))]

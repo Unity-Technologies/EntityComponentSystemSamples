@@ -1,5 +1,7 @@
+using Unity.Assertions;
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Stateful;
@@ -18,7 +20,7 @@ public struct TriggerVolumeForceField : IComponentData
     public int MassInvariant;
 }
 
-public class TriggerVolumeForceFieldAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class TriggerVolumeForceFieldAuthoring : MonoBehaviour
 {
     public enum Direction { Center, XAxis, YAxis, ZAxis };
 
@@ -28,44 +30,54 @@ public class TriggerVolumeForceFieldAuthoring : MonoBehaviour, IConvertGameObjec
     public float Rotation = 0;
     public bool Proportional = true;
     public bool MassInvariant = false;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class TriggerVolumeForceFieldAuthoringBaker : Baker<TriggerVolumeForceFieldAuthoring>
+{
+    public override void Bake(TriggerVolumeForceFieldAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new TriggerVolumeForceField
+        var transform = GetComponent<Transform>();
+        AddComponent(new TriggerVolumeForceField
         {
             Center = transform.position,
-            Strength = Strength,
-            DeadZone = (DeadZone == 0) ? 0.001f : math.abs(DeadZone),
-            Axis = (int)Axis - 1,
-            Rotation = math.radians(Rotation),
-            Proportional = Proportional ? 1 : 0,
-            MassInvariant = MassInvariant ? 1 : 0
+            Strength = authoring.Strength,
+            DeadZone = (authoring.DeadZone == 0) ? 0.001f : math.abs(authoring.DeadZone),
+            Axis = (int)authoring.Axis - 1,
+            Rotation = math.radians(authoring.Rotation),
+            Proportional = authoring.Proportional ? 1 : 0,
+            MassInvariant = authoring.MassInvariant ? 1 : 0
         });
     }
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(ExportPhysicsWorld))]
-[UpdateAfter(typeof(StatefulTriggerEventBufferSystem))]
-public partial class TriggerVolumeForceFieldSystem : SystemBase
+[UpdateAfter(typeof(PhysicsSystemGroup))]
+[BurstCompile]
+public partial struct TriggerVolumeForceFieldSystem : ISystem
 {
+    private EntityQuery m_NonTriggerDynamicBodyQuery;
     private EntityQueryMask m_NonTriggerDynamicBodyMask;
+    private ComponentDataHandles m_Handles;
 
-    protected override void OnCreate()
+    struct ComponentDataHandles
     {
-        m_NonTriggerDynamicBodyMask = EntityManager.GetEntityQueryMask(GetEntityQuery(new EntityQueryDesc
+        public ComponentLookup<Translation> TranslationFromEntity;
+        public ComponentLookup<PhysicsMass> MassFromEntity;
+        public ComponentLookup<PhysicsVelocity> VelocityFromEntity;
+
+        public ComponentDataHandles(ref SystemState state)
         {
-            All = new ComponentType[]
-            {
-                typeof(PhysicsVelocity),
-                typeof(PhysicsMass),
-                typeof(Translation)
-            },
-            None = new ComponentType[]
-            {
-                typeof(StatefulTriggerEvent)
-            }
-        }));
+            TranslationFromEntity = state.GetComponentLookup<Translation>(true);
+            MassFromEntity = state.GetComponentLookup<PhysicsMass>(true);
+            VelocityFromEntity = state.GetComponentLookup<PhysicsVelocity>(false);
+        }
+
+        public void Update(ref SystemState state)
+        {
+            TranslationFromEntity.Update(ref state);
+            MassFromEntity.Update(ref state);
+            VelocityFromEntity.Update(ref state);
+        }
     }
 
     public static void ApplyForceField(
@@ -119,46 +131,88 @@ public partial class TriggerVolumeForceFieldSystem : SystemBase
         }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    partial struct ApplyForceFieldJob : IJobEntity
     {
-        float dt = Time.DeltaTime;
+        public EntityQueryMask NonTriggerDynamicBodyMask;
 
-        // Need extra variables here so that they can be
-        // captured by the Entities.Foreach loop below
-        var stepComponent = HasSingleton<PhysicsStep>() ? GetSingleton<PhysicsStep>() : PhysicsStep.Default;
-        var nonTriggerDynamicBodyMask = m_NonTriggerDynamicBodyMask;
+        public PhysicsStep StepComponent;
+        public float DeltaTime;
 
-        Entities
-            .WithName("ApplyForceFieldJob")
-            .WithBurst()
-            .ForEach((Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer, ref TriggerVolumeForceField forceField) =>
+        [ReadOnly] public ComponentLookup<Translation> Translations;
+        [ReadOnly] public ComponentLookup<PhysicsMass> Masses;
+        public ComponentLookup<PhysicsVelocity> Velocities;
+
+        [BurstCompile]
+        public void Execute(Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer, ref TriggerVolumeForceField forceField)
+        {
+            forceField.Center = Translations[e].Value;
+
+            for (int i = 0; i < triggerEventBuffer.Length; i++)
             {
-                forceField.Center = GetComponent<Translation>(e).Value;
+                var triggerEvent = triggerEventBuffer[i];
 
-                for (int i = 0; i < triggerEventBuffer.Length; i++)
+                var otherEntity = triggerEvent.GetOtherEntity(e);
+
+                // exclude static bodies, other triggers and enter/exit events
+                if (triggerEvent.State != StatefulEventState.Stay || !NonTriggerDynamicBodyMask.MatchesIgnoreFilter(otherEntity))
                 {
-                    var triggerEvent = triggerEventBuffer[i];
-
-                    var otherEntity = triggerEvent.GetOtherEntity(e);
-
-                    // exclude static bodies, other triggers and enter/exit events
-                    if (triggerEvent.State != StatefulEventState.Stay || !nonTriggerDynamicBodyMask.Matches(otherEntity))
-                    {
-                        continue;
-                    }
-
-                    var physicsVelocity = GetComponent<PhysicsVelocity>(otherEntity);
-                    var physicsMass = GetComponent<PhysicsMass>(otherEntity);
-                    var pos = GetComponent<Translation>(otherEntity);
-
-                    ApplyForceField(dt, ref physicsVelocity, pos, physicsMass, forceField);
-
-                    // counter-act gravity
-                    physicsVelocity.Linear += -1.25f * stepComponent.Gravity * dt;
-
-                    // write back
-                    SetComponent(otherEntity, physicsVelocity);
+                    continue;
                 }
-            }).Schedule();
+
+                var physicsVelocity = Velocities[otherEntity];
+                var physicsMass = Masses[otherEntity];
+                var pos = Translations[otherEntity];
+
+                ApplyForceField(DeltaTime, ref physicsVelocity, pos, physicsMass, forceField);
+
+                // counter-act gravity
+                physicsVelocity.Linear += -1.25f * StepComponent.Gravity * DeltaTime;
+
+                // write back
+                Velocities[otherEntity] = physicsVelocity;
+            }
+        }
+    }
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        EntityQueryBuilder builder = new EntityQueryBuilder(Unity.Collections.Allocator.Temp)
+            .WithAllRW<PhysicsVelocity>()
+            .WithAll<Translation, PhysicsMass>()
+            .WithNone<StatefulTriggerEvent>();
+        m_NonTriggerDynamicBodyQuery = state.GetEntityQuery(builder);
+
+        Assert.IsFalse(m_NonTriggerDynamicBodyQuery.HasFilter(), "The use of EntityQueryMask in this system will not respect the query's active filter settings.");
+        m_NonTriggerDynamicBodyMask = m_NonTriggerDynamicBodyQuery.GetEntityQueryMask();
+
+        state.RequireForUpdate<TriggerVolumeForceField>();
+        m_Handles = new ComponentDataHandles(ref state);
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_Handles.Update(ref state);
+        var stepComponent = SystemAPI.HasSingleton<PhysicsStep>() ? SystemAPI.GetSingleton<PhysicsStep>() : PhysicsStep.Default;
+        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
+        float dt = SystemAPI.Time.DeltaTime;
+        state.Dependency = new ApplyForceFieldJob
+        {
+            NonTriggerDynamicBodyMask = m_NonTriggerDynamicBodyMask,
+
+            StepComponent = stepComponent,
+            DeltaTime = dt,
+
+            Translations = m_Handles.TranslationFromEntity,
+            Masses = m_Handles.MassFromEntity,
+            Velocities = m_Handles.VelocityFromEntity
+        }.Schedule(state.Dependency);
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
     }
 }

@@ -12,21 +12,24 @@ class StateTransitionMaterials : IComponentData
 #endif
 
 [DisallowMultipleComponent]
-public class MaterialSingletonAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class MaterialSingletonAuthoring : MonoBehaviour
 {
     public Material m_IdleMaterial;
     public Material m_PatrollingMaterial;
     public Material m_ChasingMaterial;
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class Baker : Baker<MaterialSingletonAuthoring>
     {
-        #if !UNITY_DISABLE_MANAGED_COMPONENTS
-        dstManager.AddComponentData(entity, new StateTransitionMaterials
+        public override void Bake(MaterialSingletonAuthoring authoring)
         {
-            m_ChasingMaterial = m_ChasingMaterial,
-            m_IdleMaterial = m_IdleMaterial,
-            m_PatrollingMaterial = m_PatrollingMaterial
-        });
-        #endif
+            #if !UNITY_DISABLE_MANAGED_COMPONENTS
+            AddComponentObject( new StateTransitionMaterials
+            {
+                m_ChasingMaterial = authoring.m_ChasingMaterial,
+                m_IdleMaterial = authoring.m_IdleMaterial,
+                m_PatrollingMaterial = authoring.m_PatrollingMaterial
+            });
+            #endif
+        }
     }
 }

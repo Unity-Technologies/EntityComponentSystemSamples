@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Rendering;
+using Unity.Entities.Graphics;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -12,22 +13,25 @@ using UnityEngine.Rendering;
 public class TestEntityCreationAPI : MonoBehaviour
 {
     public int EntityCount = 10000;
-    public int MainThreadEntityCount = 500;
     public float ObjectScale = 0.1f;
     public float Radius = 10;
     public float Twists = 16;
-    public Mesh Mesh;
+    public List<Mesh> Meshes;
     public Material Material;
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     public struct SpawnJob : IJobParallelFor
     {
         public Entity Prototype;
         public int EntityCount;
+        public int MeshCount;
         public float ObjectScale;
         public float Radius;
         public float Twists;
         public EntityCommandBuffer.ParallelWriter Ecb;
+
+        [ReadOnly]
+        public NativeArray<RenderBounds> MeshBounds;
 
         public void Execute(int index)
         {
@@ -35,6 +39,10 @@ public class TestEntityCreationAPI : MonoBehaviour
             // Prototype has all correct components up front, can use SetComponent
             Ecb.SetComponent(index, e, new LocalToWorld {Value = ComputeTransform(index)});
             Ecb.SetComponent(index, e, new MaterialColor() {Value = ComputeColor(index)});
+            // MeshBounds must be set according to the actual mesh for culling to work.
+            int meshIndex = index % MeshCount;
+            Ecb.SetComponent(index, e, MaterialMeshInfo.FromRenderMeshArrayIndices(0, meshIndex));
+            Ecb.SetComponent(index, e, MeshBounds[meshIndex]);
         }
 
         public float4 ComputeColor(int index)
@@ -74,20 +82,30 @@ public class TestEntityCreationAPI : MonoBehaviour
         var entityManager = world.EntityManager;
 
         EntityCommandBuffer ecbJob = new EntityCommandBuffer(Allocator.TempJob);
-        EntityCommandBuffer ecbMainThread = new EntityCommandBuffer(Allocator.Temp);
 
-        var desc = new RenderMeshDescription(
-            Mesh,
-            Material,
-            shadowCastingMode: ShadowCastingMode.Off,
-            receiveShadows: false);
+        var filterSettings = RenderFilterSettings.Default;
+        filterSettings.ShadowCastingMode = ShadowCastingMode.Off;
+        filterSettings.ReceiveShadows = false;
+
+        var renderMeshArray = new RenderMeshArray(new[] {Material}, Meshes.ToArray());
+        var renderMeshDescription = new RenderMeshDescription
+        {
+            FilterSettings = filterSettings,
+            LightProbeUsage = LightProbeUsage.Off,
+        };
 
         var prototype = entityManager.CreateEntity();
         RenderMeshUtility.AddComponents(
             prototype,
             entityManager,
-            desc);
+            renderMeshDescription,
+            renderMeshArray,
+            MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
         entityManager.AddComponentData(prototype, new MaterialColor());
+
+        var bounds = new NativeArray<RenderBounds>(Meshes.Count, Allocator.TempJob);
+        for (int i = 0; i < bounds.Length; ++i)
+            bounds[i] = new RenderBounds {Value = Meshes[i].bounds.ToAABB()};
 
         // Spawn most of the entities in a Burst job by cloning a pre-created prototype entity,
         // which can be either a Prefab or an entity created at run time like in this sample.
@@ -97,71 +115,26 @@ public class TestEntityCreationAPI : MonoBehaviour
             Prototype = prototype,
             Ecb = ecbJob.AsParallelWriter(),
             EntityCount = EntityCount,
+            MeshCount = Meshes.Count,
+            MeshBounds = bounds,
             ObjectScale = ObjectScale,
             Radius = Radius,
             Twists = Twists,
         };
 
-        int numJobEntities = EntityCount - MainThreadEntityCount;
-        var spawnHandle = spawnJob.Schedule(numJobEntities, 128);
-
-        // Spawn a small portion in the main thread to test that the ECB API works.
-        // This is NOT the recommended way, this simply tests that this API works.
-        for (int i = 0; i < MainThreadEntityCount; ++i)
-        {
-            int index = i + numJobEntities;
-            var e = ecbMainThread.CreateEntity();
-            RenderMeshUtility.AddComponents(
-                e,
-                ecbMainThread,
-                desc);
-            ecbMainThread.SetComponent(e, new LocalToWorld {Value = spawnJob.ComputeTransform(index)});
-            // Use AddComponent because we didn't clone the prototype here
-            ecbMainThread.AddComponent(e, new MaterialColor {Value = spawnJob.ComputeColor(index)});
-        }
+        var spawnHandle = spawnJob.Schedule(EntityCount, 128);
+        bounds.Dispose(spawnHandle);
 
         spawnHandle.Complete();
 
         ecbJob.Playback(entityManager);
         ecbJob.Dispose();
-        ecbMainThread.Playback(entityManager);
         entityManager.DestroyEntity(prototype);
-    }
-
-    // RenderMeshUtility.AddComponents code example as actual code to make sure it compiles.
-    void CodeExample()
-    {
-        var world = World.DefaultGameObjectInjectionWorld;
-        var entityManager = world.EntityManager;
-
-        var desc = new RenderMeshDescription(
-            Mesh,
-            Material);
-
-        // RenderMeshUtility can be used to easily create Hybrid Renderer
-        // compatible entities, but it can only be called from the main thread.
-        var entity = entityManager.CreateEntity();
-        RenderMeshUtility.AddComponents(
-            entity,
-            entityManager,
-            desc);
-        entityManager.AddComponentData(entity, new ExampleComponent());
-
-        // If multiple similar entities are to be created, 'entity' can now
-        // be instantiated using Instantiate(), and its component values changed
-        // afterwards.
-        // This can also be done in Burst jobs using EntityCommandBuffer.ParallelWriter.
-        var secondEntity = entityManager.Instantiate(entity);
-        entityManager.SetComponentData(secondEntity, new Translation {Value = new float3(1, 2, 3)});
     }
 
     // Update is called once per frame
     void Update()
     {
+
     }
 }
-
-struct ExampleComponent : IComponentData
-{
-}
-

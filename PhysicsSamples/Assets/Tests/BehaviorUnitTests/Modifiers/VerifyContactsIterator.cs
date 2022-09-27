@@ -13,36 +13,36 @@ namespace Unity.Physics.Tests
     }
 
     [Serializable]
-    public class VerifyContactsIterator : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyContactsIterator : MonoBehaviour
     {
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyContactsIteratorBaker : Baker<VerifyContactsIterator>
         {
-            dstManager.AddComponentData(entity, new VerifyContactsIteratorData());
+            public override void Bake(VerifyContactsIterator authoring)
+            {
+                AddComponent<VerifyContactsIteratorData>();
 
 #if HAVOK_PHYSICS_EXISTS
-            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
-            config.EnableSleeping = 0;
-            dstManager.AddComponentData(entity, config);
+                Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+                config.EnableSleeping = 0;
+                AddComponent(config);
 #endif
+            }
         }
     }
-
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSimulationGroup))]
+    [UpdateAfter(typeof(PhysicsCreateContactsGroup))]
+    [UpdateBefore(typeof(PhysicsCreateJacobiansGroup))]
+    [RequireMatchingQueriesForUpdate]
     public partial class VerifyContactsIteratorSystem : SystemBase
     {
-        EntityQuery m_VerificationGroup;
-        StepPhysicsWorld m_StepPhysicsWorld;
-
         public NativeArray<int> CurrentManifoldNumContacts;
 
         protected override void OnCreate()
         {
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyContactsIteratorData) }
-            });
+            }));
             CurrentManifoldNumContacts = new NativeArray<int>(2, Allocator.Persistent);
         }
 
@@ -64,7 +64,7 @@ namespace Unity.Physics.Tests
             public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
-            public ComponentDataFromEntity<VerifyContactsIteratorData> VerificationData;
+            public ComponentLookup<VerifyContactsIteratorData> VerificationData;
 
             public void Execute(ref ModifiableContactHeader manifold, ref ModifiableContactPoint contact)
             {
@@ -106,7 +106,7 @@ namespace Unity.Physics.Tests
             public NativeArray<int> CurrentManifoldNumContacts;
 
             [ReadOnly]
-            public ComponentDataFromEntity<VerifyContactsIteratorData> VerificationData;
+            public ComponentLookup<VerifyContactsIteratorData> VerificationData;
 
             public void Execute()
             {
@@ -117,27 +117,20 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            SimulationCallbacks.Callback verifyContactsIteratorJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-            {
-                return new VerifyContactsIteratorJob
-                {
-                    CurrentManifoldNumContacts = CurrentManifoldNumContacts,
-                    Bodies = world.Bodies,
-                    VerificationData = GetComponentDataFromEntity<VerifyContactsIteratorData>(true)
-                }.Schedule(simulation, ref world, inDeps);
-            };
+            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
 
-            SimulationCallbacks.Callback verifyNumContactsJobCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
+            Dependency = new VerifyContactsIteratorJob
             {
-                return new VerifyNumContactsJob
-                {
-                    CurrentManifoldNumContacts = CurrentManifoldNumContacts,
-                    VerificationData = GetComponentDataFromEntity<VerifyContactsIteratorData>(true)
-                }.Schedule(inDeps);
-            };
+                Bodies = worldSingleton.PhysicsWorld.Bodies,
+                CurrentManifoldNumContacts = CurrentManifoldNumContacts,
+                VerificationData = GetComponentLookup<VerifyContactsIteratorData>(true)
+            }.Schedule(GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
 
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, verifyContactsIteratorJobCallback, Dependency);
-            m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, verifyNumContactsJobCallback, Dependency);
+            Dependency = new VerifyNumContactsJob
+            {
+                CurrentManifoldNumContacts = CurrentManifoldNumContacts,
+                VerificationData = GetComponentLookup<VerifyContactsIteratorData>(true)
+            }.Schedule(Dependency);
         }
     }
 }
