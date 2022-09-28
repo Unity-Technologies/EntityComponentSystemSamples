@@ -5,10 +5,11 @@ using Unity.Physics.Systems;
 using Unity.Physics.Tests;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class DriveAnimationBodyAuthoring : MonoBehaviour
 {
-    public ConvertToEntity DrivingEntity;
+    public GameObject DrivingEntity;
     [Range(0f, 1f)] public float PositionGain;
     [Range(0f, 1f)] public float RotationGain;
     [Range(0f, 1f)] public float LinearVelocityGain;
