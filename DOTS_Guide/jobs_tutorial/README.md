@@ -51,7 +51,9 @@ Each seeker takes ~0.3ms to update, taking over 330ms total.
 
 By putting the hard work into a job, we can move the work from the main thread to a worker thread, and we can Burst-compile the code. Jobs and Burst-compiled code cannot access any managed objects (including GameObjects and GameObject components), so we must first copy all the data to be processed by the job into unmanaged collections, such as `NativeArray`'s.
 
-> [!NOTE] Strictly speaking, jobs actually *can* access managed objects, but doing so requires special care and is not normally a good idea. Besides, we definitely want to Burst-compile our jobs, and Burst-compiled code strictly *cannot* access managed objects at all.
+| &#x1F4DD; NOTE |
+| :- |
+| Strictly speaking, jobs actually *can* access managed objects, but doing so requires special care and is not normally a good idea. Besides, we definitely want to Burst-compile our jobs, and Burst-compiled code strictly *cannot* access managed objects at all.|
 
 Though we could still use `Vector3`'s and `Mathf`, we'll instead use `float3` and `math` from the `Unity.Mathematics` package, which has special optimization hooks for Burst.
 
@@ -128,7 +130,9 @@ Since we have so much headroom now,  let's try 10,000 seekers and 10,000 targets
 
 A 10-fold increase in seekers and targets results in a 70-fold increase in run time, but this is expected given that every seeker is checking its distance to every target.
 
-> [!NOTE] Notice in these profiles that the jobs run on the main thread. This can happen when we call `Complete()` on a job that hasn't yet been pulled off the job queue: because the main thread would otherwise just be sitting idle while it waits for the job to finish, the main thread may decide to run the job itself.
+| &#x1F4DD; NOTE |
+| :- |
+ Notice in these profiles that the jobs run on the main thread. This can happen when we call `Complete()` on a job that hasn't yet been pulled off the job queue: because the main thread would otherwise just be sitting idle while it waits for the job to finish, the main thread may decide to run the job itself. |
 
 <br/>
 

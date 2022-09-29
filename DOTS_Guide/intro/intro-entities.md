@@ -191,8 +191,10 @@ We can randomly access the components of individual entities through an `EntityM
 
 To test whether an entity simply exists, we can call [`Exists()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityStorageInfoLookup.Exists.html) of an [`EntityStorageInfoLookup`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityStorageInfoLookup.html). Indexing an `EntityStorageInfoLookup` returns an [`EntityStorageInfo`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityStorageInfo.html) struct, which includes a reference to the entity's chunk and its index within the chunk.
 
-> [!IMPORTANT]
-> Keep in mind that lookups of entities by ID tend to incur the performance cost of cache misses, so avoiding random lookups when you can is generally a good idea. There are, of course, many problems which require random lookups to solve, so by no means are they to be avoided entirely. Just avoid using them thoughtlessly!
+
+| &#x26A0; IMPORTANT |
+| :- |
+| Keep in mind that lookups of entities by ID tend to incur the performance cost of cache misses, so avoiding random lookups when you can is generally a good idea. There are, of course, many problems which require random lookups to solve, so by no means are they to be avoided entirely. Just avoid using them thoughtlessly! |
 
 <br>
 
@@ -202,8 +204,9 @@ The [`SystemAPI`](https://docs.unity3d.com/Packages/com.unity.entities@latest?su
 
 The `SystemAPI` methods rely upon [source generators](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview), so they only work in an `ISystem` or `IJobEntity`. The advantage of using `SystemAPI` is that these methods produce the same results in both contexts, so code that uses `SystemAPI` will generally be easier to copy-paste between these two contexts.
 
-> [!NOTE] 
-> If you get confused about where to look for key Entities functionality, the general rule is to check `SystemAPI` first. If `SystemAPI` doesn't have what you're looking for, look in `SystemState`, and failing that, look in `EntityManager` and `World`.
+| &#x1F4DD; NOTE |
+| :- |
+| If you get confused about where to look for key Entities functionality, the general rule is to check `SystemAPI` first. If `SystemAPI` doesn't have what you're looking for, look in `SystemState`, and failing that, look in `EntityManager` and `World`. |
 
 `SystemAPI` also provides a special [`Query()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemAPI.Query.html) method that makes it convenient to iterate through the entities and components matching a query.
 
@@ -219,11 +222,13 @@ Recording commands to defer changes is particularly useful in jobs because jobs 
 
 *[See examples of creating and using an `EntityCommandBuffer`](../cheatsheet/jobs.md#ijobchunk).*
 
-> [!NOTE]
-> Some `EntityManager` methods have no `EntityCommandBuffer` equivalent because an equivalent wouldn’t be feasible or make sense. For example, there are no `EntityCommandBuffer` methods for getting component values because *reading* data is not something that can be usefully deferred.
+| &#x1F4DD; NOTE |
+| :- |
+| Some `EntityManager` methods have no `EntityCommandBuffer` equivalent because an equivalent wouldn’t be feasible or make sense. For example, there are no `EntityCommandBuffer` methods for getting component values because *reading* data is not something that can be usefully deferred. |
 
-> [!IMPORTANT]
-> You might be tempted to share a single `EntityCommandBuffer` instance across multiple jobs, but this is strongly discouraged. There are cases where it will work fine, but in many cases it will not. Besides, you shouldn’t worry about the overhead of creating and using separate `EntityCommandBuffer`'s: recording and playing back a set of commands split across multiple `EntityCommandBuffer`'s is not really any more expensive than recording the same set of commands into one `EntityCommandBuffer`, so it’s almost always best to create and use one `EntityCommandBuffer` per job.
+| &#x26A0; IMPORTANT |
+| :- |
+| You might be tempted to share a single `EntityCommandBuffer` instance across multiple jobs, but this is strongly discouraged. There are cases where it will work fine, but in many cases it will not. Besides, you shouldn’t worry about the overhead of creating and using separate `EntityCommandBuffer`'s: recording and playing back a set of commands split across multiple `EntityCommandBuffer`'s is not really any more expensive than recording the same set of commands into one `EntityCommandBuffer`, so it’s almost always best to create and use one `EntityCommandBuffer` per job. |
 
 ## Temporary entities
 ---
@@ -290,8 +295,9 @@ A struct implementing `IComponentData` or `IBufferElementData` can also implemen
 
 **When a component of an entity is disabled, queries consider the entity to not have the component type.** If no entities in a chunk match the query because one or more of their components are disabled, that chunk will not be included in the array returned by the [`ToArchetypeChunkArray()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityQuery.ToArchetypeChunkArray.html) method of `EntityQuery`.
 
-> [!NOTE]
-> Be clear that disabling a component does *not* remove or modify the component: rather, a bit associated with the specific component of the specific entity is cleared. The disabled component can otherwise still be read and modified as normal. 
+| &#x1F4DD; NOTE |
+| :- |
+| Be clear that disabling a component does *not* remove or modify the component: rather, a bit associated with the specific component of the specific entity is cleared. The disabled component can otherwise still be read and modified as normal. |
 
 The enabled state of an entity's components can be checked and set through:
 
@@ -310,8 +316,9 @@ In an `IJobChunk`, the `Execute` method parameters signal which entities in the 
 
 *[See an example `IJobChunk` that correctly accounts for disabled components](../cheatsheet/jobs.md#ijobchunk).*
 
-> [!NOTE]
-> The `chunkEnabledMask` is a *composite* of all the enabled states of the enableable components included in the query of the job. To check enabled states of individual components, use the `IsComponentEnabled()` and `SetComponentEnabled()` methods of the `ArchetypeChunk`.
+| &#x1F4DD; NOTE |
+| :- |
+| The `chunkEnabledMask` is a *composite* of all the enabled states of the enableable components included in the query of the job. To check enabled states of individual components, use the `IsComponentEnabled()` and `SetComponentEnabled()` methods of the `ArchetypeChunk`. |
 
 <br/>
 
@@ -345,8 +352,9 @@ public readonly partial struct MyAspect : IAspect
 }
 ```
 
-> [!NOTE]
-> Whether a component should be exposed directly as a public field, only as a property, or only through methods is a matter of judgement in each case.
+| &#x1F4DD; NOTE |
+| :- |
+| Whether a component should be exposed directly as a public field, only as a property, or only through methods is a matter of judgement in each case. |
 
 An aspect can include fields of these types:
 

@@ -6,8 +6,6 @@ This is a guide for learning and using the core DOTS packages: [Entities](https:
 
 The initial release of this guide (September 2022) contains intro reading, a few videos, two tutorials, and accompanying code samples. Along the way to the final 1.0 release, additional material and samples will be added covering more advanced topics and demonstrating solutions to common problems.
 
-- [What's new in Entities 1.0-experimental](./whats-new.md)
-
 ### Intro
 ---
 - [Intro to Collections and Jobs](./intro/intro-jobs.md)
