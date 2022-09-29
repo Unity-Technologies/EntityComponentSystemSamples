@@ -106,12 +106,11 @@ A query can filter its results based on whether component values may have possib
 
 In order to look up entities by ID, the world’s `EntityManager` maintains an array of entity metadata. Each entity ID has an index value denoting a slot in this metadata array, and the slot stores a pointer to the chunk where that entity is stored, as well as the index of the entity within the chunk. When no entity exists for a particular index, the chunk pointer at that index is null. Here, for example, no entities with indexes 1, 2, and 5 currently exist, so the chunk pointers in those slots are all null.
 
-![entity metadata](http://url/to/img.png)
+![entity metadata](./entity_metadata1.png)
 
 In order to allow entity indexes to be reused after an entity is destroyed, each entity ID also contains a *version number*. When an entity is destroyed, the version number stored at its index is incremented, and so if an ID’s version number doesn’t match the one currently stored, then the ID must refer to an entity that has already been destroyed or perhaps never existed.
 
-![entity metadata version numbers](http://url/to/img.png)
-
+![entity metadata](./entity_metadata2.png)
 
 <br>
 
