@@ -12,8 +12,8 @@ The initial release of this guide (September 2022) contains intro reading, a few
 ---
 - [Intro to Collections and Jobs](./intro/intro-jobs.md)
 - [Intro to Entities](./intro/intro-entities.md)
-- [Jobs Tutorial](./jobs_tutorial/jobs_tutorial.md)
-- [Entities Tutorial](https://github.com/Unity-Technologies/dots-tutorial)
+- [Jobs Tutorial](./jobs_tutorial/README.md)
+- [Entities Tutorial](./entities_tutorial/README.md)
 
 
 ### Cheat sheets
