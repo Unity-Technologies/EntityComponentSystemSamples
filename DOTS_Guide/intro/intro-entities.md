@@ -310,7 +310,8 @@ In an `IJobChunk`, the `Execute` method parameters signal which entities in the 
 
 *[See an example `IJobChunk` that correctly accounts for disabled components](../cheatsheet/jobs.md#ijobchunk).*
 
-> NOTE: The `chunkEnabledMask` is a *composite* of all the enabled states of the enableable components included in the query of the job. To check enabled states of individual components, use the `IsComponentEnabled()` and `SetComponentEnabled()` methods of the `ArchetypeChunk`.
+> [!NOTE]
+> The `chunkEnabledMask` is a *composite* of all the enabled states of the enableable components included in the query of the job. To check enabled states of individual components, use the `IsComponentEnabled()` and `SetComponentEnabled()` methods of the `ArchetypeChunk`.
 
 <br/>
 
@@ -344,7 +345,8 @@ public readonly partial struct MyAspect : IAspect
 }
 ```
 
-> NOTE: Whether a component should be exposed directly as a public field, only as a property, or only through methods is a matter of judgement in each case.
+> [!NOTE]
+> Whether a component should be exposed directly as a public field, only as a property, or only through methods is a matter of judgement in each case.
 
 An aspect can include fields of these types:
 
