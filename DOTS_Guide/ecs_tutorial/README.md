@@ -1,4 +1,4 @@
-# Entities tutorial
+# ECS tutorial
 
 ## Overview
 > What to expect from this document.

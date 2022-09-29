@@ -11,7 +11,7 @@ The initial release of this guide (September 2022) contains intro reading, a few
 - [Intro to Collections and Jobs](./intro/intro-jobs.md)
 - [Intro to Entities](./intro/intro-entities.md)
 - [Jobs Tutorial](./jobs_tutorial/README.md)
-- [Entities Tutorial](./entities_tutorial/README.md)
+- [ECS Tutorial](./ecs_tutorial/README.md)
 
 
 ### Cheat sheets
