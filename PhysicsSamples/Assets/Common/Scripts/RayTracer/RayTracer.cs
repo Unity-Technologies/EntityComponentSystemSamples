@@ -29,7 +29,7 @@ namespace Unity.Physics.Extensions
         {
             RayTracerSystem rbs;
             var world = World.DefaultGameObjectInjectionWorld;
-            if (world != null && null != (rbs = world.GetExistingSystem<RayTracerSystem>()))
+            if (world != null && null != (rbs = world.GetExistingSystemManaged<RayTracerSystem>()))
             {
                 rbs.DisposeRequest(requestId);
                 requestId = kInvalidRequestId;
@@ -71,7 +71,7 @@ namespace Unity.Physics.Extensions
         {
             if (World.DefaultGameObjectInjectionWorld == null) return;
 
-            RayTracerSystem rbs = World.DefaultGameObjectInjectionWorld.GetExistingSystem<RayTracerSystem>();
+            RayTracerSystem rbs = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<RayTracerSystem>();
             if (rbs == null || !rbs.IsEnabled) return;
 
             if (requestId != kInvalidRequestId && rbs.TryGetResults(requestId, out var reader))

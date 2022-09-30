@@ -22,37 +22,34 @@ public struct CharacterGunInput : IComponentData
     public float Firing;
 }
 
-public class CharacterGunAuthoring : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
+public class CharacterGunAuthoring : MonoBehaviour
 {
     public GameObject Bullet;
 
     public float Strength;
     public float Rate;
 
-    // Referenced prefabs have to be declared so that the conversion system knows about them ahead of time
-    public void DeclareReferencedPrefabs(List<GameObject> gameObjects)
+    class CharacterGunBaker : Baker<CharacterGunAuthoring>
     {
-        gameObjects.Add(Bullet);
-    }
-
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-    {
-        dstManager.AddComponentData(
-            entity,
-            new CharacterGun
+        public override void Bake(CharacterGunAuthoring authoring)
+        {
+            AddComponent(new CharacterGun()
             {
-                Bullet = conversionSystem.GetPrimaryEntity(Bullet),
-                Strength = Strength,
-                Rate = Rate,
+                Bullet = GetEntity(authoring.Bullet),
+                Strength = authoring.Strength,
+                Rate = authoring.Rate,
                 WasFiring = 0,
                 IsFiring = 0
             });
+        }
     }
 }
 
 #region System
+
 // Update before physics gets going so that we don't have hazard warnings.
 // This assumes that all gun are being controlled from the same single input system
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(CharacterControllerSystem))]
 public partial class CharacterGunOneToManyInputSystem : SystemBase
@@ -60,13 +57,13 @@ public partial class CharacterGunOneToManyInputSystem : SystemBase
     EntityCommandBufferSystem m_EntityCommandBufferSystem;
 
     protected override void OnCreate() =>
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
+        m_EntityCommandBufferSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
 
     protected override void OnUpdate()
     {
         var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
         var input = GetSingleton<CharacterGunInput>();
-        float dt = Time.DeltaTime;
+        float dt = SystemAPI.Time.DeltaTime;
 
         Entities
             .WithName("CharacterControllerGunToManyInputJob")

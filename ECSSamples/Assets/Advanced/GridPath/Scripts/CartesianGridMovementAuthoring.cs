@@ -3,8 +3,7 @@ using Unity.Rendering;
 using UnityEngine;
 
 [AddComponentMenu("DOTS Samples/GridPath/Cartesian Grid Movement")]
-[ConverterVersion("macton", 4)]
-public class CartesianGridMovementAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class CartesianGridMovementAuthoring : MonoBehaviour
 {
     public enum MovementOptions
     {
@@ -16,23 +15,26 @@ public class CartesianGridMovementAuthoring : MonoBehaviour, IConvertGameObjectT
     public float Speed;
     public MovementOptions Movement;
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class Baker : Baker<CartesianGridMovementAuthoring>
     {
-        dstManager.AddComponentData(entity, new CartesianGridDirection
+        public override void Bake(CartesianGridMovementAuthoring authoring)
         {
-            Value = 0, // default N
-        });
-        dstManager.AddComponentData(entity, new CartesianGridSpeed
-        {
-            Value = (ushort)(Speed * 1024.0f)
-        });
-        dstManager.AddComponentData(entity, new CartesianGridCoordinates
-        {
-            x = 0,
-            y = 0
-        });
+            AddComponent( new CartesianGridDirection
+            {
+                Value = 0, // default N
+            });
+            AddComponent( new CartesianGridSpeed
+            {
+                Value = (ushort)(authoring.Speed * 1024.0f)
+            });
+            AddComponent( new CartesianGridCoordinates
+            {
+                x = 0,
+                y = 0
+            });
 
-        if (Movement == MovementOptions.FollowTarget)
-            dstManager.AddComponentData(entity, new CartesianGridFollowTarget());
+            if (authoring.Movement == MovementOptions.FollowTarget)
+                AddComponent( new CartesianGridFollowTarget());
+        }
     }
 }

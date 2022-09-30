@@ -45,9 +45,9 @@ public unsafe partial class CartesianGridOnPlaneFollowTargetSystem : SystemBase
         var colCount = cartesianGridPlane.Blob.Value.ColCount;
         var trailingOffsets = (float2*)cartesianGridPlane.Blob.Value.TrailingOffsets.GetUnsafePtr();
 
-        var targetEntities = m_TargetQuery.ToEntityArray(Allocator.TempJob);
-        var targetCoordinates = m_TargetQuery.ToComponentDataArray<CartesianGridCoordinates>(Allocator.TempJob);
-        var getCartesianGridTargetDirectionFromEntity = GetBufferFromEntity<CartesianGridTargetDirection>(true);
+        var targetEntities = m_TargetQuery.ToEntityArray(World.UpdateAllocator.ToAllocator);
+        var targetCoordinates = m_TargetQuery.ToComponentDataArray<CartesianGridCoordinates>(World.UpdateAllocator.ToAllocator);
+        var getCartesianGridTargetDirectionFromEntity = GetBufferLookup<CartesianGridTargetDirection>(true);
 
         // Offset center to grid cell
         var cellCenterOffset = new float2(((float)colCount * 0.5f) - 0.5f, ((float)rowCount * 0.5f) - 0.5f);
@@ -63,16 +63,28 @@ public unsafe partial class CartesianGridOnPlaneFollowTargetSystem : SystemBase
             .WithAll<CartesianGridFollowTarget>()
             .ForEach((ref CartesianGridDirection gridDirection,
                 ref CartesianGridCoordinates gridCoordinates,
+#if !ENABLE_TRANSFORM_V1
+                ref LocalToWorldTransform transform) =>
+#else
                 ref Translation translation) =>
+#endif
                 {
                     var dir = gridDirection.Value;
                     if (dir != 0xff) // If moving, update grid based on trailing direction.
                     {
+#if !ENABLE_TRANSFORM_V1
+                        var nextGridPosition = new CartesianGridCoordinates(transform.Value.Position.xz + trailingOffsets[dir], rowCount, colCount);
+                        if (gridCoordinates.Equals(nextGridPosition))
+                        {
+                            // Don't allow translation to drift
+                            transform.Value.Position = CartesianGridMovement.SnapToGridAlongDirection(transform.Value.Position, dir, gridCoordinates, cellCenterOffset);
+#else
                         var nextGridPosition = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[dir], rowCount, colCount);
                         if (gridCoordinates.Equals(nextGridPosition))
                         {
                             // Don't allow translation to drift
                             translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
+#endif
                             return; // Still in the same grid cell. No need to change direction.
                         }
 
@@ -93,8 +105,5 @@ public unsafe partial class CartesianGridOnPlaneFollowTargetSystem : SystemBase
                     var validDirections = CartesianGridOnPlaneShortestPath.LookupDirectionToTarget(gridCoordinates, rowCount, colCount, targetDirections);
                     gridDirection.Value = CartesianGridMovement.PathVariation[(pathOffset * 16) + validDirections];
                 }).Schedule();
-
-        Dependency = targetEntities.Dispose(Dependency);
-        Dependency = targetCoordinates.Dispose(Dependency);
     }
 }

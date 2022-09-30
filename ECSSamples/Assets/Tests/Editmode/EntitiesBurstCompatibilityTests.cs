@@ -10,7 +10,8 @@ namespace Unity.Entities.Tests
         public EntitiesBurstCompatibilityTests()
             : base(new [] { "Unity.Entities", "Unity.Entities.BurstCompatibilityTestCodeGen" },
                 "Assets/Tests/Editmode/BurstCompatibility/Unity.Entities.BurstCompatibilityTestCodeGen/_generated_burst_tests.cs",
-                "Unity.Entities.BurstCompatibilityTestCodeGen")
+                "Unity.Entities.BurstCompatibilityTestCodeGen",
+                "Assets/Tests/EditMode/BurstCompatibility/TestScene.unity")
         {
         }
     }

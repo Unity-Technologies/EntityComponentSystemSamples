@@ -2,12 +2,14 @@ using Unity.Entities;
 using UnityEngine;
 
 [AddComponentMenu("DOTS Samples/GridPath/Cartesian Grid Target")]
-[ConverterVersion("macton", 1)]
-public class CartesianGridTargetAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class CartesianGridTargetAuthoring : MonoBehaviour
 {
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class Baker : Baker<CartesianGridTargetAuthoring>
     {
-        dstManager.AddComponent<CartesianGridTarget>(entity);
-        dstManager.AddComponentData(entity, new CartesianGridTargetCoordinates { x = -1, y = -1 });
+        public override void Bake(CartesianGridTargetAuthoring authoring)
+        {
+            AddComponent<CartesianGridTarget>();
+            AddComponent(new CartesianGridTargetCoordinates { x = -1, y = -1 });
+        }
     }
 }

@@ -1,6 +1,5 @@
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -12,16 +11,20 @@ namespace Unity.Physics.Tests
     {
     }
 
-    public class VerifyGravityFactor : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyGravityFactor : MonoBehaviour
     {
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyGravityFactorBaker : Baker<VerifyGravityFactor>
         {
-            dstManager.AddComponentData(entity, new VerifyGravityFactorData());
+            public override void Bake(VerifyGravityFactor authoring)
+            {
+                AddComponent<VerifyGravityFactorData>();
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    [RequireMatchingQueriesForUpdate]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateBefore(typeof(PhysicsSimulationGroup))]
     public partial class VerifyGravityFactorSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;

@@ -1,11 +1,10 @@
 # Hybrid URP Samples Project
-This Project includes feature sample Scenes, stress test Scenes, and unit tests for the URP Hybrid Renderer.\
-Please visit official [Hybrid Renderer documentation](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@0.50/manual/index.html) for more details.
+This Project includes feature sample Scenes, stress test Scenes, and unit tests for the URP Hybrid Renderer.
 
 ## Feature sample Scenes
-The feature sample Scenes are in the _SampleScenes_ folder. To ensure full workflow coverage, most of these Scenes include GameObjects in a SubScene and GameObjects that have a ConvertToEntity component. 
+The feature sample Scenes are in the _SampleScenes_ folder. Most of these Scenes include GameObjects in a SubScene. 
 
-Unity renders GameObjects with the Hybrid Renderer when a coresponding DOTS entity exists, and without the Hybrid Renderer when a corresponding DOTS entity does not exist. For the GameObjects in the SubScene, this means that Unity renders them with the Hybrid Renderer at all times; in Edit Mode, in Play Mode, and in the built player. For the GameObjects with a ConvertToEntity component, this means that Unity renders them with the Hybrid Renderer only in Play Mode and in the built player. This is because Unity converts the components to DOTS entities at runtime.
+Unity renders GameObjects with the Hybrid Renderer when a corresponding DOTS entity exists, and without the Hybrid Renderer when a corresponding DOTS entity does not exist. For the GameObjects in the SubScene, this means that Unity renders them with the Hybrid Renderer at all times; in Edit Mode, in Play Mode, and in the built player.
 
 ### Scene List
 
@@ -18,7 +17,7 @@ Unity renders GameObjects with the Hybrid Renderer when a coresponding DOTS enti
 | HybridEntitiesConversion | Demonstrates the graphics related Hybrid entities that you can put in a Subscene | ![](READMEimages/HybridEntitiesConversion.PNG) |
 | Lightmaps | Demonstrates lightmap support for Entities | ![](READMEimages/Lightmaps.PNG) |
 | Lightprobes | Demonstrates lightprobe support for Entities | ![](READMEimages/Lightprobes.PNG) |
-| LODs | Demonstrates LODs and HLODs in Hybrid Renderer | ![](READMEimages/LODs.PNG) |
+| LODs | Demonstrates LODs in Hybrid Renderer | ![](READMEimages/LODs.PNG) |
 | LODsStatic | Demonstrates static optimized LOD hierarchies | ![](READMEimages/LODs.PNG) |
 | MaterialMeshChange | Demonstrates how to change a Material and Mesh on Entities at runtime | ![](READMEimages/MaterialMeshChange.PNG) |
 | MaterialOverridesSample | Demonstrates the setup of overriding a material's properties without having to write code | ![](READMEimages/MaterialOverridesSample.PNG) |
@@ -43,4 +42,4 @@ The stress test scene contains 100,000 spawned boxes. They cycle though four dif
 _StressTestGameObjects_ has two variants: one that includes the color overrides, and one that does not incude color overrides. This is because modifying GameObject color requires Material changes per GameObject, which causes material replication per object and has a large performance impact. Providing a variant without color overrides demonstrates more realistic performance for cases where you only modify position.
 
 ## Compatibility
-Compatible with Unity 2021.3.4f1 and URP 12.1.7 or later.
+Compatible with Unity 2022.2.0b8 and URP 14.0.3 or later.

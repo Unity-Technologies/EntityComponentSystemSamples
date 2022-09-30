@@ -38,18 +38,30 @@ public unsafe partial class CartesianGridOnCubeBounceOffWallsSystem : SystemBase
             .WithNativeDisableUnsafePtrRestriction(trailingOffsets)
             .WithEntityQueryOptions(EntityQueryOptions.FilterWriteGroup)
             .ForEach((ref CartesianGridDirection gridDirection,
+#if !ENABLE_TRANSFORM_V1
+                ref LocalToWorldTransform transform,
+#else
                 ref Translation translation,
+#endif
                 ref CartesianGridCoordinates gridCoordinates,
                 ref CartesianGridOnCubeFace cubeFace) =>
                 {
                     var prevDir = gridDirection.Value;
                     var trailingOffset = trailingOffsets[prevDir];
+#if !ENABLE_TRANSFORM_V1
+                    var pos = transform.Value.Position.xz + trailingOffset;
+#else
                     var pos = translation.Value.xz + trailingOffset;
+#endif
                     var nextGridPosition = new CartesianGridCoordinates(pos, rowCount, rowCount);
                     if (gridCoordinates.Equals(nextGridPosition))
                     {
                         // Don't allow translation to drift
+#if !ENABLE_TRANSFORM_V1
+                        transform.Value.Position = CartesianGridMovement.SnapToGridAlongDirection(transform.Value.Position, prevDir, gridCoordinates, cellCenterOffset);
+#else
                         translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, prevDir, gridCoordinates, cellCenterOffset);
+#endif
                         return; // Still in the same grid cell. No need to change direction.
                     }
 
@@ -85,10 +97,17 @@ public unsafe partial class CartesianGridOnCubeBounceOffWallsSystem : SystemBase
                         // - Note that Y position won't be at target value from one edge to another, so that is interpolated in movement update,
                         //   purely for "smoothing" purposes.
                         var localToLocal = faceLocalToLocal[((prevFaceIndex * 6) + nextFaceIndex)];
+#if !ENABLE_TRANSFORM_V1
+                        transform.Value.Position.xyz = math.mul(localToLocal, new float4(transform.Value.Position, 1.0f)).xyz;
+
+                        // Update gridPosition relative to new face.
+                        gridCoordinates = new CartesianGridCoordinates(transform.Value.Position.xz + trailingOffsets[nextDir], rowCount, rowCount);
+#else
                         translation.Value.xyz = math.mul(localToLocal, new float4(translation.Value, 1.0f)).xyz;
 
                         // Update gridPosition relative to new face.
                         gridCoordinates = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[nextDir], rowCount, rowCount);
+#endif
                     }
                 }).Schedule();
     }

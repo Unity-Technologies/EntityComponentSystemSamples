@@ -43,13 +43,29 @@ namespace Unity.Physics.Editor
 
         private static void DrawCone(float3 point, float3 axis, float angle, Color color)
         {
-            new DebugStream.Cone
+#if UNITY_EDITOR
+            Handles.color = color;
+
+            float3 dir;
+            float scale = Math.NormalizeWithLength(axis, out dir);
+
+            float3 arm;
             {
-                Point = point,
-                Axis = axis,
-                Angle = angle,
-                Color = color
-            }.Draw();
+                float3 perp1, perp2;
+                Math.CalculatePerpendicularNormalized(dir, out perp1, out perp2);
+                arm = math.mul(quaternion.AxisAngle(perp1, angle), dir) * scale;
+            }
+
+            const int res = 16;
+            quaternion q = quaternion.AxisAngle(dir, 2.0f * (float)math.PI / res);
+            for (int i = 0; i < res; i++)
+            {
+                float3 nextArm = math.mul(q, arm);
+                Handles.DrawLine(point, point + arm);
+                Handles.DrawLine(point + arm, point + nextArm);
+                arm = nextArm;
+            }
+#endif
         }
 
         protected virtual void OnSceneGUI()

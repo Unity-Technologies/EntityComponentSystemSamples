@@ -7,39 +7,33 @@ namespace Unity.Physics.Tests
 {
     public struct WritingPhysicsData : IComponentData {}
 
-    public class PhysicsWritingScript : MonoBehaviour, IConvertGameObjectToEntity
+    public class PhysicsWritingScript : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class PhysicsWritingScriptBaker : Baker<PhysicsWritingScript>
         {
-            dstManager.AddComponentData(entity, new WritingPhysicsData());
+            public override void Bake(PhysicsWritingScript authoring)
+            {
+                AddComponent<WritingPhysicsData>();
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(BuildPhysicsWorld))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsInitializeGroup))]
+    [UpdateBefore(typeof(PhysicsSimulationGroup))]
     public partial class WritePhysicsTagsSystem : SystemBase
     {
         protected override void OnCreate()
         {
             base.OnCreate();
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(WritingPhysicsData) }
-            }));
-        }
-
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadWrite();
+            RequireForUpdate<WritingPhysicsData>();
         }
 
         protected override void OnUpdate()
         {
             Dependency = new WritePhysicsTagsJob
             {
-                PhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>().PhysicsWorld
+                PhysicsWorld = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld
             }.Schedule(Dependency);
         }
 

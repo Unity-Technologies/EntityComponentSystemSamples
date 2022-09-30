@@ -1,3 +1,9 @@
+# Samples Version 40
+
+## Changes
+
+* Update sample to com.unity.entities 1.0.0-exp.8.
+
 # Samples Version 39
 
 ## Changes

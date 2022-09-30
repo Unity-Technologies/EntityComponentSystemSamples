@@ -8,39 +8,33 @@ namespace Unity.Physics.Tests
 {
     public struct ReadingPhysicsData : IComponentData {}
 
-    public class PhysicsReadingScript : MonoBehaviour, IConvertGameObjectToEntity
+    public class PhysicsReadingScript : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class PhysicsReadingScriptBaker : Baker<PhysicsReadingScript>
         {
-            dstManager.AddComponentData(entity, new ReadingPhysicsData());
+            public override void Bake(PhysicsReadingScript authoring)
+            {
+                AddComponent<ReadingPhysicsData>();
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
     public partial class ReadPhysicsTagsSystem : SystemBase
     {
         protected override void OnCreate()
         {
             base.OnCreate();
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(ReadingPhysicsData) }
-            }));
-        }
-
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
+            RequireForUpdate<ReadingPhysicsData>();
         }
 
         protected override void OnUpdate()
         {
             Dependency = new ReadPhysicsTagsJob
             {
-                PhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>().PhysicsWorld
+                PhysicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld
             }.Schedule(Dependency);
         }
 
@@ -53,7 +47,7 @@ namespace Unity.Physics.Tests
                 var bodies = PhysicsWorld.Bodies;
                 for (int i = 0; i < bodies.Length; i++)
                 {
-                    // Default tags are 0, 1 should be written in WritingPhysicsTagsSystem to each of them
+                    //Default tags are 0, 1 should be written in WritingPhysicsTagsSystem to each of them
                     var body = bodies[i];
                     Assertions.Assert.AreEqual(1, body.CustomTags, "CustomTags should be 1 on all bodies!");
                 }

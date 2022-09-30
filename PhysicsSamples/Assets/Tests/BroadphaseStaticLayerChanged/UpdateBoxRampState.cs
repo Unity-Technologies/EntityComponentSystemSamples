@@ -1,6 +1,7 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -11,19 +12,23 @@ public struct EntityUpdater : IComponentData
     public int TimeToMove;
 }
 
-public class UpdateBoxRampState : MonoBehaviour, IConvertGameObjectToEntity
+public class UpdateBoxRampState : MonoBehaviour
 {
     public int TimeToDie;
     public int TimeToMove;
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class UpdateBoxRampStateBaker : Baker<UpdateBoxRampState>
     {
-        dstManager.AddComponentData(entity, new EntityUpdater { TimeToDie = TimeToDie, TimeToMove = TimeToMove });
+        public override void Bake(UpdateBoxRampState authoring)
+        {
+            AddComponent(new EntityUpdater { TimeToDie = authoring.TimeToDie, TimeToMove = authoring.TimeToMove });
+        }
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class EntityUpdaterSystem : SystemBase
 {
     protected override void OnUpdate()

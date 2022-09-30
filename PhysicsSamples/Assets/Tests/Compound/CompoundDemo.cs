@@ -5,7 +5,20 @@ using Unity.Physics;
 
 public class CompoundDemoScene : SceneCreationSettings {};
 
-public class CompoundDemo : SceneCreationAuthoring<CompoundDemoScene> {}
+public class CompoundDemo : SceneCreationAuthoring<CompoundDemoScene>
+{
+    class CompoundDemoBaker : Baker<CompoundDemo>
+    {
+        public override void Bake(CompoundDemo authoring)
+        {
+            AddComponentObject(new CompoundDemoScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial
+            });
+        }
+    }
+}
 
 public class CompoundDemoSystem : SceneCreationSystem<CompoundDemoScene>
 {

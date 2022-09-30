@@ -18,7 +18,9 @@ namespace Unity.Physics.Extensions
     {
         public bool IgnoreTriggers;
         public bool IgnoreStatic;
+        [System.NonSerialized]
         public Entity PreviousEntity;
+        [System.NonSerialized]
         public Entity CurrentEntity;
         public UnityEngine.Material HoverMaterial;
         public UnityEngine.Material OriginalMaterial;
@@ -46,33 +48,34 @@ namespace Unity.Physics.Extensions
     }
 
     [DisallowMultipleComponent]
-    public class MouseHoverAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    public class MouseHoverAuthoring : MonoBehaviour
     {
         public UnityEngine.Material Highlight;
         public bool IgnoreTriggers = true;
         public bool IgnoreStatic = true;
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        protected void OnEnable() {}
+    }
+
+    class MouseHoverBaker : Baker<MouseHoverAuthoring>
+    {
+        public override void Bake(MouseHoverAuthoring authoring)
         {
-            dstManager.AddSharedComponentData(entity, new MouseHover()
+            AddSharedComponentManaged(new MouseHover()
             {
                 PreviousEntity = Entity.Null,
                 CurrentEntity = Entity.Null,
-                HoverMaterial = Highlight,
-                IgnoreTriggers = IgnoreTriggers,
-                IgnoreStatic = IgnoreStatic
+                HoverMaterial = authoring.Highlight,
+                IgnoreTriggers = authoring.IgnoreTriggers,
+                IgnoreStatic = authoring.IgnoreStatic
             });
         }
-
-        protected void OnEnable() {}
     }
 
     // Applies any mouse spring as a change in velocity on the entity's motion component
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial class MouseHoverSystem : SystemBase
     {
-        BuildPhysicsWorld m_BuildPhysicsWorld;
-
         [BurstCompile]
         public struct WorldRaycastJob : IJob
         {
@@ -99,12 +102,7 @@ namespace Unity.Physics.Extensions
         protected override void OnCreate()
         {
             base.OnCreate();
-
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(MouseHover) }
-            }));
+            RequireForUpdate<MouseHover>();
         }
 
         // Find the Entity holding the Graphical representation of a Physics Shape.
@@ -176,8 +174,8 @@ namespace Unity.Physics.Extensions
                     {
                         // Check for an Key/Entity pair buffer first.
                         // This should exist if the Physics conversion pipeline was invoked.
-                        var colliderKeyEntityPairBuffers = GetBufferFromEntity<PhysicsColliderKeyEntityPair>(true);
-                        if (colliderKeyEntityPairBuffers.HasComponent(bodyEntity))
+                        var colliderKeyEntityPairBuffers = GetBufferLookup<PhysicsColliderKeyEntityPair>(true);
+                        if (colliderKeyEntityPairBuffers.HasBuffer(bodyEntity))
                         {
                             var colliderKeyEntityBuffer = colliderKeyEntityPairBuffers[bodyEntity];
                             // TODO: Faster lookup option?
@@ -215,11 +213,11 @@ namespace Unity.Physics.Extensions
                                 // This assumes there is a LinkedEntityGroup Buffer on original and instance Entity.
                                 // No doubt there is a more optimal way of doing this remap with more specific
                                 // knowledge of the final application.
-                                var linkedEntityGroupBuffers = GetBufferFromEntity<LinkedEntityGroup>(true);
+                                var linkedEntityGroupBuffers = GetBufferLookup<LinkedEntityGroup>(true);
 
                                 // Only remap if the buffers exist, have been created and are of equal length.
-                                bool hasBufferRootEntity = linkedEntityGroupBuffers.HasComponent(rootEntityFromLeaf);
-                                bool hasBufferBodyEntity = linkedEntityGroupBuffers.HasComponent(bodyEntity);
+                                bool hasBufferRootEntity = linkedEntityGroupBuffers.HasBuffer(rootEntityFromLeaf);
+                                bool hasBufferBodyEntity = linkedEntityGroupBuffers.HasBuffer(bodyEntity);
                                 if (hasBufferRootEntity && hasBufferBodyEntity)
                                 {
                                     var prefabEntityGroupBuffer = linkedEntityGroupBuffers[rootEntityFromLeaf];
@@ -261,7 +259,7 @@ namespace Unity.Physics.Extensions
 
         protected override void OnUpdate()
         {
-            var collisionWorld = m_BuildPhysicsWorld.PhysicsWorld.CollisionWorld;
+            var collisionWorld = GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             Vector2 mousePosition = Input.mousePosition;
             UnityEngine.Ray unityRay = Camera.main.ScreenPointToRay(mousePosition);
             var rayInput = new RaycastInput
@@ -272,7 +270,7 @@ namespace Unity.Physics.Extensions
             };
 
             var mouseHoverEntity = GetSingletonEntity<MouseHover>();
-            var mouseHover = EntityManager.GetSharedComponentData<MouseHover>(mouseHoverEntity);
+            var mouseHover = EntityManager.GetSharedComponentManaged<MouseHover>(mouseHoverEntity);
 
             RaycastHit hit;
             using (var raycastHitRef = new NativeReference<RaycastHit>(Allocator.TempJob))
@@ -303,23 +301,23 @@ namespace Unity.Physics.Extensions
             // If there was a previous entity and it had a RenderMesh then reset its Material
             if (hasPreviousEntity && EntityManager.HasComponent<RenderMesh>(mouseHover.PreviousEntity))
             {
-                var renderMesh = EntityManager.GetSharedComponentData<RenderMesh>(mouseHover.PreviousEntity);
+                var renderMesh = EntityManager.GetSharedComponentManaged<RenderMesh>(mouseHover.PreviousEntity);
                 renderMesh.material = mouseHover.OriginalMaterial;
-                EntityManager.SetSharedComponentData(mouseHover.PreviousEntity, renderMesh);
+                EntityManager.SetSharedComponentManaged(mouseHover.PreviousEntity, renderMesh);
             }
 
             // If there was a new current entity and it has a RenderMesh then set its Material
             if (hasCurrentEntity && EntityManager.HasComponent<RenderMesh>(mouseHover.CurrentEntity))
             {
-                var renderMesh = EntityManager.GetSharedComponentData<RenderMesh>(mouseHover.CurrentEntity);
+                var renderMesh = EntityManager.GetSharedComponentManaged<RenderMesh>(mouseHover.CurrentEntity);
                 mouseHover.OriginalMaterial = renderMesh.material;
                 mouseHover.PreviousEntity = mouseHover.CurrentEntity;
                 mouseHover.CurrentEntity = graphicsEntity;
                 renderMesh.material = mouseHover.HoverMaterial;
-                EntityManager.SetSharedComponentData(mouseHover.CurrentEntity, renderMesh);
+                EntityManager.SetSharedComponentManaged(mouseHover.CurrentEntity, renderMesh);
             }
 
-            EntityManager.SetSharedComponentData(mouseHoverEntity, mouseHover);
+            EntityManager.SetSharedComponentManaged(mouseHoverEntity, mouseHover);
         }
     }
 }

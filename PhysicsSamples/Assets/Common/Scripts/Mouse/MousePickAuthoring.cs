@@ -76,31 +76,31 @@ namespace Unity.Physics.Extensions
     }
 
     [DisallowMultipleComponent]
-    public class MousePickAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    public class MousePickAuthoring : MonoBehaviour
     {
         public bool IgnoreTriggers = true;
         public bool IgnoreStatic = true;
 
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-        {
-            dstManager.AddComponentData(entity, new MousePick()
-            {
-                IgnoreTriggers = IgnoreTriggers,
-                IgnoreStatic = IgnoreStatic
-            });
-        }
-
         protected void OnEnable() {}
     }
 
+    class MousePickBaker : Baker<MousePickAuthoring>
+    {
+        public override void Bake(MousePickAuthoring authoring)
+        {
+            AddComponent(new MousePick()
+            {
+                IgnoreTriggers = authoring.IgnoreTriggers,
+                IgnoreStatic = authoring.IgnoreStatic
+            });
+        }
+    }
+
     // Attaches a virtual spring to the picked entity
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
+    [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
     public partial class MousePickSystem : SystemBase
     {
         public const float k_MaxDistance = 100.0f;
-
-        BuildPhysicsWorld m_BuildPhysicsWorldSystem;
-
         public NativeReference<SpringData> SpringDataRef;
         public JobHandle? PickJobHandle;
 
@@ -111,7 +111,6 @@ namespace Unity.Physics.Extensions
             public float3 PointOnBody;
             public float MouseDepth;
         }
-
 
         [BurstCompile]
         struct Pick : IJob
@@ -162,22 +161,12 @@ namespace Unity.Physics.Extensions
 
         protected override void OnCreate()
         {
-            m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(MousePick) }
-            }));
+            RequireForUpdate<MousePick>();
         }
 
         protected override void OnDestroy()
         {
             SpringDataRef.Dispose();
-        }
-
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
         }
 
         protected override void OnUpdate()
@@ -187,10 +176,12 @@ namespace Unity.Physics.Extensions
                 Vector2 mousePosition = Input.mousePosition;
                 UnityEngine.Ray unityRay = Camera.main.ScreenPointToRay(mousePosition);
 
+                var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+
                 // Schedule picking job, after the collision world has been built
                 Dependency = new Pick
                 {
-                    CollisionWorld = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld,
+                    CollisionWorld = world.CollisionWorld,
                     SpringDataRef = SpringDataRef,
                     RayInput = new RaycastInput
                     {
@@ -218,28 +209,24 @@ namespace Unity.Physics.Extensions
     }
 
     // Applies any mouse spring as a change in velocity on the entity's motion component
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(BuildPhysicsWorld))]
+    [UpdateInGroup(typeof(BeforePhysicsSystemGroup))]
     public partial class MouseSpringSystem : SystemBase
     {
         MousePickSystem m_PickSystem;
 
         protected override void OnCreate()
         {
-            m_PickSystem = World.GetOrCreateSystem<MousePickSystem>();
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(MousePick) }
-            }));
+            m_PickSystem = World.GetOrCreateSystemManaged<MousePickSystem>();
+            RequireForUpdate<MousePick>();
         }
 
         protected override void OnUpdate()
         {
-            ComponentDataFromEntity<Translation> Positions = GetComponentDataFromEntity<Translation>(true);
-            ComponentDataFromEntity<Rotation> Rotations = GetComponentDataFromEntity<Rotation>(true);
-            ComponentDataFromEntity<PhysicsVelocity> Velocities = GetComponentDataFromEntity<PhysicsVelocity>();
-            ComponentDataFromEntity<PhysicsMass> Masses = GetComponentDataFromEntity<PhysicsMass>(true);
-            ComponentDataFromEntity<PhysicsMassOverride> MassOverrides = GetComponentDataFromEntity<PhysicsMassOverride>(true);
+            ComponentLookup<Translation> Positions = GetComponentLookup<Translation>(true);
+            ComponentLookup<Rotation> Rotations = GetComponentLookup<Rotation>(true);
+            ComponentLookup<PhysicsVelocity> Velocities = GetComponentLookup<PhysicsVelocity>();
+            ComponentLookup<PhysicsMass> Masses = GetComponentLookup<PhysicsMass>(true);
+            ComponentLookup<PhysicsMassOverride> MassOverrides = GetComponentLookup<PhysicsMassOverride>(true);
 
             // If there's a pick job, wait for it to finish
             if (m_PickSystem.PickJobHandle != null)
@@ -293,7 +280,7 @@ namespace Unity.Physics.Extensions
 
                     const float elasticity = 0.1f;
                     const float damping = 0.5f;
-                    deltaVelocity = -pointDiff * (elasticity / Time.DeltaTime) - damping * relativeVelocityInWorld;
+                    deltaVelocity = -pointDiff * (elasticity / SystemAPI.Time.DeltaTime) - damping * relativeVelocityInWorld;
                 }
 
                 // Build effective mass matrix in world space
@@ -329,7 +316,7 @@ namespace Unity.Physics.Extensions
 
                 // Clip the impulse
                 const float maxAcceleration = 250.0f;
-                float maxImpulse = math.rcp(massComponent.InverseMass) * Time.DeltaTime * maxAcceleration;
+                float maxImpulse = math.rcp(massComponent.InverseMass) * SystemAPI.Time.DeltaTime * maxAcceleration;
                 impulse *= math.min(1.0f, math.sqrt((maxImpulse * maxImpulse) / math.lengthsq(impulse)));
 
                 // Apply the impulse

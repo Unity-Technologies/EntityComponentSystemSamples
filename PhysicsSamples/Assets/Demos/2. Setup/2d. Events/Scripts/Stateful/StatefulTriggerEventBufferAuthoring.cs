@@ -1,13 +1,5 @@
 using Unity.Entities;
-using Unity.Jobs;
-using Unity.Physics;
-using Unity.Physics.Systems;
 using UnityEngine;
-using Unity.Collections;
-using Unity.Burst;
-using System;
-using Unity.Assertions;
-using Unity.Mathematics;
 
 namespace Unity.Physics.Stateful
 {
@@ -17,11 +9,15 @@ namespace Unity.Physics.Stateful
     // CharacterController on its own, without StatefulTriggerEventBufferSystem interference.
     public struct StatefulTriggerEventExclude : IComponentData {}
 
-    public class StatefulTriggerEventBufferAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    public class StatefulTriggerEventBufferAuthoring : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    }
+
+    class StatefulTriggerEventBufferAuthoringBaker : Baker<StatefulTriggerEventBufferAuthoring>
+    {
+        public override void Bake(StatefulTriggerEventBufferAuthoring authoring)
         {
-            dstManager.AddBuffer<StatefulTriggerEvent>(entity);
+            AddBuffer<StatefulTriggerEvent>();
         }
     }
 }

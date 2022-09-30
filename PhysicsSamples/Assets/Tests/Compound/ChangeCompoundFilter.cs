@@ -13,10 +13,17 @@ namespace Unity.Physics.Tests
 
     public class ChangeCompoundFilter : SceneCreationAuthoring<ChangeCompoundFilterScene>
     {
-        public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class ChangeCompoundFilterBaker : Baker<ChangeCompoundFilter>
         {
-            base.Convert(entity, dstManager, conversionSystem);
-            dstManager.AddComponentData(entity, new ChangeCompoundFilterData());
+            public override void Bake(ChangeCompoundFilter authoring)
+            {
+                AddComponentObject(new ChangeCompoundFilterScene
+                {
+                    DynamicMaterial = authoring.DynamicMaterial,
+                    StaticMaterial = authoring.StaticMaterial
+                });
+                AddComponent<ChangeCompoundFilterData>();
+            }
         }
     }
 
@@ -98,16 +105,11 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
+    [UpdateAfter(typeof(PhysicsSystemGroup))]
     public partial class UpdateFilterSystem : SystemBase
     {
         private int m_Counter;
-
         EntityQuery m_VerificationGroup;
-
-        BuildPhysicsWorld m_BuildPhysicsWorld;
-        ExportPhysicsWorld m_ExportPhysicsWorld;
-        ChangeCompoundFilterSystem m_ChangeCompoundFilterSystem;
 
         protected override void OnCreate()
         {
@@ -117,10 +119,6 @@ namespace Unity.Physics.Tests
             });
 
             RequireForUpdate(m_VerificationGroup);
-
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            m_ExportPhysicsWorld = World.GetOrCreateSystem<ExportPhysicsWorld>();
-            m_ChangeCompoundFilterSystem = World.GetOrCreateSystem<ChangeCompoundFilterSystem>();
 
             m_Counter = 0;
         }
@@ -132,21 +130,16 @@ namespace Unity.Physics.Tests
             {
                 Dependency.Complete();
 
-                var staticEntities = m_BuildPhysicsWorld.PhysicsData.StaticEntityGroup.ToEntityArray(Allocator.TempJob);
+                var bpwData = EntityManager.GetComponentData<BuildPhysicsWorldData>(World.GetExistingSystem<BuildPhysicsWorld>());
+                var staticEntities = bpwData.StaticEntityGroup.ToEntityArray(Allocator.TempJob);
 
                 // Change filter of child 0 in compound
                 unsafe
                 {
                     var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[0]);
 
-                    ColliderKey colliderKey0 = ColliderKey.Empty;
-                    colliderKey0.PushSubKey(colliderComponent.Value.Value.NumColliderKeyBits, 0);
-
                     CompoundCollider* compoundCollider = (CompoundCollider*)colliderComponent.ColliderPtr;
-                    compoundCollider->GetChild(ref colliderKey0, out ChildCollider child0);
-                    child0.Collider->Filter = CollisionFilter.Zero;
-                    compoundCollider->RefreshCollisionFilter();
-
+                    compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(0));
                     EntityManager.SetComponentData(staticEntities[0], colliderComponent);
                 }
 
@@ -155,14 +148,8 @@ namespace Unity.Physics.Tests
                 {
                     var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[1]);
 
-                    ColliderKey colliderKey1 = ColliderKey.Empty;
-                    colliderKey1.PushSubKey(colliderComponent.Value.Value.NumColliderKeyBits, 1);
-
                     CompoundCollider* compoundCollider = (CompoundCollider*)colliderComponent.ColliderPtr;
-                    compoundCollider->GetChild(ref colliderKey1, out ChildCollider child1);
-                    child1.Collider->Filter = CollisionFilter.Zero;
-                    compoundCollider->RefreshCollisionFilter();
-
+                    compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(1));
                     EntityManager.SetComponentData(staticEntities[1], colliderComponent);
                 }
 
@@ -171,25 +158,16 @@ namespace Unity.Physics.Tests
                 {
                     var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[2]);
 
-                    ColliderKey colliderKey0 = ColliderKey.Empty;
-                    colliderKey0.PushSubKey(colliderComponent.Value.Value.NumColliderKeyBits, 0);
-                    ColliderKey colliderKey1 = ColliderKey.Empty;
-                    colliderKey1.PushSubKey(colliderComponent.Value.Value.NumColliderKeyBits, 1);
-
                     CompoundCollider* compoundCollider = (CompoundCollider*)colliderComponent.ColliderPtr;
-                    compoundCollider->GetChild(ref colliderKey0, out ChildCollider child0);
-                    compoundCollider->GetChild(ref colliderKey1, out ChildCollider child1);
-                    child0.Collider->Filter = CollisionFilter.Zero;
-                    child1.Collider->Filter = CollisionFilter.Zero;
-                    compoundCollider->RefreshCollisionFilter();
-
+                    compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(0));
+                    compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(1));
                     EntityManager.SetComponentData(staticEntities[2], colliderComponent);
                 }
 
                 // Change filter of the compound itself
                 {
                     var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[3]);
-                    colliderComponent.Value.Value.Filter = CollisionFilter.Zero;
+                    colliderComponent.Value.Value.SetCollisionFilter(CollisionFilter.Zero);
                     EntityManager.SetComponentData(staticEntities[3], colliderComponent);
                 }
 
@@ -197,7 +175,8 @@ namespace Unity.Physics.Tests
             }
             else if (m_Counter == 50)
             {
-                var dynamicEntities = m_BuildPhysicsWorld.PhysicsData.DynamicEntityGroup.ToEntityArray(Allocator.TempJob);
+                var bpwData = EntityManager.GetComponentData<BuildPhysicsWorldData>(World.GetExistingSystem<BuildPhysicsWorld>());
+                var dynamicEntities = bpwData.DynamicEntityGroup.ToEntityArray(Allocator.TempJob);
 
                 // First 2 boxes should stay still, while other 2 should fall through
                 {

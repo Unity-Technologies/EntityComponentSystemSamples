@@ -10,7 +10,7 @@ public class SliderHandler : MonoBehaviour
     public void OnSliderChange()
     {
         float fixedFps = GetComponent<Slider>().value;
-        var fixedSimulationGroup = World.DefaultGameObjectInjectionWorld?.GetExistingSystem<FixedStepSimulationSystemGroup>();
+        var fixedSimulationGroup = World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<FixedStepSimulationSystemGroup>();
         if (fixedSimulationGroup != null)
         {
             // The group timestep can be set at runtime:

@@ -14,7 +14,7 @@ public partial class CartesianGridOnCubeSoloSpawnerSystem : SystemBase
     protected override void OnCreate()
     {
         // Cache the BeginInitializationEntityCommandBufferSystem in a field, so we don't have to create it every frame
-        m_EntityCommandBufferSystem = World.GetOrCreateSystem<BeginInitializationEntityCommandBufferSystem>();
+        m_EntityCommandBufferSystem = World.GetOrCreateSystemManaged<BeginInitializationEntityCommandBufferSystem>();
         m_GridQuery = GetEntityQuery(ComponentType.ReadOnly<CartesianGridOnCube>());
         RequireForUpdate(m_GridQuery);
     }
@@ -22,7 +22,7 @@ public partial class CartesianGridOnCubeSoloSpawnerSystem : SystemBase
     protected override void OnUpdate()
     {
         // Clamp delta time so you can't overshoot.
-        var deltaTime = math.min(Time.DeltaTime, 0.05f);
+        var deltaTime = math.min(SystemAPI.Time.DeltaTime, 0.05f);
 
         var commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
         var cartesianGridCube = GetSingleton<CartesianGridOnCube>();
@@ -48,7 +48,11 @@ public partial class CartesianGridOnCubeSoloSpawnerSystem : SystemBase
                     var y = 1.0f;
                     var faceIndex = soloSpawner.Random.NextInt(0, 6);
 
+#if !ENABLE_TRANSFORM_V1
+                    commandBuffer.SetComponent(entity, new LocalToWorldTransform { Value = UniformScaleTransform.FromPosition(new float3(x, y, z)) });
+#else
                     commandBuffer.SetComponent(entity, new Translation { Value = new float3(x, y, z) });
+#endif
                     commandBuffer.AddComponent(entity, new CartesianGridOnCubeFace { Value = (byte)faceIndex });
                     soloSpawner.GeneratedCount++;
                 }

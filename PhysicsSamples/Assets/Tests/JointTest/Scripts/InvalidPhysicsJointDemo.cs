@@ -4,7 +4,20 @@ using Unity.Physics;
 
 public class InvalidPhysicsJointDemoScene : SceneCreationSettings {}
 
-public class InvalidPhysicsJointDemo : SceneCreationAuthoring<InvalidPhysicsJointDemoScene> {}
+public class InvalidPhysicsJointDemo : SceneCreationAuthoring<InvalidPhysicsJointDemoScene>
+{
+    class InvalidPhysicsJointDemoBaker : Baker<InvalidPhysicsJointDemo>
+    {
+        public override void Bake(InvalidPhysicsJointDemo authoring)
+        {
+            AddComponentObject(new InvalidPhysicsJointDemoScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial
+            });
+        }
+    }
+}
 
 public class InvalidPhyiscsJointDemoSystem : SceneCreationSystem<InvalidPhysicsJointDemoScene>
 {

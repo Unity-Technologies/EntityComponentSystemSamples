@@ -26,63 +26,34 @@ public struct ModifyContactJacobians : IComponentData
 }
 
 [Serializable]
-public class ModifyContactJacobiansBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class ModifyContactJacobiansBehaviour : MonoBehaviour
 {
-    void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-    {
-        dstManager.AddComponentData(entity, new ModifyContactJacobians { type = ModificationType });
-    }
-
     public ModifyContactJacobians.ModificationType ModificationType;
 }
 
-// A system which configures the simulation step to modify contact jacobains in various ways
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(StepPhysicsWorld))]
-public partial class ModifyContactJacobiansSystem : SystemBase
+class ModifyContactJacobiansBaker : Baker<ModifyContactJacobiansBehaviour>
 {
-    StepPhysicsWorld m_StepPhysicsWorld;
-    SimulationCallbacks.Callback m_PreparationCallback;
-    SimulationCallbacks.Callback m_JacobianModificationCallback;
-
-    private static bool IsModificationType(ModifyContactJacobians.ModificationType typeToCheck,
-        ModifyContactJacobians.ModificationType typeOfA, ModifyContactJacobians.ModificationType typeOfB) => typeOfA == typeToCheck || typeOfB == typeToCheck;
-
-    protected override void OnCreate()
+    public override void Bake(ModifyContactJacobiansBehaviour authoring)
     {
-        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-
-        m_PreparationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-        {
-            return new SetContactFlagsJob
-            {
-                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
-            }.Schedule(simulation, ref world, inDeps);
-        };
-
-        m_JacobianModificationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-        {
-            return new ModifyJacobiansJob
-            {
-                modificationData = GetComponentDataFromEntity<ModifyContactJacobians>(true)
-            }.Schedule(simulation, ref world, inDeps);
-        };
-
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[] { typeof(ModifyContactJacobians) }
-        }));
+        AddComponent(new ModifyContactJacobians { type = authoring.ModificationType });
     }
+}
+
+[BurstCompile]
+[UpdateInGroup(typeof(PhysicsCreateJacobiansGroup), OrderFirst = true)]
+public partial struct SetContactFlagsSystem : ISystem
+{
+    private ComponentLookup<ModifyContactJacobians> m_JacobianData;
 
     // This job reads the modify component and sets some data on the contact, to get propagated to the jacobian
     // for processing in our jacobian modifier job. This is necessary because some flags require extra data to
     // be allocated along with the jacobian (e.g., SurfaceVelocity data typically does not exist). We also set
-    // user data bits in the jacobianFlags to save us from looking up the ComponentDataFromEntity later.
+    // user data bits in the jacobianFlags to save us from looking up the ComponentLookup later.
     [BurstCompile]
     struct SetContactFlagsJob : IContactsJob
     {
         [ReadOnly]
-        public ComponentDataFromEntity<ModifyContactJacobians> modificationData;
+        public ComponentLookup<ModifyContactJacobians> modificationData;
 
         public void Execute(ref ModifiableContactHeader manifold, ref ModifiableContactPoint contact)
         {
@@ -101,13 +72,13 @@ public partial class ModifyContactJacobiansSystem : SystemBase
                 typeB = modificationData[entityB].type;
             }
 
-            if (IsModificationType(ModifyContactJacobians.ModificationType.SurfaceVelocity, typeA, typeB))
+            if (ModifyContactJacobiansSystem.IsModificationType(ModifyContactJacobians.ModificationType.SurfaceVelocity, typeA, typeB))
             {
                 manifold.JacobianFlags |= JacobianFlags.EnableSurfaceVelocity;
             }
 
-            if (IsModificationType(ModifyContactJacobians.ModificationType.InfiniteInertia, typeA, typeB) ||
-                IsModificationType(ModifyContactJacobians.ModificationType.BiggerInertia, typeA, typeB))
+            if (ModifyContactJacobiansSystem.IsModificationType(ModifyContactJacobians.ModificationType.InfiniteInertia, typeA, typeB) ||
+                ModifyContactJacobiansSystem.IsModificationType(ModifyContactJacobians.ModificationType.BiggerInertia, typeA, typeB))
             {
                 manifold.JacobianFlags |= JacobianFlags.EnableMassFactors;
             }
@@ -115,10 +86,55 @@ public partial class ModifyContactJacobiansSystem : SystemBase
     }
 
     [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ModifyContactJacobians>()));
+        m_JacobianData = state.GetComponentLookup<ModifyContactJacobians>();
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_JacobianData.Update(ref state);
+        var simulationSingleton = SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW;
+
+        if (simulationSingleton.Type == SimulationType.NoPhysics)
+        {
+            return;
+        }
+
+        // Schedule jobs
+        var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+
+        var job = new SetContactFlagsJob
+        {
+            modificationData = m_JacobianData
+        };
+
+        state.Dependency = job.Schedule(simulationSingleton, ref world, state.Dependency);
+    }
+}
+
+// A system which configures the simulation step to modify contact jacobains in various ways
+[UpdateInGroup(typeof(PhysicsSolveAndIntegrateGroup), OrderFirst = true)]
+[BurstCompile]
+public partial struct ModifyContactJacobiansSystem : ISystem
+{
+    private ComponentLookup<ModifyContactJacobians> m_JacobianData;
+
+    internal static bool IsModificationType(ModifyContactJacobians.ModificationType typeToCheck,
+        ModifyContactJacobians.ModificationType typeOfA, ModifyContactJacobians.ModificationType typeOfB) => typeOfA == typeToCheck || typeOfB == typeToCheck;
+
+    [BurstCompile]
     struct ModifyJacobiansJob : IJacobiansJob
     {
         [ReadOnly]
-        public ComponentDataFromEntity<ModifyContactJacobians> modificationData;
+        public ComponentLookup<ModifyContactJacobians> modificationData;
 
         // Don't do anything for triggers
         public void Execute(ref ModifiableJacobianHeader h, ref ModifiableTriggerJacobian j) {}
@@ -234,11 +250,37 @@ public partial class ModifyContactJacobiansSystem : SystemBase
         }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics) return;
+        state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ModifyContactJacobians>()));
+        m_JacobianData = state.GetComponentLookup<ModifyContactJacobians>(true);
+    }
 
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, m_PreparationCallback, Dependency);
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, m_JacobianModificationCallback, Dependency);
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_JacobianData.Update(ref state);
+        var simulationSingleton = SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW;
+
+        if (simulationSingleton.Type == SimulationType.NoPhysics)
+        {
+            return;
+        }
+
+        // Schedule jobs
+        var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+
+        var job = new ModifyJacobiansJob
+        {
+            modificationData = m_JacobianData
+        };
+
+        state.Dependency = job.Schedule(simulationSingleton, ref world, state.Dependency);
     }
 }

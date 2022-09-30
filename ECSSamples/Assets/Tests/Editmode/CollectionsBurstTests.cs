@@ -8,7 +8,8 @@ public class CollectionsBurstTests : BurstCompatibilityTests
     public CollectionsBurstTests()
         : base(new [] { "Unity.Collections", "Unity.Collections.BurstCompatibilityTestCodeGen" },
             "Assets/Tests/Editmode/BurstCompatibility/Unity.Collections.BurstCompatibilityTestCodeGen/_generated_burst_tests.cs",
-            "Unity.Collections.BurstCompatibilityTestCodeGen")
+            "Unity.Collections.BurstCompatibilityTestCodeGen",
+            "Assets/Tests/EditMode/BurstCompatibility/TestScene.unity")
     {
     }
 }

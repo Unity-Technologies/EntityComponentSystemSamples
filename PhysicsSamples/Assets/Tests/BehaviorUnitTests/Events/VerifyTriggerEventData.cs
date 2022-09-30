@@ -1,7 +1,6 @@
 using System;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics.Systems;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -13,36 +12,31 @@ namespace Unity.Physics.Tests
     }
 
     [Serializable]
-    public class VerifyTriggerEventData : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyTriggerEventData : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyTriggerEventDataBaker : Baker<VerifyTriggerEventData>
         {
-            dstManager.AddComponentData(entity, new VerifyTriggerEventDataData());
+            public override void Bake(VerifyTriggerEventData authoring)
+            {
+                AddComponent<VerifyTriggerEventDataData>();
 
 #if HAVOK_PHYSICS_EXISTS
-            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
-            config.EnableSleeping = 0;
-            dstManager.AddComponentData(entity, config);
+                Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
+                config.EnableSleeping = 0;
+                AddComponent(config);
 #endif
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
     public partial class VerifyTriggerEventDataSystem : SystemBase
     {
-        BuildPhysicsWorld m_BuildPhysicsWorld;
-        StepPhysicsWorld m_StepPhysicsWorld;
-
         protected override void OnCreate()
         {
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[] { typeof(VerifyTriggerEventDataData) }
-            }));
+            RequireForUpdate<VerifyTriggerEventDataData>();
         }
 
         struct VerifyTriggerEventDataJob : ITriggerEventsJob
@@ -51,7 +45,7 @@ namespace Unity.Physics.Tests
             public NativeArray<RigidBody> Bodies;
 
             [ReadOnly]
-            public ComponentDataFromEntity<VerifyTriggerEventDataData> VerificationData;
+            public ComponentLookup<VerifyTriggerEventDataData> VerificationData;
 
             public void Execute(TriggerEvent triggerEvent)
             {
@@ -65,19 +59,13 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
-        }
-
         protected override void OnUpdate()
         {
             Dependency = new VerifyTriggerEventDataJob
             {
-                Bodies = m_BuildPhysicsWorld.PhysicsWorld.Bodies,
-                VerificationData = GetComponentDataFromEntity<VerifyTriggerEventDataData>(true)
-            }.Schedule(m_StepPhysicsWorld.Simulation, Dependency);
+                Bodies = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld.Bodies,
+                VerificationData = GetComponentLookup<VerifyTriggerEventDataData>(true)
+            }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
         }
     }
 }

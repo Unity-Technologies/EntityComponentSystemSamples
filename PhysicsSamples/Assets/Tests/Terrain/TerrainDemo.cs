@@ -35,22 +35,25 @@ public class TerrainDemo : SceneCreationAuthoring<TerrainDemoScene>
     public int NumChildren = 0;
     public TerrainCollider.CollisionMethod Method;
 
-    public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class TerrainDemoBaker : Baker<TerrainDemo>
     {
-        dstManager.AddComponentData(entity, new TerrainDemoScene
+        public override void Bake(TerrainDemo authoring)
         {
-            DynamicMaterial = DynamicMaterial,
-            StaticMaterial = StaticMaterial,
-            Method = Method,
-            SizeX = SizeX,
-            SizeZ = SizeZ,
-            ScaleX = ScaleX,
-            ScaleY = ScaleY,
-            ScaleZ = ScaleZ,
-            BuildCompoundTerrain = BuildCompoundTerrain,
-            NumChildren = NumChildren,
-            BuildTerrainMesh = BuildTerrainMesh
-        });
+            AddComponentObject(new TerrainDemoScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial,
+                Method = authoring.Method,
+                SizeX = authoring.SizeX,
+                SizeZ = authoring.SizeZ,
+                ScaleX = authoring.ScaleX,
+                ScaleY = authoring.ScaleY,
+                ScaleZ = authoring.ScaleZ,
+                BuildCompoundTerrain = authoring.BuildCompoundTerrain,
+                NumChildren = authoring.NumChildren,
+                BuildTerrainMesh = authoring.BuildTerrainMesh
+            });
+        }
     }
 }
 
@@ -162,6 +165,6 @@ public class TerrainDemoSystem : SceneCreationSystem<TerrainDemoScene>
                 triangles.Add(new int3(vertexIndex++, vertexIndex++, vertexIndex++));
             }
 
-        return MeshCollider.Create(vertices, triangles);
+        return MeshCollider.Create(vertices.AsArray(), triangles.AsArray());
     }
 }

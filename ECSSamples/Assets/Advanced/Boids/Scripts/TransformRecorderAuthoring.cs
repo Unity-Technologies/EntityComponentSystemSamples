@@ -14,18 +14,20 @@ using UnityEngine;
 // - Store samples into DynamicBuffer
 
 [AddComponentMenu("DOTS Samples/Boids/TransformRecorder")]
-[ConverterVersion("macton", 2)]
-public class TransformRecorderAuthoring : MonoBehaviour,  IConvertGameObjectToEntity
+public class TransformRecorderAuthoring : MonoBehaviour
 {
     [Range(2, 120)]
     public int SamplesPerSecond = 60;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+public class TransformRecorderAuthoringBaker : Baker<TransformRecorderAuthoring>
+{
+    public override void Bake(TransformRecorderAuthoring authoring)
     {
-        var animationClips = AnimationUtility.GetAnimationClips(gameObject);
+        var animationClips = AnimationUtility.GetAnimationClips(authoring.gameObject);
         var animationClip = animationClips[0];
         var lengthSeconds = animationClip.length;
-        var sampleRate = 1.0f / SamplesPerSecond;
+        var sampleRate = 1.0f / authoring.SamplesPerSecond;
         var frameCount = (int)(lengthSeconds / sampleRate);
         if (frameCount < 2) // Minimum two frames of animation to capture.
         {
@@ -41,15 +43,15 @@ public class TransformRecorderAuthoring : MonoBehaviour,  IConvertGameObjectToEn
 
         for (int i = 0; i < frameCount; i++)
         {
-            animationClip.SampleAnimation(gameObject, s);
+            animationClip.SampleAnimation(authoring.gameObject, s);
 
-            translationSamples[i] = gameObject.transform.position;
-            rotationSamples[i] = gameObject.transform.rotation;
+            translationSamples[i] = authoring.gameObject.transform.position;
+            rotationSamples[i] = authoring.gameObject.transform.rotation;
 
             s += sampleRate;
         }
 
-        dstManager.AddComponentData(entity, new SampledAnimationClip
+        AddComponent( new SampledAnimationClip
         {
             FrameCount = frameCount,
             SampleRate = sampleRate,

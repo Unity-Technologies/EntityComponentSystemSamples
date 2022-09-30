@@ -16,14 +16,17 @@ namespace Samples.Boids
         public int Count;
     }
 
+    [RequireMatchingQueriesForUpdate]
     public partial class BoidSchoolSpawnSystem : SystemBase
     {
+        public ComponentLookup<LocalToWorld> LocalToWorldFromEntity;
+
         [BurstCompile]
         struct SetBoidLocalToWorld : IJobParallelFor
         {
             [NativeDisableContainerSafetyRestriction]
             [NativeDisableParallelForRestriction]
-            public ComponentDataFromEntity<LocalToWorld> LocalToWorldFromEntity;
+            public ComponentLookup<LocalToWorld> LocalToWorldFromEntity;
 
             public NativeArray<Entity> Entities;
             public float3 Center;
@@ -43,6 +46,11 @@ namespace Samples.Boids
             }
         }
 
+        protected override void OnCreate()
+        {
+             LocalToWorldFromEntity = GetComponentLookup<LocalToWorld>();
+        }
+
         protected override void OnUpdate()
         {
             Entities.WithStructuralChanges().ForEach((Entity entity, int entityInQueryIndex, in BoidSchool boidSchool, in LocalToWorld boidSchoolLocalToWorld) =>
@@ -54,10 +62,10 @@ namespace Samples.Boids
                 EntityManager.Instantiate(boidSchool.Prefab, boidEntities);
                 Profiler.EndSample();
 
-                var localToWorldFromEntity = GetComponentDataFromEntity<LocalToWorld>();
+                LocalToWorldFromEntity.Update(this);
                 var setBoidLocalToWorldJob = new SetBoidLocalToWorld
                 {
-                    LocalToWorldFromEntity = localToWorldFromEntity,
+                    LocalToWorldFromEntity = LocalToWorldFromEntity,
                     Entities = boidEntities,
                     Center = boidSchoolLocalToWorld.Position,
                     Radius = boidSchool.InitialRadius

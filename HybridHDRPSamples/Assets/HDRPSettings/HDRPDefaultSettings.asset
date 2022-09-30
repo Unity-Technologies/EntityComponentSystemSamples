@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   active: 1
   m_AdvancedMode: 0
+  quality:
+    m_OverrideState: 0
+    m_Value: 1
   enable:
     m_OverrideState: 1
     m_Value: 1
@@ -36,13 +39,31 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 50
     min: 0
+  minDistance:
+    m_OverrideState: 0
+    m_Value: 0
+    min: 0
   fadeDistance:
     m_OverrideState: 0
     m_Value: 5
     min: 0
-  sampleCount:
+  fadeInDistance:
     m_OverrideState: 0
-    m_Value: 8
+    m_Value: 0
+    min: 0
+  rayBias:
+    m_OverrideState: 0
+    m_Value: 0.2
+    min: 0
+    max: 1
+  thicknessScale:
+    m_OverrideState: 0
+    m_Value: 0.15
+    min: 0.02
+    max: 1
+  m_SampleCount:
+    m_OverrideState: 0
+    m_Value: 10
     min: 4
     max: 64
 --- !u!114 &11400000
@@ -77,6 +98,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   active: 1
   m_AdvancedMode: 0
+  quality:
+    m_OverrideState: 0
+    m_Value: 1
+  threshold:
+    m_OverrideState: 0
+    m_Value: 0
+    min: 0
   intensity:
     m_OverrideState: 1
     m_Value: 0.2
@@ -100,16 +128,16 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0
     min: 0
-  highQualityFiltering:
+  anamorphic:
     m_OverrideState: 0
     m_Value: 1
-  resolution:
+  m_Resolution:
     m_OverrideState: 0
     m_Value: 2
-  prefilter:
+  m_HighQualityPrefiltering:
     m_OverrideState: 0
     m_Value: 0
-  anamorphic:
+  m_HighQualityFiltering:
     m_OverrideState: 0
     m_Value: 1
 --- !u!114 &7502528774814404555
@@ -126,55 +154,88 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   active: 1
   m_AdvancedMode: 0
+  quality:
+    m_OverrideState: 0
+    m_Value: 1
+  rayTracing:
+    m_OverrideState: 0
+    m_Value: 0
   intensity:
     m_OverrideState: 1
     m_Value: 0.5
     min: 0
     max: 4
-  stepCount:
-    m_OverrideState: 0
-    m_Value: 6
-    min: 2
-    max: 32
-  radius:
-    m_OverrideState: 1
-    m_Value: 1.5
-    min: 0.25
-    max: 5
-  fullResolution:
-    m_OverrideState: 0
-    m_Value: 0
-  maximumRadiusInPixels:
-    m_OverrideState: 0
-    m_Value: 40
-    min: 16
-    max: 256
   directLightingStrength:
     m_OverrideState: 0
     m_Value: 0
     min: 0
     max: 1
-  enableRaytracing:
+  radius:
+    m_OverrideState: 1
+    m_Value: 1.5
+    min: 0.25
+    max: 5
+  spatialBilateralAggressiveness:
     m_OverrideState: 0
-    m_Value: 0
-  rayLength:
+    m_Value: 0.15
+    min: 0
+    max: 1
+  temporalAccumulation:
+    m_OverrideState: 0
+    m_Value: 1
+  ghostingReduction:
     m_OverrideState: 0
     m_Value: 0.5
     min: 0
-    max: 50
-  enableFilter:
+    max: 1
+  blurSharpness:
+    m_OverrideState: 0
+    m_Value: 0.1
+    min: 0
+    max: 1
+  layerMask:
+    m_OverrideState: 0
+    m_Value:
+      serializedVersion: 2
+      m_Bits: 4294967295
+  m_StepCount:
+    m_OverrideState: 0
+    m_Value: 6
+    min: 2
+    max: 32
+  m_FullResolution:
     m_OverrideState: 0
     m_Value: 0
-  numSamples:
+  m_MaximumRadiusInPixels:
     m_OverrideState: 0
-    m_Value: 4
+    m_Value: 40
+    min: 16
+    max: 256
+  m_BilateralUpsample:
+    m_OverrideState: 0
+    m_Value: 1
+  m_DirectionCount:
+    m_OverrideState: 0
+    m_Value: 2
+    min: 1
+    max: 6
+  m_RayLength:
+    m_OverrideState: 0
+    m_Value: 3
+    min: 0
+  m_SampleCount:
+    m_OverrideState: 0
+    m_Value: 2
     min: 1
     max: 64
-  filterRadius:
+  m_Denoise:
     m_OverrideState: 0
-    m_Value: 16
-    min: 1
-    max: 32
+    m_Value: 1
+  m_DenoiserRadius:
+    m_OverrideState: 0
+    m_Value: 0.5
+    min: 0.001
+    max: 1
 --- !u!114 &7542669330009093999
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -220,6 +281,14 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 1
     min: 0.001
+  lutTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+  lutContribution:
+    m_OverrideState: 0
+    m_Value: 1
+    min: 0
+    max: 1
 --- !u!114 &7686318427622180703
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -238,6 +307,11 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 150
     min: 0
+  directionalTransmissionMultiplier:
+    m_OverrideState: 0
+    m_Value: 1
+    min: 0
+    max: 1
   cascadeShadowSplitCount:
     m_OverrideState: 0
     m_Value: 4

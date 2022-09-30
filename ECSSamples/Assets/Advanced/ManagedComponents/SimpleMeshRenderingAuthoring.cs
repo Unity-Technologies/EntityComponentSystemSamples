@@ -7,24 +7,26 @@ using Unity.Entities;
 using UnityEngine;
 using Unity.Transforms;
 
-[ConverterVersion("joe", 4)]
-class SimpleMeshRenderingAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+class SimpleMeshRenderingAuthoring : MonoBehaviour
 {
     public Mesh Mesh = null;
     public Color Color = Color.white;
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class SimpleMeshRenderingAuthoringBaker : Baker<SimpleMeshRenderingAuthoring>
     {
-        // Assets in subscenes can either be created during conversion and embedded in the scene
-        var material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        material.color = Color;
-        // ... Or be an asset that is being referenced.
-
-        dstManager.AddComponentData(entity, new SimpleMeshRenderer
+        public override void Bake(SimpleMeshRenderingAuthoring authoring)
         {
-            Mesh = Mesh,
-            Material = material,
-        });
+            // Assets in subscenes can either be created during conversion and embedded in the scene
+            var material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            material.color = authoring.Color;
+            // ... Or be an asset that is being referenced.
+
+            AddComponentObject( new SimpleMeshRenderer
+            {
+                Mesh = authoring.Mesh,
+                Material = material,
+            });
+        }
     }
 }
 
@@ -34,17 +36,16 @@ public class SimpleMeshRenderer : IComponentData
     public Material Material;
 }
 
-[ExecuteAlways]
-[AlwaysUpdateSystem]
+[WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor)]
 [UpdateInGroup(typeof(PresentationSystemGroup))]
-class SimpleMeshRendererSystem : ComponentSystem
+partial class SimpleMeshRendererSystem : SystemBase
 {
-    override protected void OnUpdate()
+    protected override void OnUpdate()
     {
         Entities.ForEach((SimpleMeshRenderer renderer, ref LocalToWorld localToWorld) =>
         {
             Graphics.DrawMesh(renderer.Mesh, localToWorld.Value, renderer.Material, 0);
-        });
+        }).WithoutBurst().Run();
     }
 }
 

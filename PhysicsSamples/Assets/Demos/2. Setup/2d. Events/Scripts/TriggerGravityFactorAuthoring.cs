@@ -1,7 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using UnityEngine;
@@ -12,56 +11,88 @@ public struct TriggerGravityFactor : IComponentData
     public float DampingFactor;
 }
 
-public class TriggerGravityFactorAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class TriggerGravityFactorAuthoring : MonoBehaviour
 {
     public float GravityFactor = 0f;
     public float DampingFactor = 0.9f;
 
     void OnEnable() {}
 
-    void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class TriggerGravityFactorBaker : Baker<TriggerGravityFactorAuthoring>
     {
-        if (enabled)
+        public override void Bake(TriggerGravityFactorAuthoring authoring)
         {
-            dstManager.AddComponentData(entity, new TriggerGravityFactor()
+            AddComponent(new TriggerGravityFactor()
             {
-                GravityFactor = GravityFactor,
-                DampingFactor = DampingFactor,
+                GravityFactor = authoring.GravityFactor,
+                DampingFactor = authoring.DampingFactor,
             });
         }
     }
 }
 
-
 // This system sets the PhysicsGravityFactor of any dynamic body that enters a Trigger Volume.
 // A Trigger Volume is defined by a PhysicsShapeAuthoring with the `Is Trigger` flag ticked and a
 // TriggerGravityFactor behaviour added.
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(ExportPhysicsWorld))]
-[UpdateBefore(typeof(EndFramePhysicsSystem))]
-public partial class TriggerGravityFactorSystem : SystemBase
+[UpdateAfter(typeof(PhysicsSystemGroup))]
+[BurstCompile]
+public partial struct TriggerGravitySystem : ISystem
 {
-    StepPhysicsWorld m_StepPhysicsWorldSystem;
-    EntityQuery m_TriggerGravityGroup;
+    ComponentDataHandles m_Handles;
 
-    protected override void OnCreate()
+    struct ComponentDataHandles
     {
-        m_StepPhysicsWorldSystem = World.GetOrCreateSystem<StepPhysicsWorld>();
-        m_TriggerGravityGroup = GetEntityQuery(new EntityQueryDesc
+        public ComponentLookup<TriggerGravityFactor> TriggerGravityFactorGroup;
+        public ComponentLookup<PhysicsGravityFactor> PhysicsGravityFactorGroup;
+        public ComponentLookup<PhysicsVelocity> PhysicsVelocityGroup;
+
+        public ComponentDataHandles(ref SystemState state)
         {
-            All = new ComponentType[]
-            {
-                typeof(TriggerGravityFactor)
-            }
-        });
+            TriggerGravityFactorGroup = state.GetComponentLookup<TriggerGravityFactor>(true);
+            PhysicsGravityFactorGroup = state.GetComponentLookup<PhysicsGravityFactor>(false);
+            PhysicsVelocityGroup = state.GetComponentLookup<PhysicsVelocity>(false);
+        }
+
+        public void Update(ref SystemState state)
+        {
+            TriggerGravityFactorGroup.Update(ref state);
+            PhysicsGravityFactorGroup.Update(ref state);
+            PhysicsVelocityGroup.Update(ref state);
+        }
+    }
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<TriggerGravityFactor>()));
+        m_Handles = new ComponentDataHandles(ref state);
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_Handles.Update(ref state);
+        state.Dependency = new TriggerGravityFactorJob
+        {
+            TriggerGravityFactorGroup = m_Handles.TriggerGravityFactorGroup,
+            PhysicsGravityFactorGroup = m_Handles.PhysicsGravityFactorGroup,
+            PhysicsVelocityGroup = m_Handles.PhysicsVelocityGroup,
+        }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
     }
 
     [BurstCompile]
     struct TriggerGravityFactorJob : ITriggerEventsJob
     {
-        [ReadOnly] public ComponentDataFromEntity<TriggerGravityFactor> TriggerGravityFactorGroup;
-        public ComponentDataFromEntity<PhysicsGravityFactor> PhysicsGravityFactorGroup;
-        public ComponentDataFromEntity<PhysicsVelocity> PhysicsVelocityGroup;
+        [ReadOnly] public ComponentLookup<TriggerGravityFactor> TriggerGravityFactorGroup;
+        public ComponentLookup<PhysicsGravityFactor> PhysicsGravityFactorGroup;
+        public ComponentLookup<PhysicsVelocity> PhysicsVelocityGroup;
 
         public void Execute(TriggerEvent triggerEvent)
         {
@@ -100,26 +131,5 @@ public partial class TriggerGravityFactorSystem : SystemBase
                 PhysicsVelocityGroup[dynamicEntity] = component;
             }
         }
-    }
-
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-        this.RegisterPhysicsRuntimeSystemReadOnly();
-    }
-
-    protected override void OnUpdate()
-    {
-        if (m_TriggerGravityGroup.CalculateEntityCount() == 0)
-        {
-            return;
-        }
-
-        Dependency = new TriggerGravityFactorJob
-        {
-            TriggerGravityFactorGroup = GetComponentDataFromEntity<TriggerGravityFactor>(true),
-            PhysicsGravityFactorGroup = GetComponentDataFromEntity<PhysicsGravityFactor>(),
-            PhysicsVelocityGroup = GetComponentDataFromEntity<PhysicsVelocity>(),
-        }.Schedule(m_StepPhysicsWorldSystem.Simulation, Dependency);
     }
 }

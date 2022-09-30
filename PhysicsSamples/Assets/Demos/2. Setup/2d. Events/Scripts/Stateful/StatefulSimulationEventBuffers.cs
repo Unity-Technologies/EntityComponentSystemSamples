@@ -1,15 +1,16 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 
 namespace Unity.Physics.Stateful
 {
-    public class StatefulSimulationEventBuffers<T> where T : unmanaged, IStatefulSimulationEvent<T>
+    public struct StatefulSimulationEventBuffers<T> where T : unmanaged, IStatefulSimulationEvent<T>
     {
         public NativeList<T> Previous;
         public NativeList<T> Current;
 
-        public StatefulSimulationEventBuffers()
+        public void AllocateBuffers()
         {
             Previous = new NativeList<T>(Allocator.Persistent);
             Current = new NativeList<T>(Allocator.Persistent);
@@ -104,9 +105,6 @@ namespace Unity.Physics.Stateful
 
     public static class StatefulEventCollectionJobs
     {
-        // NOTE: ITrigger|CollisionEventsJob[Base] needs be used rather than the
-        // non-Base version if this code is part of the Unity Physics package.
-
         [BurstCompile]
         public struct CollectTriggerEvents : ITriggerEventsJob
         {
@@ -126,7 +124,7 @@ namespace Unity.Physics.Stateful
         {
             public NativeList<StatefulCollisionEvent> CollisionEvents;
             [ReadOnly] public PhysicsWorld PhysicsWorld;
-            [ReadOnly] public ComponentDataFromEntity<StatefulCollisionEventDetails> EventDetails;
+            [ReadOnly] public ComponentLookup<StatefulCollisionEventDetails> EventDetails;
             public bool ForceCalculateDetails;
 
             public void Execute(CollisionEvent collisionEvent)
@@ -153,6 +151,43 @@ namespace Unity.Physics.Stateful
                 }
 
                 CollisionEvents.Add(statefulCollisionEvent);
+            }
+        }
+
+        [BurstCompile]
+        public struct ConvertEventStreamToDynamicBufferJob<T, C> : IJob
+            where T : unmanaged, IBufferElementData, IStatefulSimulationEvent<T>
+            where C : unmanaged, IComponentData
+        {
+            public NativeList<T> PreviousEvents;
+            public NativeList<T> CurrentEvents;
+            public BufferLookup<T> EventBuffers;
+
+            public bool UseExcludeComponent;
+            [ReadOnly] public ComponentLookup<C> EventExcludeLookup;
+
+            public void Execute()
+            {
+                var statefulEvents = new NativeList<T>(CurrentEvents.Length, Allocator.Temp);
+
+                StatefulSimulationEventBuffers<T>.GetStatefulEvents(PreviousEvents, CurrentEvents, statefulEvents);
+
+                for (int i = 0; i < statefulEvents.Length; i++)
+                {
+                    var statefulEvent = statefulEvents[i];
+
+                    var addToEntityA = EventBuffers.HasBuffer(statefulEvent.EntityA) && (!UseExcludeComponent || !EventExcludeLookup.HasComponent(statefulEvent.EntityA));
+                    var addToEntityB = EventBuffers.HasBuffer(statefulEvent.EntityB) && (!UseExcludeComponent || !EventExcludeLookup.HasComponent(statefulEvent.EntityA));
+
+                    if (addToEntityA)
+                    {
+                        EventBuffers[statefulEvent.EntityA].Add(statefulEvent);
+                    }
+                    if (addToEntityB)
+                    {
+                        EventBuffers[statefulEvent.EntityB].Add(statefulEvent);
+                    }
+                }
             }
         }
     }

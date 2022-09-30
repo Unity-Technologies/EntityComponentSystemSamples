@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -39,7 +40,7 @@ struct VehicleCameraReferences : IComponentData
     public Entity CameraFrom;
 }
 
-class VehicleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+class VehicleAuthoring : MonoBehaviour
 {
     #pragma warning disable 649
     public bool ActiveAtStart;
@@ -67,37 +68,40 @@ class VehicleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
         SpeedDamping = math.clamp(SpeedDamping, 0f, 1f);
     }
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class VehicleBaker : Baker<VehicleAuthoring>
     {
-        if (ActiveAtStart)
-            dstManager.AddComponent<ActiveVehicle>(entity);
-
-        dstManager.AddComponent<Vehicle>(entity);
-
-        dstManager.AddComponentData(entity, new VehicleCameraSettings
+        public override void Bake(VehicleAuthoring authoring)
         {
-            OrientationType = CameraOrientation,
-            OrbitAngularSpeed = math.radians(CameraOrbitAngularSpeed)
-        });
+            if (authoring.ActiveAtStart)
+                AddComponent<ActiveVehicle>();
 
-        dstManager.AddComponentData(entity, new VehicleSpeed
-        {
-            TopSpeed = TopSpeed,
-            Damping = SpeedDamping
-        });
+            AddComponent<Vehicle>();
 
-        dstManager.AddComponentData(entity, new VehicleSteering
-        {
-            MaxSteeringAngle = math.radians(MaxSteeringAngle),
-            Damping = SteeringDamping
-        });
+            AddComponent(new VehicleCameraSettings
+            {
+                OrientationType = authoring.CameraOrientation,
+                OrbitAngularSpeed = math.radians(authoring.CameraOrbitAngularSpeed)
+            });
 
-        dstManager.AddComponentData(entity, new VehicleCameraReferences
-        {
-            CameraOrbit = conversionSystem.GetPrimaryEntity(CameraOrbit),
-            CameraTarget = conversionSystem.GetPrimaryEntity(CameraTarget),
-            CameraTo = conversionSystem.GetPrimaryEntity(CameraTo),
-            CameraFrom = conversionSystem.GetPrimaryEntity(CameraFrom)
-        });
+            AddComponent(new VehicleSpeed
+            {
+                TopSpeed = authoring.TopSpeed,
+                Damping = authoring.SpeedDamping
+            });
+
+            AddComponent(new VehicleSteering
+            {
+                MaxSteeringAngle = math.radians(authoring.MaxSteeringAngle),
+                Damping = authoring.SteeringDamping
+            });
+
+            AddComponent(new VehicleCameraReferences
+            {
+                CameraOrbit = GetEntity(authoring.CameraOrbit),
+                CameraTarget = GetEntity(authoring.CameraTarget),
+                CameraTo = GetEntity(authoring.CameraTo),
+                CameraFrom = GetEntity(authoring.CameraFrom)
+            });
+        }
     }
 }

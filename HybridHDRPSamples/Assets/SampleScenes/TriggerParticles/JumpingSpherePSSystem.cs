@@ -5,14 +5,15 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[RequireMatchingQueriesForUpdate]
 public partial class JumpingSpherePSSystem : SystemBase
 {
     protected override void OnUpdate()
-    {      
+    {
         //Make the sphere jumps
-        var time = (float)Time.ElapsedTime;
+        var time = (float)SystemAPI.Time.ElapsedTime;
         var y = math.abs(math.cos(time*3f));
-        Entities.WithAll<JumpingSphereTag>().ForEach((ref Translation translation) => 
+        Entities.WithAll<JumpingSphereTag>().ForEach((ref Translation translation) =>
         {
             translation.Value = new float3(0, y, 0);
 

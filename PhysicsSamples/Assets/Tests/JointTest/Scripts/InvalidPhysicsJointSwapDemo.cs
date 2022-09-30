@@ -14,14 +14,17 @@ public class InvalidPhysicsJointSwapDemo : SceneCreationAuthoring<InvalidPhysics
 {
     public float TimeToSwap = 0.25f;
 
-    public override void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class InvalidPhysicsJointSwapDemoBaker : Baker<InvalidPhysicsJointSwapDemo>
     {
-        dstManager.AddComponentData(entity, new InvalidPhysicsJointSwapDemoScene
+        public override void Bake(InvalidPhysicsJointSwapDemo authoring)
         {
-            DynamicMaterial = DynamicMaterial,
-            StaticMaterial = StaticMaterial,
-            TimeToSwap = TimeToSwap
-        });
+            AddComponentObject(new InvalidPhysicsJointSwapDemoScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial,
+                TimeToSwap = authoring.TimeToSwap
+            });
+        }
     }
 }
 
@@ -49,13 +52,14 @@ public struct InvalidPhysicsJointSwapMotionType : IComponentData
     public RigidTransform OriginalTransform;
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class InvalidPhysicsJointSwapDemoSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = SystemAPI.Time.DeltaTime;
 
         Entities
             .WithName("InvalidPhysicsJointTimerEvent")

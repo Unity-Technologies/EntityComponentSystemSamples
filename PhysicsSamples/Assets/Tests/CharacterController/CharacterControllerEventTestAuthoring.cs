@@ -1,10 +1,7 @@
 using Unity.Assertions;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Physics.Stateful;
-using Unity.Physics.Systems;
 using UnityEngine;
 
 public struct CharacterControllerEventTest : IComponentData
@@ -12,20 +9,19 @@ public struct CharacterControllerEventTest : IComponentData
     public bool IsFirstFrame;
 }
 
-public class CharacterControllerEventTestAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class CharacterControllerEventTestAuthoring : MonoBehaviour
 {
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class CharacterControllerEventTestBaker : Baker<CharacterControllerEventTestAuthoring>
     {
-        dstManager.AddComponentData(entity, new CharacterControllerEventTest
+        public override void Bake(CharacterControllerEventTestAuthoring authoring)
         {
-            IsFirstFrame = true
-        });
+            AddComponent(new CharacterControllerEventTest { IsFirstFrame = true });
+        }
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(StatefulTriggerEventBufferSystem))]
-[UpdateAfter(typeof(StatefulCollisionEventBufferSystem))]
 [UpdateAfter(typeof(CharacterControllerSystem))]
 public partial class CharacterControllerEventTestSystem : SystemBase
 {

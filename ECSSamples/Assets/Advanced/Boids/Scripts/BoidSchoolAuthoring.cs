@@ -8,25 +8,22 @@ using UnityEngine;
 namespace Samples.Boids
 {
     [AddComponentMenu("DOTS Samples/Boids/BoidSchool")]
-    [ConverterVersion("macton", 4)]
-    public class BoidSchoolAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+    public class BoidSchoolAuthoring : MonoBehaviour
     {
         public GameObject Prefab;
         public float InitialRadius;
         public int Count;
+    }
 
-        public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
+    public class BoidSchoolAuthoringBaker : Baker<BoidSchoolAuthoring>
+    {
+        public override void Bake(BoidSchoolAuthoring authoring)
         {
-            referencedPrefabs.Add(Prefab);
-        }
-
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-        {
-            dstManager.AddComponentData(entity, new BoidSchool
+            AddComponent( new BoidSchool
             {
-                Prefab = conversionSystem.GetPrimaryEntity(Prefab),
-                Count = Count,
-                InitialRadius = InitialRadius
+                Prefab = GetEntity(authoring.Prefab),
+                Count = authoring.Count,
+                InitialRadius = authoring.InitialRadius
             });
         }
     }

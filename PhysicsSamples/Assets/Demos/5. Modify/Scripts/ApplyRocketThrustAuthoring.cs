@@ -1,31 +1,18 @@
-using System;
+using Unity.Burst;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Physics.Authoring;
-using Unity.Physics.Extensions;
 using Unity.Physics.Systems;
-using Unity.Transforms;
 using UnityEngine;
 using Math = Unity.Physics.Math;
+using Unity.Physics.Aspects;
 
 [RequireComponent(typeof(PhysicsBodyAuthoring))]
-public class ApplyRocketThrustAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class ApplyRocketThrustAuthoring : MonoBehaviour
 {
     [Min(0)] public float Magnitude = 1.0f;
     public Vector3 LocalDirection = -Vector3.forward;
     public Vector3 LocalOffset = Vector3.zero;
-
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-    {
-        dstManager.AddComponentData(entity, new ApplyRocketThrust
-        {
-            Magnitude = Magnitude,
-            Direction = LocalDirection.normalized,
-            Offset = LocalOffset,
-        });
-    }
 
     public void OnDrawGizmos()
     {
@@ -57,6 +44,19 @@ public class ApplyRocketThrustAuthoring : MonoBehaviour, IConvertGameObjectToEnt
     }
 }
 
+class ApplyRocketThrustAuthoringBaker : Baker<ApplyRocketThrustAuthoring>
+{
+    public override void Bake(ApplyRocketThrustAuthoring authoring)
+    {
+        AddComponent(new ApplyRocketThrust
+        {
+            Magnitude = authoring.Magnitude,
+            Direction = authoring.LocalDirection.normalized,
+            Offset = authoring.LocalOffset,
+        });
+    }
+}
+
 public struct ApplyRocketThrust : IComponentData
 {
     public float Magnitude;
@@ -64,29 +64,47 @@ public struct ApplyRocketThrust : IComponentData
     public float3 Offset;
 }
 
-
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
-public partial class ApplyRocketThrustSystem : SystemBase
+[UpdateBefore(typeof(PhysicsSystemGroup))]
+[BurstCompile]
+public partial struct ApplyRocketThrustSystem : ISystem
 {
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        var deltaTime = Time.DeltaTime;
+    }
 
-        Entities
-            .WithName("ApplyRocketThrust")
-            .WithBurst()
-            .ForEach((ref ApplyRocketThrust rocket, ref Translation t, ref Rotation r, ref PhysicsVelocity pv, ref PhysicsMass pm) =>
-            {
-                // Newton's 3rd law states that for every action there is an equal and opposite reaction.
-                // As this is a rocket thrust the impulse applied with therefore use negative Direction.
-                float3 impulse = -rocket.Direction * rocket.Magnitude;
-                impulse = math.rotate(r.Value, impulse);
-                impulse *= deltaTime;
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
 
-                float3 offset = math.rotate(r.Value, rocket.Offset) + t.Value;
+    [BurstCompile]
+    public partial struct ApplyRocketThurstJob : IJobEntity
+    {
+        public float DeltaTime;
 
-                pv.ApplyImpulse(pm, t, r, impulse, offset);
-            }).Schedule();
+        [BurstCompile]
+        public void Execute(in ApplyRocketThrust rocket, ref RigidBodyAspect rigidBodyAspect)
+        {
+            // Newton's 3rd law states that for every action there is an equal and opposite reaction.
+            // As this is a rocket thrust the impulse applied with therefore use negative Direction.
+            float3 impulse = -rocket.Direction * rocket.Magnitude;
+            impulse *= DeltaTime;
+
+            rigidBodyAspect.ApplyImpulseAtPointLocalSpace(impulse, rocket.Offset);
+        }
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
+        float dt = SystemAPI.Time.DeltaTime;
+        state.Dependency = new ApplyRocketThurstJob
+        {
+            DeltaTime = dt,
+        }.Schedule(state.Dependency);
     }
 }

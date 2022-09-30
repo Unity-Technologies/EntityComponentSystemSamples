@@ -2,16 +2,19 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class RotateComponentAuthoring_DOTS : MonoBehaviour, IConvertGameObjectToEntity
+public class RotateComponentAuthoring_DOTS : MonoBehaviour
 {
     public Vector3 LocalAngularVelocity = Vector3.zero; // in degrees/sec
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class RotateComponentBaker : Baker<RotateComponentAuthoring_DOTS>
     {
-        dstManager.AddComponentData(entity, new RotateComponent_DOTS
+        public override void Bake(RotateComponentAuthoring_DOTS authoring)
         {
-            // We can convert to radians/sec once here.
-            LocalAngularVelocity = math.radians(LocalAngularVelocity),
-        });
+            AddComponent(new RotateComponent_DOTS
+            {
+                // We can convert to radians/sec once here.
+                LocalAngularVelocity = math.radians(authoring.LocalAngularVelocity),
+            });
+        }
     }
 }

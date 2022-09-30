@@ -1,66 +1,64 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Physics.Systems;
+using static Unity.Physics.Systems.PhysicsWorldExporter;
 
 namespace Unity.Physics.Tests
 {
     // A system which performs the whole physics pipeline on animated bodies
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(DriveAnimationBodySystem))]
-    public partial class AnimationPhysicsSystem : SystemBase
+    [BurstCompile]
+    public partial struct AnimationPhysicsSystem : ISystem
     {
         private PhysicsWorldData PhysicsData;
-
         private PhysicsWorldIndex WorldFilter;
-
         private ImmediatePhysicsWorldStepper m_Stepper;
+        private ExportPhysicsWorldTypeHandles m_ExportPhysicsWorldTypeHandles;
 
-        protected override void OnCreate()
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
         {
-            base.OnCreate();
-
+            state.RequireForUpdate<DriveAnimationBodyData>();
             WorldFilter = new PhysicsWorldIndex(1);
-            PhysicsData = new PhysicsWorldData(EntityManager, WorldFilter);
+            PhysicsData = new PhysicsWorldData(ref state, WorldFilter);
+            m_ExportPhysicsWorldTypeHandles = new ExportPhysicsWorldTypeHandles(ref state);
         }
 
-        protected override void OnDestroy()
+        [BurstCompile]
+        public void OnDestroy(ref SystemState state)
         {
-            if (m_Stepper != null)
+            if (m_Stepper.Created == true)
             {
                 m_Stepper.Dispose();
             }
 
             PhysicsData.Dispose();
-
-            base.OnDestroy();
         }
 
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-
-            if (m_Stepper == null)
-            {
-                // Initialize immediate stepper here, since it can't be done in OnCreate.
-                m_Stepper = new ImmediatePhysicsWorldStepper(this, WorldFilter.Value);
-            }
-        }
-
-        protected override void OnUpdate()
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
         {
             // Make sure dependencies are complete, we'll run everything immediately
-            Dependency.Complete();
+            state.CompleteDependency();
 
-            float timeStep = Time.DeltaTime;
+            if (!m_Stepper.Created)
+            {
+                // Initialize immediate stepper here, since it can't be done in OnCreate.
+                m_Stepper = new ImmediatePhysicsWorldStepper(ref state, WorldFilter.Value);
+            }
+
+            float timeStep = SystemAPI.Time.DeltaTime;
 
             // Tweak if you want a different simulation for this world
             PhysicsStep stepComponent = PhysicsStep.Default;
-            if (HasSingleton<PhysicsStep>())
+            if (SystemAPI.HasSingleton<PhysicsStep>())
             {
-                stepComponent = GetSingleton<PhysicsStep>();
+                stepComponent = SystemAPI.GetSingleton<PhysicsStep>();
             }
 
             // Build PhysicsWorld immediately
-            PhysicsWorldBuilder.BuildPhysicsWorldImmediate(this, ref PhysicsData, timeStep, stepComponent.Gravity, LastSystemVersion);
+            PhysicsWorldBuilder.BuildPhysicsWorldImmediate(ref state, ref PhysicsData, timeStep, stepComponent.Gravity, state.LastSystemVersion);
 
             // Early out if world is static
             if (PhysicsData.PhysicsWorld.NumDynamicBodies == 0) return;
@@ -79,7 +77,7 @@ namespace Unity.Physics.Tests
                 });
 
             // Export physics world only (don't copy CollisionWorld)
-            PhysicsWorldExporter.ExportPhysicsWorldImmediate(this, in PhysicsData.PhysicsWorld, PhysicsData.DynamicEntityGroup);
+            ExportPhysicsWorldImmediate(ref state, ref m_ExportPhysicsWorldTypeHandles, in PhysicsData.PhysicsWorld, PhysicsData.DynamicEntityGroup);
         }
     }
 }

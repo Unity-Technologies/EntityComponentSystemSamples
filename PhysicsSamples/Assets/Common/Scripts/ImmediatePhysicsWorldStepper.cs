@@ -1,4 +1,5 @@
 using System;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace Unity.Physics.Systems
@@ -7,7 +8,7 @@ namespace Unity.Physics.Systems
     /// Utility class for running physics simulation immediately on the main thread.
     /// Not suitable for a field in an ECS job!
     /// </summary>
-    public class ImmediatePhysicsWorldStepper : IDisposable
+    public struct ImmediatePhysicsWorldStepper : IDisposable
     {
         // Simulation context
         public SimulationContext SimulationContext;
@@ -15,16 +16,35 @@ namespace Unity.Physics.Systems
         public Havok.Physics.SimulationContext HavokSimulationContext;
 #endif
 
+        public bool Created;
+
         /// <summary>
         /// Constructor. Do not use in system's OnCreate when simulation is Havok, as it won't pick up HavokConfiguration properly.
         /// </summary>
         public ImmediatePhysicsWorldStepper(SystemBase system, uint physicsWorldIndex)
         {
+            Created = true;
             SimulationContext = new SimulationContext();
 #if HAVOK_PHYSICS_EXISTS
             Havok.Physics.HavokConfiguration config = system.HasSingleton<Havok.Physics.HavokConfiguration>() ?
                 system.GetSingleton<Havok.Physics.HavokConfiguration>() : Havok.Physics.HavokConfiguration.Default;
 
+            // We want to show different physics worlds in separate VDBs, so each one needs its own port
+            config.VisualDebugger.Port += (int)physicsWorldIndex;
+            HavokSimulationContext = new Havok.Physics.SimulationContext(config);
+#endif
+        }
+
+        public ImmediatePhysicsWorldStepper(ref SystemState systemState, uint physicsWorldIndex)
+        {
+            Created = true;
+            SimulationContext = new SimulationContext();
+
+#if HAVOK_PHYSICS_EXISTS
+            //Havok.Physics.HavokConfiguration config = SystemAPI.HasSingleton<Havok.Physics.HavokConfiguration>() ?
+            //    SystemAPI.GetSingleton<Havok.Physics.HavokConfiguration>() : Havok.Physics.HavokConfiguration.Default; need SYSTEMAPI.GetSingleton() here
+
+            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
             // We want to show different physics worlds in separate VDBs, so each one needs its own port
             config.VisualDebugger.Port += (int)physicsWorldIndex;
             HavokSimulationContext = new Havok.Physics.SimulationContext(config);
@@ -56,6 +76,7 @@ namespace Unity.Physics.Systems
 #if HAVOK_PHYSICS_EXISTS
             HavokSimulationContext.Dispose();
 #endif
+            Created = false;
         }
 
         /// <summary>

@@ -4,9 +4,10 @@ using UnityEngine;
 
 struct ActiveVehicle : IComponentData {}
 
+[RequireMatchingQueriesForUpdate]
 partial class ChangeActiveVehicleSystem : SystemBase
 {
-    struct AvailableVehicle : ISystemStateComponentData {}
+    struct AvailableVehicle : ICleanupComponentData {}
 
     EntityQuery m_ActiveVehicleQuery;
     EntityQuery m_VehicleInputQuery;
@@ -75,7 +76,7 @@ partial class ChangeActiveVehicleSystem : SystemBase
                 if (activeVehicles.Length > 0)
                 {
                     activeVehicle = activeVehicles[0];
-                    EntityManager.RemoveComponent<ActiveVehicle>(m_AllVehicles);
+                    EntityManager.RemoveComponent<ActiveVehicle>(m_AllVehicles.AsArray());
                 }
                 // otherwise use the first vehicle found
                 else
@@ -108,7 +109,7 @@ partial class ChangeActiveVehicleSystem : SystemBase
         if (newVehicleIndex == activeVehicleIndex)
             return;
 
-        EntityManager.RemoveComponent<ActiveVehicle>(m_AllVehicles);
+        EntityManager.RemoveComponent<ActiveVehicle>(m_AllVehicles.AsArray());
         EntityManager.AddComponent(m_AllVehicles[newVehicleIndex], typeof(ActiveVehicle));
     }
 }

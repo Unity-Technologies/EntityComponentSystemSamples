@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
-[AlwaysUpdateSystem]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 partial class DemoInputGatheringSystem : SystemBase
 #if UNITY_INPUT_SYSTEM_EXISTS

@@ -8,7 +8,20 @@ using Unity.Transforms;
 
 public class CreateSimpleTerrainScene : SceneCreationSettings {}
 
-public class CreateSimpleTerrain : SceneCreationAuthoring<CreateSimpleTerrainScene> {}
+public class CreateSimpleTerrain : SceneCreationAuthoring<CreateSimpleTerrainScene>
+{
+    class CreateSimpleTerrainBaker : Baker<CreateSimpleTerrain>
+    {
+        public override void Bake(CreateSimpleTerrain authoring)
+        {
+            AddComponentObject(new CreateSimpleTerrainScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial
+            });
+        }
+    }
+}
 
 public class CreateSimpleTerrainSystem : SceneCreationSystem<CreateSimpleTerrainScene>
 {
@@ -30,9 +43,9 @@ public class CreateSimpleTerrainSystem : SceneCreationSystem<CreateSimpleTerrain
         CreateTerrainBody(position, collider);
 
         // Mark this one CollisionResponse.None
-        collider = TerrainCollider.Create(heights, size, scale, TerrainCollider.CollisionMethod.VertexSamples);
-        collider.As<TerrainCollider>().Material.CollisionResponse = CollisionResponsePolicy.None;
-
+        var material = Material.Default;
+        material.CollisionResponse = CollisionResponsePolicy.None;
+        collider = TerrainCollider.Create(heights, size, scale, TerrainCollider.CollisionMethod.VertexSamples, CollisionFilter.Default, material);
         CreatedColliders.Add(collider);
 
         position = new float3(15.0f, -1.0f, 10.0f);

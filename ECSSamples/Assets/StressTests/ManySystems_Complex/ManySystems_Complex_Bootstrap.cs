@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -50,7 +51,7 @@ namespace StressTests.ManySystems
             arr.Dispose();
 
             for (int i = 0; i < m_Systems.Length; i++)
-                world.AddSystem(m_Systems[i]);
+                world.AddSystemManaged(m_Systems[i]);
         }
 
         static readonly Type[] k_Components =
@@ -159,7 +160,6 @@ namespace StressTests.ManySystems
 
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [DisableAutoCreation]
-    [AlwaysUpdateSystem]
     partial class TestSystem_Complex : SystemBase
     {
         EntityQuery m_Query;
@@ -216,7 +216,7 @@ namespace StressTests.ManySystems
             [NativeDisableContainerSafetyRestriction]
             public DynamicComponentTypeHandle Type9;
 
-            public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex) {}
+            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask) {}
         }
     }
 }

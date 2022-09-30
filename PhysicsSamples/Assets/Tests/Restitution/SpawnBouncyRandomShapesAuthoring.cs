@@ -14,6 +14,15 @@ class SpawnBouncyRandomShapesAuthoring : SpawnRandomObjectsAuthoringBase<BouncyS
     internal override void Configure(ref BouncySpawnSettings spawnSettings) => spawnSettings.Restitution = restitution;
 }
 
+class SpawnBouncyRandomShapesAuthoringBaker : SpawnRandomObjectsAuthoringBaseBaker<SpawnBouncyRandomShapesAuthoring, BouncySpawnSettings>
+{
+    internal override void Configure(SpawnBouncyRandomShapesAuthoring authoring,
+        ref BouncySpawnSettings spawnSettings)
+    {
+        spawnSettings.Restitution = authoring.restitution;
+    }
+}
+
 struct BouncySpawnSettings : IComponentData, ISpawnSettings
 {
     public Entity Prefab { get; set; }

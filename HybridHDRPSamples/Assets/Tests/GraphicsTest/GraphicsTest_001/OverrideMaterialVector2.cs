@@ -5,29 +5,27 @@ using Unity.Rendering;
 using UnityEngine;
 
 [Serializable]
-[MaterialProperty("_PBRVector2", MaterialPropertyFormat.Float2)]
+[MaterialProperty("_PBRVector2")]
 public struct OverrideMaterialVector2Data : IComponentData
 {
     public float2 Value;
 }
 
-[DisallowMultipleComponent]
-public class OverrideMaterialVector2 : MonoBehaviour
+namespace Authoring
 {
-    public Vector2 vec2;
-}
-
-[WorldSystemFilter(WorldSystemFilterFlags.HybridGameObjectConversion)]
-[ConverterVersion("unity", 1)]
-public class OverrideMaterialVector2System : GameObjectConversionSystem
-{
-    protected override void OnUpdate()
+    [DisallowMultipleComponent]
+    public class OverrideMaterialVector2 : MonoBehaviour
     {
-        Entities.ForEach((OverrideMaterialVector2 comp) =>
+        public Vector2 vec2;
+    }
+
+    public class OverrideMaterialVector2Baker : Baker<OverrideMaterialVector2>
+    {
+        public override void Bake(OverrideMaterialVector2 authoring)
         {
-            var entity = GetPrimaryEntity(comp);
-            var data = new OverrideMaterialVector2Data { Value = comp.vec2 };
-            DstEntityManager.AddComponentData(entity, data);
-        });
+            var data = new OverrideMaterialVector2Data { Value = authoring.vec2 };
+            AddComponent(data);
+        }
     }
 }
+

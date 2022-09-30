@@ -3,7 +3,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Unity.Collections.Tests
 {
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     unsafe struct RefReturn
     {
         private static readonly int* ptr = null;
@@ -20,7 +20,7 @@ namespace Unity.Collections.Tests
         public ref int Method() => ref UnsafeUtility.AsRef<int>(ptr);
     }
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     unsafe struct RefReadonlyReturn
     {
         private static readonly int* ptr = null;
@@ -37,7 +37,7 @@ namespace Unity.Collections.Tests
         public ref readonly int Method() => ref UnsafeUtility.AsRef<int>(ptr);
     }
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     struct NotBurstCompatible
     {
         public int Compatible(int i)
@@ -45,14 +45,14 @@ namespace Unity.Collections.Tests
             return i + 12;
         }
 
-        [NotBurstCompatible]
+        [ExcludeFromBurstCompatTesting("test")]
         public string NotCompatible(string str)
         {
             return str + "Not Burst Compatible!";
         }
     }
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     unsafe struct BurstCompatibleIndexerTest
     {
         double* ptr;
@@ -69,7 +69,7 @@ namespace Unity.Collections.Tests
         }
     }
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     unsafe struct BurstCompatibleMultiDimensionalIndexerTest
     {
         double* ptr;
@@ -86,8 +86,8 @@ namespace Unity.Collections.Tests
         }
     }
 
-    // To verify this case https://unity3d.atlassian.net/browse/DOTS-3165
-    [BurstCompatible(GenericTypeArguments = new [] { typeof(int) })]
+    // To verify this case DOTS-3165
+    [GenerateTestsForBurstCompatibility(GenericTypeArguments = new [] { typeof(int) })]
     struct BurstCompatibleUseSameGenericTypeWithDifferentStruct1<T> where T : struct
     {
         public T Value;
@@ -103,8 +103,8 @@ namespace Unity.Collections.Tests
         }
     }
 
-    // To verify this case https://unity3d.atlassian.net/browse/DOTS-3165
-    [BurstCompatible(GenericTypeArguments = new [] { typeof(int) })]
+    // To verify this case DOTS-3165
+    [GenerateTestsForBurstCompatibility(GenericTypeArguments = new [] { typeof(int) })]
     struct BurstCompatibleUseSameGenericTypeWithDifferentStruct2<T> where T : struct
     {
         public T Value;
@@ -120,7 +120,7 @@ namespace Unity.Collections.Tests
         }
     }
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     struct BurstCompatibleTypeWithPrivateMethods
     {
         private static int i = 0;
@@ -133,7 +133,7 @@ namespace Unity.Collections.Tests
     }
 
     [BurstCompile]
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     struct IgnoreBurstDirectCallPostfix
     {
         // This method is Burst direct callable (as of Burst 1.5.0). The IL post processor will generate a copy of this

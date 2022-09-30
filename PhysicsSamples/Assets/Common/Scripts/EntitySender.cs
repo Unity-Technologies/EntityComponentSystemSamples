@@ -1,29 +1,35 @@
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public interface IReceiveEntity
 {
-    void SetReceivedEntity(Entity entity);
 }
 
-public struct SentEntity : IComponentData {}
+public struct SentEntity : IBufferElementData
+{
+    public Entity Target;
+}
 
-public class EntitySender : MonoBehaviour, IConvertGameObjectToEntity
+public class EntitySender : MonoBehaviour
 {
     public GameObject[] EntityReceivers;
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class EntitySenderBaker : Baker<EntitySender>
     {
-        dstManager.AddComponentData(entity, new SentEntity() {});
-        foreach (var EntityReceiver in EntityReceivers)
+        public override void Bake(EntitySender authoring)
         {
-            var potentialReceivers = EntityReceiver.GetComponents<MonoBehaviour>();
-            foreach (var potentialReceiver in potentialReceivers)
+            var sentEntities = AddBuffer<SentEntity>();
+            foreach (var entityReceiver in authoring.EntityReceivers)
             {
-                if (potentialReceiver is IReceiveEntity receiver)
+                List<MonoBehaviour> potentialReceivers = new List<MonoBehaviour>();
+                GetComponents<MonoBehaviour>(entityReceiver, potentialReceivers);
+                foreach (var potentialReceiver in potentialReceivers)
                 {
-                    receiver.SetReceivedEntity(entity);
+                    if (potentialReceiver is IReceiveEntity)
+                    {
+                        sentEntities.Add(new SentEntity() {Target = GetEntity(entityReceiver)});
+                    }
                 }
             }
         }

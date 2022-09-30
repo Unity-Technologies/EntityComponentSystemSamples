@@ -2,12 +2,16 @@ using Unity.Entities;
 using UnityEngine;
 
 #if UNITY_EDITOR
-public class SelfDestructAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class SelfDestructAuthoring : MonoBehaviour
 {
     public float TimeToLive;
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+
+    class Baker : Baker<SelfDestructAuthoring>
     {
-        dstManager.AddComponentData(entity, new SelfDestruct {TimeToLive = TimeToLive});
+        public override void Bake(SelfDestructAuthoring authoring)
+        {
+            AddComponent(new SelfDestruct {TimeToLive = authoring.TimeToLive});
+        }
     }
 }
 
