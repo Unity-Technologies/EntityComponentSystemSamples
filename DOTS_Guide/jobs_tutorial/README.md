@@ -276,7 +276,7 @@ Zooming in, we can see the `SegmentSort` and `SegmentSortMerge` jobs:
 
 The `SegmentSort` takes under a 0.1ms start to end, and the single-threaded `SegmentSortMerge` takes ~0.5ms. Weighed against the enormous improvement in `FindNearestJob`, the extra step of sorting is well worth the additional cost.
 
-Most of the frame time now is eaten up by the inefficiencies of GameObjects, and the most effective way to address that problem would be to replace the GameObjects with [entities](../entities_tutorial/README.md). 
+Most of the frame time now is eaten up by the inefficiencies of GameObjects, and the most effective way to address that problem would be to replace the GameObjects with [entities](../ecs_tutorial/README.md). 
 
 
 
