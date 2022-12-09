@@ -31,7 +31,7 @@ class HavokPhysicsVDBTest : UnityPhysicsSamplesTest
 
     private IEnumerator SetupAndLoadScene(World world, HavokConfiguration havokConfig, string scenePath)
     {
-        var system = world.GetOrCreateSystem<EnsureHavokSystem>();
+        var system = world.GetOrCreateSystemManaged<EnsureHavokSystem>();
         system.Enabled = true;
         system.EntityManager.CreateEntity(new ComponentType[] { typeof(HavokConfiguration) });
         system.SetSingleton<HavokConfiguration>(havokConfig);

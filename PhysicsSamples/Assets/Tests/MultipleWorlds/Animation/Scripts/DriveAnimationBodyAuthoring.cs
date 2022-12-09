@@ -1,15 +1,15 @@
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Physics.Tests;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class DriveAnimationBodyAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class DriveAnimationBodyAuthoring : MonoBehaviour
 {
-    public ConvertToEntity DrivingEntity;
+    public GameObject DrivingEntity;
     [Range(0f, 1f)] public float PositionGain;
     [Range(0f, 1f)] public float RotationGain;
     [Range(0f, 1f)] public float LinearVelocityGain;
@@ -17,19 +17,22 @@ public class DriveAnimationBodyAuthoring : MonoBehaviour, IConvertGameObjectToEn
 
     protected void OnEnable() {}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class DriveAnimationBodyBaker : Baker<DriveAnimationBodyAuthoring>
     {
-        var worldFromDriven = new RigidTransform(transform.rotation, transform.position);
-        var worldFromDriving = new RigidTransform(DrivingEntity.transform.rotation, DrivingEntity.transform.position);
-        dstManager.AddComponentData<DriveAnimationBodyData>(entity, new DriveAnimationBodyData
+        public override void Bake(DriveAnimationBodyAuthoring authoring)
         {
-            DrivingEntity = conversionSystem.GetPrimaryEntity(DrivingEntity),
-            DrivingFromDriven = math.mul(math.inverse(worldFromDriving), worldFromDriven),
-            PositionGain = PositionGain,
-            RotationGain = RotationGain,
-            LinearVelocityGain = LinearVelocityGain,
-            AngularVelocityGain = AngularVelocityGain
-        });
+            var worldFromDriven = new RigidTransform(authoring.transform.rotation, authoring.transform.position);
+            var worldFromDriving = new RigidTransform(authoring.DrivingEntity.transform.rotation, authoring.DrivingEntity.transform.position);
+            AddComponent(new DriveAnimationBodyData
+            {
+                DrivingEntity = GetEntity(authoring.DrivingEntity),
+                DrivingFromDriven = math.mul(math.inverse(worldFromDriving), worldFromDriven),
+                PositionGain = authoring.PositionGain,
+                RotationGain = authoring.RotationGain,
+                LinearVelocityGain = authoring.LinearVelocityGain,
+                AngularVelocityGain = authoring.AngularVelocityGain
+            });
+        }
     }
 }
 
@@ -45,26 +48,23 @@ public struct DriveAnimationBodyData : IComponentData
 
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(EndFramePhysicsSystem))]
+[UpdateAfter(typeof(PhysicsSystemGroup))]
 [UpdateBefore(typeof(AnimationPhysicsSystem))]
 public partial class DriveAnimationBodySystem : SystemBase
 {
     protected override void OnCreate()
     {
         base.OnCreate();
-
-        RequireForUpdate(GetEntityQuery(
-            ComponentType.ReadOnly<DriveAnimationBodyData>()
-        ));
+        RequireForUpdate<DriveAnimationBodyData>();
     }
 
     protected override void OnUpdate()
     {
-        var positions = GetComponentDataFromEntity<Translation>();
-        var rotations = GetComponentDataFromEntity<Rotation>();
-        var velocities = GetComponentDataFromEntity<PhysicsVelocity>();
+        var positions = GetComponentLookup<Translation>();
+        var rotations = GetComponentLookup<Rotation>();
+        var velocities = GetComponentLookup<PhysicsVelocity>();
 
-        float stepFrequency = math.rcp(Time.DeltaTime);
+        float stepFrequency = math.rcp(SystemAPI.Time.DeltaTime);
         Entities.
             WithBurst().
             ForEach((Entity drivenEntity, in DriveAnimationBodyData driveData, in PhysicsMass mass) =>

@@ -4,12 +4,14 @@ using UnityEngine;
 namespace Samples.FixedTimestepSystem.Authoring
 {
     [AddComponentMenu("DOTS Samples/FixedTimestepWorkaround/Projectile Spawn Time")]
-    [ConverterVersion("joe", 1)]
-    public class ProjectileAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    public class ProjectileAuthoring : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class Baker : Baker<ProjectileAuthoring>
         {
-            dstManager.AddComponent<Projectile>(entity);
+            public override void Bake(ProjectileAuthoring authoring)
+            {
+                AddComponent<Projectile>();
+            }
         }
     }
 }

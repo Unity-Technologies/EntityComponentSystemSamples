@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Jobs;
 
+[RequireMatchingQueriesForUpdate]
 public partial class UpdateIdleTimerSystem : SystemBase
 {
     // Cache a reference to this system in OnCreate() to prevent World.GetExistingSystem being called every frame
@@ -8,7 +9,7 @@ public partial class UpdateIdleTimerSystem : SystemBase
 
     protected override void OnCreate()
     {
-        m_EndSimECBSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        m_EndSimECBSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
@@ -17,7 +18,7 @@ public partial class UpdateIdleTimerSystem : SystemBase
         var ecb = m_EndSimECBSystem.CreateCommandBuffer().AsParallelWriter();
 
         // Grab our DeltaTime out of the system so it is usable by the ForEach lambda
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = SystemAPI.Time.DeltaTime;
 
         var updateHandle = Entities
             .WithName("UpdateTimer") // ForEach name is helpful for debugging

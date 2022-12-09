@@ -6,12 +6,13 @@ using Unity.Entities;
 using UnityEngine;
 
 [AddComponentMenu("DOTS Samples/Boids/BoidTarget")]
-[ConverterVersion("joe", 1)]
-public class BoidTargetAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class BoidTargetAuthoring : MonoBehaviour {}
+
+public class BoidTargetAuthoringBaker : Baker<BoidTargetAuthoring>
 {
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public override void Bake(BoidTargetAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new BoidTarget());
+        AddComponent( new BoidTarget());
     }
 }
 

@@ -3,6 +3,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[RequireMatchingQueriesForUpdate]
 public partial class CheckedReachedWaypointSystem : SystemBase
 {
     // Cache a reference to this system in OnCreate() to prevent World.GetExistingSystem being called every frame
@@ -10,7 +11,7 @@ public partial class CheckedReachedWaypointSystem : SystemBase
 
     protected override void OnCreate()
     {
-        m_EndSimECBSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        m_EndSimECBSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
@@ -25,11 +26,19 @@ public partial class CheckedReachedWaypointSystem : SystemBase
             .ForEach((
                 Entity e, // Refers to the current guard entity. Used by the ECB when changing states
                 int entityInQueryIndex, // Index of the guard entity in the query. Used for Concurrent ECB writing
+#if !ENABLE_TRANSFORM_V1
+                in LocalToWorldTransform currentTransform, // "in" keyword makes this parameter ReadOnly
+#else
                 in Translation currentPosition, // "in" keyword makes this parameter ReadOnly
+#endif
                 in TargetPosition targetPosition) =>
                 {
                     // Determine if we are within the StopDistance of our target waypoint.
+#if !ENABLE_TRANSFORM_V1
+                    var distanceSq = math.lengthsq(targetPosition.Value - currentTransform.Value.Position);
+#else
                     var distanceSq = math.lengthsq(targetPosition.Value - currentPosition.Value);
+#endif
                     if (distanceSq < GuardAIUtility.kStopDistanceSq)
                     {
                         // If we are, transition to idle and remove the target position

@@ -5,24 +5,22 @@ using UnityEngine;
 namespace Samples.FixedTimestepSystem.Authoring
 {
     [AddComponentMenu("DOTS Samples/FixedTimestepWorkaround/Variable Rate Spawner")]
-    [ConverterVersion("joe", 1)]
-    public class VariableRateSpawnerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+    public class VariableRateSpawnerAuthoring : MonoBehaviour
     {
         public GameObject projectilePrefab;
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class Baker : Baker<VariableRateSpawnerAuthoring>
         {
-            var spawnerData = new VariableRateSpawner
+            public override void Bake(VariableRateSpawnerAuthoring authoring)
             {
-                Prefab = conversionSystem.GetPrimaryEntity(projectilePrefab),
-                SpawnPos = transform.position,
-            };
-            dstManager.AddComponentData(entity, spawnerData);
-        }
-
-        public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
-        {
-            referencedPrefabs.Add(projectilePrefab);
+                var transform = GetComponent<Transform>();
+                var spawnerData = new VariableRateSpawner
+                {
+                    Prefab = GetEntity(authoring.projectilePrefab),
+                    SpawnPos = transform.position,
+                };
+                AddComponent(spawnerData);
+            }
         }
     }
 }

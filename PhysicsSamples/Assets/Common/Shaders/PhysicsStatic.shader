@@ -156,7 +156,7 @@ Shader "Custom/Physics Static"
                     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
                     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-    
+
                     // normalWS and tangentWS already normalize.
                     // this is required to avoid skewing the direction during interpolation
                     // also required for per-vertex lighting and SH evaluation
@@ -234,9 +234,9 @@ Shader "Custom/Physics Static"
                     InitializeInputData(input, surfaceData.normalTS, inputData);
 
                     half4 color = UniversalFragmentPBR(inputData, surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.occlusion, surfaceData.emission, surfaceData.alpha);
-    
+
                     color.rgb = MixFog(color.rgb, inputData.fogCoord);
-                    color.a = OutputAlpha(color.a);
+                    color.a = OutputAlpha(color.a, false);
 
                     return color;
                 }

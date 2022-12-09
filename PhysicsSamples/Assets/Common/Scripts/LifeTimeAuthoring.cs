@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using UnityEngine;
 
@@ -8,17 +9,23 @@ public struct LifeTime : IComponentData
     public int Value;
 }
 
-public class LifeTimeAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class LifeTimeAuthoring : MonoBehaviour
 {
     [Tooltip("The number of frames until the entity should be destroyed.")]
     public int Value;
-
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem) =>
-        dstManager.AddComponentData(entity, new LifeTime { Value = Value });
 }
 
+public class LifeTimeBaker : Baker<LifeTimeAuthoring>
+{
+    public override void Bake(LifeTimeAuthoring authoring)
+    {
+        AddComponent(new LifeTime { Value = authoring.Value });
+    }
+}
+
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class LifeTimeSystem : SystemBase
 {
     protected override void OnUpdate()

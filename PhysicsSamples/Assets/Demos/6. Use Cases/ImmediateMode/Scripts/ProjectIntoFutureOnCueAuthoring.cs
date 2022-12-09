@@ -16,9 +16,9 @@ using Slider = UnityEngine.UI.Slider;
 
 public struct ProjectIntoFutureTrail : IComponentData {}
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(ExportPhysicsWorld))]
-[UpdateBefore(typeof(EndFramePhysicsSystem))]
+[UpdateAfter(typeof(PhysicsSystemGroup))]
 public partial class ProjectIntoFutureOnCueSystem : SystemBase
 {
     private bool NeedsUpdate = true;
@@ -38,12 +38,11 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
 
     private ImmediatePhysicsWorldStepper m_SimulationData;
 
-    private BuildPhysicsWorld m_BuildPhysicsWorld;
-
-    public void Initialize(Entity whiteBall, int numSteps, Mesh referenceMesh, Material referenceMaterial, ref PhysicsWorld world)
+    public void Initialize(Entity whiteBall, int numSteps, Mesh referenceMesh, Material referenceMaterial, in PhysicsWorld world)
     {
         WhiteBallEntity = whiteBall;
         NumSteps = numSteps;
+
         GhostMaterial = new RenderMesh
         {
             mesh = referenceMesh,
@@ -52,7 +51,7 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
 
         CheckEntityPool(world.NumDynamicBodies);
 
-        if (m_SimulationData == null)
+        if (!m_SimulationData.Created)
         {
             m_SimulationData = new ImmediatePhysicsWorldStepper(this, 2);
         }
@@ -81,7 +80,7 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
             manager.RemoveComponent<PhysicsVelocity>(ghost);
 
             manager.AddComponentData(ghost, new ProjectIntoFutureTrail());
-            manager.SetSharedComponentData(ghost, GhostMaterial);
+            manager.AddSharedComponentManaged(ghost, GhostMaterial);
 
             var scale = new NonUniformScale { Value = GhostScale };
             manager.AddComponentData(ghost, scale);
@@ -161,21 +160,13 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
     {
         Positions = new NativeArray<float3>();
         LocalWorld = new PhysicsWorld();
-
-        m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
     }
 
     protected override void OnDestroy()
     {
-        if (m_SimulationData != null) m_SimulationData.Dispose();
+        if (m_SimulationData.Created) m_SimulationData.Dispose();
         if (Positions.IsCreated) Positions.Dispose();
         if (LocalWorld.NumBodies != 0) LocalWorld.Dispose();
-    }
-
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-        this.RegisterPhysicsRuntimeSystemReadOnly();
     }
 
     protected override void OnUpdate()
@@ -192,7 +183,7 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
         // Complete the local simulation trails from the previous step.
         Dependency.Complete();
 
-        ref var world = ref m_BuildPhysicsWorld.PhysicsWorld;
+        var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
         CheckEntityPool(world.NumDynamicBodies);
 
         // Clear the trails ready for a new simulation prediction
@@ -205,7 +196,7 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
         }
         LocalWorld = world.Clone();
 
-        float timeStep = Time.DeltaTime;
+        float timeStep = SystemAPI.Time.DeltaTime;
 
         PhysicsStep stepComponent = PhysicsStep.Default;
         if (HasSingleton<PhysicsStep>())
@@ -213,6 +204,7 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
             stepComponent = GetSingleton<PhysicsStep>();
         }
 
+        var bpwData = EntityManager.GetComponentData<BuildPhysicsWorldData>(World.GetExistingSystem<BuildPhysicsWorld>());
         var stepInput = new SimulationStepInput
         {
             World = LocalWorld,
@@ -221,7 +213,7 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
             SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
             Gravity = stepComponent.Gravity,
             SynchronizeCollisionWorld = true,
-            HaveStaticBodiesChanged = m_BuildPhysicsWorld.PhysicsData.HaveStaticBodiesChanged
+            HaveStaticBodiesChanged = bpwData.HaveStaticBodiesChanged
         };
 
         // Assign the requested cue ball velocity to the local simulation
@@ -338,7 +330,7 @@ public partial class ProjectIntoFutureOnCueSystem : SystemBase
     }
 }
 
-public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
+public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour
 {
     public Mesh ReferenceMesh;
     public Material ReferenceMaterial;
@@ -347,6 +339,7 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
     public int NumSteps = 25;
 
     private Entity WhiteBallEntity = Entity.Null;
+    private EntityQuery WhiteBallQuery;
     private ProjectIntoFutureOnCueSystem System;
 
     private float3 GetVelocityFromSliders()
@@ -360,19 +353,38 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
 
     void Start()
     {
-        System = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<ProjectIntoFutureOnCueSystem>();
+        System = World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<ProjectIntoFutureOnCueSystem>();
+        WhiteBallQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(typeof(WhiteBall));
+    }
+
+    void OnDestroy()
+    {
+        if (World.DefaultGameObjectInjectionWorld?.IsCreated == true &&
+            World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(WhiteBallQuery))
+            WhiteBallQuery.Dispose();
     }
 
     void Update()
     {
+        if (WhiteBallEntity.Equals(Entity.Null) &&
+            World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(WhiteBallQuery) &&
+            !WhiteBallQuery.IsEmpty)
+        {
+            WhiteBallEntity = WhiteBallQuery.GetSingletonEntity();
+        }
+
         if (!System.IsInitialized && !WhiteBallEntity.Equals(Entity.Null))
         {
-            var physicsWorld = World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+            EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
+                .WithAll<PhysicsWorldSingleton>();
+            EntityQuery singletonQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(builder);
+            PhysicsWorld physicsWorld = singletonQuery.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
             if (physicsWorld.NumDynamicBodies > 0)
             {
-                System.Initialize(WhiteBallEntity, NumSteps, ReferenceMesh, ReferenceMaterial, ref physicsWorld);
+                System.Initialize(WhiteBallEntity, NumSteps, ReferenceMesh, ReferenceMaterial, in physicsWorld);
                 System.WhiteBallVelocity = GetVelocityFromSliders();
             }
+            singletonQuery.Dispose();
         }
     }
 
@@ -398,10 +410,5 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour, IReceiveEntity
 
             System.WhiteBallVelocity = float3.zero;
         }
-    }
-
-    public void SetReceivedEntity(Entity entity)
-    {
-        WhiteBallEntity = entity;
     }
 }

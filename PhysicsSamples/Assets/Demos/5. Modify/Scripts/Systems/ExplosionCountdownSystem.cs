@@ -13,29 +13,26 @@ public struct ExplosionCountdown : IComponentData
     public float Force;
 }
 
-
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class ExplosionCountdownSystem : SystemBase
 {
-    private BuildPhysicsWorld m_BuildPhysicsWorld;
     private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;
 
     protected override void OnCreate()
     {
-        m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-        m_CommandBufferSystem = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
-        RequireForUpdate(GetEntityQuery(new ComponentType[] { typeof(ExplosionCountdown) }));
+        m_CommandBufferSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
+        RequireForUpdate<ExplosionCountdown>();
     }
 
     protected override void OnUpdate()
     {
         var commandBufferParallel = m_CommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
-        var timeStep = Time.DeltaTime;
+        var timeStep = SystemAPI.Time.DeltaTime;
         var up = math.up();
 
-        var positions = GetComponentDataFromEntity<Translation>(true);
+        var positions = GetComponentLookup<Translation>(true);
 
         Entities
             .WithName("ExplosionCountdown_Tick")
@@ -50,7 +47,6 @@ public partial class ExplosionCountdownSystem : SystemBase
                     explosion.Center = positions[explosion.Source].Value;
                 }
             }).ScheduleParallel();
-
 
         Entities
             .WithName("ExplosionCountdown_Bang")
@@ -67,7 +63,5 @@ public partial class ExplosionCountdownSystem : SystemBase
 
                     commandBufferParallel.RemoveComponent<ExplosionCountdown>(entityInQueryIndex, entity);
                 }).Schedule();
-
-        m_BuildPhysicsWorld.AddInputDependencyToComplete(Dependency);
     }
 }

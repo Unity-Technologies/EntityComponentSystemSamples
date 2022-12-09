@@ -26,7 +26,7 @@ struct AnimateKinematicBodyCurve : ISharedComponentData, IEquatable<AnimateKinem
 
 // translate a body along the z-axis and rotate about the y-axis following animation curves
 [RequireComponent(typeof(PhysicsBodyAuthoring))]
-class AnimateKinematicBodyAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+class AnimateKinematicBodyAuthoring : MonoBehaviour
 {
     public enum Mode
     {
@@ -58,26 +58,30 @@ class AnimateKinematicBodyAuthoring : MonoBehaviour, IConvertGameObjectToEntity
         preWrapMode = WrapMode.Loop,
         postWrapMode = WrapMode.Loop
     };
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class AnimateKinematicBodyBaker : Baker<AnimateKinematicBodyAuthoring>
+{
+    public override void Bake(AnimateKinematicBodyAuthoring authoring)
     {
-        if (AnimateMode == Mode.Teleport)
-            dstManager.AddComponent<TeleportKinematicBody>(entity);
+        if (authoring.AnimateMode == AnimateKinematicBodyAuthoring.Mode.Teleport)
+            AddComponent<TeleportKinematicBody>();
 
-        dstManager.AddSharedComponentData(entity, new AnimateKinematicBodyCurve
+        AddSharedComponentManaged(new AnimateKinematicBodyCurve
         {
-            TranslationCurve = TranslationCurve,
-            OrientationCurve = OrientationCurve
+            TranslationCurve = authoring.TranslationCurve,
+            OrientationCurve = authoring.OrientationCurve
         });
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 partial class AnimateKinematicBodySystem : SystemBase
 {
-    // system state component used to identify new animated bodies on their first frame
-    struct Initialized : ISystemStateComponentData {}
+    // cleanup component used to identify new animated bodies on their first frame
+    struct Initialized : ICleanupComponentData {}
 
     // sample the animation curves to generate a new position and orientation
     // curves translate along the z-axis and set an orientation rotated about the y-axis
@@ -89,7 +93,7 @@ partial class AnimateKinematicBodySystem : SystemBase
 
     protected override void OnUpdate()
     {
-        float elapsedTime = (float)Time.ElapsedTime;
+        float elapsedTime = (float)SystemAPI.Time.ElapsedTime;
 
         var commandBuffer = new EntityCommandBuffer(Allocator.TempJob);
 
@@ -125,7 +129,7 @@ partial class AnimateKinematicBodySystem : SystemBase
                     Sample(curve, elapsedTime, ref translation.Value, ref rotation.Value)
             ).Run();
 
-        var tickSpeed = 1f / Time.DeltaTime;
+        var tickSpeed = 1f / SystemAPI.Time.DeltaTime;
 
         // moving kinematic bodies via their PhysicsVelocity component will generate contact events with any bodies they pass through
         // use PhysicsVelocity.CalculateVelocityToTarget() to compute the velocity required to move to a desired target position

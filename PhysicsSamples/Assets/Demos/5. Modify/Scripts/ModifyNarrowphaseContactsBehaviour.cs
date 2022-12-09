@@ -1,5 +1,3 @@
-using System;
-using Unity.Assertions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -7,10 +5,8 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Authoring;
-using Unity.Physics.Extensions;
 using Unity.Physics.Systems;
 using UnityEngine;
-using MeshCollider = Unity.Physics.MeshCollider;
 
 public struct ModifyNarrowphaseContacts : IComponentData
 {
@@ -20,63 +16,73 @@ public struct ModifyNarrowphaseContacts : IComponentData
 
 [RequireComponent(typeof(PhysicsBodyAuthoring))]
 [DisallowMultipleComponent]
-public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour, IConvertGameObjectToEntity
+public class ModifyNarrowphaseContactsBehaviour : MonoBehaviour
 {
     // SurfaceUpNormal used for non-mesh surfaces.
     // For mesh surface we get the normal from the individual polygon
     public Vector3 SurfaceUpNormal = Vector3.up;
 
     void OnEnable() {}
+}
 
-    void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class ModifyNarrowphaseContactsBehaviourBaker : Baker<ModifyNarrowphaseContactsBehaviour>
+{
+    public override void Bake(ModifyNarrowphaseContactsBehaviour authoring)
     {
-        if (enabled)
+        if (authoring.enabled)
         {
-            var component = new ModifyNarrowphaseContacts
+            var transform = GetComponent<Transform>();
+            AddComponent(new ModifyNarrowphaseContacts
             {
-                surfaceEntity = entity,
-                surfaceNormal = transform.rotation * SurfaceUpNormal
-            };
-            dstManager.AddComponentData(entity, component);
+                surfaceEntity = GetEntity(),
+                surfaceNormal = transform.rotation * authoring.SurfaceUpNormal
+            });
         }
     }
 }
 
 // A system which configures the simulation step to rotate certain contact normals
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(StepPhysicsWorld))]
-public partial class ModifyNarrowphaseContactsSystem : SystemBase
+[UpdateInGroup(typeof(PhysicsSimulationGroup))]
+[UpdateAfter(typeof(PhysicsCreateContactsGroup)), UpdateBefore(typeof(PhysicsCreateJacobiansGroup))]
+[BurstCompile]
+public partial struct ModifyNarrowphaseContactsSystem : ISystem
 {
-    StepPhysicsWorld m_StepPhysicsWorld;
-    BuildPhysicsWorld m_BuildPhysicsWorld;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-        m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-
-        RequireForUpdate(GetEntityQuery(new ComponentType[] { typeof(ModifyNarrowphaseContacts) }));
+        state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ModifyNarrowphaseContacts>()));
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
     {
-        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics) return;
+    }
 
-        var modifier = GetSingleton<ModifyNarrowphaseContacts>();
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        var simulationSingleton = SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW;
+
+        if (simulationSingleton.Type == SimulationType.NoPhysics)
+        {
+            return;
+        }
+
+        var modifier = SystemAPI.GetSingleton<ModifyNarrowphaseContacts>();
 
         var surfaceNormal = modifier.surfaceNormal;
         var surfaceEntity = modifier.surfaceEntity;
 
-        SimulationCallbacks.Callback callback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
+        var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+
+        var job = new ModifyNormalsJob
         {
-            return new ModifyNormalsJob
-            {
-                SurfaceEntity = surfaceEntity,
-                SurfaceNormal = surfaceNormal,
-                CollisionWorld = world.CollisionWorld,
-            }.Schedule(simulation, ref world, inDeps);
+            SurfaceEntity = surfaceEntity,
+            SurfaceNormal = surfaceNormal,
+            CollisionWorld = world.CollisionWorld
         };
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, callback);
+
+        state.Dependency = job.Schedule(simulationSingleton, ref world, state.Dependency);
     }
 
     [BurstCompile]

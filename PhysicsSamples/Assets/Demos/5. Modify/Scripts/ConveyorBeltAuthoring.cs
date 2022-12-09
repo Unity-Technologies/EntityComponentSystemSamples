@@ -44,23 +44,13 @@ public class ConveyorBeltAuthoringEditor : Editor
 #endif
 
 [RequireComponent(typeof(PhysicsBodyAuthoring))]
-public class ConveyorBeltAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class ConveyorBeltAuthoring : MonoBehaviour
 {
     public float Speed = 0.0f;
     public bool IsLinear = true;
     public Vector3 LocalDirection = Vector3.forward;
 
     private float _Offset = 0.0f;
-
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-    {
-        dstManager.AddComponentData(entity, new ConveyorBelt
-        {
-            Speed = IsLinear ? Speed : math.radians(Speed),
-            IsAngular = !IsLinear,
-            LocalDirection = LocalDirection.normalized,
-        });
-    }
 
     public void OnDrawGizmos()
     {
@@ -101,6 +91,19 @@ public class ConveyorBeltAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
+class ConveyorBeltBaker : Baker<ConveyorBeltAuthoring>
+{
+    public override void Bake(ConveyorBeltAuthoring authoring)
+    {
+        AddComponent(new ConveyorBelt
+        {
+            Speed = authoring.IsLinear ? authoring.Speed : math.radians(authoring.Speed),
+            IsAngular = !authoring.IsLinear,
+            LocalDirection = authoring.LocalDirection.normalized,
+        });
+    }
+}
+
 public struct ConveyorBelt : IComponentData
 {
     public float3 LocalDirection;
@@ -108,44 +111,15 @@ public struct ConveyorBelt : IComponentData
     public bool IsAngular;
 }
 
+// A system which configures the simulation step to modify contact jacobians in various ways
 
-// A system which configures the simulation step to modify contact jacobains in various ways
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(StepPhysicsWorld))]
-public partial class ConveyorBeltSystem : SystemBase
+[UpdateInGroup(typeof(PhysicsSimulationGroup))]
+[UpdateAfter(typeof(PhysicsCreateContactsGroup))]
+[UpdateBefore(typeof(PhysicsCreateJacobiansGroup))]
+[BurstCompile]
+public partial struct PrepareConveyorBeltSystem : ISystem
 {
-    StepPhysicsWorld m_StepPhysicsWorld;
-    SimulationCallbacks.Callback m_PreparationCallback;
-    SimulationCallbacks.Callback m_JacobianModificationCallback;
-
-    protected override void OnCreate()
-    {
-        m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-
-        m_PreparationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-        {
-            var job = new SetConveyorBeltFlagJob
-            {
-                ConveyorBelts = GetComponentDataFromEntity<ConveyorBelt>(true)
-            }.Schedule(simulation, ref world, inDeps);
-            return job;
-        };
-
-        m_JacobianModificationCallback = (ref ISimulation simulation, ref PhysicsWorld world, JobHandle inDeps) =>
-        {
-            var job = new SetConveyorBeltSpeedJob
-            {
-                ConveyorBelts = GetComponentDataFromEntity<ConveyorBelt>(true),
-                Bodies = world.Bodies,
-            }.Schedule(simulation, ref world, inDeps);
-            return job;
-        };
-
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[] { typeof(ConveyorBelt) }
-        }));
-    }
+    private ComponentLookup<ConveyorBelt> m_ConveyorBeltData;
 
     // This job reads the modify component and sets some data on the contact, to get propagated to the jacobian
     // for processing in our jacobian modifier job. This is necessary because some flags require extra data to
@@ -154,7 +128,7 @@ public partial class ConveyorBeltSystem : SystemBase
     struct SetConveyorBeltFlagJob : IContactsJob
     {
         [ReadOnly]
-        public ComponentDataFromEntity<ConveyorBelt> ConveyorBelts;
+        public ComponentLookup<ConveyorBelt> ConveyorBelts;
 
         public void Execute(ref ModifiableContactHeader manifold, ref ModifiableContactPoint contact)
         {
@@ -166,9 +140,47 @@ public partial class ConveyorBeltSystem : SystemBase
     }
 
     [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ConveyorBelt>()));
+        m_ConveyorBeltData = state.GetComponentLookup<ConveyorBelt>(true);
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_ConveyorBeltData.Update(ref state);
+        SimulationSingleton simulation = SystemAPI.GetSingleton<SimulationSingleton>();
+        if (simulation.Type == SimulationType.NoPhysics)
+        {
+            return;
+        }
+
+        state.Dependency = new SetConveyorBeltFlagJob
+        {
+            ConveyorBelts = m_ConveyorBeltData
+        }.Schedule(simulation, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);
+    }
+}
+
+
+[UpdateInGroup(typeof(PhysicsSimulationGroup))]
+[UpdateBefore(typeof(PhysicsSolveAndIntegrateGroup))]
+[UpdateAfter(typeof(PhysicsCreateJacobiansGroup))]
+[BurstCompile]
+public partial struct ConveyorBeltSystem : ISystem
+{
+    private ComponentLookup<ConveyorBelt> m_ConveyorBeltData;
+
+    [BurstCompile]
     struct SetConveyorBeltSpeedJob : IJacobiansJob
     {
-        [ReadOnly] public ComponentDataFromEntity<ConveyorBelt> ConveyorBelts;
+        [ReadOnly] public ComponentLookup<ConveyorBelt> ConveyorBelts;
         [NativeDisableContainerSafetyRestriction]
         public NativeArray<RigidBody> Bodies;
 
@@ -220,11 +232,34 @@ public partial class ConveyorBeltSystem : SystemBase
         }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        if (m_StepPhysicsWorld.Simulation.Type == SimulationType.NoPhysics) return;
+        state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ConveyorBelt>()));
+        m_ConveyorBeltData = state.GetComponentLookup<ConveyorBelt>(true);
+    }
 
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContacts, m_PreparationCallback, Dependency);
-        m_StepPhysicsWorld.EnqueueCallback(SimulationCallbacks.Phase.PostCreateContactJacobians, m_JacobianModificationCallback, Dependency);
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_ConveyorBeltData.Update(ref state);
+        SimulationSingleton simulation = SystemAPI.GetSingleton<SimulationSingleton>();
+        if (simulation.Type == SimulationType.NoPhysics)
+        {
+            return;
+        }
+
+        var world = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
+
+        state.Dependency = new SetConveyorBeltSpeedJob
+        {
+            ConveyorBelts = m_ConveyorBeltData,
+            Bodies = world.Bodies
+        }.Schedule(simulation, ref world, state.Dependency);
     }
 }

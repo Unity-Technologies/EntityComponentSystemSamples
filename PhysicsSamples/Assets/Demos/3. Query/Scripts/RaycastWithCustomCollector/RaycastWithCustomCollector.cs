@@ -1,5 +1,5 @@
+using Unity.Burst;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Extensions;
@@ -76,68 +76,100 @@ public struct IgnoreTransparentClosestHitCollector : ICollector<RaycastHit>
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(ExportPhysicsWorld))]
-[UpdateBefore(typeof(EndFramePhysicsSystem))]
-public partial class RaycastWithCustomCollectorSystem : SystemBase
+[UpdateAfter(typeof(PhysicsSystemGroup))]
+[BurstCompile]
+public partial struct RaycastWithCustomCollectorSystem : ISystem
 {
-    BuildPhysicsWorld m_BuildPhysicsWorld;
-    EndFixedStepSimulationEntityCommandBufferSystem m_EntityCommandBufferSystem;
+    private ComponentHandles m_Handles;
 
-    protected override void OnCreate()
+    struct ComponentHandles
     {
-        m_BuildPhysicsWorld = World.GetExistingSystem<BuildPhysicsWorld>();
-        m_EntityCommandBufferSystem = World.GetExistingSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
+        public ComponentLookup<Translation> Positions;
+        public ComponentLookup<NonUniformScale> NonUniformScales;
+
+        public ComponentHandles(ref SystemState state)
+        {
+            Positions = state.GetComponentLookup<Translation>(false);
+            NonUniformScales = state.GetComponentLookup<NonUniformScale>(false);
+        }
+
+        public void Update(ref SystemState state)
+        {
+            Positions.Update(ref state);
+            NonUniformScales.Update(ref state);
+        }
     }
 
-    protected override void OnStartRunning()
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnStartRunning();
-        this.RegisterPhysicsRuntimeSystemReadOnly();
+        state.RequireForUpdate<VisualizedRaycast>();
+        m_Handles = new ComponentHandles(ref state);
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
     {
-        CollisionWorld collisionWorld = m_BuildPhysicsWorld.PhysicsWorld.CollisionWorld;
-        EntityCommandBuffer commandBuffer = m_EntityCommandBufferSystem.CreateCommandBuffer();
+    }
 
-        Entities
-            .WithName("RaycastWithCustomCollector")
-            .WithBurst()
-            .WithReadOnly(collisionWorld)
-            .ForEach((Entity entity, ref Translation position, ref Rotation rotation, ref VisualizedRaycast visualizedRaycast) =>
+    [BurstCompile]
+    public partial struct RaycastWithCustomCollectorJob : IJobEntity
+    {
+        public ComponentLookup<Translation> Translations;
+        public ComponentLookup<NonUniformScale> NonUniformScales;
+        public PhysicsWorldSingleton PhysicsWorldSingleton;
+
+        [BurstCompile]
+        public void Execute(Entity entity, ref Rotation rotation, ref VisualizedRaycast visualizedRaycast)
+        {
+            var raycastLength = visualizedRaycast.RayLength;
+            var position = Translations[entity];
+
+            // Perform the Raycast
+            var raycastInput = new RaycastInput
             {
-                var raycastLength = visualizedRaycast.RayLength;
+                Start = position.Value,
+                End = position.Value + (math.forward(rotation.Value) * visualizedRaycast.RayLength),
+                Filter = CollisionFilter.Default
+            };
 
-                // Perform the Raycast
-                var raycastInput = new RaycastInput
-                {
-                    Start = position.Value,
-                    End = position.Value + (math.forward(rotation.Value) * visualizedRaycast.RayLength),
-                    Filter = CollisionFilter.Default
-                };
+            var collector = new IgnoreTransparentClosestHitCollector(PhysicsWorldSingleton.CollisionWorld);
 
-                var collector = new IgnoreTransparentClosestHitCollector(collisionWorld);
+            PhysicsWorldSingleton.CastRay(raycastInput, ref collector);
 
-                collisionWorld.CastRay(raycastInput, ref collector);
+            var hit = collector.ClosestHit;
+            var hitDistance = raycastLength * hit.Fraction;
 
-                var hit = collector.ClosestHit;
-                var hitDistance = raycastLength * hit.Fraction;
+            // position the entities and scale based on the ray length and hit distance
+            // visualization elements are scaled along the z-axis aka math.forward
+            var newFullRayPosition = new float3(0, 0, raycastLength * 0.5f);
+            var newFullRayScale = new float3(1f, 1f, raycastLength);
+            var newHitPosition = new float3(0, 0, hitDistance);
+            var newHitRayPosition = new float3(0, 0, hitDistance * 0.5f);
+            var newHitRayScale = new float3(1f, 1f, raycastLength * hit.Fraction);
 
-                // position the entities and scale based on the ray length and hit distance
-                // visualization elements are scaled along the z-axis aka math.forward
-                var newFullRayPosition = new float3(0, 0, raycastLength * 0.5f);
-                var newFullRayScale = new float3(1f, 1f, raycastLength);
-                var newHitPosition = new float3(0, 0, hitDistance);
-                var newHitRayPosition = new float3(0, 0, hitDistance * 0.5f);
-                var newHitRayScale = new float3(1f, 1f, raycastLength * hit.Fraction);
+            Translations[visualizedRaycast.HitPositionEntity] = new Translation { Value = newHitPosition };
+            Translations[visualizedRaycast.HitRayEntity] = new Translation { Value = newHitRayPosition };
+            NonUniformScales[visualizedRaycast.HitRayEntity] = new NonUniformScale { Value = newHitRayScale };
+            Translations[visualizedRaycast.FullRayEntity] = new Translation { Value = newFullRayPosition };
+            NonUniformScales[visualizedRaycast.FullRayEntity] = new NonUniformScale { Value = newFullRayScale };
+        }
+    }
 
-                commandBuffer.SetComponent(visualizedRaycast.HitPositionEntity, new Translation { Value = newHitPosition });
-                commandBuffer.SetComponent(visualizedRaycast.HitRayEntity, new Translation { Value = newHitRayPosition });
-                commandBuffer.SetComponent(visualizedRaycast.HitRayEntity, new NonUniformScale { Value = newHitRayScale });
-                commandBuffer.SetComponent(visualizedRaycast.FullRayEntity, new Translation { Value = newFullRayPosition });
-                commandBuffer.SetComponent(visualizedRaycast.FullRayEntity, new NonUniformScale { Value = newFullRayScale });
-            }).Schedule();
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_Handles.Update(ref state);
 
-        m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
+        PhysicsWorldSingleton physicsWorldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+        var world = physicsWorldSingleton.CollisionWorld;
+
+        state.Dependency = new RaycastWithCustomCollectorJob
+        {
+            Translations = m_Handles.Positions,
+            NonUniformScales = m_Handles.NonUniformScales,
+            PhysicsWorldSingleton = physicsWorldSingleton
+        }.Schedule(state.Dependency);
     }
 }

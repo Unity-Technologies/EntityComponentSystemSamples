@@ -13,29 +13,31 @@ struct SpawnIndex : IComponentData
     public int Height;
 }
 
-public class SpawnerSystem : ComponentSystem
+public partial class SpawnerSystem : SystemBase
 {
     protected override void OnUpdate()
     {
+        var cmdBuffer = new EntityCommandBuffer(Allocator.TempJob, PlaybackPolicy.SinglePlayback);
+
         Entities.ForEach((Entity spawnerEntity, ref SpawnData spawndata, ref LocalToWorld localToWorld) =>
         {
-            Action<float4x4, SpawnData, int, int, bool> spawn = (lToWorld, spawnData, x, y, disabled) =>
+            Action<float4x4, SpawnData, int, int, bool, EntityCommandBuffer> spawn = (lToWorld, spawnData, x, y, disabled, ecb) =>
             {
                 var pos = new float4(x, 0.0f, y, 1);
                 pos = math.mul(lToWorld, pos);
 
-                var cube = PostUpdateCommands.Instantiate(spawnData.Prefab);
-                PostUpdateCommands.SetComponent(cube, new Translation { Value = pos.xyz });
-                PostUpdateCommands.AddComponent(cube, new SpawnIndex { Value = (y*spawnData.CountX)+x, Height = spawnData.CountY });
+                var cube = ecb.Instantiate(spawnData.Prefab);
+                ecb.SetComponent(cube, new Translation { Value = pos.xyz });
+                ecb.AddComponent(cube, new SpawnIndex { Value = (y*spawnData.CountX)+x, Height = spawnData.CountY });
                 if(disabled)
-                    PostUpdateCommands.AddComponent(cube, new DisableRendering { });
+                    ecb.AddComponent(cube, new DisableRendering { });
             };
 
             if (!spawndata.HasRenderingDisabledEntities)
             {
                 for (int x = 0; x < spawndata.CountX; ++x)
-                    for (int y = 0; y < spawndata.CountY; ++y)
-                        spawn(localToWorld.Value, spawndata, x, y, false);
+                for (int y = 0; y < spawndata.CountY; ++y)
+                    spawn(localToWorld.Value, spawndata, x, y, false, cmdBuffer);
             }
             else
             {
@@ -43,13 +45,16 @@ public class SpawnerSystem : ComponentSystem
                 {
                     for (int y = 0; y < spawndata.CountY; ++y)
                     {
-                        spawn(localToWorld.Value, spawndata, x, y, false);
-                        spawn(localToWorld.Value, spawndata, x, y, true);
+                        spawn(localToWorld.Value, spawndata, x, y, false, cmdBuffer);
+                        spawn(localToWorld.Value, spawndata, x, y, true, cmdBuffer);
                     }
                 }
             }
 
-            PostUpdateCommands.DestroyEntity(spawnerEntity);
-        });
+            cmdBuffer.DestroyEntity(spawnerEntity);
+        }).WithoutBurst().Run();
+
+        cmdBuffer.Playback(EntityManager);
+        cmdBuffer.Dispose();
     }
 }

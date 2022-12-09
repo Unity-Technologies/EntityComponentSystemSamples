@@ -5,29 +5,27 @@ using Unity.Rendering;
 using UnityEngine;
 
 [Serializable]
-[MaterialProperty("_Color", MaterialPropertyFormat.Float4)]
+[MaterialProperty("_Color")]
 public struct OverrideMaterialColorData : IComponentData
 {
     public float4 Value;
 }
 
-[DisallowMultipleComponent]
-public class OverrideMaterialColor : MonoBehaviour
+namespace Authoring
 {
-    public Color color;
-}
-
-[ConverterVersion("unity", 1)]
-[WorldSystemFilter(WorldSystemFilterFlags.HybridGameObjectConversion)]
-public class OverrideMaterialColorSystem : GameObjectConversionSystem
-{
-    protected override void OnUpdate()
+    [DisallowMultipleComponent]
+    public class OverrideMaterialColor : MonoBehaviour
     {
-        Entities.ForEach((OverrideMaterialColor comp) =>
+        public Color color;
+    }
+
+    public class OverrideMaterialColorBaker : Baker<OverrideMaterialColor>
+    {
+        public override void Bake(OverrideMaterialColor authoring)
         {
-            var entity = GetPrimaryEntity(comp);
-            var data = new OverrideMaterialColorData { Value = new float4(comp.color.r, comp.color.g, comp.color.b, comp.color.a) };
-            DstEntityManager.AddComponentData(entity, data);
-        });
+            Color linearCol = authoring.color.linear;
+            var data = new OverrideMaterialColorData { Value = new float4(linearCol.r, linearCol.g, linearCol.b, linearCol.a) };
+            AddComponent(data);
+        }
     }
 }

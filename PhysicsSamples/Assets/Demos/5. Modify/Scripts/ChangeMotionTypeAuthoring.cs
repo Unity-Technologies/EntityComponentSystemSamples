@@ -38,8 +38,7 @@ public struct ChangeMotionMaterials : ISharedComponentData, IEquatable<ChangeMot
         )));
 }
 
-// Converted in PhysicsSamplesConversionSystem so Physics and Graphics conversion is complete
-public class ChangeMotionTypeAuthoring : MonoBehaviour//, IConvertGameObjectToEntity
+public class ChangeMotionTypeAuthoring : MonoBehaviour
 {
     public UnityEngine.Material DynamicMaterial;
     public UnityEngine.Material KinematicMaterial;
@@ -47,35 +46,47 @@ public class ChangeMotionTypeAuthoring : MonoBehaviour//, IConvertGameObjectToEn
 
     [Range(0, 10)] public float TimeToSwap = 1.0f;
     public bool SetVelocityToZero = false;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class ChangeMotionTypeAuthoringBaker : Baker<ChangeMotionTypeAuthoring>
+{
+    public override void Bake(ChangeMotionTypeAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new ChangeMotionType
+        var velocity = new PhysicsVelocity();
+        var physicsBodyAuthoring = GetComponent<PhysicsBodyAuthoring>();
+        if (physicsBodyAuthoring != null)
+        {
+            velocity.Linear = physicsBodyAuthoring.InitialLinearVelocity;
+            velocity.Angular = physicsBodyAuthoring.InitialAngularVelocity;
+        }
+
+        AddComponent(new ChangeMotionType
         {
             NewMotionType = BodyMotionType.Dynamic,
-            DynamicInitialVelocity = dstManager.GetComponentData<PhysicsVelocity>(entity),
-            TimeLimit = TimeToSwap,
-            Timer = TimeToSwap,
-            SetVelocityToZero = SetVelocityToZero
+            DynamicInitialVelocity = velocity,
+            TimeLimit = authoring.TimeToSwap,
+            Timer = authoring.TimeToSwap,
+            SetVelocityToZero = authoring.SetVelocityToZero
         });
 
-        dstManager.AddSharedComponentData(entity, new ChangeMotionMaterials
+        AddSharedComponentManaged(new ChangeMotionMaterials
         {
-            DynamicMaterial = DynamicMaterial,
-            KinematicMaterial = KinematicMaterial,
-            StaticMaterial = StaticMaterial
+            DynamicMaterial = authoring.DynamicMaterial,
+            KinematicMaterial = authoring.KinematicMaterial,
+            StaticMaterial = authoring.StaticMaterial
         });
-        dstManager.AddComponent<PhysicsMassOverride>(entity);
+        AddComponent<PhysicsMassOverride>();
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class ChangeMotionTypeSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = SystemAPI.Time.DeltaTime;
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
             Entities
@@ -129,7 +140,7 @@ public partial class ChangeMotionTypeSystem : SystemBase
                     // assign the new render mesh material
                     var newRenderMesh = renderMesh;
                     newRenderMesh.material = material;
-                    commandBuffer.SetSharedComponent(entity, newRenderMesh);
+                    commandBuffer.SetSharedComponentManaged(entity, newRenderMesh);
 
                     // move to next motion type
                     modifier.NewMotionType = (BodyMotionType)(((int)modifier.NewMotionType + 1) % 3);

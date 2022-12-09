@@ -11,7 +11,7 @@ class SetupProject
     {
 #if UNITY_2020_2_OR_NEWER && UNITY_EDITOR_OSX
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneOSX)
-            UserBuildSettings.architecture = MacOSArchitecture.x64;
+            UserBuildSettings.architecture = UnityEditor.Build.OSArchitecture.x64;
 #endif
     }
 }

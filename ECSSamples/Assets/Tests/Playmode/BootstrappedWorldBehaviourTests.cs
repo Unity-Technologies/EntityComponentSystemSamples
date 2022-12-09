@@ -16,8 +16,8 @@ namespace BootstrappedWorldTests
         /// bootstrapping or system discovery), or an unexpected system was added that creates entities.  This usually
         /// means a sample/demo system is running by default.
         ///
-        /// There is an expected number of entities after one frame, as some built-in systems (such as Time) create
-        /// singleton entities for tracking.
+        /// There is an expected number of entities after one frame, as some built-in systems (such as Time, and
+        /// all the ECB systems) create singleton entities.
         /// </summary>
         ///
         [UnityTest]
@@ -27,23 +27,20 @@ namespace BootstrappedWorldTests
             // In the Editor we bootstrap the GameObjectScene handle for the current scene when entering playmode, but not in a standalone player
             // Where we expect the users to control this
 #if UNITY_EDITOR
-            const int ExpectedEntityCount = 2;
+            const int ExpectedEntityCount = 11;
 #else
-            const int ExpectedEntityCount = 1;
+            const int ExpectedEntityCount = 10;
 #endif
 
             yield return new WaitForFixedUpdate();
 
             Assert.Greater(world.Systems.Count, 0, "No systems were found; bootstrapping or system discovery failed");
-            Assert.AreEqual(ExpectedEntityCount, GetEntityCount(world), GetTruncatedEntitiesDescription(world, 50));
+            Assert.AreEqual(ExpectedEntityCount, GetEntityCountExceptSystems(world), GetTruncatedEntitiesDescription(world, 50));
         }
 
-        static int GetEntityCount(World world)
+        static int GetEntityCountExceptSystems(World world)
         {
-            using (var entities = world.EntityManager.GetAllEntities())
-            {
-                return entities.Length;
-            }
+            return world.EntityManager.UniversalQuery.CalculateEntityCount();
         }
 
         static string GetTruncatedEntitiesDescription(World world, int truncateAfter)

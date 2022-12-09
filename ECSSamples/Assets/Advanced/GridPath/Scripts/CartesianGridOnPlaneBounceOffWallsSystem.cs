@@ -37,14 +37,26 @@ public unsafe partial class CartesianGridOnPlaneBounceOffWallsSystem : SystemBas
             .WithEntityQueryOptions(EntityQueryOptions.FilterWriteGroup)
             .ForEach((ref CartesianGridDirection gridDirection,
                 ref CartesianGridCoordinates gridCoordinates,
+#if !ENABLE_TRANSFORM_V1
+                ref LocalToWorldTransform transform) =>
+#else
                 ref Translation translation) =>
+#endif
                 {
                     var dir = gridDirection.Value;
+#if !ENABLE_TRANSFORM_V1
+                    var nextGridPosition = new CartesianGridCoordinates(transform.Value.Position.xz + trailingOffsets[dir], rowCount, colCount);
+                    if (gridCoordinates.Equals(nextGridPosition))
+                    {
+                        // Don't allow translation to drift
+                        transform.Value.Position = CartesianGridMovement.SnapToGridAlongDirection(transform.Value.Position, dir, gridCoordinates, cellCenterOffset);
+#else
                     var nextGridPosition = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[dir], rowCount, colCount);
                     if (gridCoordinates.Equals(nextGridPosition))
                     {
                         // Don't allow translation to drift
                         translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
+#endif
                         return; // Still in the same grid cell. No need to change direction.
                     }
 

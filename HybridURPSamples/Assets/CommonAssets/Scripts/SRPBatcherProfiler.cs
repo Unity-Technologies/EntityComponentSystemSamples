@@ -38,21 +38,27 @@ namespace UnityEngine.Experimental.Rendering
 			kSRPBRenderApplyShader,
 			kSRPBShadowApplyShader,
 			kPrepareBatchRendererGroupNodes,
-		};
+            kRenderLoopPrepare,
+            kRenderLoopSort,
+            kRenderShadowSort,
+        };
 		
         RecorderEntry[] recordersList =
         {
 			// Warning: Keep that list in the exact same order than SRPBMarkers enum
             new RecorderEntry() { name="RenderLoop.Draw" },
             new RecorderEntry() { name="Shadows.Draw" },
-            new RecorderEntry() { name="SRPBatcher.Draw", oldName="RenderLoopNewBatcher.Draw" },
-            new RecorderEntry() { name="SRPBatcherShadow.Draw", oldName="ShadowLoopNewBatcher.Draw" },
+            new RecorderEntry() { name="RenderLoop.DrawSRPBatcher", oldName="RenderLoopNewBatcher.Draw" },
+            new RecorderEntry() { name="Shadows.DrawSRPBatcher", oldName="ShadowLoopNewBatcher.Draw" },
             new RecorderEntry() { name="RenderLoopDevice.Idle" },
             new RecorderEntry() { name="StdRender.ApplyShader" },
             new RecorderEntry() { name="StdShadow.ApplyShader" },
             new RecorderEntry() { name="SRPBRender.ApplyShader" },
             new RecorderEntry() { name="SRPBShadow.ApplyShader" },
             new RecorderEntry() { name="PrepareBatchRendererGroupNodes" },
+            new RecorderEntry() { name="RenderLoop.Prepare" },
+            new RecorderEntry() { name="RenderLoop.Sort" },
+            new RecorderEntry() { name="Shadows.Sort" },
         };
 
         void Awake()
@@ -150,6 +156,10 @@ namespace UnityEngine.Experimental.Rendering
 					float RTIdleTime = recordersList[(int)SRPBMarkers.kRenderThreadIdle].accTime * ooFrameCount;
 					float avgPIRPrepareGroupNodes = recordersList[(int)SRPBMarkers.kPrepareBatchRendererGroupNodes].accTime * ooFrameCount;
 
+                    float avgRenderLoopPrepare = recordersList[(int)SRPBMarkers.kRenderLoopPrepare].accTime * ooFrameCount;
+                    float avgRenderLoopSort = recordersList[(int)SRPBMarkers.kRenderLoopSort].accTime * ooFrameCount;
+                    float avgRenderShadowSort = recordersList[(int)SRPBMarkers.kRenderShadowSort].accTime * ooFrameCount;
+
 					m_statsLabel = string.Format("Accumulated time for RenderLoop.Draw and ShadowLoop.Draw (all threads)\n{0:F2}ms CPU Rendering time ( incl {1:F2}ms RT idle )\n", avgStdRender + avgStdShadow + avgSRPBRender + avgSRPBShadow + avgPIRPrepareGroupNodes, RTIdleTime);
 					if (SRPBatcher)
 					{
@@ -163,7 +173,12 @@ namespace UnityEngine.Experimental.Rendering
 					m_statsLabel += string.Format("  {0:F2}ms PIR Prepare Group Nodes ( {1} calls )\n", avgPIRPrepareGroupNodes, recordersList[(int)SRPBMarkers.kPrepareBatchRendererGroupNodes].callCount / m_frameCount);
 					m_statsLabel += string.Format("Global Main Loop: {0:F2}ms ({1} FPS)\n", m_AccDeltaTime * 1000.0f * ooFrameCount, (int)(((float)m_frameCount) / m_AccDeltaTime));
 
-					RazCounters();
+                    m_statsLabel += string.Format("  {0:F2}ms RenderLoop Prepare ( {1} calls )\n", avgRenderLoopPrepare, recordersList[(int)SRPBMarkers.kRenderLoopPrepare].callCount / m_frameCount);
+                    m_statsLabel += string.Format("  {0:F2}ms RenderLoop Sort ( {1} calls )\n", avgRenderLoopSort, recordersList[(int)SRPBMarkers.kRenderLoopSort].callCount / m_frameCount);
+                    m_statsLabel += string.Format("  {0:F2}ms Shadow Sort ( {1} calls )\n", avgRenderShadowSort, recordersList[(int)SRPBMarkers.kRenderShadowSort].callCount / m_frameCount);
+
+
+                    RazCounters();
 				}
 
 			}

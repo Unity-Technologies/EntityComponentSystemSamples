@@ -13,4 +13,5 @@ This scene is same as LODs but with StaticOptimizeEntity component added in the 
 1. In the Hierarchy, select the Subscene
 2. In the Inspector, click Open
 3. In the Hierarchy, select **Root**
-4. Note that StaticOptimizeEntity component is attached together with LOD Group component and HLOD component
+4. Note that StaticOptimizeEntity component is attached to it 
+5. Note 100 LodGroup children attached to it

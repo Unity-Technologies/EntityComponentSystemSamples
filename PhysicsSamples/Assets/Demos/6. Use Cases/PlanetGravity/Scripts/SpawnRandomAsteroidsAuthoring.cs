@@ -12,6 +12,11 @@ class SpawnRandomAsteroidsAuthoring : SpawnRandomObjectsAuthoringBase<AsteroidSp
     internal override void Configure(ref AsteroidSpawnSettings spawnSettings) => spawnSettings.MassFactor = massFactor;
 }
 
+class SpawnRandomAsteroidsAuthoringBaker : SpawnRandomObjectsAuthoringBaseBaker<SpawnRandomAsteroidsAuthoring, AsteroidSpawnSettings>
+{
+    internal override void Configure(SpawnRandomAsteroidsAuthoring authoring, ref AsteroidSpawnSettings spawnSettings) => spawnSettings.MassFactor = authoring.massFactor;
+}
+
 struct AsteroidSpawnSettings : IComponentData, ISpawnSettings
 {
     public Entity Prefab { get; set; }

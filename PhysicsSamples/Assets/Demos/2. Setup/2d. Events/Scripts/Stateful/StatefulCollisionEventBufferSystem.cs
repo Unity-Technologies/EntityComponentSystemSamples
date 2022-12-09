@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -14,99 +15,92 @@ namespace Unity.Physics.Stateful
     /// or, if this is desired on a Character Controller:
     ///    1) Tick the 'Raise Collision Events' flag on the <see cref="CharacterControllerAuthoring"/> component.
     /// </summary>
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(StepPhysicsWorld))]
-    [UpdateBefore(typeof(EndFramePhysicsSystem))]
-    public partial class StatefulCollisionEventBufferSystem : SystemBase
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsSimulationGroup))]
+    [BurstCompile]
+    public partial struct StatefulCollisionEventBufferSystem : ISystem
     {
-        private StepPhysicsWorld m_StepPhysicsWorld = default;
-        private BuildPhysicsWorld m_BuildPhysicsWorld = default;
-        private EntityQuery m_Query = default;
-
         private StatefulSimulationEventBuffers<StatefulCollisionEvent> m_StateFulEventBuffers;
+        private ComponentHandles m_Handles;
 
-        protected override void OnCreate()
+        // Component that does nothing. Made in order to use a generic job. See OnUpdate() method for details.
+        internal struct DummyExcludeComponent : IComponentData {};
+
+        struct ComponentHandles
         {
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            m_Query = GetEntityQuery(new EntityQueryDesc
-            {
-                All = new ComponentType[]
-                {
-                    typeof(StatefulCollisionEvent)
-                }
-            });
+            public ComponentLookup<DummyExcludeComponent> EventExcludes;
+            public ComponentLookup<StatefulCollisionEventDetails> EventDetails;
+            public BufferLookup<StatefulCollisionEvent> EventBuffers;
 
-            m_StateFulEventBuffers = new StatefulSimulationEventBuffers<StatefulCollisionEvent>();
+            public ComponentHandles(ref SystemState systemState)
+            {
+                EventExcludes = systemState.GetComponentLookup<DummyExcludeComponent>(true);
+                EventDetails = systemState.GetComponentLookup<StatefulCollisionEventDetails>(true);
+                EventBuffers = systemState.GetBufferLookup<StatefulCollisionEvent>(false);
+            }
+
+            public void Update(ref SystemState systemState)
+            {
+                EventExcludes.Update(ref systemState);
+                EventBuffers.Update(ref systemState);
+                EventDetails.Update(ref systemState);
+            }
         }
 
-        protected override void OnDestroy()
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            m_StateFulEventBuffers = new StatefulSimulationEventBuffers<StatefulCollisionEvent>();
+            m_StateFulEventBuffers.AllocateBuffers();
+            state.RequireForUpdate<StatefulCollisionEvent>();
+
+            m_Handles = new ComponentHandles(ref state);
+        }
+
+        [BurstCompile]
+        public void OnDestroy(ref SystemState state)
         {
             m_StateFulEventBuffers.Dispose();
         }
 
-        protected override void OnStartRunning()
+        [BurstCompile]
+        public partial struct ClearCollisionEventDynamicBufferJob : IJobEntity
         {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
+            public void Execute(ref DynamicBuffer<StatefulCollisionEvent> eventBuffer) => eventBuffer.Clear();
         }
 
-        protected override void OnUpdate()
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
         {
-            if (m_Query.CalculateEntityCount() == 0)
-            {
-                return;
-            }
+            m_Handles.Update(ref state);
 
-            Entities
-                .WithName("ClearCollisionEventDynamicBuffersJobParallel")
-                .WithBurst()
-                .ForEach((ref DynamicBuffer<StatefulCollisionEvent> buffer) =>
-                {
-                    buffer.Clear();
-                }).ScheduleParallel();
+            state.Dependency = new ClearCollisionEventDynamicBufferJob()
+                .ScheduleParallel(state.Dependency);
 
             m_StateFulEventBuffers.SwapBuffers();
 
             var currentEvents = m_StateFulEventBuffers.Current;
             var previousEvents = m_StateFulEventBuffers.Previous;
 
-            var eventDetails = GetComponentDataFromEntity<StatefulCollisionEventDetails>(true);
-            var eventBuffers = GetBufferFromEntity<StatefulCollisionEvent>();
-
-            Dependency = new StatefulEventCollectionJobs.CollectCollisionEventsWithDetails
+            state.Dependency = new StatefulEventCollectionJobs.
+                CollectCollisionEventsWithDetails
             {
                 CollisionEvents = currentEvents,
-                PhysicsWorld = m_BuildPhysicsWorld.PhysicsWorld,
-                EventDetails = eventDetails
-            }.Schedule(m_StepPhysicsWorld.Simulation, Dependency);
+                PhysicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld,
+                EventDetails = m_Handles.EventDetails
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
 
-            Job
-                .WithName("ConvertCollisionEventStreamToDynamicBufferJob")
-                .WithBurst()
-                .WithCode(() =>
-                {
-                    var statefulEvents = new NativeList<StatefulCollisionEvent>(currentEvents.Length, Allocator.Temp);
 
-                    StatefulSimulationEventBuffers<StatefulCollisionEvent>.GetStatefulEvents(previousEvents, currentEvents, statefulEvents);
+            state.Dependency = new StatefulEventCollectionJobs.
+                ConvertEventStreamToDynamicBufferJob<StatefulCollisionEvent, DummyExcludeComponent>
+            {
+                CurrentEvents = currentEvents,
+                PreviousEvents = previousEvents,
+                EventBuffers = m_Handles.EventBuffers,
 
-                    for (int i = 0; i < statefulEvents.Length; i++)
-                    {
-                        var statefulEvent = statefulEvents[i];
-
-                        var addToEntityA = eventBuffers.HasComponent(statefulEvent.EntityA);
-                        var addToEntityB = eventBuffers.HasComponent(statefulEvent.EntityB);
-
-                        if (addToEntityA)
-                        {
-                            eventBuffers[statefulEvent.EntityA].Add(statefulEvent);
-                        }
-                        if (addToEntityB)
-                        {
-                            eventBuffers[statefulEvent.EntityB].Add(statefulEvent);
-                        }
-                    }
-                }).Schedule();
+                UseExcludeComponent = false,
+                EventExcludeLookup = m_Handles.EventExcludes
+            }.Schedule(state.Dependency);
         }
     }
 }

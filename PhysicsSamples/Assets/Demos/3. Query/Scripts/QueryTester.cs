@@ -9,9 +9,10 @@ using UnityEngine.Assertions;
 using Unity.Jobs;
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
-using System.Diagnostics;
+using Unity.Collections.NotBurstCompatible;
 using static Unity.Physics.CompoundCollider;
 using Random = Unity.Mathematics.Random;
+using static Unity.Physics.Math;
 
 namespace Unity.Physics.Extensions
 {
@@ -44,29 +45,19 @@ namespace Unity.Physics.Extensions
         [BurstCompile]
         public struct ColliderCastJob : IJob
         {
-            [NativeDisableUnsafePtrRestriction] public Collider* Collider;
-            public quaternion Orientation;
-            public float3 Start;
-            public float3 End;
+            [NativeDisableUnsafePtrRestriction]
+            public ColliderCastInput Input;
             public NativeList<ColliderCastHit> ColliderCastHits;
             public bool CollectAllHits;
             [ReadOnly] public PhysicsWorld World;
 
             public void Execute()
             {
-                ColliderCastInput colliderCastInput = new ColliderCastInput
-                {
-                    Collider = Collider,
-                    Orientation = Orientation,
-                    Start = Start,
-                    End = End
-                };
-
                 if (CollectAllHits)
                 {
-                    World.CastCollider(colliderCastInput, ref ColliderCastHits);
+                    World.CastCollider(Input, ref ColliderCastHits);
                 }
-                else if (World.CastCollider(colliderCastInput, out ColliderCastHit hit))
+                else if (World.CastCollider(Input, out ColliderCastHit hit))
                 {
                     ColliderCastHits.Add(hit);
                 }
@@ -97,27 +88,19 @@ namespace Unity.Physics.Extensions
         [BurstCompile]
         public struct ColliderDistanceJob : IJob
         {
-            public RigidTransform Transform;
-            public float MaxDistance;
-            [NativeDisableUnsafePtrRestriction] public Collider* Collider;
+            [NativeDisableUnsafePtrRestriction]
+            public ColliderDistanceInput Input;
             public NativeList<DistanceHit> DistanceHits;
             public bool CollectAllHits;
             [ReadOnly] public PhysicsWorld World;
 
             public void Execute()
             {
-                var colliderDistanceInput = new ColliderDistanceInput
-                {
-                    Collider = Collider,
-                    Transform = Transform,
-                    MaxDistance = MaxDistance
-                };
-
                 if (CollectAllHits)
                 {
-                    World.CalculateDistance(colliderDistanceInput, ref DistanceHits);
+                    World.CalculateDistance(Input, ref DistanceHits);
                 }
-                else if (World.CalculateDistance(colliderDistanceInput, out DistanceHit hit))
+                else if (World.CalculateDistance(Input, out DistanceHit hit))
                 {
                     DistanceHits.Add(hit);
                 }
@@ -339,14 +322,17 @@ namespace Unity.Physics.Extensions
 
         void RunQueries()
         {
-            ref PhysicsWorld world = ref World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
-
+            EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
+                .WithAll<PhysicsWorldSingleton>();
+            EntityQuery singletonQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(builder);
+            PhysicsWorld world = singletonQuery.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
             float3 origin = transform.position;
             float3 direction = (transform.rotation * Direction) * Distance;
 
             RaycastHits.Clear();
             ColliderCastHits.Clear();
             DistanceHits.Clear();
+            singletonQuery.Dispose();
 
             if (!ColliderQuery)
             {
@@ -389,43 +375,46 @@ namespace Unity.Physics.Extensions
             {
                 if (math.any(new float3(Direction) != float3.zero))
                 {
-                    ColliderCastInput = new ColliderCastInput
+                    unsafe
                     {
-                        Collider = Collider.AsPtr(),
-                        Orientation = transform.rotation,
-                        Start = origin,
-                        End = origin + direction,
-                    };
+                        ColliderCastInput = new ColliderCastInput
+                        {
+                            Collider = Collider.AsPtr(),
+                            Orientation = transform.rotation,
+                            Start = origin,
+                            End = origin + direction,
+                            QueryColliderScale = InputColliderScale
+                        };
 
-                    new ColliderCastJob
-                    {
-                        Collider = ColliderCastInput.Collider,
-                        Orientation = ColliderCastInput.Orientation,
-                        Start = ColliderCastInput.Start,
-                        End = ColliderCastInput.End,
-                        ColliderCastHits = ColliderCastHits,
-                        CollectAllHits = CollectAllHits,
-                        World = world,
-                    }.Schedule().Complete();
+                        new ColliderCastJob
+                        {
+                            Input = ColliderCastInput,
+                            ColliderCastHits = ColliderCastHits,
+                            CollectAllHits = CollectAllHits,
+                            World = world
+                        }.Schedule().Complete();
+                    }
                 }
                 else
                 {
-                    ColliderDistanceInput = new ColliderDistanceInput
+                    unsafe
                     {
-                        Collider = Collider.AsPtr(),
-                        Transform = new RigidTransform(transform.rotation, origin),
-                        MaxDistance = Distance
-                    };
+                        ColliderDistanceInput = new ColliderDistanceInput
+                        {
+                            Collider = Collider.AsPtr(),
+                            Transform = new RigidTransform(transform.rotation, origin),
+                            MaxDistance = Distance,
+                            Scale = InputColliderScale
+                        };
 
-                    new ColliderDistanceJob
-                    {
-                        Transform = ColliderDistanceInput.Transform,
-                        MaxDistance = ColliderDistanceInput.MaxDistance,
-                        Collider = ColliderDistanceInput.Collider,
-                        DistanceHits = DistanceHits,
-                        CollectAllHits = CollectAllHits,
-                        World = world,
-                    }.Schedule().Complete();
+                        new ColliderDistanceJob
+                        {
+                            Input = ColliderDistanceInput,
+                            DistanceHits = DistanceHits,
+                            CollectAllHits = CollectAllHits,
+                            World = world,
+                        }.Schedule().Complete();
+                    }
                 }
             }
         }
@@ -437,6 +426,8 @@ namespace Unity.Physics.Extensions
         public bool HighlightLeafCollider = true;
         public ColliderType ColliderType;
         public bool ColliderQuery;
+        [Tooltip("Applied only if ColliderQuery == true")]
+        public float InputColliderScale = 1.0f;
 
         protected bool Simulating;
         protected RaycastInput RaycastInput;
@@ -456,27 +447,28 @@ namespace Unity.Physics.Extensions
             {
                 RunQueries();
 
-                ref PhysicsWorld world = ref World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+                EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
+                    .WithAll<PhysicsWorldSingleton>();
+                EntityQuery singletonQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(builder);
+                PhysicsWorld world = singletonQuery.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
 
                 // Draw the query
                 Gizmos.color = new Color(0.94f, 0.35f, 0.15f, 0.75f);
                 bool colliderCast = math.any(new float3(Direction) != float3.zero);
                 if (ColliderQuery)
                 {
-                    var worldFromCollider = colliderCast ? new RigidTransform
-                    {
-                        pos = ColliderCastInput.Start,
-                        rot = ColliderCastInput.Orientation
-                    } : ColliderDistanceInput.Transform;
+                    ScaledMTransform worldFromCollider = colliderCast ?
+                        new ScaledMTransform(new RigidTransform(ColliderCastInput.Orientation, ColliderCastInput.Start), ColliderCastInput.QueryColliderScale) :
+                        new ScaledMTransform(ColliderDistanceInput.Transform, ColliderDistanceInput.Scale);
 
                     if (colliderCast)
                     {
-                        Gizmos.DrawRay(worldFromCollider.pos, ColliderCastInput.End - ColliderCastInput.Start);
+                        Gizmos.DrawRay(worldFromCollider.Translation, ColliderCastInput.End - ColliderCastInput.Start);
                     }
 
                     if (ColliderType != ColliderType.Compound)
                     {
-                        Gizmos.DrawWireMesh(ColliderMeshes[0], worldFromCollider.pos, worldFromCollider.rot);
+                        Gizmos.DrawWireMesh(ColliderMeshes[0], worldFromCollider.Translation, new quaternion(worldFromCollider.Rotation), new float3(InputColliderScale));
                     }
                     else
                     {
@@ -486,9 +478,9 @@ namespace Unity.Physics.Extensions
                             for (int i = 0; i < compoundCollider->NumChildren; i++)
                             {
                                 ref Child child = ref compoundCollider->Children[i];
-                                RigidTransform worldFromChild = math.mul(worldFromCollider, child.CompoundFromChild);
+                                ScaledMTransform worldFromChild = ScaledMTransform.Mul(worldFromCollider, new MTransform(child.CompoundFromChild));
 
-                                Gizmos.DrawWireMesh(ColliderMeshes[i], worldFromChild.pos, worldFromChild.rot);
+                                Gizmos.DrawWireMesh(ColliderMeshes[i], worldFromChild.Translation, new quaternion(worldFromChild.Rotation), new float3(InputColliderScale));
                             }
                         }
                     }
@@ -508,7 +500,7 @@ namespace Unity.Physics.Extensions
                 // Draw ray hits
                 if (RaycastHits.IsCreated)
                 {
-                    foreach (RaycastHit hit in RaycastHits.ToArray())
+                    foreach (RaycastHit hit in RaycastHits.ToArrayNBC())
                     {
                         Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
                         Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
@@ -539,13 +531,14 @@ namespace Unity.Physics.Extensions
                 // Draw collider hits
                 if (ColliderCastHits.IsCreated)
                 {
-                    foreach (ColliderCastHit hit in ColliderCastHits.ToArray())
+                    foreach (ColliderCastHit hit in ColliderCastHits.ToArrayNBC())
                     {
                         Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
                         Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
 
                         Gizmos.color = Color.magenta;
                         Gizmos.DrawSphere(hit.Position, 0.02f);
+                        Gizmos.DrawSphere(hit.Position - (ColliderCastInput.End - ColliderCastInput.Start) * hit.Fraction, 0.02f);
 
                         if (Collider.Value.Type == ColliderType.Compound)
                         {
@@ -559,23 +552,15 @@ namespace Unity.Physics.Extensions
                                 {
                                     if (child.Collider->Type == compound->Children[i].Collider->Type)
                                     {
-                                        var compoundFromChild = child.TransformFromChild;
-                                        var worldFromCompoundCastStart = new RigidTransform
-                                        {
-                                            pos = ColliderCastInput.Start,
-                                            rot = ColliderCastInput.Orientation
-                                        };
+                                        MTransform compoundFromChild = new MTransform(child.TransformFromChild);
 
-                                        var worldFromCompoundCastEnd = new RigidTransform
-                                        {
-                                            pos = ColliderCastInput.End,
-                                            rot = ColliderCastInput.Orientation
-                                        };
+                                        ScaledMTransform worldFromCompoundCastStart = new ScaledMTransform(new RigidTransform(ColliderCastInput.Orientation, ColliderCastInput.Start), InputColliderScale);
+                                        ScaledMTransform worldFromCompoundCastEnd = new ScaledMTransform(new RigidTransform(ColliderCastInput.Orientation, ColliderCastInput.End), InputColliderScale);
 
-                                        var worldFromChildCastStart = math.mul(worldFromCompoundCastStart, compoundFromChild);
-                                        var worldFromChildCastEnd = math.mul(worldFromCompoundCastEnd, compoundFromChild);
+                                        var worldFromChildCastStart = ScaledMTransform.Mul(worldFromCompoundCastStart, compoundFromChild);
+                                        var worldFromChildCastEnd = ScaledMTransform.Mul(worldFromCompoundCastEnd, compoundFromChild);
 
-                                        Gizmos.DrawWireMesh(ColliderMeshes[i], math.lerp(worldFromChildCastStart.pos, worldFromChildCastEnd.pos, hit.Fraction), ColliderCastInput.Orientation);
+                                        Gizmos.DrawWireMesh(ColliderMeshes[i], math.lerp(worldFromChildCastStart.Translation, worldFromChildCastEnd.Translation, hit.Fraction), new quaternion(worldFromChildCastStart.Rotation), new float3(InputColliderScale));
                                         break;
                                     }
                                 }
@@ -583,7 +568,7 @@ namespace Unity.Physics.Extensions
                         }
                         else
                         {
-                            Gizmos.DrawWireMesh(ColliderMeshes[0], math.lerp(ColliderCastInput.Start, ColliderCastInput.End, hit.Fraction), ColliderCastInput.Orientation);
+                            Gizmos.DrawWireMesh(ColliderMeshes[0], math.lerp(ColliderCastInput.Start, ColliderCastInput.End, hit.Fraction), ColliderCastInput.Orientation, new float3(InputColliderScale));
                         }
 
                         if (DrawSurfaceNormal)
@@ -619,11 +604,14 @@ namespace Unity.Physics.Extensions
                 // Draw distance hits
                 if (DistanceHits.IsCreated)
                 {
-                    foreach (DistanceHit hit in DistanceHits.ToArray())
+                    foreach (DistanceHit hit in DistanceHits.ToArrayNBC())
                     {
                         Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
                         Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
 
+
+                        float maxDistance = ColliderQuery ? ColliderDistanceInput.MaxDistance : PointDistanceInput.MaxDistance;
+                        Assert.IsTrue(hit.Fraction <= maxDistance);
                         float3 queryPoint = hit.Position + hit.SurfaceNormal * hit.Distance;
 
                         Gizmos.color = Color.magenta;
@@ -649,7 +637,7 @@ namespace Unity.Physics.Extensions
                         }
 
 #if UNITY_EDITOR
-                        if (HighlightLeafCollider && Collider.Value.CollisionType != CollisionType.Convex && !hit.QueryColliderKey.Equals(ColliderKey.Empty))
+                        if (ColliderQuery && HighlightLeafCollider && Collider.Value.CollisionType != CollisionType.Convex && !hit.QueryColliderKey.Equals(ColliderKey.Empty))
                         {
                             float3 flippedPosition = hit.Position + hit.SurfaceNormal * hit.Fraction;
 

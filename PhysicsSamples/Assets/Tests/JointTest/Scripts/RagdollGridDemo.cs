@@ -6,7 +6,20 @@ using static Unity.Physics.Math;
 
 public class RagdollGridDemoScene : SceneCreationSettings {}
 
-public class RagdollGridDemo : SceneCreationAuthoring<RagdollGridDemoScene> {}
+public class RagdollGridDemo : SceneCreationAuthoring<RagdollGridDemoScene>
+{
+    class RagdollGridDemoBaker : Baker<RagdollGridDemo>
+    {
+        public override void Bake(RagdollGridDemo authoring)
+        {
+            AddComponentObject(new RagdollGridDemoScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial
+            });
+        }
+    }
+}
 
 public class RagdollGridDemoSceneSystem : SceneCreationSystem<RagdollGridDemoScene>
 {

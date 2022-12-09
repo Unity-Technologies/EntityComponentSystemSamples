@@ -1,13 +1,13 @@
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using NUnit.Framework;
 using Unity.Entities;
-using UnityEngine.SceneManagement;
-using UnityEngine.TestTools;
-using Unity.Physics.Systems;
 using Unity.Mathematics;
 using Unity.Physics.Authoring;
+using Unity.Physics.Systems;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 
 namespace Unity.Physics.Samples.Test
 {
@@ -17,15 +17,12 @@ namespace Unity.Physics.Samples.Test
         bool TestingFinished();
     }
 
+    [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
+    [UpdateAfter(typeof(PhysicsSystemGroup))]
+    [CreateAfter(typeof(PhysicsInitializeGroup))]
     partial class UnityPhysicsDeterminismTestSystem : SystemBase, IDeterminismTestSystem
     {
-        protected BuildPhysicsWorld m_BuildPhysicsWorld;
-        protected StepPhysicsWorld m_StepPhysicsWorld;
-        protected ExportPhysicsWorld m_ExportPhysicsWorld;
-        protected FixedStepSimulationSystemGroup m_FixedStepGroup;
-
         protected bool m_TestingFinished = false;
         protected bool m_RecordingBegan = false;
 
@@ -36,10 +33,7 @@ namespace Unity.Physics.Samples.Test
         {
             SimulatedFramesInCurrentTest = 0;
             Enabled = true;
-            m_ExportPhysicsWorld.Enabled = true;
-            m_StepPhysicsWorld.Enabled = true;
-            m_BuildPhysicsWorld.Enabled = true;
-            m_FixedStepGroup.Enabled = true;
+            World.GetOrCreateSystemManaged<FixedStepSimulationSystemGroup>().Enabled = true;
             m_TestingFinished = false;
         }
 
@@ -48,20 +42,12 @@ namespace Unity.Physics.Samples.Test
         protected override void OnCreate()
         {
             Enabled = false;
-
-            m_BuildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            m_StepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-            m_ExportPhysicsWorld = World.GetOrCreateSystem<ExportPhysicsWorld>();
-            m_FixedStepGroup = World.GetOrCreateSystem<FixedStepSimulationSystemGroup>();
         }
 
         protected void FinishTesting()
         {
             SimulatedFramesInCurrentTest = 0;
-            m_FixedStepGroup.Enabled = false;
-            m_ExportPhysicsWorld.Enabled = false;
-            m_StepPhysicsWorld.Enabled = false;
-            m_BuildPhysicsWorld.Enabled = false;
+            World.GetOrCreateSystemManaged<FixedStepSimulationSystemGroup>().Enabled = false;
             Enabled = false;
 
             m_TestingFinished = true;
@@ -69,9 +55,6 @@ namespace Unity.Physics.Samples.Test
 
         protected override void OnStartRunning()
         {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
-
             // Read/write the display singleton to register as writing data
             // to make sure display systems don't interfere with the test
             if (HasSingleton<PhysicsDebugDisplayData>())
@@ -86,7 +69,7 @@ namespace Unity.Physics.Samples.Test
             if (!m_RecordingBegan)
             {
                 // > 1 because of default static body, logically should be > 0
-                m_RecordingBegan = m_BuildPhysicsWorld.PhysicsWorld.NumBodies > 1;
+                m_RecordingBegan = GetSingleton<PhysicsWorldSingleton>().NumBodies > 1;
             }
             else
             {
@@ -114,12 +97,12 @@ namespace Unity.Physics.Samples.Test
         // The workaround is to avoid calling SwitchWorld() when the first scene is being loaded
         protected bool FirstSceneLoad = true;
 
-        protected virtual IDeterminismTestSystem GetTestSystem() => DefaultWorld.GetExistingSystem<UnityPhysicsDeterminismTestSystem>();
+        protected virtual IDeterminismTestSystem GetTestSystem() => DefaultWorld.GetExistingSystemManaged<UnityPhysicsDeterminismTestSystem>();
 
         protected static void SwitchWorlds()
         {
             var defaultWorld = World.DefaultGameObjectInjectionWorld;
-            defaultWorld.EntityManager.CompleteAllJobs();
+            defaultWorld.EntityManager.CompleteAllTrackedJobs();
             foreach (var system in defaultWorld.Systems)
             {
                 system.Enabled = false;
@@ -135,7 +118,10 @@ namespace Unity.Physics.Samples.Test
             "InitTestScene", "LoaderScene", "SingleThreadedRagdoll",
 
             // Removing 1c. Conversion since it has no ECS data, it would cause timeouts in EndToEndDeterminismTest
-            "1c. Conversion"
+            "1c. Conversion",
+
+            // Apparently we need a different way of dealing with subscenes in tests.
+            "ClientServerScene"
         };
 
         protected static IEnumerable GetScenes()
@@ -175,15 +161,12 @@ namespace Unity.Physics.Samples.Test
                 SwitchWorlds();
             }
             FirstSceneLoad = false;
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>().Enabled = false;
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<StepPhysicsWorld>().Enabled = false;
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<ExportPhysicsWorld>().Enabled = false;
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<FixedStepSimulationSystemGroup>().Enabled = false;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<FixedStepSimulationSystemGroup>().Enabled = false;
             foreach (var system in World.DefaultGameObjectInjectionWorld.Systems)
             {
                 // MouseHoverSystem can effect End To End Determinism
                 // Can't find the type at this point so just check by name
-                if (system.ToString().Contains("MouseHoverSystem"))
+                if (system.ToString().Contains("MouseHoverSystem") || system.ToString().Contains("SmoothlyTrackCameraTarget"))
                     system.Enabled = false;
             }
 
@@ -197,7 +180,7 @@ namespace Unity.Physics.Samples.Test
 
         public List<RigidTransform> EndTest()
         {
-            var world = DefaultWorld.GetExistingSystem<BuildPhysicsWorld>().PhysicsWorld;
+            var world = DefaultWorld.GetExistingSystemManaged<UnityPhysicsDeterminismTestSystem>().GetSingleton<PhysicsWorldSingleton>();
 
             List<RigidTransform> results = new List<RigidTransform>();
 

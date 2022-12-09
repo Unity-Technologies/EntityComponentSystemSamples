@@ -29,7 +29,7 @@ namespace Unity.Physics.Authoring
         public float MinTwistAngle;
         public float MaxTwistAngle;
 
-        void UpgradeVersionIfNecessary()
+        internal void UpgradeVersionIfNecessary()
         {
             if (m_Version >= k_LatestVersion)
                 return;
@@ -89,11 +89,54 @@ namespace Unity.Physics.Authoring
                 out var perpendicularCone
             );
 
-            conversionSystem.World.GetOrCreateSystem<EndJointConversionSystem>().CreateJointEntities(
+            var constraints = primaryCone.GetConstraints();
+            for (int i = 0; i < constraints.Length; ++i)
+            {
+                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
+                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
+            }
+            primaryCone.SetConstraints(constraints);
+
+            constraints = perpendicularCone.GetConstraints();
+            for (int i = 0; i < constraints.Length; ++i)
+            {
+                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
+                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
+            }
+            perpendicularCone.SetConstraints(constraints);
+
+            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntities(
                 this,
                 GetConstrainedBodyPair(conversionSystem),
                 new NativeArray<PhysicsJoint>(2, Allocator.Temp) { [0] = primaryCone, [1] = perpendicularCone }
             );
+        }
+    }
+
+    class RagdollJointBaker : JointBaker<RagdollJoint>
+    {
+        public override void Bake(RagdollJoint authoring)
+        {
+            authoring.UpdateAuto();
+            authoring.UpgradeVersionIfNecessary();
+
+            PhysicsJoint.CreateRagdoll(
+                new BodyFrame { Axis = authoring.TwistAxisLocal, PerpendicularAxis = authoring.PerpendicularAxisLocal, Position = authoring.PositionLocal },
+                new BodyFrame { Axis = authoring.TwistAxisInConnectedEntity, PerpendicularAxis = authoring.PerpendicularAxisInConnectedEntity, Position = authoring.PositionInConnectedEntity },
+                math.radians(authoring.MaxConeAngle),
+                math.radians(new FloatRange(authoring.MinPerpendicularAngle, authoring.MaxPerpendicularAngle)),
+                math.radians(new FloatRange(authoring.MinTwistAngle, authoring.MaxTwistAngle)),
+                out var primaryCone,
+                out var perpendicularCone
+            );
+
+            var constraintBodyPair = GetConstrainedBodyPair(authoring);
+
+            using NativeList<Entity> entities = new NativeList<Entity>(1, Allocator.TempJob);
+            uint worldIndex = GetWorldIndexFromBaseJoint(authoring);
+            CreateJointEntities(worldIndex,
+                constraintBodyPair,
+                new NativeArray<PhysicsJoint>(2, Allocator.Temp) { [0] = primaryCone, [1] = perpendicularCone }, entities);
         }
     }
 }

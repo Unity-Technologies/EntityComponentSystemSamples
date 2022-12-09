@@ -1,25 +1,25 @@
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 
-[ConverterVersion("macton", 4)]
-[WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.EntitySceneOptimizations)]
+[RequireMatchingQueriesForUpdate]
 public unsafe partial class CartesianGridOnPlaneSystemGeneratorSystem : SystemBase
 {
     protected override void OnUpdate()
     {
         Dependency.Complete();
-        Entities.WithStructuralChanges().ForEach((Entity entity, ref CartesianGridOnPlaneGenerator cartesianGridOnPlaneGenerator) =>
+        Entities.WithStructuralChanges().ForEach((Entity entity, in CartesianGridOnPlaneGenerator cartesianGridOnPlaneGenerator, in DynamicBuffer<CartesianGridOnPlaneGeneratorFloorPrefab> floorPrefabsBuffer) =>
         {
-            ref var floorPrefab = ref cartesianGridOnPlaneGenerator.Blob.Value.FloorPrefab;
-            var wallPrefab = cartesianGridOnPlaneGenerator.Blob.Value.WallPrefab;
-            var rowCount = cartesianGridOnPlaneGenerator.Blob.Value.RowCount;
-            var colCount = cartesianGridOnPlaneGenerator.Blob.Value.ColCount;
-            var wallSProbability = cartesianGridOnPlaneGenerator.Blob.Value.WallSProbability;
-            var wallWProbability = cartesianGridOnPlaneGenerator.Blob.Value.WallWProbability;
+            var floorPrefabs = new NativeArray<Entity>(floorPrefabsBuffer.Length, Allocator.Temp);
+            floorPrefabs.CopyFrom(floorPrefabsBuffer.Reinterpret<Entity>().AsNativeArray());
 
-            var floorPrefabCount = floorPrefab.Length;
+            var wallPrefab = cartesianGridOnPlaneGenerator.WallPrefab;
+            var rowCount = cartesianGridOnPlaneGenerator.RowCount;
+            var colCount = cartesianGridOnPlaneGenerator.ColCount;
+            var wallSProbability = cartesianGridOnPlaneGenerator.WallSProbability;
+            var wallWProbability = cartesianGridOnPlaneGenerator.WallWProbability;
+
+            var floorPrefabCount = floorPrefabsBuffer.Length;
             if (floorPrefabCount == 0)
                 return;
 
@@ -48,7 +48,7 @@ public unsafe partial class CartesianGridOnPlaneSystemGeneratorSystem : SystemBa
                     var tx = ((float)x) - cx;
                     var tz = ((float)y) - cz;
 
-                    CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefab[prefabIndex], float4x4.identity, tx, tz);
+                    CartesianGridGeneratorUtility.CreateFloorPanel(EntityManager, floorPrefabs[prefabIndex], float4x4.identity, tx, tz);
 
                     var gridWallsIndex = (y * ((colCount + 1) / 2)) + (x / 2);
                     var walls = (gridWalls[gridWallsIndex] >> ((x & 1) * 4)) & 0x0f;

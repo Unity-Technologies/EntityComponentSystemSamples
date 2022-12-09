@@ -1,3 +1,8 @@
+# HybridHDRPSamples Version 6
+
+## Changes
+* Update the project to com.unity.entities 1.0.0-exp.8.
+
 # HybridHDRPSamples Version 5
 
 ## Changes

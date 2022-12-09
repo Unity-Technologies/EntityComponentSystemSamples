@@ -6,12 +6,13 @@ using Unity.Entities;
 using UnityEngine;
 
 [AddComponentMenu("DOTS Samples/Boids/BoidObstacle")]
-[ConverterVersion("joe", 1)]
-public class BoidObstacleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class BoidObstacleAuthoring : MonoBehaviour {}
+
+public class BoidObstacleAuthoringBaker : Baker<BoidObstacleAuthoring>
 {
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public override void Bake(BoidObstacleAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new BoidObstacle());
+        AddComponent(new BoidObstacle());
     }
 }
 

@@ -1,16 +1,17 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[RequireMatchingQueriesForUpdate]
 public partial class JumpingSpherePSSystem : SystemBase
 {
     protected override void OnUpdate()
     {
         //Make the sphere jumps
-        var time = (float)Time.ElapsedTime;
+        var time = (float)SystemAPI.Time.ElapsedTime;
         var y = math.abs(math.cos(time*3f));
         Entities.WithAll<JumpingSphereTag>().ForEach((ref Translation translation) =>
         {

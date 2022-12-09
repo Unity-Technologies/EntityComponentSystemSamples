@@ -8,6 +8,7 @@ using UnityEngine.Jobs;
 
 public class EntityTracker : MonoBehaviour {}
 
+[RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(TransformSystemGroup))]
 [UpdateAfter(typeof(LocalToParentSystem))]
 partial class SynchronizeGameObjectTransformsWithEntities : SystemBase
@@ -30,18 +31,20 @@ partial class SynchronizeGameObjectTransformsWithEntities : SystemBase
 
     protected override void OnUpdate()
     {
-        var localToWorlds = m_Query.ToComponentDataArrayAsync<LocalToWorld>(Allocator.TempJob, out var jobHandle);
+        var localToWorlds = m_Query.ToComponentDataListAsync<LocalToWorld>(World.UpdateAllocator.ToAllocator,
+            out var jobHandle);
+        // TODO(DOTS-6141): this call can't currently be made inline from inside the Schedule call
+        var inputDep = JobHandle.CombineDependencies(Dependency, jobHandle);
         Dependency = new SyncTransforms
         {
             LocalToWorlds = localToWorlds
-        }.Schedule(m_Query.GetTransformAccessArray(), JobHandle.CombineDependencies(Dependency, jobHandle));
+        }.Schedule(m_Query.GetTransformAccessArray(), inputDep);
     }
 
     [BurstCompile]
     struct SyncTransforms : IJobParallelForTransform
     {
-        [DeallocateOnJobCompletion]
-        [ReadOnly] public NativeArray<LocalToWorld> LocalToWorlds;
+        [ReadOnly] public NativeList<LocalToWorld> LocalToWorlds;
 
         public void Execute(int index, TransformAccess transform)
         {

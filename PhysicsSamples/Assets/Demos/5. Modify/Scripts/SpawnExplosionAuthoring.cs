@@ -24,7 +24,7 @@ struct SpawnExplosionSettings : ISpawnSettings, IComponentData
     public Entity Source;
 }
 
-public class SpawnExplosionAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+public class SpawnExplosionAuthoring : MonoBehaviour
 {
     [Header("Debris")]
     public GameObject Prefab;
@@ -34,25 +34,27 @@ public class SpawnExplosionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     public int Countdown;
     public float Force;
 
-    private static int Id = -1;
+    internal static int Id = -1;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class SpawnExplosionAuthoringBaker : Baker<SpawnExplosionAuthoring>
+{
+    public override void Bake(SpawnExplosionAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new SpawnExplosionSettings
+        var transform = GetComponent<Transform>();
+        AddComponent(new SpawnExplosionSettings
         {
-            Prefab = conversionSystem.GetPrimaryEntity(Prefab),
+            Prefab = GetEntity(authoring.Prefab),
             Position = transform.position,
             Rotation = quaternion.identity,
-            Count = Count,
+            Count = authoring.Count,
 
-            Id = Id--,
-            Countdown = Countdown,
-            Force = Force,
+            Id = SpawnExplosionAuthoring.Id--,
+            Countdown = authoring.Countdown,
+            Force = authoring.Force,
             Source = Entity.Null,
         });
     }
-
-    public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs) => referencedPrefabs.Add(Prefab);
 }
 
 class SpawnExplosionSystem : SpawnRandomObjectsSystemBase<SpawnExplosionSettings>
@@ -87,7 +89,7 @@ class SpawnExplosionSystem : SpawnRandomObjectsSystemBase<SpawnExplosionSettings
 
             var collider = EntityManager.GetComponentData<PhysicsCollider>(instance);
             var memsize = collider.Value.Value.MemorySize;
-            var oldFilter = collider.Value.Value.Filter;
+            var oldFilter = collider.Value.Value.GetCollisionFilter();
 
             // Only one of these needed per group, since all debris within
             // a group will share a single collider
@@ -103,12 +105,12 @@ class SpawnExplosionSystem : SpawnRandomObjectsSystemBase<SpawnExplosionSettings
 
             // Set the GroupIndex to GroupId, which is negative
             // This ensures that the debris within a group don't collide
-            colliderCopy.Value.Filter = new CollisionFilter
+            colliderCopy.Value.SetCollisionFilter(new CollisionFilter
             {
                 BelongsTo = oldFilter.BelongsTo,
                 CollidesWith = oldFilter.CollidesWith,
                 GroupIndex = GroupId,
-            };
+            });
 
             PhysicsCollider newCollider = colliderCopy.AsComponent();
             GroupCollider = newCollider;

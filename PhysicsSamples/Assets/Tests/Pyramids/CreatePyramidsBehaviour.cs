@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 using Unity.Collections;
@@ -18,42 +17,39 @@ public struct CreatePyramids : IComponentData
 }
 
 
-public class CreatePyramidsBehaviour : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
+public class CreatePyramidsBehaviour : MonoBehaviour
 {
     public GameObject boxPrefab;
     public int Count = 5;
     public int Height = 5;
     public int Space = 2;
 
-    // Referenced prefabs have to be declared so that the conversion system knows about them ahead of time
-    public void DeclareReferencedPrefabs(List<GameObject> gameObjects)
+    class CreatePyramidsBaker : Baker<CreatePyramidsBehaviour>
     {
-        gameObjects.Add(boxPrefab);
-    }
-
-    void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-    {
-        var sourceEntity = conversionSystem.GetPrimaryEntity(boxPrefab);
-        if (sourceEntity == null)
-            return;
-
-        var boxSize = float3.zero;
-        var renderer = boxPrefab.GetComponent<Renderer>();
-        if (renderer != null)
+        public override void Bake(CreatePyramidsBehaviour authoring)
         {
-            boxSize = renderer.bounds.size;
+            var sourceEntity = GetEntity(authoring.boxPrefab);
+            if (sourceEntity == Entity.Null)
+                return;
+
+            var boxSize = float3.zero;
+            var renderer = authoring.boxPrefab.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                boxSize = renderer.bounds.size;
+            }
+
+            var createPyramids = new CreatePyramids
+            {
+                BoxEntity = sourceEntity,
+                Count = authoring.Count,
+                Height = authoring.Height,
+                Space = authoring.Space,
+                StartPosition = authoring.transform.position,
+                BoxSize = boxSize
+            };
+            AddComponent(createPyramids);
         }
-
-        var createPyramids = new CreatePyramids
-        {
-            BoxEntity = conversionSystem.GetPrimaryEntity(boxPrefab),
-            Count = Count,
-            Height = Height,
-            Space = Space,
-            StartPosition = transform.position,
-            BoxSize = boxSize
-        };
-        dstManager.AddComponentData<CreatePyramids>(entity, createPyramids);
     }
 }
 
@@ -63,13 +59,7 @@ public partial class CreatePyramidsSystem : SystemBase
 {
     protected override void OnCreate()
     {
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[]
-            {
-                typeof(CreatePyramids)
-            }
-        }));
+        RequireForUpdate<CreatePyramids>();
     }
 
     protected override void OnUpdate()

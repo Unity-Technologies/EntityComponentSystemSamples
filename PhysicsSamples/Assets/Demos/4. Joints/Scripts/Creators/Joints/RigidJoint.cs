@@ -25,14 +25,39 @@ namespace Unity.Physics.Authoring
         public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
         {
             UpdateAuto();
-            conversionSystem.World.GetOrCreateSystem<EndJointConversionSystem>().CreateJointEntity(
+            PhysicsJoint joint = PhysicsJoint.CreateFixed(
+                new RigidTransform(OrientationLocal, PositionLocal),
+                new RigidTransform(OrientationInConnectedEntity, PositionInConnectedEntity)
+            );
+            var constraints = joint.GetConstraints();
+            for (int i = 0; i < constraints.Length; ++i)
+            {
+                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
+                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
+            }
+            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
                 this,
                 GetConstrainedBodyPair(conversionSystem),
-                PhysicsJoint.CreateFixed(
-                    new RigidTransform(OrientationLocal, PositionLocal),
-                    new RigidTransform(OrientationInConnectedEntity, PositionInConnectedEntity)
-                )
+                joint
             );
+        }
+    }
+
+    class RigidJointBaker : JointBaker<RigidJoint>
+    {
+        public override void Bake(RigidJoint authoring)
+        {
+            authoring.UpdateAuto();
+
+            var physicsJoint = PhysicsJoint.CreateFixed(
+                new RigidTransform(authoring.OrientationLocal, authoring.PositionLocal),
+                new RigidTransform(authoring.OrientationInConnectedEntity, authoring.PositionInConnectedEntity)
+            );
+
+            var constraintBodyPair = GetConstrainedBodyPair(authoring);
+
+            uint worldIndex = GetWorldIndexFromBaseJoint(authoring);
+            CreateJointEntity(worldIndex, constraintBodyPair, physicsJoint);
         }
     }
 }

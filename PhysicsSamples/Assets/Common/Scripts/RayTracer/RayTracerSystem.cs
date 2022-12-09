@@ -10,12 +10,10 @@ using Unity.Assertions;
 
 namespace Unity.Physics.Extensions
 {
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateAfter(typeof(PhysicsInitializeGroup))]
     public partial class RayTracerSystem : SystemBase
     {
-        BuildPhysicsWorld m_BuildPhysicsWorldSystem;
-
         internal JobHandle FinalJobHandle => Dependency;
         internal bool HasRequests => m_Requests.Count > 0;
 
@@ -242,7 +240,6 @@ namespace Unity.Physics.Extensions
 
         protected override void OnCreate()
         {
-            m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
             m_Requests = new List<RayRequest>();
             m_Results = new List<RayResult>();
         }
@@ -256,16 +253,11 @@ namespace Unity.Physics.Extensions
             m_Results.Clear();
         }
 
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            this.RegisterPhysicsRuntimeSystemReadOnly();
-        }
-
         protected override void OnUpdate()
         {
             if (m_Requests == null || m_Requests.Count == 0) return;
 
+            var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
             JobHandle combinedJobs = Dependency;
             for (int i = 0; i < m_Requests.Count; i++)
             {
@@ -275,8 +267,8 @@ namespace Unity.Physics.Extensions
                     {
                         Results = m_Results[i].PixelData.AsWriter(),
                         Request = m_Requests[i],
-                        World = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld,
-                        NumDynamicBodies = m_BuildPhysicsWorldSystem.PhysicsWorld.NumDynamicBodies
+                        World = world.CollisionWorld,
+                        NumDynamicBodies = world.NumDynamicBodies
                     }.Schedule(m_Results[i].PixelData.ForEachCount, 1, Dependency);
 
                     combinedJobs = JobHandle.CombineDependencies(combinedJobs, rcj);

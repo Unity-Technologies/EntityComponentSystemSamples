@@ -27,13 +27,12 @@ class ToggleSubsceneLoading : MonoBehaviour
             FramesUntilToggleLoad = 0;
 
             var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            var sceneSystem = entityManager.World.GetExistingSystem<SceneSystem>();
-            var sceneEntity = sceneSystem.GetSceneEntity(m_SubScene.SceneGUID);
+            var sceneEntity = SceneSystem.GetSceneEntity(entityManager.World.Unmanaged, m_SubScene.SceneGUID);
 
             if (!entityManager.HasComponent<RequestSceneLoaded>(sceneEntity))
-                sceneSystem.LoadSceneAsync(m_SubScene.SceneGUID);
+                SceneSystem.LoadSceneAsync(entityManager.World.Unmanaged, m_SubScene.SceneGUID);
             else
-                sceneSystem.UnloadScene(m_SubScene.SceneGUID);
+                SceneSystem.UnloadScene(entityManager.World.Unmanaged, m_SubScene.SceneGUID);
         }
     }
 }

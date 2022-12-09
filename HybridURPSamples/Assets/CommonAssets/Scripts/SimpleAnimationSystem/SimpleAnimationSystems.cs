@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[RequireMatchingQueriesForUpdate]
 [UpdateBefore(typeof(TransformSystemGroup))]
 partial class AnimateBlendShapeWeightSystem : SystemBase
 {
@@ -10,7 +11,7 @@ partial class AnimateBlendShapeWeightSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var t = (float)Time.ElapsedTime;
+        var t = (float)SystemAPI.Time.ElapsedTime;
 
         Entities.ForEach((ref DynamicBuffer<BlendShapeWeight> weights, in AnimateBlendShape data) =>
         {
@@ -27,6 +28,7 @@ partial class AnimateBlendShapeWeightSystem : SystemBase
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateBefore(typeof(TransformSystemGroup))]
 partial class AnimatePositionSystem : SystemBase
 {
@@ -34,7 +36,7 @@ partial class AnimatePositionSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var t = (float)Time.ElapsedTime;
+        var t = (float)SystemAPI.Time.ElapsedTime;
 
         Entities.ForEach((ref Translation translation, in AnimatePosition data) =>
         {
@@ -44,6 +46,7 @@ partial class AnimatePositionSystem : SystemBase
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateBefore(typeof(TransformSystemGroup))]
 partial class AnimateRotationSystem : SystemBase
 {
@@ -51,7 +54,7 @@ partial class AnimateRotationSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var t = (float)Time.ElapsedTime;
+        var t = (float)SystemAPI.Time.ElapsedTime;
 
         Entities.ForEach((ref Rotation rotation, in AnimateRotation data) =>
         {
@@ -61,6 +64,7 @@ partial class AnimateRotationSystem : SystemBase
     }
 }
 
+[RequireMatchingQueriesForUpdate]
 [UpdateBefore(typeof(TransformSystemGroup))]
 partial class AnimateScaleSystem : SystemBase
 {
@@ -68,7 +72,7 @@ partial class AnimateScaleSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var t = (float)Time.ElapsedTime;
+        var t = (float)SystemAPI.Time.ElapsedTime;
 
         Entities.ForEach((ref NonUniformScale scale, in AnimateScale data) =>
         {

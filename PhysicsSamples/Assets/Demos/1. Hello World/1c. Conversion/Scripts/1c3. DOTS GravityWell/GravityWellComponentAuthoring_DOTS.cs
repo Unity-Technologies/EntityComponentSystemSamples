@@ -1,18 +1,21 @@
 using Unity.Entities;
 using UnityEngine;
 
-public class GravityWellComponentAuthoring_DOTS : MonoBehaviour, IConvertGameObjectToEntity
+public class GravityWellComponentAuthoring_DOTS : MonoBehaviour
 {
     public float Strength = 100.0f;
     public float Radius = 10.0f;
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class GravityWellComponentBaker : Baker<GravityWellComponentAuthoring_DOTS>
     {
-        dstManager.AddComponentData(entity, new GravityWellComponent_DOTS
+        public override void Bake(GravityWellComponentAuthoring_DOTS authoring)
         {
-            Strength = Strength,
-            Radius = Radius,
-            Position = gameObject.transform.position
-        });
+            AddComponent(new GravityWellComponent_DOTS
+            {
+                Strength = authoring.Strength,
+                Radius = authoring.Radius,
+                Position = authoring.gameObject.transform.position
+            });
+        }
     }
 }

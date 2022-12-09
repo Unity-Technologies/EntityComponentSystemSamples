@@ -1,6 +1,5 @@
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -12,16 +11,19 @@ namespace Unity.Physics.Tests
     {
     }
 
-    public class VerifyCollision : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyCollision : MonoBehaviour
     {
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyCollisionBaker : Baker<VerifyCollision>
         {
-            dstManager.AddComponentData(entity, new VerifyCollisionData());
+            public override void Bake(VerifyCollision authoring)
+            {
+                AddComponent<VerifyCollisionData>();
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateBefore(typeof(PhysicsSimulationGroup))]
     public partial class VerifyCollisionSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;

@@ -17,8 +17,12 @@ namespace Samples.Boids
         public BlobAssetReference<TransformSamples> TransformSamplesBlob;
     }
 
+#if !ENABLE_TRANSFORM_V1
+    [WriteGroup(typeof(LocalToWorldTransform))]
+#else
     [WriteGroup(typeof(Translation))]
     [WriteGroup(typeof(Rotation))]
+#endif
     public struct TransformSamples
     {
         public BlobArray<float3> TranslationSamples;

@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -31,61 +32,56 @@ public class GravityWellSystem_GO : MonoBehaviour
 
 #region ECS
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
-public partial class GravityWellSystem_GO_ECS : SystemBase
+[UpdateBefore(typeof(PhysicsSystemGroup))]
+[BurstCompile]
+public partial struct GravityWellSystem_GO_ECS : ISystem
 {
     private EntityQuery GravityWellQuery;
 
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
+        EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
+            .WithAll<LocalToWorld>()
+            .WithAllRW<GravityWellComponent_GO_ECS>();
+
         // Query equivalent to GameObject.FindObjectsOfType<GravityWellComponent_GO>
-        GravityWellQuery = GetEntityQuery(
-            ComponentType.ReadOnly<LocalToWorld>(),
-            typeof(GravityWellComponent_GO_ECS));
+        GravityWellQuery = state.GetEntityQuery(builder);
         // Only need to update the GravityWellSystem if there are any entities with a GravityWellComponent
-        RequireForUpdate(GravityWellQuery);
+        state.RequireForUpdate(GravityWellQuery);
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
     {
-        Profiler.BeginSample("GravityWellSystem_GO_ECS:Update");
+    }
 
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
         // Update all the gravity well component positions from the entity's transform
-        Entities
-            .WithBurst()
-            .ForEach((ref GravityWellComponent_GO_ECS gravityWell, in LocalToWorld transform) =>
-            {
-                gravityWell.Position = transform.Position;
-            }).Run();
-
-        // Create local 'up' and 'deltaTime' variables so they are accessible inside the ForEach lambda
-        var up = math.up();
-        var deltaTime = Time.DeltaTime;
+        foreach (var(gravityWell, transform) in SystemAPI.Query<RefRW<GravityWellComponent_GO_ECS>, RefRO<LocalToWorld>>())
+        {
+            gravityWell.ValueRW.Position = transform.ValueRO.Position;
+        }
 
         // Pull all the Gravity Well component data into a contiguous array
         using (var gravityWells = GravityWellQuery.ToComponentDataArray<GravityWellComponent_GO_ECS>(Allocator.TempJob))
         {
             // For each dynamic body apply the forces for all the gravity wells
             // Query equivalent to GameObject.FindObjectsOfType<Rigidbody>
-            Entities
-                .WithBurst()
-                .WithReadOnly(gravityWells)
-                .ForEach((ref PhysicsVelocity velocity,
-                    in PhysicsCollider collider, in PhysicsMass mass,
-                    in Translation position, in Rotation rotation) =>
-                    {
-                        for (int i = 0; i < gravityWells.Length; i++)
-                        {
-                            var gravityWell = gravityWells[i];
-                            velocity.ApplyExplosionForce(
-                                mass, collider, position, rotation,
-                                -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
-                                deltaTime, up);
-                        }
-                    }).Run();
+            foreach (var(velocity, collider, mass, position, rotation) in SystemAPI.Query<RefRW<PhysicsVelocity>, RefRO<PhysicsCollider>, RefRO<PhysicsMass>, RefRO<Translation>, RefRO<Rotation>>())
+            {
+                for (int i = 0; i < gravityWells.Length; i++)
+                {
+                    var gravityWell = gravityWells[i];
+                    velocity.ValueRW.ApplyExplosionForce(
+                        mass.ValueRO, collider.ValueRO, position.ValueRO, rotation.ValueRO,
+                        -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
+                        SystemAPI.Time.DeltaTime, math.up());
+                }
+            }
         }
-
-        Profiler.EndSample();
     }
 }
 #endregion

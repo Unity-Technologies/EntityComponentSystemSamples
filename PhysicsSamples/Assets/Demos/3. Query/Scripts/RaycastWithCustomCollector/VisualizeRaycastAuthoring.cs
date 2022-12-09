@@ -14,7 +14,7 @@ public struct VisualizedRaycast : IComponentData
 
 // An authoring component that configures a visualization for a raycast
 [DisallowMultipleComponent]
-public class VisualizeRaycastAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class VisualizeRaycastAuthoring : MonoBehaviour
 {
     [Tooltip("The length of the desired raycast")]
     public float RayLength;
@@ -26,36 +26,30 @@ public class VisualizeRaycastAuthoring : MonoBehaviour, IConvertGameObjectToEnti
     public Transform HitRay;
     [Tooltip("An object that will be snapped to the hit position of the raycast, if the raycast is successful")]
     public Transform HitPosition;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class VisualizeRaycastBaker : Baker<VisualizeRaycastAuthoring>
+{
+    public override void Bake(VisualizeRaycastAuthoring authoring)
     {
-        var fullRayEntity = conversionSystem.GetPrimaryEntity(FullRay);
-        var hitRayEntity = conversionSystem.GetPrimaryEntity(HitRay);
-        var hitPosEntity = conversionSystem.GetPrimaryEntity(HitPosition);
+        var fullRayEntity = GetEntity(authoring.FullRay);
+        var hitRayEntity = GetEntity(authoring.HitRay);
+        var hitPosEntity = GetEntity(authoring.HitPosition);
 
         Assert.IsTrue(fullRayEntity != Entity.Null);
         Assert.IsTrue(hitRayEntity != Entity.Null);
         Assert.IsTrue(hitPosEntity != Entity.Null);
-        Assert.IsTrue(RayLength != 0.0f);
+        Assert.IsTrue(authoring.RayLength != 0.0f);
 
         VisualizedRaycast visualizedRaycast = new VisualizedRaycast
         {
-            RayLength = RayLength,
+            RayLength = authoring.RayLength,
 
             FullRayEntity = fullRayEntity,
             HitRayEntity = hitRayEntity,
             HitPositionEntity = hitPosEntity,
         };
 
-        dstManager.AddComponentData(entity, visualizedRaycast);
-
-        if (!dstManager.HasComponent<NonUniformScale>(fullRayEntity))
-        {
-            dstManager.AddComponentData(fullRayEntity, new NonUniformScale() { Value = 1 });
-        }
-        if (!dstManager.HasComponent<NonUniformScale>(hitRayEntity))
-        {
-            dstManager.AddComponentData(hitRayEntity, new NonUniformScale() { Value = 1 });
-        }
+        AddComponent(visualizedRaycast);
     }
 }

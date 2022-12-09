@@ -17,62 +17,67 @@ public struct ChangeColliderType : IComponentData
 }
 
 // Converted in PhysicsSamplesConversionSystem so Physics and Graphics conversion is over
-public class ChangeColliderTypeAuthoring : MonoBehaviour, IDeclareReferencedPrefabs//, IConvertGameObjectToEntity
+public class ChangeColliderTypeAuthoring : MonoBehaviour
 {
     public GameObject PhysicsColliderPrefabA;
     public GameObject PhysicsColliderPrefabB;
     [Range(0, 10)] public float TimeToSwap = 1.0f;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class ChangeColliderTypeAuthoringBaker : Baker<ChangeColliderTypeAuthoring>
+{
+    public override void Bake(ChangeColliderTypeAuthoring authoring)
     {
-        if (PhysicsColliderPrefabA == null || PhysicsColliderPrefabB == null) return;
+        if (authoring.PhysicsColliderPrefabA == null || authoring.PhysicsColliderPrefabB == null) return;
 
-        var entityA = conversionSystem.GetPrimaryEntity(PhysicsColliderPrefabA);
-        var entityB = conversionSystem.GetPrimaryEntity(PhysicsColliderPrefabB);
+        var entityA = GetEntity(authoring.PhysicsColliderPrefabA);
+        var entityB = GetEntity(authoring.PhysicsColliderPrefabB);
 
         if (entityA == Entity.Null || entityB == Entity.Null) return;
 
-        var colliderA = dstManager.GetComponentData<PhysicsCollider>(entityA);
-        var colliderB = dstManager.GetComponentData<PhysicsCollider>(entityB);
-
-        dstManager.AddComponentData(entity, new ChangeColliderType()
+        AddComponent(new ChangeColliderType()
         {
-            ColliderA = colliderA,
-            ColliderB = colliderB,
+            // These 2 are filled in in the baking system
+            //ColliderA = colliderA,
+            //ColliderB = colliderB,
             EntityA = entityA,
             EntityB = entityB,
-            TimeToSwap = TimeToSwap,
-            LocalTime = TimeToSwap,
+            TimeToSwap = authoring.TimeToSwap,
+            LocalTime = authoring.TimeToSwap,
         });
-    }
-
-    public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
-    {
-        if (PhysicsColliderPrefabA == null || PhysicsColliderPrefabB == null) return;
-
-        referencedPrefabs.Add(PhysicsColliderPrefabA);
-        referencedPrefabs.Add(PhysicsColliderPrefabB);
     }
 }
 
+[WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
+public partial class ChangeColliderTypeBakingSystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+        var manager = EntityManager;
+        Entities
+            .ForEach((ref ChangeColliderType colliderType) =>
+        {
+            var colliderA = manager.GetComponentData<PhysicsCollider>(colliderType.EntityA);
+            var colliderB = manager.GetComponentData<PhysicsCollider>(colliderType.EntityB);
+            colliderType.ColliderA = colliderA;
+            colliderType.ColliderB = colliderB;
+        }).Run();
+    }
+}
+
+
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class ChangeColliderTypeSystem : SystemBase
 {
     protected override void OnCreate()
     {
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[]
-            {
-                typeof(ChangeColliderType)
-            }
-        }));
+        RequireForUpdate<ChangeColliderType>();
     }
 
     protected override unsafe void OnUpdate()
     {
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = SystemAPI.Time.DeltaTime;
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
             Entities
@@ -90,12 +95,12 @@ public partial class ChangeColliderTypeSystem : SystemBase
                     if (collider.ColliderPtr->Type == modifier.ColliderA.ColliderPtr->Type)
                     {
                         commandBuffer.SetComponent(entity, modifier.ColliderB);
-                        commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityB));
+                        commandBuffer.SetSharedComponentManaged(entity, EntityManager.GetSharedComponentManaged<RenderMesh>(modifier.EntityB));
                     }
                     else
                     {
                         commandBuffer.SetComponent(entity, modifier.ColliderA);
-                        commandBuffer.SetSharedComponent(entity, EntityManager.GetSharedComponentData<RenderMesh>(modifier.EntityA));
+                        commandBuffer.SetSharedComponentManaged(entity, EntityManager.GetSharedComponentManaged<RenderMesh>(modifier.EntityA));
                     }
                 }).Run();
 

@@ -9,6 +9,7 @@ using UnityEngine.TestTools;
 using UnityEngine.TestTools.Graphics;
 using UnityEngine.SceneManagement;
 using Unity.Entities;
+using Unity.Scenes;
 
 public class GraphicsTests
 {
@@ -96,8 +97,23 @@ public class GraphicsTests
 
     public void CleanUp()
     {
-        EntityManager m_Manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        m_Manager.DestroyEntity(m_Manager.GetAllEntities());
+        var world = World.DefaultGameObjectInjectionWorld;
+        var entityManager = world.EntityManager;
+        var entities = entityManager.GetAllEntities();
+
+        for (int i = 0; i < entities.Length; i++)
+        {
+            string ename = entityManager.GetName(entities[i]);
+            bool isSubscene = entityManager.HasComponent<SubScene>(entities[i]);
+            bool isSceneSection = entityManager.HasComponent<SceneSection>(entities[i]);
+
+            //Runtime generated entities requires manual deletion, 
+            //but we need to skip for some specific entities otherwise there will be spamming error
+            if( ename != "SceneSectionStreamingSingleton" && !isSubscene && !isSceneSection && !ename.Contains("GameObject Scene:") )
+            {
+                entityManager.DestroyEntity(entities[i]);
+            }
+        }
     }
 
 }

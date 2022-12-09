@@ -5,67 +5,87 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using Unity.Physics.Systems;
 using Unity.Collections;
+using Unity.Burst;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
-public partial class GravityWellSystem_DOTS : SystemBase
+[UpdateBefore(typeof(PhysicsSystemGroup))]
+[BurstCompile]
+public partial struct GravityWellSystem_DOTS : ISystem
 {
     private EntityQuery GravityWellQuery;
 
-    protected override void OnCreate()
+    [BurstCompile]
+    public partial struct GravityWellSystem_DOTS_ForEachGravityWell : IJobEntity
     {
-        GravityWellQuery = GetEntityQuery(
-            ComponentType.ReadOnly<LocalToWorld>(),
-            typeof(GravityWellComponent_DOTS));
-        // Only need to update the GravityWellSystem if there are any entities with a GravityWellComponent
-        RequireForUpdate(GravityWellQuery);
+        [NativeDisableParallelForRestriction]
+        public NativeArray<GravityWellComponent_DOTS> GravityWells;
+
+        [BurstCompile]
+        public void Execute([EntityInQueryIndex] int entityInQueryIndex, ref GravityWellComponent_DOTS gravityWell, in LocalToWorld transform)
+        {
+            gravityWell.Position = transform.Position;
+            GravityWells[entityInQueryIndex] = gravityWell;
+        }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public partial struct GravityWellSystem_DOTS_ForEachDynamicBodies : IJobEntity
     {
-        // Now that we are Scheduling the Entities.ForEach rather than Running them,
-        // we need to grab the gravityWells for use in the next job.
-        // This would be unnecessary if the GravityWellQuery.ToComponentDataArray function
-        // can return a JobHandle that can be chained between the ForEach jobs.
+        [ReadOnly]
+        [NativeDisableParallelForRestriction]
+        [DeallocateOnJobCompletion]
+        public NativeArray<GravityWellComponent_DOTS> GravityWells;
+        public float DeltaTime;
+
+        [BurstCompile]
+        public void Execute(ref PhysicsVelocity velocity, in PhysicsCollider collider, in PhysicsMass mass, in Translation position, in Rotation rotation)
+        {
+            for (int i = 0; i < GravityWells.Length; i++)
+            {
+                var gravityWell = GravityWells[i];
+                velocity.ApplyExplosionForce(
+                    mass, collider, position, rotation,
+                    -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
+                    DeltaTime, math.up());
+            }
+        }
+    }
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
+            .WithAll<LocalToWorld>()
+            .WithAllRW<GravityWellComponent_DOTS>();
+
+        GravityWellQuery = state.GetEntityQuery(builder);
+        // Only need to update the GravityWellSystem if there are any entities with a GravityWellComponent
+        state.RequireForUpdate(GravityWellQuery);
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
         var gravityWells = new NativeArray<GravityWellComponent_DOTS>(
             GravityWellQuery.CalculateEntityCount(), Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
         // For each gravity well component update the position and add them to the array
-        Entities
-            .WithName("GravityWellSystem_DOTS_ForEachGravityWell")
-            .WithBurst()
-            .WithNativeDisableParallelForRestriction(gravityWells)
-            .WithChangeFilter<LocalToWorld>()
-            .ForEach((Entity entity, int entityInQueryIndex, ref GravityWellComponent_DOTS gravityWell, in LocalToWorld transform) =>
-            {
-                gravityWell.Position = transform.Position;
-                gravityWells[entityInQueryIndex] = gravityWell;
-            }).Schedule();
+        state.Dependency = new GravityWellSystem_DOTS_ForEachGravityWell
+        {
+            GravityWells = gravityWells
+        }.ScheduleParallel(state.Dependency);
 
-        // Create local 'up' and 'deltaTime' variables so they are accessible inside the ForEach lambda
-        var up = math.up();
-        var deltaTime = Time.DeltaTime;
-
-        // For each dynamic body apply the forces for all the gravity wells
-        Entities
-            .WithName("GravityWellSystem_DOTS_ForEachDynamicBodies")
-            .WithBurst()
-            .WithReadOnly(gravityWells)
-            .WithNativeDisableParallelForRestriction(gravityWells)
-            .WithDisposeOnCompletion(gravityWells)
-            .ForEach((
-                ref PhysicsVelocity velocity,
-                in PhysicsCollider collider, in PhysicsMass mass,
-                in Translation position, in Rotation rotation) =>
-                {
-                    for (int i = 0; i < gravityWells.Length; i++)
-                    {
-                        var gravityWell = gravityWells[i];
-                        velocity.ApplyExplosionForce(
-                            mass, collider, position, rotation,
-                            -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
-                            deltaTime, up);
-                    }
-                }).ScheduleParallel();
+        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
+        float dt = SystemAPI.Time.DeltaTime;
+        state.Dependency = new GravityWellSystem_DOTS_ForEachDynamicBodies
+        {
+            GravityWells = gravityWells,
+            DeltaTime = dt,
+        }.ScheduleParallel(state.Dependency);
     }
 }

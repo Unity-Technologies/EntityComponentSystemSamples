@@ -12,14 +12,15 @@ struct TestPrefabReference : IComponentData
     public EntityPrefabReference PrefabReference;
 }
 
-[UnityEngine.ExecuteAlways]
+[RequireMatchingQueriesForUpdate]
+[WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor)]
 public partial class TestWeakRefLoadingSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem m_EndSimECBSystem;
 
     protected override void OnCreate()
     {
-        m_EndSimECBSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        m_EndSimECBSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
     }
     protected override void OnUpdate()
     {

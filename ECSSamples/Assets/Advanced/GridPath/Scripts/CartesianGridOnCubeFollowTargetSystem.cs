@@ -18,7 +18,7 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
         RequireForUpdate(m_GridQuery);
     }
 
-    static Entity FindTargetShortestPathLength(CartesianGridCoordinates gridCoordinates, CartesianGridOnCubeFace cubeFace, int rowCount, NativeArray<CartesianGridCoordinates> targetCoordinates, NativeArray<Entity> targetEntities, BufferFromEntity<CartesianGridTargetDistance> getCartesianGridTargetDistanceFromEntity)
+    static Entity FindTargetShortestPathLength(CartesianGridCoordinates gridCoordinates, CartesianGridOnCubeFace cubeFace, int rowCount, NativeArray<CartesianGridCoordinates> targetCoordinates, NativeArray<Entity> targetEntities, BufferLookup<CartesianGridTargetDistance> getCartesianGridTargetDistanceLookup)
     {
         var targetEntity = Entity.Null;
         if (!gridCoordinates.OnGrid(rowCount, rowCount))
@@ -31,7 +31,7 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
             if (!targetCoordinates[i].OnGrid(rowCount, rowCount))
                 continue;
 
-            var targetDistances = getCartesianGridTargetDistanceFromEntity[targetEntities[i]].Reinterpret<int>().AsNativeArray();
+            var targetDistances = getCartesianGridTargetDistanceLookup[targetEntities[i]].Reinterpret<int>().AsNativeArray();
             var targetDistance = CartesianGridOnCubeShortestPath.LookupDistanceToTarget(gridCoordinates, cubeFace, rowCount, targetDistances);
             if (targetDistance < targetBestDistance)
             {
@@ -54,10 +54,10 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
         var trailingOffsets = (float2*)cartesianGridCube.Blob.Value.TrailingOffsets.GetUnsafePtr();
         var faceLocalToLocal = (float4x4*)cartesianGridCube.Blob.Value.FaceLocalToLocal.GetUnsafePtr();
 
-        var targetEntities = m_TargetQuery.ToEntityArray(Allocator.TempJob);
-        var targetCoordinates = m_TargetQuery.ToComponentDataArray<CartesianGridCoordinates>(Allocator.TempJob);
-        var getCartesianGridTargetDirectionFromEntity = GetBufferFromEntity<CartesianGridTargetDirection>(true);
-        var getCartesianGridTargetDistanceFromEntity = GetBufferFromEntity<CartesianGridTargetDistance>(true);
+        var targetEntities = m_TargetQuery.ToEntityArray(World.UpdateAllocator.ToAllocator);
+        var targetCoordinates = m_TargetQuery.ToComponentDataArray<CartesianGridCoordinates>(World.UpdateAllocator.ToAllocator);
+        var getCartesianGridTargetDirectionFromEntity = GetBufferLookup<CartesianGridTargetDirection>(true);
+        var getCartesianGridTargetDistanceFromEntity = GetBufferLookup<CartesianGridTargetDistance>(true);
 
         // Offset center to grid cell
         var cellCenterOffset = new float2(((float)rowCount * 0.5f) - 0.5f, ((float)rowCount * 0.5f) - 0.5f);
@@ -76,12 +76,25 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
             .WithAll<CartesianGridFollowTarget>()
             .ForEach((ref CartesianGridDirection gridDirection,
                 ref CartesianGridCoordinates gridCoordinates,
+#if !ENABLE_TRANSFORM_V1
+                ref LocalToWorldTransform transform,
+#else
                 ref Translation translation,
+#endif
                 ref CartesianGridOnCubeFace cubeFace) =>
                 {
                     var dir = gridDirection.Value;
                     if (dir != 0xff) // If moving, update grid based on trailing direction.
                     {
+#if !ENABLE_TRANSFORM_V1
+                        var nextGridPosition = new CartesianGridCoordinates(transform.Value.Position.xz + trailingOffsets[dir], rowCount, rowCount);
+                        if (gridCoordinates.Equals(nextGridPosition))
+                        {
+                            // Don't allow translation to drift
+                            transform.Value.Position = CartesianGridMovement.SnapToGridAlongDirection(transform.Value.Position, dir, gridCoordinates, cellCenterOffset);
+                            return; // Still in the same grid cell. No need to change direction.
+                        }
+#else
                         var nextGridPosition = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[dir], rowCount, rowCount);
                         if (gridCoordinates.Equals(nextGridPosition))
                         {
@@ -89,6 +102,7 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
                             translation.Value = CartesianGridMovement.SnapToGridAlongDirection(translation.Value, dir, gridCoordinates, cellCenterOffset);
                             return; // Still in the same grid cell. No need to change direction.
                         }
+#endif
 
                         var edge = CartesianGridMovement.CubeExitEdge(nextGridPosition, rowCount);
 
@@ -116,10 +130,17 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
                             // - Note that Y position won't be at target value from one edge to another, so that is interpolated in movement update,
                             //   purely for "smoothing" purposes.
                             var localToLocal = faceLocalToLocal[((prevFaceIndex * 6) + nextFaceIndex)];
+#if !ENABLE_TRANSFORM_V1
+                            transform.Value.Position.xyz = math.mul(localToLocal, new float4(transform.Value.Position, 1.0f)).xyz;
+
+                            // Update gridPosition relative to new face.
+                            gridCoordinates = new CartesianGridCoordinates(transform.Value.Position.xz + trailingOffsets[nextDir], rowCount, rowCount);
+#else
                             translation.Value.xyz = math.mul(localToLocal, new float4(translation.Value, 1.0f)).xyz;
 
                             // Update gridPosition relative to new face.
                             gridCoordinates = new CartesianGridCoordinates(translation.Value.xz + trailingOffsets[nextDir], rowCount, rowCount);
+#endif
                         }
                     }
 
@@ -144,8 +165,5 @@ public unsafe partial class CartesianGridOnPCubeFollowTargetSystem : SystemBase
                     var validDirections = CartesianGridOnCubeShortestPath.LookupDirectionToTarget(gridCoordinates, cubeFace, rowCount, targetDirections);
                     gridDirection.Value = CartesianGridMovement.PathVariation[(pathOffset * 16) + validDirections];
                 }).Schedule();
-
-        Dependency = targetEntities.Dispose(Dependency);
-        Dependency = targetCoordinates.Dispose(Dependency);
     }
 }

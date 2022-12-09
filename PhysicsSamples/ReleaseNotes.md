@@ -1,6 +1,16 @@
 # Release Notes
 All notable changes to this project will be documented in this file.
 
+
+## [Samples Project for 1.0.0-exp.8] - 2022-09-27
+### Changes
+* Packages:
+  * Updated com.unity.physics from `0.51.0-preview.32` to `1.0.0-exp.8`
+  * Updated com.unity.entities.graphics from `0.51.0-preview.32` to `1.0.0-exp.8`
+  * Updated com.unity.render-pipelines.universal from `12.1.7` to `14.0.3`
+* Editor:
+  * Updated Editor version from `2021.3.4f1` to `2022.2.0b8`
+
 ## [Samples Project for 0.51.0-preview.32] - 2022-06-30
 ### Changes
 * Packages:

@@ -19,44 +19,42 @@ public struct RandomMotion : IComponentData
 // This behavior will set a dynamic body's linear velocity to get to randomly selected
 // point in space. When the body gets with a specified tolerance of the random position,
 // a new random position is chosen and the body starts header there instead.
-public class RandomMotionAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class RandomMotionAuthoring : MonoBehaviour
 {
     public float3 Range = new float3(1);
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+class RandomMotionAuthoringBaker : Baker<RandomMotionAuthoring>
+{
+    public override void Bake(RandomMotionAuthoring authoring)
     {
-        var length = math.length(Range);
-        dstManager.AddComponentData(entity, new RandomMotion
+        var length = math.length(authoring.Range);
+        var transform = GetComponent<Transform>();
+        AddComponent(new RandomMotion
         {
             InitialPosition = transform.position,
             DesiredPosition = transform.position,
             Speed = length * 0.001f,
             Tolerance = length * 0.1f,
-            Range = Range,
+            Range = authoring.Range,
         });
     }
 }
 
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(BuildPhysicsWorld))]
+[UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial class RandomMotionSystem : SystemBase
 {
     protected override void OnCreate()
     {
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
-        {
-            All = new ComponentType[]
-            {
-                typeof(RandomMotion)
-            }
-        }));
+        RequireForUpdate<RandomMotion>();
     }
 
     protected override void OnUpdate()
     {
         var random = new Random();
-        float deltaTime = Time.DeltaTime;
+        float deltaTime = SystemAPI.Time.DeltaTime;
         var stepComponent = HasSingleton<PhysicsStep>() ? GetSingleton<PhysicsStep>() : PhysicsStep.Default;
 
         Entities

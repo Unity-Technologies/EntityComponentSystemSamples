@@ -55,7 +55,7 @@ public struct IsInTransitionTag : IComponentData
 /// Allows us to edit GameObjects in the Editor and convert those GameObjects to the optimized Entity representation
 /// </summary>
 [DisallowMultipleComponent]
-public class GuardAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class GuardAuthoring : MonoBehaviour
 {
     /// <summary>
     /// We can refer directly to GameObject transforms in the authoring component
@@ -68,44 +68,43 @@ public class GuardAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     public float VisionMaxDistance = 5.0f;
     public float MovementSpeedMetersPerSecond = 3.0f;
 
-    /// <summary>
-    /// A function which converts our Guard authoring GameObject to a more optimized Entity representation
-    /// </summary>
-    /// <param name="entity">A reference to the entity this GameObject will become</param>
-    /// <param name="dstManager">The EntityManager is used to make changes to Entity data.</param>
-    /// <param name="conversionSystem">Used for more advanced conversion features. Not used here.</param>
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class Baker : Baker<GuardAuthoring>
     {
-        // Here we add all of the components needed to start the guard off in the "Patrol" state
-        // i.e. We add TargetPosition, and don't add IdleTimer or IsChasing tag
-        dstManager.AddComponents(entity, new ComponentTypes(
-            new ComponentType[]
-            {
-                typeof(CooldownTime),
-                typeof(NextWaypointIndex),
-                typeof(TargetPosition),
-                typeof(WaypointPosition),
-                typeof(VisionCone),
-                typeof(MovementSpeed),
-                typeof(IsInTransitionTag)
-            }));
-
-        // Since we've already added the WaypointPosition IBufferElementData to the entity, we need to Get the buffer to fill it
-        var buffer = dstManager.GetBuffer<WaypointPosition>(entity);
-        foreach (var waypointTransform in Waypoints)
+        public override void Bake(GuardAuthoring authoring)
         {
-            buffer.Add(new WaypointPosition { Value = waypointTransform.position });
+            // Here we add all of the components needed to start the guard off in the "Patrol" state
+            // i.e. We add TargetPosition, and don't add IdleTimer or IsChasing tag
+            AddComponent(GetEntity(), new ComponentTypeSet(
+                new ComponentType[]
+                {
+                    typeof(CooldownTime),
+                    typeof(NextWaypointIndex),
+                    typeof(TargetPosition),
+                    typeof(WaypointPosition),
+                    typeof(VisionCone),
+                    typeof(MovementSpeed),
+                    typeof(IsInTransitionTag)
+                }));
+
+            // Since we've already added the WaypointPosition IBufferElementData to the entity, we need to Get the buffer to fill it
+            var buffer = SetBuffer<WaypointPosition>();
+            foreach (var waypointTransform in authoring.Waypoints)
+            {
+                buffer.Add(new WaypointPosition { Value = waypointTransform.position });
+            }
+
+            var entity = GetEntity();
+
+            // Transfer the values from the authoring component to the entity data
+            SetComponent( entity, new CooldownTime {Value = authoring.IdleCooldownTime});
+            SetComponent( entity, new NextWaypointIndex {Value = 0});
+            SetComponent( entity, new TargetPosition {Value = buffer[0].Value});
+            SetComponent( entity, new MovementSpeed {MetersPerSecond = authoring.MovementSpeedMetersPerSecond});
+
+            // Note: The authoring component uses Degrees and non-squared distance, while the runtime uses radians and squared distance
+            // We want the authoring component to use the most user-friendly data formats, but the runtime to use a more optimized format
+            // GameObject Conversion is perfect for this. During conversion, we convert to the more optimized units.
+            SetComponent(entity, new VisionCone {AngleRadians = math.radians(authoring.VisionAngleDegrees), ViewDistanceSq = authoring.VisionMaxDistance * authoring.VisionMaxDistance});
         }
-
-        // Transfer the values from the authoring component to the entity data
-        dstManager.SetComponentData(entity, new CooldownTime {Value = IdleCooldownTime});
-        dstManager.SetComponentData(entity, new NextWaypointIndex {Value = 0});
-        dstManager.SetComponentData(entity, new TargetPosition {Value = buffer[0].Value});
-        dstManager.SetComponentData(entity, new MovementSpeed {MetersPerSecond = MovementSpeedMetersPerSecond});
-
-        // Note: The authoring component uses Degrees and non-squared distance, while the runtime uses radians and squared distance
-        // We want the authoring component to use the most user-friendly data formats, but the runtime to use a more optimized format
-        // GameObject Conversion is perfect for this. During conversion, we convert to the more optimized units.
-        dstManager.SetComponentData(entity, new VisionCone {AngleRadians = math.radians(VisionAngleDegrees), ViewDistanceSq = VisionMaxDistance * VisionMaxDistance});
     }
 }

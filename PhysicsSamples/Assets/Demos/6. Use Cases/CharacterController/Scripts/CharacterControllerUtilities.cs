@@ -32,7 +32,7 @@ public static class CharacterControllerUtilities
 
     public struct CharacterControllerStepInput
     {
-        public PhysicsWorld World;
+        public PhysicsWorldSingleton PhysicsWorldSingleton;
         public float DeltaTime;
         public float3 Gravity;
         public float3 Up;
@@ -60,6 +60,17 @@ public static class CharacterControllerUtilities
         public NativeList<T> TriggerHits;
 
         private PhysicsWorld m_world;
+
+        public CharacterControllerAllHitsCollector(int rbIndex, float maxFraction, ref NativeList<T> allHits, PhysicsWorldSingleton physicsWorldSingleton,
+                                                   NativeList<T> triggerHits = default)
+        {
+            MaxFraction = maxFraction;
+            AllHits = allHits;
+            m_selfRBIndex = rbIndex;
+            m_world = physicsWorldSingleton.PhysicsWorld;
+            TriggerHits = triggerHits;
+            MinHitFraction = float.MaxValue;
+        }
 
         public CharacterControllerAllHitsCollector(int rbIndex, float maxFraction, ref NativeList<T> allHits, PhysicsWorld world,
                                                    NativeList<T> triggerHits = default)
@@ -125,6 +136,16 @@ public static class CharacterControllerUtilities
             m_PredefinedConstraints = predefinedConstraints;
         }
 
+        public CharacterControllerClosestHitCollector(NativeList<SurfaceConstraintInfo> predefinedConstraints, PhysicsWorldSingleton world, int rbIndex, float maxFraction)
+        {
+            MaxFraction = maxFraction;
+            m_ClosestHit = default;
+            NumHits = 0;
+            m_selfRBIndex = rbIndex;
+            m_world = world.PhysicsWorld;
+            m_PredefinedConstraints = predefinedConstraints;
+        }
+
         #region ICollector
 
         public bool AddHit(T hit)
@@ -159,8 +180,8 @@ public static class CharacterControllerUtilities
         #endregion
     }
 
-    public static unsafe void CheckSupport(
-        ref PhysicsWorld world, ref PhysicsCollider collider, CharacterControllerStepInput stepInput, RigidTransform transform,
+    public static void CheckSupport(
+        in PhysicsWorldSingleton physicsWorldSingleton, ref PhysicsCollider collider, CharacterControllerStepInput stepInput, RigidTransform transform,
         out CharacterSupportState characterState, out float3 surfaceNormal, out float3 surfaceVelocity,
         NativeList<StatefulCollisionEvent> collisionEvents = default)
     {
@@ -173,18 +194,12 @@ public static class CharacterControllerUtilities
         // Query the world
         NativeList<ColliderCastHit> castHits = new NativeList<ColliderCastHit>(k_DefaultQueryHitsCapacity, Allocator.Temp);
         CharacterControllerAllHitsCollector<ColliderCastHit> castHitsCollector = new CharacterControllerAllHitsCollector<ColliderCastHit>(
-            stepInput.RigidBodyIndex, 1.0f, ref castHits, world);
+            stepInput.RigidBodyIndex, 1.0f, ref castHits, physicsWorldSingleton);
         var maxDisplacement = -stepInput.ContactTolerance * stepInput.Up;
         {
-            ColliderCastInput input = new ColliderCastInput()
-            {
-                Collider = collider.ColliderPtr,
-                Orientation = transform.rot,
-                Start = transform.pos,
-                End = transform.pos + maxDisplacement
-            };
+            ColliderCastInput input = new ColliderCastInput(collider.Value, transform.pos, transform.pos + maxDisplacement, transform.rot);
 
-            world.CastCollider(input, ref castHitsCollector);
+            physicsWorldSingleton.PhysicsWorld.CastCollider(input, ref castHitsCollector);
         }
 
         // If no hits, proclaim unsupported state
@@ -202,7 +217,7 @@ public static class CharacterControllerUtilities
         for (int i = 0; i < castHitsCollector.NumHits; i++)
         {
             ColliderCastHit hit = castHitsCollector.AllHits[i];
-            CreateConstraint(stepInput.World, stepInput.Up,
+            CreateConstraint(stepInput.PhysicsWorldSingleton.PhysicsWorld, stepInput.Up,
                 hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal, hit.Fraction * maxDisplacementLength,
                 stepInput.SkinWidth, maxSlopeCos, ref constraints);
         }
@@ -232,10 +247,11 @@ public static class CharacterControllerUtilities
                     // Add supporting planes to collision events
                     if (collisionEvents.IsCreated)
                     {
+                        CollisionWorld world = stepInput.PhysicsWorldSingleton.PhysicsWorld.CollisionWorld;
                         var collisionEvent = new StatefulCollisionEvent()
                         {
-                            EntityA = stepInput.World.Bodies[stepInput.RigidBodyIndex].Entity,
-                            EntityB = stepInput.World.Bodies[constraint.RigidBodyIndex].Entity,
+                            EntityA = world.Bodies[stepInput.RigidBodyIndex].Entity,
+                            EntityB = world.Bodies[constraint.RigidBodyIndex].Entity,
                             BodyIndexA = stepInput.RigidBodyIndex,
                             BodyIndexB = constraint.RigidBodyIndex,
                             ColliderKeyA = ColliderKey.Empty,
@@ -293,15 +309,15 @@ public static class CharacterControllerUtilities
         }
     }
 
-    public static unsafe void CollideAndIntegrate(
-        CharacterControllerStepInput stepInput, float characterMass, bool affectBodies, Unity.Physics.Collider* collider,
+    public static void CollideAndIntegrate(
+        CharacterControllerStepInput stepInput, float characterMass, bool affectBodies, ref PhysicsCollider collider,
         ref RigidTransform transform, ref float3 linearVelocity, ref NativeStream.Writer deferredImpulseWriter,
         NativeList<StatefulCollisionEvent> collisionEvents = default, NativeList<StatefulTriggerEvent> triggerEvents = default)
     {
         // Copy parameters
         float deltaTime = stepInput.DeltaTime;
         float3 up = stepInput.Up;
-        PhysicsWorld world = stepInput.World;
+        PhysicsWorld world = stepInput.PhysicsWorldSingleton.PhysicsWorld;
 
         float remainingTime = deltaTime;
 
@@ -326,21 +342,15 @@ public static class CharacterControllerUtilities
                 }
                 NativeList<ColliderCastHit> castHits = new NativeList<ColliderCastHit>(k_DefaultQueryHitsCapacity, Allocator.Temp);
                 CharacterControllerAllHitsCollector<ColliderCastHit> collector = new CharacterControllerAllHitsCollector<ColliderCastHit>(
-                    stepInput.RigidBodyIndex, 1.0f, ref castHits, world, triggerHits);
-                ColliderCastInput input = new ColliderCastInput()
-                {
-                    Collider = collider,
-                    Orientation = orientation,
-                    Start = newPosition,
-                    End = newPosition + displacement
-                };
-                world.CastCollider(input, ref collector);
+                    stepInput.RigidBodyIndex, 1.0f, ref castHits, stepInput.PhysicsWorldSingleton, triggerHits);
+                ColliderCastInput input = new ColliderCastInput(collider.Value, newPosition, newPosition + displacement, orientation);
+                stepInput.PhysicsWorldSingleton.PhysicsWorld.CastCollider(input, ref collector);
 
                 // Iterate over hits and create constraints from them
                 for (int hitIndex = 0; hitIndex < collector.NumHits; hitIndex++)
                 {
                     ColliderCastHit hit = collector.AllHits[hitIndex];
-                    CreateConstraint(stepInput.World, stepInput.Up,
+                    CreateConstraint(stepInput.PhysicsWorldSingleton.PhysicsWorld, stepInput.Up,
                         hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal, math.dot(-hit.SurfaceNormal, hit.Fraction * displacement),
                         stepInput.SkinWidth, maxSlopeCos, ref constraints);
                 }
@@ -358,15 +368,10 @@ public static class CharacterControllerUtilities
                 // Collider distance query
                 NativeList<DistanceHit> distanceHits = new NativeList<DistanceHit>(k_DefaultQueryHitsCapacity, Allocator.Temp);
                 CharacterControllerAllHitsCollector<DistanceHit> distanceHitsCollector = new CharacterControllerAllHitsCollector<DistanceHit>(
-                    stepInput.RigidBodyIndex, stepInput.ContactTolerance, ref distanceHits, world);
+                    stepInput.RigidBodyIndex, stepInput.ContactTolerance, ref distanceHits, stepInput.PhysicsWorldSingleton);
                 {
-                    ColliderDistanceInput input = new ColliderDistanceInput()
-                    {
-                        MaxDistance = stepInput.ContactTolerance,
-                        Transform = transform,
-                        Collider = collider
-                    };
-                    world.CalculateDistance(input, ref distanceHitsCollector);
+                    ColliderDistanceInput input = new ColliderDistanceInput(collider.Value, stepInput.ContactTolerance, transform);
+                    stepInput.PhysicsWorldSingleton.PhysicsWorld.CalculateDistance(input, ref distanceHitsCollector);
                 }
 
                 // Iterate over penetrating hits and fix up distance and normal
@@ -388,7 +393,7 @@ public static class CharacterControllerUtilities
                                 // Fix up the constraint (normal, distance)
                                 {
                                     // Create new constraint
-                                    CreateConstraintFromHit(world, hit.RigidBodyIndex, hit.ColliderKey,
+                                    CreateConstraintFromHit(stepInput.PhysicsWorldSingleton.PhysicsWorld, hit.RigidBodyIndex, hit.ColliderKey,
                                         hit.Position, hit.SurfaceNormal, hit.Distance,
                                         stepInput.SkinWidth, out SurfaceConstraintInfo newConstraint);
 
@@ -407,7 +412,7 @@ public static class CharacterControllerUtilities
                         // Add penetrating hit not caught by collider cast
                         if (!found)
                         {
-                            CreateConstraint(stepInput.World, stepInput.Up,
+                            CreateConstraint(stepInput.PhysicsWorldSingleton.PhysicsWorld, stepInput.Up,
                                 hit.RigidBodyIndex, hit.ColliderKey, hit.Position, hit.SurfaceNormal, hit.Distance,
                                 stepInput.SkinWidth, maxSlopeCos, ref constraints);
                         }
@@ -442,17 +447,11 @@ public static class CharacterControllerUtilities
             if (math.lengthsq(newDisplacement) > k_SimplexSolverEpsilon)
             {
                 // Check if we can walk to the position simplex solver has suggested
-                var newCollector = new CharacterControllerClosestHitCollector<ColliderCastHit>(constraints, world, stepInput.RigidBodyIndex, 1.0f);
+                var newCollector = new CharacterControllerClosestHitCollector<ColliderCastHit>(constraints, stepInput.PhysicsWorldSingleton, stepInput.RigidBodyIndex, 1.0f);
 
-                ColliderCastInput input = new ColliderCastInput()
-                {
-                    Collider = collider,
-                    Orientation = orientation,
-                    Start = prevPosition,
-                    End = prevPosition + newDisplacement
-                };
+                ColliderCastInput input = new ColliderCastInput(collider.Value, prevPosition, prevPosition + newDisplacement, orientation);
 
-                world.CastCollider(input, ref newCollector);
+                stepInput.PhysicsWorldSingleton.PhysicsWorld.CastCollider(input, ref newCollector);
 
                 if (newCollector.NumHits > 0)
                 {
@@ -562,12 +561,12 @@ public static class CharacterControllerUtilities
         constraints.Add(constraint);
     }
 
-    private static unsafe void CalculateAndStoreDeferredImpulsesAndCollisionEvents(
+    private static void CalculateAndStoreDeferredImpulsesAndCollisionEvents(
         CharacterControllerStepInput stepInput, bool affectBodies, float characterMass,
         float3 linearVelocity, NativeList<SurfaceConstraintInfo> constraints, ref NativeStream.Writer deferredImpulseWriter,
         NativeList<StatefulCollisionEvent> collisionEvents)
     {
-        PhysicsWorld world = stepInput.World;
+        PhysicsWorld world = stepInput.PhysicsWorldSingleton.PhysicsWorld;
         for (int i = 0; i < constraints.Length; i++)
         {
             SurfaceConstraintInfo constraint = constraints[i];
@@ -685,7 +684,7 @@ public static class CharacterControllerUtilities
     private static void UpdateTriggersSeen<T>(CharacterControllerStepInput stepInput, NativeList<T> triggerHits,
         NativeList<StatefulTriggerEvent> currentFrameTriggerEvents, float maxFraction) where T : unmanaged, IQueryResult
     {
-        var world = stepInput.World;
+        var world = stepInput.PhysicsWorldSingleton.PhysicsWorld;
         for (int i = 0; i < triggerHits.Length; i++)
         {
             var hit = triggerHits[i];

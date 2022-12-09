@@ -11,10 +11,10 @@ using UnityEngine;
 
 //     To change the generator, use this command:
 //
-//        $ t4.exe -o BurstInteropCodeGenerator.gen.cs -c Unity.Entities.Editor.BurstInteropCodeGenerator BurstInteropCodeGenerator.tt
+//        $ t4.exe -o BurstInteropCodeGenerator.gen.cs -c Unity.Entities.Editor.BurstInteropCodeGenerator BurstInteropCodeGenerator.gen.tt
 //
 //        On Mac, you may need:
-//        $ DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX=2 t4 -o BurstInteropCodeGenerator.gen.cs -c Unity.Entities.Editor.BurstInteropCodeGenerator BurstInteropCodeGenerator.tt
+//        $ DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX=2 t4 -o BurstInteropCodeGenerator.gen.cs -c Unity.Entities.Editor.BurstInteropCodeGenerator BurstInteropCodeGenerator.gen.tt
 //
 //     To install the t4 tool (note that the default MS tool will not work):
 //

@@ -1,4 +1,5 @@
 using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -28,31 +29,69 @@ namespace Samples.Boids
 
     public static class JobNativeMultiHashMapUniqueHashExtensions
     {
-        internal struct JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob>
-            where TJob : struct, IJobNativeMultiHashMapMergedSharedKeyIndices
+        internal struct JobWrapper<T> where T : struct
         {
-            [ReadOnly] public NativeParallelMultiHashMap<int, int> HashMap;
-            internal TJob JobData;
+            [ReadOnly] public NativeMultiHashMap<int, int> HashMap;
+            public T JobData;
+        }
 
-            private static IntPtr s_JobReflectionData;
+        /// <summary>
+        /// Gathers and caches reflection data for the internal job system's managed bindings. Unity is responsible for calling this method - don't call it yourself.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <remarks>
+        /// When the Jobs package is included in the project, Unity generates code to call EarlyJobInit at startup. This allows Burst compiled code to schedule jobs because the reflection part of initialization, which is not compatible with burst compiler constraints, has already happened in EarlyJobInit.
+        ///
+        /// __Note__: While the Jobs package code generator handles this automatically for all closed job types, you must register those with generic arguments (like IJobChunk&amp;lt;MyJobType&amp;lt;T&amp;gt;&amp;gt;) manually for each specialization with [[Unity.Jobs.RegisterGenericJobTypeAttribute]].
+        /// </remarks>
+        public static void EarlyJobInit<T>()
+            where T : struct, IJobNativeMultiHashMapMergedSharedKeyIndices
+        {
+            JobNativeMultiHashMapMergedSharedKeyIndicesProducer<T>.Initialize();
+        }
 
-            internal static IntPtr Initialize()
+        public static unsafe JobHandle Schedule<T>(this T jobData, NativeMultiHashMap<int, int> hashMap,
+                int minIndicesPerJobCount, JobHandle dependsOn = default)
+            where T : struct, IJobNativeMultiHashMapMergedSharedKeyIndices
+        {
+            var jobWrapper = new JobWrapper<T>
             {
-                if (s_JobReflectionData == IntPtr.Zero)
-                {
-#if UNITY_2020_2_OR_NEWER
-                    s_JobReflectionData = JobsUtility.CreateJobReflectionData(typeof(JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob>), typeof(TJob), (ExecuteJobFunction)Execute);
-#else
-                    s_JobReflectionData = JobsUtility.CreateJobReflectionData(typeof(JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob>), typeof(TJob), JobType.ParallelFor, (ExecuteJobFunction)Execute);
-#endif
-                }
+                HashMap = hashMap,
+                JobData = jobData,
+            };
+            JobNativeMultiHashMapMergedSharedKeyIndicesProducer<T>.Initialize();
+            var reflectionData = JobNativeMultiHashMapMergedSharedKeyIndicesProducer<T>.reflectionData.Data;
+            CollectionHelper.CheckReflectionDataCorrect<T>(reflectionData);
 
-                return s_JobReflectionData;
+            var scheduleParams = new JobsUtility.JobScheduleParameters(
+                UnsafeUtility.AddressOf(ref jobWrapper),
+                reflectionData,
+                dependsOn,
+                ScheduleMode.Parallel);
+
+            return JobsUtility.ScheduleParallelFor(ref scheduleParams, hashMap.GetUnsafeBucketData().bucketCapacityMask + 1, minIndicesPerJobCount);
+        }
+
+
+        [BurstCompile]
+        internal struct JobNativeMultiHashMapMergedSharedKeyIndicesProducer<T>
+            where T : struct, IJobNativeMultiHashMapMergedSharedKeyIndices
+        {
+            internal static readonly SharedStatic<IntPtr> reflectionData = SharedStatic<IntPtr>.GetOrCreate<JobNativeMultiHashMapMergedSharedKeyIndicesProducer<T>>();
+
+            [BurstDiscard]
+            internal static void Initialize()
+            {
+                if (reflectionData.Data == IntPtr.Zero)
+                    reflectionData.Data = JobsUtility.CreateJobReflectionData(typeof(JobWrapper<T>), typeof(T), (ExecuteJobFunction)Execute);
             }
 
-            delegate void ExecuteJobFunction(ref JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob> jobProducer, IntPtr additionalPtr, IntPtr bufferRangePatchData, ref JobRanges ranges, int jobIndex);
+            delegate void ExecuteJobFunction(ref JobWrapper<T> jobWrapper, IntPtr additionalPtr, IntPtr bufferRangePatchData,
+                ref JobRanges ranges, int jobIndex);
 
-            public static unsafe void Execute(ref JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob> jobProducer, IntPtr additionalPtr, IntPtr bufferRangePatchData, ref JobRanges ranges, int jobIndex)
+            [BurstCompile]
+            public static unsafe void Execute(ref JobWrapper<T> jobWrapper, IntPtr additionalPtr, IntPtr bufferRangePatchData,
+                ref JobRanges ranges, int jobIndex)
             {
                 while (true)
                 {
@@ -64,7 +103,7 @@ namespace Samples.Boids
                         return;
                     }
 
-                    var bucketData = jobProducer.HashMap.GetUnsafeBucketData();
+                    var bucketData = jobWrapper.HashMap.GetUnsafeBucketData();
                     var buckets = (int*)bucketData.buckets;
                     var nextPtrs = (int*)bucketData.next;
                     var keys = bucketData.keys;
@@ -80,8 +119,8 @@ namespace Samples.Boids
                             var value = UnsafeUtility.ReadArrayElement<int>(values, entryIndex);
                             int firstValue;
 
-                            NativeParallelMultiHashMapIterator<int> it;
-                            jobProducer.HashMap.TryGetFirstValue(key, out firstValue, out it);
+                            NativeMultiHashMapIterator<int> it;
+                            jobWrapper.HashMap.TryGetFirstValue(key, out firstValue, out it);
 
                             // [macton] Didn't expect a usecase for this with multiple same values
                             // (since it's intended use was for unique indices.)
@@ -89,9 +128,9 @@ namespace Samples.Boids
                             if (entryIndex == it.GetEntryIndex())
                             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                                JobsUtility.PatchBufferMinMaxRanges(bufferRangePatchData, UnsafeUtility.AddressOf(ref jobProducer), value, 1);
+                                JobsUtility.PatchBufferMinMaxRanges(bufferRangePatchData, UnsafeUtility.AddressOf(ref jobWrapper), value, 1);
 #endif
-                                jobProducer.JobData.ExecuteFirst(value);
+                                jobWrapper.JobData.ExecuteFirst(value);
                             }
                             else
                             {
@@ -100,9 +139,9 @@ namespace Samples.Boids
                                 var lastIndex = math.max(firstValue, value);
                                 var rangeLength = (lastIndex - startIndex) + 1;
 
-                                JobsUtility.PatchBufferMinMaxRanges(bufferRangePatchData, UnsafeUtility.AddressOf(ref jobProducer), startIndex, rangeLength);
+                                JobsUtility.PatchBufferMinMaxRanges(bufferRangePatchData, UnsafeUtility.AddressOf(ref jobWrapper), startIndex, rangeLength);
 #endif
-                                jobProducer.JobData.ExecuteNext(firstValue, value);
+                                jobWrapper.JobData.ExecuteNext(firstValue, value);
                             }
 
                             entryIndex = nextPtrs[entryIndex];
@@ -110,29 +149,6 @@ namespace Samples.Boids
                     }
                 }
             }
-        }
-
-        public static unsafe JobHandle Schedule<TJob>(this TJob jobData, NativeParallelMultiHashMap<int, int> hashMap, int minIndicesPerJobCount, JobHandle dependsOn = new JobHandle())
-            where TJob : struct, IJobNativeMultiHashMapMergedSharedKeyIndices
-        {
-            var jobProducer = new JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob>
-            {
-                HashMap = hashMap,
-                JobData = jobData
-            };
-
-            var scheduleParams = new JobsUtility.JobScheduleParameters(
-                UnsafeUtility.AddressOf(ref jobProducer)
-                , JobNativeMultiHashMapMergedSharedKeyIndicesProducer<TJob>.Initialize()
-                , dependsOn
-#if UNITY_2020_2_OR_NEWER
-                , ScheduleMode.Parallel
-#else
-                , ScheduleMode.Batched
-#endif
-            );
-
-            return JobsUtility.ScheduleParallelFor(ref scheduleParams, hashMap.GetUnsafeBucketData().bucketCapacityMask + 1, minIndicesPerJobCount);
         }
     }
 }

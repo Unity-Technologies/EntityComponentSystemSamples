@@ -1,6 +1,9 @@
+using Unity.Entities;
 using UnityEngine;
 
-public class LightConversionSystem : GameObjectConversionSystem
+// TODO: Port sample
+/*
+public partial class LightConversionSystem : GameObjectConversionSystem
 {
     protected override void OnUpdate()
     {
@@ -8,6 +11,7 @@ public class LightConversionSystem : GameObjectConversionSystem
         {
             var entity = GetPrimaryEntity(light);
             DstEntityManager.AddComponentObject(entity, light);
-        });
+        }).WithStructuralChanges().Run();
     }
 }
+*/

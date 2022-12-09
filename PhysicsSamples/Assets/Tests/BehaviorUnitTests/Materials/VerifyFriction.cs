@@ -1,6 +1,5 @@
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -12,16 +11,20 @@ namespace Unity.Physics.Tests
     {
     }
 
-    public class VerifyFriction : MonoBehaviour, IConvertGameObjectToEntity
+    public class VerifyFriction : MonoBehaviour
     {
-        void IConvertGameObjectToEntity.Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        class VerifyFrictionBaker : Baker<VerifyFriction>
         {
-            dstManager.AddComponentData(entity, new VerifyFrictionData());
+            public override void Bake(VerifyFriction authoring)
+            {
+                AddComponent<VerifyFrictionData>();
+            }
         }
     }
 
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(StepPhysicsWorld))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateBefore(typeof(PhysicsSimulationGroup))]
+    [RequireMatchingQueriesForUpdate]
     public partial class VerifyFrictionSystem : SystemBase
     {
         EntityQuery m_VerificationGroup;
