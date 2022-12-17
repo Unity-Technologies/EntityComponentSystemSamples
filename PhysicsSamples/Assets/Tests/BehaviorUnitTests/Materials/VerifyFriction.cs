@@ -42,10 +42,17 @@ namespace Unity.Physics.Tests
             var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
             foreach (var entity in entities)
             {
+#if !ENABLE_TRANSFORM_V1
+                var localTransform = EntityManager.GetComponentData<LocalTransform>(entity);
+
+                // Cube should never get past the X == 0
+                Assert.IsTrue(localTransform.Position.x < 0.0f);
+#else
                 var translation = EntityManager.GetComponentData<Translation>(entity);
 
                 // Cube should never get past the X == 0
                 Assert.IsTrue(translation.Value.x < 0.0f);
+#endif
             }
             entities.Dispose();
         }

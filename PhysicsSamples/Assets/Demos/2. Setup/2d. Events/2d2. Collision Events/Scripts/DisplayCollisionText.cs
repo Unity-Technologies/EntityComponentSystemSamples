@@ -126,7 +126,7 @@ public partial class DisplayCollisionTextSystem : SystemBase
 
             EntityManager.SetComponentData(mapping.TextEntity, displayCollisionTextComponent);
 
-            textTransform.Position = displayTransform.Position + k_TextOffset;
+            textTransform.LocalPosition = displayTransform.LocalPosition + k_TextOffset;
         }
     }
 

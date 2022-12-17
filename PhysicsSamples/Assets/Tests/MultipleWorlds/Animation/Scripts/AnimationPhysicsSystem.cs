@@ -23,6 +23,7 @@ namespace Unity.Physics.Tests
             WorldFilter = new PhysicsWorldIndex(1);
             PhysicsData = new PhysicsWorldData(ref state, WorldFilter);
             m_ExportPhysicsWorldTypeHandles = new ExportPhysicsWorldTypeHandles(ref state);
+            m_Stepper = ImmediatePhysicsWorldStepper.Create();
         }
 
         [BurstCompile]
@@ -41,12 +42,6 @@ namespace Unity.Physics.Tests
         {
             // Make sure dependencies are complete, we'll run everything immediately
             state.CompleteDependency();
-
-            if (!m_Stepper.Created)
-            {
-                // Initialize immediate stepper here, since it can't be done in OnCreate.
-                m_Stepper = new ImmediatePhysicsWorldStepper(ref state, WorldFilter.Value);
-            }
 
             float timeStep = SystemAPI.Time.DeltaTime;
 

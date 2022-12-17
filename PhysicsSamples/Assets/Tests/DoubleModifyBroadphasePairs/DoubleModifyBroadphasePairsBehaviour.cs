@@ -33,14 +33,14 @@ public partial class DoubleModifyBroadphasePairsSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        SimulationSingleton simSingleton = GetSingleton<SimulationSingleton>();
+        SimulationSingleton simSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
 
         if (simSingleton.Type == SimulationType.NoPhysics)
         {
             return;
         }
 
-        PhysicsWorldSingleton worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+        PhysicsWorldSingleton worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
         // Add a custom callback to the simulation, which will inject our custom job after the body pairs have been created
         Dependency = new DisableDynamicDynamicPairsJob

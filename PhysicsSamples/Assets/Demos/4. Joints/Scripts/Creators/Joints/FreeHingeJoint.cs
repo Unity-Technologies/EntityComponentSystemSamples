@@ -22,31 +22,6 @@ namespace Unity.Physics.Authoring
                 HingeAxisInConnectedEntity = math.mul(bFromA.rot, HingeAxisLocal);
             }
         }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            UpdateAuto();
-            Math.CalculatePerpendicularNormalized(HingeAxisLocal, out var perpendicularLocal, out _);
-            Math.CalculatePerpendicularNormalized(HingeAxisInConnectedEntity, out var perpendicularConnected, out _);
-            PhysicsJoint joint = PhysicsJoint.CreateHinge(
-                new BodyFrame { Axis = HingeAxisLocal, Position = PositionLocal, PerpendicularAxis = perpendicularLocal },
-                new BodyFrame { Axis = HingeAxisInConnectedEntity, Position = PositionInConnectedEntity, PerpendicularAxis = perpendicularConnected }
-            );
-
-            var constraints = joint.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            joint.SetConstraints(constraints);
-
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                joint
-            );
-        }
     }
 
     class FreeHingeJointBaker : JointBaker<FreeHingeJoint>
@@ -62,6 +37,9 @@ namespace Unity.Physics.Authoring
                 new BodyFrame {Axis = authoring.HingeAxisLocal, Position = authoring.PositionLocal, PerpendicularAxis = perpendicularLocal},
                 new BodyFrame {Axis = authoring.HingeAxisInConnectedEntity, Position = authoring.PositionInConnectedEntity, PerpendicularAxis = perpendicularConnected }
             );
+
+            physicsJoint.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
+
             var constraintBodyPair = GetConstrainedBodyPair(authoring);
 
             uint worldIndex = GetWorldIndexFromBaseJoint(authoring);

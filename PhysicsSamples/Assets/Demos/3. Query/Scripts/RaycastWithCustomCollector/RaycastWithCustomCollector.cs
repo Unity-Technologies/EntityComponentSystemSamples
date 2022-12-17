@@ -1,3 +1,4 @@
+using Unity.Assertions;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -84,22 +85,36 @@ public partial struct RaycastWithCustomCollectorSystem : ISystem
 
     struct ComponentHandles
     {
+#if !ENABLE_TRANSFORM_V1
+        public ComponentLookup<LocalTransform> LocalTransforms;
+        public ComponentLookup<PostTransformScale> PostTransformScales;
+#else
         public ComponentLookup<Translation> Positions;
         public ComponentLookup<NonUniformScale> NonUniformScales;
+#endif
 
         public ComponentHandles(ref SystemState state)
         {
+#if !ENABLE_TRANSFORM_V1
+            LocalTransforms = state.GetComponentLookup<LocalTransform>(false);
+            PostTransformScales = state.GetComponentLookup<PostTransformScale>(false);
+#else
             Positions = state.GetComponentLookup<Translation>(false);
             NonUniformScales = state.GetComponentLookup<NonUniformScale>(false);
+#endif
         }
 
         public void Update(ref SystemState state)
         {
+#if !ENABLE_TRANSFORM_V1
+            LocalTransforms.Update(ref state);
+            PostTransformScales.Update(ref state);
+#else
             Positions.Update(ref state);
             NonUniformScales.Update(ref state);
+#endif
         }
     }
-
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -116,21 +131,37 @@ public partial struct RaycastWithCustomCollectorSystem : ISystem
     [BurstCompile]
     public partial struct RaycastWithCustomCollectorJob : IJobEntity
     {
+#if !ENABLE_TRANSFORM_V1
+        public ComponentLookup<LocalTransform> LocalTransforms;
+        public ComponentLookup<PostTransformScale> PostTransformScales;
+#else
         public ComponentLookup<Translation> Translations;
         public ComponentLookup<NonUniformScale> NonUniformScales;
+#endif
         public PhysicsWorldSingleton PhysicsWorldSingleton;
 
         [BurstCompile]
+#if !ENABLE_TRANSFORM_V1
+        public void Execute(Entity entity, ref VisualizedRaycast visualizedRaycast)
+        {
+            var rayLocalTransform = LocalTransforms[entity];
+#else
         public void Execute(Entity entity, ref Rotation rotation, ref VisualizedRaycast visualizedRaycast)
         {
-            var raycastLength = visualizedRaycast.RayLength;
             var position = Translations[entity];
+#endif
+            var raycastLength = visualizedRaycast.RayLength;
 
             // Perform the Raycast
             var raycastInput = new RaycastInput
             {
+#if !ENABLE_TRANSFORM_V1
+                Start = rayLocalTransform.Position,
+                End = rayLocalTransform.Position + rayLocalTransform.Forward() * visualizedRaycast.RayLength,
+#else
                 Start = position.Value,
                 End = position.Value + (math.forward(rotation.Value) * visualizedRaycast.RayLength),
+#endif
                 Filter = CollisionFilter.Default
             };
 
@@ -144,16 +175,23 @@ public partial struct RaycastWithCustomCollectorSystem : ISystem
             // position the entities and scale based on the ray length and hit distance
             // visualization elements are scaled along the z-axis aka math.forward
             var newFullRayPosition = new float3(0, 0, raycastLength * 0.5f);
-            var newFullRayScale = new float3(1f, 1f, raycastLength);
             var newHitPosition = new float3(0, 0, hitDistance);
             var newHitRayPosition = new float3(0, 0, hitDistance * 0.5f);
-            var newHitRayScale = new float3(1f, 1f, raycastLength * hit.Fraction);
-
+            var newFullRayScale = new float3(.025f, .025f, raycastLength * 0.5f);
+            var newHitRayScale = new float3(.05f, .05f, raycastLength * hit.Fraction * 0.5f);
+#if !ENABLE_TRANSFORM_V1
+            LocalTransforms[visualizedRaycast.HitPositionEntity] = LocalTransforms[visualizedRaycast.HitPositionEntity].WithPosition(newHitPosition);
+            LocalTransforms[visualizedRaycast.HitRayEntity] = LocalTransforms[visualizedRaycast.HitRayEntity].WithPosition(newHitRayPosition).WithScale(1);
+            PostTransformScales[visualizedRaycast.HitRayEntity] = new PostTransformScale { Value = float3x3.Scale(newHitRayScale) };
+            LocalTransforms[visualizedRaycast.FullRayEntity] = LocalTransforms[visualizedRaycast.FullRayEntity].WithPosition(newFullRayPosition).WithScale(1);
+            PostTransformScales[visualizedRaycast.FullRayEntity] = new PostTransformScale { Value = float3x3.Scale(newFullRayScale) };
+#else
             Translations[visualizedRaycast.HitPositionEntity] = new Translation { Value = newHitPosition };
             Translations[visualizedRaycast.HitRayEntity] = new Translation { Value = newHitRayPosition };
             NonUniformScales[visualizedRaycast.HitRayEntity] = new NonUniformScale { Value = newHitRayScale };
             Translations[visualizedRaycast.FullRayEntity] = new Translation { Value = newFullRayPosition };
             NonUniformScales[visualizedRaycast.FullRayEntity] = new NonUniformScale { Value = newFullRayScale };
+#endif
         }
     }
 
@@ -165,11 +203,17 @@ public partial struct RaycastWithCustomCollectorSystem : ISystem
         PhysicsWorldSingleton physicsWorldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
         var world = physicsWorldSingleton.CollisionWorld;
 
-        state.Dependency = new RaycastWithCustomCollectorJob
+        var raycastJob = new RaycastWithCustomCollectorJob
         {
+#if !ENABLE_TRANSFORM_V1
+            LocalTransforms = m_Handles.LocalTransforms,
+            PostTransformScales = m_Handles.PostTransformScales,
+#else
             Translations = m_Handles.Positions,
             NonUniformScales = m_Handles.NonUniformScales,
+#endif
             PhysicsWorldSingleton = physicsWorldSingleton
-        }.Schedule(state.Dependency);
+        };
+        state.Dependency = raycastJob.Schedule(state.Dependency);
     }
 }

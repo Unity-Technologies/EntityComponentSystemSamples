@@ -60,8 +60,12 @@ public partial class DriveAnimationBodySystem : SystemBase
 
     protected override void OnUpdate()
     {
+#if !ENABLE_TRANSFORM_V1
+        var localTransforms = GetComponentLookup<LocalTransform>();
+#else
         var positions = GetComponentLookup<Translation>();
         var rotations = GetComponentLookup<Rotation>();
+#endif
         var velocities = GetComponentLookup<PhysicsVelocity>();
 
         float stepFrequency = math.rcp(SystemAPI.Time.DeltaTime);
@@ -69,6 +73,20 @@ public partial class DriveAnimationBodySystem : SystemBase
             WithBurst().
             ForEach((Entity drivenEntity, in DriveAnimationBodyData driveData, in PhysicsMass mass) =>
             {
+#if !ENABLE_TRANSFORM_V1
+                var drivingLocalTransform = localTransforms[driveData.DrivingEntity];
+                var currentLocalTransform = localTransforms[drivenEntity];
+
+                // First order gains - position/rotation
+                var worldFromDriving = new RigidTransform(drivingLocalTransform.Rotation, drivingLocalTransform.Position);
+                var worldFromDriven = math.mul(worldFromDriving, driveData.DrivingFromDriven);
+
+                var desiredLocalTransform = LocalTransform.FromPositionRotationScale(
+                        math.lerp(currentLocalTransform.Position, worldFromDriven.pos, driveData.PositionGain),
+                        math.slerp(currentLocalTransform.Rotation, worldFromDriven.rot, driveData.RotationGain),
+                        localTransforms[drivenEntity].Scale);
+                localTransforms[drivenEntity] = desiredLocalTransform;
+#else
                 var drivingRotation = rotations[driveData.DrivingEntity];
                 var drivingPosition = positions[driveData.DrivingEntity];
 
@@ -83,11 +101,16 @@ public partial class DriveAnimationBodySystem : SystemBase
                 var desiredRotation = new Rotation() { Value = math.slerp(currentRotation.Value, worldFromDriven.rot, driveData.RotationGain) };
                 positions[drivenEntity] = desiredPosition;
                 rotations[drivenEntity] = desiredRotation;
+#endif
 
                 // Second order gains - velocity
                 var currentVelocity = velocities[drivenEntity];
                 var desiredVelocity = PhysicsVelocity.CalculateVelocityToTarget(
-                    in mass, in desiredPosition, in desiredRotation,
+#if !ENABLE_TRANSFORM_V1
+                    in mass, in desiredLocalTransform.Position, in desiredLocalTransform.Rotation,
+#else
+                    in mass, in desiredPosition.Value, in desiredRotation.Value,
+#endif
                     worldFromDriven, stepFrequency);
                 desiredVelocity.Linear = math.lerp(currentVelocity.Linear, desiredVelocity.Linear, driveData.LinearVelocityGain);
                 desiredVelocity.Angular = math.lerp(currentVelocity.Angular, desiredVelocity.Angular, driveData.AngularVelocityGain);

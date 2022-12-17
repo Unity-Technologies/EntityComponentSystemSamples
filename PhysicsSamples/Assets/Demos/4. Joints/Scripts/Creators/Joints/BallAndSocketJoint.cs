@@ -32,25 +32,6 @@ namespace Unity.Physics.Authoring
                 PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
             }
         }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            UpdateAuto();
-            PhysicsJoint joint = PhysicsJoint.CreateBallAndSocket(PositionLocal, PositionInConnectedEntity);
-            var constraints = joint.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            joint.SetConstraints(constraints);
-
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                joint
-            );
-        }
     }
 
     public abstract class JointBaker<T> : Baker<T> where T : BaseJoint
@@ -170,6 +151,8 @@ namespace Unity.Physics.Authoring
         {
             authoring.UpdateAuto();
             var physicsJoint = PhysicsJoint.CreateBallAndSocket(authoring.PositionLocal, authoring.PositionInConnectedEntity);
+            physicsJoint.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
+
             var constraintBodyPair = GetConstrainedBodyPair(authoring);
 
             uint worldIndex = GetWorldIndexFromBaseJoint(authoring);

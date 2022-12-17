@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -18,10 +19,14 @@ abstract class SpawnRandomObjectsAuthoringBase<T> : MonoBehaviour
     public float3 range = new float3(10f);
     [Tooltip("Limited to 500 on some platforms!")]
     public int count;
+    // The random seed used for spawners is a function of the spawner's quantized position, range, count, etc.
+    // See the GetRandomSeed() method.
+    // Two spawners in the same scene can potentially end up with the same random seed. If so, this field gives scene
+    // authors a way to tweak one of the spawners' seeds without changing its behavior-defining parameters.
+    public int randomSeedOffset;
     #pragma warning restore 649
 
     internal virtual void Configure(ref T spawnSettings) {}
-    internal virtual void Configure(ref T spawnSettings, Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem) {}
     internal virtual void Configure(List<GameObject> referencedPrefabs) { referencedPrefabs.Add(prefab); }
 }
 
@@ -41,7 +46,8 @@ abstract class SpawnRandomObjectsAuthoringBaseBaker<T, U> : Baker<T> where T : S
             Position = transform.position,
             Rotation = transform.rotation,
             Range = authoring.range,
-            Count = authoring.count
+            Count = authoring.count,
+            RandomSeedOffset = authoring.randomSeedOffset,
         };
         Configure(authoring, ref spawnSettings, GetEntity(), this);
         Configure(authoring, ref spawnSettings);
@@ -61,6 +67,7 @@ interface ISpawnSettings
     quaternion Rotation { get; set; }
     float3 Range { get; set; }
     int Count { get; set; }
+    int RandomSeedOffset { get; set; }
 }
 
 struct SpawnSettings : IComponentData, ISpawnSettings
@@ -70,6 +77,7 @@ struct SpawnSettings : IComponentData, ISpawnSettings
     public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
+    public int RandomSeedOffset { get; set; }
 }
 
 class SpawnRandomObjectsSystem : SpawnRandomObjectsSystemBase<SpawnSettings>
@@ -82,7 +90,7 @@ abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : un
 {
     internal virtual int GetRandomSeed(T spawnSettings)
     {
-        var seed = 0;
+        var seed = spawnSettings.RandomSeedOffset;
         seed = (seed * 397) ^ spawnSettings.Count;
         seed = (seed * 397) ^ (int)math.csum(spawnSettings.Position);
         seed = (seed * 397) ^ (int)math.csum(spawnSettings.Range);
@@ -122,8 +130,15 @@ abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : un
                 for (int i = 0; i < count; i++)
                 {
                     var instance = instances[i];
+#if !ENABLE_TRANSFORM_V1
+                    var transform = EntityManager.GetComponentData<LocalTransform>(instance);
+                    transform.Position = positions[i];
+                    transform.Rotation = rotations[i];
+                    EntityManager.SetComponentData(instance, transform);
+#else
                     EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
                     EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
+#endif
 
                     ConfigureInstance(instance, ref spawnSettings);
                 }
@@ -139,7 +154,7 @@ abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : un
     {
         var count = positions.Length;
         // initialize the seed of the random number generator
-        var random = new Unity.Mathematics.Random((uint)seed);
+        var random = Unity.Mathematics.Random.CreateFromIndex((uint)seed);
         for (int i = 0; i < count; i++)
         {
             positions[i] = center + math.mul(orientation, random.NextFloat3(-range, range));

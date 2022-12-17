@@ -71,16 +71,6 @@ public struct ApplyRocketThrust : IComponentData
 public partial struct ApplyRocketThrustSystem : ISystem
 {
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public partial struct ApplyRocketThurstJob : IJobEntity
     {
         public float DeltaTime;
@@ -95,6 +85,16 @@ public partial struct ApplyRocketThrustSystem : ISystem
 
             rigidBodyAspect.ApplyImpulseAtPointLocalSpace(impulse, rocket.Offset);
         }
+    }
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
     }
 
     [BurstCompile]

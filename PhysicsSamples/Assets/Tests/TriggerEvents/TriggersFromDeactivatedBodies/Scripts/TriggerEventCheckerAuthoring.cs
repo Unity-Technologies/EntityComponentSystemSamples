@@ -49,9 +49,64 @@ public partial class TriggerEventCheckerSystem : SystemBase
         }
     }
 
+    public partial struct CheckTriggerEventsJob : IJobEntity
+    {
+        public NativeReference<int> ExpectedNumberOfTriggerEvents;
+        public NativeList<TriggerEvent> TriggerEvents;
+        [ReadOnly] public PhysicsWorld World;
+
+        public void Execute(Entity entity, ref TriggerEventChecker triggerEventChecker)
+        {
+            int numTriggerEvents = 0;
+            TriggerEvent triggerEvent = default;
+            ExpectedNumberOfTriggerEvents.Value += triggerEventChecker.NumExpectedEvents;
+
+            for (int i = 0; i < TriggerEvents.Length; i++)
+            {
+                if (TriggerEvents[i].EntityA == entity || TriggerEvents[i].EntityB == entity)
+                {
+                    triggerEvent = TriggerEvents[i];
+                    numTriggerEvents++;
+                }
+            }
+
+            Assert.IsTrue(numTriggerEvents == triggerEventChecker.NumExpectedEvents, "Missing events!");
+
+            if (numTriggerEvents == 0)
+            {
+                return;
+            }
+
+            // Even if component.NumExpectedEvents is > 1, we still take one trigger event, and not all, because the only
+            // difference will be in ColliderKeys which we're not checking here
+            int nonTriggerBodyIndex = triggerEvent.EntityA == entity ? triggerEvent.BodyIndexA : triggerEvent.BodyIndexB;
+            int triggerBodyIndex = triggerEvent.EntityA == entity ? triggerEvent.BodyIndexB : triggerEvent.BodyIndexA;
+
+            Assert.IsTrue(nonTriggerBodyIndex == World.GetRigidBodyIndex(entity), "Wrong body index!");
+
+            RigidBody nonTriggerBody = World.Bodies[nonTriggerBodyIndex];
+            RigidBody triggerBody = World.Bodies[triggerBodyIndex];
+
+            bool isTrigger = false;
+            unsafe
+            {
+                ConvexCollider* colliderPtr = (ConvexCollider*)triggerBody.Collider.GetUnsafePtr();
+                var material = colliderPtr->Material;
+
+                isTrigger = colliderPtr->Material.CollisionResponse == CollisionResponsePolicy.RaiseTriggerEvents;
+            }
+
+            Assert.IsTrue(isTrigger, "Event doesn't have valid trigger index");
+
+            float distance = math.distance(triggerBody.WorldFromBody.pos, nonTriggerBody.WorldFromBody.pos);
+
+            Assert.IsTrue(distance < 10.0f, "The trigger index is wrong!");
+        }
+    }
+
     protected override void OnUpdate()
     {
-        // Complete the simulation
+        //Complete the simulation
         Dependency.Complete();
 
         NativeList<TriggerEvent> triggerEvents = new NativeList<TriggerEvent>(Allocator.TempJob);
@@ -66,63 +121,18 @@ public partial class TriggerEventCheckerSystem : SystemBase
         handle.Complete();
 
         var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-        int expectedNumberOfTriggerEvents = 0;
+        NativeReference<int> expectedNumberOfTriggerEvents = new NativeReference<int>(0, Allocator.TempJob);
 
-        Entities
-            .WithName("ValidateTriggerEventsJob")
-            .WithReadOnly(physicsWorld)
-            .WithReadOnly(triggerEvents)
-            .WithoutBurst()
-            .ForEach((ref Entity entity, ref TriggerEventChecker component) =>
-            {
-                int numTriggerEvents = 0;
-                TriggerEvent triggerEvent = default;
-                expectedNumberOfTriggerEvents += component.NumExpectedEvents;
+        new CheckTriggerEventsJob
+        {
+            ExpectedNumberOfTriggerEvents = expectedNumberOfTriggerEvents,
+            TriggerEvents = triggerEvents,
+            World = physicsWorld
+        }.Run();
 
-                for (int i = 0; i < triggerEvents.Length; i++)
-                {
-                    if (triggerEvents[i].EntityA == entity || triggerEvents[i].EntityB == entity)
-                    {
-                        triggerEvent = triggerEvents[i];
-                        numTriggerEvents++;
-                    }
-                }
+        Assert.IsTrue(expectedNumberOfTriggerEvents.Value == triggerEvents.Length, "Incorrect number of events: Expected: " + expectedNumberOfTriggerEvents.Value + " Actual: " + triggerEvents.Length);
 
-                Assert.IsTrue(numTriggerEvents == component.NumExpectedEvents, "Missing events!");
-
-                if (numTriggerEvents == 0)
-                {
-                    return;
-                }
-
-                // Even if component.NumExpectedEvents is > 1, we still take one trigger event, and not all, because the only
-                // difference will be in ColliderKeys which we're not checking here
-                int nonTriggerBodyIndex = triggerEvent.EntityA == entity ? triggerEvent.BodyIndexA : triggerEvent.BodyIndexB;
-                int triggerBodyIndex = triggerEvent.EntityA == entity ? triggerEvent.BodyIndexB : triggerEvent.BodyIndexA;
-
-                Assert.IsTrue(nonTriggerBodyIndex == physicsWorld.GetRigidBodyIndex(entity), "Wrong body index!");
-
-                RigidBody nonTriggerBody = physicsWorld.Bodies[nonTriggerBodyIndex];
-                RigidBody triggerBody = physicsWorld.Bodies[triggerBodyIndex];
-
-                bool isTrigger = false;
-                unsafe
-                {
-                    ConvexCollider* colliderPtr = (ConvexCollider*)triggerBody.Collider.GetUnsafePtr();
-                    var material = colliderPtr->Material;
-
-                    isTrigger = colliderPtr->Material.CollisionResponse == CollisionResponsePolicy.RaiseTriggerEvents;
-                }
-
-                Assert.IsTrue(isTrigger, "Event doesn't have valid trigger index");
-
-                float distance = math.distance(triggerBody.WorldFromBody.pos, nonTriggerBody.WorldFromBody.pos);
-
-                Assert.IsTrue(distance < 10.0f, "The trigger index is wrong!");
-            }).Run();
-
-        Assert.IsTrue(expectedNumberOfTriggerEvents == triggerEvents.Length, "Incorrect number of events: Expected: " + expectedNumberOfTriggerEvents + " Actual: " + triggerEvents.Length);
-
+        expectedNumberOfTriggerEvents.Dispose();
         triggerEvents.Dispose();
     }
 }

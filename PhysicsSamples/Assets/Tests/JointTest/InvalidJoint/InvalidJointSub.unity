@@ -198,7 +198,6 @@ GameObject:
   m_Component:
   - component: {fileID: 612467337}
   - component: {fileID: 612467336}
-  - component: {fileID: 612467335}
   m_Layer: 0
   m_Name: SwapSceneCreator
   m_TagString: Untagged
@@ -206,19 +205,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &612467335
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 612467334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!114 &612467336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,7 +245,6 @@ GameObject:
   m_Component:
   - component: {fileID: 829720445}
   - component: {fileID: 829720444}
-  - component: {fileID: 829720442}
   m_Layer: 0
   m_Name: SceneCreator
   m_TagString: Untagged
@@ -267,19 +252,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &829720442
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 829720441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!114 &829720444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -319,7 +291,6 @@ GameObject:
   m_Component:
   - component: {fileID: 968716112}
   - component: {fileID: 968716111}
-  - component: {fileID: 968716110}
   m_Layer: 0
   m_Name: ExcludeSceneCreator
   m_TagString: Untagged
@@ -327,19 +298,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &968716110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 968716109}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!114 &968716111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,7 +438,6 @@ GameObject:
   - component: {fileID: 1379210944}
   - component: {fileID: 1379210943}
   - component: {fileID: 1379210942}
-  - component: {fileID: 1379210941}
   m_Layer: 0
   m_Name: Physics Settings
   m_TagString: Untagged
@@ -488,19 +445,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1379210941
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1379210940}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 1
 --- !u!114 &1379210942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -529,12 +473,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1379210940}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c1f2299aae95eb4e80de7e4124130c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Highlight: {fileID: 2100000, guid: e889ae5f4d0a97f4fa03330ed4ab2d05, type: 2}
+  HoverPrefab: {fileID: 1191054677816456, guid: 5847e3636a433e3428bdc22fad0f06fe,
+    type: 3}
   IgnoreTriggers: 1
   IgnoreStatic: 1
 --- !u!114 &1379210944

@@ -20,7 +20,7 @@ namespace Unity.Physics
             }
         }
     }
-    
+
     [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(PhysicsSimulationGroup))]
     [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
@@ -67,8 +67,8 @@ namespace Unity.Physics
 
         protected override void OnUpdate()
         {
-            var simulationSingleton = GetSingleton<SimulationSingleton>();
-            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+            var simulationSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
+            var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
             Dependency = new VerifyPhasedDispatchPairsJob
             {

@@ -70,8 +70,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
         // Creating dynamic bodies
         {
             NativeArray<CustomCollider> colliders = CustomDynamicEntityGroup.ToComponentDataArray<CustomCollider>(Allocator.TempJob);
+#if !ENABLE_TRANSFORM_V1
+            NativeArray<LocalTransform> localTransforms = CustomDynamicEntityGroup.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
+#else
             NativeArray<Translation> positions = CustomDynamicEntityGroup.ToComponentDataArray<Translation>(Allocator.TempJob);
             NativeArray<Rotation> rotations = CustomDynamicEntityGroup.ToComponentDataArray<Rotation>(Allocator.TempJob);
+#endif
             NativeArray<PhysicsCustomTags> customTags = CustomDynamicEntityGroup.ToComponentDataArray<PhysicsCustomTags>(Allocator.TempJob);
             NativeArray<Entity> entities = CustomDynamicEntityGroup.ToEntityArray(Allocator.TempJob);
 
@@ -79,7 +83,11 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             {
                 dynamicBodies[i] = new RigidBody
                 {
+#if !ENABLE_TRANSFORM_V1
+                    WorldFromBody = new RigidTransform(localTransforms[i].Rotation, localTransforms[i].Position),
+#else
                     WorldFromBody = new RigidTransform(rotations[i].Value, positions[i].Value),
+#endif
                     Collider = colliders[i].ColliderRef,
                     Entity = entities[i],
                     CustomTags = customTags[i].Value,
@@ -88,8 +96,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             }
 
             colliders.Dispose();
+#if !ENABLE_TRANSFORM_V1
+            localTransforms.Dispose();
+#else
             positions.Dispose();
             rotations.Dispose();
+#endif
             customTags.Dispose();
             entities.Dispose();
         }
@@ -97,8 +109,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
         // Creating static bodies
         {
             NativeArray<CustomCollider> colliders = CustomStaticEntityGroup.ToComponentDataArray<CustomCollider>(Allocator.TempJob);
+#if !ENABLE_TRANSFORM_V1
+            NativeArray<LocalTransform> localTransforms = CustomStaticEntityGroup.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
+#else
             NativeArray<Translation> positions = CustomStaticEntityGroup.ToComponentDataArray<Translation>(Allocator.TempJob);
             NativeArray<Rotation> rotations = CustomStaticEntityGroup.ToComponentDataArray<Rotation>(Allocator.TempJob);
+#endif
             NativeArray<PhysicsCustomTags> customTags = CustomStaticEntityGroup.ToComponentDataArray<PhysicsCustomTags>(Allocator.TempJob);
             NativeArray<Entity> entities = CustomStaticEntityGroup.ToEntityArray(Allocator.TempJob);
 
@@ -106,7 +122,11 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             {
                 staticBodies[i] = new RigidBody
                 {
+#if !ENABLE_TRANSFORM_V1
+                    WorldFromBody = new RigidTransform(localTransforms[i].Rotation, localTransforms[i].Position),
+#else
                     WorldFromBody = new RigidTransform(rotations[i].Value, positions[i].Value),
+#endif
                     Collider = colliders[i].ColliderRef,
                     Entity = entities[i],
                     CustomTags = customTags[i].Value,
@@ -125,8 +145,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             };
 
             colliders.Dispose();
+#if !ENABLE_TRANSFORM_V1
+            localTransforms.Dispose();
+#else
             positions.Dispose();
             rotations.Dispose();
+#endif
             customTags.Dispose();
             entities.Dispose();
         }
@@ -161,19 +185,32 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
 
     public void CreateMotionDatas()
     {
+#if !ENABLE_TRANSFORM_V1
+        NativeArray<LocalTransform> localTransforms = CustomDynamicEntityGroup.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
+#else
         NativeArray<Translation> positions = CustomDynamicEntityGroup.ToComponentDataArray<Translation>(Allocator.TempJob);
         NativeArray<Rotation> rotations = CustomDynamicEntityGroup.ToComponentDataArray<Rotation>(Allocator.TempJob);
+#endif
         NativeArray<PhysicsMass> masses = CustomDynamicEntityGroup.ToComponentDataArray<PhysicsMass>(Allocator.TempJob);
         NativeArray<PhysicsDamping> dampings = CustomDynamicEntityGroup.ToComponentDataArray<PhysicsDamping>(Allocator.TempJob);
 
         NativeArray<MotionData> motionDatas = PhysicsWorld.MotionDatas;
+#if !ENABLE_TRANSFORM_V1
+        for (int i = 0; i < localTransforms.Length; i++)
+#else
         for (int i = 0; i < positions.Length; i++)
+#endif
         {
             motionDatas[i] = new MotionData
             {
                 WorldFromMotion = new RigidTransform(
+#if !ENABLE_TRANSFORM_V1
+                    math.mul(localTransforms[i].Rotation, masses[i].InertiaOrientation),
+                    math.rotate(localTransforms[i].Rotation, masses[i].CenterOfMass) + localTransforms[i].Position
+#else
                     math.mul(rotations[i].Value, masses[i].InertiaOrientation),
                     math.rotate(rotations[i].Value, masses[i].CenterOfMass) + positions[i].Value
+#endif
                     ),
                 BodyFromMotion = new RigidTransform(masses[i].InertiaOrientation, masses[i].CenterOfMass),
                 LinearDamping = dampings[i].Linear,
@@ -181,8 +218,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             };
         }
 
+#if !ENABLE_TRANSFORM_V1
+        localTransforms.Dispose();
+#else
         positions.Dispose();
         rotations.Dispose();
+#endif
         masses.Dispose();
         dampings.Dispose();
     }
@@ -241,8 +282,15 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             MotionData md = motionDatas[i];
             RigidTransform worldFromBody = math.mul(md.WorldFromMotion, math.inverse(md.BodyFromMotion));
 
+#if !ENABLE_TRANSFORM_V1
+            var localTransform = EntityManager.GetComponentData<LocalTransform>(dynamicBodies[i].Entity);
+            localTransform.Position = worldFromBody.pos;
+            localTransform.Rotation = worldFromBody.rot;
+            EntityManager.SetComponentData(dynamicBodies[i].Entity, localTransform);
+#else
             EntityManager.SetComponentData(dynamicBodies[i].Entity, new Translation { Value = worldFromBody.pos });
             EntityManager.SetComponentData(dynamicBodies[i].Entity, new Rotation { Value = worldFromBody.rot});
+#endif
             EntityManager.SetComponentData(dynamicBodies[i].Entity, new CustomVelocity { Linear = motionVelocities[i].LinearVelocity, Angular = motionVelocities[i].AngularVelocity});
         }
     }
@@ -255,8 +303,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
         {
             All = new ComponentType[]
             {
+#if !ENABLE_TRANSFORM_V1
+                typeof(LocalTransform),
+#else
                 typeof(Translation),
                 typeof(Rotation),
+#endif
             }
         });
 
@@ -268,15 +320,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
 
         for (int i = 0; i < entities.Length; i++)
         {
-            if (!EntityManager.HasComponent(entities[i], typeof(RenderMesh)))
+            if (!EntityManager.HasComponent(entities[i], typeof(RenderMeshArray)))
             {
                 continue;
             }
-            var ghostMaterial = new RenderMesh
-            {
-                mesh = EntityManager.GetSharedComponentManaged<RenderMesh>(entities[i]).mesh,
-                material = referenceMaterial
-            };
+
+            var ghostMaterial = new RenderMeshArray(new[] { referenceMaterial }, EntityManager.GetSharedComponentManaged<RenderMeshArray>(entities[i]).Meshes);
 
             var ghost = EntityManager.Instantiate(entities[i]);
 
@@ -354,11 +403,20 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
                 EntityManager.AddComponentData(ghost, customVel);
             }
 
+#if !ENABLE_TRANSFORM_V1
+            var transform = EntityManager.GetComponentData<LocalTransform>(entities[i]);
+            float3 position = transform.Position;
+            // The idea is that static bodies overlap, and dynamic ones are separated from original ones
+            transform.Position = new float3(position.x, position.y, position.z);
+
+            EntityManager.SetComponentData(ghost, transform);
+#else
             var position = EntityManager.GetComponentData<Translation>(entities[i]);
             // The idea is that static bodies overlap, and dynamic ones are separated from original ones
             position.Value = new float3(position.Value.x, position.Value.y, position.Value.z);
 
             EntityManager.SetComponentData(ghost, position);
+#endif
             EntityManager.RemoveComponent<PhysicsVelocity>(ghost);
 
             EntityManager.SetSharedComponentManaged(ghost, ghostMaterial);
@@ -380,8 +438,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             All = new ComponentType[]
             {
                 typeof(CustomVelocity),
+#if !ENABLE_TRANSFORM_V1
+                typeof(LocalTransform),
+#else
                 typeof(Translation),
                 typeof(Rotation),
+#endif
                 typeof(CustomCollider),
                 typeof(PhysicsCustomTags),
                 typeof(PhysicsMass),
@@ -396,8 +458,12 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             All = new ComponentType[]
             {
                 typeof(CustomCollider),
+#if !ENABLE_TRANSFORM_V1
+                typeof(LocalTransform),
+#else
                 typeof(Translation),
                 typeof(Rotation),
+#endif
                 typeof(PhysicsCustomTags),
                 typeof(PhysicsWorldIndex)
             },
@@ -446,9 +512,9 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
         if (PhysicsWorld.NumDynamicBodies != 0)
         {
             PhysicsStep stepComponent = PhysicsStep.Default;
-            if (HasSingleton<PhysicsStep>())
+            if (SystemAPI.HasSingleton<PhysicsStep>())
             {
-                stepComponent = GetSingleton<PhysicsStep>();
+                stepComponent = SystemAPI.GetSingleton<PhysicsStep>();
             }
 
             SimulationStepInput input = new SimulationStepInput

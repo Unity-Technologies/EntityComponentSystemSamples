@@ -19,37 +19,36 @@ namespace Unity.Physics.Systems
         public bool Created;
 
         /// <summary>
-        /// Constructor. Do not use in system's OnCreate when simulation is Havok, as it won't pick up HavokConfiguration properly.
+        /// Create method. Use this instead of constructor.
         /// </summary>
-        public ImmediatePhysicsWorldStepper(SystemBase system, uint physicsWorldIndex)
+        public static ImmediatePhysicsWorldStepper Create()
         {
-            Created = true;
-            SimulationContext = new SimulationContext();
-#if HAVOK_PHYSICS_EXISTS
-            Havok.Physics.HavokConfiguration config = system.HasSingleton<Havok.Physics.HavokConfiguration>() ?
-                system.GetSingleton<Havok.Physics.HavokConfiguration>() : Havok.Physics.HavokConfiguration.Default;
-
-            // We want to show different physics worlds in separate VDBs, so each one needs its own port
-            config.VisualDebugger.Port += (int)physicsWorldIndex;
-            HavokSimulationContext = new Havok.Physics.SimulationContext(config);
-#endif
-        }
-
-        public ImmediatePhysicsWorldStepper(ref SystemState systemState, uint physicsWorldIndex)
-        {
-            Created = true;
-            SimulationContext = new SimulationContext();
+            ImmediatePhysicsWorldStepper instance = new ImmediatePhysicsWorldStepper();
+            instance.Created = true;
+            instance.SimulationContext = new SimulationContext();
 
 #if HAVOK_PHYSICS_EXISTS
-            //Havok.Physics.HavokConfiguration config = SystemAPI.HasSingleton<Havok.Physics.HavokConfiguration>() ?
-            //    SystemAPI.GetSingleton<Havok.Physics.HavokConfiguration>() : Havok.Physics.HavokConfiguration.Default; need SYSTEMAPI.GetSingleton() here
-
-            Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
-            // We want to show different physics worlds in separate VDBs, so each one needs its own port
-            config.VisualDebugger.Port += (int)physicsWorldIndex;
-            HavokSimulationContext = new Havok.Physics.SimulationContext(config);
+            instance.HavokSimulationContext = new Havok.Physics.SimulationContext(Havok.Physics.HavokConfiguration.Default);
 #endif
+
+            return instance;
         }
+
+#if HAVOK_PHYSICS_EXISTS
+        /// <summary>
+        /// Create method. Provides an option to pass in HavokConfiguration (for example, VDB options).
+        /// </summary>
+        /// <param name="havokConfiguration"></param>
+        public static ImmediatePhysicsWorldStepper Create(Havok.Physics.HavokConfiguration havokConfiguration)
+        {
+            ImmediatePhysicsWorldStepper instance = new ImmediatePhysicsWorldStepper();
+            instance.Created = true;
+            instance.SimulationContext = new SimulationContext();
+            instance.HavokSimulationContext = new Havok.Physics.SimulationContext(havokConfiguration);
+            return instance;
+        }
+
+#endif
 
         /// <summary>
         /// Steps the UnityPhysics simulation (on current thread)

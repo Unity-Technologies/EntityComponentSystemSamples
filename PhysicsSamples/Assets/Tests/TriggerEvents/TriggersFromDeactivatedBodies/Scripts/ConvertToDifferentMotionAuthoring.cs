@@ -46,49 +46,58 @@ public partial class ConvertToStaticSystem : SystemBase
         RequireForUpdate<ConvertToDifferentMotion>();
     }
 
+    public partial struct ConvertToDifferentMotionJob : IJobEntity
+    {
+        public EntityCommandBuffer CommandBuffer;
+
+        public void Execute(Entity entity, ref ConvertToDifferentMotion tag, ref TriggerEventChecker checkerComponent, ref PhysicsCollider collider)
+        {
+            if (--tag.ConvertIn == 0)
+            {
+                if (tag.ConversionSettings == ConversionSettings.ConvertToStatic ||
+                    tag.ConversionSettings == ConversionSettings.ConvertToStaticDontInvalidateNumExpectedEvents)
+                {
+                    CommandBuffer.RemoveComponent<PhysicsVelocity>(entity);
+
+                    if (tag.ConversionSettings == ConversionSettings.ConvertToStatic)
+                    {
+                        checkerComponent.NumExpectedEvents = 0;
+                    }
+                }
+                else
+                {
+                    CommandBuffer.AddComponent(entity, new PhysicsVelocity
+                    {
+                        Angular = float3.zero,
+                        Linear = float3.zero
+                    });
+
+                    if (collider.Value.Value.Type == ColliderType.Compound)
+                    {
+                        unsafe
+                        {
+                            checkerComponent.NumExpectedEvents = ((CompoundCollider*)collider.ColliderPtr)->NumChildren;
+                        }
+                    }
+                    else
+                    {
+                        checkerComponent.NumExpectedEvents = 1;
+                    }
+                }
+                CommandBuffer.RemoveComponent<ConvertToDifferentMotion>(entity);
+            }
+        }
+    }
+
     protected override void OnUpdate()
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities
-                .WithName("ConvertToDifferentMotion")
-                .ForEach((ref Entity e, ref ConvertToDifferentMotion tag, ref TriggerEventChecker checkerComponent, ref PhysicsCollider pc) =>
-                {
-                    if (--tag.ConvertIn == 0)
-                    {
-                        if (tag.ConversionSettings == ConversionSettings.ConvertToStatic ||
-                            tag.ConversionSettings == ConversionSettings.ConvertToStaticDontInvalidateNumExpectedEvents)
-                        {
-                            commandBuffer.RemoveComponent<PhysicsVelocity>(e);
+            new ConvertToDifferentMotionJob
+            {
+                CommandBuffer = commandBuffer
+            }.Run();
 
-                            if (tag.ConversionSettings == ConversionSettings.ConvertToStatic)
-                            {
-                                checkerComponent.NumExpectedEvents = 0;
-                            }
-                        }
-                        else
-                        {
-                            commandBuffer.AddComponent(e, new PhysicsVelocity
-                            {
-                                Angular = float3.zero,
-                                Linear = float3.zero
-                            });
-
-                            if (pc.Value.Value.Type == ColliderType.Compound)
-                            {
-                                unsafe
-                                {
-                                    checkerComponent.NumExpectedEvents = ((CompoundCollider*)pc.ColliderPtr)->NumChildren;
-                                }
-                            }
-                            else
-                            {
-                                checkerComponent.NumExpectedEvents = 1;
-                            }
-                        }
-                        commandBuffer.RemoveComponent<ConvertToDifferentMotion>(e);
-                    }
-                }).Run();
             commandBuffer.Playback(EntityManager);
         }
     }

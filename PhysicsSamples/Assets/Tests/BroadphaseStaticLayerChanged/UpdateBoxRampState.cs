@@ -35,22 +35,28 @@ public partial class EntityUpdaterSystem : SystemBase
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities.ForEach(
-                (Entity entity, ref EntityUpdater updater, ref Translation position) =>
+#if !ENABLE_TRANSFORM_V1
+            foreach (var(updater, localTransform, entity) in SystemAPI.Query<RefRW<EntityUpdater>, RefRW<LocalTransform>>().WithEntityAccess())
+#else
+            foreach (var(updater, position, entity) in SystemAPI.Query<RefRW<EntityUpdater>, RefRW<Translation>>().WithEntityAccess())
+#endif
+            {
+                if (updater.ValueRW.TimeToDie-- == 0)
                 {
-                    if (updater.TimeToDie-- == 0)
-                    {
-                        commandBuffer.DestroyEntity(entity);
-                    }
-
-                    if (updater.TimeToMove-- == 0)
-                    {
-                        position.Value += new float3(0, -2, 0);
-                        commandBuffer.SetComponent(entity, position);
-                    }
+                    commandBuffer.DestroyEntity(entity);
                 }
-                ).Run();
 
+                if (updater.ValueRW.TimeToMove-- == 0)
+                {
+#if !ENABLE_TRANSFORM_V1
+                    localTransform.ValueRW.Position += new float3(0, -2, 0);
+                    commandBuffer.SetComponent(entity, localTransform.ValueRW);
+#else
+                    position.ValueRW.Value += new float3(0, -2, 0);
+                    commandBuffer.SetComponent(entity, position.ValueRW);
+#endif
+                }
+            }
             commandBuffer.Playback(EntityManager);
         }
     }

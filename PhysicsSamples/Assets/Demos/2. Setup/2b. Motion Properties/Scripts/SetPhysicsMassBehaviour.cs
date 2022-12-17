@@ -65,14 +65,13 @@ public partial class SetPhysicsMassBehaviourSystem : SystemBase
     protected override void OnUpdate()
     {
         // Fill in the MassProperties based on the potential calculated value by BuildCompoundColliderBakingSystem
-        Entities
-            .ForEach(
-            (ref PhysicsMass mass, in SetPhysicsMassBehaviour.SetPhysicsMassAuthoring setPhysicsMass) =>
-            {
-                mass.InverseInertia[0] = setPhysicsMass.InfiniteInertiaX ? 0 : mass.InverseInertia[0];
-                mass.InverseInertia[1] = setPhysicsMass.InfiniteInertiaY ? 0 : mass.InverseInertia[1];
-                mass.InverseInertia[2] = setPhysicsMass.InfiniteInertiaZ ? 0 : mass.InverseInertia[2];
-                mass.InverseMass = setPhysicsMass.InfiniteMass ? 0 : mass.InverseMass;
-            }).Run();
+        foreach (var(mass, setPhysicsMass)
+                 in SystemAPI.Query<RefRW<PhysicsMass>, RefRO<SetPhysicsMassBehaviour.SetPhysicsMassAuthoring>>().WithOptions(EntityQueryOptions.IncludePrefab | EntityQueryOptions.IncludeDisabledEntities))
+        {
+            mass.ValueRW.InverseInertia[0] = setPhysicsMass.ValueRO.InfiniteInertiaX ? 0 : mass.ValueRW.InverseInertia[0];
+            mass.ValueRW.InverseInertia[1] = setPhysicsMass.ValueRO.InfiniteInertiaY ? 0 : mass.ValueRW.InverseInertia[1];
+            mass.ValueRW.InverseInertia[2] = setPhysicsMass.ValueRO.InfiniteInertiaZ ? 0 : mass.ValueRW.InverseInertia[2];
+            mass.ValueRW.InverseMass = setPhysicsMass.ValueRO.InfiniteMass ? 0 : mass.ValueRW.InverseMass;
+        }
     }
 }

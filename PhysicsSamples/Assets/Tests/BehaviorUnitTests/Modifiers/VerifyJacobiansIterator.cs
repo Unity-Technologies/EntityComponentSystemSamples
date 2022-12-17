@@ -79,7 +79,7 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+            var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
             Dependency = new VerifyJacobiansIteratorJob
             {
                 Bodies = worldSingleton.PhysicsWorld.Bodies,

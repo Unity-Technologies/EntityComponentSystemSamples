@@ -14,7 +14,7 @@ public class GravityWellComponentAuthoring_DOTS : MonoBehaviour
             {
                 Strength = authoring.Strength,
                 Radius = authoring.Radius,
-                Position = authoring.gameObject.transform.position
+                Position = GetComponent<Transform>().position
             });
         }
     }

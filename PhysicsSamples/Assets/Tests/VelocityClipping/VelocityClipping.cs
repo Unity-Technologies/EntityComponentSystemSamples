@@ -72,13 +72,13 @@ namespace Unity.Physics.Tests
         protected override void OnUpdate()
         {
             var physicsStep = PhysicsStep.Default;
-            if (HasSingleton<PhysicsStep>())
+            if (SystemAPI.HasSingleton<PhysicsStep>())
             {
-                physicsStep = GetSingleton<PhysicsStep>();
+                physicsStep = SystemAPI.GetSingleton<PhysicsStep>();
             }
 
             //var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-            var world = GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
+            var world = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
             // No need for clipping if Havok is used
             if (physicsStep.SimulationType == SimulationType.UnityPhysics)
             {

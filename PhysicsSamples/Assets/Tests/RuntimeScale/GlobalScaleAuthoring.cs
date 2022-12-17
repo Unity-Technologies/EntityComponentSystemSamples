@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -37,36 +38,48 @@ public partial class GlobalScaleSystem : SystemBase
         RequireForUpdate<GlobalScaleComponent>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
-        GlobalScaleComponent singleton = GetSingleton<GlobalScaleComponent>();
+        GlobalScaleComponent singleton = SystemAPI.GetSingleton<GlobalScaleComponent>();
 
-        EntityCommandBuffer ecb = new EntityCommandBuffer(Unity.Collections.Allocator.TempJob);
-
-        Entities
-            .WithBurst()
-            .ForEach((ref Entity e, ref Translation t, ref PhysicsCollider pc) =>
+#if !ENABLE_TRANSFORM_V1
+        foreach (var(localPosition, collider, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<PhysicsCollider>>().WithEntityAccess())
+        {
+            if (SystemAPI.HasComponent<PhysicsVelocity>(entity))
             {
-                if (!HasComponent<Scale>(e))
+                if (singleton.DynamicUniformScale != 1.0f)
                 {
-                    if (HasComponent<PhysicsVelocity>(e))
-                    {
-                        if (singleton.DynamicUniformScale != 1.0f)
-                        {
-                            ecb.AddComponent(e, new Scale { Value = singleton.DynamicUniformScale});
-                        }
-                    }
-                    else
-                    {
-                        if (singleton.StaticUniformScale != 1.0f)
-                        {
-                            ecb.AddComponent(e, new Scale { Value = singleton.StaticUniformScale});
-                        }
-                    }
+                    localPosition.ValueRW.Scale = singleton.DynamicUniformScale;
                 }
-            }).Run();
+            }
+            else
+            {
+                if (singleton.StaticUniformScale != 1.0f)
+                {
+                    localPosition.ValueRW.Scale = singleton.StaticUniformScale;
+                }
+            }
+        }
 
-        ecb.Playback(EntityManager);
-        ecb.Dispose();
+#else
+        foreach (var(scale, collider, entity) in SystemAPI.Query<RefRW<Scale>, RefRW<PhysicsCollider>>().WithEntityAccess())
+        {
+            if (SystemAPI.HasComponent<PhysicsVelocity>(entity))
+            {
+                if (singleton.DynamicUniformScale != 1.0f)
+                {
+                    scale.ValueRW.Value = singleton.DynamicUniformScale;
+                }
+            }
+            else
+            {
+                if (singleton.StaticUniformScale != 1.0f)
+                {
+                    scale.ValueRW.Value = singleton.StaticUniformScale;
+                }
+            }
+        }
+#endif
     }
 }

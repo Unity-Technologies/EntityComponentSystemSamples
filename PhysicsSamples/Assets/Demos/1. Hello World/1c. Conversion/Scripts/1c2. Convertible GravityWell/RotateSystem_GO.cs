@@ -30,11 +30,19 @@ public partial class RotateSystem_GO_ECS : SystemBase
 
         Entities
             .WithBurst()
+#if !ENABLE_TRANSFORM_V1
+            .ForEach((ref LocalTransform transform, in RotateComponent_GO_ECS rotator) =>
+            {
+                var av = rotator.LocalAngularVelocity * deltaTime;
+                transform.Rotation = math.mul(transform.Rotation, quaternion.EulerZXY(av));
+            }).Run();
+#else
             .ForEach((ref Rotation rotation, in RotateComponent_GO_ECS rotator) =>
             {
                 var av = rotator.LocalAngularVelocity * deltaTime;
                 rotation.Value = math.mul(rotation.Value, quaternion.EulerZXY(av));
             }).Run();
+#endif
     }
 }
 #endregion

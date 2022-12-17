@@ -118,8 +118,8 @@ public partial class TriggerEventsCountSystem_BeforePhysicsGroup : SystemBase
     {
         NativeReference<int> eventCount = new NativeReference<int>(0, Allocator.TempJob);
 
-        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
-        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.BeforePhysicsGroup, WorldIndex = (int)GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
+        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
+        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.BeforePhysicsGroup, WorldIndex = (int)SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
         Dependency = eventCount.Dispose(Dependency);
     }
 }
@@ -139,8 +139,8 @@ public partial class TriggerEventsCountSystem_InPhysicsGroup : SystemBase
     {
         NativeReference<int> eventCount = new NativeReference<int>(0, Allocator.TempJob);
 
-        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
-        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.InPhysicsGroup, WorldIndex = (int)GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
+        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
+        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.InPhysicsGroup, WorldIndex = (int)SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
         Dependency = eventCount.Dispose(Dependency);
     }
 }
@@ -158,8 +158,8 @@ public partial class TriggerEventsCountSystem_AfterPhysicsGroup : SystemBase
     {
         NativeReference<int> eventCount = new NativeReference<int>(0, Allocator.TempJob);
 
-        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
-        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.AfterPhysicsGroup, WorldIndex = (int)GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
+        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
+        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.AfterPhysicsGroup, WorldIndex = (int)SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
         Dependency = eventCount.Dispose(Dependency);
     }
 }

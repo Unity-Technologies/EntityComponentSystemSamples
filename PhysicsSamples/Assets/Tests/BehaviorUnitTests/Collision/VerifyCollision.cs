@@ -42,8 +42,13 @@ namespace Unity.Physics.Tests
             foreach (var entity in entities)
             {
                 // "Y" component should never go way below 0 if there was a collision
+#if !ENABLE_TRANSFORM_V1
+                var localTransform = EntityManager.GetComponentData<LocalTransform>(entity);
+                Assert.IsTrue(localTransform.Position.y > -0.001f);
+#else
                 var translation = EntityManager.GetComponentData<Translation>(entity);
                 Assert.IsTrue(translation.Value.y > -0.001f);
+#endif
             }
             entities.Dispose();
         }

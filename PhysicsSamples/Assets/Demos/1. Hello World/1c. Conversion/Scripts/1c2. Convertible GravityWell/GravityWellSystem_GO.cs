@@ -70,13 +70,21 @@ public partial struct GravityWellSystem_GO_ECS : ISystem
         {
             // For each dynamic body apply the forces for all the gravity wells
             // Query equivalent to GameObject.FindObjectsOfType<Rigidbody>
+#if !ENABLE_TRANSFORM_V1
+            foreach (var(velocity, collider, mass, localTransform) in SystemAPI.Query<RefRW<PhysicsVelocity>, RefRO<PhysicsCollider>, RefRO<PhysicsMass>, RefRO<LocalTransform>>())
+#else
             foreach (var(velocity, collider, mass, position, rotation) in SystemAPI.Query<RefRW<PhysicsVelocity>, RefRO<PhysicsCollider>, RefRO<PhysicsMass>, RefRO<Translation>, RefRO<Rotation>>())
+#endif
             {
                 for (int i = 0; i < gravityWells.Length; i++)
                 {
                     var gravityWell = gravityWells[i];
                     velocity.ValueRW.ApplyExplosionForce(
-                        mass.ValueRO, collider.ValueRO, position.ValueRO, rotation.ValueRO,
+#if !ENABLE_TRANSFORM_V1
+                        mass.ValueRO, collider.ValueRO, localTransform.ValueRO.Position, localTransform.ValueRO.Rotation,
+#else
+                        mass.ValueRO, collider.ValueRO, position.ValueRO.Value, rotation.ValueRO.Value,
+#endif
                         -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
                         SystemAPI.Time.DeltaTime, math.up());
                 }

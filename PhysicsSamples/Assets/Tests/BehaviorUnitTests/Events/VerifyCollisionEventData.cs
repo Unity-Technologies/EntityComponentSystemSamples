@@ -69,9 +69,9 @@ namespace Unity.Physics.Tests
         {
             Dependency = new VerifyCollisionEventDataJob
             {
-                World = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld,
+                World = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld,
                 VerificationData = GetComponentLookup<VerifyCollisionEventDataData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
         }
     }
 }

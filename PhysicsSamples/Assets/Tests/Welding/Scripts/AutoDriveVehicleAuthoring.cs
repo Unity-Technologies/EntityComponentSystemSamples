@@ -41,12 +41,12 @@ namespace Demos
     {
         protected override void OnUpdate()
         {
-            if (!HasSingleton<VehicleInputOverride>())
+            if (!SystemAPI.HasSingleton<VehicleInputOverride>())
                 return;
 
-            var input = GetSingleton<VehicleInput>();
-            input = GetSingleton<VehicleInputOverride>().Value;
-            SetSingleton(input);
+            var input = SystemAPI.GetSingleton<VehicleInput>();
+            input = SystemAPI.GetSingleton<VehicleInputOverride>().Value;
+            SystemAPI.SetSingleton(input);
         }
     }
 }

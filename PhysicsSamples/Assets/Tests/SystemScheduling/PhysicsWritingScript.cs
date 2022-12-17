@@ -33,7 +33,7 @@ namespace Unity.Physics.Tests
         {
             Dependency = new WritePhysicsTagsJob
             {
-                PhysicsWorld = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld
+                PhysicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld
             }.Schedule(Dependency);
         }
 

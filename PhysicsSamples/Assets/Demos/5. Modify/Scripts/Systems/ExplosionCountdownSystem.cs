@@ -1,3 +1,5 @@
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -13,55 +15,111 @@ public struct ExplosionCountdown : IComponentData
     public float Force;
 }
 
+[BurstCompile]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class ExplosionCountdownSystem : SystemBase
+public partial struct ExplosionCountdownSystem : ISystem
 {
-    private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;
+#if !ENABLE_TRANSFORM_V1
+    private ComponentLookup<LocalTransform> m_LocalTransformLookup;
+#else
+    private ComponentLookup<Translation> m_PositionLookup;
+#endif
 
-    protected override void OnCreate()
+    [BurstCompile]
+    private partial struct IJobEntity_ExplosionCountdown_Tick : IJobEntity
     {
-        m_CommandBufferSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
-        RequireForUpdate<ExplosionCountdown>();
+#if !ENABLE_TRANSFORM_V1
+        [ReadOnly]
+        public ComponentLookup<LocalTransform> LocalTransforms;
+#else
+        [ReadOnly]
+        public ComponentLookup<Translation> Positions;
+#endif
+
+        private void Execute(Entity entity, ref ExplosionCountdown explosion)
+        {
+            explosion.Countdown--;
+            bool bang = explosion.Countdown <= 0;
+            if (bang && !explosion.Source.Equals(Entity.Null))
+            {
+#if !ENABLE_TRANSFORM_V1
+                explosion.Center = LocalTransforms[explosion.Source].Position;
+#else
+                explosion.Center = Positions[explosion.Source].Value;
+#endif
+            }
+        }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    private partial struct IJobEntity_ExplosionCountdown_Bang : IJobEntity
     {
-        var commandBufferParallel = m_CommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+        public EntityCommandBuffer.ParallelWriter CommandBufferParallel;
+        public float DeltaTime;
+        public float3 Up;
 
-        var timeStep = SystemAPI.Time.DeltaTime;
-        var up = math.up();
+#if !ENABLE_TRANSFORM_V1
+        private void Execute([ChunkIndexInQuery] int chunkInQueryIndex, Entity entity, ref ExplosionCountdown explosion, ref PhysicsVelocity velocity, in PhysicsMass mass,
+            in PhysicsCollider collider, in LocalTransform localTransform)
+#else
+        private void Execute([ChunkIndexInQuery] int chunkInQueryIndex, Entity entity, ref ExplosionCountdown explosion, ref PhysicsVelocity velocity, in PhysicsMass mass,
+            in PhysicsCollider collider, in Translation pos, in Rotation rot)
+#endif
+        {
+            if (0 < explosion.Countdown) return;
 
-        var positions = GetComponentLookup<Translation>(true);
+#if !ENABLE_TRANSFORM_V1
+            velocity.ApplyExplosionForce(mass, collider, localTransform.Position, localTransform.Rotation,
+                explosion.Force, explosion.Center, 0, DeltaTime, Up);
+#else
+            velocity.ApplyExplosionForce(mass, collider, pos.Value, rot.Value,
+                explosion.Force, explosion.Center, 0, DeltaTime, Up);
+#endif
 
-        Entities
-            .WithName("ExplosionCountdown_Tick")
-            .WithReadOnly(positions)
-            .WithBurst()
-            .ForEach((Entity entity, ref ExplosionCountdown explosion) =>
-            {
-                explosion.Countdown--;
-                bool bang = explosion.Countdown <= 0;
-                if (bang && !explosion.Source.Equals(Entity.Null))
-                {
-                    explosion.Center = positions[explosion.Source].Value;
-                }
-            }).ScheduleParallel();
+            CommandBufferParallel.RemoveComponent<ExplosionCountdown>(chunkInQueryIndex, entity);
+        }
+    }
 
-        Entities
-            .WithName("ExplosionCountdown_Bang")
-            .WithBurst()
-            .ForEach((int entityInQueryIndex, Entity entity,
-                ref ExplosionCountdown explosion, ref PhysicsVelocity pv,
-                in PhysicsMass pm, in PhysicsCollider collider,
-                in Translation pos, in Rotation rot) =>
-                {
-                    if (0 < explosion.Countdown) return;
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+#if !ENABLE_TRANSFORM_V1
+        m_LocalTransformLookup = state.GetComponentLookup<LocalTransform>(true);
+#else
+        m_PositionLookup = state.GetComponentLookup<Translation>(true);
+#endif
+        state.RequireForUpdate<ExplosionCountdown>();
+    }
 
-                    pv.ApplyExplosionForce(pm, collider, pos, rot,
-                        explosion.Force, explosion.Center, 0, timeStep, up);
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
 
-                    commandBufferParallel.RemoveComponent<ExplosionCountdown>(entityInQueryIndex, entity);
-                }).Schedule();
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+#if !ENABLE_TRANSFORM_V1
+        m_LocalTransformLookup.Update(ref state);
+#else
+        m_PositionLookup.Update(ref state);
+#endif
+
+        state.Dependency = new IJobEntity_ExplosionCountdown_Tick
+        {
+#if !ENABLE_TRANSFORM_V1
+            LocalTransforms = m_LocalTransformLookup,
+#else
+            Positions = m_PositionLookup
+#endif
+        }.ScheduleParallel(state.Dependency);
+
+        state.Dependency = new IJobEntity_ExplosionCountdown_Bang
+        {
+            DeltaTime = SystemAPI.Time.DeltaTime,
+            Up = math.up(),
+            CommandBufferParallel = SystemAPI.GetSingleton<EndFixedStepSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
+        }.Schedule(state.Dependency);
     }
 }

@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
@@ -34,49 +35,61 @@ public partial class DestroyTriggerSystem : SystemBase
         RequireForUpdate<DestroyTrigger>();
     }
 
+    public partial struct DestroyTriggerJob : IJobEntity
+    {
+        public PhysicsWorld World;
+        public EntityCommandBuffer CommandBuffer;
+        public ComponentLookup<TriggerEventChecker> TriggerEventComponentLookup;
+
+        public void Execute(Entity e, ref DestroyTrigger destroyComponent)
+        {
+            if (--destroyComponent.FramesToDestroyIn != 0)
+            {
+                return;
+            }
+
+            CommandBuffer.DestroyEntity(e);
+
+            int triggerRbIndex = World.GetRigidBodyIndex(e);
+            RigidBody triggerBody = World.Bodies[triggerRbIndex];
+
+            // Remove the TriggerEventCheckerComponent of all overlapping bodies
+            OverlapAabbInput input = new OverlapAabbInput
+            {
+                Aabb = triggerBody.CalculateAabb(),
+                Filter = CollisionFilter.Default
+            };
+
+            NativeList<int> overlappingBodies = new NativeList<int>(Allocator.Temp);
+
+            World.CollisionWorld.OverlapAabb(input, ref overlappingBodies);
+
+            for (int i = 0; i < overlappingBodies.Length; i++)
+            {
+                Entity overlappingEntity = World.Bodies[overlappingBodies[i]].Entity;
+                if (TriggerEventComponentLookup.HasComponent(overlappingEntity))
+                {
+                    CommandBuffer.RemoveComponent<TriggerEventChecker>(overlappingEntity);
+                }
+            }
+        }
+    }
+
+    [BurstCompile]
     protected override void OnUpdate()
     {
         Dependency.Complete();
 
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            var physicsWorld = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-            Entities
-                .WithName("DestroyTriggerJob")
-                .WithReadOnly(physicsWorld)
-                .WithBurst()
-                .ForEach((ref Entity e, ref DestroyTrigger destroyComponent) =>
-                {
-                    if (--destroyComponent.FramesToDestroyIn != 0)
-                    {
-                        return;
-                    }
+            var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
 
-                    commandBuffer.DestroyEntity(e);
-
-                    int triggerRbIndex = physicsWorld.GetRigidBodyIndex(e);
-                    RigidBody triggerBody = physicsWorld.Bodies[triggerRbIndex];
-
-                    // Remove the TriggerEventCheckerComponent of all overlapping bodies
-                    OverlapAabbInput input = new OverlapAabbInput
-                    {
-                        Aabb = triggerBody.CalculateAabb(),
-                        Filter = CollisionFilter.Default
-                    };
-
-                    NativeList<int> overlappingBodies = new NativeList<int>(Allocator.Temp);
-
-                    physicsWorld.CollisionWorld.OverlapAabb(input, ref overlappingBodies);
-
-                    for (int i = 0; i < overlappingBodies.Length; i++)
-                    {
-                        Entity overlappingEntity = physicsWorld.Bodies[overlappingBodies[i]].Entity;
-                        if (HasComponent<TriggerEventChecker>(overlappingEntity))
-                        {
-                            commandBuffer.RemoveComponent<TriggerEventChecker>(overlappingEntity);
-                        }
-                    }
-                }).Run();
+            new DestroyTriggerJob
+            {
+                World = physicsWorld,
+                CommandBuffer = commandBuffer,
+                TriggerEventComponentLookup = SystemAPI.GetComponentLookup<TriggerEventChecker>()
+            }.Run();
 
             commandBuffer.Playback(EntityManager);
         }

@@ -21,10 +21,10 @@ public partial struct GravityWellSystem_DOTS : ISystem
         public NativeArray<GravityWellComponent_DOTS> GravityWells;
 
         [BurstCompile]
-        public void Execute([EntityInQueryIndex] int entityInQueryIndex, ref GravityWellComponent_DOTS gravityWell, in LocalToWorld transform)
+        public void Execute([EntityIndexInQuery] int entityIndexInQuery, ref GravityWellComponent_DOTS gravityWell, in LocalToWorld transform)
         {
             gravityWell.Position = transform.Position;
-            GravityWells[entityInQueryIndex] = gravityWell;
+            GravityWells[entityIndexInQuery] = gravityWell;
         }
     }
 
@@ -38,13 +38,21 @@ public partial struct GravityWellSystem_DOTS : ISystem
         public float DeltaTime;
 
         [BurstCompile]
+#if !ENABLE_TRANSFORM_V1
+        public void Execute(ref PhysicsVelocity velocity, in PhysicsCollider collider, in PhysicsMass mass, in LocalTransform localTransform)
+#else
         public void Execute(ref PhysicsVelocity velocity, in PhysicsCollider collider, in PhysicsMass mass, in Translation position, in Rotation rotation)
+#endif
         {
             for (int i = 0; i < GravityWells.Length; i++)
             {
                 var gravityWell = GravityWells[i];
                 velocity.ApplyExplosionForce(
-                    mass, collider, position, rotation,
+#if !ENABLE_TRANSFORM_V1
+                    mass, collider, localTransform.Position, localTransform.Rotation,
+#else
+                    mass, collider, position.Value, rotation.Value,
+#endif
                     -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
                     DeltaTime, math.up());
             }

@@ -86,7 +86,7 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            SimulationSingleton simSingleton = GetSingleton<SimulationSingleton>();
+            SimulationSingleton simSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
 
             Dependency = new VerifyCollisionEventsJob
             {

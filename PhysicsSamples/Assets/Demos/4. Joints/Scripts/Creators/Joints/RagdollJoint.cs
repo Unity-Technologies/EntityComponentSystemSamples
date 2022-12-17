@@ -74,43 +74,6 @@ namespace Unity.Physics.Authoring
                 PerpendicularAxisInConnectedEntity = math.mul(bFromA.rot, PerpendicularAxisLocal);
             }
         }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            UpdateAuto();
-            UpgradeVersionIfNecessary();
-            PhysicsJoint.CreateRagdoll(
-                new BodyFrame { Axis = TwistAxisLocal, PerpendicularAxis = PerpendicularAxisLocal, Position = PositionLocal },
-                new BodyFrame { Axis = TwistAxisInConnectedEntity, PerpendicularAxis = PerpendicularAxisInConnectedEntity, Position = PositionInConnectedEntity },
-                math.radians(MaxConeAngle),
-                math.radians(new FloatRange(MinPerpendicularAngle, MaxPerpendicularAngle)),
-                math.radians(new FloatRange(MinTwistAngle, MaxTwistAngle)),
-                out var primaryCone,
-                out var perpendicularCone
-            );
-
-            var constraints = primaryCone.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            primaryCone.SetConstraints(constraints);
-
-            constraints = perpendicularCone.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            perpendicularCone.SetConstraints(constraints);
-
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntities(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                new NativeArray<PhysicsJoint>(2, Allocator.Temp) { [0] = primaryCone, [1] = perpendicularCone }
-            );
-        }
     }
 
     class RagdollJointBaker : JointBaker<RagdollJoint>
@@ -129,6 +92,9 @@ namespace Unity.Physics.Authoring
                 out var primaryCone,
                 out var perpendicularCone
             );
+
+            primaryCone.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
+            perpendicularCone.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
 
             var constraintBodyPair = GetConstrainedBodyPair(authoring);
 

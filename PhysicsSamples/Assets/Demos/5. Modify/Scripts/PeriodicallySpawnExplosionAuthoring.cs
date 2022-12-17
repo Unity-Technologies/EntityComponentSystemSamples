@@ -14,6 +14,7 @@ public struct PeriodicallySpawnExplosionComponent : IComponentData, ISpawnSettin
     public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
+    public int RandomSeedOffset { get; set; }
 
     public int SpawnRate { get; set; }
     public int DeathRate { get; set; }
@@ -56,14 +57,22 @@ partial class PeriodicallySpawnExplosionsSystem : PeriodicalySpawnRandomObjectsS
         Assert.IsTrue(EntityManager.HasComponent<SpawnExplosionSettings>(instance));
 
         var explosionComponent = EntityManager.GetComponentData<SpawnExplosionSettings>(instance);
+#if !ENABLE_TRANSFORM_V1
+        var localTransform = EntityManager.GetComponentData<LocalTransform>(instance);
+#else
         var pos = EntityManager.GetComponentData<Translation>(instance);
+#endif
 
         spawnSettings.Id--;
 
         // Setting the ID of a new explosion group
         // so that the group gets unique collider
         explosionComponent.Id = spawnSettings.Id;
+#if !ENABLE_TRANSFORM_V1
+        explosionComponent.Position = localTransform.Position;
+#else
         explosionComponent.Position = pos.Value;
+#endif
 
         EntityManager.SetComponentData(instance, explosionComponent);
     }

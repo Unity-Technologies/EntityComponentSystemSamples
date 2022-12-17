@@ -32,17 +32,15 @@ public partial class LifeTimeSystem : SystemBase
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities
-                .WithName("DestroyExpiredLifeTime")
-                .ForEach((Entity entity, ref LifeTime timer) =>
-                {
-                    timer.Value -= 1;
+            foreach (var(timer, entity) in SystemAPI.Query<RefRW<LifeTime>>().WithEntityAccess())
+            {
+                timer.ValueRW.Value -= 1;
 
-                    if (timer.Value < 0f)
-                    {
-                        commandBuffer.DestroyEntity(entity);
-                    }
-                }).Run();
+                if (timer.ValueRW.Value < 0f)
+                {
+                    commandBuffer.DestroyEntity(entity);
+                }
+            }
 
             commandBuffer.Playback(EntityManager);
         }

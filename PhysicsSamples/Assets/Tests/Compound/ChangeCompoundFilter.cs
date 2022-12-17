@@ -180,6 +180,16 @@ namespace Unity.Physics.Tests
 
                 // First 2 boxes should stay still, while other 2 should fall through
                 {
+#if !ENABLE_TRANSFORM_V1
+                    var transform1 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[0]);
+                    Assert.IsTrue(transform1.Position.y > 0.99f, "Box started falling!");
+                    var transform2 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[1]);
+                    Assert.IsTrue(transform2.Position.y > 0.99f, "Box started falling!");
+                    var transform3 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[2]);
+                    Assert.IsTrue(transform3.Position.y < 0.9f, "Box didn't start falling!");
+                    var transform4 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[3]);
+                    Assert.IsTrue(transform4.Position.y < 0.9f, "Box didn't start falling!");
+#else
                     var translation1 = EntityManager.GetComponentData<Translation>(dynamicEntities[0]);
                     Assert.IsTrue(translation1.Value.y > 0.99f, "Box started falling!");
                     var translation2 = EntityManager.GetComponentData<Translation>(dynamicEntities[1]);
@@ -188,6 +198,7 @@ namespace Unity.Physics.Tests
                     Assert.IsTrue(translation3.Value.y < 0.9f, "Box didn't start falling!");
                     var translation4 = EntityManager.GetComponentData<Translation>(dynamicEntities[3]);
                     Assert.IsTrue(translation4.Value.y < 0.9f, "Box didn't start falling!");
+#endif
                 }
 
                 dynamicEntities.Dispose();

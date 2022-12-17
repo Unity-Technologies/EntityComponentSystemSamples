@@ -14,7 +14,11 @@ public partial struct RotateSystem_DOTS : ISystem
     {
         var queryBuilder = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<RotateComponent_DOTS>()
+#if !ENABLE_TRANSFORM_V1
+            .WithAllRW<LocalTransform>();
+#else
             .WithAllRW<Rotation>();
+#endif
 
         // Only need to update the system if there are any entities with the associated component.
         state.RequireForUpdate(state.GetEntityQuery(queryBuilder));
@@ -31,10 +35,18 @@ public partial struct RotateSystem_DOTS : ISystem
         public float DeltaTime;
 
         [BurstCompile]
+#if !ENABLE_TRANSFORM_V1
+        public void Execute(ref LocalTransform localTransform, in RotateComponent_DOTS rotator)
+#else
         public void Execute(ref Rotation rotation, in RotateComponent_DOTS rotator)
+#endif
         {
             var av = rotator.LocalAngularVelocity * DeltaTime;
+#if !ENABLE_TRANSFORM_V1
+            localTransform.Rotation = math.mul(localTransform.Rotation, quaternion.Euler(av));
+#else
             rotation.Value = math.mul(rotation.Value, quaternion.Euler(av));
+#endif
         }
     }
 

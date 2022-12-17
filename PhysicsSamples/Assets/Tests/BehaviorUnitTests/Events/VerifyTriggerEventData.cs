@@ -63,9 +63,9 @@ namespace Unity.Physics.Tests
         {
             Dependency = new VerifyTriggerEventDataJob
             {
-                Bodies = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld.Bodies,
+                Bodies = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld.Bodies,
                 VerificationData = GetComponentLookup<VerifyTriggerEventDataData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
         }
     }
 }

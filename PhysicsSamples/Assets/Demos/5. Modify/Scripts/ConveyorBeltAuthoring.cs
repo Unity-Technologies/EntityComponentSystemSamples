@@ -8,6 +8,7 @@ using UnityEngine;
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Physics.Authoring;
+using Unity.Transforms;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -43,6 +44,7 @@ public class ConveyorBeltAuthoringEditor : Editor
 }
 #endif
 
+// Displays conveyor belt data in Editor.
 [RequireComponent(typeof(PhysicsBodyAuthoring))]
 public class ConveyorBeltAuthoring : MonoBehaviour
 {
@@ -54,40 +56,30 @@ public class ConveyorBeltAuthoring : MonoBehaviour
 
     public void OnDrawGizmos()
     {
-        if (Speed == 0.0f) return;
-        if (IsLinear && LocalDirection.Equals(Vector3.zero)) return;
-
-        _Offset += UnityEngine.Time.deltaTime * Speed;
-
-        var originalColor = Gizmos.color;
-        var originalMatrix = Gizmos.matrix;
-
-        Gizmos.color = Color.blue;
-
-        // Calculate the final Physics Body runtime coordinate system which bakes out skew from non-uniform scaling in parent
-        var worldFromLocalRigidTransform = Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix);
-        var worldFromLocal = Matrix4x4.TRS(worldFromLocalRigidTransform.pos, worldFromLocalRigidTransform.rot, Vector3.one);
-
-        if (IsLinear)
+        float speed = Speed;
+        if (!IsLinear)
         {
-            if (Mathf.Abs(_Offset) > Mathf.Abs(Speed)) _Offset = 0.0f;
-
-            Gizmos.matrix = worldFromLocal;
-            Gizmos.DrawWireCube(_Offset * LocalDirection, Vector3.one);
-        }
-        else
-        {
-            if (Mathf.Abs(_Offset) > 360) _Offset = 0.0f;
-
-            var axis = LocalDirection.Equals(Vector3.zero) ? Vector3.up : LocalDirection.normalized;
-            var localFromOffset = Matrix4x4.Rotate(Quaternion.AngleAxis(_Offset, axis));
-
-            Gizmos.matrix = worldFromLocal * localFromOffset;
-            Gizmos.DrawWireSphere(Vector3.zero, 1.0f);
+            speed = math.radians(speed);
         }
 
-        Gizmos.matrix = originalMatrix;
-        Gizmos.color = originalColor;
+        if (DisplayConveyorBeltSystem.ComputeDebugDisplayData(Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix), speed, LocalDirection,
+            UnityEngine.Time.deltaTime, IsLinear, ref _Offset,
+            out RigidTransform worldDrawingTransform, out float3 boxSize))
+        {
+            var originalColor = Gizmos.color;
+            var originalMatrix = Gizmos.matrix;
+
+            Gizmos.color = Color.blue;
+
+            Matrix4x4 newMatrix = new Matrix4x4();
+            newMatrix.SetTRS(worldDrawingTransform.pos, worldDrawingTransform.rot, Vector3.one);
+            Gizmos.matrix = newMatrix;
+
+            Gizmos.DrawWireCube(Vector3.zero, boxSize);
+
+            Gizmos.color = originalColor;
+            Gizmos.matrix = originalMatrix;
+        }
     }
 }
 
@@ -101,6 +93,11 @@ class ConveyorBeltBaker : Baker<ConveyorBeltAuthoring>
             IsAngular = !authoring.IsLinear,
             LocalDirection = authoring.LocalDirection.normalized,
         });
+
+        AddComponent(new ConveyorBeltDebugDisplayData
+        {
+            Offset = 0.0f
+        });
     }
 }
 
@@ -109,6 +106,117 @@ public struct ConveyorBelt : IComponentData
     public float3 LocalDirection;
     public float Speed;
     public bool IsAngular;
+}
+
+public struct ConveyorBeltDebugDisplayData : IComponentData
+{
+    public float Offset;
+}
+
+// Displays conveyor belt data in Runtime, where it is impossible to do so using OnDrawGizmos().
+[UpdateInGroup(typeof(PhysicsSimulationGroup))]
+[BurstCompile]
+public partial struct DisplayConveyorBeltSystem : ISystem
+{
+    private EntityQuery m_ConveyorBeltQuery;
+
+    // Returns true if drawing should be done.
+    // Expecting speed in radians/s in case of isLinear == false
+    public static bool ComputeDebugDisplayData(in RigidTransform localToWorld, float speed, float3 localDirection,
+        float deltaTime, bool isLinear, ref float offset,
+        out RigidTransform worldDrawingTransform, out float3 boxSize)
+    {
+        worldDrawingTransform = RigidTransform.identity;
+        boxSize = float3.zero;
+
+        if (speed == 0.0f)
+        {
+            return false;
+        }
+
+        if (isLinear && math.all(localDirection == float3.zero))
+        {
+            return false;
+        }
+
+        offset += deltaTime * speed;
+
+        if (isLinear)
+        {
+            if (math.abs(offset) > math.abs(speed))
+            {
+                offset = 0.0f;
+            }
+
+            worldDrawingTransform = math.mul(localToWorld, new RigidTransform(quaternion.identity, offset * localDirection));
+            boxSize = new float3(1.0f);
+        }
+        else
+        {
+            if (math.abs(offset) > 2 * math.PI)
+            {
+                offset = 0.0f;
+            }
+
+            var axis = math.all(localDirection == float3.zero) ? math.up() : math.normalize(localDirection);
+            var localFromOffset = new RigidTransform(quaternion.AxisAngle(axis, offset), float3.zero);
+
+            worldDrawingTransform = math.mul(localToWorld, localFromOffset);
+            boxSize = new float3(2.0f);
+        }
+
+        return true;
+    }
+
+    [BurstCompile]
+    public partial struct DisplayConveyorBeltJob : IJobEntity
+    {
+        public float DeltaTime;
+
+        public void Execute(in LocalToWorld localToWorld, in ConveyorBelt conveyorBelt, ref ConveyorBeltDebugDisplayData debugDisplayData)
+        {
+            if (ComputeDebugDisplayData(Math.DecomposeRigidBodyTransform(localToWorld.Value), conveyorBelt.Speed, conveyorBelt.LocalDirection,
+                DeltaTime, !conveyorBelt.IsAngular, ref debugDisplayData.Offset,
+                out RigidTransform worldDrawingTransform, out float3 boxSize))
+            {
+                PhysicsDebugDisplaySystem.Box(boxSize, worldDrawingTransform.pos, worldDrawingTransform.rot, Unity.DebugDisplay.ColorIndex.Blue);
+            }
+        }
+    }
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp).WithAll<ConveyorBelt, ConveyorBeltDebugDisplayData>();
+        m_ConveyorBeltQuery = state.GetEntityQuery(builder);
+        state.RequireForUpdate(m_ConveyorBeltQuery);
+        builder.Dispose();
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        // Properly chain up dependencies
+        {
+            if (!SystemAPI.TryGetSingleton<PhysicsDebugDisplayData>(out _))
+            {
+                var singletonEntity = state.EntityManager.CreateEntity();
+                state.EntityManager.AddComponentData(singletonEntity, new PhysicsDebugDisplayData());
+            }
+            SystemAPI.GetSingletonRW<PhysicsDebugDisplayData>();
+        }
+
+        float deltaTime = SystemAPI.Time.fixedDeltaTime;
+        new DisplayConveyorBeltJob
+        {
+            DeltaTime = deltaTime
+        }.Schedule(m_ConveyorBeltQuery);
+    }
 }
 
 // A system which configures the simulation step to modify contact jacobians in various ways

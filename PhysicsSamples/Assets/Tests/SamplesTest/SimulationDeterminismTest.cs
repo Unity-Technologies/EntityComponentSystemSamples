@@ -43,8 +43,8 @@ namespace Unity.Physics.Samples.Test
             // Removed as long as Havok plugins are not build with -strict floating point mode
             "RaycastCar", "Joints Parade",
 
-            // Apparently we need a new way of testing to deal with subscenes
-            "ClientServerScene",
+            // These demos do some verifications that would currently fail with UP
+            "AllMotors.unity",
 
 #if UNITY_ANDROID_ARM7V
             // disabled due to sigbuss crashes, something is defo corrupting memory in the allocators
@@ -132,9 +132,12 @@ namespace Unity.Physics.Samples.Test
             }
 
             var stepComponent = PhysicsStep.Default;
-            if (sampler.HasSingleton<PhysicsStep>())
+            using (var query = DefaultWorld.EntityManager.CreateEntityQuery(typeof(PhysicsStep)))
             {
-                stepComponent = sampler.GetSingleton<PhysicsStep>();
+                if (query.HasSingleton<PhysicsStep>())
+                {
+                    stepComponent = query.GetSingleton<PhysicsStep>();
+                }
             }
 
             // Extract original world and make copies

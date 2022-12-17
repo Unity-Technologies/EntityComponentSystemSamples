@@ -16,6 +16,7 @@ struct SpawnExplosionSettings : ISpawnSettings, IComponentData
     public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
+    public int RandomSeedOffset { get; set; }
     #endregion
 
     public int Id;

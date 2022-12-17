@@ -99,7 +99,7 @@ namespace Unity.Physics.Tests
             {
                 NumEvents = NumEvents,
                 VerificationData = GetComponentLookup<VerifyTriggerEventsData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
 
             Dependency = new VerifyTriggerEventsPostJob
             {

@@ -2,23 +2,28 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class GravityWellComponent_GO : MonoBehaviour, IConvertGameObjectToEntity
+public class GravityWellComponent_GO : MonoBehaviour
 {
     public float Strength = 100.0f;
     public float Radius = 10.0f;
 
+    // Added Baker, but is disabled as this is in a redundant sample with ConvertToEntity gone
+    /*
     #region ECS
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class Baker : Baker<GravityWellComponent_GO>
     {
-        dstManager.AddComponentData(entity, new GravityWellComponent_GO_ECS
+        public override void Bake(GravityWellComponent_GO authoring)
         {
-            Strength = Strength,
-            Radius = Radius,
-            Position = gameObject.transform.position
-        });
+            AddComponent(new GravityWellComponent_GO_ECS
+            {
+                Strength = authoring.Strength,
+                Radius = authoring.Radius,
+                Position = GetComponent<Transform>().position,
+            });
+        }
     }
-
     #endregion
+    */
 }
 
 #region ECS

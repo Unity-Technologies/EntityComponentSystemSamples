@@ -10,7 +10,11 @@ public class EntityTracker : MonoBehaviour {}
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(TransformSystemGroup))]
+#if !ENABLE_TRANSFORM_V1
+[UpdateAfter(typeof(LocalToWorldSystem))]
+#else
 [UpdateAfter(typeof(LocalToParentSystem))]
+#endif
 partial class SynchronizeGameObjectTransformsWithEntities : SystemBase
 {
     EntityQuery m_Query;

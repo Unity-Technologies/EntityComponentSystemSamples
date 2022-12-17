@@ -117,14 +117,14 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+            var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
             Dependency = new VerifyContactsIteratorJob
             {
                 Bodies = worldSingleton.PhysicsWorld.Bodies,
                 CurrentManifoldNumContacts = CurrentManifoldNumContacts,
                 VerificationData = GetComponentLookup<VerifyContactsIteratorData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
 
             Dependency = new VerifyNumContactsJob
             {

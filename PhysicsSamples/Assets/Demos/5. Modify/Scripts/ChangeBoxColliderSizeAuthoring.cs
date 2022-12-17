@@ -36,10 +36,17 @@ class ChangeBoxColliderSizeBaker : Baker<ChangeBoxColliderSizeAuthoring>
             Target = math.lerp(authoring.Min, authoring.Max, 0.5f),
         });
 
+#if !ENABLE_TRANSFORM_V1
+        AddComponent(entity, new PostTransformScale
+        {
+            Value = float3x3.identity,
+        });
+#else
         AddComponent(entity, new NonUniformScale
         {
             Value = new float3(1)
         });
+#endif
     }
 }
 
@@ -52,7 +59,11 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
     [BurstCompile]
     public partial struct ChangeBoxColliderSizeJob : IJobEntity
     {
+#if !ENABLE_TRANSFORM_V1
+        public void Execute(ref PhysicsCollider collider, ref ChangeBoxColliderSize size, ref PostTransformScale postTransformScale)
+#else
         public void Execute(ref PhysicsCollider collider, ref ChangeBoxColliderSize size, ref NonUniformScale scale)
+#endif
         {
             // make sure we are dealing with boxes
             if (collider.Value.Value.Type != ColliderType.Box) return;
@@ -60,7 +71,7 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
             // tweak the physical representation of the box
 
             // NOTE: this approach affects all instances using the same BlobAsset
-            // so you cannot simply use this approach for instantiated prefabss
+            // so you cannot simply use this approach for instantiated prefabs
             // if you want to modify prefab instances independently, you need to create
             // unique BlobAssets at run-time and dispose them when you are done
 
@@ -81,21 +92,23 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
                 boxGeometry.Size = newSize;
                 bxPtr->Geometry = boxGeometry;
             }
+#if !ENABLE_TRANSFORM_V1
+            // now tweak the graphical representation of the box
+            float3x3 oldScale = postTransformScale.Value;
 
+            float3 newScale = newSize / oldSize;
+            postTransformScale.Value.c0 *= newScale.x;
+            postTransformScale.Value.c1 *= newScale.y;
+            postTransformScale.Value.c2 *= newScale.z;
+#else
             // now tweak the graphical representation of the box
             float3 oldScale = scale.Value;
             float3 newScale = oldScale;
 
-            oldScale = math.select(oldScale, new float3(1.0f), oldScale == float3.zero);
             newScale *= newSize / oldSize;
             scale.Value = newScale;
+#endif
         }
-    }
-
-    [BurstCompile]
-    public void OnUpdate(ref SystemState state)
-    {
-        state.Dependency = new ChangeBoxColliderSizeJob().Schedule(state.Dependency);
     }
 
     [BurstCompile]
@@ -106,5 +119,11 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        state.Dependency = new ChangeBoxColliderSizeJob().Schedule(state.Dependency);
     }
 }

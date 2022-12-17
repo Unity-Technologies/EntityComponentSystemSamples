@@ -26,39 +26,6 @@ namespace Unity.Physics.Authoring
                 PerpendicularAxisInConnectedEntity = math.mul(bFromA.rot, PerpendicularAxisLocal);
             }
         }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            UpdateAuto();
-            PhysicsJoint joint = PhysicsJoint.CreateLimitedHinge(
-                new BodyFrame
-                {
-                    Axis = math.normalize(HingeAxisLocal),
-                    PerpendicularAxis = math.normalize(PerpendicularAxisLocal),
-                    Position = PositionLocal
-                },
-                new BodyFrame
-                {
-                    Axis = math.normalize(HingeAxisInConnectedEntity),
-                    PerpendicularAxis = math.normalize(PerpendicularAxisInConnectedEntity),
-                    Position = PositionInConnectedEntity
-                },
-                math.radians(new FloatRange(MinAngle, MaxAngle))
-            );
-            var constraints = joint.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            joint.SetConstraints(constraints);
-
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                joint
-            );
-        }
     }
 
     class LimitedHingeJointBaker : JointBaker<LimitedHingeJoint>
@@ -82,6 +49,9 @@ namespace Unity.Physics.Authoring
                 },
                 math.radians(new FloatRange(authoring.MinAngle, authoring.MaxAngle))
             );
+
+            physicsJoint.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
+
             var constraintBodyPair = GetConstrainedBodyPair(authoring);
 
             uint worldIndex = GetWorldIndexFromBaseJoint(authoring);

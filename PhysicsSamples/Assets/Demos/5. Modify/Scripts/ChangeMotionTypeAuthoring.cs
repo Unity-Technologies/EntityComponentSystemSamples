@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Entities.Graphics;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Authoring;
 using Unity.Physics.Systems;
 using Unity.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public struct ChangeMotionType : IComponentData
 {
@@ -87,66 +90,71 @@ public partial class ChangeMotionTypeSystem : SystemBase
     protected override void OnUpdate()
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
-        using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
+        List<RenderMeshArray> renderMeshArraysToAdd = new List<RenderMeshArray>();
+        NativeList<Entity> entitiesToAdd = new NativeList<Entity>(Allocator.Temp);
+        var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
+
+        foreach (var(renderMeshArray, modifier, materials, entity) in SystemAPI.Query<RenderMeshArray, RefRW<ChangeMotionType>, ChangeMotionMaterials>().WithEntityAccess())
         {
-            Entities
-                .WithName("ChangeMotionTypeJob")
-                .WithoutBurst()
-                .ForEach((Entity entity, ref ChangeMotionType modifier, in ChangeMotionMaterials materials, in RenderMesh renderMesh) =>
-                {
-                    // tick timer
-                    modifier.Timer -= deltaTime;
+            // tick timer
+            modifier.ValueRW.Timer -= deltaTime;
 
-                    if (modifier.Timer > 0f)
-                        return;
+            if (modifier.ValueRW.Timer > 0f)
+                continue;
 
-                    // reset timer
-                    modifier.Timer = modifier.TimeLimit;
+            // reset timer
+            modifier.ValueRW.Timer = modifier.ValueRW.TimeLimit;
 
-                    var setVelocityToZero = (byte)(modifier.SetVelocityToZero ? 1 : 0);
-                    // make modifications based on new motion type
-                    UnityEngine.Material material = renderMesh.material;
-                    switch (modifier.NewMotionType)
-                    {
-                        case BodyMotionType.Dynamic:
-                            // a dynamic body has PhysicsVelocity and PhysicsMassOverride is disabled if it exists
-                            if (!HasComponent<PhysicsVelocity>(entity))
-                                commandBuffer.AddComponent(entity, modifier.DynamicInitialVelocity);
-                            if (HasComponent<PhysicsMassOverride>(entity))
-                                commandBuffer.SetComponent(entity, new PhysicsMassOverride { IsKinematic = 0, SetVelocityToZero = setVelocityToZero });
+            var setVelocityToZero = (byte)(modifier.ValueRW.SetVelocityToZero ? 1 : 0);
+            // make modifications based on new motion type
+            UnityEngine.Material material = renderMeshArray.Materials[0];
+            switch (modifier.ValueRW.NewMotionType)
+            {
+                case BodyMotionType.Dynamic:
+                    // a dynamic body has PhysicsVelocity and PhysicsMassOverride is disabled if it exists
+                    if (!SystemAPI.HasComponent<PhysicsVelocity>(entity))
+                        commandBuffer.AddComponent(entity, modifier.ValueRW.DynamicInitialVelocity);
+                    if (SystemAPI.HasComponent<PhysicsMassOverride>(entity))
+                        commandBuffer.SetComponent(entity, new PhysicsMassOverride { IsKinematic = 0, SetVelocityToZero = setVelocityToZero });
 
-                            material = materials.DynamicMaterial;
-                            break;
-                        case BodyMotionType.Kinematic:
-                            // a static body has PhysicsVelocity and PhysicsMassOverride is enabled if it exists
-                            // note that a 'kinematic' body is really just a dynamic body with infinite mass properties
-                            // hence you can create a persistently kinematic body by setting properties via PhysicsMass.CreateKinematic()
-                            if (!HasComponent<PhysicsVelocity>(entity))
-                                commandBuffer.AddComponent(entity, modifier.DynamicInitialVelocity);
-                            if (HasComponent<PhysicsMassOverride>(entity))
-                                commandBuffer.SetComponent(entity, new PhysicsMassOverride { IsKinematic = 1, SetVelocityToZero = setVelocityToZero });
+                    material = materials.DynamicMaterial;
+                    break;
+                case BodyMotionType.Kinematic:
+                    // a static body has PhysicsVelocity and PhysicsMassOverride is enabled if it exists
+                    // note that a 'kinematic' body is really just a dynamic body with infinite mass properties
+                    // hence you can create a persistently kinematic body by setting properties via PhysicsMass.CreateKinematic()
+                    if (!SystemAPI.HasComponent<PhysicsVelocity>(entity))
+                        commandBuffer.AddComponent(entity, modifier.ValueRW.DynamicInitialVelocity);
+                    if (SystemAPI.HasComponent<PhysicsMassOverride>(entity))
+                        commandBuffer.SetComponent(entity, new PhysicsMassOverride { IsKinematic = 1, SetVelocityToZero = setVelocityToZero });
 
-                            material = materials.KinematicMaterial;
-                            break;
-                        case BodyMotionType.Static:
-                            // a static body is one with a PhysicsCollider but no PhysicsVelocity
-                            if (HasComponent<PhysicsVelocity>(entity))
-                                commandBuffer.RemoveComponent<PhysicsVelocity>(entity);
+                    material = materials.KinematicMaterial;
+                    break;
+                case BodyMotionType.Static:
+                    // a static body is one with a PhysicsCollider but no PhysicsVelocity
+                    if (SystemAPI.HasComponent<PhysicsVelocity>(entity))
+                        commandBuffer.RemoveComponent<PhysicsVelocity>(entity);
 
-                            material = materials.StaticMaterial;
-                            break;
-                    }
+                    material = materials.StaticMaterial;
+                    break;
+            }
 
-                    // assign the new render mesh material
-                    var newRenderMesh = renderMesh;
-                    newRenderMesh.material = material;
-                    commandBuffer.SetSharedComponentManaged(entity, newRenderMesh);
+            // assign the new render mesh material
+            var newRenderMeshArray = new RenderMeshArray(new[] { material }, renderMeshArray.Meshes);
+            renderMeshArraysToAdd.Add(newRenderMeshArray);
+            entitiesToAdd.Add(entity);
 
-                    // move to next motion type
-                    modifier.NewMotionType = (BodyMotionType)(((int)modifier.NewMotionType + 1) % 3);
-                }).Run();
+            // move to next motion type
+            modifier.ValueRW.NewMotionType = (BodyMotionType)(((int)modifier.ValueRW.NewMotionType + 1) % 3);
+        }
 
-            commandBuffer.Playback(EntityManager);
+        commandBuffer.Playback(EntityManager);
+        for (int i = 0; i < entitiesToAdd.Length; i++)
+        {
+            var entity = entitiesToAdd[i];
+            var renderMeshArray = renderMeshArraysToAdd[i];
+
+            RenderMeshUtility.AddComponents(entity, EntityManager, new RenderMeshDescription(ShadowCastingMode.Off), renderMeshArray, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
         }
     }
 }

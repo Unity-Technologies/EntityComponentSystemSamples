@@ -20,11 +20,11 @@ namespace Unity.Physics.Samples.Test
         {
             SimulatedFramesInCurrentTest = 0;
             Enabled = true;
-            var component = GetSingleton<PhysicsStep>();
+            var component = SystemAPI.GetSingleton<PhysicsStep>();
             if (component.SimulationType != SimulationType.HavokPhysics)
             {
                 component.SimulationType = SimulationType.HavokPhysics;
-                SetSingleton(component);
+                SystemAPI.SetSingleton(component);
             }
 
             World.GetOrCreateSystemManaged<FixedStepSimulationSystemGroup>().Enabled = true;
@@ -51,10 +51,10 @@ namespace Unity.Physics.Samples.Test
         {
             // Read/write the display singleton to register as writing data
             // to make sure display systems don't interfere with the test
-            if (HasSingleton<PhysicsDebugDisplayData>())
+            if (SystemAPI.HasSingleton<PhysicsDebugDisplayData>())
             {
-                var data = GetSingleton<PhysicsDebugDisplayData>();
-                SetSingleton(data);
+                var data = SystemAPI.GetSingleton<PhysicsDebugDisplayData>();
+                SystemAPI.SetSingleton(data);
             }
         }
 
@@ -63,7 +63,7 @@ namespace Unity.Physics.Samples.Test
             if (!m_RecordingBegan)
             {
                 // > 1 because of default static body, logically should be > 0
-                m_RecordingBegan = GetSingleton<PhysicsWorldSingleton>().NumBodies > 1;
+                m_RecordingBegan = SystemAPI.GetSingleton<PhysicsWorldSingleton>().NumBodies > 1;
             }
             else
             {

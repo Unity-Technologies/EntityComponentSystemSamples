@@ -54,12 +54,12 @@ namespace Unity.Physics.Tests
 
         protected override void OnUpdate()
         {
-            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+            var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
             Dependency = new VerifyBodyPairsIteratorJob
             {
                 Bodies = worldSingleton.PhysicsWorld.Bodies,
                 VerificationData = GetComponentLookup<VerifyBodyPairsIteratorData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
         }
     }
 }

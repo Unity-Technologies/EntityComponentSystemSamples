@@ -5,7 +5,8 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Physics.Samples.Test;
+using Unity.Physics;
+using Unity.Physics.Tests;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -31,14 +32,17 @@ class HavokPhysicsVDBTest : UnityPhysicsSamplesTest
 
     private IEnumerator SetupAndLoadScene(World world, HavokConfiguration havokConfig, string scenePath)
     {
-        var system = world.GetOrCreateSystemManaged<EnsureHavokSystem>();
-        system.Enabled = true;
-        system.EntityManager.CreateEntity(new ComponentType[] { typeof(HavokConfiguration) });
-        system.SetSingleton<HavokConfiguration>(havokConfig);
+        // Ensure Havok simulation
+        ConfigureSimulation(world, SimulationType.HavokPhysics);
+
+        var system = world.GetOrCreateSystemManaged<SimulationConfigurationSystem>();
+        system.EntityManager.CreateEntity(typeof(HavokConfiguration));
+        var query = new EntityQueryBuilder(system.WorldUpdateAllocator).WithAllRW<HavokConfiguration>().Build(system);
+        query.SetSingleton(havokConfig);
 
         SceneManager.LoadScene(scenePath);
         yield return new WaitForSeconds(1);
-        UnityPhysicsSamplesTest.ResetDefaultWorld();
+        ResetDefaultWorld();
         yield return new WaitForFixedUpdate();
     }
 

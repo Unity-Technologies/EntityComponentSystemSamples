@@ -42,36 +42,50 @@ public partial class ActivateBodySystem : SystemBase
         RequireForUpdate<ActivateBody>();
     }
 
+    public partial struct ActivateBodyJob : IJobEntity
+    {
+        public EntityCommandBuffer CommandBuffer;
+
+#if !ENABLE_TRANSFORM_V1
+        public void Execute(Entity entity, ref LocalTransform localTransform, ref ActivateBody activateBody)
+#else
+        public void Execute(Entity entity, ref Translation localPosition, ref ActivateBody activateBody)
+#endif
+        {
+            if (--activateBody.FramesToActivateIn == 0)
+            {
+                CommandBuffer.RemoveComponent<ActivateBody>(entity);
+
+#if !ENABLE_TRANSFORM_V1
+                localTransform.Position += activateBody.ActivationDisplacement;
+#else
+                localPosition.Value += activateBody.ActivationDisplacement;
+#endif
+                // Bodies get out of trigger
+                if (activateBody.ActivationDisplacement.y >= 5.0f)
+                {
+                    CommandBuffer.RemoveComponent<TriggerEventChecker>(entity);
+                }
+                else if (activateBody.ActivationDisplacement.x > 0)
+                {
+                    // New bodies enter trigger
+                    CommandBuffer.AddComponent(entity, new TriggerEventChecker
+                    {
+                        NumExpectedEvents = 1
+                    });
+                }
+            }
+        }
+    }
+
     protected override void OnUpdate()
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities
-                .WithName("ActivateBodies")
-                .WithoutBurst()
-                .WithStructuralChanges()
-                .ForEach((ref Entity e, ref Translation pos, ref ActivateBody activationComponent) =>
-                {
-                    if (--activationComponent.FramesToActivateIn == 0)
-                    {
-                        commandBuffer.RemoveComponent<ActivateBody>(e);
-                        pos.Value += activationComponent.ActivationDisplacement;
-
-                        // Bodies get out of trigger
-                        if (activationComponent.ActivationDisplacement.y >= 5.0f)
-                        {
-                            commandBuffer.RemoveComponent<TriggerEventChecker>(e);
-                        }
-                        else if (activationComponent.ActivationDisplacement.x > 0)
-                        {
-                            // New bodies enter trigger
-                            commandBuffer.AddComponent(e, new TriggerEventChecker
-                            {
-                                NumExpectedEvents = 1
-                            });
-                        }
-                    }
-                }).Run();
+            new ActivateBodyJob
+            {
+                CommandBuffer = commandBuffer
+            }.Run();
 
             commandBuffer.Playback(EntityManager);
         }

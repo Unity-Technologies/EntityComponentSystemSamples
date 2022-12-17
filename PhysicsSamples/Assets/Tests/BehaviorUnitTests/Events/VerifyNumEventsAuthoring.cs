@@ -54,13 +54,13 @@ public partial class VerifyNumEventsSystem : SystemBase
     {
         Dependency.Complete();
 
-        PhysicsWorld world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+        PhysicsWorld world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
         var numDynamicBodies = world.NumDynamicBodies;
 
         NativeReference<int> numEvents = new NativeReference<int>(Allocator.Persistent);
         numEvents.Value = 0;
 
-        SimulationSingleton simSingleton = GetSingleton<SimulationSingleton>();
+        SimulationSingleton simSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
 
         var getNumTriggerEventsJob = new GetNumTriggerEvents
         {

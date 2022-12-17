@@ -61,8 +61,8 @@ namespace Unity.Physics.Tests
             float3 boxSize = new float3(1.0f, 1.0f, 1.0f);
             float mass = 1.0f;
 
-            Entity e = GetSingletonEntity<VerifyActivationScene>();
-            VerifyActivationData data = GetComponent<VerifyActivationData>(e);
+            Entity e = SystemAPI.ManagedAPI.GetSingletonEntity<VerifyActivationScene>();
+            VerifyActivationData data = SystemAPI.GetComponent<VerifyActivationData>(e);
 
             // Ground to do nothing on (other than filter change) and dynamic box over it
             if (data.PureFilter == 1)
@@ -224,9 +224,15 @@ namespace Unity.Physics.Tests
                 // Teleport one ground (3)
                 if (verificationComponentData.Teleport > 0)
                 {
+#if !ENABLE_TRANSFORM_V1
+                    var localTransformComponent = state.EntityManager.GetComponentData<LocalTransform>(staticEntities[counter]);
+                    localTransformComponent.Position.y = -10.0f;
+                    state.EntityManager.SetComponentData(staticEntities[counter], localTransformComponent);
+#else
                     var translationComponent = state.EntityManager.GetComponentData<Translation>(staticEntities[counter]);
                     translationComponent.Value.y = -10.0f;
                     state.EntityManager.SetComponentData(staticEntities[counter], translationComponent);
+#endif
                     counter++;
                 }
 
@@ -263,8 +269,13 @@ namespace Unity.Physics.Tests
                 var dynamicEntities = bpwData.DynamicEntityGroup.ToEntityArray(Allocator.TempJob);
                 for (int i = 0; i < dynamicEntities.Length; i++)
                 {
+#if !ENABLE_TRANSFORM_V1
+                    var localTransform = state.EntityManager.GetComponentData<LocalTransform>(dynamicEntities[i]);
+                    Assert.IsTrue(localTransform.Position.y < 0.99f, "Box didn't start falling!");
+#else
                     var translation = state.EntityManager.GetComponentData<Translation>(dynamicEntities[i]);
                     Assert.IsTrue(translation.Value.y < 0.99f, "Box didn't start falling!");
+#endif
                 }
 
                 dynamicEntities.Dispose();

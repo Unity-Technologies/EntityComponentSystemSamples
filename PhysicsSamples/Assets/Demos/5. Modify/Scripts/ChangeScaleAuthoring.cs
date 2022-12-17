@@ -1,7 +1,7 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -30,13 +30,34 @@ class ChangeScaleBaker : Baker<ChangeScaleAuthoring>
             Max = authoring.Max,
             Target = math.lerp(authoring.Min, authoring.Max, 0.5f),
         });
-
-        AddComponent(entity, new Scale
-        {
-            Value = 1
-        });
     }
 }
+
+#if ENABLE_TRANSFORM_V1
+[UpdateInGroup(typeof(PostBakingSystemGroup))]
+[WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
+partial class ChangeScaleBakerPostBakingSystem : SystemBase
+{
+    EntityQuery bakedEntities;
+    protected override void OnCreate()
+    {
+        bakedEntities = new EntityQueryBuilder(Allocator.Temp)
+            .WithAll<ChangeScaleSettings>()
+            .WithNone<Scale>()
+            .Build(this);
+        RequireForUpdate(bakedEntities);
+    }
+
+    protected override void OnUpdate()
+    {
+        EntityManager.AddComponent<Scale>(bakedEntities);
+        foreach (var scale in SystemAPI.Query<RefRW<Scale>>().WithAll<ChangeScaleSettings>())
+        {
+            scale.ValueRW.Value = 1;
+        }
+    }
+}
+#endif
 
 
 [RequireMatchingQueriesForUpdate]
@@ -46,22 +67,18 @@ class ChangeScaleBaker : Baker<ChangeScaleAuthoring>
 public partial struct ChangeScaleSystem : ISystem
 {
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public partial struct ChangeScaleJob : IJobEntity
     {
+#if !ENABLE_TRANSFORM_V1
+        public void Execute(ref ChangeScaleSettings scaleSettings, ref LocalTransform localTransform)
+        {
+            float oldScale = localTransform.Scale;
+#else
         public void Execute(ref ChangeScaleSettings scaleSettings, ref Scale scale)
         {
-            float newScale = 1.0f;
             float oldScale = scale.Value;
+#endif
+            float newScale = 1.0f;
 
             newScale = math.lerp(oldScale, scaleSettings.Target, 0.05f);
 
@@ -71,8 +88,22 @@ public partial struct ChangeScaleSystem : ISystem
                 scaleSettings.Target = scaleSettings.Target == scaleSettings.Min ? scaleSettings.Max : scaleSettings.Min;
             }
 
+#if !ENABLE_TRANSFORM_V1
+            localTransform.Scale = newScale;
+#else
             scale.Value = newScale;
+#endif
         }
+    }
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
     }
 
     [BurstCompile]

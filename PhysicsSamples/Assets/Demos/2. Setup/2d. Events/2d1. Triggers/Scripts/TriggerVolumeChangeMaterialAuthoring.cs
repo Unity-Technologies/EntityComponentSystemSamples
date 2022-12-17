@@ -66,51 +66,48 @@ public partial class TriggerVolumeChangeMaterialSystem : SystemBase
 
         ComponentLookup<MaterialMeshInfo> materialMeshInfoFromEntity = GetComponentLookup<MaterialMeshInfo>();
 
-        Entities
-            .WithName("ChangeMaterialOnTriggerEnter")
-            .WithoutBurst()
-            .ForEach((Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer, ref TriggerVolumeChangeMaterial changeMaterial) =>
+        foreach (var(triggerEventBuffer, changeMaterial, entity) in SystemAPI.Query<DynamicBuffer<StatefulTriggerEvent>, RefRW<TriggerVolumeChangeMaterial>>().WithEntityAccess())
+        {
+            for (int i = 0; i < triggerEventBuffer.Length; i++)
             {
-                for (int i = 0; i < triggerEventBuffer.Length; i++)
-                {
-                    var triggerEvent = triggerEventBuffer[i];
-                    var otherEntity = triggerEvent.GetOtherEntity(e);
+                var triggerEvent = triggerEventBuffer[i];
+                var otherEntity = triggerEvent.GetOtherEntity(entity);
 
-                    // exclude other triggers and processed events
-                    if (triggerEvent.State == StatefulEventState.Stay || !nonTriggerMask.MatchesIgnoreFilter(otherEntity))
+                // exclude other triggers and processed events
+                if (triggerEvent.State == StatefulEventState.Stay || !nonTriggerMask.MatchesIgnoreFilter(otherEntity))
+                {
+                    continue;
+                }
+
+                if (triggerEvent.State == StatefulEventState.Enter)
+                {
+                    MaterialMeshInfo volumeMaterialInfo = materialMeshInfoFromEntity[entity];
+                    RenderMeshArray volumeRenderMeshArray = EntityManager.GetSharedComponentManaged<RenderMeshArray>(entity);
+
+                    MaterialMeshInfo otherMaterialMeshInfo = materialMeshInfoFromEntity[otherEntity];
+
+                    otherMaterialMeshInfo.Material = volumeMaterialInfo.Material;
+
+                    commandBuffer.SetComponent(otherEntity, otherMaterialMeshInfo);
+                }
+                else
+                {
+                    // State == PhysicsEventState.Exit
+                    if (changeMaterial.ValueRW.ReferenceEntity == Entity.Null)
                     {
                         continue;
                     }
 
-                    if (triggerEvent.State == StatefulEventState.Enter)
-                    {
-                        MaterialMeshInfo volumeMaterialInfo = materialMeshInfoFromEntity[e];
-                        RenderMeshArray volumeRenderMeshArray = EntityManager.GetSharedComponentManaged<RenderMeshArray>(e);
+                    MaterialMeshInfo otherMaterialMeshInfo = materialMeshInfoFromEntity[otherEntity];
+                    MaterialMeshInfo referenceMaterialMeshInfo = materialMeshInfoFromEntity[changeMaterial.ValueRW.ReferenceEntity];
+                    RenderMeshArray referenceRenderMeshArray = EntityManager.GetSharedComponentManaged<RenderMeshArray>(changeMaterial.ValueRW.ReferenceEntity);
 
-                        MaterialMeshInfo otherMaterialMeshInfo = materialMeshInfoFromEntity[otherEntity];
+                    otherMaterialMeshInfo.Material = referenceMaterialMeshInfo.Material;
 
-                        otherMaterialMeshInfo.Material = volumeMaterialInfo.Material;
-
-                        commandBuffer.SetComponent(otherEntity, otherMaterialMeshInfo);
-                    }
-                    else
-                    {
-                        // State == PhysicsEventState.Exit
-                        if (changeMaterial.ReferenceEntity == Entity.Null)
-                        {
-                            continue;
-                        }
-
-                        MaterialMeshInfo otherMaterialMeshInfo = materialMeshInfoFromEntity[otherEntity];
-                        MaterialMeshInfo referenceMaterialMeshInfo = materialMeshInfoFromEntity[changeMaterial.ReferenceEntity];
-                        RenderMeshArray referenceRenderMeshArray = EntityManager.GetSharedComponentManaged<RenderMeshArray>(changeMaterial.ReferenceEntity);
-
-                        otherMaterialMeshInfo.Material = referenceMaterialMeshInfo.Material;
-
-                        commandBuffer.SetComponent(otherEntity, otherMaterialMeshInfo);
-                    }
+                    commandBuffer.SetComponent(otherEntity, otherMaterialMeshInfo);
                 }
-            }).Run();
+            }
+        }
 
         m_CommandBufferSystem.AddJobHandleForProducer(Dependency);
     }

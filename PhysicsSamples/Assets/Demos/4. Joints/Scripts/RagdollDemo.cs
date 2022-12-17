@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -87,29 +88,27 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
         EntityManager.RemoveComponent<RenderMesh>(entity);
 
         var renderMesh = new RenderMeshArray(
-            new [] { DynamicMaterial },
-            new [] { isTorso? torsoMesh: mesh });
+            new[] { DynamicMaterial },
+            new[] { isTorso? torsoMesh: mesh });
 
         var renderMeshDescription = new RenderMeshDescription(ShadowCastingMode.On);
+        var scale = EntityManager.GetComponentData<RenderBounds>(entity).Value.Size;
 
         RenderMeshUtility.AddComponents(entity, EntityManager, renderMeshDescription, renderMesh, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
         EntityManager.AddComponentData(entity, new LocalToWorld());
 
         if (!isTorso)
         {
-            var renderBounds = EntityManager.GetComponentData<RenderBounds>(entity);
+#if !ENABLE_TRANSFORM_V1
+            var compositeScale = float3x3.Scale(scale);
+            EntityManager.AddComponentData(entity, new PostTransformScale { Value = compositeScale });
+#else
             EntityManager.AddComponentData<NonUniformScale>(entity, new NonUniformScale
             {
-                Value = renderBounds.Value.Size,
+                Value = scale,
             });
+#endif
         }
-    }
-
-    private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
-        float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
-    {
-        CreateRagdoll(torsoMesh, renderMesh, positionOffset,
-            rotationOffset, float3.zero, ragdollIndex, internalCollisions, rangeGain);
     }
 
     private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
@@ -217,7 +216,6 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
             CreatedColliders.Add(upperArmCollider);
             CreatedColliders.Add(foreArmCollider);
             CreatedColliders.Add(handCollider);
-
 
             for (int i = 0; i < 2; i++)
             {
@@ -431,15 +429,23 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
             {
                 var e = entities[i];
 
-                bool isTorso = (i == 1);
-                SwapRenderMesh(e, isTorso, torsoMesh, renderMesh);
+                SwapRenderMesh(e, i == 1, torsoMesh, renderMesh);
 
+#if !ENABLE_TRANSFORM_V1
+                LocalTransform localTransformComponent = EntityManager.GetComponentData<LocalTransform>(e);
+#else
                 Translation positionComponent = EntityManager.GetComponentData<Translation>(e);
                 Rotation rotationComponent = EntityManager.GetComponentData<Rotation>(e);
+#endif
                 PhysicsVelocity velocityComponent = EntityManager.GetComponentData<PhysicsVelocity>(e);
 
+#if !ENABLE_TRANSFORM_V1
+                float3 position = localTransformComponent.Position;
+                quaternion rotation = localTransformComponent.Rotation;
+#else
                 float3 position = positionComponent.Value;
                 quaternion rotation = rotationComponent.Value;
+#endif
 
                 float3 localPosition = position - pelvisPosition;
                 localPosition = math.rotate(rotationOffset, localPosition);
@@ -447,14 +453,23 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
                 position = localPosition + pelvisPosition + positionOffset;
                 rotation = math.mul(rotation, rotationOffset);
 
+#if !ENABLE_TRANSFORM_V1
+                localTransformComponent.Position = position;
+                localTransformComponent.Rotation = rotation;
+#else
                 positionComponent.Value = position;
                 rotationComponent.Value = rotation;
+#endif
 
                 velocityComponent.Linear = initialVelocity;
 
                 EntityManager.SetComponentData<PhysicsVelocity>(e, velocityComponent);
+#if !ENABLE_TRANSFORM_V1
+                EntityManager.SetComponentData<LocalTransform>(e, localTransformComponent);
+#else
                 EntityManager.SetComponentData<Translation>(e, positionComponent);
                 EntityManager.SetComponentData<Rotation>(e, rotationComponent);
+#endif
             }
         }
     }

@@ -14,35 +14,33 @@ namespace Unity.Physics.Authoring
         public bool3 LockLinearAxes;
         public bool3 LockAngularAxes;
 
-        public PhysicsJoint CreateLimitDOFJoint(RigidTransform offset, bool3 linearLocks, bool3 angularLocks)
+        public PhysicsJoint CreateLimitDOFJoint(RigidTransform offset)
         {
             var constraints = new FixedList512Bytes<Constraint>();
-            if (math.any(linearLocks))
+            if (math.any(LockLinearAxes))
             {
                 constraints.Add(new Constraint
                 {
-                    ConstrainedAxes = linearLocks,
+                    ConstrainedAxes = LockLinearAxes,
                     Type = ConstraintType.Linear,
                     Min = 0,
                     Max = 0,
                     SpringFrequency = Constraint.DefaultSpringFrequency,
                     SpringDamping = Constraint.DefaultSpringDamping,
                     MaxImpulse = MaxImpulse,
-                    EnableImpulseEvents = RaiseImpulseEvents
                 });
             }
-            if (math.any(angularLocks))
+            if (math.any(LockAngularAxes))
             {
                 constraints.Add(new Constraint
                 {
-                    ConstrainedAxes = angularLocks,
+                    ConstrainedAxes = LockAngularAxes,
                     Type = ConstraintType.Angular,
                     Min = 0,
                     Max = 0,
                     SpringFrequency = Constraint.DefaultSpringFrequency,
                     SpringDamping = Constraint.DefaultSpringDamping,
                     MaxImpulse = MaxImpulse,
-                    EnableImpulseEvents = RaiseImpulseEvents
                 });
             }
 
@@ -53,19 +51,6 @@ namespace Unity.Physics.Authoring
             };
             joint.SetConstraints(constraints);
             return joint;
-        }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            if (!math.any(LockLinearAxes) && !math.any(LockAngularAxes))
-                return;
-
-            RigidTransform bFromA = math.mul(math.inverse(worldFromB), worldFromA);
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                CreateLimitDOFJoint(bFromA, LockLinearAxes, LockAngularAxes)
-            );
         }
     }
 
@@ -147,11 +132,13 @@ namespace Unity.Physics.Authoring
                 return;
 
             RigidTransform bFromA = math.mul(math.inverse(authoring.worldFromB), authoring.worldFromA);
+            PhysicsJoint physicsJoint = authoring.CreateLimitDOFJoint(bFromA);
+
             var worldIndex = GetWorldIndex(authoring);
             CreateJointEntity(
                 worldIndex,
                 GetConstrainedBodyPair(authoring),
-                authoring.CreateLimitDOFJoint(bFromA, authoring.LockLinearAxes, authoring.LockAngularAxes)
+                physicsJoint
             );
         }
     }

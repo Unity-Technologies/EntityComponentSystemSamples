@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -8,33 +9,43 @@ public struct ChangeFilterCountdown : IComponentData
     public int Countdown;
 }
 
+[BurstCompile]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class ChangeFilterCountdownSystem : SystemBase
+public partial struct ChangeFilterCountdownSystem : ISystem
 {
-    private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    private partial struct ChangeFilterCountDownJob : IJobEntity
     {
-        m_CommandBufferSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
-        RequireForUpdate<ChangeFilterCountdown>();
+        public EntityCommandBuffer CommandBuffer;
+        private void Execute(Entity entity, ref PhysicsCollider collider, ref ChangeFilterCountdown tag)
+        {
+            if (--tag.Countdown > 0) return;
+
+            collider.Value.Value.SetCollisionFilter(tag.Filter);
+            CommandBuffer.RemoveComponent<ChangeFilterCountdown>(entity);
+        }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        var commandBuffer = m_CommandBufferSystem.CreateCommandBuffer();
+        state.RequireForUpdate<ChangeFilterCountdown>();
+    }
 
-        // No need to be parallel, as only one entity per explosion cluster
-        // shall have ChangeFilterCountdown
-        Entities
-            .WithName("ChangeFilterCountdown")
-            .WithBurst()
-            .ForEach((int entityInQueryIndex, ref Entity entity, ref PhysicsCollider collider, ref ChangeFilterCountdown tag) =>
-            {
-                if (--tag.Countdown > 0) return;
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
+    }
 
-                collider.Value.Value.SetCollisionFilter(tag.Filter);
-                commandBuffer.RemoveComponent<ChangeFilterCountdown>(entity);
-            }).Schedule();
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        var commandBuffer = SystemAPI.GetSingleton<EndFixedStepSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
+
+        state.Dependency = new ChangeFilterCountDownJob
+        {
+            CommandBuffer = commandBuffer
+        }.Schedule(state.Dependency);
     }
 }

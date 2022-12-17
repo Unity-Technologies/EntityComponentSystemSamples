@@ -257,7 +257,7 @@ namespace Unity.Physics.Extensions
         {
             if (m_Requests == null || m_Requests.Count == 0) return;
 
-            var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+            var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
             JobHandle combinedJobs = Dependency;
             for (int i = 0; i < m_Requests.Count; i++)
             {

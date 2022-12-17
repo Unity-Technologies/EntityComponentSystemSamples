@@ -405,7 +405,9 @@ public class SingleThreadedRagdoll : MonoBehaviour
 
 #if HAVOK_PHYSICS_EXISTS
 
-        if (!World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().TryGetSingleton<PhysicsStep>(out PhysicsStep stepComponent))
+        var system = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<FixedStepSimulationSystemGroup>();
+        var query = new EntityQueryBuilder(system.WorldUpdateAllocator).WithAll<PhysicsStep>().Build(system);
+        if (!query.TryGetSingleton<PhysicsStep>(out PhysicsStep stepComponent))
         {
             stepComponent = PhysicsStep.Default;
         }
