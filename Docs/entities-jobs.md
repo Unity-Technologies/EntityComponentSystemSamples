@@ -6,7 +6,7 @@ You can offload the processing of entity data to worker threads with the [C# Job
 - [`IJobChunk`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IJobChunk.html), whose `Execute()` method is called once for each individual chunk matching the query.
 - [`IJobEntity`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IJobEntity.html), whose `Execute()` method is called once for each entity entity matching the query. 
 
-&#x1F579; *[See examples of IJobChunk](../examples/jobs.md#ijobchunk) [and IJobEntity](../examples/jobs.md#ijobentity).*
+&#x1F579; *[See examples of IJobChunk](./examples/jobs.md#ijobchunk) [and IJobEntity](./examples/jobs.md#ijobentity).*
 
 Although `IJobEntity` is generally more convenient to write and use, `IJobChunk` provides more precise control. In most cases, their performance is identical for equivalent work.
 

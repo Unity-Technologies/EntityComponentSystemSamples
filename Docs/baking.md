@@ -13,7 +13,7 @@ Baking a Sub Scene is done in a few main steps:
 2. The Baker of each authoring component in the Sub Scene is executed. Each Baker can read the authoring component and add components to the corresponding entity.
 2. The baking systems execute. Each system can read and modify the baked entities in any way: set components, add components, remove components, create additional entities, or destroy entities. Unlike Bakers, baking systems should not access the original GameObjects of the Sub Scene.
 
-&#x1F579; *[See examples of authoring components, Bakers, and baking systems.](../examples/baking.md)*
+&#x1F579; *[See examples of authoring components, Bakers, and baking systems.](./examples/baking.md)*
 
 When modified, a Sub Scene is re-baked:
 
@@ -58,7 +58,7 @@ The [`SceneSystem`](https://docs.unity3d.com/Packages/com.unity.entities@latest?
 | [`GetScenePath()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupComponent.html)  | Returns the path of a scene asset (specified by its GUID). |
 | [`GetSceneEntity()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupComponent.html)  | Returns the entity representing a scene (specified by its GUID). |
 
-&#x1F579; *[See examples of loading and unloading entity scenes and sections.](../examples/baking.md#scene-loading)*
+&#x1F579; *[See examples of loading and unloading entity scenes and sections.](./examples/baking.md#scene-loading)*
 
 | &#x26A0; IMPORTANT |
 | :- |

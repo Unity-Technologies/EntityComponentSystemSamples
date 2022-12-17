@@ -21,7 +21,7 @@ The unmanaged collection types of `Unity.Collections` have a few advantages over
 
 On the downside, you are responsible for calling `Dispose()` on every unmanaged collection once it's no longer needed. Neglecting to dispose a collection creates a memory leak, and the disposal safety checks will throw an error.
 
-*[See more information about unmanaged collections](../cheatsheet/collections.md).*
+*[See more information about unmanaged collections](./cheatsheet/collections.md).*
 
 ## Allocators
 
@@ -41,7 +41,7 @@ The C# Jobs system allows us to schedule work to be executed in a pool of worker
 - A job type is created by defining a struct that implements [`IJob`](https://docs.unity3d.com/ScriptReference/Unity.Jobs.IJob.html) or one of the other job interfaces (`IJobParallelFor`, `IJobEntity`, `IJobChunk`...).
 - To put a job instance on the job queue, call the extension method `Schedule()`. Jobs can only be scheduled from the main thread, not from within other jobs.
 
-&#x1F579;  *[See an example IJob](../examples/jobs.md#ijob).*
+&#x1F579;  *[See an example IJob](./examples/jobs.md#ijob).*
 
 <br>
 
@@ -145,7 +145,7 @@ JobHandle handle = job.Schedule(
         100);              // batch size
 ```
 
-&#x1F579;  *[See more examples of IJobParallelFor](../examples/jobs.md#ijobparallelfor).*
+&#x1F579;  *[See more examples of IJobParallelFor](./examples/jobs.md#ijobparallelfor).*
 
 When the job runs, its `Execute()` will be called *`count`* times, with all values from 0 up to *count* passed to `index`.
 

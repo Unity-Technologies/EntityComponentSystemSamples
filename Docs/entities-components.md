@@ -118,7 +118,7 @@ An [`EntityQuery`](https://docs.unity3d.com/Packages/com.unity.entities@latest?s
 
 A query can also specify component types to *exclude* from the matching archetypes. For example, if a query looks for all entities having component types *A* and *B* but *not* having component type *C*, the query would match entities with component types *A* and *B*, but the query would *not* match entities with component types *A*, *B*, and *C*.
 
-&#x1F579; *[See examples of creating and using queries](../examples/components_systems.md#querying-for-entities).*
+&#x1F579; *[See examples of creating and using queries](./examples/components_systems.md#querying-for-entities).*
 
 
 <br>
@@ -139,7 +139,7 @@ In order to allow entity indexes to be reused after an entity is destroyed, each
 
 The most common, basic kind of component type is defined as a struct implementing [`IComponentData`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IComponentData.html).
 
-&#x1F579;  *[See examples of creating and using `IComponentData` components.](../examples/components_systems.md#icomponentdata)*
+&#x1F579;  *[See examples of creating and using `IComponentData` components.](./examples/components_systems.md#icomponentdata)*
 
 An `IComponentData` struct is expected to be unmanaged, so it cannot contain any managed field types. Specifically, the allowed field types are:
 
@@ -179,7 +179,7 @@ If a managed component type implements `ICloneable`, then any resources it conta
 
 A [`DynamicBuffer`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.DynamicBuffer-1.html) is a component type which is a resizable array. To define a `DynamicBuffer` component type, create a struct that implements the [`IBufferElementData`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IBufferElementData.html) interface.
 
-&#x1F579;  *[See examples of creating and using `DynamicBuffer` components](../examples/components_systems.md#dynamicbuffers-ibufferelementdata).*
+&#x1F579;  *[See examples of creating and using `DynamicBuffer` components](./examples/components_systems.md#dynamicbuffers-ibufferelementdata).*
 
 The buffer of each entity stores a `Length`, a `Capacity`, and a pointer:
 
@@ -228,7 +228,7 @@ A `DynamicBuffer<T>` can be '[reinterpreted](https://docs.unity3d.com/Packages/c
 
 An aspect is an object-like wrapper over a subset of an entity's components. Aspects can be useful for simplifying queries and component-related code. The [`TransformAspect`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.TransformAspect.html), for example, groups together the standard transform components ([`LocalTransform`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.LocalTransform.html), [`ParentTransform`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.ParentTransform.html), and [`WorldTransform`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.WorldTransform.html)).
 
-&#x1F579;  *[See examples of creating and using aspects](../examples/components_systems.md#aspects)*.
+&#x1F579;  *[See examples of creating and using aspects](./examples/components_systems.md#aspects)*.
 
 Including an aspect in a query is the same as including the components wrapped by the aspect, *e.g.* a query that includes `TransformAspect` includes the standard transform matrix components.
 
