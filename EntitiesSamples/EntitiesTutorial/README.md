@@ -1134,7 +1134,7 @@ With the three primitives selected, use the "Add Component" button in the inspec
                 UnityEngine.Debug.DrawLine(a * radius, b * radius);
             }
 
-            m_TurretActiveFromEntity.Update(ref state);
+            m_ShootingLookup.Update(ref state);
             var safeZoneJob = new SafeZoneJob
             {
                 ShootingLookup = m_ShootingLookup,
