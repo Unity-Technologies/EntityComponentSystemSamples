@@ -1208,6 +1208,7 @@ With the three primitives selected, use the "Add Component" button in the inspec
 1. Create a new C# source file named "CameraSystem.cs" in the folder "Scripts/Systems", put the following contents in there:
 
     ```c#
+    using Unity.Burst;
     using Unity.Collections;
     using Unity.Entities;
     using Unity.Mathematics;
@@ -1246,7 +1247,7 @@ With the three primitives selected, use the "Add Component" button in the inspec
             }
 
             var cameraTransform = CameraSingleton.Instance.transform;
-            var tankTransform = GetComponent<LocalToWorld>(Target);
+            var tankTransform = SystemAPI.GetComponent<LocalToWorld>(Target);
             cameraTransform.position = tankTransform.Position - 10.0f * tankTransform.Forward + new float3(0.0f, 5.0f, 0.0f);
             cameraTransform.LookAt(tankTransform.Position, new float3(0.0f, 1.0f, 0.0f));
         }
