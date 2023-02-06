@@ -562,7 +562,7 @@ When working on larger projects which are split over multiple assemblies, explic
     [BurstCompile]
     partial struct TurretShoot : IJobEntity
     {
-        [ReadOnly] public ComponentLookup<LocalToWorldTransform> WorldTransformLookup;
+        [ReadOnly] public ComponentLookup<WorldTransform> WorldTransformLookup;
         public EntityCommandBuffer ECB;
 
         // Note that the TurretAspects parameter is "in", which declares it as read only.
@@ -1134,7 +1134,7 @@ With the three primitives selected, use the "Add Component" button in the inspec
                 UnityEngine.Debug.DrawLine(a * radius, b * radius);
             }
 
-            m_TurretActiveFromEntity.Update(ref state);
+            m_ShootingLookup.Update(ref state);
             var safeZoneJob = new SafeZoneJob
             {
                 ShootingLookup = m_ShootingLookup,
