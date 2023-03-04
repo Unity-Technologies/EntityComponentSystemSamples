@@ -527,7 +527,7 @@ When working on larger projects which are split over multiple assemblies, explic
         {
             // ComponentLookup structures have to be initialized once.
             // The parameter specifies if the lookups will be read only or if they should allow writes.
-            m_LocalToWorldTransformFromEntity = state.GetComponentLookup<WorldTransform>(true);
+            m_WorldTransformLookup = state.GetComponentLookup<WorldTransform>(true);
         }
 
         [BurstCompile]
@@ -562,7 +562,7 @@ When working on larger projects which are split over multiple assemblies, explic
     [BurstCompile]
     partial struct TurretShoot : IJobEntity
     {
-        [ReadOnly] public ComponentLookup<LocalToWorldTransform> WorldTransformLookup;
+        [ReadOnly] public ComponentLookup<WorldTransform> WorldTransformLookup;
         public EntityCommandBuffer ECB;
 
         // Note that the TurretAspects parameter is "in", which declares it as read only.
