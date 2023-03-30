@@ -20,13 +20,14 @@ public class PredictionSwitchingSettingsAuthoring : UnityEngine.MonoBehaviour
         public override void Bake(PredictionSwitchingSettingsAuthoring authoring)
         {
             PredictionSwitchingSettings component = default(PredictionSwitchingSettings);
-            component.Player = GetEntity(authoring.Player);
+            component.Player = GetEntity(authoring.Player, TransformUsageFlags.Dynamic);
             component.PlayerSpeed = authoring.PlayerSpeed;
             component.TransitionDurationSeconds = authoring.TransitionDurationSeconds;
             component.PredictionSwitchingRadius = authoring.PredictionSwitchingRadius;
             component.PredictionSwitchingMargin = authoring.PredictionSwitchingMargin;
             component.BallColorChangingEnabled = authoring.BallColorChangingEnabled;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }

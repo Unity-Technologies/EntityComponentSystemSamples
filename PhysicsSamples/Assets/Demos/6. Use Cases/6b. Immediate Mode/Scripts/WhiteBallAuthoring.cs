@@ -9,7 +9,8 @@ public class WhiteBallAuthoring : MonoBehaviour
     {
         public override void Bake(WhiteBallAuthoring authoring)
         {
-            AddComponent<WhiteBall>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<WhiteBall>(entity);
         }
     }
 }

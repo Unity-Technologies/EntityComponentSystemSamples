@@ -11,7 +11,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(EnableCharacterControllerAuthoring authoring)
             {
-                AddComponent<EnableCharacterController>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<EnableCharacterController>(entity);
             }
         }
     }

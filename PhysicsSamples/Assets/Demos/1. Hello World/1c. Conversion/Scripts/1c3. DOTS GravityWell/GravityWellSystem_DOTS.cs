@@ -9,7 +9,6 @@ using Unity.Burst;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct GravityWellSystem_DOTS : ISystem
 {
     private EntityQuery GravityWellQuery;
@@ -20,7 +19,6 @@ public partial struct GravityWellSystem_DOTS : ISystem
         [NativeDisableParallelForRestriction]
         public NativeArray<GravityWellComponent_DOTS> GravityWells;
 
-        [BurstCompile]
         public void Execute([EntityIndexInQuery] int entityIndexInQuery, ref GravityWellComponent_DOTS gravityWell, in LocalToWorld transform)
         {
             gravityWell.Position = transform.Position;
@@ -37,22 +35,15 @@ public partial struct GravityWellSystem_DOTS : ISystem
         public NativeArray<GravityWellComponent_DOTS> GravityWells;
         public float DeltaTime;
 
-        [BurstCompile]
-#if !ENABLE_TRANSFORM_V1
         public void Execute(ref PhysicsVelocity velocity, in PhysicsCollider collider, in PhysicsMass mass, in LocalTransform localTransform)
-#else
-        public void Execute(ref PhysicsVelocity velocity, in PhysicsCollider collider, in PhysicsMass mass, in Translation position, in Rotation rotation)
-#endif
         {
             for (int i = 0; i < GravityWells.Length; i++)
             {
                 var gravityWell = GravityWells[i];
                 velocity.ApplyExplosionForce(
-#if !ENABLE_TRANSFORM_V1
+
                     mass, collider, localTransform.Position, localTransform.Rotation,
-#else
-                    mass, collider, position.Value, rotation.Value,
-#endif
+
                     -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
                     DeltaTime, math.up());
             }
@@ -72,11 +63,6 @@ public partial struct GravityWellSystem_DOTS : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var gravityWells = new NativeArray<GravityWellComponent_DOTS>(
@@ -88,12 +74,10 @@ public partial struct GravityWellSystem_DOTS : ISystem
             GravityWells = gravityWells
         }.ScheduleParallel(state.Dependency);
 
-        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
-        float dt = SystemAPI.Time.DeltaTime;
         state.Dependency = new GravityWellSystem_DOTS_ForEachDynamicBodies
         {
             GravityWells = gravityWells,
-            DeltaTime = dt,
+            DeltaTime = SystemAPI.Time.DeltaTime
         }.ScheduleParallel(state.Dependency);
     }
 }

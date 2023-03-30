@@ -12,9 +12,9 @@ struct VehicleInput : IComponentData
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-partial class VehicleInputHandlingSystem : SystemBase
+partial struct VehicleInputHandlingSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var input = SystemAPI.GetSingleton<VehicleInput>();
 
@@ -32,7 +32,7 @@ partial class VehicleInputHandlingSystem : SystemBase
             var newSteeringAngle = x * steering.ValueRW.MaxSteeringAngle;
             steering.ValueRW.DesiredSteeringAngle = math.lerp(steering.ValueRW.DesiredSteeringAngle, newSteeringAngle, steering.ValueRW.Damping);
 
-#if !ENABLE_TRANSFORM_V1
+
             if (SystemAPI.HasComponent<LocalTransform>(references.ValueRO.CameraOrbit))
             {
                 var localTransform = SystemAPI.GetComponent<LocalTransform>(references.ValueRO.CameraOrbit);
@@ -42,41 +42,19 @@ partial class VehicleInputHandlingSystem : SystemBase
                         localTransform.Rotation = math.mul(localTransform.Rotation, quaternion.Euler(0f, z * SystemAPI.Time.DeltaTime * cameraSettings.ValueRO.OrbitAngularSpeed, 0f));
                         break;
                     case VehicleCameraOrientation.Absolute:
-                        WorldTransform worldFromLocal = SystemAPI.HasComponent<WorldTransform>(references.ValueRO.CameraOrbit)
-                            ? SystemAPI.GetComponent<WorldTransform>(references.ValueRO.CameraOrbit)
-                            : WorldTransform.Identity;
-                        LocalTransform worldFromParent = SystemAPI.HasComponent<LocalTransform>(references.ValueRO.CameraOrbit)
-                            ? SystemAPI.GetComponent<LocalTransform>(references.ValueRO.CameraOrbit).InverseTransformTransform(worldFromLocal)
-                            : (LocalTransform)worldFromLocal;
+                        float4x4 worldFromLocal = SystemAPI.HasComponent<LocalToWorld>(references.ValueRO.CameraOrbit)
+                            ? SystemAPI.GetComponent<LocalToWorld>(references.ValueRO.CameraOrbit).Value
+                            : float4x4.identity;
+                        float4x4 worldFromParent = SystemAPI.HasComponent<Parent>(references.ValueRO.CameraOrbit)
+                            ? math.mul(worldFromLocal, math.inverse(localTransform.ToMatrix()))
+                            : worldFromLocal;
                         var worldOrientation = quaternion.Euler(0f, z * math.PI, 0f);
-                        localTransform.Rotation = worldFromParent.TransformRotation(worldOrientation);
+                        localTransform.Rotation = math.mul(new quaternion(math.orthonormalize(new float3x3(worldFromParent))), worldOrientation);
                         break;
                 }
                 SystemAPI.SetComponent(references.ValueRO.CameraOrbit, localTransform);
             }
-#else
-            if (SystemAPI.HasComponent<Rotation>(references.ValueRO.CameraOrbit))
-            {
-                var orientation = SystemAPI.GetComponent<Rotation>(references.ValueRO.CameraOrbit);
-                switch (cameraSettings.ValueRO.OrientationType)
-                {
-                    case VehicleCameraOrientation.Relative:
-                        orientation.Value = math.mul(orientation.Value, quaternion.Euler(0f, z * SystemAPI.Time.DeltaTime * cameraSettings.ValueRO.OrbitAngularSpeed, 0f));
-                        break;
-                    case VehicleCameraOrientation.Absolute:
-                        float4x4 worldFromLocal = SystemAPI.HasComponent<LocalToWorld>(references.ValueRO.CameraOrbit)
-                            ? SystemAPI.GetComponent<LocalToWorld>(references.ValueRO.CameraOrbit).Value
-                            : float4x4.identity;
-                        float4x4 worldFromParent = SystemAPI.HasComponent<LocalToParent>(references.ValueRO.CameraOrbit)
-                            ? math.mul(worldFromLocal, math.inverse(SystemAPI.GetComponent<LocalToParent>(references.ValueRO.CameraOrbit).Value))
-                            : worldFromLocal;
-                        var worldOrientation = quaternion.Euler(0f, z * math.PI, 0f);
-                        orientation.Value = new quaternion(math.mul(worldFromParent, new float4x4(worldOrientation, float3.zero)));
-                        break;
-                }
-                SystemAPI.SetComponent(references.ValueRO.CameraOrbit, orientation);
-            }
-#endif
+
         }
     }
 }

@@ -17,7 +17,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(HealthAuthoring authoring)
             {
-                AddComponent(new Health
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new Health
                 {
                     MaximumHitPoints = authoring.MaximumHitPoints,
                     CurrentHitPoints = authoring.MaximumHitPoints,

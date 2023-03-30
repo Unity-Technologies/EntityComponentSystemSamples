@@ -20,7 +20,8 @@ public class GlobalScaleAuthoring : MonoBehaviour
     {
         public override void Bake(GlobalScaleAuthoring authoring)
         {
-            AddComponent(new GlobalScaleComponent
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new GlobalScaleComponent
             {
                 DynamicUniformScale = authoring.DynamicUniformScale,
                 StaticUniformScale = authoring.StaticUniformScale
@@ -31,19 +32,19 @@ public class GlobalScaleAuthoring : MonoBehaviour
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class GlobalScaleSystem : SystemBase
+public partial struct GlobalScaleSystem : ISystem
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<GlobalScaleComponent>();
+        state.RequireForUpdate<GlobalScaleComponent>();
     }
 
     [BurstCompile]
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         GlobalScaleComponent singleton = SystemAPI.GetSingleton<GlobalScaleComponent>();
 
-#if !ENABLE_TRANSFORM_V1
         foreach (var(localPosition, collider, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<PhysicsCollider>>().WithEntityAccess())
         {
             if (SystemAPI.HasComponent<PhysicsVelocity>(entity))
@@ -61,25 +62,5 @@ public partial class GlobalScaleSystem : SystemBase
                 }
             }
         }
-
-#else
-        foreach (var(scale, collider, entity) in SystemAPI.Query<RefRW<Scale>, RefRW<PhysicsCollider>>().WithEntityAccess())
-        {
-            if (SystemAPI.HasComponent<PhysicsVelocity>(entity))
-            {
-                if (singleton.DynamicUniformScale != 1.0f)
-                {
-                    scale.ValueRW.Value = singleton.DynamicUniformScale;
-                }
-            }
-            else
-            {
-                if (singleton.StaticUniformScale != 1.0f)
-                {
-                    scale.ValueRW.Value = singleton.StaticUniformScale;
-                }
-            }
-        }
-#endif
     }
 }

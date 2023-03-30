@@ -18,7 +18,12 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(AnchorPointAuthoring authoring)
             {
-                AddComponent(new AnchorPoint {SpawnPoint = GetEntity(authoring.SpawnPoint), WeaponSlot = GetEntity(authoring.WeaponSlot)});
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new AnchorPoint
+                {
+                    SpawnPoint = GetEntity(authoring.SpawnPoint, TransformUsageFlags.Dynamic),
+                    WeaponSlot = GetEntity(authoring.WeaponSlot, TransformUsageFlags.Dynamic)
+                });
             }
         }
     }

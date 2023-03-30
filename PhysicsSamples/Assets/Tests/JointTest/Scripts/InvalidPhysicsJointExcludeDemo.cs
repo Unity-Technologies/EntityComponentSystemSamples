@@ -18,7 +18,8 @@ public class InvalidPhysicsJointExcludeDemo : SceneCreationAuthoring<InvalidPhys
     {
         public override void Bake(InvalidPhysicsJointExcludeDemo authoring)
         {
-            AddComponentObject(new InvalidPhysicsJointExcludeDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new InvalidPhysicsJointExcludeDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial,
@@ -49,9 +50,9 @@ public struct InvalidPhysicsJointExcludeBodies : IComponentData {}
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class InvalidPhysicsJointExcludeDemoSystem : SystemBase
+public partial struct InvalidPhysicsJointExcludeDemoSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
 
@@ -83,13 +84,13 @@ public partial class InvalidPhysicsJointExcludeDemoSystem : SystemBase
                 }
             }
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }
 
 
-public class InvalidPhyiscsJointExcludeDemoSceneCreationSystem : SceneCreationSystem<InvalidPhysicsJointExcludeDemoScene>
+public partial class InvalidPhyiscsJointExcludeDemoSceneCreationSystem : SceneCreationSystem<InvalidPhysicsJointExcludeDemoScene>
 {
     public override void CreateScene(InvalidPhysicsJointExcludeDemoScene sceneSettings)
     {
@@ -132,9 +133,9 @@ public class InvalidPhyiscsJointExcludeDemoSceneCreationSystem : SceneCreationSy
             }
 
             // add exclude components.
-            EntityManager.AddComponentData(bodyA, new InvalidPhysicsJointExcludeBodies {});
+            EntityManager.AddComponentData(bodyA, new InvalidPhysicsJointExcludeBodies());
             EntityManager.AddComponentData(bodyA, new InvalidPhysicsJointExcludeTimerEvent { TimeLimit = timeToSwap, Timer = timeToSwap });
-            EntityManager.AddComponentData(bodyB, new InvalidPhysicsJointExcludeBodies {});
+            EntityManager.AddComponentData(bodyB, new InvalidPhysicsJointExcludeBodies());
             EntityManager.AddComponentData(bodyB, new InvalidPhysicsJointExcludeTimerEvent { TimeLimit = timeToSwap, Timer = timeToSwap });
         }
     }

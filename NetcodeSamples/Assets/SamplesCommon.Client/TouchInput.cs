@@ -77,6 +77,10 @@ namespace Unity.NetCode.Samples.Common
         }
         public void OnDrag(PointerEventData eventData)
         {
+            // Only handle the drag logic on the left/right sticks (this is also called when slightly dragging on a button)
+            if (Stick == StickCode.NumSticks)
+                return;
+
             if (eventData.dragging)
             {
                 var child = gameObject.transform.GetChild(0).gameObject;
@@ -91,14 +95,11 @@ namespace Unity.NetCode.Samples.Common
                     delta *= maxLength;
                 }
 
-                if (Key == KeyCode.LeftStick || Key == KeyCode.RightStick)
-                {
-                    var stick = child.transform.GetChild(0).gameObject;
-                    var stickRectTrans = stick.transform as RectTransform;
+                var stick = child.transform.GetChild(0).gameObject;
+                var stickRectTrans = stick.transform as RectTransform;
 
-                    stickRectTrans.localPosition = delta;
-                    StickOffsets[(int)Stick] = new float2(delta.x / maxLength, delta.y / maxLength);
-                }
+                stickRectTrans.localPosition = delta;
+                StickOffsets[(int)Stick] = new float2(delta.x/maxLength,delta.y/maxLength);
             }
         }
     }

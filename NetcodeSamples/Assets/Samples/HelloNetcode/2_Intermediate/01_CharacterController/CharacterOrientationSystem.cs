@@ -17,11 +17,6 @@ namespace Samples.HelloNetcode
         }
 
         [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             state.CompleteDependency();
@@ -44,7 +39,7 @@ namespace Samples.HelloNetcode
                 if (math.length(wantedMove) > 0)
                 {
                     quaternion forw = quaternion.LookRotation(math.normalize(wantedMove), math.up());
-                    character.Transform.LocalRotation = forw;
+                    character.Transform.ValueRW.Rotation = forw;
                 }
             }
         }

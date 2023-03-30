@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class ShipCommandDataAuthoringComponent : MonoBehaviour
 {
-}
-
-public class ShipCommandDataAuthoringComponentBaker : Baker<ShipCommandDataAuthoringComponent>
-{
-    public override void Bake(ShipCommandDataAuthoringComponent authoring)
+    public class Baker : Baker<ShipCommandDataAuthoringComponent>
     {
-        AddBuffer<ShipCommandData>();
+        public override void Bake(ShipCommandDataAuthoringComponent authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddBuffer<ShipCommandData>(entity);
+        }
     }
 }

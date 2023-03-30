@@ -33,7 +33,6 @@ public class GravityWellSystem_GO : MonoBehaviour
 #region ECS
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct GravityWellSystem_GO_ECS : ISystem
 {
     private EntityQuery GravityWellQuery;
@@ -52,11 +51,6 @@ public partial struct GravityWellSystem_GO_ECS : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         // Update all the gravity well component positions from the entity's transform
@@ -70,21 +64,16 @@ public partial struct GravityWellSystem_GO_ECS : ISystem
         {
             // For each dynamic body apply the forces for all the gravity wells
             // Query equivalent to GameObject.FindObjectsOfType<Rigidbody>
-#if !ENABLE_TRANSFORM_V1
+
             foreach (var(velocity, collider, mass, localTransform) in SystemAPI.Query<RefRW<PhysicsVelocity>, RefRO<PhysicsCollider>, RefRO<PhysicsMass>, RefRO<LocalTransform>>())
-#else
-            foreach (var(velocity, collider, mass, position, rotation) in SystemAPI.Query<RefRW<PhysicsVelocity>, RefRO<PhysicsCollider>, RefRO<PhysicsMass>, RefRO<Translation>, RefRO<Rotation>>())
-#endif
             {
                 for (int i = 0; i < gravityWells.Length; i++)
                 {
                     var gravityWell = gravityWells[i];
                     velocity.ValueRW.ApplyExplosionForce(
-#if !ENABLE_TRANSFORM_V1
+
                         mass.ValueRO, collider.ValueRO, localTransform.ValueRO.Position, localTransform.ValueRO.Rotation,
-#else
-                        mass.ValueRO, collider.ValueRO, position.ValueRO.Value, rotation.ValueRO.Value,
-#endif
+
                         -gravityWell.Strength, gravityWell.Position, gravityWell.Radius,
                         SystemAPI.Time.DeltaTime, math.up());
                 }

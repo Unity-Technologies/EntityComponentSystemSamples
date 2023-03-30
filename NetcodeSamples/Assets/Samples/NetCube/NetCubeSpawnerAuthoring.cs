@@ -16,8 +16,9 @@ public class NetCubeSpawnerAuthoring : MonoBehaviour
         public override void Bake(NetCubeSpawnerAuthoring authoring)
         {
             NetCubeSpawner component = default(NetCubeSpawner);
-            component.Cube = GetEntity(authoring.Cube);
-            AddComponent(component);
+            component.Cube = GetEntity(authoring.Cube, TransformUsageFlags.Dynamic);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }

@@ -68,12 +68,9 @@ public class ProjectIntoFutureOnCueData : IComponentData
 
             manager.AddComponentData(ghost, new ProjectIntoFutureTrail());
             manager.AddSharedComponentManaged(ghost, GhostMaterial);
+            manager.SetComponentData(ghost, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
 
-#if !ENABLE_TRANSFORM_V1
-            var scale = new PostTransformScale { Value = float3x3.Scale(GhostScale) };
-#else
-            var scale = new NonUniformScale { Value = GhostScale};
-#endif
+            var scale = new PostTransformMatrix { Value = float4x4.Scale(GhostScale) };
             manager.AddComponentData(ghost, scale);
         }
 
@@ -88,30 +85,22 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
 {
     [BurstCompile]
     [WithAll(typeof(ProjectIntoFutureTrail))]
-    private partial struct IJobEntity_ProjectIntoFutureTrail : IJobEntity
+    private partial struct ProjectIntoFutureTrailJob : IJobEntity
     {
         public NativeArray<float3> Positions;
         public float GhostScale;
         public int NumSteps;
 
-#if !ENABLE_TRANSFORM_V1
-        public void Execute([EntityIndexInQuery] int entityInQueryIndex, Entity entity, ref LocalTransform localTransform, ref PostTransformScale postTransformScale)
-#else
-        public void Execute([EntityIndexInQuery] int entityInQueryIndex, Entity entity, ref Translation translation, ref Rotation rotation, ref NonUniformScale scale)
-#endif
+        public void Execute([EntityIndexInQuery] int entityInQueryIndex, ref LocalTransform localTransform, ref PostTransformMatrix postTransformMatrix)
         {
             var posT0 = Positions[entityInQueryIndex];
 
             // Return if we are on the last step
             if ((entityInQueryIndex % NumSteps) == (NumSteps - 1))
             {
-#if !ENABLE_TRANSFORM_V1
+
                 localTransform.Position = posT0;
-                postTransformScale.Value = float3x3.Scale(GhostScale);
-#else
-                translation.Value = posT0;
-                scale.Value = GhostScale;
-#endif
+                postTransformMatrix.Value = float4x4.Scale(GhostScale);
                 return;
             }
 
@@ -122,22 +111,17 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
             var haveMovement = !posT0.Equals(posT1);
             if (!haveMovement)
             {
-#if !ENABLE_TRANSFORM_V1
+
                 localTransform.Position = posT0; // Comment this out to leave the trails after shot.
-                postTransformScale.Value = float3x3.Scale(GhostScale);
-#else
-                translation.Value = posT0; // Comment this out to leave the trails after shot.
-                scale.Value = GhostScale;
-#endif
+                postTransformMatrix.Value = float4x4.Scale(GhostScale);
+
                 return;
             }
 
             // Position the ghost ball half way between T0 and T1
-#if !ENABLE_TRANSFORM_V1
+
             localTransform.Position = math.lerp(posT0, posT1, 0.5f);
-#else
-            translation.Value = math.lerp(posT0, posT1, 0.5f);
-#endif
+
 
             // Orientation the ball along the direction between T0 and T1
             // and stretch the ball between those 2 positions.
@@ -145,13 +129,9 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
             var scaleValue = math.length(forward);
             var rotationValue = quaternion.LookRotationSafe(forward, new float3(0, 1, 0));
 
-#if !ENABLE_TRANSFORM_V1
+
             localTransform.Rotation = rotationValue;
-            postTransformScale.Value.c2.z = scaleValue;
-#else
-            rotation.Value = rotationValue;
-            scale.Value = scaleValue;
-#endif
+            postTransformMatrix.Value.c2.z = scaleValue;
         }
     }
 
@@ -341,7 +321,7 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
 #endif
         }
 
-        state.Dependency = new IJobEntity_ProjectIntoFutureTrail
+        state.Dependency = new ProjectIntoFutureTrailJob
         {
             Positions = projectIntoFutureOnCueData.Positions,
             GhostScale = projectIntoFutureOnCueData.GhostScale,

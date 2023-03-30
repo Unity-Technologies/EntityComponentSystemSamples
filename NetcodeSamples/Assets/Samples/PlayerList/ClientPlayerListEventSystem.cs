@@ -19,7 +19,7 @@ namespace Unity.NetCode.Samples.PlayerList
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<EnablePlayerListsFeature>();
-            state.RequireForUpdate<NetworkIdComponent>();
+            state.RequireForUpdate<NetworkId>();
 
             var bufferSingleton = state.EntityManager.CreateEntity();
             state.EntityManager.AddBuffer<PlayerListNotificationBuffer>(bufferSingleton);
@@ -27,9 +27,6 @@ namespace Unity.NetCode.Samples.PlayerList
 
             m_PlayerListEntryChangedRpc = state.GetEntityQuery(ComponentType.ReadOnly<PlayerListEntry.ChangedRpc>());
         }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state) { }
 
         [BurstCompile]
         public void OnStartRunning(ref SystemState state)

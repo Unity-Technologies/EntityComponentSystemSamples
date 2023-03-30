@@ -106,12 +106,9 @@ public abstract partial class SceneCreationSystem<T> : SystemBase
         Entity entity = entityManager.CreateEntity(new ComponentType[] {});
 
         entityManager.AddComponentData(entity, new LocalToWorld {});
-#if !ENABLE_TRANSFORM_V1
+
         entityManager.AddComponentData(entity, LocalTransform.FromPositionRotation(position, orientation));
-#else
-        entityManager.AddComponentData(entity, new Translation { Value = position });
-        entityManager.AddComponentData(entity, new Rotation { Value = orientation });
-#endif
+
 
         var colliderComponent = new PhysicsCollider { Value = collider };
         entityManager.AddComponentData(entity, colliderComponent);
@@ -172,16 +169,12 @@ public abstract partial class SceneCreationSystem<T> : SystemBase
     public static RigidTransform GetBodyTransform(Entity entity)
     {
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-#if !ENABLE_TRANSFORM_V1
+
         var localTransform = entityManager.GetComponentData<LocalTransform>(entity);
         return new RigidTransform(
             localTransform.Rotation,
             localTransform.Position);
-#else
-        return new RigidTransform(
-            entityManager.GetComponentData<Rotation>(entity).Value,
-            entityManager.GetComponentData<Translation>(entity).Value);
-#endif
+
     }
 
     #endregion

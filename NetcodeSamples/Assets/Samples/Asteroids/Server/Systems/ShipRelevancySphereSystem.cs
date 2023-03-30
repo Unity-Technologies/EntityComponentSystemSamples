@@ -20,27 +20,23 @@ namespace Asteroids.Server
         NativeList<ConnectionRelevancy> m_Connections;
         EntityQuery m_GhostQuery;
         EntityQuery m_ConnectionQuery;
-#if !ENABLE_TRANSFORM_V1
+
         ComponentLookup<LocalTransform> m_Transforms;
-#else
-        ComponentLookup<Translation> m_Translations;
-#endif
+
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            var builder = new EntityQueryBuilder(Allocator.Temp).WithAll<GhostComponent>();
+            var builder = new EntityQueryBuilder(Allocator.Temp).WithAll<GhostInstance>();
             m_GhostQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
-            builder.WithAll<NetworkIdComponent>();
+            builder.WithAll<NetworkId>();
             m_ConnectionQuery = state.GetEntityQuery(builder);
 
-#if !ENABLE_TRANSFORM_V1
+
             m_Transforms = state.GetComponentLookup<LocalTransform>(true);
-#else
-            m_Translations = state.GetComponentLookup<Translation>(true);
-#endif
+
             m_Connections = new NativeList<ConnectionRelevancy>(16, Allocator.Persistent);
 
             state.RequireForUpdate(m_ConnectionQuery);
@@ -50,6 +46,7 @@ namespace Asteroids.Server
         [BurstCompile]
         public void OnDestroy(ref SystemState state)
         {
+            m_Connections.Dispose();
         }
 
         [BurstCompile]
@@ -78,19 +75,15 @@ namespace Asteroids.Server
             };
             var clearHandle = clearJob.Schedule(state.Dependency);
 
-#if !ENABLE_TRANSFORM_V1
+
             m_Transforms.Update(ref state);
-#else
-            m_Translations.Update(ref state);
-#endif
+
 
             var connectionJob = new ConnectionRelevancyJob
             {
-#if !ENABLE_TRANSFORM_V1
+
                 transFromEntity = m_Transforms,
-#else
-                transFromEntity = m_Translations,
-#endif
+
                 connections = m_Connections
             };
             var connectionHandle = connectionJob.Schedule(state.Dependency);
@@ -112,19 +105,15 @@ namespace Asteroids.Server
             [ReadOnly] public NativeList<ConnectionRelevancy> connections;
             public NativeParallelHashMap<RelevantGhostForConnection, int>.ParallelWriter parallelRelevantSet;
 
-#if !ENABLE_TRANSFORM_V1
-            public void Execute(Entity entity, in GhostComponent ghost, in LocalTransform transform)
-#else
-            public void Execute(Entity entity, in GhostComponent ghost, in Translation pos)
-#endif
+
+            public void Execute(Entity entity, in GhostInstance ghost, in LocalTransform transform)
+
             {
                 for (int i = 0; i < connections.Length; ++i)
                 {
-#if !ENABLE_TRANSFORM_V1
+
                     if (math.distance(transform.Position, connections[i].Position) > relevancyRadius)
-#else
-                    if (math.distance(pos.Value, connections[i].Position) > relevancyRadius)
-#endif
+
                         parallelRelevantSet.TryAdd(new RelevantGhostForConnection(connections[i].ConnectionId, ghost.ghostId), 1);
                 }
             }
@@ -134,22 +123,18 @@ namespace Asteroids.Server
         partial struct ConnectionRelevancyJob : IJobEntity
         {
             [ReadOnly]
-#if !ENABLE_TRANSFORM_V1
+
             public ComponentLookup<LocalTransform> transFromEntity;
-#else
-            public ComponentLookup<Translation> transFromEntity;
-#endif
+
             public NativeList<ConnectionRelevancy> connections;
 
-            public void Execute(in NetworkIdComponent netId, in CommandTargetComponent target)
+            public void Execute(in NetworkId netId, in CommandTarget target)
             {
                 if (target.targetEntity == Entity.Null || !transFromEntity.HasComponent(target.targetEntity))
                     return;
-#if !ENABLE_TRANSFORM_V1
+
                 var pos = transFromEntity[target.targetEntity].Position;
-#else
-                var pos = transFromEntity[target.targetEntity].Value;
-#endif
+
                 connections.Add(new ConnectionRelevancy{ConnectionId = netId.Value, Position = pos});
             }
         }

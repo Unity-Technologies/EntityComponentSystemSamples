@@ -14,7 +14,8 @@ public class MovableCubeComponentAuthoring : MonoBehaviour
         public override void Bake(MovableCubeComponentAuthoring authoring)
         {
             MovableCubeComponent component = default(MovableCubeComponent);
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }

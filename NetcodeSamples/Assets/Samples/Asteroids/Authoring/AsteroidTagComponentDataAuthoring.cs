@@ -4,12 +4,13 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class AsteroidTagComponentDataAuthoring : MonoBehaviour
 {
-    class AsteroidTagComponentDataBaker : Baker<AsteroidTagComponentDataAuthoring>
+    class Baker : Baker<AsteroidTagComponentDataAuthoring>
     {
         public override void Bake(AsteroidTagComponentDataAuthoring authoring)
         {
             AsteroidTagComponentData component = default(AsteroidTagComponentData);
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }

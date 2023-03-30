@@ -31,7 +31,7 @@ When a system group is updated, the group normally updates its children in their
 
 A group's children are re-sorted every time a child is added or removed from the group.
 
-The [`[UpdateBefore]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.UpdateBeforeAttribute.html) and [`[UpdateAfter]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.UpdateAfterAttribute.html) attributes can be used to determine the relative sort order amongst the children in a group. For example, if a `FooSystem` has the attribute `UpdateBefore(typeof(BarSystem))]`, then `FooSystem` will be put somewhere before `BarSystem` in the sorted order. If, however, `FooSystem` and `BarSystem` don't belong to the same group, the attribute is ignored. If an ordering attribute contradicts another, an exception is thrown.
+The [`[UpdateBefore]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.UpdateBeforeAttribute.html) and [`[UpdateAfter]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.UpdateAfterAttribute.html) attributes can be used to determine the relative sort order amongst the children in a group. For example, if a *FooSystem* has the attribute `UpdateBefore(typeof(BarSystem))]`, then *FooSystem* will be put somewhere before *BarSystem* in the sorted order. If, however, *FooSystem* and *BarSystem* don't belong to the same group, the attribute is ignored. If the ordering attributes of a group's children create a contradiction (*e.g.* *A* is marked to update before *B* but also *B* is marked to update before *A*), an exception is thrown when the group's children are sorted.
 
 <br>
 
@@ -43,7 +43,7 @@ By default, an automatic bootstrapping process creates a default world with thre
 - `SimulationSystemGroup`, which updates at the end of the `Update` phase of the Unity player loop.
 - `PresentationSystemGroup`, which updates at the end of the `PreLateUpdate` phase of the Unity player loop.
 
-The systems and system groups will normally be added to the `SimulationSystemGroup`, but this can be overridden by marking them with the [`[UpdateInGroup]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.UpdateInGroupAttribute.html) attribute. For example, if a `FooSystem` has the attribute `UpdateInGroup(typeof(InitializationSystemGroup))]`, then `FooSystem` will be added to the `InitializationSystemGroup` instead of the `SimulationSystemGroup`. A system or system group with the [`[DisableAutoCreation]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.DisableAutoCreationAttribute.html) attribute will not be instantiated by the automatic bootstrapping.
+Automatic bootstrapping creates an instance of every system and system group (except those with the [`[DisableAutoCreation]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.DisableAutoCreationAttribute.html) attribute). These instances are added added to the `SimulationSystemGroup` unless overridden by the [`[UpdateInGroup]`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.UpdateInGroupAttribute.html) attribute. For example, if a system has the attribute `UpdateInGroup(typeof(InitializationSystemGroup))]`, then the system will be added to the `InitializationSystemGroup` instead of the `SimulationSystemGroup`.
 
 The automatic bootstrapping process can be disabled with scripting defines:
 
@@ -57,7 +57,7 @@ When automatic bootstrapping is disabled, your code is responsible for:
 
 - Creating any worlds you need.
 - Calling [`World.GetOrCreateSystem<T>()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.World.GetOrCreateSystem.html) to add the system and system group instances to the worlds.
-- Inserting updates of the top-level system groups (*e.g.* `SimulationSystemGroup`) into the Unity [PlayerLoop](https://docs.unity3d.com/ScriptReference/LowLevel.PlayerLoop.html).
+- Registering top-level system groups (like `SimulationSystemGroup`) to update in the Unity [PlayerLoop](https://docs.unity3d.com/ScriptReference/LowLevel.PlayerLoop.html).
 
 Alternatively, automatic bootstrapping can be customized by creating a class that implements [`ICustomBootstrap`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICustomBootstrap.html).
 
@@ -75,13 +75,13 @@ A world has a `Time` property, which returns a [`TimeData`](https://docs.unity3d
 | [`PushTime`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.World.PushTime.html) | Temporarily change the time value. |
 | [`PopTime`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.World.PopTime.html) | Restore the time value from before the last push. |
 
-Some system groups, like [`FixedStepSimulationSystemGroup`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.FixedStepSimulationSystemGroup.html), push a time value before updating their children and then pop the value once done updating. Systems in these groups effectively see the pushed time value.
+Some system groups, like [`FixedStepSimulationSystemGroup`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.FixedStepSimulationSystemGroup.html), push a time value before updating their children and then pop the value once done updating.
 
 <br>
 
 ## SystemState
 
-The [`SystemState`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemState.html) parameter of a system's `OnUpdate()`, `OnCreate()`, and `OnDestroy()` methods represents the state of the system instance and has important methods and properties, including:
+A system's `OnUpdate()`, `OnCreate()`, and `OnDestroy()` methods are passed a [`SystemState`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemState.html) parameter. `SystemState` represents the state of the system instance and has important methods and properties, including:
 
 |**Method or property**|**Description**|
 |---|---|
@@ -108,7 +108,7 @@ The `SystemAPI` methods rely upon [source generators](https://docs.microsoft.com
 | :- |
 | If you get confused about where to look for key Entities functionality, the general rule is to check `SystemAPI` first. If `SystemAPI` doesn't have what you're looking for, look in `SystemState`, and if what you're looking for isn't there, look in the `EntityManager` and `World`. |
 
-`SystemAPI` provides a special [`Query()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemAPI.Query.html) method that, through source generation, helps conveniently create a foreach that loops through the entities and components matching a query.
+`SystemAPI` also provides a special [`Query()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemAPI.Query.html) method that, through source generation, helps conveniently create a foreach loop over the entities and components matching a query.
 
 &#x1F579; *[See examples of using `SystemAPI.Query()`](./examples/components_systems.md#querying-for-entities).*
 

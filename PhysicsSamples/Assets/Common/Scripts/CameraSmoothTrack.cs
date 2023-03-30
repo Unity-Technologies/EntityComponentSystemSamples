@@ -88,6 +88,7 @@ struct CameraSmoothTrackSettings : IComponentData
 
 [RequireMatchingQueriesForUpdate]
 [UpdateAfter(typeof(TransformSystemGroup))]
+[BurstCompile]
 partial class SmoothlyTrackCameraTarget : SystemBase
 {
     struct Initialized : ICleanupComponentData {}

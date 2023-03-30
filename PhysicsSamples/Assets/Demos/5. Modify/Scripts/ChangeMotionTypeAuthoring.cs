@@ -63,7 +63,8 @@ class ChangeMotionTypeAuthoringBaker : Baker<ChangeMotionTypeAuthoring>
             velocity.Angular = physicsBodyAuthoring.InitialAngularVelocity;
         }
 
-        AddComponent(new ChangeMotionType
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new ChangeMotionType
         {
             NewMotionType = BodyMotionType.Dynamic,
             DynamicInitialVelocity = velocity,
@@ -72,22 +73,22 @@ class ChangeMotionTypeAuthoringBaker : Baker<ChangeMotionTypeAuthoring>
             SetVelocityToZero = authoring.SetVelocityToZero
         });
 
-        AddSharedComponentManaged(new ChangeMotionMaterials
+        AddSharedComponentManaged(entity, new ChangeMotionMaterials
         {
             DynamicMaterial = authoring.DynamicMaterial,
             KinematicMaterial = authoring.KinematicMaterial,
             StaticMaterial = authoring.StaticMaterial
         });
-        AddComponent<PhysicsMassOverride>();
+        AddComponent<PhysicsMassOverride>(entity);
     }
 }
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class ChangeMotionTypeSystem : SystemBase
+public partial struct ChangeMotionTypeSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
         List<RenderMeshArray> renderMeshArraysToAdd = new List<RenderMeshArray>();
@@ -148,13 +149,13 @@ public partial class ChangeMotionTypeSystem : SystemBase
             modifier.ValueRW.NewMotionType = (BodyMotionType)(((int)modifier.ValueRW.NewMotionType + 1) % 3);
         }
 
-        commandBuffer.Playback(EntityManager);
+        commandBuffer.Playback(state.EntityManager);
         for (int i = 0; i < entitiesToAdd.Length; i++)
         {
             var entity = entitiesToAdd[i];
             var renderMeshArray = renderMeshArraysToAdd[i];
 
-            RenderMeshUtility.AddComponents(entity, EntityManager, new RenderMeshDescription(ShadowCastingMode.Off), renderMeshArray, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
+            RenderMeshUtility.AddComponents(entity, state.EntityManager, new RenderMeshDescription(ShadowCastingMode.Off), renderMeshArray, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
         }
     }
 }

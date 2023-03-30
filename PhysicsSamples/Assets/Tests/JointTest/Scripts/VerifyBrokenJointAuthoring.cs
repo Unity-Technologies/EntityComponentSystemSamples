@@ -14,7 +14,8 @@ public class BreakableJointBaker : Baker<VerifyBrokenJointAuthoring>
 {
     public override void Bake(VerifyBrokenJointAuthoring authoring)
     {
-        AddComponent<VerifyBrokenJointTag>();
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent<VerifyBrokenJointTag>(entity);
     }
 }
 
@@ -31,10 +32,6 @@ public partial struct VerifyBrokenJointSystem : ISystem
         m_numNonBreakableJoints = 0;
         m_PhysicsJointQuery = state.GetEntityQuery(typeof(PhysicsJoint));
         state.RequireForUpdate<VerifyBrokenJointTag>();
-    }
-
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     public void OnUpdate(ref SystemState state)

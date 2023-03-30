@@ -28,7 +28,8 @@ namespace Samples.HelloNetcode
                 component.AmountOfCircles = authoring.AmountOfCircles;
                 component.Spacing = authoring.Spacing;
                 component.EnableProblem = authoring.EnableProblem;
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

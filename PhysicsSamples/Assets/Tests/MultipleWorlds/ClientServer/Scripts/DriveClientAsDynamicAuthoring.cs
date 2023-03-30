@@ -10,7 +10,8 @@ public class DriveClientAsDynamicBaker : Baker<DriveClientAsDynamicAuthoring>
 {
     public override void Bake(DriveClientAsDynamicAuthoring authoring)
     {
-        AddComponent(new DriveClientAsDynamic {});
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new DriveClientAsDynamic {});
     }
 }
 

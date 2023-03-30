@@ -34,12 +34,13 @@ class PeriodicallySpawnExplosionAuthoringBaking : Baker<PeriodicallySpawnExplosi
     public override void Bake(PeriodicallySpawnExplosionAuthoring authoring)
     {
         var transform = GetComponent<Transform>();
-        AddComponent(new PeriodicallySpawnExplosionComponent
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new PeriodicallySpawnExplosionComponent
         {
             Count = authoring.Count,
             DeathRate = 10,
             Position = transform.position,
-            Prefab = GetEntity(authoring.Prefab),
+            Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
             Range = authoring.Range,
             Rotation = quaternion.identity,
             SpawnRate = authoring.SpawnRate,
@@ -57,22 +58,18 @@ partial class PeriodicallySpawnExplosionsSystem : PeriodicalySpawnRandomObjectsS
         Assert.IsTrue(EntityManager.HasComponent<SpawnExplosionSettings>(instance));
 
         var explosionComponent = EntityManager.GetComponentData<SpawnExplosionSettings>(instance);
-#if !ENABLE_TRANSFORM_V1
+
         var localTransform = EntityManager.GetComponentData<LocalTransform>(instance);
-#else
-        var pos = EntityManager.GetComponentData<Translation>(instance);
-#endif
+
 
         spawnSettings.Id--;
 
         // Setting the ID of a new explosion group
         // so that the group gets unique collider
         explosionComponent.Id = spawnSettings.Id;
-#if !ENABLE_TRANSFORM_V1
+
         explosionComponent.Position = localTransform.Position;
-#else
-        explosionComponent.Position = pos.Value;
-#endif
+
 
         EntityManager.SetComponentData(instance, explosionComponent);
     }

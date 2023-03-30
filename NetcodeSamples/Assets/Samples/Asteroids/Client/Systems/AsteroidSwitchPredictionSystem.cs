@@ -22,9 +22,6 @@ namespace Asteroids.Client
         }
 
         [BurstCompile]
-        public void OnDestroy(ref SystemState state) { }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var settings = SystemAPI.GetSingleton<ClientSettings>();
@@ -32,17 +29,12 @@ namespace Asteroids.Client
                 return;
 
             var stateEntityManager = state.EntityManager;
-#if !ENABLE_TRANSFORM_V1
+
             if (!SystemAPI.TryGetSingletonEntity<ShipCommandData>(out var playerEnt) || !stateEntityManager.HasComponent<LocalTransform>(playerEnt))
                 return;
 
             var playerPos = stateEntityManager.GetComponentData<LocalTransform>(playerEnt).Position;
-#else
-            if (!SystemAPI.TryGetSingletonEntity<ShipCommandData>(out var playerEnt) || !stateEntityManager.HasComponent<Translation>(playerEnt))
-                return;
 
-            var playerPos = stateEntityManager.GetComponentData<Translation>(playerEnt).Value;
-#endif
             var parallelEcb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
             var ghostPredictionSwitchingQueues = SystemAPI.GetSingletonRW<GhostPredictionSwitchingQueues>().ValueRW;
 
@@ -65,7 +57,7 @@ namespace Asteroids.Client
         }
 
         [BurstCompile]
-        [WithNone(typeof(PredictedGhostComponent), typeof(SwitchPredictionSmoothing))]
+        [WithNone(typeof(PredictedGhost), typeof(SwitchPredictionSmoothing))]
         [WithAll(typeof(AsteroidTagComponentData))]
         partial struct SwitchToPredictedGhostViaRange : IJobEntity
         {
@@ -74,15 +66,11 @@ namespace Asteroids.Client
             public NativeQueue<ConvertPredictionEntry>.ParallelWriter predictedQueue;
             public EntityCommandBuffer.ParallelWriter parallelEcb;
 
-#if !ENABLE_TRANSFORM_V1
+
             void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform)
             {
                 if (math.distancesq(playerPos, transform.Position) < enterRadiusSq)
-#else
-            void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in Translation position)
-            {
-                if (math.distancesq(playerPos, position.Value) < enterRadiusSq)
-#endif
+
                 {
                     predictedQueue.Enqueue(new ConvertPredictionEntry
                     {
@@ -96,7 +84,7 @@ namespace Asteroids.Client
 
         [BurstCompile]
         [WithNone(typeof(SwitchPredictionSmoothing))]
-        [WithAll(typeof(PredictedGhostComponent), typeof(AsteroidTagComponentData))]
+        [WithAll(typeof(PredictedGhost), typeof(AsteroidTagComponentData))]
         partial struct SwitchToInterpolatedGhostViaRange : IJobEntity
         {
             public float3 playerPos;
@@ -104,15 +92,11 @@ namespace Asteroids.Client
 
             public NativeQueue<ConvertPredictionEntry>.ParallelWriter interpolatedQueue;
             public EntityCommandBuffer.ParallelWriter parallelEcb;
-#if !ENABLE_TRANSFORM_V1
+
             void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform)
             {
                 if (math.distancesq(playerPos, transform.Position) > exitRadiusSq)
-#else
-            void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in Translation position)
-            {
-                if (math.distancesq(playerPos, position.Value) > exitRadiusSq)
-#endif
+
                 {
                     interpolatedQueue.Enqueue(new ConvertPredictionEntry
                     {

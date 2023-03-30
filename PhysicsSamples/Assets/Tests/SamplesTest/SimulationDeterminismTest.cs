@@ -14,7 +14,7 @@ using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Jobs;
 
-namespace Unity.Physics.Samples.Test
+namespace Unity.Physics.Tests
 {
     // Runs all simulation types on the same cloned physics world for a
     // predefined number of steps and compares results.
@@ -281,6 +281,9 @@ namespace Unity.Physics.Samples.Test
                 {
                     physicsWorlds[i].Dispose();
                 }
+
+                UnityPhysicsSamplesTest.ExpectURPForwardWarningMessage();
+
                 LogAssert.NoUnexpectedReceived();
             }
         }

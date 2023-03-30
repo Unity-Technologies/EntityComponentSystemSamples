@@ -23,7 +23,7 @@ namespace Unity.NetCode.Samples.Common
             if (SetOutlineToLocalPlayerColor.All.Count <= 0)
                 return;
 
-            SystemAPI.TryGetSingleton(out NetworkIdComponent networkId);
+            SystemAPI.TryGetSingleton(out NetworkId networkId);
             if (networkId.Value != m_LastNetworkId)
             {
                 m_LastNetworkId = networkId.Value;

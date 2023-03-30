@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
             public override void Bake(EnablePhysicsAuthoring authoring)
             {
                 EnablePhysics component = default(EnablePhysics);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

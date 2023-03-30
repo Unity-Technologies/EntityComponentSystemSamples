@@ -54,8 +54,9 @@ namespace Demos
     {
         public override void Bake(VehicleMechanics authoring)
         {
-            AddComponent<VehicleBody>();
-            AddComponent(new VehicleConfiguration
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<VehicleBody>(entity);
+            AddComponent(entity, new VehicleConfiguration
             {
                 wheelBase = authoring.wheelBase,
                 wheelFrictionRight = authoring.wheelFrictionRight,
@@ -68,7 +69,7 @@ namespace Demos
                 invWheelCount = 1f / authoring.wheels.Count,
                 drawDebugInformation = (byte)(authoring.drawDebugInformation ? 1 : 0)
             });
-            AddComponent(new VehicleMechanicsForBaking()
+            AddComponent(entity, new VehicleMechanicsForBaking()
             {
                 Wheels = GetWheelInfo(authoring.wheels, Allocator.Temp),
                 steeringWheels = ToNativeArray(authoring.steeringWheels, Allocator.Temp),
@@ -99,8 +100,8 @@ namespace Demos
 
                 array[i++] = new WheelBakingInfo()
                 {
-                    Wheel = GetEntity(wheel),
-                    GraphicalRepresentation = GetEntity(wheel.transform.GetChild(0)),
+                    Wheel = GetEntity(wheel, TransformUsageFlags.Dynamic),
+                    GraphicalRepresentation = GetEntity(wheel.transform.GetChild(0), TransformUsageFlags.Dynamic),
                     WorldFromSuspension = worldFromSuspension,
                     WorldFromChassis = worldFromChassis,
                 };
@@ -116,7 +117,7 @@ namespace Demos
 
             var array = new NativeArray<Entity>(list.Count, allocator);
             for (int i = 0; i < list.Count; ++i)
-                array[i] = GetEntity(list[i]);
+                array[i] = GetEntity(list[i], TransformUsageFlags.Dynamic);
 
             return array;
         }
@@ -126,9 +127,9 @@ namespace Demos
     [UpdateAfter(typeof(EndColliderBakingSystem))]
     [UpdateAfter(typeof(PhysicsBodyBakingSystem))]
     [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-    partial class VehicleMechanicsBakingSystem : SystemBase
+    partial struct VehicleMechanicsBakingSystem : ISystem
     {
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             EntityCommandBuffer commandBuffer = new EntityCommandBuffer(Allocator.Temp);
 
@@ -163,7 +164,8 @@ namespace Demos
                     });
                 }
             }
-            commandBuffer.Playback(EntityManager);
+
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 
@@ -200,6 +202,7 @@ namespace Demos
 
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsInitializeGroup)), UpdateBefore(typeof(PhysicsSimulationGroup))]
+    [BurstCompile]
     public partial class VehicleMechanicsSystem : SystemBase
     {
         protected override void OnCreate()
@@ -216,7 +219,7 @@ namespace Demos
                 .WithBurst()
                 .ForEach((
                     Entity entity, ref VehicleBody vehicleBody,
-#if !ENABLE_TRANSFORM_V1
+
                     in VehicleConfiguration mechanics, in PhysicsMass mass, in LocalTransform localTransform
                     ) =>
                     {
@@ -224,15 +227,7 @@ namespace Demos
 
                         // calculate a simple slip factor based on chassis tilt
                         float3 worldUp = math.mul(localTransform.Rotation, math.up());
-#else
-                    in VehicleConfiguration mechanics, in PhysicsMass mass, in Translation translation, in Rotation rotation
-                    ) =>
-                    {
-                        vehicleBody.WorldCenterOfMass = mass.GetCenterOfMassWorldSpace(in translation.Value, in rotation.Value);
 
-                        // calculate a simple slip factor based on chassis tilt
-                        float3 worldUp = math.mul(rotation.Value, math.up());
-#endif
                         vehicleBody.SlopeSlipFactor = math.pow(math.abs(math.dot(worldUp, math.up())), 4f);
                     })
                 .Schedule(Dependency);
@@ -247,14 +242,11 @@ namespace Demos
             // update each wheel
             var commandBuffer = new EntityCommandBuffer(Allocator.TempJob);
 
-#if !ENABLE_TRANSFORM_V1
+
             foreach (var(localTransform, wheel, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRO<Wheel>>().WithEntityAccess())
             {
                 var newLocalTransform = localTransform;
-#else
-            foreach (var(localPosition, localRotation, wheel, entity) in SystemAPI.Query<RefRW<Translation>, RefRW<Rotation>, RefRO<Wheel>>().WithEntityAccess())
-            {
-#endif
+
                 Entity ce = wheel.ValueRO.Vehicle;
                 if (ce == Entity.Null) return;
                 int ceIdx = world.GetRigidBodyIndex(ce);
@@ -263,14 +255,11 @@ namespace Demos
                 var mechanics = SystemAPI.GetComponent<VehicleConfiguration>(ce);
                 var vehicleBody = SystemAPI.GetComponent<VehicleBody>(ce);
 
-#if !ENABLE_TRANSFORM_V1
+
                 var t = SystemAPI.GetComponent<LocalTransform>(ce);
                 float3 cePosition = t.Position;
                 quaternion ceRotation = t.Rotation;
-#else
-                float3 cePosition = GetComponent<Translation>(ce).Value;
-                quaternion ceRotation = GetComponent<Rotation>(ce).Value;
-#endif
+
                 float3 ceCenterOfMass = vehicleBody.WorldCenterOfMass;
                 float3 ceUp = math.mul(ceRotation, new float3(0f, 1f, 0f));
                 float3 ceForward = math.mul(ceRotation, new float3(0f, 0f, 1f));
@@ -299,13 +288,10 @@ namespace Demos
 
                 RigidTransform suspensionFromWheel = new RigidTransform
                 {
-#if !ENABLE_TRANSFORM_V1
+
                     pos = localTransform.ValueRO.Position,
                     rot = localTransform.ValueRO.Rotation
-#else
-                    pos = localPosition.ValueRO.Value,
-                    rot = localRotation.ValueRO.Value
-#endif
+
                 };
 
                 RigidTransform chassisFromWheel = math.mul(wheel.ValueRO.ChassisFromSuspension, suspensionFromWheel);
@@ -358,11 +344,9 @@ namespace Demos
                         weRight = math.rotate(wRotation, weRight);
                         weForward = math.rotate(wRotation, weForward);
 
-#if !ENABLE_TRANSFORM_V1
+
                         newLocalTransform.ValueRW.Rotation = quaternion.AxisAngle(math.up(), desiredSteeringAngle);
-#else
-                        commandBuffer.SetComponent(entity, new Rotation { Value = quaternion.AxisAngle(math.up(), desiredSteeringAngle) });
-#endif
+
                     }
                 }
                 #endregion
@@ -380,16 +364,9 @@ namespace Demos
                         : (currentSpeedForward / mechanics.wheelBase);
 
                     weRotation = math.radians(weRotation);
-#if !ENABLE_TRANSFORM_V1
+
                     newLocalTransform.ValueRW.Rotation = math.mul(localTransform.ValueRO.Rotation, quaternion.AxisAngle(new float3(1f, 0f, 0f), weRotation));         // TODO Should this use newLocalTransform to read from?
-#else
-                    var currentRotation = SystemAPI.GetComponent<Rotation>(wheel.ValueRO.GraphicalRepresentation).Value;
-                    commandBuffer.SetComponent(wheel.ValueRO.GraphicalRepresentation, new Rotation
-                    {
-                        // assumes wheels are aligned with chassis in "bind pose"
-                        Value = math.mul(currentRotation, quaternion.AxisAngle(new float3(1f, 0f, 0f), weRotation))
-                    });
-#endif
+
                 }
                 #endregion
 
@@ -399,14 +376,9 @@ namespace Demos
                     float3 wheelDesiredPos = (-ceUp * mechanics.suspensionLength) + rayStart;
                     var worldPosition = math.lerp(worldFromLocal.pos, wheelDesiredPos, mechanics.suspensionDamping / mechanics.suspensionStrength);
                     // update translation of wheels along suspension column
-#if !ENABLE_TRANSFORM_V1
+
                     newLocalTransform.ValueRW.Position = math.mul(parentFromWorld, new float4(worldPosition, 1f)).xyz;
-#else
-                    commandBuffer.SetComponent(entity, new Translation
-                    {
-                        Value = math.mul(parentFromWorld, new float4(worldPosition, 1f)).xyz
-                    });
-#endif
+
                 }
                 else
                 {
@@ -417,14 +389,9 @@ namespace Demos
                     // update translation of wheels along suspension column
                     var worldPosition = math.lerp(worldFromLocal.pos, wheelDesiredPos, mechanics.suspensionDamping / mechanics.suspensionStrength);
 
-#if !ENABLE_TRANSFORM_V1
+
                     newLocalTransform.ValueRW.Position = math.mul(parentFromWorld, new float4(worldPosition, 1f)).xyz;
-#else
-                    commandBuffer.SetComponent(entity, new Translation
-                    {
-                        Value = math.mul(parentFromWorld, new float4(worldPosition, 1f)).xyz
-                    });
-#endif
+
                     #region Suspension
                     {
                         // Calculate and apply the impulses
@@ -497,13 +464,12 @@ namespace Demos
                     #endregion
                 }
 
-#if !ENABLE_TRANSFORM_V1
+
                 if (!newLocalTransform.ValueRO.Equals(localTransform.ValueRO))
                 {
                     commandBuffer.SetComponent(entity, newLocalTransform.ValueRO);
                 }
-#else
-#endif
+
             }
 
             commandBuffer.Playback(EntityManager);

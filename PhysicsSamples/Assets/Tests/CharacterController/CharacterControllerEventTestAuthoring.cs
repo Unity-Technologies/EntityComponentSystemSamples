@@ -16,19 +16,19 @@ public class CharacterControllerEventTestAuthoring : MonoBehaviour
     {
         public override void Bake(CharacterControllerEventTestAuthoring authoring)
         {
-            AddComponent(new CharacterControllerEventTest { IsFirstFrame = true });
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new CharacterControllerEventTest { IsFirstFrame = true });
         }
     }
 }
 
-[BurstCompile]
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(CharacterControllerSystem))]
 public partial struct CharacterControllerEventTestSystem : ISystem
 {
     [BurstCompile]
-    public partial struct IJobEntity_CharacterControllerEventTest : IJobEntity
+    public partial struct CharacterControllerEventTestJob : IJobEntity
     {
         private void Execute(Entity ccEntity, ref DynamicBuffer<StatefulCollisionEvent> collisionEvents,
             ref DynamicBuffer<StatefulTriggerEvent> triggerEvents, ref CharacterControllerEventTest test)
@@ -70,18 +70,8 @@ public partial struct CharacterControllerEventTestSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        state.Dependency = new IJobEntity_CharacterControllerEventTest().Schedule(state.Dependency);
+        state.Dependency = new CharacterControllerEventTestJob().Schedule(state.Dependency);
     }
 }

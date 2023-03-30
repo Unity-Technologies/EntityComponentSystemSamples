@@ -3,12 +3,13 @@ using UnityEngine;
 
 public class PlayerIdAuthoringComponent : MonoBehaviour
 {
-}
-
-public class PlayerIdAuthoringComponentBaker : Baker<PlayerIdAuthoringComponent>
-{
-    public override void Bake(PlayerIdAuthoringComponent authoring)
+    public class Baker : Baker<PlayerIdAuthoringComponent>
     {
-        AddComponent(new PlayerIdComponentData());
+        public override void Bake(PlayerIdAuthoringComponent authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new PlayerIdComponentData());
+        }
     }
+
 }

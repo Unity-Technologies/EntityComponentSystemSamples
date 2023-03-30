@@ -28,7 +28,7 @@ namespace Samples.HelloNetcode
         {
             RequireForUpdate<EnableRPC>();
             // Can't send any RPC/chat messages before connection is established
-            RequireForUpdate<NetworkIdComponent>();
+            RequireForUpdate<NetworkId>();
             m_CommandBufferSystem = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
         }
 
@@ -40,7 +40,7 @@ namespace Samples.HelloNetcode
             {
                 EntityManager.DestroyEntity(GetEntityQuery(new EntityQueryDesc()
                 {
-                    All = new[] { ComponentType.ReadOnly<ReceiveRpcCommandRequestComponent>() },
+                    All = new[] { ComponentType.ReadOnly<ReceiveRpcCommandRequest>() },
                     Any = new[] { ComponentType.ReadOnly<ChatMessage>(), ComponentType.ReadOnly<ChatUser>() }
                 }));
             }
@@ -48,17 +48,17 @@ namespace Samples.HelloNetcode
             // When a user or chat message RPCs arrive they are added the queues for consumption
             // in the UI system.
             var buffer = m_CommandBufferSystem.CreateCommandBuffer();
-            var connections = GetComponentLookup<NetworkIdComponent>(true);
+            var connections = GetComponentLookup<NetworkId>(true);
             FixedString32Bytes worldName = World.Name;
             Entities.WithName("ReceiveChatMessage").ForEach(
-                (Entity entity, ref ReceiveRpcCommandRequestComponent rpcCmd, ref ChatMessage chat) =>
+                (Entity entity, ref ReceiveRpcCommandRequest rpcCmd, ref ChatMessage chat) =>
                 {
                     buffer.DestroyEntity(entity);
                     // Not thread safe, so all UI logic is kept on main thread
                     RpcUiData.Messages.Data.Enqueue(chat.Message);
                 }).Run();
             Entities.WithName("RegisterUser").WithReadOnly(connections).ForEach(
-                (Entity entity, ref ReceiveRpcCommandRequestComponent rpcCmd, ref ChatUser user) =>
+                (Entity entity, ref ReceiveRpcCommandRequest rpcCmd, ref ChatUser user) =>
                 {
                     var conId = connections[rpcCmd.SourceConnection].Value;
                     UnityEngine.Debug.Log(
@@ -95,14 +95,14 @@ namespace Samples.HelloNetcode
         protected override void OnUpdate()
         {
             var buffer = m_CommandBufferSystem.CreateCommandBuffer();
-            var connections = GetComponentLookup<NetworkIdComponent>(true);
+            var connections = GetComponentLookup<NetworkId>(true);
             FixedString32Bytes worldName = World.Name;
 
             // New incoming RPCs are placed on an entity with the ReceiveRpcCommandRequestComponent component and the RPC data payload component (ChatMessage)
             // This entity should be deleted when you're done processing it
             // The server RPC broadcasts the chat message to all connections
             Entities.WithName("ReceiveChatMessage").WithReadOnly(connections).ForEach(
-                (Entity entity, ref ReceiveRpcCommandRequestComponent rpcCmd, ref ChatMessage chat) =>
+                (Entity entity, ref ReceiveRpcCommandRequest rpcCmd, ref ChatMessage chat) =>
                 {
                     var conId = connections[rpcCmd.SourceConnection].Value;
                     UnityEngine.Debug.Log(
@@ -110,20 +110,20 @@ namespace Samples.HelloNetcode
                     buffer.DestroyEntity(entity);
                     var broadcastEntity = buffer.CreateEntity();
                     buffer.AddComponent(broadcastEntity, new ChatMessage() { Message = FixedString.Format("User {0}: {1}", conId, chat.Message) });
-                    buffer.AddComponent<SendRpcCommandRequestComponent>(broadcastEntity);
+                    buffer.AddComponent<SendRpcCommandRequest>(broadcastEntity);
                 }).Run();
             m_CommandBufferSystem.AddJobHandleForProducer(Dependency);
 
             var users = m_Users;
             Entities.WithName("AddNewUser").WithNone<ChatUserInitialized>().ForEach(
-                (Entity entity, ref NetworkIdComponent id) =>
+                (Entity entity, ref NetworkId id) =>
                 {
                     var connectionId = id.Value;
 
                     // Notify all connections about new chat user (including himself)
                     var broadcastEntity = buffer.CreateEntity();
                     buffer.AddComponent(broadcastEntity, new ChatUser() { UserData = connectionId });
-                    buffer.AddComponent<SendRpcCommandRequestComponent>(broadcastEntity);
+                    buffer.AddComponent<SendRpcCommandRequest>(broadcastEntity);
                     UnityEngine.Debug.Log($"[{worldName}] New user 'User {connectionId}' connected. Broadcasting user entry to all connections;");
 
                     // Notify only new connection about other users already connected, this uses the TargetConnection portion
@@ -133,8 +133,8 @@ namespace Samples.HelloNetcode
                         var newEntity = buffer.CreateEntity();
                         var user = users[i];
                         buffer.AddComponent(newEntity, new ChatUser(){ UserData = user });
-                        buffer.AddComponent<SendRpcCommandRequestComponent>(newEntity);
-                        buffer.SetComponent(newEntity, new SendRpcCommandRequestComponent{TargetConnection = entity});
+                        buffer.AddComponent<SendRpcCommandRequest>(newEntity);
+                        buffer.SetComponent(newEntity, new SendRpcCommandRequest{TargetConnection = entity});
                         UnityEngine.Debug.Log($"[{worldName}] Sending user 'User {user}' to new connection {connectionId}");
                     }
 

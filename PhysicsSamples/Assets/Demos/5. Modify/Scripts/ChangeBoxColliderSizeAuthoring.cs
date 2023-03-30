@@ -36,34 +36,22 @@ class ChangeBoxColliderSizeBaker : Baker<ChangeBoxColliderSizeAuthoring>
             Target = math.lerp(authoring.Min, authoring.Max, 0.5f),
         });
 
-#if !ENABLE_TRANSFORM_V1
-        AddComponent(entity, new PostTransformScale
+        AddComponent(entity, new PostTransformMatrix
         {
-            Value = float3x3.identity,
+            Value = float4x4.identity,
         });
-#else
-        AddComponent(entity, new NonUniformScale
-        {
-            Value = new float3(1)
-        });
-#endif
     }
 }
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct ChangeBoxColliderSizeSystem : ISystem
 {
     [BurstCompile]
     public partial struct ChangeBoxColliderSizeJob : IJobEntity
     {
-#if !ENABLE_TRANSFORM_V1
-        public void Execute(ref PhysicsCollider collider, ref ChangeBoxColliderSize size, ref PostTransformScale postTransformScale)
-#else
-        public void Execute(ref PhysicsCollider collider, ref ChangeBoxColliderSize size, ref NonUniformScale scale)
-#endif
+        public void Execute(ref PhysicsCollider collider, ref ChangeBoxColliderSize size, ref PostTransformMatrix postTransformMatrix)
         {
             // make sure we are dealing with boxes
             if (collider.Value.Value.Type != ColliderType.Box) return;
@@ -92,33 +80,15 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
                 boxGeometry.Size = newSize;
                 bxPtr->Geometry = boxGeometry;
             }
-#if !ENABLE_TRANSFORM_V1
+
             // now tweak the graphical representation of the box
-            float3x3 oldScale = postTransformScale.Value;
+            float4x4 oldScale = postTransformMatrix.Value;
 
             float3 newScale = newSize / oldSize;
-            postTransformScale.Value.c0 *= newScale.x;
-            postTransformScale.Value.c1 *= newScale.y;
-            postTransformScale.Value.c2 *= newScale.z;
-#else
-            // now tweak the graphical representation of the box
-            float3 oldScale = scale.Value;
-            float3 newScale = oldScale;
-
-            newScale *= newSize / oldSize;
-            scale.Value = newScale;
-#endif
+            postTransformMatrix.Value.c0 *= newScale.x;
+            postTransformMatrix.Value.c1 *= newScale.y;
+            postTransformMatrix.Value.c2 *= newScale.z;
         }
-    }
-
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]

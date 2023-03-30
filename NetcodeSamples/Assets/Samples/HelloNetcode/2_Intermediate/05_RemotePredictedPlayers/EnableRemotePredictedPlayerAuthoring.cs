@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
             public override void Bake(EnableRemotePredictedPlayerAuthoring authoring)
             {
                 EnableRemotePredictedPlayer component = default(EnableRemotePredictedPlayer);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

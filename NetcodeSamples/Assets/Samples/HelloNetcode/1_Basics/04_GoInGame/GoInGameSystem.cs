@@ -23,7 +23,7 @@ namespace Samples.HelloNetcode
             FixedString32Bytes worldName = World.Name;
             // Go in game as soon as we have a connection set up (connection network ID has been set)
             Entities.WithName("NewConnectionsGoInGame").WithStoreEntityQueryInField(ref m_NewConnections).WithNone<NetworkStreamInGame>().ForEach(
-                (Entity ent, in NetworkIdComponent id) =>
+                (Entity ent, in NetworkId id) =>
                 {
                     UnityEngine.Debug.Log($"[{worldName}] Go in game connection {id.Value}");
                     commandBuffer.AddComponent<NetworkStreamInGame>(ent);

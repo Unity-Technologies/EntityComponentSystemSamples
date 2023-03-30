@@ -21,11 +21,6 @@ namespace Asteroids.Mixed
             state.RequireForUpdate<LevelComponent>();
             state.RequireForUpdate<AsteroidsSpawner>();
         }
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         [WithAll(typeof(ShipTagComponentData), typeof(ShipCommandData), typeof(Simulate))]
         [BurstCompile]
         partial struct SteeringJob : IJobEntity
@@ -38,12 +33,10 @@ namespace Asteroids.Mixed
             public byte isFirstFullTick;
             [ReadOnly] public BufferLookup<ShipCommandData> inputFromEntity;
             public void Execute(Entity entity, [EntityIndexInQuery] int entityIndexInQuery,
-#if !ENABLE_TRANSFORM_V1
+
                 ref LocalTransform transform, ref Velocity velocity,
-#else
-                ref Translation position, ref Rotation rotation, ref Velocity velocity,
-#endif
-                ref ShipStateComponentData state, in GhostOwnerComponent ghostOwner)
+
+                ref ShipStateComponentData state, in GhostOwner ghostOwner)
             {
                 var input = inputFromEntity[entity];
                 ShipCommandData inputData;
@@ -54,39 +47,31 @@ namespace Asteroids.Mixed
 
                 if (inputData.left == 1)
                 {
-#if !ENABLE_TRANSFORM_V1
+
                     transform.Rotation = math.mul(transform.Rotation,
-#else
-                    rotation.Value = math.mul(rotation.Value,
-#endif
+
                         quaternion.RotateZ(math.radians(level.shipRotationRate * deltaTime)));
                 }
 
                 if (inputData.right == 1)
                 {
-#if !ENABLE_TRANSFORM_V1
+
                     transform.Rotation = math.mul(transform.Rotation,
-#else
-                    rotation.Value = math.mul(rotation.Value,
-#endif
+
                         quaternion.RotateZ(math.radians(-level.shipRotationRate * deltaTime)));
                 }
 
                 if (inputData.thrust == 1)
                 {
                     float3 fwd = new float3(0, level.shipForwardForce * deltaTime, 0);
-#if !ENABLE_TRANSFORM_V1
+
                     velocity.Value += math.mul(transform.Rotation, fwd).xy;
-#else
-                    velocity.Value += math.mul(rotation.Value, fwd).xy;
-#endif
+
                 }
 
-#if !ENABLE_TRANSFORM_V1
+
                 transform.Position.xy += velocity.Value * deltaTime;
-#else
-                position.Value.xy += velocity.Value * deltaTime;
-#endif
+
 
                 var canShoot = !state.WeaponCooldown.IsValid || currentTick.IsNewerThan(state.WeaponCooldown);
                 if (inputData.shoot != 0 && canShoot)
@@ -95,23 +80,17 @@ namespace Asteroids.Mixed
                     {
                         var e = commandBuffer.Instantiate(entityIndexInQuery, bulletPrefab);
 
-#if !ENABLE_TRANSFORM_V1
+
                         var bulletTx = transform;
                         bulletTx.Scale = 10; //TODO: this should come from the bullet prefab
                         commandBuffer.SetComponent(entityIndexInQuery, e, bulletTx);
 
                         var vel = new Velocity
                             {Value = math.mul(transform.Rotation, new float3(0, level.bulletVelocity, 0)).xy};
-#else
-                        commandBuffer.SetComponent(entityIndexInQuery, e, position);
-                        commandBuffer.SetComponent(entityIndexInQuery, e, rotation);
 
-                        var vel = new Velocity
-                            {Value = math.mul(rotation.Value, new float3(0, level.bulletVelocity, 0)).xy};
-#endif
 
                         commandBuffer.SetComponent(entityIndexInQuery, e,
-                            new GhostOwnerComponent {NetworkId = ghostOwner.NetworkId});
+                            new GhostOwner {NetworkId = ghostOwner.NetworkId});
                         commandBuffer.SetComponent(entityIndexInQuery, e, vel);
                     }
 

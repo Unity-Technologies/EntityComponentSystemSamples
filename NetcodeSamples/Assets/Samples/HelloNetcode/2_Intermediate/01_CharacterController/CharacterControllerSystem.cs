@@ -31,13 +31,13 @@ namespace Samples.HelloNetcode
     public readonly partial struct CharacterAspect : IAspect
     {
         public readonly Entity Self;
-        public readonly TransformAspect Transform;
+        public readonly RefRW<LocalTransform> Transform;
 
         readonly RefRO<AutoCommandTarget> m_AutoCommandTarget;
         readonly RefRW<Character> m_Character;
         readonly RefRW<PhysicsVelocity> m_Velocity;
         readonly RefRO<CharacterControllerPlayerInput> m_Input;
-        readonly RefRO<GhostOwnerComponent> m_Owner;
+        readonly RefRO<GhostOwner> m_Owner;
 
         public AutoCommandTarget AutoCommandTarget => m_AutoCommandTarget.ValueRO;
         public CharacterControllerPlayerInput Input => m_Input.ValueRO;
@@ -53,7 +53,7 @@ namespace Samples.HelloNetcode
     {
         const float k_DefaultTau = 0.4f;
         const float k_DefaultDamping = 0.9f;
-        const float k_DefaultSkinWidth = 0.02f;
+        const float k_DefaultSkinWidth = 0f;
         const float k_DefaultContactTolerance = 0.1f;
         const float k_DefaultMaxSlope = 60f;
         const float k_DefaultMaxMovementSpeed = 10f;
@@ -73,16 +73,16 @@ namespace Samples.HelloNetcode
             m_MarkerStep = new Unity.Profiling.ProfilerMarker("Step");
         }
 
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             state.CompleteDependency();
 
             var physicsWorldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+            if (!HasPhysicsWorldBeenInitialized(physicsWorldSingleton))
+            {
+                return;
+            }
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
 
             foreach (var character in SystemAPI.Query<CharacterAspect>().WithAll<Simulate>())
@@ -119,7 +119,7 @@ namespace Samples.HelloNetcode
                 //the world transform isn't).
                 RigidTransform ccTransform = new RigidTransform()
                 {
-                    pos = character.Transform.LocalPosition,
+                    pos = character.Transform.ValueRO.Position,
                     rot = quaternion.identity
                 };
 
@@ -171,8 +171,19 @@ namespace Samples.HelloNetcode
                 m_MarkerStep.End();
 
                 // Set the physics velocity and let physics move the kinematic object based on that
-                character.Velocity.Linear = (ccTransform.pos - character.Transform.LocalPosition) / SystemAPI.Time.DeltaTime;
+                character.Velocity.Linear = (ccTransform.pos - character.Transform.ValueRO.Position) / SystemAPI.Time.DeltaTime;
             }
+        }
+
+        /// <summary>
+        /// As we run before <see cref="PhysicsInitializeGroup"/> it is possible to execute before any physics bodies
+        /// has been initialized.
+        ///
+        /// There may be a better way to do this.
+        /// </summary>
+        static bool HasPhysicsWorldBeenInitialized(PhysicsWorldSingleton physicsWorldSingleton)
+        {
+            return physicsWorldSingleton.PhysicsWorld.Bodies is { IsCreated: true, Length: > 0 };
         }
     }
 }

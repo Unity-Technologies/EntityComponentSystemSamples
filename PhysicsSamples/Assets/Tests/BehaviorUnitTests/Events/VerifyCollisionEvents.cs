@@ -19,12 +19,13 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyCollisionEvents authoring)
             {
-                AddComponent(new VerifyCollisionEventsData());
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new VerifyCollisionEventsData());
 
 #if HAVOK_PHYSICS_EXISTS
                 Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
                 config.EnableSleeping = 0;
-                AddComponent(config);
+                AddComponent(entity, config);
 #endif
             }
         }
@@ -33,17 +34,17 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
-    public partial class VerifyCollisionEventsSystem : SystemBase
+    public partial struct VerifyCollisionEventsSystem : ISystem
     {
         public NativeArray<int> NumEvents;
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
             NumEvents = new NativeArray<int>(1, Allocator.Persistent);
-            RequireForUpdate<VerifyCollisionEventsData>();
+            state.RequireForUpdate<VerifyCollisionEventsData>();
         }
 
-        protected override void OnDestroy()
+        public void OnDestroy(ref SystemState state)
         {
             NumEvents.Dispose();
         }
@@ -84,22 +85,22 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             SimulationSingleton simSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
 
-            Dependency = new VerifyCollisionEventsJob
+            state.Dependency = new VerifyCollisionEventsJob
             {
                 NumEvents = NumEvents,
-                VerificationData = GetComponentLookup<VerifyCollisionEventsData>(true)
-            }.Schedule(simSingleton, Dependency);
+                VerificationData = SystemAPI.GetComponentLookup<VerifyCollisionEventsData>(true)
+            }.Schedule(simSingleton, state.Dependency);
 
-            Dependency = new VerifyCollisionEventsPostJob
+            state.Dependency = new VerifyCollisionEventsPostJob
             {
                 NumEvents = NumEvents,
                 SimulationType = simSingleton.Type,
-                VerificationData = GetComponentLookup<VerifyCollisionEventsData>(true)
-            }.Schedule(Dependency);
+                VerificationData = SystemAPI.GetComponentLookup<VerifyCollisionEventsData>(true)
+            }.Schedule(state.Dependency);
         }
     }
 }

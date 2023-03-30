@@ -16,24 +16,16 @@ namespace Asteroids.Mixed
             state.RequireForUpdate<BulletTagComponent>();
         }
         [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {}
-        [BurstCompile]
         [WithAll(typeof(Simulate), typeof(BulletTagComponent))]
         partial struct BulletJob : IJobEntity
         {
             public float deltaTime;
-#if !ENABLE_TRANSFORM_V1
+
             public void Execute(ref LocalTransform transform, in Velocity velocity)
             {
                 transform.Position.xy += velocity.Value * deltaTime;
             }
-#else
-            public void Execute(ref Translation position, in Velocity velocity)
-            {
-                position.Value.xy += velocity.Value * deltaTime;
-            }
-#endif
+
         }
         [BurstCompile]
         public void OnUpdate(ref SystemState state)

@@ -30,9 +30,6 @@ namespace Samples.HelloNetcode
         }
 
         [BurstCompile]
-        public void OnDestroy(ref SystemState state) {}
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             // Since this is only handling the fire inputs which spawn grenades we'll only want to predict the spawn one time
@@ -61,12 +58,9 @@ namespace Samples.HelloNetcode
                     var grenadeSpawnRotation = localToWorldTransformLookup[spawnPointEntity].Rotation;
 
                     // Set the spawn location at the grenade spawn position and with it's rotation but in world coordinates since it's not a child of the player
-#if !ENABLE_TRANSFORM_V1
+
                     commandBuffer.SetComponent(grenadeEntity, LocalTransform.FromPositionRotation(grenadeSpawnPosition, grenadeSpawnRotation));
-#else
-                    commandBuffer.SetComponent(grenadeEntity, new Translation {Value = grenadeSpawnPosition});
-                    commandBuffer.SetComponent(grenadeEntity, new Rotation { Value = grenadeSpawnRotation});
-#endif
+
 
                     // Launch the grenade by setting the physics linear velocity in the forward direction with the configured initial velocity
                     var initialVelocity = new PhysicsVelocity();
@@ -82,7 +76,7 @@ namespace Samples.HelloNetcode
                     commandBuffer.SetComponent(grenadeEntity, grenadeData);
 
                     // Set the owner so the prediction will work (important until it's replaced by it's interpolated version)
-                    commandBuffer.SetComponent(grenadeEntity, new GhostOwnerComponent {NetworkId = character.OwnerNetworkId});
+                    commandBuffer.SetComponent(grenadeEntity, new GhostOwner {NetworkId = character.OwnerNetworkId});
 
                     // Set the color on the grenade so it alternates between red and green
                     if (state.WorldUnmanaged.IsClient())

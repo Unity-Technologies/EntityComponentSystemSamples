@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(EnableHitScanWeaponsAuthoring authoring)
             {
-                AddComponent<EnableHitScanWeapons>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<EnableHitScanWeapons>(entity);
             }
         }
     }

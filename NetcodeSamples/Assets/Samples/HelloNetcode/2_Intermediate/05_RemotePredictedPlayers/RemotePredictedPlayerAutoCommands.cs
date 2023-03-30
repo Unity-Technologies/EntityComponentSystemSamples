@@ -75,11 +75,9 @@ namespace Samples.HelloNetcode
             var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
             FixedString32Bytes world = World.Name;
             Entities.WithAll<Simulate>().WithName("ProcessInputForTick").ForEach(
-#if !ENABLE_TRANSFORM_V1
+
                 (ref RemotePredictedPlayerInput input, ref LocalTransform trans, ref PlayerMovement movement) =>
-#else
-                (ref RemotePredictedPlayerInput input, ref Translation trans, ref PlayerMovement movement) =>
-#endif
+
                 {
                     if (input.Jump.IsSet)
                         movement.JumpVelocity = 10;
@@ -95,30 +93,21 @@ namespace Samples.HelloNetcode
                     }
                     else
                     {
-#if !ENABLE_TRANSFORM_V1
+
                         if (trans.Position.y > 0)
                             verticalMovement = -1;
-#else
-                        if (trans.Value.y > 0)
-                            verticalMovement = -1;
-#endif
+
                     }
                     var moveInput = new float3(input.Horizontal, verticalMovement, input.Vertical);
                     moveInput = math.normalizesafe(moveInput) * movementSpeed;
                     // Ensure we don't go through the ground when landing (and stick to it when close)
-#if !ENABLE_TRANSFORM_V1
+
                     if (movement.JumpVelocity <= 0 && (trans.Position.y + moveInput.y < 0 || trans.Position.y + moveInput.y < 0.05))
                         moveInput.y = trans.Position.y = 0;
                     trans.Position += new float3(moveInput.x, moveInput.y, moveInput.z);
                     if (trans.Position.y != 0)
                         UnityEngine.Debug.Log($"[{world}][{tick}] ({trans.Position.x}, {trans.Position.y}, {trans.Position.z}) velocity={movement.JumpVelocity}");
-#else
-                    if (movement.JumpVelocity <= 0 && (trans.Value.y + moveInput.y < 0 || trans.Value.y + moveInput.y < 0.05))
-                        moveInput.y = trans.Value.y = 0;
-                    trans.Value += new float3(moveInput.x, moveInput.y, moveInput.z);
-                    if (trans.Value.y != 0)
-                        UnityEngine.Debug.Log($"[{world}][{tick}] ({trans.Value.x}, {trans.Value.y}, {trans.Value.z}) velocity={movement.JumpVelocity}");
-#endif
+
                 }).ScheduleParallel();
         }
     }

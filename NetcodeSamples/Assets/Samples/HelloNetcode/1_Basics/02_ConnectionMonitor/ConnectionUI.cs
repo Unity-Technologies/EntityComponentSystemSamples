@@ -43,9 +43,9 @@ namespace Samples.HelloNetcode
             {
                 if (world.Name == con.WorldName)
                 {
-                    var connection = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkIdComponent>(),
+                    var connection = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>(),
                         ComponentType.ReadOnly<NetworkStreamConnection>());
-                    var connectionIds = connection.ToComponentDataArray<NetworkIdComponent>(Allocator.Temp);
+                    var connectionIds = connection.ToComponentDataArray<NetworkId>(Allocator.Temp);
                     var connectionEntities = connection.ToEntityArray(Allocator.Temp);
                     for (int i = 0; i < connectionIds.Length; ++i)
                     {

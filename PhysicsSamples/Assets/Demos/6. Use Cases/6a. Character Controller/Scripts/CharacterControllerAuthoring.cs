@@ -126,20 +126,21 @@ class CharacterControllerBaker : Baker<CharacterControllerAuthoring>
             };
             var internalData = new CharacterControllerInternalData
             {
-                Entity = GetEntity(),
+                Entity = GetEntity(TransformUsageFlags.Dynamic),
                 Input = new CharacterControllerInput(),
             };
 
-            AddComponent(componentData);
-            AddComponent(internalData);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, componentData);
+            AddComponent(entity, internalData);
             if (authoring.RaiseCollisionEvents)
             {
-                AddBuffer<StatefulCollisionEvent>();
+                AddBuffer<StatefulCollisionEvent>(entity);
             }
             if (authoring.RaiseTriggerEvents)
             {
-                AddBuffer<StatefulTriggerEvent>();
-                AddComponent(new StatefulTriggerEventExclude {});
+                AddBuffer<StatefulTriggerEvent>(entity);
+                AddComponent(entity, new StatefulTriggerEventExclude());
             }
         }
     }
@@ -150,37 +151,19 @@ class CharacterControllerBaker : Baker<CharacterControllerAuthoring>
 [UpdateAfter(typeof(PhysicsInitializeGroup)), UpdateBefore(typeof(ExportPhysicsWorld))]
 [UpdateAfter(typeof(BufferInterpolatedRigidBodiesMotion))]
 [RequireMatchingQueriesForUpdate]
-[BurstCompile]
 public partial struct BufferInterpolatedCharacterControllerMotion : ISystem
 {
     public partial struct UpdateCCInterpolationBuffersJobParallel : IJobEntity
     {
-#if !ENABLE_TRANSFORM_V1
-        public void Execute(ref PhysicsGraphicalInterpolationBuffer interpolationBuffer, in CharacterControllerInternalData ccInternalData, in LocalTransform localTransform, in PhysicsWorldIndex index)
-#else
-        public void Execute(ref PhysicsGraphicalInterpolationBuffer interpolationBuffer, in CharacterControllerInternalData ccInternalData, in Translation position, in Rotation orientation, in PhysicsWorldIndex index)
-#endif
+        public void Execute(ref PhysicsGraphicalInterpolationBuffer interpolationBuffer, in CharacterControllerInternalData ccInternalData, in LocalTransform localTransform)
         {
             interpolationBuffer = new PhysicsGraphicalInterpolationBuffer
             {
-#if !ENABLE_TRANSFORM_V1
                 PreviousTransform = new RigidTransform(localTransform.Rotation, localTransform.Position),
-#else
-                PreviousTransform = new RigidTransform(orientation.Value, position.Value),
-#endif
+
                 PreviousVelocity = ccInternalData.Velocity,
             };
         }
-    }
-
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]
@@ -194,7 +177,6 @@ public partial struct BufferInterpolatedCharacterControllerMotion : ISystem
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct CharacterControllerSystem : ISystem
 {
     const float k_DefaultTau = 0.4f;
@@ -205,12 +187,9 @@ public partial struct CharacterControllerSystem : ISystem
     struct CharacterControllerTypeHandles
     {
         public ComponentTypeHandle<CharacterControllerInternalData> CharacterControllerInternalType;
-#if !ENABLE_TRANSFORM_V1
+
         public ComponentTypeHandle<LocalTransform> LocalTransformType;
-#else
-        public ComponentTypeHandle<Translation> TranslationType;
-        public ComponentTypeHandle<Rotation> RotationType;
-#endif
+
         public BufferTypeHandle<StatefulCollisionEvent> CollisionEventBufferType;
         public BufferTypeHandle<StatefulTriggerEvent> TriggerEventBufferType;
         public ComponentTypeHandle<CharacterControllerComponentData> CharacterControllerComponentType;
@@ -219,22 +198,16 @@ public partial struct CharacterControllerSystem : ISystem
 
         public ComponentLookup<PhysicsVelocity> PhysicsVelocityData;
         public ComponentLookup<PhysicsMass> PhysicsMassData;
-#if !ENABLE_TRANSFORM_V1
+
         public ComponentLookup<LocalTransform> LocalTransformData;
-#else
-        public ComponentLookup<Translation> TranslationData;
-        public ComponentLookup<Rotation> RotationData;
-#endif
+
 
         public CharacterControllerTypeHandles(ref SystemState state)
         {
             CharacterControllerInternalType = state.GetComponentTypeHandle<CharacterControllerInternalData>();
-#if !ENABLE_TRANSFORM_V1
+
             LocalTransformType = state.GetComponentTypeHandle<LocalTransform>();
-#else
-            TranslationType = state.GetComponentTypeHandle<Translation>();
-            RotationType = state.GetComponentTypeHandle<Rotation>();
-#endif
+
             CollisionEventBufferType = state.GetBufferTypeHandle<StatefulCollisionEvent>();
             TriggerEventBufferType = state.GetBufferTypeHandle<StatefulTriggerEvent>();
             PhysicsGraphicalSmoothingType = state.GetComponentTypeHandle<PhysicsGraphicalSmoothing>();
@@ -243,23 +216,16 @@ public partial struct CharacterControllerSystem : ISystem
 
             PhysicsVelocityData = state.GetComponentLookup<PhysicsVelocity>();
             PhysicsMassData = state.GetComponentLookup<PhysicsMass>(true);
-#if !ENABLE_TRANSFORM_V1
+
             LocalTransformData = state.GetComponentLookup<LocalTransform>(true);
-#else
-            TranslationData = state.GetComponentLookup<Translation>(true);
-            RotationData = state.GetComponentLookup<Rotation>(true);
-#endif
         }
 
         public void Update(ref SystemState state)
         {
             CharacterControllerInternalType.Update(ref state);
-#if !ENABLE_TRANSFORM_V1
+
             LocalTransformType.Update(ref state);
-#else
-            TranslationType.Update(ref state);
-            RotationType.Update(ref state);
-#endif
+
             CollisionEventBufferType.Update(ref state);
             TriggerEventBufferType.Update(ref state);
             PhysicsGraphicalSmoothingType.Update(ref state);
@@ -268,12 +234,8 @@ public partial struct CharacterControllerSystem : ISystem
 
             PhysicsVelocityData.Update(ref state);
             PhysicsMassData.Update(ref state);
-#if !ENABLE_TRANSFORM_V1
+
             LocalTransformData.Update(ref state);
-#else
-            TranslationData.Update(ref state);
-            RotationData.Update(ref state);
-#endif
         }
     }
 
@@ -284,12 +246,9 @@ public partial struct CharacterControllerSystem : ISystem
 
         [ReadOnly] public PhysicsWorldSingleton PhysicsWorldSingleton;
         public ComponentTypeHandle<CharacterControllerInternalData> CharacterControllerInternalType;
-#if !ENABLE_TRANSFORM_V1
+
         public ComponentTypeHandle<LocalTransform> LocalTransformType;
-#else
-        public ComponentTypeHandle<Translation> TranslationType;
-        public ComponentTypeHandle<Rotation> RotationType;
-#endif
+
         public BufferTypeHandle<StatefulCollisionEvent> CollisionEventBufferType;
         public BufferTypeHandle<StatefulTriggerEvent> TriggerEventBufferType;
         [ReadOnly] public ComponentTypeHandle<CharacterControllerComponentData> CharacterControllerComponentType;
@@ -306,12 +265,9 @@ public partial struct CharacterControllerSystem : ISystem
             var chunkCCData = chunk.GetNativeArray(ref CharacterControllerComponentType);
             var chunkCCInternalData = chunk.GetNativeArray(ref CharacterControllerInternalType);
             var chunkPhysicsColliderData = chunk.GetNativeArray(ref PhysicsColliderType);
-#if !ENABLE_TRANSFORM_V1
+
             var chunkLocalTransformData = chunk.GetNativeArray(ref LocalTransformType);
-#else
-            var chunkTranslationData = chunk.GetNativeArray(ref TranslationType);
-            var chunkRotationData = chunk.GetNativeArray(ref RotationType);
-#endif
+
 
             var hasChunkCollisionEventBufferType = chunk.Has(ref CollisionEventBufferType);
             var hasChunkTriggerEventBufferType = chunk.Has(ref TriggerEventBufferType);
@@ -334,12 +290,9 @@ public partial struct CharacterControllerSystem : ISystem
                 var ccComponentData = chunkCCData[i];
                 var ccInternalData = chunkCCInternalData[i];
                 var collider = chunkPhysicsColliderData[i];
-#if !ENABLE_TRANSFORM_V1
+
                 var localTransform = chunkLocalTransformData[i];
-#else
-                var position = chunkTranslationData[i];
-                var rotation = chunkRotationData[i];
-#endif
+
                 DynamicBuffer<StatefulCollisionEvent> collisionEventBuffer = default;
                 DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer = default;
 
@@ -381,13 +334,8 @@ public partial struct CharacterControllerSystem : ISystem
                 // Character transform
                 RigidTransform transform = new RigidTransform
                 {
-#if !ENABLE_TRANSFORM_V1
                     pos = localTransform.Position,
                     rot = localTransform.Rotation
-#else
-                    pos = position.Value,
-                    rot = rotation.Value
-#endif
                 };
 
                 NativeList<StatefulCollisionEvent> currentFrameCollisionEvents = default;
@@ -402,7 +350,6 @@ public partial struct CharacterControllerSystem : ISystem
                 {
                     currentFrameTriggerEvents = new NativeList<StatefulTriggerEvent>(Allocator.Temp);
                 }
-
 
                 // Check support
                 CheckSupport(in PhysicsWorldSingleton, ref collider, stepInput, transform,
@@ -441,23 +388,16 @@ public partial struct CharacterControllerSystem : ISystem
                 }
 
                 // Write back and orientation integration
-#if !ENABLE_TRANSFORM_V1
+
                 localTransform.Position = transform.pos;
                 localTransform.Rotation = quaternion.AxisAngle(up, ccInternalData.CurrentRotationAngle);
-#else
-                position.Value = transform.pos;
-                rotation.Value = quaternion.AxisAngle(up, ccInternalData.CurrentRotationAngle);
-#endif
+
 
                 // Write back to chunk data
                 {
                     chunkCCInternalData[i] = ccInternalData;
-#if !ENABLE_TRANSFORM_V1
+
                     chunkLocalTransformData[i] = localTransform;
-#else
-                    chunkTranslationData[i] = position;
-                    chunkRotationData[i] = rotation;
-#endif
                 }
             }
 
@@ -536,11 +476,8 @@ public partial struct CharacterControllerSystem : ISystem
         {
             float3 forward = math.forward(quaternion.AxisAngle(up, currentRotationAngle));
 
-#if !ENABLE_TRANSFORM_V1
             quaternion surfaceFrame;
-#else
-            Rotation surfaceFrame;
-#endif
+
             float3 binorm;
             {
                 binorm = math.cross(forward, up);
@@ -552,19 +489,12 @@ public partial struct CharacterControllerSystem : ISystem
                 binorm = math.cross(tangent, surfaceNormal);
                 binorm = math.normalize(binorm);
 
-#if !ENABLE_TRANSFORM_V1
                 surfaceFrame = new quaternion(new float3x3(binorm, tangent, surfaceNormal));
-#else
-                surfaceFrame.Value = new quaternion(new float3x3(binorm, tangent, surfaceNormal));
-#endif
             }
 
             float3 relative = currentVelocity - surfaceVelocity;
-#if !ENABLE_TRANSFORM_V1
+
             relative = math.rotate(math.inverse(surfaceFrame), relative);
-#else
-            relative = math.rotate(math.inverse(surfaceFrame.Value), relative);
-#endif
 
             float3 diff;
             {
@@ -580,13 +510,8 @@ public partial struct CharacterControllerSystem : ISystem
 
             relative += diff;
 
-#if !ENABLE_TRANSFORM_V1
             linearVelocity = math.rotate(surfaceFrame, relative) + surfaceVelocity +
                 (isJumping ? math.dot(desiredVelocity, up) * up : float3.zero);
-#else
-            linearVelocity = math.rotate(surfaceFrame.Value, relative) + surfaceVelocity +
-                (isJumping ? math.dot(desiredVelocity, up) * up : float3.zero);
-#endif
         }
 
         private void UpdateTriggerEvents(NativeList<StatefulTriggerEvent> triggerEvents,
@@ -650,12 +575,8 @@ public partial struct CharacterControllerSystem : ISystem
 
         public ComponentLookup<PhysicsVelocity> PhysicsVelocityData;
         [ReadOnly] public ComponentLookup<PhysicsMass> PhysicsMassData;
-#if !ENABLE_TRANSFORM_V1
+
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformData;
-#else
-        [ReadOnly] public ComponentLookup<Translation> TranslationData;
-        [ReadOnly] public ComponentLookup<Rotation> RotationData;
-#endif
 
         public void Execute()
         {
@@ -678,22 +599,17 @@ public partial struct CharacterControllerSystem : ISystem
 
                 PhysicsVelocity pv = PhysicsVelocityData[impulse.Entity];
                 PhysicsMass pm = PhysicsMassData[impulse.Entity];
-#if !ENABLE_TRANSFORM_V1
+
                 LocalTransform t = LocalTransformData[impulse.Entity];
-#else
-                Translation t = TranslationData[impulse.Entity];
-                Rotation r = RotationData[impulse.Entity];
-#endif
+
 
                 // Don't apply on kinematic bodies
                 if (pm.InverseMass > 0.0f)
                 {
                     // Apply impulse
-#if !ENABLE_TRANSFORM_V1
+
                     pv.ApplyImpulse(pm, t.Position, t.Rotation, impulse.Impulse, impulse.Point);
-#else
-                    pv.ApplyImpulse(pm, t.Value, r.Value, impulse.Impulse, impulse.Point);
-#endif
+
                     // Write back
                     PhysicsVelocityData[impulse.Entity] = pv;
                 }
@@ -719,11 +635,9 @@ public partial struct CharacterControllerSystem : ISystem
     {
         EntityQueryBuilder queryBuilder = new EntityQueryBuilder(Allocator.Temp)
             .WithAllRW<CharacterControllerComponentData, CharacterControllerInternalData>()
-#if !ENABLE_TRANSFORM_V1
+
             .WithAllRW<LocalTransform>()
-#else
-            .WithAllRW<Translation, Rotation>()
-#endif
+
             .WithAll<PhysicsCollider>();
 
         m_CharacterControllersGroup = state.GetEntityQuery(queryBuilder);
@@ -738,11 +652,6 @@ public partial struct CharacterControllerSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         m_Handles.Update(ref state);
@@ -751,7 +660,6 @@ public partial struct CharacterControllerSystem : ISystem
         var deferredImpulses = new NativeStream(chunks.Length, Allocator.TempJob);
         var physicsWorldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
-        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
         float dt = SystemAPI.Time.DeltaTime;
         var ccJob = new CharacterControllerJob
         {
@@ -759,12 +667,9 @@ public partial struct CharacterControllerSystem : ISystem
             CharacterControllerComponentType = m_Handles.CharacterControllerComponentType,
             CharacterControllerInternalType = m_Handles.CharacterControllerInternalType,
             PhysicsColliderType = m_Handles.PhysicsColliderType,
-#if !ENABLE_TRANSFORM_V1
+
             LocalTransformType = m_Handles.LocalTransformType,
-#else
-            TranslationType = m_Handles.TranslationType,
-            RotationType = m_Handles.RotationType,
-#endif
+
             CollisionEventBufferType = m_Handles.CollisionEventBufferType,
             TriggerEventBufferType = m_Handles.TriggerEventBufferType,
 
@@ -776,9 +681,7 @@ public partial struct CharacterControllerSystem : ISystem
 
         state.Dependency = ccJob.ScheduleParallel(m_CharacterControllersGroup, state.Dependency);
 
-        var copyVelocitiesHandle = new CopyVelocityToGraphicalSmoothingJob
-        {
-        }.ScheduleParallel(m_SmoothedCharacterControllersGroup, state.Dependency);
+        var copyVelocitiesHandle = new CopyVelocityToGraphicalSmoothingJob().ScheduleParallel(m_SmoothedCharacterControllersGroup, state.Dependency);
 
         var applyJob = new ApplyDefferedPhysicsUpdatesJob()
         {
@@ -786,12 +689,8 @@ public partial struct CharacterControllerSystem : ISystem
             DeferredImpulseReader = deferredImpulses.AsReader(),
             PhysicsVelocityData = m_Handles.PhysicsVelocityData,
             PhysicsMassData = m_Handles.PhysicsMassData,
-#if !ENABLE_TRANSFORM_V1
+
             LocalTransformData = m_Handles.LocalTransformData,
-#else
-            TranslationData = m_Handles.TranslationData,
-            RotationData = m_Handles.RotationData
-#endif
         };
 
         state.Dependency = applyJob.Schedule(state.Dependency);

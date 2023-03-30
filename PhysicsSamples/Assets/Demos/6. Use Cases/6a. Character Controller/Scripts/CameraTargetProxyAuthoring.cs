@@ -18,11 +18,12 @@ public class CameraTargetProxyAuthoring : MonoBehaviour
     {
         public override void Bake(CameraTargetProxyAuthoring authoring)
         {
-            AddComponent(new CameraTargetProxy()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new CameraTargetProxy()
             {
-                Target = GetEntity(authoring.Target),
-                LookTo = GetEntity(authoring.LookTo),
-                LookFrom = GetEntity(authoring.LookFrom)
+                Target = GetEntity(authoring.Target, TransformUsageFlags.Dynamic),
+                LookTo = GetEntity(authoring.LookTo, TransformUsageFlags.Dynamic),
+                LookFrom = GetEntity(authoring.LookFrom, TransformUsageFlags.Dynamic)
             });
         }
     }

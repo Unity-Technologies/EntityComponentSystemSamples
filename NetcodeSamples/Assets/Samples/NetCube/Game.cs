@@ -20,26 +20,21 @@ public partial struct GoInGameClientSystem : ISystem
     {
         state.RequireForUpdate<NetCubeSpawner>();
         var builder = new EntityQueryBuilder(Allocator.Temp)
-            .WithAll<NetworkIdComponent>()
+            .WithAll<NetworkId>()
             .WithNone<NetworkStreamInGame>();
         state.RequireForUpdate(state.GetEntityQuery(builder));
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-        foreach (var (id, entity) in SystemAPI.Query<RefRO<NetworkIdComponent>>().WithEntityAccess().WithNone<NetworkStreamInGame>())
+        foreach (var (id, entity) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess().WithNone<NetworkStreamInGame>())
         {
             commandBuffer.AddComponent<NetworkStreamInGame>(entity);
             var req = commandBuffer.CreateEntity();
             commandBuffer.AddComponent<GoInGameRequest>(req);
-            commandBuffer.AddComponent(req, new SendRpcCommandRequestComponent { TargetConnection = entity });
+            commandBuffer.AddComponent(req, new SendRpcCommandRequest { TargetConnection = entity });
         }
         commandBuffer.Playback(state.EntityManager);
     }
@@ -50,7 +45,7 @@ public partial struct GoInGameClientSystem : ISystem
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 public partial struct GoInGameServerSystem : ISystem
 {
-    private ComponentLookup<NetworkIdComponent> networkIdFromEntity;
+    private ComponentLookup<NetworkId> networkIdFromEntity;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -58,14 +53,9 @@ public partial struct GoInGameServerSystem : ISystem
         state.RequireForUpdate<NetCubeSpawner>();
         var builder = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<GoInGameRequest>()
-            .WithAll<ReceiveRpcCommandRequestComponent>();
+            .WithAll<ReceiveRpcCommandRequest>();
         state.RequireForUpdate(state.GetEntityQuery(builder));
-        networkIdFromEntity = state.GetComponentLookup<NetworkIdComponent>(true);
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
+        networkIdFromEntity = state.GetComponentLookup<NetworkId>(true);
     }
 
     [BurstCompile]
@@ -78,31 +68,29 @@ public partial struct GoInGameServerSystem : ISystem
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
         networkIdFromEntity.Update(ref state);
 
-        foreach (var (reqSrc, reqEntity) in SystemAPI.Query<RefRO<ReceiveRpcCommandRequestComponent>>().WithAll<GoInGameRequest>().WithEntityAccess())
+        foreach (var (reqSrc, reqEntity) in SystemAPI.Query<RefRO<ReceiveRpcCommandRequest>>().WithAll<GoInGameRequest>().WithEntityAccess())
         {
             commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
-            var networkIdComponent = networkIdFromEntity[reqSrc.ValueRO.SourceConnection];
+            var networkId = networkIdFromEntity[reqSrc.ValueRO.SourceConnection];
 
-            UnityEngine.Debug.Log($"'{worldName}' setting connection '{networkIdComponent.Value}' to in game, spawning a Ghost '{prefabName}' for them!");
+            UnityEngine.Debug.Log($"'{worldName}' setting connection '{networkId.Value}' to in game, spawning a Ghost '{prefabName}' for them!");
 
             var player = commandBuffer.Instantiate(prefab);
-            commandBuffer.SetComponent(player, new GhostOwnerComponent { NetworkId = networkIdComponent.Value});
+            commandBuffer.SetComponent(player, new GhostOwner { NetworkId = networkId.Value});
 
             // Add the player to the linked entity group so it is destroyed automatically on disconnect
             commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup{Value = player});
 
             // Give each NetworkId their own spawn pos:
             {
-                var isEven = (networkIdComponent.Value & 1) == 0;
+                var isEven = (networkId.Value & 1) == 0;
                 const float halfCharacterWidthPlusHalfPadding = .55f;
                 const float spawnStaggeredOffset = 0.25f;
-                var staggeredXPos = networkIdComponent.Value * math.@select(halfCharacterWidthPlusHalfPadding, -halfCharacterWidthPlusHalfPadding, isEven) + math.@select(-spawnStaggeredOffset, spawnStaggeredOffset, isEven);
-                var preventZFighting = -0.01f * networkIdComponent.Value;
-#if !ENABLE_TRANSFORM_V1
+                var staggeredXPos = networkId.Value * math.@select(halfCharacterWidthPlusHalfPadding, -halfCharacterWidthPlusHalfPadding, isEven) + math.@select(-spawnStaggeredOffset, spawnStaggeredOffset, isEven);
+                var preventZFighting = -0.01f * networkId.Value;
+
                 commandBuffer.SetComponent(player, LocalTransform.FromPosition(new float3(staggeredXPos, preventZFighting, 0)));
-#else
-                commandBuffer.SetComponent(player, new Translation { Value = new float3(staggeredXPos, preventZFighting, 0) });
-#endif
+
             }
             commandBuffer.DestroyEntity(reqEntity);
         }

@@ -10,7 +10,7 @@ namespace Asteroids.Client
 {
     [WorldSystemFilter(WorldSystemFilterFlags.Presentation, WorldSystemFilterFlags.Presentation)]
     [UpdateBefore(typeof(TransformSystemGroup))]
-    public class ParticleUpdateSystemGroup : ComponentSystemGroup
+    public partial class ParticleUpdateSystemGroup : ComponentSystemGroup
     {
     }
 
@@ -19,15 +19,6 @@ namespace Asteroids.Client
     [BurstCompile]
     public partial struct ParticleAgeSystem : ISystem
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-        }
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -61,15 +52,6 @@ namespace Asteroids.Client
     public partial struct ParticleMoveSystem : ISystem
     {
         [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-        }
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var job = new ParticleMoveJob
@@ -82,19 +64,13 @@ namespace Asteroids.Client
         partial struct ParticleMoveJob : IJobEntity
         {
             public float deltaTime;
-#if !ENABLE_TRANSFORM_V1
+
             public void Execute(ref LocalTransform transform, in ParticleVelocity velocity)
             {
                 transform.Position.x += velocity.velocity.x * deltaTime;
                 transform.Position.y += velocity.velocity.y * deltaTime;
             }
-#else
-            public void Execute(ref Translation position, in ParticleVelocity velocity)
-            {
-                position.Value.x += velocity.velocity.x * deltaTime;
-                position.Value.y += velocity.velocity.y * deltaTime;
-            }
-#endif
+
         }
     }
 
@@ -104,15 +80,6 @@ namespace Asteroids.Client
     [BurstCompile]
     public partial struct ParticleColorTransitionSystem : ISystem
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-        }
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -137,15 +104,6 @@ namespace Asteroids.Client
     public partial struct ParticleSizeTransitionSystem : ISystem
     {
         [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-        }
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var job = new ParticleSizeJob();
@@ -154,25 +112,15 @@ namespace Asteroids.Client
         [BurstCompile]
         partial struct ParticleSizeJob : IJobEntity
         {
-#if !ENABLE_TRANSFORM_V1
-            public void Execute(ref PostTransformScale scaleMatrix, in ParticleSizeTransition size,
+            public void Execute(ref PostTransformMatrix scaleMatrix, in ParticleSizeTransition size,
                 in ParticleAge age)
             {
                 float sizeScale = age.age / age.maxAge;
                 var particleLength = size.startLength + (size.endLength - size.startLength) * sizeScale;
                 var particleWidth = size.startWidth + (size.endWidth - size.startWidth) * sizeScale;
-                scaleMatrix.Value = float3x3.Scale(particleWidth, particleWidth + particleLength, particleWidth);
+                scaleMatrix.Value = float4x4.Scale(particleWidth, particleWidth + particleLength, particleWidth);
             }
-#else
-            public void Execute(ref NonUniformScale scale, in ParticleSizeTransition size,
-                in ParticleAge age)
-            {
-                float sizeScale = age.age / age.maxAge;
-                var particleLength = size.startLength + (size.endLength - size.startLength) * sizeScale;
-                var particleWidth = size.startWidth + (size.endWidth - size.startWidth) * sizeScale;
-                scale.Value = new float3(particleWidth, particleWidth + particleLength, particleWidth);
-            }
-#endif
+
         }
     }
 }

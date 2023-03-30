@@ -25,15 +25,8 @@ public struct IncrementJob : IJob
 }
 
 // A system that schedules the IJob.
-[BurstCompile]
 public partial struct MySystem : ISystem
 {
-    [BurstCompile]
-    public void OnCreate(ref SystemState state) { }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
-
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -69,15 +62,8 @@ public struct IncrementParallelJob : IJobParallelFor
 }
 
 // A system that schedules the IJobParallelFor.
-[BurstCompile]
 public partial struct MySystem : ISystem
 {
-    [BurstCompile]
-    public void OnCreate(ref SystemState state) { }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
-
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -185,7 +171,6 @@ The `unfilteredChunkIndex` is the index of the chunk in the sequence of all chun
 
 ```c#
 // A system that schedules and completes the above IJobChunk.
-[BurstCompile]
 public partial struct MySystem : ISystem
 {
     private EntityQuery myQuery;
@@ -197,10 +182,10 @@ public partial struct MySystem : ISystem
         builder.WithAll<Foo, Bar, Apple>();
         builder.WithNone<Banana>();
         myQuery = state.GetEntityQuery(builder);
-    }
 
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
+        // You can also use SystemAPI.QueryBuilder(), which is
+        // a bit more convenient.
+    }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -291,17 +276,10 @@ public partial struct MyIJobEntity : IJobEntity
 
 ```c#
 // A system that schedules and completes the above IJobEntity.
-[BurstCompile]
 public partial struct MySystem : ISystem
 {
     // We don't need to create the query manually because source generation
     // creates one inferred from the IJobEntity's attributes and Execute params.
-
-    [BurstCompile]
-    public void OnCreate(ref SystemState state) { }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)

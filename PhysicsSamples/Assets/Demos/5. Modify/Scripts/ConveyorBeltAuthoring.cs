@@ -87,14 +87,15 @@ class ConveyorBeltBaker : Baker<ConveyorBeltAuthoring>
 {
     public override void Bake(ConveyorBeltAuthoring authoring)
     {
-        AddComponent(new ConveyorBelt
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new ConveyorBelt
         {
             Speed = authoring.IsLinear ? authoring.Speed : math.radians(authoring.Speed),
             IsAngular = !authoring.IsLinear,
             LocalDirection = authoring.LocalDirection.normalized,
         });
 
-        AddComponent(new ConveyorBeltDebugDisplayData
+        AddComponent(entity, new ConveyorBeltDebugDisplayData
         {
             Offset = 0.0f
         });
@@ -115,7 +116,6 @@ public struct ConveyorBeltDebugDisplayData : IComponentData
 
 // Displays conveyor belt data in Runtime, where it is impossible to do so using OnDrawGizmos().
 [UpdateInGroup(typeof(PhysicsSimulationGroup))]
-[BurstCompile]
 public partial struct DisplayConveyorBeltSystem : ISystem
 {
     private EntityQuery m_ConveyorBeltQuery;
@@ -194,11 +194,6 @@ public partial struct DisplayConveyorBeltSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         // Properly chain up dependencies
@@ -211,11 +206,10 @@ public partial struct DisplayConveyorBeltSystem : ISystem
             SystemAPI.GetSingletonRW<PhysicsDebugDisplayData>();
         }
 
-        float deltaTime = SystemAPI.Time.fixedDeltaTime;
-        new DisplayConveyorBeltJob
+        state.Dependency = new DisplayConveyorBeltJob
         {
-            DeltaTime = deltaTime
-        }.Schedule(m_ConveyorBeltQuery);
+            DeltaTime = SystemAPI.Time.fixedDeltaTime
+        }.Schedule(state.Dependency);
     }
 }
 
@@ -224,7 +218,6 @@ public partial struct DisplayConveyorBeltSystem : ISystem
 [UpdateInGroup(typeof(PhysicsSimulationGroup))]
 [UpdateAfter(typeof(PhysicsCreateContactsGroup))]
 [UpdateBefore(typeof(PhysicsCreateJacobiansGroup))]
-[BurstCompile]
 public partial struct PrepareConveyorBeltSystem : ISystem
 {
     private ComponentLookup<ConveyorBelt> m_ConveyorBeltData;
@@ -255,11 +248,6 @@ public partial struct PrepareConveyorBeltSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         m_ConveyorBeltData.Update(ref state);
@@ -280,7 +268,6 @@ public partial struct PrepareConveyorBeltSystem : ISystem
 [UpdateInGroup(typeof(PhysicsSimulationGroup))]
 [UpdateBefore(typeof(PhysicsSolveAndIntegrateGroup))]
 [UpdateAfter(typeof(PhysicsCreateJacobiansGroup))]
-[BurstCompile]
 public partial struct ConveyorBeltSystem : ISystem
 {
     private ComponentLookup<ConveyorBelt> m_ConveyorBeltData;
@@ -345,11 +332,6 @@ public partial struct ConveyorBeltSystem : ISystem
     {
         state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ConveyorBelt>()));
         m_ConveyorBeltData = state.GetComponentLookup<ConveyorBelt>(true);
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]

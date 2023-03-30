@@ -39,7 +39,8 @@ public class TerrainDemo : SceneCreationAuthoring<TerrainDemoScene>
     {
         public override void Bake(TerrainDemo authoring)
         {
-            AddComponentObject(new TerrainDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new TerrainDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial,
@@ -57,7 +58,7 @@ public class TerrainDemo : SceneCreationAuthoring<TerrainDemoScene>
     }
 }
 
-public class TerrainDemoSystem : SceneCreationSystem<TerrainDemoScene>
+public partial class TerrainDemoSystem : SceneCreationSystem<TerrainDemoScene>
 {
     public override void CreateScene(TerrainDemoScene sceneSettings)
     {

@@ -20,7 +20,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(PhysicsPlayerInputAuthoring authoring)
             {
-                AddBuffer<PhysicsPlayerInput>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddBuffer<PhysicsPlayerInput>(entity);
             }
         }
     }

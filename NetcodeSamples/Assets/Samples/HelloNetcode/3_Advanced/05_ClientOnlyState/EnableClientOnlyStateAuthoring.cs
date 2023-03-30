@@ -10,10 +10,11 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(EnableClientOnlyStateAuthoring authoring)
             {
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
                 //Enabled the the sample systems
-                AddComponent<EnableClientOnlyState>();
+                AddComponent<EnableClientOnlyState>(entity);
                 //Enabled the client only backup systems
-                AddComponent<EnableClientOnlyBackup>();
+                AddComponent<EnableClientOnlyBackup>(entity);
             }
         }
     }

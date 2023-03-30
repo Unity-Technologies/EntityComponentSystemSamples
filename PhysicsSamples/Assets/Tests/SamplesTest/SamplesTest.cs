@@ -49,7 +49,32 @@ namespace Unity.Physics.Tests
     [TestFixture]
     abstract class UnityPhysicsSamplesTest
     {
+        public static void ExpectURPForwardWarningMessage()
+        {
+            // DOTS-7808: adding expected warning message regarding URP Forward+ renderer. To be removed once this
+            // project is updated accordingly.
+#if UNITY_EDITOR
+            LogAssert.Expect(LogType.Warning, "Entities.Graphics should be used with URP Forward+. Change Rendering Path on UniversalRenderPipelineAsset_Renderer for best compatibility.");
+#endif
+        }
+
         protected static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
+
+        protected static IEnumerable GetPerformanceScenes()
+        {
+            var scenes = new List<string>();
+
+            var sceneCount = SceneManager.sceneCountInBuildSettings;
+            for (int sceneIndex = 0; sceneIndex < sceneCount; ++sceneIndex)
+            {
+                var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
+                if (scenePath.Contains("Tests/Performance"))
+                    scenes.Add(scenePath);
+            }
+            scenes.Sort();
+
+            return scenes;
+        }
 
         protected static IEnumerable GetScenes()
         {
@@ -166,6 +191,10 @@ namespace Unity.Physics.Tests
 
             ResetDefaultWorld();
             yield return new WaitForFixedUpdate();
+
+            ExpectURPForwardWarningMessage();
+
+            LogAssert.NoUnexpectedReceived();
         }
 
         protected static void ResetDefaultWorld()
@@ -229,8 +258,6 @@ namespace Unity.Physics.Tests
             ConfigureSimulation(DefaultWorld, SimulationType.UnityPhysics, true);
 
             yield return LoadSceneAndSimulate(scenePath);
-
-            LogAssert.NoUnexpectedReceived();
         }
     }
 
@@ -260,8 +287,6 @@ namespace Unity.Physics.Tests
             ConfigureSimulation(DefaultWorld, SimulationType.UnityPhysics, false);
 
             yield return LoadSceneAndSimulate(scenePath);
-
-            LogAssert.NoUnexpectedReceived();
         }
     }
 }

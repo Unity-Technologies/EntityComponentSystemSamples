@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
             public override void Bake(EnableGoInGameAuthoring authoring)
             {
                 EnableGoInGame component = default(EnableGoInGame);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

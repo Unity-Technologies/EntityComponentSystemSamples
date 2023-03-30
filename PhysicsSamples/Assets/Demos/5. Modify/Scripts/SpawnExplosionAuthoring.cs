@@ -43,9 +43,10 @@ class SpawnExplosionAuthoringBaker : Baker<SpawnExplosionAuthoring>
     public override void Bake(SpawnExplosionAuthoring authoring)
     {
         var transform = GetComponent<Transform>();
-        AddComponent(new SpawnExplosionSettings
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new SpawnExplosionSettings
         {
-            Prefab = GetEntity(authoring.Prefab),
+            Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
             Position = transform.position,
             Rotation = quaternion.identity,
             Count = authoring.Count,
@@ -58,7 +59,7 @@ class SpawnExplosionAuthoringBaker : Baker<SpawnExplosionAuthoring>
     }
 }
 
-class SpawnExplosionSystem : SpawnRandomObjectsSystemBase<SpawnExplosionSettings>
+partial class SpawnExplosionSystem : SpawnRandomObjectsSystemBase<SpawnExplosionSettings>
 {
     // Used to divide colliders into groups, and to create a single collider for each group
     internal int GroupId;

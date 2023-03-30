@@ -45,7 +45,7 @@ namespace Asteroids.Client
                     {
                         var req = commandBuffer.CreateEntity();
                         commandBuffer.AddComponent<PlayerSpawnRequest>(req);
-                        commandBuffer.AddComponent(req, new SendRpcCommandRequestComponent());
+                        commandBuffer.AddComponent(req, new SendRpcCommandRequest());
                     }
                 }
                 else
@@ -82,7 +82,7 @@ namespace Asteroids.Client
 
         protected override void OnUpdate()
         {
-            if (SystemAPI.TryGetSingleton<CommandTargetComponent>(out var commandTarget))
+            if (SystemAPI.TryGetSingleton<CommandTarget>(out var commandTarget))
             {
                 if (commandTarget.targetEntity == Entity.Null ||
                     !EntityManager.HasComponent<ShipCommandData>(commandTarget.targetEntity))
@@ -90,7 +90,7 @@ namespace Asteroids.Client
                     // No ghosts are spawned, so create a placeholder struct to store the commands in
                     var ent = EntityManager.CreateEntity();
                     EntityManager.AddBuffer<ShipCommandData>(ent);
-                    SystemAPI.SetSingleton(new CommandTargetComponent{targetEntity = ent});
+                    SystemAPI.SetSingleton(new CommandTarget{targetEntity = ent});
                 }
             }
 
@@ -121,7 +121,7 @@ namespace Asteroids.Client
                     // Special handling for thin clients since we can't tell if the ship is spawned or not
                     var req = commandBuffer.CreateEntity();
                     commandBuffer.AddComponent<PlayerSpawnRequest>(req);
-                    commandBuffer.AddComponent(req, new SendRpcCommandRequestComponent());
+                    commandBuffer.AddComponent(req, new SendRpcCommandRequest());
                 }
                 // If ship, store commands in network command buffer
                 if (inputFromEntity.HasBuffer(targetEntity))

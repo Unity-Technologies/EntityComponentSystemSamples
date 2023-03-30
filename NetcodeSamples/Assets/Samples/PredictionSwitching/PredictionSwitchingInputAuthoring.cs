@@ -8,7 +8,8 @@ public class PredictionSwitchingInputAuthoring : MonoBehaviour
     {
         public override void Bake(PredictionSwitchingInputAuthoring authoring)
         {
-            AddBuffer<PredictionSwitchingInput>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddBuffer<PredictionSwitchingInput>(entity);
         }
     }
 }

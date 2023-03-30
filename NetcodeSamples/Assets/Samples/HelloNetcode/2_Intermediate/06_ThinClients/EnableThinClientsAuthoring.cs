@@ -8,7 +8,8 @@ namespace Samples.HelloNetcode
     {
         public override void Bake(EnableThinClientsAuthoring authoring)
         {
-            AddComponent<EnableThinClients>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<EnableThinClients>(entity);
         }
     }
     public struct EnableThinClients : IComponentData { }

@@ -29,11 +29,6 @@ namespace Asteroids.Server
         }
 
         [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var settings = SystemAPI.GetSingleton<ServerSettings>();
@@ -46,15 +41,13 @@ namespace Asteroids.Server
                 // We want to make sure that asteroidsPerPx * tileSize * tileSize = maxAsteroidsPerTile
                 int tileSize = math.max(minTileSize, (int)math.ceil(math.sqrt((float)maxAsteroidsPerTile / asteroidsPerPx)));
 
-                var grid = state.EntityManager.CreateEntity();
-                state.EntityManager.SetName(grid, "GhostImportanceSingleton");
-                state.EntityManager.AddComponentData(grid, new GhostDistanceData
+                var gridSingleton = state.EntityManager.CreateSingleton(new GhostDistanceData
                 {
                     TileSize = new int3(tileSize, tileSize, 256),
                     TileCenter = new int3(0, 0, 128),
                     TileBorderWidth = new float3(1f, 1f, 1f),
                 });
-                state.EntityManager.AddComponentData(grid, new GhostImportance
+                state.EntityManager.AddComponentData(gridSingleton, new GhostImportance
                 {
                     ScaleImportanceFunction = m_ScaleFunctionPointer,
                     GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
@@ -90,7 +83,7 @@ namespace Asteroids.Server
             public EntityCommandBuffer ecb;
             [ReadOnly] public NativeList<LevelComponent> level;
 
-            public void Execute(Entity entity, in NetworkIdComponent networkId)
+            public void Execute(Entity entity, in NetworkId networkId)
             {
                 ecb.AddComponent(entity, new LevelRequestedTag());
                 var req = ecb.CreateEntity();
@@ -98,7 +91,7 @@ namespace Asteroids.Server
                 {
                     levelData = level[0],
                 });
-                ecb.AddComponent(req, new SendRpcCommandRequestComponent {TargetConnection = entity});
+                ecb.AddComponent(req, new SendRpcCommandRequest {TargetConnection = entity});
             }
         }
     }

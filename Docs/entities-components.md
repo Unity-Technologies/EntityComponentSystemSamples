@@ -31,7 +31,7 @@ Entity component types are defined by implementing these interfaces:
 | [`ISharedComponent`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ISharedComponent.html) | Defines a shared component type, whose values can be shared by multiple entities.|
 | [`ICleanupComponent`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupComponent.html)  | Defines a cleanup component type, which facilitates proper setup and teardown of resources.|
 
-There are also two additional interfaces ([`ICleanupSharedComponent`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupSharedComponent.html) and [`ICleanupBufferElementData`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupBufferElementData.html)) and [chunk components](additional-entities-features.md#chunk-components) (which are defined with `IComponentData` but added and removed from entities by a distinct set of methods).
+There are also two additional interfaces ([`ICleanupSharedComponent`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupSharedComponent.html) and [`ICleanupBufferElementData`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupBufferElementData.html)) and [chunk components](additional-entities-features.md#chunk-components) (which are defined with `IComponentData` but added and removed from entities by a different set of methods).
 
 A component type defined with `IComponentData` or `IBufferElementData` can be made **'enableable'** by also implementing [`IEnableableComponent`](additional-entities-features.md#enableable-components).
 
@@ -58,7 +58,7 @@ The entities in a world are created, destroyed, and modified through the world's
 
 | &#x1F4DD; NOTE |
 | :- |
-| All of the above methods, except `GetComponent` and `SetComponent`, are [structural change](concepts-structural-changes.md) operations. |
+| `CreateEntity`, `Instantiate`, `DestroyEntity`, `AddComponent`, and `RemoveComponent` are [structural change](https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-structural-changes.html) operations. |
 
 <br>
 
@@ -84,7 +84,7 @@ Archetypes are created by the `EntityManager` as you create and modify entities,
 
 # Chunks
 
-The entities of an archetype are stored in 16KiB blocks of memory belonging to the archetype called *chunks*. Each chunk stores up to 128 entities (with the precise number depending upon the number and size of the archetype's component types).
+The entities of an archetype are stored in 16KiB blocks of memory belonging to the archetype called *chunks*. Each chunk stores up to 128 entities (with the precise quantity depending upon the number and size of the component types in the archetype).
 
 The entity ID's and components of each type are stored in their own separate array within the chunk. For example, in the archetype for entities which have component types *A* and *B*, each chunk will store three arrays: 
 
@@ -104,17 +104,17 @@ The creation and destruction of chunks is handled by the `EntityManager`:
 - The `EntityManager` creates a new chunk only when an entity is added to an archetype whose already existing chunks are all full.
 - The `EntityManager` only destroys a chunk when the chunk's last entity is removed.
 
-Any `EntityManager` operation that adds, removes, or moves entities within a chunk is called a *structural change*. Such changes should generally be made only on the main thread, not in jobs. (An [`EntityCommandBuffer`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityCommandBuffer.html) can be used to work around this limitation.)
+Any `EntityManager` operation that adds, removes, or moves entities within a chunk is called a *structural change*. Such changes should generally be made only on the main thread, not in jobs (though an [`EntityCommandBuffer`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityCommandBuffer.html) can be used as a work around).
 
 <br>
 
 # Queries
 
-An [`EntityQuery`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityQuery.html) efficiently finds all entities having a specified set of component types. For example, if a query looks for all entities having component types *A* and *B*, then the query will gather the chunks of all archetypes having those two component types, regardless of whatever other component types those archetypes might have. So such a query would match the entities with component types *A* and *B*, but the query would also match the entities with component types  *A*, *B*, and *C*.
+An [`EntityQuery`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityQuery.html) efficiently finds all entities having a specified set of component types. For example, if a query looks for all entities having component types *A* and *B*, then the query will gather the chunks of all archetypes which include *A* and *B*, regardless of whatever other component types those archetypes might have. Such a query would match the entities with component types *A* and *B*, but the query would also match, say, the entities with component types  *A*, *B*, and *C*.
 
 | &#x1F4DD; NOTE |
 | :- |
-| The archetypes matching a query will get cached until the next time a new archetype is added to the world. Because the set of existing archetypes in a world tends to stabilize early in the lifetime of a program, this caching tends to improve performance. |
+| The archetypes matching a query will get cached until the next time a new archetype is added to the world. Because the set of existing archetypes in a world tends to stabilize early in the lifetime of a program, this caching usually helps make the queries much cheaper. |
 
 A query can also specify component types to *exclude* from the matching archetypes. For example, if a query looks for all entities having component types *A* and *B* but *not* having component type *C*, the query would match entities with component types *A* and *B*, but the query would *not* match entities with component types *A*, *B*, and *C*.
 
@@ -127,11 +127,11 @@ A query can also specify component types to *exclude* from the matching archetyp
 
 An entity ID is represented by the struct [`Entity`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.Entity.html).
 
-In order to look up entities by ID, the world’s `EntityManager` maintains an array of entity metadata. Each entity ID has an index value denoting a slot in this metadata array, and the slot stores a pointer to the chunk where that entity is stored, as well as the index of the entity within the chunk. When no entity exists for a particular index, the chunk pointer at that index is null. Here, for example, no entities with indexes 1, 2, and 5 currently exist, so the chunk pointers in those slots are all null.
-
-In order to allow entity indexes to be reused after an entity is destroyed, each entity ID also contains a *version number*. When an entity is destroyed, the version number stored at its index is incremented, and so if an ID’s version number doesn’t match the one currently stored, then the ID must refer to an entity that has already been destroyed or perhaps never existed.
+In order to look up entities by ID, the world’s `EntityManager` maintains an array of entity metadata. Each entity ID has an index value denoting a slot in this metadata array, and the slot stores a pointer to the chunk where that entity is stored, as well as the index of the entity within the chunk. When no entity exists for a particular index, the chunk pointer at that index is null. Here, for example, no entities with indexes 1, 2, and 5 currently exist, so the chunk pointers in those slots are all null:
 
 ![entity metadata](./images/entities_metadata.png)
+
+In order to allow entity indexes to be reused after an entity is destroyed, each entity ID also contains a *version number*. When an entity is destroyed, the version number stored at its index is incremented, and so if an ID’s version number doesn’t match the one currently stored, then the ID must refer to an entity that has already been destroyed or perhaps never existed.
 
 <br>
 
@@ -152,11 +152,7 @@ An `IComponentData` struct is expected to be unmanaged, so it cannot contain any
 * [Fixed array](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/fixed-statement) (only allowed in an [unsafe](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/unsafe) context)
 * Struct types that conform to these same restrictions.
 
-<br>
-
-## Tag components
-
-An `IComponentData` struct with no fields is called a **tag component**. Although tag components store no data, they can still be added and removed from entities like any other component type, and they can be useful to mark entities for queries. For example, if all of our entities representing monsters have a *Monster* tag component, a query for the *Monster* component type will match all the monster entities.
+An `IComponentData` struct with no fields is called a ***tag component***. Although tag components store no data, they can still be added and removed from entities like any other component type, which is useful for queries. For example, if all of our entities representing monsters have a *Monster* tag component, a query for the *Monster* component type will match all the monster entities.
 
 <br>
 
@@ -164,14 +160,14 @@ An `IComponentData` struct with no fields is called a **tag component**. Althoug
 
 A class implementing `IComponentData` is a *managed* component type. Unlike the unmanaged `IComponentData` structs, these managed components can store any managed objects.
 
-In general, managed component types should be used only when really needed because, compared to *unmanaged* components, managed components incur some heavy costs:
+In general, managed component types should be used only when really needed because, compared to *unmanaged* components, they incur some heavy costs:
 
 - Like all managed objects, managed components *cannot* be used in [Burst](https://docs.unity3d.com/Packages/com.unity.burst@latest)-compiled code.
-- Managed objects can only be safely used in [jobs](https://docs.unity3d.com/Manual/JobSystem.html) with some special considerations.
-- Managed components are not stored directly in the chunks: instead, all managed components of a world are all stored in one big array, and the chunks store just indexes of this array.
+- Managed objects cannot normally be used safely in [jobs](https://docs.unity3d.com/Manual/JobSystem.html).
+- Managed components are not stored directly in the chunks: instead, all managed components of a world are all stored in one big array while the chunks merely store indexes of this array.
 - Like all managed objects, creating managed components incurs garbage collection overhead.
 
-If a managed component type implements `ICloneable`, then any resources it contains can be properly copied when an instance is itself copied. Likewise, if a managed component type implements `IDisposable`, then it can properly dispose any resources it may contain when an instance is removed from an entity or the entity is destroyed. Example:
+If a managed component type implements `ICloneable`, then any resources it contains can be properly copied when an instance is itself copied. Likewise, if a managed component type implements `IDisposable`, then it can properly dispose any resources it may contain when an instance is removed from an entity or the entity is destroyed.
 
 <br>
 
@@ -242,11 +238,7 @@ An aspect is defined as a readonly partial struct implementing [`IAspect`](https
 |`DynamicBuffer<T>`|The wrapped entity's dynamic buffer T component.|
 |Another aspect type| The containing aspect will encompass all the fields of the 'embedded' aspect. |
 
-<br>
-
-## Creating instances of an aspect
-
-These EntityManager methods create instances of an aspect:
+These `EntityManager` methods create instances of an aspect:
 
 |**Method**|**Description**|
 |----|---|
@@ -257,7 +249,7 @@ Aspect instances can also be retrieved by [`SystemAPI.GetAspectRW<T>`](https://d
 
 | &#x26A0; IMPORTANT |
 | :- |
-| In a system, you should get aspect instances *via* `SystemAPI.GetAspectRW<T>` and `SystemAPI.GetAspectRO<T>` rather than *via* the `EntityManager` methods. Unlike the `EntityManager` methods, the `SystemAPI` methods register the underlying component types of the aspect with the system, which is [required for the systems to schedule jobs with every needed dependency](./entities-jobs.md#systemstatedependency). |
+| You should generally get aspect instances *via* `SystemAPI` rather than the `EntityManager`: unlike the `EntityManager` methods, the `SystemAPI` methods register the underlying component types of the aspect with the system, which is [necessary for the systems to properly schedule jobs with every dependency they need](./entities-jobs.md#systemstatedependency). |
 
 <br>
 

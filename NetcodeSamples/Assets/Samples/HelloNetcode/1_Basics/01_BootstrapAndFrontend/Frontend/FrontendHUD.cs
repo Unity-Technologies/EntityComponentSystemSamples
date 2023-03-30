@@ -1,23 +1,24 @@
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Entities;
 using Unity.NetCode;
 using System.Collections.Generic;
-using UnityEngine.UIElements;
 
 namespace Samples.HelloNetcode
 {
     public class FrontendHUD : MonoBehaviour
     {
+        [SerializeField]
+        UnityEngine.EventSystems.EventSystem m_EventSystem;
+
         public string ConnectionStatus
         {
             get { return m_ConnectionLabel.text; }
             set { m_ConnectionLabel.text = value; }
         }
 
-        Label m_ConnectionLabel;
-        Button m_MainMenuButton;
+        [SerializeField]
+        UnityEngine.UI.Text m_ConnectionLabel;
 
         public void ReturnToFrontend()
         {
@@ -37,24 +38,6 @@ namespace Samples.HelloNetcode
             SceneManager.LoadScene("Frontend");
         }
 
-        void ReturnButtonClicked(ClickEvent evt)
-        {
-            ReturnToFrontend();
-        }
-
-        void OnEnable()
-        {
-            var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
-            m_ConnectionLabel = rootVisualElement.Query<Label>("label");
-            m_MainMenuButton = rootVisualElement.Query<Button>("button");
-            m_MainMenuButton.RegisterCallback<ClickEvent>(ReturnButtonClicked);
-        }
-
-        void OnDisable()
-        {
-            m_MainMenuButton.UnregisterCallback<ClickEvent>(ReturnButtonClicked);
-        }
-
         public void Start()
         {
             foreach (var world in World.All)
@@ -67,6 +50,11 @@ namespace Samples.HelloNetcode
                     simGroup.AddSystemToUpdateList(sys);
                 }
             }
+
+            // We must always have an event system (DOTS-7177), but some scenes will already have one,
+            // so we only enable ours if we can't find someone else's.
+            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>(false) == null)
+                m_EventSystem.gameObject.SetActive(true);
         }
     }
 
@@ -90,11 +78,11 @@ namespace Samples.HelloNetcode
             {
                 var connection = EntityManager.GetComponentData<NetworkStreamConnection>(connectionEntity);
                 var address = SystemAPI.GetSingletonRW<NetworkStreamDriver>().ValueRO.GetRemoteEndPoint(connection).Address;
-                if (EntityManager.HasComponent<NetworkIdComponent>(connectionEntity))
+                if (EntityManager.HasComponent<NetworkId>(connectionEntity))
                 {
                     if (string.IsNullOrEmpty(m_PingText) || UnityEngine.Time.frameCount % 30 == 0)
                     {
-                        var networkSnapshotAck = EntityManager.GetComponentData<NetworkSnapshotAckComponent>(connectionEntity);
+                        var networkSnapshotAck = EntityManager.GetComponentData<NetworkSnapshotAck>(connectionEntity);
                         m_PingText = networkSnapshotAck.EstimatedRTT > 0 ? $"{(int)networkSnapshotAck.EstimatedRTT}ms" : "Connected";
                     }
 

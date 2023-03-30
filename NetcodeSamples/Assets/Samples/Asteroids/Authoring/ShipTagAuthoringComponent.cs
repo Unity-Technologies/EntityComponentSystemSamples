@@ -3,12 +3,13 @@ using UnityEngine;
 
 public class ShipTagAuthoringComponent : MonoBehaviour
 {
-}
-
-public class ShipTagAuthoringComponentBaker : Baker<ShipTagAuthoringComponent>
-{
-    public override void Bake(ShipTagAuthoringComponent authoring)
+    public class Baker : Baker<ShipTagAuthoringComponent>
     {
-        AddComponent(new ShipTagComponentData());
+        public override void Bake(ShipTagAuthoringComponent authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new ShipTagComponentData());
+        }
     }
+
 }

@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
             public override void Bake(EnableRPCAuthoring authoring)
             {
                 EnableRPC component = default(EnableRPC);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

@@ -19,7 +19,8 @@ namespace Samples.HelloNetcode
             public override void Bake(HitAuthoring authoring)
             {
                 Hit component = default(Hit);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

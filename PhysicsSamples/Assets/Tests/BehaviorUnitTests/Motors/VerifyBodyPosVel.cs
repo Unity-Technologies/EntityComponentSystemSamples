@@ -44,7 +44,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyBodyPosVel authoring)
             {
-                AddComponent(new VerifyBodyPosVelData()
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new VerifyBodyPosVelData()
                 {
                     ExpectedPosition = authoring.ExpectedPosition,
                     ExpectedVelocity = authoring.ExpectedVelocity,
@@ -63,28 +64,28 @@ namespace Unity.Physics.Tests
 
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateBefore(typeof(PhysicsSimulationGroup))]
-    public partial class VerifyBodyPosVelSystem : SystemBase
+    public partial struct VerifyBodyPosVelSystem : ISystem
     {
         EntityQuery m_VerificationGroup;
         int m_FrameCount;
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
             m_FrameCount = -1;
-            RequireForUpdate<VerifyBodyPosVelData>();
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            state.RequireForUpdate<VerifyBodyPosVelData>();
+            m_VerificationGroup = state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyBodyPosVelData) }
             });
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             m_FrameCount++;
             var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
             foreach (var entity in entities)
             {
-                VerifyBodyPosVelData data = EntityManager.GetComponentData<VerifyBodyPosVelData>(entity);
+                VerifyBodyPosVelData data = state.EntityManager.GetComponentData<VerifyBodyPosVelData>(entity);
                 if (data.StartAtFrame > m_FrameCount)
                 {
                     // Desired frame not reached yet
@@ -93,28 +94,21 @@ namespace Unity.Physics.Tests
 
                 if (data.CheckPosition)
                 {
-#if !ENABLE_TRANSFORM_V1
-                    var translation = EntityManager.GetComponentData<LocalTransform>(entity).Position;
-#else
-                    var translation = EntityManager.GetComponentData<Translation>(entity).Value;
-#endif
+                    var translation = state.EntityManager.GetComponentData<LocalTransform>(entity).Position;
                     Assert.IsTrue(math.distance(translation, data.ExpectedPosition) <= data.Tolerance,
                         $"{m_FrameCount}: Actual position {translation} of Entity {entity.Index} is not close enough to expected position {data.ExpectedPosition}");
                 }
 
                 if (data.CheckVelocity || data.CheckAngularVelocity)
                 {
-                    var vel = EntityManager.GetComponentData<PhysicsVelocity>(entity);
+                    var vel = state.EntityManager.GetComponentData<PhysicsVelocity>(entity);
                     Assert.IsTrue(data.CheckVelocity ? math.distance(vel.Linear, data.ExpectedVelocity) <= data.Tolerance : true,
                         $"{m_FrameCount}: Actual linear velocity {vel.Linear} of Entity {entity.Index} is not close enough to expected one {data.ExpectedVelocity}");
                     if (data.CheckAngularVelocity)
                     {
-                        var mass = EntityManager.GetComponentData<PhysicsMass>(entity);
-#if !ENABLE_TRANSFORM_V1
-                        quaternion rot = EntityManager.GetComponentData<LocalTransform>(entity).Rotation;
-#else
-                        quaternion rot = EntityManager.GetComponentData<Rotation>(entity).Value;
-#endif
+                        var mass = state.EntityManager.GetComponentData<PhysicsMass>(entity);
+                        quaternion rot = state.EntityManager.GetComponentData<LocalTransform>(entity).Rotation;
+
                         var angVelWorldSpace = vel.GetAngularVelocityWorldSpace(mass, rot);
                         var expectedRadians = math.radians(data.ExpectedAngularVelocity);
                         Assert.IsTrue(math.distance(angVelWorldSpace, expectedRadians) <= data.Tolerance,
@@ -124,11 +118,8 @@ namespace Unity.Physics.Tests
 
                 if (data.CheckOrientation)
                 {
-#if !ENABLE_TRANSFORM_V1
-                    var rot = EntityManager.GetComponentData<LocalTransform>(entity).Rotation;
-#else
-                    var rot = EntityManager.GetComponentData<Rotation>(entity).Value;
-#endif
+                    var rot = state.EntityManager.GetComponentData<LocalTransform>(entity).Rotation;
+
                     // Before comparing orientations, make sure we properly handle 180 deg rotations around an axis (it could be 180 around axis or -180 around -axis).
                     Assert.IsTrue(math.distance(AbsIfHalfCircle(rot).value, AbsIfHalfCircle(data.ExpectedOrientation).value) <= data.Tolerance,
                         $"{m_FrameCount}: Actual orientation {rot} of Entity {entity.Index} is not close enough to expected one {data.ExpectedOrientation}");

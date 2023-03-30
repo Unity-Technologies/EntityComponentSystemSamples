@@ -12,8 +12,12 @@ namespace Samples.HelloNetcode
     {
         public override void Bake(CharacterControllerAuthoring authoring)
         {
-            AddComponent(new CharacterControllerPlayerInput());
-            AddComponent(new Character{ControllerConfig = GetEntity(authoring.ControllerConfig.gameObject)});
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new CharacterControllerPlayerInput());
+            AddComponent(entity, new Character
+            {
+                ControllerConfig = GetEntity(authoring.ControllerConfig.gameObject, TransformUsageFlags.Dynamic)
+            });
         }
     }
 }

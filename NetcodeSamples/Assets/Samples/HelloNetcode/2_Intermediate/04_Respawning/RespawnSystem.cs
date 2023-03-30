@@ -10,11 +10,11 @@ namespace Samples.HelloNetcode
     {
         readonly RefRW<AutoCommandTarget> m_AutoCommandTarget;
         readonly RefRO<Health> m_Health;
-        readonly RefRO<GhostOwnerComponent> m_GhostOwner;
+        readonly RefRO<GhostOwner> m_GhostOwner;
         readonly RefRO<ConnectionOwner> m_ConnectionOwner;
 
         public ref AutoCommandTarget AutoCommandTarget => ref m_AutoCommandTarget.ValueRW;
-        public GhostOwnerComponent GhostOwner => m_GhostOwner.ValueRO;
+        public GhostOwner GhostOwner => m_GhostOwner.ValueRO;
         public ConnectionOwner ConnectionOwner => m_ConnectionOwner.ValueRO;
 
         public bool IsAlive()
@@ -37,16 +37,12 @@ namespace Samples.HelloNetcode
             state.RequireForUpdate<Health>();
         }
 
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             var playerPrefab = SystemAPI.GetSingleton<Spawner>().Player;
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var linkedEntityGroupFromEntity = SystemAPI.GetBufferLookup<LinkedEntityGroup>();
-#if !ENABLE_TRANSFORM_V1
+
             foreach (var (character, localTransform, entity) in SystemAPI.Query<CharacterWithHealth, RefRW<LocalTransform>>().WithEntityAccess())
             {
                 if (character.IsAlive())
@@ -61,26 +57,11 @@ namespace Samples.HelloNetcode
 
                 DestroyAndRespawnPlayer(ecb, entity, playerPrefab, character.GhostOwner, character.ConnectionOwner, linkedEntityGroupFromEntity);
             }
-#else
-            foreach (var (character, rotation, entity) in SystemAPI.Query<CharacterWithHealth, RefRW<Rotation>>().WithEntityAccess())
-            {
-                if (character.IsAlive())
-                {
-                    continue;
-                }
 
-                if (FallingDown(ref character.AutoCommandTarget, ref rotation.ValueRW.Value, SystemAPI.Time.DeltaTime))
-                {
-                    continue;
-                }
-
-                DestroyAndRespawnPlayer(ecb, entity, playerPrefab, character.GhostOwner, character.ConnectionOwner, linkedEntityGroupFromEntity);
-            }
-#endif
             ecb.Playback(state.EntityManager);
         }
 
-        void DestroyAndRespawnPlayer(EntityCommandBuffer ecb, Entity entity, Entity playerPrefab, GhostOwnerComponent networkId,
+        void DestroyAndRespawnPlayer(EntityCommandBuffer ecb, Entity entity, Entity playerPrefab, GhostOwner networkId,
             ConnectionOwner connectionOwner, BufferLookup<LinkedEntityGroup> linkedEntityGroupFromEntity)
         {
             ecb.DestroyEntity(entity);
@@ -90,26 +71,21 @@ namespace Samples.HelloNetcode
 
         /// <summary>
         /// Initialize new player at a random point within the plane. (Hardcoded to [-50;50]).
-        /// To patch up the network components we set CommandTargetComponent as well as removing the destroyed entity
+        /// To patch up the network components we set CommandTarget as well as removing the destroyed entity
         /// and adding the new player entity to the linked entity group of the connection entity.
         /// </summary>
-        void InitializeNewPlayer(EntityCommandBuffer ecb, Entity destroyedPlayer, Entity newPlayer, GhostOwnerComponent networkId,
+        void InitializeNewPlayer(EntityCommandBuffer ecb, Entity destroyedPlayer, Entity newPlayer, GhostOwner networkId,
             ConnectionOwner connectionOwner, BufferLookup<LinkedEntityGroup> linkedEntityGroupFromEntity)
         {
             var spawnedPlayer = ecb.Instantiate(newPlayer);
             ecb.SetComponent(spawnedPlayer, networkId);
             var newX = m_Random.NextInt(-40, 40);
             var newZ = m_Random.NextInt(-40, 40);
-#if !ENABLE_TRANSFORM_V1
-            ecb.SetComponent(spawnedPlayer, LocalTransform.FromPosition(new float3(newX, 1, newZ)));
-#else
-            ecb.SetComponent(spawnedPlayer, new Translation
-            {
-                Value = new float3(newX, 1, newZ)
-            });
-#endif
 
-            ecb.SetComponent(connectionOwner.Entity, new CommandTargetComponent() { targetEntity = spawnedPlayer });
+            ecb.SetComponent(spawnedPlayer, LocalTransform.FromPosition(new float3(newX, 1, newZ)));
+
+
+            ecb.SetComponent(connectionOwner.Entity, new CommandTarget() { targetEntity = spawnedPlayer });
             ecb.AddComponent(spawnedPlayer, new ConnectionOwner { Entity = connectionOwner.Entity });
 
             var linkedEntityGroups = linkedEntityGroupFromEntity[connectionOwner.Entity];

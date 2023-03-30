@@ -47,7 +47,7 @@ To try out samples in this repository all you need to do is open `NetcodeSamples
 
 If you wish to create a new Unity project using the Netcode package that is also possible.
 
-* Minimum supported version is Unity 2022.2.0b8 but it’s recommended to use the latest released 2022.2 version for important fixes
+* Minimum supported version is Unity 2022.2.0f1 but it’s recommended to use the latest released 2022.2 version for important fixes
 * Create a new **URP** Unity project
 * Navigate to the **Package Manager** (Window -> Package Manager). And add the following packages using **Add package from git URL...** under the **+** menu at the top left of the Package Manager.
   * com.unity.netcode
@@ -56,6 +56,4 @@ If you wish to create a new Unity project using the Netcode package that is also
 
 ## Building
 
-At the moment there are two ways of building the samples. You can use the **Build Configuration** assets or the builtin method using the **Build Settings** window. 
-
-When using the Build Settings window the **Builtin Builds Enabled** checkbox in the Entities tab in the Editor preferences must be checked. Make sure you have the appropriate player type set int he DOTS tab in the **Player Settings**. To build the whole sample scene list (with frontend) as a client/server build select the **Client** as *Player type* and **ClientAndServer** as the *Netcode client target*. To make a client only build select both **Client** as *Player type* and *Netcode client target*. For a server only build switch to the **Dedicated Server** platform target and select **Server** as the *Player type*.
+Building is done via the **Build Settings** window as with normal Unity builds. Make sure you have the appropriate player type set int he _Entities->Build_ tab in the **Player Settings**. To build the whole sample scene list (with frontend) as a client/server build select the **ClientAndServer** as the *Netcode client target*. To make a client only build select **Client**. For a server only build switch to the **Dedicated Server** platform target. This will automatically use the **Server** configuration.

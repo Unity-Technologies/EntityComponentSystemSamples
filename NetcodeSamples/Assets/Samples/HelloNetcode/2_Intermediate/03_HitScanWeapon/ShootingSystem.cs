@@ -16,21 +16,13 @@ namespace Samples.HelloNetcode
             state.RequireForUpdate<Hit>();
         }
 
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             var collisionHistory = SystemAPI.GetSingleton<PhysicsWorldHistorySingleton>();
             var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
-            var ghostComponentFromEntity = SystemAPI.GetComponentLookup<GhostComponent>();
-#if !ENABLE_TRANSFORM_V1
-            var scaleFromEntity = SystemAPI.GetComponentLookup<PostTransformScale>();
-#else
-            var scaleFromEntity = SystemAPI.GetComponentLookup<NonUniformScale>();
-#endif
+            var ghostComponentFromEntity = SystemAPI.GetComponentLookup<GhostInstance>();
+            var scaleFromEntity = SystemAPI.GetComponentLookup<PostTransformMatrix>();
             var lagCompensationEnabledFromEntity = SystemAPI.GetComponentLookup<LagCompensationEnabled>();
             var predictingTick = networkTime.ServerTick;
             // Do not perform hit-scan when rolling back, only when simulating the latest tick
@@ -59,7 +51,7 @@ namespace Samples.HelloNetcode
 
                 var cameraRotation = math.mul(quaternion.RotateY(character.Input.Yaw), quaternion.RotateX(-character.Input.Pitch));
                 var offset = math.rotate(cameraRotation, CharacterControllerCameraSystem.k_CameraOffset);
-                var cameraPosition = character.Transform.LocalPosition + offset;
+                var cameraPosition = character.Transform.ValueRO.Position + offset;
                 var forward = math.mul(cameraRotation, math.forward());
                 var rayInput = new RaycastInput
                 {
@@ -83,7 +75,7 @@ namespace Samples.HelloNetcode
                     var rigidTransform = collWorld.Bodies[closestHit.RigidBodyIndex].WorldFromBody;
                     hitPoint -= rigidTransform.pos;
                     hitPoint = math.mul(math.inverse(rigidTransform.rot), hitPoint);
-#if !ENABLE_TRANSFORM_V1
+
                     if (scaleFromEntity.HasComponent(closestHit.Entity))
                     {
                         var scaleMatrix = scaleFromEntity[closestHit.Entity].Value;
@@ -92,12 +84,7 @@ namespace Samples.HelloNetcode
                         var scaleZ = math.length(scaleMatrix.c2.xyz);
                         hitPoint /= new float3(scaleX, scaleY, scaleZ);
                     }
-#else
-                    if (scaleFromEntity.HasComponent(closestHit.Entity))
-                    {
-                        hitPoint /= scaleFromEntity[closestHit.Entity].Value;
-                    }
-#endif
+
                 }
 
                 hitComponent.ValueRW.Entity = hitEntity;

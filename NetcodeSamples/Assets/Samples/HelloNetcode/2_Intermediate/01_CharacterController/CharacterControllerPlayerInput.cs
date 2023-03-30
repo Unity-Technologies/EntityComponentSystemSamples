@@ -29,10 +29,6 @@ namespace Samples.HelloNetcode
             state.RequireForUpdate<CharacterControllerPlayerInput>();
             state.RequireForUpdate<NetworkStreamInGame>();
         }
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             foreach (var input in SystemAPI.Query<RefRW<CharacterControllerPlayerInput>>().WithAll<GhostOwnerIsLocal>())
@@ -59,7 +55,7 @@ namespace Samples.HelloNetcode
                     input.ValueRW.Jump.Set();
                 m_WasJumpTouch = jumpTouch;
 
-                var lookDelta = new float2(0,0);
+                float2 lookDelta = float2.zero;
                 if (TouchInput.GetKey(TouchInput.KeyCode.RightStick))
                 {
                     lookDelta = TouchInput.GetStick(TouchInput.StickCode.RightStick) * SystemAPI.Time.DeltaTime;
@@ -70,7 +66,7 @@ namespace Samples.HelloNetcode
                     lookDelta = new float2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
                 }
                 #endif
-                input.ValueRW.Pitch = math.clamp(input.ValueRW.Pitch+lookDelta.y, -math.PI/4, math.PI/4);
+                input.ValueRW.Pitch = math.clamp(input.ValueRW.Pitch+lookDelta.y, -math.PI/2, math.PI/2);
                 input.ValueRW.Yaw = math.fmod(input.ValueRW.Yaw + lookDelta.x, 2*math.PI);
 
                 var fireTouch = TouchInput.GetKey(TouchInput.KeyCode.Left);

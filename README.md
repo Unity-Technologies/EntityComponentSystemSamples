@@ -1,25 +1,12 @@
+[How to set up a new Entities project](./Docs/project_setup.md)
+
 # DOTS Samples 
 
-<br>
-
-**Entities samples:**
-
-- [HelloCube](./EntitiesSamples/HelloCube/README.md) (very simple sample scenes demonstrating the basic elements of Entities)
-- [MiscellenousEntities samples](./EntitiesSamples/MiscellaneousEntities/README.md) (various small samples demonstrating additional ECS code patterns)
-- [Basic Entities URP Template sample](./EntitiesSamples/BasicEntitiesURPTemplate/README.md) (a template project you can copy)
-- [Boids sample](./EntitiesSamples/Boids/README.md)
-- [GridPath sample](./EntitiesSamples/GridPath/README.md)
-
-<br>
-
-**Other DOTS samples:**
-
+- [Entities samples](./EntitiesSamples/Assets/README.md)
 - [Physics samples](./PhysicsSamples/README.md)
 - [Netcode samples](./NetcodeSamples/README.md)
 - [Entities.Graphics HDRP samples](./GraphicsSamples/HDRPSamples/README.md)
 - [Entities.Graphics URP samples](./GraphicsSamples/URPSamples/README.md)
-
-<br>
 
 # Learning DOTS
 
@@ -29,20 +16,13 @@ This material covers the core DOTS packages: [Entities](https://docs.unity3d.com
 
 **Videos:**
 
-1. [Video: The C# Job system](https://youtu.be/jdW66hA-Qu8)
-1. [Video: ECS Entities and components](https://youtu.be/jzCEzNoztzM)
-1. [Video: ECS Systems](https://youtu.be/k07I-DpCcvE)
+1. [Video: The C# Job system](https://youtu.be/jdW66hA-Qu8) (11 minutes)
+1. [Video: ECS Entities and components](https://youtu.be/jzCEzNoztzM) (10 minutes)
+1. [Video: ECS Systems](https://youtu.be/k07I-DpCcvE) (7 minutes)
 
 <br>
 
-**Tutorials:**
-
-1. [Jobs Tutorial](./EntitiesSamples/JobsTutorial/README.md)
-1. [Entities Tutorial](./EntitiesSamples/EntitiesTutorial/README.md)
-
-<br>
-
-**Reading:**
+**API Overview**
 
 1. [The C# Job system](./Docs/jobs.md)
 1. [Entities and components](./Docs/entities-components.md)
@@ -55,7 +35,14 @@ This material covers the core DOTS packages: [Entities](https://docs.unity3d.com
 
 <br>
 
-**Example code:**
+**Additional reading**
+
+1. [Blog post: Improving Job System Performance part 1](https://blog.unity.com/engine-platform/improving-job-system-performance-2022-2-part-1)
+1. [Blog post: Improving Job System Performance part 2](https://blog.unity.com/engine-platform/improving-job-system-performance-2022-2-part-2)
+
+<br>
+
+**Example code and cheat sheets:**
 
 - [Examples: jobs](./Docs/examples/jobs.md)
 - [Examples: components and systems](./Docs/examples/components_systems.md)

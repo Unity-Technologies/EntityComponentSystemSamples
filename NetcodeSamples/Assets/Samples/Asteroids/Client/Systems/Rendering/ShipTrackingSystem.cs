@@ -17,12 +17,6 @@ namespace Asteroids.Client
     public partial struct ShipThrustParticleSystem : ISystem
     {
         [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {}
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {}
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var job = new ShipThrustParticle();
@@ -64,11 +58,9 @@ namespace Asteroids.Client
         {
             JobHandle levelHandle;
             SystemAPI.TryGetSingletonEntity<ShipCommandData>(out var localPlayerShip);
-#if !ENABLE_TRANSFORM_V1
+
             var shipTransform = GetComponentLookup<LocalTransform>(true);
-#else
-            var shipPosition = GetComponentLookup<Translation>(true);
-#endif
+
             var screenWidth = Screen.width;
             var screenHeight = Screen.height;
             var screenWidthHalf = Screen.width/2;
@@ -86,11 +78,9 @@ namespace Asteroids.Client
 
             var deltaTime = SystemAPI.Time.DeltaTime;
 
-#if !ENABLE_TRANSFORM_V1
+
             var trackJob = Job.WithReadOnly(shipTransform).WithReadOnly(level).
-#else
-            var trackJob = Job.WithReadOnly(shipPosition).WithReadOnly(level).
-#endif
+
                 WithCode(() =>
             {
                 const float mapEdgePaddingPercent = .2f;
@@ -99,15 +89,11 @@ namespace Asteroids.Client
                 int mapHeight = level[0].levelHeight;
                 int nextTeleport = 1;
 
-#if !ENABLE_TRANSFORM_V1
+
                 if (shipTransform.HasComponent(localPlayerShip))
                 {
                     float3 desiredCamPos = shipTransform[localPlayerShip].Position;
-#else
-                if (shipPosition.HasComponent(localPlayerShip))
-                {
-                    float3 desiredCamPos = shipPosition[localPlayerShip].Value;
-#endif
+
 
                     desiredCamPos.x = math.clamp(desiredCamPos.x, -mapEdgeCameraPadding + screenWidthHalf, mapWidth + mapEdgeCameraPadding - screenWidthHalf);
                     desiredCamPos.y = math.clamp(desiredCamPos.y, -mapEdgeCameraPadding + screenHeightHalf, mapHeight + mapEdgeCameraPadding - screenHeightHalf);

@@ -17,7 +17,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyFriction authoring)
             {
-                AddComponent<VerifyFrictionData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<VerifyFrictionData>(entity);
             }
         }
     }
@@ -25,34 +26,27 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateBefore(typeof(PhysicsSimulationGroup))]
     [RequireMatchingQueriesForUpdate]
-    public partial class VerifyFrictionSystem : SystemBase
+    public partial struct VerifyFrictionSystem : ISystem
     {
         EntityQuery m_VerificationGroup;
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            m_VerificationGroup = state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyFrictionData) }
             });
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
             foreach (var entity in entities)
             {
-#if !ENABLE_TRANSFORM_V1
-                var localTransform = EntityManager.GetComponentData<LocalTransform>(entity);
+                var localTransform = state.EntityManager.GetComponentData<LocalTransform>(entity);
 
                 // Cube should never get past the X == 0
                 Assert.IsTrue(localTransform.Position.x < 0.0f);
-#else
-                var translation = EntityManager.GetComponentData<Translation>(entity);
-
-                // Cube should never get past the X == 0
-                Assert.IsTrue(translation.Value.x < 0.0f);
-#endif
             }
             entities.Dispose();
         }

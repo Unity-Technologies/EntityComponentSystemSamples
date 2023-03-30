@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -8,11 +9,33 @@ using Object = UnityEngine.Object;
 namespace Samples.HelloNetcode
 {
 #if !UNITY_DISABLE_MANAGED_COMPONENTS
-    public class HealthUI : IComponentData
+    public class HealthUI : IComponentData, IDisposable, ICloneable
     {
         public Transform HealthBar;
         public Image HealthSlider;
         public float3 Offset;
+        
+        public void Dispose()
+        {
+            //The Healbar is disposed by the client in two cases:
+            //- By the DespawnHealthBarSystem (if the healt < 0)
+            //- When a character is respawn (so the ghost get destroyed). Being the HealthUI this method is called in that case.
+            if (HealthBar != null)
+                Object.Destroy(HealthBar.gameObject);
+        }
+
+        public object Clone()
+        {
+            if (HealthBar == null || HealthBar.gameObject == null)
+                return new HealthUI();
+            var newHealtbar = Object.Instantiate(HealthBar.gameObject);
+            var images = HealthBar.gameObject.GetComponentsInChildren<Image>();
+            return new HealthUI
+            {
+                HealthBar = newHealtbar.GetComponent<Transform>(),
+                HealthSlider = images[1]
+            };
+        }
     }
 
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
@@ -23,10 +46,6 @@ namespace Samples.HelloNetcode
         {
             state.RequireForUpdate<HealthBarSpawner>();
             state.RequireForUpdate<Health>();
-        }
-
-        public void OnDestroy(ref SystemState state)
-        {
         }
 
         public void OnUpdate(ref SystemState state)

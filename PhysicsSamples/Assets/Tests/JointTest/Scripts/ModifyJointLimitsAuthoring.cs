@@ -86,7 +86,8 @@ class ModifyJointLimitsBaker : Baker<ModifyJointLimitsAuthoring>
 {
     public override void Bake(ModifyJointLimitsAuthoring authoring)
     {
-        AddComponentObject(new ModifyJointLimitsBakingData
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponentObject(entity, new ModifyJointLimitsBakingData
         {
             AngularRangeScalar = authoring.AngularRangeScalar,
             LinearRangeScalar = authoring.LinearRangeScalar
@@ -97,21 +98,20 @@ class ModifyJointLimitsBaker : Baker<ModifyJointLimitsAuthoring>
 // after joints have been converted, find the entities they produced and add ModifyJointLimits to them
 [UpdateAfter(typeof(EndJointBakingSystem))]
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-partial class ModifyJointLimitsBakingSystem : SystemBase
+partial struct ModifyJointLimitsBakingSystem : ISystem
 {
     private EntityQuery _ModifyJointLimitsBakingDataQuery;
     private EntityQuery _JointEntityBakingQuery;
 
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        _ModifyJointLimitsBakingDataQuery = GetEntityQuery(new EntityQueryDesc
+        _ModifyJointLimitsBakingDataQuery = state.GetEntityQuery(new EntityQueryDesc
         {
             All = new[] { ComponentType.ReadOnly<ModifyJointLimitsBakingData>() },
             Options = EntityQueryOptions.IncludeDisabledEntities | EntityQueryOptions.IncludePrefab
         });
 
-        _JointEntityBakingQuery = GetEntityQuery(new EntityQueryDesc
+        _JointEntityBakingQuery = state.GetEntityQuery(new EntityQueryDesc
         {
             All = new[] { ComponentType.ReadOnly<JointEntityBaking>() }
         });
@@ -120,7 +120,7 @@ partial class ModifyJointLimitsBakingSystem : SystemBase
         _JointEntityBakingQuery.AddChangedVersionFilter(typeof(JointEntityBaking));
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         if (_ModifyJointLimitsBakingDataQuery.IsEmpty && _JointEntityBakingQuery.IsEmpty)
         {
@@ -128,7 +128,7 @@ partial class ModifyJointLimitsBakingSystem : SystemBase
         }
 
         // Collect all the joints
-        NativeMultiHashMap<Entity, (Entity, PhysicsJoint)> jointsLookUp = new NativeMultiHashMap<Entity, (Entity, PhysicsJoint)>(10, Allocator.TempJob);
+        NativeParallelMultiHashMap<Entity, (Entity, PhysicsJoint)> jointsLookUp = new NativeParallelMultiHashMap<Entity, (Entity, PhysicsJoint)>(10, Allocator.TempJob);
 
         foreach (var(jointEntity, physicsJoint, entity) in SystemAPI.Query<RefRO<JointEntityBaking>, RefRO<PhysicsJoint>>().WithEntityAccess().WithOptions(EntityQueryOptions.IncludeDisabledEntities | EntityQueryOptions.IncludePrefab))
         {
@@ -145,7 +145,7 @@ partial class ModifyJointLimitsBakingSystem : SystemBase
 
             foreach (var joint in jointsLookUp.GetValuesForKey(entity))
             {
-                EntityManager.SetSharedComponentManaged(joint.Item1, new ModifyJointLimits
+                state.EntityManager.SetSharedComponentManaged(joint.Item1, new ModifyJointLimits
                 {
                     InitialValue = joint.Item2,
                     AngularRangeScalar = angularModification,
@@ -162,9 +162,9 @@ partial class ModifyJointLimitsBakingSystem : SystemBase
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-partial class ModifyJointLimitsSystem : SystemBase
+partial struct ModifyJointLimitsSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var time = (float)SystemAPI.Time.ElapsedTime;
 

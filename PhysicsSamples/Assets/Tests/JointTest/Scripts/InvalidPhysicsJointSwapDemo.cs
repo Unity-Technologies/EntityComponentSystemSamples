@@ -18,7 +18,8 @@ public class InvalidPhysicsJointSwapDemo : SceneCreationAuthoring<InvalidPhysics
     {
         public override void Bake(InvalidPhysicsJointSwapDemo authoring)
         {
-            AddComponentObject(new InvalidPhysicsJointSwapDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new InvalidPhysicsJointSwapDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial,
@@ -55,9 +56,9 @@ public struct InvalidPhysicsJointSwapMotionType : IComponentData
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class InvalidPhysicsJointSwapDemoSystem : SystemBase
+public partial struct InvalidPhysicsJointSwapDemoSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
 
@@ -86,36 +87,28 @@ public partial class InvalidPhysicsJointSwapDemoSystem : SystemBase
                 }
             }
 
-#if !ENABLE_TRANSFORM_V1
+
             foreach (var(swapMotionType, timer, localTransform, valocity, entity) in SystemAPI
                      .Query<RefRW<InvalidPhysicsJointSwapMotionType>, RefRW<InvalidPhysicsJointSwapTimerEvent>,
                             RefRW<LocalTransform>, RefRO<PhysicsVelocity>>().WithEntityAccess())
-#else
-            foreach (var(swapMotionType, timer, position, rotation, velocity, entity) in SystemAPI.Query<RefRW<InvalidPhysicsJointSwapMotionType>, RefRW<InvalidPhysicsJointSwapTimerEvent>, RefRW<Translation>, RefRW<Rotation>, RefRO<PhysicsVelocity>>().WithEntityAccess())
-#endif
+
             {
                 if (timer.ValueRW.Fired(true))
                 {
-#if !ENABLE_TRANSFORM_V1
+
                     localTransform.ValueRW.Position = swapMotionType.ValueRW.OriginalTransform.pos;
                     localTransform.ValueRW.Rotation = swapMotionType.ValueRW.OriginalTransform.rot;
-#else
-                    position.ValueRW.Value = swapMotionType.ValueRW.OriginalTransform.pos;
-                    rotation.ValueRW.Value = swapMotionType.ValueRW.OriginalTransform.rot;
-#endif
+
                     commandBuffer.RemoveComponent<PhysicsVelocity>(entity);
                     commandBuffer.RemoveComponent<PhysicsMass>(entity);
                 }
             }
 
-#if !ENABLE_TRANSFORM_V1
+
             foreach (var(timer, localTransform, velocity, entity) in SystemAPI
                      .Query<RefRW<InvalidPhysicsJointSwapTimerEvent>, RefRW<LocalTransform>,
                             RefRW<PhysicsVelocity>>().WithEntityAccess().WithAll<InvalidPhysicsJointKillBodies>())
-#else
-            foreach (var(timer, position, rotation, velocity, entity)
-                     in SystemAPI.Query<RefRW<InvalidPhysicsJointSwapTimerEvent>, RefRW<Translation>, RefRW<Rotation>, RefRW<PhysicsVelocity>>().WithEntityAccess().WithAll<InvalidPhysicsJointKillBodies>())
-#endif
+
             {
                 if (timer.ValueRW.Fired(true))
                 {
@@ -123,12 +116,12 @@ public partial class InvalidPhysicsJointSwapDemoSystem : SystemBase
                 }
             }
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }
 
-public class InvalidPhysicsJointSwapDemoSceneCreationSystem : SceneCreationSystem<InvalidPhysicsJointSwapDemoScene>
+public partial class InvalidPhysicsJointSwapDemoSceneCreationSystem : SceneCreationSystem<InvalidPhysicsJointSwapDemoScene>
 {
     public override void CreateScene(InvalidPhysicsJointSwapDemoScene sceneSettings)
     {

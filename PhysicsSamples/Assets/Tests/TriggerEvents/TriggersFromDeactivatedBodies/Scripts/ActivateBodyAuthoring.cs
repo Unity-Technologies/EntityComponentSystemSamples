@@ -16,9 +16,7 @@ public class ActivateBodyAuthoring : UnityEngine.MonoBehaviour
 {
     [RegisterBinding(typeof(ActivateBody), "FramesToActivateIn")]
     public int FramesToActivateIn;
-    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement.x", true)]
-    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement.y", true)]
-    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement.z", true)]
+    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement")]
     public float3 ActivationDisplacement;
 
     class AcitvateBodyBaker : Baker<ActivateBodyAuthoring>
@@ -28,39 +26,36 @@ public class ActivateBodyAuthoring : UnityEngine.MonoBehaviour
             ActivateBody component = default(ActivateBody);
             component.FramesToActivateIn = authoring.FramesToActivateIn;
             component.ActivationDisplacement = authoring.ActivationDisplacement;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class ActivateBodySystem : SystemBase
+public partial struct ActivateBodySystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<ActivateBody>();
+        state.RequireForUpdate<ActivateBody>();
     }
 
     public partial struct ActivateBodyJob : IJobEntity
     {
         public EntityCommandBuffer CommandBuffer;
 
-#if !ENABLE_TRANSFORM_V1
+
         public void Execute(Entity entity, ref LocalTransform localTransform, ref ActivateBody activateBody)
-#else
-        public void Execute(Entity entity, ref Translation localPosition, ref ActivateBody activateBody)
-#endif
+
         {
             if (--activateBody.FramesToActivateIn == 0)
             {
                 CommandBuffer.RemoveComponent<ActivateBody>(entity);
 
-#if !ENABLE_TRANSFORM_V1
+
                 localTransform.Position += activateBody.ActivationDisplacement;
-#else
-                localPosition.Value += activateBody.ActivationDisplacement;
-#endif
+
                 // Bodies get out of trigger
                 if (activateBody.ActivationDisplacement.y >= 5.0f)
                 {
@@ -78,7 +73,7 @@ public partial class ActivateBodySystem : SystemBase
         }
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
@@ -87,7 +82,7 @@ public partial class ActivateBodySystem : SystemBase
                 CommandBuffer = commandBuffer
             }.Run();
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

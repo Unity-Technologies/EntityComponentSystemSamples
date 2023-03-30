@@ -114,15 +114,12 @@ abstract partial class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjec
                     for (int i = 0; i < count; i++)
                     {
                         var instance = instances[i];
-#if !ENABLE_TRANSFORM_V1
+
                         var transform = EntityManager.GetComponentData<LocalTransform>(instance);
                         transform.Position = positions[i];
                         transform.Rotation = rotations[i];
                         EntityManager.SetComponentData(instance, transform);
-#else
-                        EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
-                        EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
-#endif
+
                         ConfigureInstance(instance, ref spawnSettings);
                     }
                 }
@@ -136,4 +133,4 @@ abstract partial class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjec
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-class PeriodicallySpawnRandomShapeSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicSpawnSettings> { }
+partial class PeriodicallySpawnRandomShapeSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicSpawnSettings> {}

@@ -35,11 +35,11 @@ class ModifyContactJacobiansBaker : Baker<ModifyContactJacobiansBehaviour>
 {
     public override void Bake(ModifyContactJacobiansBehaviour authoring)
     {
-        AddComponent(new ModifyContactJacobians { type = authoring.ModificationType });
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new ModifyContactJacobians { type = authoring.ModificationType });
     }
 }
 
-[BurstCompile]
 [UpdateInGroup(typeof(PhysicsCreateJacobiansGroup), OrderFirst = true)]
 public partial struct SetContactFlagsSystem : ISystem
 {
@@ -93,11 +93,6 @@ public partial struct SetContactFlagsSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         m_JacobianData.Update(ref state);
@@ -122,7 +117,6 @@ public partial struct SetContactFlagsSystem : ISystem
 
 // A system which configures the simulation step to modify contact jacobains in various ways
 [UpdateInGroup(typeof(PhysicsSolveAndIntegrateGroup), OrderFirst = true)]
-[BurstCompile]
 public partial struct ModifyContactJacobiansSystem : ISystem
 {
     private ComponentLookup<ModifyContactJacobians> m_JacobianData;
@@ -255,11 +249,6 @@ public partial struct ModifyContactJacobiansSystem : ISystem
     {
         state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ModifyContactJacobians>()));
         m_JacobianData = state.GetComponentLookup<ModifyContactJacobians>(true);
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]

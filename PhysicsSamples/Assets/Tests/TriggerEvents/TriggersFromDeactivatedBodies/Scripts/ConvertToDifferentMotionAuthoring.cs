@@ -25,7 +25,8 @@ public class ConvertToDifferentMotionAuthoring : UnityEngine.MonoBehaviour
             ConvertToDifferentMotion component = default(ConvertToDifferentMotion);
             component.ConvertIn = authoring.ConvertIn;
             component.ConversionSettings = authoring.ConversionSettings;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }
@@ -39,11 +40,11 @@ public enum ConversionSettings : byte
 
 [UpdateInGroup(typeof(PhysicsSystemGroup))]
 [UpdateBefore(typeof(TriggerEventCheckerSystem))]
-public partial class ConvertToStaticSystem : SystemBase
+public partial struct ConvertToStaticSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<ConvertToDifferentMotion>();
+        state.RequireForUpdate<ConvertToDifferentMotion>();
     }
 
     public partial struct ConvertToDifferentMotionJob : IJobEntity
@@ -89,7 +90,7 @@ public partial class ConvertToStaticSystem : SystemBase
         }
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
@@ -98,7 +99,7 @@ public partial class ConvertToStaticSystem : SystemBase
                 CommandBuffer = commandBuffer
             }.Run();
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

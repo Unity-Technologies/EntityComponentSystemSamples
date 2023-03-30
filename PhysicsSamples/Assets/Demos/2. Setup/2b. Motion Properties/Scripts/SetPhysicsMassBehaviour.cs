@@ -35,16 +35,17 @@ public class SetPhysicsMassBehaviour : MonoBehaviour
         {
             if (HasPhysics())
             {
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
                 if (authoring.IsKinematic || authoring.SetVelocityToZero)
                 {
-                    AddComponent(new PhysicsMassOverride()
+                    AddComponent(entity, new PhysicsMassOverride()
                     {
                         IsKinematic = (byte)(authoring.IsKinematic ? 1 : 0),
                         SetVelocityToZero = (byte)(authoring.SetVelocityToZero ? 1 : 0)
                     });
                 }
 
-                AddComponent(new SetPhysicsMassAuthoring()
+                AddComponent(entity, new SetPhysicsMassAuthoring()
                 {
                     InfiniteInertiaX = authoring.InfiniteInertiaX,
                     InfiniteInertiaY = authoring.InfiniteInertiaY,
@@ -60,9 +61,9 @@ public class SetPhysicsMassBehaviour : MonoBehaviour
 [UpdateAfter(typeof(LegacyRigidbodyBakingSystem))]
 [UpdateAfter(typeof(EndJointBakingSystem))]
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-public partial class SetPhysicsMassBehaviourSystem : SystemBase
+public partial struct SetPhysicsMassBehaviourSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         // Fill in the MassProperties based on the potential calculated value by BuildCompoundColliderBakingSystem
         foreach (var(mass, setPhysicsMass)

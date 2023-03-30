@@ -18,7 +18,8 @@ public class CubeInputAuthoring : MonoBehaviour
     {
         public override void Bake(CubeInputAuthoring authoring)
         {
-            AddComponent<CubeInput>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<CubeInput>(entity);
         }
     }
 }
@@ -30,10 +31,6 @@ public partial struct SampleCubeInput : ISystem
     {
         state.RequireForUpdate<NetworkStreamInGame>();
         state.RequireForUpdate<NetCubeSpawner>();
-    }
-
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     public void OnUpdate(ref SystemState state)

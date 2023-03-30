@@ -45,7 +45,8 @@ namespace Unity.Physics.Tests
     {
         public override void Bake(SimulationValidationAuthoring authoring)
         {
-            AddComponent(new SimulationValidationSettings()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new SimulationValidationSettings()
             {
                 EnableValidation = authoring.EnableValidation,
                 ValidateJointBehavior = authoring.ValidateJointBehavior,
@@ -81,11 +82,8 @@ namespace Unity.Physics.Tests
     {
         [NativeDisableUnsafePtrRestriction]
         public SimulationValidationSystem.ErrorCounter Errors;
-#if !ENABLE_TRANSFORM_V1
-        [ReadOnly] public ComponentLookup<WorldTransform> WorldTransformLookup;
-#else
-        [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
-#endif
+        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+
         [ReadOnly] public ComponentLookup<PhysicsVelocity> PhysicsVelocityLookup;
         [ReadOnly] public ComponentLookup<PhysicsMass> PhysicsMassLookup;
 
@@ -122,21 +120,14 @@ namespace Unity.Physics.Tests
                 return;
             }
 
-#if !ENABLE_TRANSFORM_V1
+
             var bodyAWorld = bodyPair.EntityA != Entity.Null
-                ? WorldTransformLookup[bodyPair.EntityA].ToMatrix()
+                ? TransformLookup[bodyPair.EntityA].ToMatrix()
                 : float4x4.identity;
             var bodyBWorld = bodyPair.EntityB != Entity.Null
-                ? WorldTransformLookup[bodyPair.EntityB].ToMatrix()
+                ? TransformLookup[bodyPair.EntityB].ToMatrix()
                 : float4x4.identity;
-#else
-            var bodyAWorld = bodyPair.EntityA != Entity.Null
-                ? LocalToWorldLookup[bodyPair.EntityA].Value
-                : float4x4.identity;
-            var bodyBWorld = bodyPair.EntityB != Entity.Null
-                ? LocalToWorldLookup[bodyPair.EntityB].Value
-                : float4x4.identity;
-#endif
+
             var anchorALocal = joint.BodyAFromJoint;
             var anchorBLocal = joint.BodyBFromJoint;
             var rigidAWorld = new RigidTransform(bodyAWorld);
@@ -444,11 +435,8 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
     public partial struct SimulationValidationSystem : ISystem
     {
-#if !ENABLE_TRANSFORM_V1
-        private ComponentLookup<WorldTransform> WorldTransformLookup;
-#else
-        private ComponentLookup<LocalToWorld> LocalToWorldLookup;
-#endif
+        private ComponentLookup<LocalTransform> TransformLookup;
+
         private ComponentLookup<PhysicsVelocity> PhysicsVelocityLookup;
         private ComponentLookup<PhysicsMass> PhysicsMassLookup;
         private int NumErrorsDetected;
@@ -487,11 +475,8 @@ namespace Unity.Physics.Tests
             state.RequireForUpdate<SimulationValidationSettings>();
             state.RequireForUpdate<PhysicsWorldSingleton>();
 
-#if !ENABLE_TRANSFORM_V1
-            WorldTransformLookup = state.GetComponentLookup<WorldTransform>();
-#else
-            LocalToWorldLookup = state.GetComponentLookup<LocalToWorld>();
-#endif
+            TransformLookup = state.GetComponentLookup<LocalTransform>();
+
             PhysicsVelocityLookup = state.GetComponentLookup<PhysicsVelocity>();
             PhysicsMassLookup = state.GetComponentLookup<PhysicsMass>();
             unsafe
@@ -532,11 +517,8 @@ namespace Unity.Physics.Tests
             ElapsedTime += SystemAPI.Time.DeltaTime;
             if (settings.ValidationTimeRange[0] <= elapsedTime && (elapsedTime <= settings.ValidationTimeRange[1] || settings.ValidationTimeRange[1] < 0))
             {
-#if !ENABLE_TRANSFORM_V1
-                WorldTransformLookup.Update(ref state);
-#else
-                LocalToWorldLookup.Update(ref state);
-#endif
+                TransformLookup.Update(ref state);
+
                 PhysicsVelocityLookup.Update(ref state);
                 PhysicsMassLookup.Update(ref state);
 
@@ -548,11 +530,8 @@ namespace Unity.Physics.Tests
                     var handle = new ValidateJointBehaviorJob()
                     {
                         Errors = Errors,
-#if !ENABLE_TRANSFORM_V1
-                        WorldTransformLookup = WorldTransformLookup,
-#else
-                        LocalToWorldLookup = LocalToWorldLookup,
-#endif
+                        TransformLookup = TransformLookup,
+
                         PhysicsVelocityLookup = PhysicsVelocityLookup,
                         PhysicsMassLookup = PhysicsMassLookup,
                         DynamicsWorld = physicsWorld.DynamicsWorld,

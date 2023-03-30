@@ -11,7 +11,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(EnablePredictedSpawningAuthoring authoring)
             {
-                AddComponent<EnablePredictedSpawning>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<EnablePredictedSpawning>(entity);
             }
         }
     }

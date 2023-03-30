@@ -34,7 +34,7 @@ struct BouncySpawnSettings : IComponentData, ISpawnSettings
     public float Restitution;
 }
 
-class SpawnBouncyRandomShapesSystem : SpawnRandomObjectsSystemBase<BouncySpawnSettings>
+partial class SpawnBouncyRandomShapesSystem : SpawnRandomObjectsSystemBase<BouncySpawnSettings>
 {
     private BlobAssetReference<Collider> TweakedCollider;
 

@@ -12,7 +12,8 @@ public class LogColliders : MonoBehaviour
     {
         public override void Bake(LogColliders authoring)
         {
-            AddComponent<ActivateColliderLogging>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<ActivateColliderLogging>(entity);
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Samples.HelloNetcode
             int worldIndex = 0;
             if (int.TryParse(World.Name[World.Name.Length - 1].ToString(), out worldIndex))
                 worldIndex++;
-            Entities.WithName("InitializeNewConnection").WithNone<InitializedConnection>().ForEach((Entity entity, in NetworkIdComponent id) =>
+            Entities.WithName("InitializeNewConnection").WithNone<InitializedConnection>().ForEach((Entity entity, in NetworkId id) =>
             {
                 buffer.AddComponent(entity, new InitializedConnection());
                 UnityEngine.Debug.Log($"[{worldName}] New connection ID:{id.Value}");
@@ -89,7 +89,7 @@ namespace Samples.HelloNetcode
         public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             var driverInstance = new NetworkDriverStore.NetworkDriverInstance();
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || NETCODE_DEBUG
             var settings = CreateNetworkSettings(100);
             driverInstance.simulatorEnabled = NetworkSimulatorSettings.Enabled;
             if (NetworkSimulatorSettings.Enabled)

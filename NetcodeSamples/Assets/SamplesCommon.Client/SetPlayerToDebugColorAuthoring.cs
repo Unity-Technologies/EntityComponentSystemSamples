@@ -16,7 +16,8 @@ namespace Unity.NetCode.Samples.Common
             public override void Bake(SetPlayerToDebugColorAuthoring authoring)
             {
                 SetPlayerToDebugColor component = default(SetPlayerToDebugColor);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

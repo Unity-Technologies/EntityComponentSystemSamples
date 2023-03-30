@@ -25,7 +25,7 @@ class MotionSmoothingSetup : MonoBehaviour
     {
         public override void Bake(MotionSmoothingSetup authoring)
         {
-            var entity = CreateAdditionalEntity();
+            var entity = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, new SetFixedTimestep { Timestep = 1f / authoring.StepsPerSecond });
         }
     }

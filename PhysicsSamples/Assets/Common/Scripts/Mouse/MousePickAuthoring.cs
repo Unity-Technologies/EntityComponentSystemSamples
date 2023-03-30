@@ -88,7 +88,8 @@ namespace Unity.Physics.Extensions
     {
         public override void Bake(MousePickAuthoring authoring)
         {
-            AddComponent(new MousePick()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new MousePick()
             {
                 IgnoreTriggers = authoring.IgnoreTriggers,
                 IgnoreStatic = authoring.IgnoreStatic
@@ -222,12 +223,8 @@ namespace Unity.Physics.Extensions
 
         protected override void OnUpdate()
         {
-#if !ENABLE_TRANSFORM_V1
             ComponentLookup<LocalTransform> LocalTransforms = GetComponentLookup<LocalTransform>(true);
-#else
-            ComponentLookup<Translation> Positions = GetComponentLookup<Translation>(true);
-            ComponentLookup<Rotation> Rotations = GetComponentLookup<Rotation>(true);
-#endif
+
             ComponentLookup<PhysicsVelocity> Velocities = GetComponentLookup<PhysicsVelocity>();
             ComponentLookup<PhysicsMass> Masses = GetComponentLookup<PhysicsMass>(true);
             ComponentLookup<PhysicsMassOverride> MassOverrides = GetComponentLookup<PhysicsMassOverride>(true);
@@ -258,11 +255,9 @@ namespace Unity.Physics.Extensions
                     return;
                 }
 
-#if !ENABLE_TRANSFORM_V1
+
                 var worldFromBody = new MTransform(LocalTransforms[entity].Rotation, LocalTransforms[entity].Position);
-#else
-                var worldFromBody = new MTransform(Rotations[entity].Value, Positions[entity].Value);
-#endif
+
 
                 // Body to motion transform
                 var bodyFromMotion = new MTransform(Masses[entity].InertiaOrientation, Masses[entity].CenterOfMass);

@@ -7,13 +7,14 @@ public class LevelBorderAuthoring : MonoBehaviour
     [RegisterBinding(typeof(LevelBorder), "Side")]
     public int Side;
 
-    class LevelBorderBaker : Baker<LevelBorderAuthoring>
+    class Baker : Baker<LevelBorderAuthoring>
     {
         public override void Bake(LevelBorderAuthoring authoring)
         {
             LevelBorder component = default(LevelBorder);
             component.Side = authoring.Side;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }

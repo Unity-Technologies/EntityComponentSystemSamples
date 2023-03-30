@@ -30,12 +30,13 @@ class ChangeColliderTypeAuthoringBaker : Baker<ChangeColliderTypeAuthoring>
     {
         if (authoring.PhysicsColliderPrefabA == null || authoring.PhysicsColliderPrefabB == null) return;
 
-        var entityA = GetEntity(authoring.PhysicsColliderPrefabA);
-        var entityB = GetEntity(authoring.PhysicsColliderPrefabB);
+        var entityA = GetEntity(authoring.PhysicsColliderPrefabA, TransformUsageFlags.Dynamic);
+        var entityB = GetEntity(authoring.PhysicsColliderPrefabB, TransformUsageFlags.Dynamic);
 
         if (entityA == Entity.Null || entityB == Entity.Null) return;
 
-        AddComponent(new ChangeColliderType()
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new ChangeColliderType()
         {
             // These 2 are filled in in the baking system
             //ColliderA = colliderA,
@@ -50,11 +51,11 @@ class ChangeColliderTypeAuthoringBaker : Baker<ChangeColliderTypeAuthoring>
 
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
 [UpdateAfter(typeof(EndColliderBakingSystem))]
-public partial class ChangeColliderTypeBakingSystem : SystemBase
+public partial struct ChangeColliderTypeBakingSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        var manager = EntityManager;
+        var manager = state.EntityManager;
         foreach (var colliderType in SystemAPI.Query<RefRW<ChangeColliderType>>().WithOptions(EntityQueryOptions.IncludePrefab | EntityQueryOptions.IncludeDisabledEntities))
         {
             var colliderA = manager.GetComponentData<PhysicsCollider>(colliderType.ValueRW.EntityA);
@@ -69,14 +70,14 @@ public partial class ChangeColliderTypeBakingSystem : SystemBase
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class ChangeColliderTypeSystem : SystemBase
+public partial struct ChangeColliderTypeSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<ChangeColliderType>();
+        state.RequireForUpdate<ChangeColliderType>();
     }
 
-    protected override unsafe void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
@@ -88,21 +89,23 @@ public partial class ChangeColliderTypeSystem : SystemBase
                 if (modifier.ValueRW.LocalTime > 0.0f) return;
 
                 modifier.ValueRW.LocalTime = modifier.ValueRW.TimeToSwap;
-                var collider = EntityManager.GetComponentData<PhysicsCollider>(entity);
-
-                if (collider.ColliderPtr->Type == modifier.ValueRW.ColliderA.ColliderPtr->Type)
+                var collider = state.EntityManager.GetComponentData<PhysicsCollider>(entity);
+                unsafe
                 {
-                    commandBuffer.SetComponent(entity, modifier.ValueRW.ColliderB);
-                    commandBuffer.SetComponent(entity, EntityManager.GetComponentData<MaterialMeshInfo>(modifier.ValueRW.EntityB));
-                }
-                else
-                {
-                    commandBuffer.SetComponent(entity, modifier.ValueRW.ColliderA);
-                    commandBuffer.SetComponent(entity, EntityManager.GetComponentData<MaterialMeshInfo>(modifier.ValueRW.EntityA));
+                    if (collider.ColliderPtr->Type == modifier.ValueRW.ColliderA.ColliderPtr->Type)
+                    {
+                        commandBuffer.SetComponent(entity, modifier.ValueRW.ColliderB);
+                        commandBuffer.SetComponent(entity, state.EntityManager.GetComponentData<MaterialMeshInfo>(modifier.ValueRW.EntityB));
+                    }
+                    else
+                    {
+                        commandBuffer.SetComponent(entity, modifier.ValueRW.ColliderA);
+                        commandBuffer.SetComponent(entity, state.EntityManager.GetComponentData<MaterialMeshInfo>(modifier.ValueRW.EntityA));
+                    }
                 }
             }
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

@@ -18,7 +18,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(PrespawnDataElementAuthoring authoring)
             {
-                DynamicBuffer<PrespawnDataElement> dynamicBuffer = AddBuffer<PrespawnDataElement>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                DynamicBuffer<PrespawnDataElement> dynamicBuffer = AddBuffer<PrespawnDataElement>(entity);
                 dynamicBuffer.ResizeUninitialized(authoring.Values.Length);
                 for (int i = 0; i < dynamicBuffer.Length; i++)
                 {

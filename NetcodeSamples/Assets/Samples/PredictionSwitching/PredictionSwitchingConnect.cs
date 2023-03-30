@@ -17,7 +17,7 @@ public partial class PredictionSwitchingConnectClientSystem : SystemBase
             .WithStructuralChanges()
             .WithoutBurst()
             .WithNone<NetworkStreamInGame>()
-            .WithAll<NetworkIdComponent>()
+            .WithAll<NetworkId>()
             .ForEach((Entity entity) =>
         {
             EntityManager.AddComponentData(entity, default(NetworkStreamInGame));
@@ -40,10 +40,10 @@ public partial class PredictionSwitchingConnectServerSystem : SystemBase
             .WithStructuralChanges()
             .WithoutBurst()
             .WithNone<NetworkStreamInGame>()
-            .ForEach((Entity entity, ref CommandTargetComponent target, in NetworkIdComponent netId) =>
+            .ForEach((Entity entity, ref CommandTarget target, in NetworkId netId) =>
         {
             target.targetEntity = EntityManager.Instantiate(settings.Player);
-            EntityManager.SetComponentData(target.targetEntity, new GhostOwnerComponent{NetworkId = netId.Value});
+            EntityManager.SetComponentData(target.targetEntity, new GhostOwner{NetworkId = netId.Value});
 
             // Spawn at the edge of the field, in a line.
             var isEven = (netId.Value & 1) == 0;
@@ -52,16 +52,11 @@ public partial class PredictionSwitchingConnectServerSystem : SystemBase
             var staggeredXPos = netId.Value * math.@select(halfCharacterSpawnSeparation, -halfCharacterSpawnSeparation, isEven) + math.@select(-spawnStaggeredOffset, spawnStaggeredOffset, isEven);
             const float halfCapsuleHeight = 1f;
             const float nearMapWall = -22.5f;
-#if !ENABLE_TRANSFORM_V1
+
             var transform = EntityManager.GetComponentData<LocalTransform>(target.targetEntity);
             EntityManager.SetComponentData(target.targetEntity,
                 transform.WithPosition(new float3(staggeredXPos, halfCapsuleHeight, nearMapWall)));
-#else
-            EntityManager.SetComponentData(target.targetEntity, new Translation
-            {
-                Value = new float3(staggeredXPos, halfCapsuleHeight, nearMapWall),
-            });
-#endif
+
             EntityManager.AddComponentData(entity, default(NetworkStreamInGame));
             // Add the player to the linked entity group so it is destroyed automatically on disconnect
             EntityManager.GetBuffer<LinkedEntityGroup>(entity).Add(new LinkedEntityGroup{Value = target.targetEntity});

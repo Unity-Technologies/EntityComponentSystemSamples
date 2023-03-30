@@ -9,7 +9,6 @@ public struct ChangeFilterCountdown : IComponentData
     public int Countdown;
 }
 
-[BurstCompile]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial struct ChangeFilterCountdownSystem : ISystem
@@ -34,18 +33,11 @@ public partial struct ChangeFilterCountdownSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var commandBuffer = SystemAPI.GetSingleton<EndFixedStepSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
-
         state.Dependency = new ChangeFilterCountDownJob
         {
-            CommandBuffer = commandBuffer
+            CommandBuffer = SystemAPI.GetSingleton<EndFixedStepSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged)
         }.Schedule(state.Dependency);
     }
 }

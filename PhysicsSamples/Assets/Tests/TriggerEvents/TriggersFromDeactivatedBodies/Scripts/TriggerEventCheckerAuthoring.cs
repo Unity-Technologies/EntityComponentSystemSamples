@@ -22,18 +22,19 @@ public class TriggerEventCheckerAuthoring : UnityEngine.MonoBehaviour
         {
             TriggerEventChecker component = default(TriggerEventChecker);
             component.NumExpectedEvents = authoring.NumExpectedEvents;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }
 
 [UpdateInGroup(typeof(PhysicsSystemGroup))]
 [UpdateAfter(typeof(PhysicsSimulationGroup))]
-public partial class TriggerEventCheckerSystem : SystemBase
+public partial struct TriggerEventCheckerSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+        state.RequireForUpdate(state.GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(TriggerEventChecker) }
         }));
@@ -104,10 +105,10 @@ public partial class TriggerEventCheckerSystem : SystemBase
         }
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         //Complete the simulation
-        Dependency.Complete();
+        state.Dependency.Complete();
 
         NativeList<TriggerEvent> triggerEvents = new NativeList<TriggerEvent>(Allocator.TempJob);
 
@@ -117,17 +118,16 @@ public partial class TriggerEventCheckerSystem : SystemBase
         };
 
         // Collect all events
-        var handle = collectTriggerEventsJob.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
+        var handle = collectTriggerEventsJob.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
         handle.Complete();
 
-        var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
         NativeReference<int> expectedNumberOfTriggerEvents = new NativeReference<int>(0, Allocator.TempJob);
 
         new CheckTriggerEventsJob
         {
             ExpectedNumberOfTriggerEvents = expectedNumberOfTriggerEvents,
             TriggerEvents = triggerEvents,
-            World = physicsWorld
+            World = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld
         }.Run();
 
         Assert.IsTrue(expectedNumberOfTriggerEvents.Value == triggerEvents.Length, "Incorrect number of events: Expected: " + expectedNumberOfTriggerEvents.Value + " Actual: " + triggerEvents.Length);

@@ -5,20 +5,9 @@ using Unity.Physics.Systems;
 
 namespace Unity.Physics.SimulationEvents
 {
-    [BurstCompile]
     [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
     public partial struct DestroyBrokenJointsSystem : ISystem
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {

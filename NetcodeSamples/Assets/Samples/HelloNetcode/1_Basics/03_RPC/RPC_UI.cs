@@ -37,8 +37,8 @@ namespace Samples.HelloNetcode
             {
                 // Non-thin client will always be first in the list
                 var connectionQuery = m_ClientWorlds[0].EntityManager
-                    .CreateEntityQuery(ComponentType.ReadOnly<NetworkIdComponent>());
-                var connectionIds = connectionQuery.ToComponentDataArray<NetworkIdComponent>(Allocator.Temp);
+                    .CreateEntityQuery(ComponentType.ReadOnly<NetworkId>());
+                var connectionIds = connectionQuery.ToComponentDataArray<NetworkId>(Allocator.Temp);
                 if (connectionIds.Length > 0)
                 {
                     // Client only has one connection
@@ -90,10 +90,10 @@ namespace Samples.HelloNetcode
             if (world == null || !world.IsCreated) return;
             var entity = world.EntityManager.CreateEntity();
             world.EntityManager.AddComponentData(entity, new ChatMessage() { Message = message});
-            world.EntityManager.AddComponent<SendRpcCommandRequestComponent>(entity);
+            world.EntityManager.AddComponent<SendRpcCommandRequest>(entity);
             if (targetEntity != Entity.Null)
                 world.EntityManager.SetComponentData(entity,
-                    new SendRpcCommandRequestComponent() { TargetConnection = targetEntity });
+                    new SendRpcCommandRequest() { TargetConnection = targetEntity });
         }
     }
 }

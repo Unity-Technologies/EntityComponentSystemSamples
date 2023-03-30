@@ -24,7 +24,8 @@ namespace Unity.NetCode.Samples.PlayerList
             {
                 EnablePlayerListsFeature component = default(EnablePlayerListsFeature);
                 component.EventListEntryDurationSeconds = authoring.EventListEntryDurationSeconds;
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

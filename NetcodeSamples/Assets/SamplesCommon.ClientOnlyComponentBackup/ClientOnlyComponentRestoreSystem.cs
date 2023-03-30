@@ -39,8 +39,8 @@ namespace Unity.NetCode.Samples
         private EntityStorageInfoLookup childEntityLookup;
         private BufferTypeHandle<LinkedEntityGroup> linkedEntityGroupHandle;
         private ComponentTypeHandle<ClientOnlyBackup> backupTypeHandle;
-        private ComponentTypeHandle<GhostTypeComponent> ghostTypeHandle;
-        private ComponentTypeHandle<PredictedGhostComponent> predictedGhostTypeHandle;
+        private ComponentTypeHandle<GhostType> ghostTypeHandle;
+        private ComponentTypeHandle<PredictedGhost> predictedGhostTypeHandle;
         //Internal to make it accessible by the tests
         internal ClientOnlyTypeHandleList componentTypeHandles;
 
@@ -48,26 +48,21 @@ namespace Unity.NetCode.Samples
         public void OnCreate(ref SystemState state)
         {
             var queryBuilder = new EntityQueryBuilder(Allocator.Temp);
-            queryBuilder.WithAll<PredictedGhostComponent>();
-            queryBuilder.WithAll<GhostTypeComponent>();
+            queryBuilder.WithAll<PredictedGhost>();
+            queryBuilder.WithAll<GhostType>();
             queryBuilder.WithAll<ClientOnlyBackup>();
             predictedGhostsWithClientOnlyBackup = state.GetEntityQuery(queryBuilder);
 
             linkedEntityGroupHandle = state.GetBufferTypeHandle<LinkedEntityGroup>(true);
             childEntityLookup = state.GetEntityStorageInfoLookup();
             backupTypeHandle = state.GetComponentTypeHandle<ClientOnlyBackup>();
-            ghostTypeHandle = state.GetComponentTypeHandle<GhostTypeComponent>(true);
-            predictedGhostTypeHandle = state.GetComponentTypeHandle<PredictedGhostComponent>(true);
+            ghostTypeHandle = state.GetComponentTypeHandle<GhostType>(true);
+            predictedGhostTypeHandle = state.GetComponentTypeHandle<PredictedGhost>(true);
 
             state.RequireForUpdate<EnableClientOnlyBackup>();
             state.RequireForUpdate<ClientOnlyCollection>();
-            state.RequireForUpdate<NetworkSnapshotAckComponent>();
+            state.RequireForUpdate<NetworkSnapshotAck>();
             state.RequireForUpdate(predictedGhostsWithClientOnlyBackup);
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
         }
 
         [BurstCompile]
@@ -75,9 +70,9 @@ namespace Unity.NetCode.Samples
         {
             var clientOnlyCollection = SystemAPI.GetSingleton<ClientOnlyCollection>();
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
-            // complete the dependency in order to access the NetworkSnapshotAckComponent (because written in NetworkStreamReceiveSystem)
+            // complete the dependency in order to access the NetworkSnapshotAck (because written in NetworkStreamReceiveSystem)
             state.CompleteDependency();
-            var ackComponent = SystemAPI.GetSingleton<NetworkSnapshotAckComponent>();
+            var ackComponent = SystemAPI.GetSingleton<NetworkSnapshotAck>();
 
             backupTypeHandle.Update(ref state);
             ghostTypeHandle.Update(ref state);
@@ -108,14 +103,14 @@ namespace Unity.NetCode.Samples
         [BurstCompile]
         unsafe struct RestoreFromBackup : IJobChunk
         {
-            [ReadOnly] public ComponentTypeHandle<GhostTypeComponent> ghostTypeHandle;
-            [ReadOnly] public ComponentTypeHandle<PredictedGhostComponent> predictedGhostComponentTypeHandle;
+            [ReadOnly] public ComponentTypeHandle<GhostType> ghostTypeHandle;
+            [ReadOnly] public ComponentTypeHandle<PredictedGhost> predictedGhostComponentTypeHandle;
             [ReadOnly] public BufferTypeHandle<LinkedEntityGroup> linkedEntityGroupHandle;
             public ComponentTypeHandle<ClientOnlyBackup> backupTypeHandle;
             public EntityStorageInfoLookup childEntityLookup;
             public ClientOnlyTypeHandleList componentTypeHandles;
             public NativeArray<ClientOnlyBackupInfo>.ReadOnly clientOnlyComponentCollection;
-            public NativeHashMap<GhostTypeComponent, ClientOnlyBackupMetadata>.ReadOnly prefabMetadata;
+            public NativeHashMap<GhostType, ClientOnlyBackupMetadata>.ReadOnly prefabMetadata;
             public NetworkTick serverTick;
             //The latest received tick from the server. All backup history before that tick can be cleared
             public NetworkTick lastReceivedSnapshotByLocal;

@@ -4,7 +4,7 @@ using Unity.Physics;
 using Unity.Physics.Authoring;
 using Unity.Physics.Systems;
 
-namespace Unity.Physics.Samples.Test
+namespace Unity.Physics.Tests
 {
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(PhysicsSystemGroup))]

@@ -28,7 +28,8 @@ class PlatformMotionBaker : Baker<PlatformMotionAuthoring>
 {
     public override void Bake(PlatformMotionAuthoring authoring)
     {
-        AddComponent(new PlatformMotion
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new PlatformMotion
         {
             InitialPosition = authoring.transform.position,
             Height = authoring.Height,
@@ -42,7 +43,6 @@ class PlatformMotionBaker : Baker<PlatformMotionAuthoring>
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct PlatformMotionSystem : ISystem
 {
     [BurstCompile]
@@ -50,44 +50,25 @@ public partial struct PlatformMotionSystem : ISystem
     {
         public float DeltaTime;
 
-        [BurstCompile]
-#if !ENABLE_TRANSFORM_V1
         public void Execute(ref PlatformMotion motion, ref PhysicsVelocity velocity, in LocalTransform localTransform)
-#else
-        public void Execute(ref PlatformMotion motion, ref PhysicsVelocity velocity, in Translation position)
-#endif
         {
             motion.CurrentTime += DeltaTime;
 
             var desiredOffset = motion.Height * math.sin(motion.CurrentTime * motion.Speed);
-#if !ENABLE_TRANSFORM_V1
+
             var currentOffset = math.dot(localTransform.Position - motion.InitialPosition, motion.Direction);
-#else
-            var currentOffset = math.dot(position.Value - motion.InitialPosition, motion.Direction);
-#endif
+
             velocity.Linear = motion.Direction * (desiredOffset - currentOffset);
             velocity.Angular = motion.Rotation;
         }
     }
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
-        float dt = SystemAPI.Time.DeltaTime;
         state.Dependency = new MovePlatformsJob()
         {
-            DeltaTime = dt,
+            DeltaTime = SystemAPI.Time.DeltaTime,
         }.Schedule(state.Dependency);
     }
 }

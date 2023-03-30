@@ -27,8 +27,9 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(HitMarkerAuthoring authoring)
             {
-                AddComponent<ServerHitMarker>();
-                AddComponent<ClientHitMarker>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<ServerHitMarker>(entity);
+                AddComponent<ClientHitMarker>(entity);
             }
         }
     }

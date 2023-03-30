@@ -10,19 +10,14 @@ public class EntityTracker : MonoBehaviour {}
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(TransformSystemGroup))]
-#if !ENABLE_TRANSFORM_V1
 [UpdateAfter(typeof(LocalToWorldSystem))]
-#else
-[UpdateAfter(typeof(LocalToParentSystem))]
-#endif
-partial class SynchronizeGameObjectTransformsWithEntities : SystemBase
+partial struct SynchronizeGameObjectTransformsWithEntities : ISystem
 {
     EntityQuery m_Query;
 
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        m_Query = GetEntityQuery(new EntityQueryDesc
+        m_Query = state.GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[]
             {
@@ -33,13 +28,12 @@ partial class SynchronizeGameObjectTransformsWithEntities : SystemBase
         });
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        var localToWorlds = m_Query.ToComponentDataListAsync<LocalToWorld>(World.UpdateAllocator.ToAllocator,
+        var localToWorlds = m_Query.ToComponentDataListAsync<LocalToWorld>(state.World.UpdateAllocator.ToAllocator,
             out var jobHandle);
-        // TODO(DOTS-6141): this call can't currently be made inline from inside the Schedule call
-        var inputDep = JobHandle.CombineDependencies(Dependency, jobHandle);
-        Dependency = new SyncTransforms
+        var inputDep = JobHandle.CombineDependencies(state.Dependency, jobHandle);
+        state.Dependency = new SyncTransforms
         {
             LocalToWorlds = localToWorlds
         }.Schedule(m_Query.GetTransformAccessArray(), inputDep);

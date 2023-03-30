@@ -14,14 +14,6 @@ namespace Samples.HelloNetcode
     [RequireMatchingQueriesForUpdate]
     public partial struct UpdateHealthBarSystem : ISystem
     {
-        public void OnCreate(ref SystemState state)
-        {
-        }
-
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             if (Camera.main == null)
@@ -31,31 +23,19 @@ namespace Samples.HelloNetcode
             }
 
             var mainCamera = Camera.main;
-#if !ENABLE_TRANSFORM_V1
-            foreach (var (ui, health, localTransform) in SystemAPI.Query<HealthUI, RefRO<Health>, RefRO<LocalTransform>>())
+
+            foreach (var (ui, health, ltw) in SystemAPI.Query<HealthUI, RefRO<Health>, RefRO<LocalToWorld>>())
             {
                 if (health.ValueRO.CurrentHitPoints <= 0)
                 {
                     continue;
                 }
-                ui.HealthBar.position = localTransform.ValueRO.Position + ui.Offset;
+                ui.HealthBar.position = ltw.ValueRO.Position + ui.Offset;
                 var n = mainCamera.transform.position - ui.HealthBar.position;
                 ui.HealthBar.rotation = Quaternion.LookRotation(n);
                 ui.HealthSlider.fillAmount = health.ValueRO.CurrentHitPoints / health.ValueRO.MaximumHitPoints;
             }
-#else
-            foreach (var (ui, health, translation) in SystemAPI.Query<HealthUI, RefRO<Health>, RefRO<Translation>>())
-            {
-                if (health.ValueRO.CurrentHitPoints <= 0)
-                {
-                    continue;
-                }
-                ui.HealthBar.position = translation.ValueRO.Value + ui.Offset;
-                var n = mainCamera.transform.position - ui.HealthBar.position;
-                ui.HealthBar.rotation = Quaternion.LookRotation(n);
-                ui.HealthSlider.fillAmount = health.ValueRO.CurrentHitPoints / health.ValueRO.MaximumHitPoints;
-            }
-#endif
+
         }
     }
 #endif

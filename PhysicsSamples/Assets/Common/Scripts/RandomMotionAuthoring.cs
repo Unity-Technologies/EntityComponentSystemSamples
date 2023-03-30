@@ -31,7 +31,8 @@ class RandomMotionAuthoringBaker : Baker<RandomMotionAuthoring>
     {
         var length = math.length(authoring.Range);
         var transform = GetComponent<Transform>();
-        AddComponent(new RandomMotion
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new RandomMotion
         {
             InitialPosition = transform.position,
             DesiredPosition = transform.position,
@@ -42,39 +43,27 @@ class RandomMotionAuthoringBaker : Baker<RandomMotionAuthoring>
     }
 }
 
-[BurstCompile]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
 public partial struct RandomMotionSystem : ISystem
 {
     [BurstCompile]
-    public partial struct JobEntityRandomMotion : IJobEntity
+    public partial struct EntityRandomMotionJob : IJobEntity
     {
         public Random Random;
         public PhysicsStep StepComponent;
         public float DeltaTime;
 
-        [BurstCompile]
-#if !ENABLE_TRANSFORM_V1
         public void Execute(ref RandomMotion motion, ref PhysicsVelocity velocity, in LocalTransform transform, in PhysicsMass mass)
-#else
-        public void Execute(ref RandomMotion motion, ref PhysicsVelocity velocity, in Translation position, in PhysicsMass mass)
-#endif
         {
             motion.CurrentTime += DeltaTime;
 
             Random.InitState((uint)(motion.CurrentTime * 1000));
-#if !ENABLE_TRANSFORM_V1
+
             var currentOffset = transform.Position - motion.InitialPosition;
             var desiredOffset = motion.DesiredPosition - motion.InitialPosition;
             // If we are close enough to the destination pick a new destination
             if (math.lengthsq(transform.Position - motion.DesiredPosition) < motion.Tolerance)
-#else
-            var currentOffset = position.Value - motion.InitialPosition;
-            var desiredOffset = motion.DesiredPosition - motion.InitialPosition;
-            // If we are close enough to the destination pick a new destination
-            if (math.lengthsq(position.Value - motion.DesiredPosition) < motion.Tolerance)
-#endif
             {
                 var min = new float3(-math.abs(motion.Range));
                 var max = new float3(math.abs(motion.Range));
@@ -98,22 +87,15 @@ public partial struct RandomMotionSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var random = new Random();
-        float dt = SystemAPI.Time.DeltaTime;
         if (!SystemAPI.TryGetSingleton<PhysicsStep>(out var stepComponent))
             stepComponent = PhysicsStep.Default;
 
-        state.Dependency = new JobEntityRandomMotion
+        state.Dependency = new EntityRandomMotionJob
         {
-            Random = random,
-            DeltaTime = dt,
+            Random = new Random(),
+            DeltaTime = SystemAPI.Time.DeltaTime,
             StepComponent = stepComponent
         }.Schedule(state.Dependency);
     }

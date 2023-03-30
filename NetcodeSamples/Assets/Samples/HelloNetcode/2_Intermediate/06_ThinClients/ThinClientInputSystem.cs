@@ -17,7 +17,7 @@ namespace Samples.HelloNetcode
         {
             RequireForUpdate<EnableThinClients>();
             RequireForUpdate<EnableSpawnPlayer>();
-            RequireForUpdate<NetworkIdComponent>();
+            RequireForUpdate<NetworkId>();
 
             // Give every thin client some randomness
             var rand = Unity.Mathematics.Random.CreateFromIndex((uint)Stopwatch.GetTimestamp());
@@ -28,7 +28,7 @@ namespace Samples.HelloNetcode
         protected override void OnUpdate()
         {
             // Check if the connection has no command target set yet, if not then create it (this is the dummy thin client player)
-            if (SystemAPI.TryGetSingleton<CommandTargetComponent>(out var commandTarget) && commandTarget.targetEntity == Entity.Null)
+            if (SystemAPI.TryGetSingleton<CommandTarget>(out var commandTarget) && commandTarget.targetEntity == Entity.Null)
                 CreateThinClientPlayer();
 
             byte left, right, up, down, jump;
@@ -72,13 +72,13 @@ namespace Samples.HelloNetcode
         {
             // Create dummy entity to store the thin clients inputs
             // When using IInputComponentData the entity will need the input component and its generated
-            // buffer, the GhostOwnerComponent set up with the local connection ID and finally the
-            // CommandTargetComponent needs to be manually set.
+            // buffer, the GhostOwner set up with the local connection ID and finally the
+            // CommandTarget needs to be manually set.
             var ent = EntityManager.CreateEntity();
             EntityManager.AddComponent<CharacterControllerPlayerInput>(ent);
 
-            var connectionId = SystemAPI.GetSingleton<NetworkIdComponent>().Value;
-            EntityManager.AddComponentData(ent, new GhostOwnerComponent() { NetworkId = connectionId });
+            var connectionId = SystemAPI.GetSingleton<NetworkId>().Value;
+            EntityManager.AddComponentData(ent, new GhostOwner() { NetworkId = connectionId });
 
             // NOTE: The buffer type might not be recognized in your IDE but it will be generated and Unity will recognize it
             EntityManager.AddComponent<HelloNetcodeSamples.Generated.CharacterControllerPlayerInputInputBufferData>(ent);
@@ -86,7 +86,7 @@ namespace Samples.HelloNetcode
             // NOTE: The server also has to manually set the command target for the thin client player
             // even though auto command target is used on the player prefab (and normal clients), see
             // SpawnPlayerSystem.
-            SystemAPI.SetSingleton(new CommandTargetComponent { targetEntity = ent });
+            SystemAPI.SetSingleton(new CommandTarget { targetEntity = ent });
         }
     }
 }

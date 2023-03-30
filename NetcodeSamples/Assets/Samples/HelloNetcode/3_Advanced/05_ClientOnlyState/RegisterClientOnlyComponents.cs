@@ -15,9 +15,6 @@ namespace Samples.HelloNetcode
             state.RequireForUpdate<EnableClientOnlyState>();
             state.RequireForUpdate<ClientOnlyCollection>();
         }
-        public void OnDestroy(ref SystemState state)
-        {
-        }
         public void OnUpdate(ref SystemState state)
         {
             SystemAPI.GetSingletonRW<ClientOnlyCollection>().ValueRW.RegisterClientOnlyComponentType(

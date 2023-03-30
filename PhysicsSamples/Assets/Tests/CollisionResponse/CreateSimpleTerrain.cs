@@ -14,7 +14,8 @@ public class CreateSimpleTerrain : SceneCreationAuthoring<CreateSimpleTerrainSce
     {
         public override void Bake(CreateSimpleTerrain authoring)
         {
-            AddComponentObject(new CreateSimpleTerrainScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new CreateSimpleTerrainScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial
@@ -23,7 +24,7 @@ public class CreateSimpleTerrain : SceneCreationAuthoring<CreateSimpleTerrainSce
     }
 }
 
-public class CreateSimpleTerrainSystem : SceneCreationSystem<CreateSimpleTerrainScene>
+public partial class CreateSimpleTerrainSystem : SceneCreationSystem<CreateSimpleTerrainScene>
 {
     public override void CreateScene(CreateSimpleTerrainScene sceneSettings)
     {
@@ -59,12 +60,9 @@ public class CreateSimpleTerrainSystem : SceneCreationSystem<CreateSimpleTerrain
         Entity entity = entityManager.CreateEntity(new ComponentType[] {});
 
         entityManager.AddComponentData(entity, new LocalToWorld {});
-#if !ENABLE_TRANSFORM_V1
+
         entityManager.AddComponentData(entity, LocalTransform.FromPosition(position));
-#else
-        entityManager.AddComponentData(entity, new Translation { Value = position });
-        entityManager.AddComponentData(entity, new Rotation { Value = quaternion.identity });
-#endif
+
 
         var colliderComponent = collider.AsComponent();
         entityManager.AddComponentData(entity, colliderComponent);

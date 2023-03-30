@@ -17,17 +17,18 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(ChangeCompoundFilter authoring)
             {
-                AddComponentObject(new ChangeCompoundFilterScene
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponentObject(entity, new ChangeCompoundFilterScene
                 {
                     DynamicMaterial = authoring.DynamicMaterial,
                     StaticMaterial = authoring.StaticMaterial
                 });
-                AddComponent<ChangeCompoundFilterData>();
+                AddComponent<ChangeCompoundFilterData>(entity);
             }
         }
     }
 
-    public class ChangeCompoundFilterSystem : SceneCreationSystem<ChangeCompoundFilterScene>
+    public partial class ChangeCompoundFilterSystem : SceneCreationSystem<ChangeCompoundFilterScene>
     {
         private BlobAssetReference<Collider> CreateGroundCompoundWith2Children(float3 groundSize)
         {
@@ -106,99 +107,89 @@ namespace Unity.Physics.Tests
 
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(PhysicsSystemGroup))]
-    public partial class UpdateFilterSystem : SystemBase
+    public partial struct UpdateFilterSystem : ISystem
     {
         private int m_Counter;
         EntityQuery m_VerificationGroup;
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            m_VerificationGroup = state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(ChangeCompoundFilterData) }
             });
 
-            RequireForUpdate(m_VerificationGroup);
+            state.RequireForUpdate(m_VerificationGroup);
 
             m_Counter = 0;
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             m_Counter++;
             if (m_Counter == 10)
             {
-                Dependency.Complete();
+                state.Dependency.Complete();
 
-                var bpwData = EntityManager.GetComponentData<BuildPhysicsWorldData>(World.GetExistingSystem<BuildPhysicsWorld>());
+                var bpwData = state.EntityManager.GetComponentData<BuildPhysicsWorldData>(state.World.GetExistingSystem<BuildPhysicsWorld>());
                 var staticEntities = bpwData.StaticEntityGroup.ToEntityArray(Allocator.TempJob);
 
                 // Change filter of child 0 in compound
                 unsafe
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[0]);
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[0]);
 
                     CompoundCollider* compoundCollider = (CompoundCollider*)colliderComponent.ColliderPtr;
                     compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(0));
-                    EntityManager.SetComponentData(staticEntities[0], colliderComponent);
+                    state.EntityManager.SetComponentData(staticEntities[0], colliderComponent);
                 }
 
                 // Change filter of child 1 in compound
                 unsafe
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[1]);
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[1]);
 
                     CompoundCollider* compoundCollider = (CompoundCollider*)colliderComponent.ColliderPtr;
                     compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(1));
-                    EntityManager.SetComponentData(staticEntities[1], colliderComponent);
+                    state.EntityManager.SetComponentData(staticEntities[1], colliderComponent);
                 }
 
                 // Change filter of both children in compound
                 unsafe
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[2]);
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[2]);
 
                     CompoundCollider* compoundCollider = (CompoundCollider*)colliderComponent.ColliderPtr;
                     compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(0));
                     compoundCollider->SetCollisionFilter(CollisionFilter.Zero, compoundCollider->ConvertChildIndexToColliderKey(1));
-                    EntityManager.SetComponentData(staticEntities[2], colliderComponent);
+                    state.EntityManager.SetComponentData(staticEntities[2], colliderComponent);
                 }
 
                 // Change filter of the compound itself
                 {
-                    var colliderComponent = EntityManager.GetComponentData<PhysicsCollider>(staticEntities[3]);
+                    var colliderComponent = state.EntityManager.GetComponentData<PhysicsCollider>(staticEntities[3]);
                     colliderComponent.Value.Value.SetCollisionFilter(CollisionFilter.Zero);
-                    EntityManager.SetComponentData(staticEntities[3], colliderComponent);
+                    state.EntityManager.SetComponentData(staticEntities[3], colliderComponent);
                 }
 
                 staticEntities.Dispose();
             }
             else if (m_Counter == 50)
             {
-                var bpwData = EntityManager.GetComponentData<BuildPhysicsWorldData>(World.GetExistingSystem<BuildPhysicsWorld>());
+                var bpwData = state.EntityManager.GetComponentData<BuildPhysicsWorldData>(state.World.GetExistingSystem<BuildPhysicsWorld>());
                 var dynamicEntities = bpwData.DynamicEntityGroup.ToEntityArray(Allocator.TempJob);
 
                 // First 2 boxes should stay still, while other 2 should fall through
                 {
-#if !ENABLE_TRANSFORM_V1
-                    var transform1 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[0]);
+                    var transform1 = state.EntityManager.GetComponentData<LocalTransform>(dynamicEntities[0]);
                     Assert.IsTrue(transform1.Position.y > 0.99f, "Box started falling!");
-                    var transform2 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[1]);
+                    var transform2 = state.EntityManager.GetComponentData<LocalTransform>(dynamicEntities[1]);
                     Assert.IsTrue(transform2.Position.y > 0.99f, "Box started falling!");
-                    var transform3 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[2]);
+                    var transform3 = state.EntityManager.GetComponentData<LocalTransform>(dynamicEntities[2]);
                     Assert.IsTrue(transform3.Position.y < 0.9f, "Box didn't start falling!");
-                    var transform4 = EntityManager.GetComponentData<LocalTransform>(dynamicEntities[3]);
+                    var transform4 = state.EntityManager.GetComponentData<LocalTransform>(dynamicEntities[3]);
                     Assert.IsTrue(transform4.Position.y < 0.9f, "Box didn't start falling!");
-#else
-                    var translation1 = EntityManager.GetComponentData<Translation>(dynamicEntities[0]);
-                    Assert.IsTrue(translation1.Value.y > 0.99f, "Box started falling!");
-                    var translation2 = EntityManager.GetComponentData<Translation>(dynamicEntities[1]);
-                    Assert.IsTrue(translation2.Value.y > 0.99f, "Box started falling!");
-                    var translation3 = EntityManager.GetComponentData<Translation>(dynamicEntities[2]);
-                    Assert.IsTrue(translation3.Value.y < 0.9f, "Box didn't start falling!");
-                    var translation4 = EntityManager.GetComponentData<Translation>(dynamicEntities[3]);
-                    Assert.IsTrue(translation4.Value.y < 0.9f, "Box didn't start falling!");
-#endif
+
                 }
 
                 dynamicEntities.Dispose();

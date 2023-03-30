@@ -8,7 +8,6 @@ namespace Unity.Physics.Tests
     // A system which performs the whole physics pipeline on animated bodies
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(DriveAnimationBodySystem))]
-    [BurstCompile]
     public partial struct AnimationPhysicsSystem : ISystem
     {
         private PhysicsWorldData PhysicsData;

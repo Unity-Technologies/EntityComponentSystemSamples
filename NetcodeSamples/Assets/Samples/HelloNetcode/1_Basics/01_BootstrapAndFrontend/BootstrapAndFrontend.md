@@ -26,3 +26,8 @@ There three scenes here:
 * _Frontend.unity_ has manual connection setup (connect or host) and on demand world creation (at runtime) with scene selection of all sample scenes in the project.
 * There is a companion _FrontendHUD.unity_ scene which shows the UI for going back to the main menu after a scene has been opened from the frontend, and text for the connection status.
 * A _FrontendBootstrap_ scene is meant to be placed first in the build settings scene list and sets up a few flows for the first sample scene loaded. It loads the Asteroids sample by default when a dedicated server is launched, but otherwise the frontend scene. When a scene name is given on the command line it picks that instead.
+
+## Note
+
+> [!NOTE]
+> The Frontend scene contains a toggle for relay support. To read more about what this feature entails, refer to the 01b_RelaySupport description.

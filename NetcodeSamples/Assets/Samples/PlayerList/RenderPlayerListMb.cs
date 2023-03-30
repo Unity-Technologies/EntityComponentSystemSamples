@@ -45,7 +45,7 @@ namespace Unity.NetCode.Samples.PlayerList
                             {
                                 m_WorldCaches[world] = new WorldCache
                                 {
-                                    NetworkIdQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkIdComponent>()),
+                                    NetworkIdQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>()),
                                     DesiredUsernameQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<DesiredUsername>()),
                                     PlayerListBufferEntryQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerListBufferEntry>()),
                                     PlayerListNotificationBufferQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerListNotificationBuffer>())
@@ -128,7 +128,7 @@ namespace Unity.NetCode.Samples.PlayerList
             }
 
             GUI.color = Color.grey;
-            var networkId = cache.NetworkIdQuery.IsEmptyIgnoreFilter ? -1 : cache.NetworkIdQuery.GetSingleton<NetworkIdComponent>().Value;
+            var networkId = cache.NetworkIdQuery.IsEmptyIgnoreFilter ? -1 : cache.NetworkIdQuery.GetSingleton<NetworkId>().Value;
             if (networkId <= 0)
             {
                 GUILayout.Box("Disconnected.");

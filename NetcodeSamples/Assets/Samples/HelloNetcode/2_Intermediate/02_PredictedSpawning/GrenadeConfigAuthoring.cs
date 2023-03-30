@@ -25,7 +25,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(GrenadeConfigAuthoring authoring)
             {
-                AddComponent(new GrenadeConfig
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new GrenadeConfig
                 {
                     InitialVelocity = authoring.InitialVelocity,
                     BlastTimer = authoring.BlastTimer,

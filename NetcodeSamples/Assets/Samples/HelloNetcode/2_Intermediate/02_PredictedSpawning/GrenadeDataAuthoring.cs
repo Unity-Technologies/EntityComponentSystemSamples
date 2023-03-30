@@ -19,7 +19,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(GrenadeDataAuthoring authoring)
             {
-                AddComponent<GrenadeData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<GrenadeData>(entity);
             }
         }
     }

@@ -13,7 +13,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(PhysicsWritingScript authoring)
             {
-                AddComponent<WritingPhysicsData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<WritingPhysicsData>(entity);
             }
         }
     }
@@ -21,20 +22,19 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsInitializeGroup))]
     [UpdateBefore(typeof(PhysicsSimulationGroup))]
-    public partial class WritePhysicsTagsSystem : SystemBase
+    public partial struct WritePhysicsTagsSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            base.OnCreate();
-            RequireForUpdate<WritingPhysicsData>();
+            state.RequireForUpdate<WritingPhysicsData>();
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
-            Dependency = new WritePhysicsTagsJob
+            state.Dependency = new WritePhysicsTagsJob
             {
                 PhysicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld
-            }.Schedule(Dependency);
+            }.Schedule(state.Dependency);
         }
 
         struct WritePhysicsTagsJob : IJob

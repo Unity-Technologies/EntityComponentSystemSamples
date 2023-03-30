@@ -16,7 +16,7 @@ namespace Unity.NetCode.Samples.Common
     {
         protected override void OnUpdate()
         {
-            Entities.WithAll<SetPlayerToDebugColor>().WithChangeFilter<MaterialMeshInfo, GhostOwnerComponent>().ForEach((ref URPMaterialPropertyBaseColor color, in GhostOwnerComponent ghostOwner) =>
+            Entities.WithAll<SetPlayerToDebugColor>().WithChangeFilter<MaterialMeshInfo, GhostOwner>().ForEach((ref URPMaterialPropertyBaseColor color, in GhostOwner ghostOwner) =>
             {
                 color.Value = NetworkIdDebugColorUtility.Get(ghostOwner.NetworkId);
             }).Run();

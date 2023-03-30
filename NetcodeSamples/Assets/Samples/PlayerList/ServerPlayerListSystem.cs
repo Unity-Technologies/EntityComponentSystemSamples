@@ -20,7 +20,7 @@ namespace Unity.NetCode.Samples.PlayerList
         EntityQuery m_PlayerListQuery;
         EntityQuery m_NewNetworkStreamConnectionsQuery;
         ComponentLookup<PlayerListEntry> m_PlayerListEntryFromEntity;
-        ComponentLookup<NetworkIdComponent> m_NetworkIdFromEntity;
+        ComponentLookup<NetworkId> m_NetworkIdFromEntity;
         EntityQuery m_ClientRegisterUsernameRpcQuery;
         EntityQuery m_DisconnectsQuery;
 
@@ -35,7 +35,7 @@ namespace Unity.NetCode.Samples.PlayerList
 
             var archetypeTypes = new NativeArray<ComponentType>(2, Allocator.Temp);
             archetypeTypes[0] = ComponentType.ReadOnly<PlayerListEntry.ChangedRpc>();
-            archetypeTypes[1] = ComponentType.ReadOnly<SendRpcCommandRequestComponent>();
+            archetypeTypes[1] = ComponentType.ReadOnly<SendRpcCommandRequest>();
             m_RpcArchetype = state.EntityManager.CreateArchetype(archetypeTypes);
             archetypeTypes[0] = ComponentType.ReadOnly<PlayerListEntry.InvalidUsernameResponseRpc>();
             m_InvalidUsernameRpcArchetype = state.EntityManager.CreateArchetype(archetypeTypes);
@@ -47,17 +47,12 @@ namespace Unity.NetCode.Samples.PlayerList
             archetypeTypes.Dispose();
 
             m_PlayerListEntryFromEntity = state.GetComponentLookup<PlayerListEntry>(true);
-            m_NetworkIdFromEntity = state.GetComponentLookup<NetworkIdComponent>(true);
+            m_NetworkIdFromEntity = state.GetComponentLookup<NetworkId>(true);
 
             m_ClientRegisterUsernameRpcQuery = state.GetEntityQuery(ComponentType.ReadOnly<PlayerListEntry.ClientRegisterUsernameRpc>());
 
 
             state.RequireForUpdate<EnablePlayerListsFeature>();
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
         }
 
         [BurstCompile]
@@ -112,17 +107,17 @@ namespace Unity.NetCode.Samples.PlayerList
             [ReadOnly]
             public ComponentLookup<PlayerListEntry> playerListEntries;
             [ReadOnly]
-            public ComponentLookup<NetworkIdComponent> networkIds;
+            public ComponentLookup<NetworkId> networkIds;
             [ReadOnly]
             public NativeList<PlayerListEntry> existingPlayerListEntries;
 
-            public void Execute(Entity rpcEntity, ref PlayerListEntry.ClientRegisterUsernameRpc rpc, in ReceiveRpcCommandRequestComponent req)
+            public void Execute(Entity rpcEntity, ref PlayerListEntry.ClientRegisterUsernameRpc rpc, in ReceiveRpcCommandRequest req)
             {
-                var networkIdComponent = networkIds[req.SourceConnection];
+                var networkId = networkIds[req.SourceConnection];
 
                 // Auto-patch here rather than kicking the player as players don't pick their default names.
                 var originalUsername = rpc.Value;
-                rpc.Value = UsernameSanitizer.SanitizeUsername(rpc.Value, networkIdComponent.Value, out var usernameWasSanitized);
+                rpc.Value = UsernameSanitizer.SanitizeUsername(rpc.Value, networkId.Value, out var usernameWasSanitized);
 
                 if (usernameWasSanitized)
                     netDbg.LogError($"Server received a PlayerListEntry.ClientRegisterUsernameRpc with an invalid username '{originalUsername}', sanitized to '{rpc.Value}'!");
@@ -135,7 +130,7 @@ namespace Unity.NetCode.Samples.PlayerList
                     {
                         ChangeType = PlayerListEntry.ChangedRpc.UpdateType.NewJoiner,
                         Reason = default,
-                        NetworkId = networkIdComponent.Value,
+                        NetworkId = networkId.Value,
                         Username = rpc
                     };
 
@@ -164,10 +159,10 @@ namespace Unity.NetCode.Samples.PlayerList
                 // We only need to broadcast if it's pertinent to other clients:
                 // Otherwise we just send back to sender.
                 ecb.RemoveComponent<PlayerListEntry.ClientRegisterUsernameRpc>(rpcEntity);
-                ecb.RemoveComponent<ReceiveRpcCommandRequestComponent>(rpcEntity);
+                ecb.RemoveComponent<ReceiveRpcCommandRequest>(rpcEntity);
 
                 ecb.AddComponent(rpcEntity, entry.State);
-                ecb.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+                ecb.AddComponent<SendRpcCommandRequest>(rpcEntity);
 
                 // Notify the sender that their original became this new, sanitized input, so that they can accept the servers value.
                 if (usernameWasSanitized)
@@ -177,7 +172,7 @@ namespace Unity.NetCode.Samples.PlayerList
                     {
                         RequestedUsername = originalUsername
                     });
-                    ecb.SetComponent(clientInvalidUsernameRpc, new SendRpcCommandRequestComponent
+                    ecb.SetComponent(clientInvalidUsernameRpc, new SendRpcCommandRequest
                     {
                         TargetConnection = req.SourceConnection
                     });
@@ -219,7 +214,7 @@ namespace Unity.NetCode.Samples.PlayerList
                 var changedRpc = existingPlayers[i].State;
                 changedRpc.ChangeType = PlayerListEntry.ChangedRpc.UpdateType.ExistingPlayer;
                 ecb.SetComponent(notifyOthersRpc, changedRpc);
-                ecb.SetComponent(notifyOthersRpc, new SendRpcCommandRequestComponent
+                ecb.SetComponent(notifyOthersRpc, new SendRpcCommandRequest
                 {
                     TargetConnection = targetConnection
                 });

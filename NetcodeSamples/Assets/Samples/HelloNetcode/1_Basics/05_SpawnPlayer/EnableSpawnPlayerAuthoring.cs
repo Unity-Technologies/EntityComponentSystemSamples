@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
             public override void Bake(EnableSpawnPlayerAuthoring authoring)
             {
                 EnableSpawnPlayer component = default(EnableSpawnPlayer);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

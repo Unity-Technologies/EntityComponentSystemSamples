@@ -13,7 +13,8 @@ public class MultiWorldMousePicker : MonoBehaviour
     {
         public override void Bake(MultiWorldMousePicker authoring)
         {
-            AddComponent<MultiWorldMousePickerTag>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<MultiWorldMousePickerTag>(entity);
         }
     }
 }
@@ -52,17 +53,11 @@ public partial class MultiWorldMousePickerGroup : CustomPhysicsSystemGroup
     {
         base.PreGroupUpdateCallback();
         SwitchMousePickerState();
-
-        // Enable debug display clean in this group - since it updates before main physics.
-        World.GetExistingSystemManaged<CleanPhysicsDebugDataSystem>().Enabled = true;
     }
 
     protected override void PostGroupUpdateCallback()
     {
         base.PostGroupUpdateCallback();
         SwitchMousePickerState();
-
-        //// Disable debug display for main physics - since it updates after this group.
-        World.GetExistingSystemManaged<CleanPhysicsDebugDataSystem>().Enabled = false;
     }
 }

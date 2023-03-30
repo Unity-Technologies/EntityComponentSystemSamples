@@ -18,7 +18,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(PlayerInputAuthoring authoring)
             {
-                AddComponent<PlayerInput>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<PlayerInput>(entity);
             }
         }
     }

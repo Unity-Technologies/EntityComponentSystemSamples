@@ -4,12 +4,13 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class BulletTagComponentAuthoring : MonoBehaviour
 {
-    class BulletTagComponentBaker : Baker<BulletTagComponentAuthoring>
+    class Baker : Baker<BulletTagComponentAuthoring>
     {
         public override void Bake(BulletTagComponentAuthoring authoring)
         {
             BulletTagComponent component = default(BulletTagComponent);
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }

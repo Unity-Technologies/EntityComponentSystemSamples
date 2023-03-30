@@ -32,11 +32,7 @@ namespace Samples.HelloNetcode
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<EnableHitScanWeapons>();
-            state.RequireForUpdate<NetworkIdComponent>();
-        }
-
-        public void OnDestroy(ref SystemState state)
-        {
+            state.RequireForUpdate<NetworkId>();
         }
 
         public void OnUpdate(ref SystemState state)
@@ -49,7 +45,7 @@ namespace Samples.HelloNetcode
             m_PrevEnabled = LagUI.EnableLagCompensation;
             var ent = state.EntityManager.CreateEntity();
             state.EntityManager.AddComponentData(ent, new ToggleLagCompensationRequest { Enable = m_PrevEnabled, Player = player });
-            state.EntityManager.AddComponentData(ent, default(SendRpcCommandRequestComponent));
+            state.EntityManager.AddComponentData(ent, default(SendRpcCommandRequest));
         }
     }
 
@@ -62,14 +58,6 @@ namespace Samples.HelloNetcode
     [UpdateInGroup(typeof(HelloNetcodeSystemGroup))]
     public partial struct LagUIControlSystem : ISystem
     {
-        public void OnCreate(ref SystemState state)
-        {
-        }
-
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             // Process requests to toggle lag compensation

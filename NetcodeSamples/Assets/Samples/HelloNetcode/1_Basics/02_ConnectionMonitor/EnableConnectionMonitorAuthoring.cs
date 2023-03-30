@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
             public override void Bake(EnableConnectionMonitorAuthoring authoring)
             {
                 EnableConnectionMonitor component = default(EnableConnectionMonitor);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

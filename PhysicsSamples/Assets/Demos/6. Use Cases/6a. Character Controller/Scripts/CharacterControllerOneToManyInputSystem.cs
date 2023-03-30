@@ -6,7 +6,6 @@ using Unity.Entities;
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 [UpdateAfter(typeof(DemoInputGatheringSystem))]
-[BurstCompile]
 public partial struct CharacterControllerOneToManyInputSystem : ISystem
 {
     public partial struct CharacterControllerOneToManyInputSystemJobParallel : IJobEntity
@@ -24,24 +23,12 @@ public partial struct CharacterControllerOneToManyInputSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        // Read user input
-        var input = SystemAPI.GetSingleton<CharacterControllerInput>();
-
         state.Dependency = new CharacterControllerOneToManyInputSystemJobParallel
         {
-            Input = input
+            // Read user input
+            Input = SystemAPI.GetSingleton<CharacterControllerInput>()
         }.ScheduleParallel(state.Dependency);
     }
 }

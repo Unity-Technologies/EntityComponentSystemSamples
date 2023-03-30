@@ -23,9 +23,10 @@ class TriggerVolumeChangeMaterialAuthoringBaker : Baker<TriggerVolumeChangeMater
 {
     public override void Bake(TriggerVolumeChangeMaterialAuthoring authoring)
     {
-        AddComponent(new TriggerVolumeChangeMaterial
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new TriggerVolumeChangeMaterial
         {
-            ReferenceEntity = GetEntity(authoring.ReferenceGameObject)
+            ReferenceEntity = GetEntity(authoring.ReferenceGameObject, TransformUsageFlags.Dynamic)
         });
     }
 }

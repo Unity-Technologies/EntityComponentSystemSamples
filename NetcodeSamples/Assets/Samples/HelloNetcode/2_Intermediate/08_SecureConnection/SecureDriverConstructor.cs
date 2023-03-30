@@ -3,7 +3,7 @@ using Unity.NetCode;
 
 namespace Samples.HelloNetcode
 {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || NETCODE_DEBUG
     /// <summary>
     /// Register client and server using TLS configuration.
     /// The configuration is retrieved from <see cref="SecureParameters"/>.

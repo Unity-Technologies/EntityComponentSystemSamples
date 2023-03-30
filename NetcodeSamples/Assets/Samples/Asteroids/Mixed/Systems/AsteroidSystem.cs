@@ -20,27 +20,18 @@ namespace Asteroids.Mixed
             state.RequireForUpdate(state.GetEntityQuery(builder));
         }
         [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {}
-        [BurstCompile]
         [WithAll(typeof(Simulate), typeof(AsteroidTagComponentData))]
         [WithNone(typeof(StaticAsteroid))]
         partial struct AsteroidJob : IJobEntity
         {
             public float deltaTime;
-#if !ENABLE_TRANSFORM_V1
+
             public void Execute(ref LocalTransform transform, in Velocity velocity)
             {
                 transform.Position.xy += velocity.Value * deltaTime;
                 transform.Rotation = math.mul(transform.Rotation, quaternion.RotateZ(math.radians(100 * deltaTime)));
             }
-#else
-            public void Execute(ref Translation position, ref Rotation rotation, in Velocity velocity)
-            {
-                position.Value.xy += velocity.Value * deltaTime;
-                rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(100 * deltaTime)));
-            }
-#endif
+
         }
         [BurstCompile]
         public void OnUpdate(ref SystemState state)

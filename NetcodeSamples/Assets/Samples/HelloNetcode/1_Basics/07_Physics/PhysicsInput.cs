@@ -14,7 +14,7 @@ namespace Samples.HelloNetcode
         {
             RequireForUpdate<EnablePhysics>();
             RequireForUpdate<PhysicsPlayerInput>();
-            RequireForUpdate<NetworkIdComponent>();
+            RequireForUpdate<NetworkId>();
         }
 
         protected override void OnUpdate()

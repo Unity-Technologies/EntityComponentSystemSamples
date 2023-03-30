@@ -49,11 +49,11 @@ namespace Unity.NetCode.Samples
         private EntityStorageInfoLookup m_childEntityLookup;
         private BufferTypeHandle<LinkedEntityGroup> m_linkedEntityGroupHandle;
         private ComponentTypeHandle<ClientOnlyBackup> m_backupTypeHandle;
-        private ComponentTypeHandle<GhostTypeComponent> m_ghostTypeHandle;
+        private ComponentTypeHandle<GhostType> m_ghostTypeHandle;
 
         private NativeList<ComponentType> m_clientOnlyComponentTypes;
         private NativeList<ClientOnlyBackupInfo> m_clientOnlyBackupInfoCollection;
-        private NativeHashMap<GhostTypeComponent, ClientOnlyBackupMetadata> m_ghostTypeToPrefabMetadata;
+        private NativeHashMap<GhostType, ClientOnlyBackupMetadata> m_ghostTypeToPrefabMetadata;
         private ClientOnlyTypeHandleList m_clientOnlyTypeHandleList;
 
         [BurstCompile]
@@ -61,33 +61,33 @@ namespace Unity.NetCode.Samples
         {
             var queryBuilder = new EntityQueryBuilder(Allocator.Temp);
             queryBuilder.WithAll<Simulate>();
-            queryBuilder.WithAll<PredictedGhostComponent>();
+            queryBuilder.WithAll<PredictedGhost>();
             queryBuilder.WithAll<ClientOnlyBackup>();
             m_predictedGhostsWithClientOnlyBackup = state.GetEntityQuery(queryBuilder);
             queryBuilder.Reset();
-            queryBuilder.WithAll<PredictedGhostComponent>();
-            queryBuilder.WithAll<GhostTypeComponent>();
+            queryBuilder.WithAll<PredictedGhost>();
+            queryBuilder.WithAll<GhostType>();
             queryBuilder.WithNone<ClientOnlyProcessed>();
             queryBuilder.WithNone<PreSpawnedGhostIndex>();
             m_predictedGhostsNotProcessed = state.GetEntityQuery(queryBuilder);
             queryBuilder.Reset();
-            queryBuilder.WithAll<PredictedGhostComponent>();
-            queryBuilder.WithAll<GhostTypeComponent>();
+            queryBuilder.WithAll<PredictedGhost>();
+            queryBuilder.WithAll<GhostType>();
             queryBuilder.WithNone<ClientOnlyProcessed>();
             queryBuilder.WithAll<PreSpawnedGhostIndex>();
             m_predictedPrespawendGhostsNotProcessed = state.GetEntityQuery(queryBuilder);
             queryBuilder.Reset();
             queryBuilder.WithAll<ClientOnlyBackup>();
-            queryBuilder.WithNone<PredictedGhostComponent>();
+            queryBuilder.WithNone<PredictedGhost>();
             m_destroyedGhostsWithClientOnlyBackup = state.GetEntityQuery(queryBuilder);
 
             m_clientOnlyBackupInfoCollection = new NativeList<ClientOnlyBackupInfo>(Allocator.Persistent);
             m_clientOnlyComponentTypes = new NativeList<ComponentType>(32, Allocator.Persistent);
-            m_ghostTypeToPrefabMetadata = new NativeHashMap<GhostTypeComponent, ClientOnlyBackupMetadata>(128, Allocator.Persistent);
+            m_ghostTypeToPrefabMetadata = new NativeHashMap<GhostType, ClientOnlyBackupMetadata>(128, Allocator.Persistent);
             m_clientOnlyTypeHandleList = default(ClientOnlyTypeHandleList);
 
             m_backupTypeHandle = state.GetComponentTypeHandle<ClientOnlyBackup>();
-            m_ghostTypeHandle = state.GetComponentTypeHandle<GhostTypeComponent>(true);
+            m_ghostTypeHandle = state.GetComponentTypeHandle<GhostType>(true);
             m_childEntityLookup = state.GetEntityStorageInfoLookup();
             m_linkedEntityGroupHandle = state.GetBufferTypeHandle<LinkedEntityGroup>(true);
 
@@ -148,7 +148,7 @@ namespace Unity.NetCode.Samples
             if (!m_predictedGhostsNotProcessed.IsEmpty)
             {
                 var entities = m_predictedGhostsNotProcessed.ToEntityArray(Allocator.Temp);
-                var ghostTypes = m_predictedGhostsNotProcessed.ToComponentDataArray<GhostTypeComponent>(Allocator.Temp);
+                var ghostTypes = m_predictedGhostsNotProcessed.ToComponentDataArray<GhostType>(Allocator.Temp);
                 //Mark entities as processed
                 state.EntityManager.AddComponent<ClientOnlyProcessed>(m_predictedGhostsNotProcessed);
                 for(int ent=0;ent<entities.Length;++ent)
@@ -171,7 +171,7 @@ namespace Unity.NetCode.Samples
             if (!m_predictedPrespawendGhostsNotProcessed.IsEmpty)
             {
                 var entities = m_predictedPrespawendGhostsNotProcessed.ToEntityArray(Allocator.Temp);
-                var ghostTypes = m_predictedPrespawendGhostsNotProcessed.ToComponentDataArray<GhostTypeComponent>(Allocator.Temp);
+                var ghostTypes = m_predictedPrespawendGhostsNotProcessed.ToComponentDataArray<GhostType>(Allocator.Temp);
                 state.EntityManager.AddComponent<ClientOnlyProcessed>(m_predictedPrespawendGhostsNotProcessed);
                 for(int ent=0;ent<entities.Length;++ent)
                 {
@@ -210,7 +210,7 @@ namespace Unity.NetCode.Samples
 
         [BurstCompile]
         [WithAll(typeof(ClientOnlyBackup))]
-        [WithNone(typeof(PredictedGhostComponent))]
+        [WithNone(typeof(PredictedGhost))]
         partial struct DisposeBackupJob : IJobEntity
         {
             public void Execute(ref ClientOnlyBackup backup)
@@ -292,13 +292,13 @@ namespace Unity.NetCode.Samples
         unsafe struct BackupJob : IJobChunk
         {
             [ReadOnly] public EntityStorageInfoLookup childEntityLookup;
-            [ReadOnly] public ComponentTypeHandle<GhostTypeComponent> ghostTypeHandle;
+            [ReadOnly] public ComponentTypeHandle<GhostType> ghostTypeHandle;
             public ComponentTypeHandle<ClientOnlyBackup> backupTypeHandle;
             [ReadOnly] public BufferTypeHandle<LinkedEntityGroup> linkedEntityGroupHandle;
 
             [ReadOnly] public ClientOnlyTypeHandleList componentTypeHandles;
             [ReadOnly] public NativeList<ClientOnlyBackupInfo> clientOnlyComponentCollection;
-            [ReadOnly] public NativeHashMap<GhostTypeComponent, ClientOnlyBackupMetadata> prefabMetadata;
+            [ReadOnly] public NativeHashMap<GhostType, ClientOnlyBackupMetadata> prefabMetadata;
             public NetworkTick serverTick;
             public NetDebug netDebug;
             public void Execute(in ArchetypeChunk chunk, int chunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)

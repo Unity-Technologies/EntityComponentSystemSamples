@@ -88,14 +88,9 @@ namespace Samples.HelloNetcode
         {
             var entity = ecb.Instantiate(spawner.Barrel);
             int centerAdjustment = rowLength == 1 ? 1 : (int)(math.floor(rowLength * 0.5f) * spacing);
-#if !ENABLE_TRANSFORM_V1
+
             ecb.AddComponent(entity, LocalTransform.FromPosition(x * spacing - centerAdjustment, 0, z * spacing - centerAdjustment));
-#else
-            ecb.AddComponent(entity, new Translation
-            {
-                Value = new float3(x * spacing - centerAdjustment, 0, z * spacing - centerAdjustment),
-            });
-#endif
+
         }
     }
 }

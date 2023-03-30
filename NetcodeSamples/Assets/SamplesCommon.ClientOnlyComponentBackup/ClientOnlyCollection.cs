@@ -17,7 +17,7 @@ namespace Unity.NetCode.Samples
     {
         internal NativeList<ComponentType> ClientOnlyComponentTypes;
         internal NativeList<ClientOnlyBackupInfo> BackupInfoCollection;
-        internal NativeHashMap<GhostTypeComponent, ClientOnlyBackupMetadata> GhostTypeToPrefabMetadata;
+        internal NativeHashMap<GhostType, ClientOnlyBackupMetadata> GhostTypeToPrefabMetadata;
         internal int ProcessedPrefabs;
         /// <summary>
         /// Flag used to check if a component can be registered. Once the first ghost prefabs has been processed,
@@ -41,7 +41,7 @@ namespace Unity.NetCode.Samples
             ClientOnlyComponentTypes.Add(componentType);
         }
 
-        internal void ProcessGhostTypePrefab(GhostTypeComponent ghostType, Entity entity, EntityManager entityManager)
+        internal void ProcessGhostTypePrefab(GhostType ghostType, Entity entity, EntityManager entityManager)
         {
             int first = BackupInfoCollection.Length;
             int componentBackupSize = 0;

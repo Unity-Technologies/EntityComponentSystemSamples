@@ -12,7 +12,8 @@ public class DoubleModifyBroadphasePairsBehaviour : MonoBehaviour
     {
         public override void Bake(DoubleModifyBroadphasePairsBehaviour authoring)
         {
-            AddComponent<DoubleModifyBroadphasePairs>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<DoubleModifyBroadphasePairs>(entity);
         }
     }
 }
@@ -21,17 +22,17 @@ public class DoubleModifyBroadphasePairsBehaviour : MonoBehaviour
 [UpdateInGroup(typeof(PhysicsSimulationGroup))]
 [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
 [UpdateBefore(typeof(PhysicsCreateContactsGroup))]
-public partial class DoubleModifyBroadphasePairsSystem : SystemBase
+public partial struct DoubleModifyBroadphasePairsSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+        state.RequireForUpdate(state.GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[] { typeof(DoubleModifyBroadphasePairs) }
         }));
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         SimulationSingleton simSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
 
@@ -43,15 +44,15 @@ public partial class DoubleModifyBroadphasePairsSystem : SystemBase
         PhysicsWorldSingleton worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
         // Add a custom callback to the simulation, which will inject our custom job after the body pairs have been created
-        Dependency = new DisableDynamicDynamicPairsJob
+        state.Dependency = new DisableDynamicDynamicPairsJob
         {
             NumDynamicBodies = worldSingleton.PhysicsWorld.NumDynamicBodies
-        }.Schedule(simSingleton, ref worldSingleton.PhysicsWorld, Dependency);
+        }.Schedule(simSingleton, ref worldSingleton.PhysicsWorld, state.Dependency);
 
-        Dependency = new DisableDynamicStaticPairsJob
+        state.Dependency = new DisableDynamicStaticPairsJob
         {
             NumDynamicBodies = worldSingleton.PhysicsWorld.NumDynamicBodies
-        }.Schedule(simSingleton, ref worldSingleton.PhysicsWorld, Dependency);
+        }.Schedule(simSingleton, ref worldSingleton.PhysicsWorld, state.Dependency);
     }
 
     [BurstCompile]

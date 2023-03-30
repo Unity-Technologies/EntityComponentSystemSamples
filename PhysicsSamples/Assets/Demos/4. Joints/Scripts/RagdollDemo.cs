@@ -34,7 +34,8 @@ class RagdollDemoBaker : Baker<RagdollDemo>
     {
         DependsOn(authoring.RenderMesh);
         DependsOn(authoring.TorsoMesh);
-        AddComponentObject(new RagdollDemoScene
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponentObject(entity, new RagdollDemoScene
         {
             DynamicMaterial = authoring.DynamicMaterial,
             StaticMaterial = authoring.StaticMaterial,
@@ -47,7 +48,7 @@ class RagdollDemoBaker : Baker<RagdollDemo>
     }
 }
 
-public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
+public partial class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
 {
     private enum layer
     {
@@ -99,15 +100,8 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
 
         if (!isTorso)
         {
-#if !ENABLE_TRANSFORM_V1
-            var compositeScale = float3x3.Scale(scale);
-            EntityManager.AddComponentData(entity, new PostTransformScale { Value = compositeScale });
-#else
-            EntityManager.AddComponentData<NonUniformScale>(entity, new NonUniformScale
-            {
-                Value = scale,
-            });
-#endif
+            var compositeScale = float4x4.Scale(scale);
+            EntityManager.AddComponentData(entity, new PostTransformMatrix { Value = compositeScale });
         }
     }
 
@@ -431,21 +425,15 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
 
                 SwapRenderMesh(e, i == 1, torsoMesh, renderMesh);
 
-#if !ENABLE_TRANSFORM_V1
+
                 LocalTransform localTransformComponent = EntityManager.GetComponentData<LocalTransform>(e);
-#else
-                Translation positionComponent = EntityManager.GetComponentData<Translation>(e);
-                Rotation rotationComponent = EntityManager.GetComponentData<Rotation>(e);
-#endif
+
                 PhysicsVelocity velocityComponent = EntityManager.GetComponentData<PhysicsVelocity>(e);
 
-#if !ENABLE_TRANSFORM_V1
+
                 float3 position = localTransformComponent.Position;
                 quaternion rotation = localTransformComponent.Rotation;
-#else
-                float3 position = positionComponent.Value;
-                quaternion rotation = rotationComponent.Value;
-#endif
+
 
                 float3 localPosition = position - pelvisPosition;
                 localPosition = math.rotate(rotationOffset, localPosition);
@@ -453,23 +441,17 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
                 position = localPosition + pelvisPosition + positionOffset;
                 rotation = math.mul(rotation, rotationOffset);
 
-#if !ENABLE_TRANSFORM_V1
+
                 localTransformComponent.Position = position;
                 localTransformComponent.Rotation = rotation;
-#else
-                positionComponent.Value = position;
-                rotationComponent.Value = rotation;
-#endif
+
 
                 velocityComponent.Linear = initialVelocity;
 
                 EntityManager.SetComponentData<PhysicsVelocity>(e, velocityComponent);
-#if !ENABLE_TRANSFORM_V1
+
                 EntityManager.SetComponentData<LocalTransform>(e, localTransformComponent);
-#else
-                EntityManager.SetComponentData<Translation>(e, positionComponent);
-                EntityManager.SetComponentData<Rotation>(e, rotationComponent);
-#endif
+
             }
         }
     }

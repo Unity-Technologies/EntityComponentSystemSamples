@@ -22,7 +22,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(HealthBarSpawnerAuthoring authoring)
             {
-                AddComponentObject(new HealthBarSpawner
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponentObject(entity, new HealthBarSpawner
                 {
                     HealthBarPrefab = authoring.HealthBarPrefab,
                     Offset = authoring.Offset,

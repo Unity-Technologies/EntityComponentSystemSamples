@@ -28,7 +28,7 @@ struct AsteroidSpawnSettings : IComponentData, ISpawnSettings
     public float MassFactor;
 }
 
-class SpawnRandomAsteroidsSystem : SpawnRandomObjectsSystemBase<AsteroidSpawnSettings>
+partial class SpawnRandomAsteroidsSystem : SpawnRandomObjectsSystemBase<AsteroidSpawnSettings>
 {
     Random m_RandomMass;
 

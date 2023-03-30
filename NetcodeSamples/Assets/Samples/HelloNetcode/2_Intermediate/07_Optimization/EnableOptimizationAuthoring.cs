@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
             public override void Bake(EnableOptimizationAuthoring authoring)
             {
                 EnableOptimization component = default(EnableOptimization);
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

@@ -21,13 +21,10 @@ namespace Samples.HelloNetcode
                 Enabled = false;
             }
 
-#if !ENABLE_TRANSFORM_V1
+
             /* This is intentionally incorrect. We grab write access to the transform data but never modify it. */
             Entities.ForEach((ref LocalTransform trans) =>
-#else
-            /* This is intentionally incorrect. We grab write access to the translation data but never modify it. */
-            Entities.ForEach((ref Translation trans) =>
-#endif
+
             {
             }).Run();
         }

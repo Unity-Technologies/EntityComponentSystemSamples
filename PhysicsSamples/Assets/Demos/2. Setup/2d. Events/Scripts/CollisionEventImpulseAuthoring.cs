@@ -22,7 +22,8 @@ public class CollisionEventImpulseAuthoring : MonoBehaviour
     {
         public override void Bake(CollisionEventImpulseAuthoring authoring)
         {
-            AddComponent(new CollisionEventImpulse()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new CollisionEventImpulse()
             {
                 Impulse = authoring.Magnitude * authoring.Direction,
             });
@@ -36,7 +37,6 @@ public class CollisionEventImpulseAuthoring : MonoBehaviour
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct CollisionEventImpulseSystem : ISystem
 {
     internal ComponentDataHandles m_ComponentDataHandles;
@@ -64,11 +64,6 @@ public partial struct CollisionEventImpulseSystem : ISystem
     {
         state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<CollisionEventImpulse>()));
         m_ComponentDataHandles = new ComponentDataHandles(ref state);
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]

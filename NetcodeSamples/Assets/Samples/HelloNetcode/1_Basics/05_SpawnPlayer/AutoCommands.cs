@@ -70,11 +70,9 @@ namespace Samples.HelloNetcode
             // Make the jump arc look the same regardless of simulation tick rate
             var velocityDecrementStep = 60 / tickRate.SimulationTickRate;
             Entities.WithAll<Simulate>().WithName("ProcessInputForTick").ForEach(
-#if !ENABLE_TRANSFORM_V1
+
                 (ref PlayerInput input, ref LocalTransform trans, ref PlayerMovement movement) =>
-#else
-                (ref PlayerInput input, ref Translation trans, ref PlayerMovement movement) =>
-#endif
+
                 {
                     if (input.Jump.IsSet)
                         movement.JumpVelocity = 10;
@@ -90,26 +88,19 @@ namespace Samples.HelloNetcode
                     }
                     else
                     {
-#if !ENABLE_TRANSFORM_V1
+
                         if (trans.Position.y > 0)
                             verticalMovement = -1;
-#else
-                        if (trans.Value.y > 0)
-                            verticalMovement = -1;
-#endif
+
                     }
                     var moveInput = new float3(input.Horizontal, verticalMovement, input.Vertical);
                     moveInput = math.normalizesafe(moveInput) * movementSpeed;
                     // Ensure we don't go through the ground when landing (and stick to it when close)
-#if !ENABLE_TRANSFORM_V1
+
                     if (movement.JumpVelocity <= 0 && (trans.Position.y + moveInput.y < 0 || trans.Position.y + moveInput.y < 0.05))
                         moveInput.y = trans.Position.y = 0;
                     trans.Position += new float3(moveInput.x, moveInput.y, moveInput.z);
-#else
-                    if (movement.JumpVelocity <= 0 && (trans.Value.y + moveInput.y < 0 || trans.Value.y + moveInput.y < 0.05))
-                        moveInput.y = trans.Value.y = 0;
-                    trans.Value += new float3(moveInput.x, moveInput.y, moveInput.z);
-#endif
+
                 }).ScheduleParallel();
         }
     }

@@ -27,7 +27,8 @@ namespace Samples.HelloNetcode
             {
                 PlayerMovement component = default(PlayerMovement);
                 component.JumpVelocity = authoring.JumpVelocity;
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

@@ -10,32 +10,27 @@ using Unity.Rendering;
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public partial struct PredictionSwitchingSystem : ISystem
 {
-    ComponentLookup<GhostOwnerComponent> m_GhostOwnerFromEntity;
+    ComponentLookup<GhostOwner> m_GhostOwnerFromEntity;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<PredictionSwitchingSettings>();
-        state.RequireForUpdate<CommandTargetComponent>();
+        state.RequireForUpdate<CommandTarget>();
         state.RequireForUpdate<GhostPredictionSwitchingQueues>();
-        m_GhostOwnerFromEntity = state.GetComponentLookup<GhostOwnerComponent>(true);
+        m_GhostOwnerFromEntity = state.GetComponentLookup<GhostOwner>(true);
     }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var playerEnt = SystemAPI.GetSingleton<CommandTargetComponent>().targetEntity;
+        var playerEnt = SystemAPI.GetSingleton<CommandTarget>().targetEntity;
         if (playerEnt == Entity.Null)
             return;
 
-#if !ENABLE_TRANSFORM_V1
+
         var playerPos = state.EntityManager.GetComponentData<LocalTransform>(playerEnt).Position;
-#else
-        var playerPos = state.EntityManager.GetComponentData<Translation>(playerEnt).Value;
-#endif
+
         var ghostPredictionSwitchingQueues = SystemAPI.GetSingletonRW<GhostPredictionSwitchingQueues>().ValueRW;
         var parallelEcb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
@@ -68,7 +63,7 @@ public partial struct PredictionSwitchingSystem : ISystem
     }
 
     [BurstCompile]
-    [WithNone(typeof(PredictedGhostComponent), typeof(SwitchPredictionSmoothing))]
+    [WithNone(typeof(PredictedGhost), typeof(SwitchPredictionSmoothing))]
     partial struct SwitchToPredictedGhostViaRange : IJobEntity
     {
         public float3 playerPos;
@@ -78,24 +73,20 @@ public partial struct PredictionSwitchingSystem : ISystem
         public EntityCommandBuffer.ParallelWriter parallelEcb;
 
         [ReadOnly]
-        public ComponentLookup<GhostOwnerComponent> ghostOwnerFromEntity;
+        public ComponentLookup<GhostOwner> ghostOwnerFromEntity;
 
         public float transitionDurationSeconds;
         public byte ballColorChangingEnabled;
 
-#if !ENABLE_TRANSFORM_V1
-        void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform, in GhostComponent ghostComponent)
-#else
-        void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in Translation position, in GhostComponent ghostComponent)
-#endif
-        {
-            if (ghostComponent.ghostType < 0) return;
 
-#if !ENABLE_TRANSFORM_V1
+        void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform, in GhostInstance ghostInstance)
+
+        {
+            if (ghostInstance.ghostType < 0) return;
+
+
             if (math.distancesq(playerPos, transform.Position) < enterRadiusSq)
-#else
-            if (math.distancesq(playerPos, position.Value) < enterRadiusSq)
-#endif
+
             {
                 transitionDurationSeconds = 1.0f;
                 predictedQueue.Enqueue(new ConvertPredictionEntry
@@ -112,7 +103,7 @@ public partial struct PredictionSwitchingSystem : ISystem
 
     [BurstCompile]
     [WithNone(typeof(SwitchPredictionSmoothing))]
-    [WithAll(typeof(PredictedGhostComponent))]
+    [WithAll(typeof(PredictedGhost))]
     partial struct SwitchToInterpolatedGhostViaRange : IJobEntity
     {
         public float3 playerPos;
@@ -122,23 +113,19 @@ public partial struct PredictionSwitchingSystem : ISystem
         public EntityCommandBuffer.ParallelWriter parallelEcb;
 
         [ReadOnly]
-        public ComponentLookup<GhostOwnerComponent> ghostOwnerFromEntity;
+        public ComponentLookup<GhostOwner> ghostOwnerFromEntity;
 
         public float transitionDurationSeconds;
 
-#if !ENABLE_TRANSFORM_V1
-        void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform, in GhostComponent ghostComponent)
-#else
-        void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in Translation position, in GhostComponent ghostComponent)
-#endif
-        {
-            if (ghostComponent.ghostType < 0) return;
 
-#if !ENABLE_TRANSFORM_V1
+        void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform, in GhostInstance ghostInstance)
+
+        {
+            if (ghostInstance.ghostType < 0) return;
+
+
             if (math.distancesq(playerPos, transform.Position) > exitRadiusSq)
-#else
-            if (math.distancesq(playerPos, position.Value) > exitRadiusSq)
-#endif
+
             {
                 interpolatedQueue.Enqueue(new ConvertPredictionEntry
                 {

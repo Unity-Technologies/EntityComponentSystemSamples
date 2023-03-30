@@ -27,7 +27,7 @@ public partial class PredictionSwitchingSampleInputSystem : SystemBase
     protected override void OnUpdate()
     {
         var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
-        var connection = SystemAPI.GetSingletonEntity<CommandTargetComponent>();
+        var connection = SystemAPI.GetSingletonEntity<CommandTarget>();
         Entities
             .WithoutBurst()
             .WithAll<GhostOwnerIsLocal>()
@@ -43,9 +43,9 @@ public partial class PredictionSwitchingSampleInputSystem : SystemBase
                 if (UnityEngine.Input.GetKey("up") || TouchInput.GetKey(TouchInput.KeyCode.Up))
                     input.vertical += 1;
                 inputBuffer.AddCommandData(input);
-                if (EntityManager.GetComponentData<CommandTargetComponent>(connection).targetEntity == Entity.Null)
+                if (EntityManager.GetComponentData<CommandTarget>(connection).targetEntity == Entity.Null)
                 {
-                    EntityManager.SetComponentData(connection, new CommandTargetComponent{targetEntity = entity});
+                    EntityManager.SetComponentData(connection, new CommandTarget{targetEntity = entity});
                 }
         }).Run();
     }

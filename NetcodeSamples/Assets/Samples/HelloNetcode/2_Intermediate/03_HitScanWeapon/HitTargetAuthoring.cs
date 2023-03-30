@@ -22,7 +22,8 @@ namespace Samples.HelloNetcode
                 var component = default(HitTarget);
                 component.Speed = authoring.Speed;
                 component.MovingRange = authoring.MovingRange;
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

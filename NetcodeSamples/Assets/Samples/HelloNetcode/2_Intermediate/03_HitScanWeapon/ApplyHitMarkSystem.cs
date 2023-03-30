@@ -14,10 +14,6 @@ namespace Samples.HelloNetcode
             state.RequireForUpdate<Hit>();
         }
 
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();

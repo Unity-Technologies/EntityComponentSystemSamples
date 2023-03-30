@@ -18,8 +18,9 @@ namespace Samples.HelloNetcode
             public override void Bake(BarrelSpawnerAuthoring authoring)
             {
                 BarrelSpawner component = default(BarrelSpawner);
-                component.Barrel = GetEntity(authoring.Barrel);
-                AddComponent(component);
+                component.Barrel = GetEntity(authoring.Barrel, TransformUsageFlags.Dynamic);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

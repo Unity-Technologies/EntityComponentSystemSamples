@@ -3,13 +3,12 @@ using UnityEngine;
 
 public class VelocityAuthoringComponent : MonoBehaviour
 {
-}
-
-public class VelocityAuthoringComponentBaker : Baker<VelocityAuthoringComponent>
-{
-    public override void Bake(VelocityAuthoringComponent authoring)
+    public class Baker : Baker<VelocityAuthoringComponent>
     {
-        AddComponent(new Velocity());
+        public override void Bake(VelocityAuthoringComponent authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new Velocity());
+        }
     }
 }
-

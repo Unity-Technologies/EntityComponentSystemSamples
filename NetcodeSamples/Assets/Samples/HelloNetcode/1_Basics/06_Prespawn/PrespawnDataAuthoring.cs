@@ -26,7 +26,8 @@ namespace Samples.HelloNetcode
                 PrespawnData component = default(PrespawnData);
                 component.Value = authoring.Value;
                 component.Direction = authoring.Direction;
-                AddComponent(component);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, component);
             }
         }
     }

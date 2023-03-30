@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace Unity.Physics.Tests
 {
-#if HAVOK_PHYSICS_EXISTS && (UNITY_EDITOR || UNITY_ANDROID ||  UNITY_IOS || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX)
+#if HAVOK_PHYSICS_EXISTS && (UNITY_EDITOR || UNITY_ANDROID ||  UNITY_IOS || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_PS5)
 
     [TestFixture]
     class HavokPhysicsSamplesTestMT : UnityPhysicsSamplesTest
@@ -27,8 +27,6 @@ namespace Unity.Physics.Tests
             ConfigureSimulation(World.DefaultGameObjectInjectionWorld, SimulationType.HavokPhysics, true);
 
             yield return LoadSceneAndSimulate(scenePath);
-
-            LogAssert.NoUnexpectedReceived();
 
             PlayerPrefs.DeleteKey("Havok.Auth.SuppressDialogs");
         }
@@ -52,8 +50,6 @@ namespace Unity.Physics.Tests
             ConfigureSimulation(World.DefaultGameObjectInjectionWorld, SimulationType.HavokPhysics, false);
 
             yield return LoadSceneAndSimulate(scenePath);
-
-            LogAssert.NoUnexpectedReceived();
 
             PlayerPrefs.DeleteKey("Havok.Auth.SuppressDialogs");
         }

@@ -30,22 +30,22 @@ In many cases, these synchronization points will also **'invalidate'** existing 
 
 ## Component safety handles
 
-Just like the native collections, each component *type* of a world has an associated job safety handle. The implication is that, for any two jobs which access the same component type, the safety checks won't let the jobs be scheduled concurrently. For example, when we try scheduling a job that accesses component type *Foo*, the safety checks will throw an exception if an already scheduled job also accesses component type *Foo*. To avoid this exception, the already scheduled job must be completed before scheduling the new job, or the new job must depend upon the already scheduled job. 
+Just like the native collections, each component type has an associated job safety handle for each world. The implication is that, for any two jobs which access the same component type in a world, the safety checks won't let the jobs be scheduled concurrently. For example, when we try scheduling a job that accesses component type *Foo*, the safety checks will throw an exception if an already scheduled job also accesses component type *Foo*. To avoid this exception, the already scheduled job must be completed before scheduling the new job, or the new job must depend upon the already scheduled job. 
 
 | &#x1F4DD; NOTE |
 | :- |
-| It's safe for two jobs to be scheduled concurrently if they both have *read-only* access of the same component type. For any component type in your job that is only read, be sure to inform the safety checks by marking the component type handle with the [`ReadOnly`](https://docs.unity3d.com/ScriptReference/Unity.Collections.ReadOnlyAttribute.html) attribute. |
+| It's safe for two jobs to be scheduled concurrently if they both have *read-only* access of the same component type. For any component type in your job that is not ever written, be sure to inform the safety checks by marking the component type handle with the [`ReadOnly`](https://docs.unity3d.com/ScriptReference/Unity.Collections.ReadOnlyAttribute.html) attribute. |
 
 <br>
 
 ## SystemState.Dependency
 
-When we schedule a job in a system, we want it to depend upon any currently scheduled jobs that might conflict with the new job, even if those jobs were scheduled in other systems. The job handle property `Dependency` of [`SystemState`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemState.html) is used to facilitate this.
+When we schedule a job in a system, we want it to depend upon any currently scheduled jobs that might conflict with the new job, even if those jobs were scheduled in other systems. To arrange this, we use the job handle property `Dependency` of [`SystemState`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemState.html).
 
 Immediately before a system updates:
 
 1. ...the system's `Dependency` property is completed
-2. ...and then assigned a combination of the `Dependency` handles of all other systems which access any of the same component types as this system.
+2. ...and then assigned a combination of the `Dependency` handles of all other systems which access any of the same component types as this system. For example, for a system which accesses the *Foo* and *Bar* component type, the `Dependency` of all other systems in the world which also access either *Foo* or *Bar* will be included in the combination job handle.
 
 You're then expected to do two things in every system:
 

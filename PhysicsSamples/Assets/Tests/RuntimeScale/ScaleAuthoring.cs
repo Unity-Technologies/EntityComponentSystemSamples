@@ -3,13 +3,11 @@ using Unity.Entities;
 using Unity.Physics.Authoring;
 using Unity.Transforms;
 
-#if !ENABLE_TRANSFORM_V1
 [TemporaryBakingType]
 struct BakedUniformScaleComponent : IComponentData
 {
     public float UniformScale;
 }
-#endif
 
 public class ScaleAuthoring : MonoBehaviour
 {
@@ -19,27 +17,22 @@ public class ScaleAuthoring : MonoBehaviour
     {
         public override void Bake(ScaleAuthoring authoring)
         {
-#if !ENABLE_TRANSFORM_V1
-            AddComponent(new BakedUniformScaleComponent { UniformScale = authoring.UniformScale });
-#else
-            AddComponent(new Scale() { Value = authoring.UniformScale });
-#endif
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new BakedUniformScaleComponent { UniformScale = authoring.UniformScale });
         }
     }
 }
 
-#if !ENABLE_TRANSFORM_V1
 [RequireMatchingQueriesForUpdate]
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
 [UpdateAfter(typeof(PostProcessPhysicsTransformBakingSystem))]
-partial class UniformScaleBakingSystem : SystemBase
+partial struct UniformScaleBakingSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        foreach (var (transform, authoring) in SystemAPI.Query<RefRW<LocalTransform>, RefRO<BakedUniformScaleComponent>>())
+        foreach (var(transform, authoring) in SystemAPI.Query<RefRW<LocalTransform>, RefRO<BakedUniformScaleComponent>>())
         {
             transform.ValueRW.Scale = authoring.ValueRO.UniformScale;
         }
     }
 }
-#endif

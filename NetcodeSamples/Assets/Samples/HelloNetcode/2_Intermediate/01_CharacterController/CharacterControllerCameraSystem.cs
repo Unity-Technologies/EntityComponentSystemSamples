@@ -7,7 +7,7 @@ using Unity.NetCode;
 namespace Samples.HelloNetcode
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
-    [UpdateAfter(typeof(TransformSystemGroup))]
+    [UpdateInGroup(typeof(PresentationSystemGroup))]
     [BurstCompile]
     partial struct CharacterControllerCameraSystem : ISystem
     {
@@ -21,11 +21,6 @@ namespace Samples.HelloNetcode
             state.RequireForUpdate<Character>();
         }
 
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             var camera = UnityEngine.Camera.main;
@@ -36,7 +31,7 @@ namespace Samples.HelloNetcode
             {
                 camera.transform.rotation = math.mul(quaternion.RotateY(input.ValueRO.Yaw), quaternion.RotateX(-input.ValueRO.Pitch));
                 var offset = math.rotate(camera.transform.rotation, k_CameraOffset);
-                camera.transform.position = localToWorld.ValueRO.Value.c3.xyz + offset;
+                camera.transform.position = localToWorld.ValueRO.Position + offset;
             }
         }
     }

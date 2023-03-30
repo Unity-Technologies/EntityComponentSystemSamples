@@ -62,7 +62,7 @@ namespace Unity.NetCode.Samples.PlayerList
 
             if (username.IsEmpty)
             {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || NETCODE_DEBUG
                 username = Environment.MachineName;
                 if (username.IsEmpty)
 #endif
@@ -74,7 +74,7 @@ namespace Unity.NetCode.Samples.PlayerList
                     username += ".tc";
             }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || NETCODE_DEBUG
             username += $".{world.SequenceNumber}";
 #endif
 

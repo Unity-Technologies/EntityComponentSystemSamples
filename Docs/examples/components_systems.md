@@ -30,21 +30,23 @@ public struct OnFire : IComponentData
 // An example system.
 // This system will be added to the system group called MySystemGroup.
 // The ISystem methods are made Burst 'entry points' by marking
-// them and the struct itself with the BurstCompile attribute.
-[BurstCompile]
+// them with the BurstCompile attribute.
 [UpdateInGroup(typeof(MySystemGroup))]
 public partial struct MySystem : ISystem
 {
     // Called once when the system is created.
+    // Can be omitted when empty.
     [BurstCompile]
     public void OnCreate(ref SystemState state) { }
 
     // Called once when the system is destroyed.
+    // Can be omitted when empty.
     [BurstCompile]
     public void OnDestroy(ref SystemState state) { }
 
     // Usually called every frame. When exactly a system is updated
     // is determined by the system group to which it belongs.
+    // Can be omitted when empty.
     [BurstCompile]
     public void OnUpdate(ref SystemState state) { }
 }
@@ -64,15 +66,8 @@ public class MySystemGroup : ComponentSystemGroup
 *If you wish to get and set components of many entities, it is best to iterate through all the entities matched by a query. See below.*
 
 ```c#
-[BurstCompile]
 public partial struct MySystem : ISystem
 {
-    [BurstCompile]
-    public void OnCreate(ref SystemState state) { }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
-
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -121,7 +116,6 @@ public partial struct MySystem : ISystem
 # **Querying for entities**
 
 ```c#
-[BurstCompile]
 public partial struct MySystem : ISystem
 {
     // We need type handles to access a chunk's
@@ -144,10 +138,10 @@ public partial struct MySystem : ISystem
         ComponentTypeHandle<Foo> fooHandle = state.GetComponentTypeHandle<Foo>();
         ComponentTypeHandle<Bar> barHandle = state.GetComponentTypeHandle<Bar>();
         EntityTypeHandle entityHandle = state.GetEntityTypeHandle();
-    }
 
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
+        // You can also get type handles with SystemAPI.GetComponentTypeHandle
+        // and SystemAPI.GetEntityTypeHandle, which are a bit more convenient.
+    }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -217,7 +211,9 @@ public partial struct MySystem : ISystem
             // - 'entity' is assigned the entity ID
             foreach (var (foo, bar, entity) in
                      SystemAPI.Query<RefRW<Foo>, RefRO<Bar>>()
-                         .WithAll<Apple>().WithNone<Banana>().WithEntityAccess())
+                         .WithAll<Apple>()
+                         .WithNone<Banana>()
+                         .WithEntityAccess())
             {
                 foo.ValueRW = new Foo { };
             }
@@ -256,15 +252,8 @@ public struct Waypoint : IBufferElementData
 }
 
 // Example of creating and accessing a DynamicBuffer in a system.
-[BurstCompile]
 public partial struct MySystem : ISystem
 {
-    [BurstCompile]
-    public void OnCreate(ref SystemState state) { }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
-
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -297,7 +286,7 @@ public partial struct MySystem : ISystem
             }
             else
             {
-                // Reacquire to get a valid DynamicBuffer instance.
+                // Re-acquire the DynamicBuffer instance.
                 waypoints = state.EntityManager.GetBuffer<Waypoint>(entity);
                 var w = waypoints[0];  // OK
             }
@@ -395,10 +384,10 @@ public partial struct MySystem : ISystem
 
         healthLookup = state.GetComponentLookup<Health>();
         healthHandle = state.GetComponentTypeHandle<Health>();
-    }
 
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
+        // You can also get component lookups with SystemAPI.GetComponentLookup,
+        // which is a bit more convenient.
+    }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -469,46 +458,30 @@ public partial struct MySystem : ISystem
 # **Aspects**
 
 ```c#
-// An example aspect which wraps a Foo component,
-// the enabled state of a Bar component,
-// and the components of the TransformAspect.
-    public readonly partial struct MyAspect : IAspect
+// An example aspect which wraps a Foo component
+// and the enabled state of a Bar component.
+public readonly partial struct MyAspect : IAspect
+{
+    // The aspect includes the entity ID.
+    // Because it's a readonly value type,
+    // there's no danger in making the field public.
+    public readonly Entity Entity;
+
+    // The aspect includes the Foo component,
+    // with read-write access.
+    private readonly RefRW<Foo> foo;
+
+    // A property which gets and sets the Foo component.
+    public float3 Foo
     {
-        // The aspect includes the entity ID.
-        // Because it's a readonly value type,
-        // there's no danger in making the field public.
-        public readonly Entity Entity;
-
-        // The aspect includes the Foo component,
-        // with read-write access.
-        private readonly RefRW<Foo> foo;
-
-        // A property which gets and sets the Speed.
-        public float3 Foo
-        {
-            get => foo.ValueRO.Value;
-            set => foo.ValueRW.Value = value;
-        }
-
-        // The aspect includes the enabled state of
-        // the Bar component.
-        public readonly EnabledRefRW<Bar> BarEnabled;
-
-        // The aspect includes Unity.Entities.TransformAspect.
-        // This means MyAspect indirectly includes
-        // all the components of TransformAspect.
-        private readonly TransformAspect transform;
-
-        // A property which gets and sets the position of the transform.
-        // The TransformAspect is otherwise kept private,
-        // so users of MyAspect will only be able to
-        // read and modify the position.
-        public float3 Position
-        {
-            get => transform.Position;
-            set => transform.Position = value;
-        }
+        get => foo.ValueRO.Value;
+        set => foo.ValueRW.Value = value;
     }
+
+    // The aspect includes the enabled state of
+    // the Bar component.
+    public readonly EnabledRefRW<Bar> BarEnabled;
+}
 ```
 
 These methods return instances of an aspect:

@@ -12,9 +12,9 @@ To modify the transform hierarchy:
 - Remove an entity's `Parent` component to de-parent it.
 - Set an entity's `Parent` component to change its parent.
 
-The [`ParentSystem`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.ParentSystem.html) updates the `Child` and `PreviousParent` components as needed, such that:
+The [`ParentSystem`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.ParentSystem.html) updates the `Child` and `PreviousParent` components to ensure that:
 
-- Every entity with a parent has a `Parent` component that references the parent.
+- Every entity with a parent has a `PreviousParent` component that references the parent.
 - Every entity with one or more children has a `Child` buffer component that references all of its children.
 
 | &#x26A0; IMPORTANT |
@@ -26,7 +26,3 @@ Every frame, the [`LocalToWorldSystem`](https://docs.unity3d.com/Packages/com.un
 | &#x1F4DD; NOTE |
 | :- |
 | The `Entity.Graphics` systems read the `LocalToWorld` component but not any of the other transform components, so `LocalToWorld` is the only transform component an entity needs to be rendered. |
-
-The [`ITransformDataHelpers`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.ITransformDataHelpers.html) class provides static methods for producing and manipulating transforms.
-
-The [`TransformAspect`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.TransformAspect.html) provides a convenient abstraction for working with an entity's transform components.

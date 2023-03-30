@@ -13,7 +13,8 @@ namespace Samples.HelloNetcode
     {
         public override void Bake(CharacterControllerConfigAuthoring authoring)
         {
-            AddComponent(new CharacterControllerConfig{Speed = authoring.Speed, JumpSpeed = authoring.JumpSpeed, Gravity = authoring.Gravity});
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new CharacterControllerConfig{Speed = authoring.Speed, JumpSpeed = authoring.JumpSpeed, Gravity = authoring.Gravity});
         }
     }
 }

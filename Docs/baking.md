@@ -1,47 +1,59 @@
 # Baking and entity scenes
 
-**Baking** is a build-time process that transforms **Sub Scenes** into **Entity Scenes** using **Bakers** and **baking systems**:
+**Baking** is a build-time process that transforms **sub scenes** into **entity scenes** using **bakers** and **baking systems**:
 
-- A **Sub Scene** is a Unity scene asset that's embedded in another scene by the [SubScene](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SubScene.html) MonoBehaviour.
-- An **Entity Scene** is a serialized set of entities and components that can be loaded at runtime.
-- A **Baker** is a class extending [`Baker<T>`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.Baker-1.html), where T is a MonoBehaviour. A MonoBehaviour with a Baker is called an **authoring component**.
+- A **sub scene** is a Unity scene asset that's embedded in another scene by the [SubScene](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SubScene.html) MonoBehaviour.
+- An **entity scene** is a serialized set of entities and components that can be loaded at runtime.
+- A **baker** is a class extending [`Baker<T>`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.Baker-1.html), where T is a MonoBehaviour. A MonoBehaviour with a Baker is called an **authoring component**.
 - A **baking system** is a normal system marked with the `[WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]` attribute. (Baking systems are fully optional and generally only required for advanced use cases.)
 
-Baking a Sub Scene is done in a few main steps:
+Baking a sub scene is done in a few main steps:
 
-1. For each GameObject of the Sub Scene, a corresponding entity is created.
-2. The Baker of each authoring component in the Sub Scene is executed. Each Baker can read the authoring component and add components to the corresponding entity.
-2. The baking systems execute. Each system can read and modify the baked entities in any way: set components, add components, remove components, create additional entities, or destroy entities. Unlike Bakers, baking systems should not access the original GameObjects of the Sub Scene.
+1. For each GameObject of the sub scene, a corresponding entity is created.
+2. The baker of each authoring component in the sub scene is executed. Each baker can read the authoring component and add components to the corresponding entity.
+2. The baking systems execute. Each system can read and modify the baked entities in any way: set components, add components, remove components, create additional entities, or destroy entities. Unlike bakers, baking systems should not access the original GameObjects of the sub scene.
 
-&#x1F579; *[See examples of authoring components, Bakers, and baking systems.](./examples/baking.md)*
+&#x1F579; *[See examples of authoring components, bakers, and baking systems.](./examples/baking.md)*
 
-When modified, a Sub Scene is re-baked:
+When modified, a sub scene is re-baked:
 
-1. Only the Bakers that read the modified authoring components are re-executed.
+1. Only the bakers that read the modified authoring components are re-executed.
 1. The baking systems are always re-executed in full.
-1. The live entities in Edit mode or Play mode are updated to match the results of Baking. (This is possible because Baking tracks the correspondence of baked entities to live entities.)
+1. The live entities in Edit mode or Play mode are updated to match the results of baking. (This is possible because baking tracks the correspondence of baked entities to live entities.)
 
 <br>
 
-## Accessing data in a Baker
+## Creating and editing sub scenes
 
-Incremental baking requires Baker's to track all the data they read. The fields of a Baker's authoring component are automatically tracked, but other data read by a Baker must be added to its list of dependencies through the Baker methods:
+A GameObject with the `SubScene` MonoBehaviour has a checkbox that opens and closes the sub scene for editing. While a sub scene is open, its GameObjects are loaded and take up resources in the Unity editor, so you may want to close sub scenes that you're not currently editing.
+
+![](./images/open_subscene.png)
+
+The convenient way to create a new sub scene is to right click within the Hierarchy window and select `New Subscene > Empty Scene...`. This creates both a new scene file and a GameObject with a `SubScene` component that references the new scene file:
+
+![](images/create_subscene.png)
+
+<br>
+
+## Accessing data in a baker
+
+Incremental baking requires bakers to track all the data they read. The fields of a baker's authoring component are automatically tracked, but other data read by a baker must be added to its list of dependencies through the `Baker` methods:
 
 |**Baker method**|**Description**|
 |---|---|
 | [`GetComponent<T>()`]() | Accesses any component of any GameObject in the Sub Scene. |
-| [`DependsOn()`]() | Tracks an asset for this Baker. |
-| [`GetEntity()`]() | Returns the id of an entity baked in the Sub Scene or baked from a prefab. (The entity will not yet have been fully baked, so you should not attempt to read or modify the components of the entity.) |
+| [`DependsOn()`]() | Tracks an asset for this `Baker`. |
+| [`GetEntity()`]() | Returns the id of an entity baked in the sub scene or baked from a prefab. (The entity will not yet have been fully baked, so you should not attempt to read or modify the components of the entity.) |
 
 <br>
 
-# Loading and unloading entity scenes
+## Loading and unloading entity scenes
 
 For streaming purposes, the entities of a scene are split into **sections** identified by index number. Which section an entity belongs to is designated by its [`SceneSection`]() shared component. By default, an entity belongs to section 0, but this can be changed by setting `SceneSection` during baking.
 
 | &#x26A0; IMPORTANT |
 | :- |
-| During baking, entities in a Sub Scene can only reference other entities of the same section or section 0 (which is a special case because section 0 is always loaded before the other sections and only *un*loaded when the scene itself is unloaded). |
+| During baking, entities in a sub scene can only reference other entities of the same section or section 0 (which is a special case because section 0 is always loaded before the other sections and only *un*loaded when the scene itself is unloaded). |
 
 When a scene is loaded, it is represented by an entity with metadata about the scene, and its sections are also each represented by an entity. An individual section is loaded and unloaded by manipulating its entity's [`RequestSceneLoaded`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupComponent.html) component: the `SceneSectionStreamingSystem` in the `SceneSystemGroup` responds when this component changes.
 

@@ -81,7 +81,7 @@ namespace Unity.Physics.Authoring
 
             for (var i = 0; i < joints.Length; ++i)
             {
-                var jointEntity = CreateAdditionalEntity();
+                var jointEntity = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
                 AddSharedComponent(jointEntity, new PhysicsWorldIndex(worldIndex));
 
                 AddComponent(jointEntity, constrainedBodyPair);
@@ -109,8 +109,8 @@ namespace Unity.Physics.Authoring
         protected PhysicsConstrainedBodyPair GetConstrainedBodyPair(LimitDOFJoint authoring)
         {
             return new PhysicsConstrainedBodyPair(
-                GetEntity(),
-                authoring.ConnectedBody == null ? Entity.Null : GetEntity(authoring.ConnectedBody),
+                GetEntity(TransformUsageFlags.Dynamic),
+                authoring.ConnectedBody == null ? Entity.Null : GetEntity(authoring.ConnectedBody, TransformUsageFlags.Dynamic),
                 authoring.EnableCollision
             );
         }

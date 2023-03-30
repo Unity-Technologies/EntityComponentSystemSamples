@@ -42,22 +42,23 @@ abstract class SpawnRandomObjectsAuthoringBaseBaker<T, U> : Baker<T> where T : S
         var transform = GetComponent<Transform>();
         var spawnSettings = new U
         {
-            Prefab = GetEntity(authoring.prefab),
+            Prefab = GetEntity(authoring.prefab, TransformUsageFlags.Dynamic),
             Position = transform.position,
             Rotation = transform.rotation,
             Range = authoring.range,
             Count = authoring.count,
             RandomSeedOffset = authoring.randomSeedOffset,
         };
-        Configure(authoring, ref spawnSettings, GetEntity(), this);
+        Configure(authoring, ref spawnSettings, GetEntity(TransformUsageFlags.Dynamic), this);
         Configure(authoring, ref spawnSettings);
         Configure(authoring, this);
-        AddComponent(spawnSettings);
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, spawnSettings);
     }
 
     internal virtual void Configure(T authoring, ref U spawnSettings) {}
     internal virtual void Configure(T authoring, ref U spawnSettings, Entity entity, IBaker baker) {}
-    internal virtual void Configure(T authoring, IBaker baker) { GetEntity(authoring.prefab); }
+    internal virtual void Configure(T authoring, IBaker baker) { GetEntity(authoring.prefab, TransformUsageFlags.Dynamic); }
 }
 
 interface ISpawnSettings
@@ -80,7 +81,7 @@ struct SpawnSettings : IComponentData, ISpawnSettings
     public int RandomSeedOffset { get; set; }
 }
 
-class SpawnRandomObjectsSystem : SpawnRandomObjectsSystemBase<SpawnSettings>
+partial class SpawnRandomObjectsSystem : SpawnRandomObjectsSystemBase<SpawnSettings>
 {
 }
 
@@ -130,15 +131,12 @@ abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : un
                 for (int i = 0; i < count; i++)
                 {
                     var instance = instances[i];
-#if !ENABLE_TRANSFORM_V1
+
                     var transform = EntityManager.GetComponentData<LocalTransform>(instance);
                     transform.Position = positions[i];
                     transform.Rotation = rotations[i];
                     EntityManager.SetComponentData(instance, transform);
-#else
-                    EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
-                    EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
-#endif
+
 
                     ConfigureInstance(instance, ref spawnSettings);
                 }

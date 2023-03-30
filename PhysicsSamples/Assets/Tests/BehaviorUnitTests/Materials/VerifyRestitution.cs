@@ -18,7 +18,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyRestitution authoring)
             {
-                AddComponent(new VerifyRestitutionData() { MaxY = 0 });
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new VerifyRestitutionData() { MaxY = 0 });
             }
         }
     }
@@ -44,19 +45,15 @@ namespace Unity.Physics.Tests
 
             double elapsedSeconds = SystemAPI.Time.ElapsedTime - m_StartSeconds;
 
-#if !ENABLE_TRANSFORM_V1
+
             foreach (var(verifyRestitution, localTransform, velocity, entity) in SystemAPI.Query<RefRW<VerifyRestitutionData>, RefRO<LocalTransform>, RefRO<PhysicsVelocity>>().WithEntityAccess())
-#else
-            foreach (var(verifyRestitution, translation, velocity, entity) in SystemAPI.Query<RefRW<VerifyRestitutionData>, RefRO<Translation>, RefRO<PhysicsVelocity>>().WithEntityAccess())
-#endif
+
             {
                 if (velocity.ValueRO.Linear.y > 0)
                 {
-#if !ENABLE_TRANSFORM_V1
+
                     verifyRestitution.ValueRW.MaxY = math.max(verifyRestitution.ValueRW.MaxY, localTransform.ValueRO.Position.y);
-#else
-                    verifyRestitution.ValueRW.MaxY = math.max(verifyRestitution.ValueRW.MaxY, translation.ValueRO.Value.y);
-#endif
+
                 }
 
                 // the ball shall have reached its apex after a certain amount of time has passed

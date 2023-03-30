@@ -37,17 +37,17 @@ class PlanetGravityAuthoringBaker : Baker<PlanetGravityAuthoring>
             EventHorizonDistance = authoring.EventHorizonDistance,
             RotationMultiplier = authoring.RotationMultiplier
         };
-        AddComponent(component);
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, component);
     }
 }
 
-[BurstCompile]
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
 partial struct InverseMassSystem : ISystem
 {
     [BurstCompile]
     [WithAll(typeof(PlanetGravity))]
-    public partial struct JobEntityInverseMass : IJobEntity
+    public partial struct EntityInverseMassJob : IJobEntity
     {
         private void Execute(ref PhysicsMass mass)
         {
@@ -58,49 +58,31 @@ partial struct InverseMassSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        state.Dependency = new JobEntityInverseMass().Schedule(state.Dependency);
+        state.Dependency = new EntityInverseMassJob().Schedule(state.Dependency);
     }
 }
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct PlanetGravitySystem : ISystem
 {
     static readonly quaternion k_GravityOrientation = quaternion.RotateY(math.PI / 2f);
 
     [BurstCompile]
-    public partial struct ApplyGravityFromPlanet : IJobEntity
+    public partial struct ApplyGravityFromPlanetJob : IJobEntity
     {
         public float DeltaTime;
 
-        [BurstCompile]
-#if !ENABLE_TRANSFORM_V1
         public void Execute(ref PhysicsMass bodyMass, ref PhysicsVelocity bodyVelocity, in LocalTransform localTransform, in PlanetGravity gravity)
-#else
-        public void Execute(ref PhysicsMass bodyMass, ref PhysicsVelocity bodyVelocity, in Translation pos, in PlanetGravity gravity)
-#endif
         {
             float mass = math.rcp(bodyMass.InverseMass);
 
-#if !ENABLE_TRANSFORM_V1
+
             float3 dir = (gravity.GravitationalCenter - localTransform.Position);
-#else
-            float3 dir = (gravity.GravitationalCenter - pos.Value);
-#endif
+
             float dist = math.length(dir);
             float invDist = 1.0f / dist;
             dir = math.normalize(dir);
@@ -115,20 +97,9 @@ public partial struct PlanetGravitySystem : ISystem
     }
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
-        state.Dependency = new ApplyGravityFromPlanet
+        state.Dependency = new ApplyGravityFromPlanetJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
         }.Schedule(state.Dependency);

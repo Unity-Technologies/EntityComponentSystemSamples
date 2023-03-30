@@ -34,9 +34,10 @@ public class CharacterGunAuthoring : MonoBehaviour
     {
         public override void Bake(CharacterGunAuthoring authoring)
         {
-            AddComponent(new CharacterGun()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new CharacterGun()
             {
-                Bullet = GetEntity(authoring.Bullet),
+                Bullet = GetEntity(authoring.Bullet, TransformUsageFlags.Dynamic),
                 Strength = authoring.Strength,
                 Rate = authoring.Rate,
                 WasFiring = 0,
@@ -50,33 +51,26 @@ public class CharacterGunAuthoring : MonoBehaviour
 
 // Update before physics gets going so that we don't have hazard warnings.
 // This assumes that all gun are being controlled from the same single input system
-[BurstCompile]
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(CharacterControllerSystem))]
 public partial struct CharacterGunOneToManyInputSystem : ISystem
 {
     [BurstCompile]
-    private partial struct IJobEntity_CharacterGunOneToManyInputSystem : IJobEntity
+    private partial struct CharacterGunOneToManyInputSystemJob : IJobEntity
     {
         public float DeltaTime;
         public CharacterGunInput Input;
         public EntityCommandBuffer.ParallelWriter CommandBufferParallel;
 
-#if !ENABLE_TRANSFORM_V1
-        private void Execute([ChunkIndexInQuery] int chunkIndexInQuery, Entity entity, ref LocalTransform gunLocalTransform, ref CharacterGun gun, in LocalToWorld gunTransform)
-#else
-        private void Execute([ChunkIndexInQuery] int chunkIndexInQuery, Entity entity, ref Rotation gunRotation, ref CharacterGun gun, in LocalToWorld gunTransform)
-#endif
+        private void Execute([ChunkIndexInQuery] int chunkIndexInQuery, ref LocalTransform gunLocalTransform, ref CharacterGun gun, in LocalToWorld gunTransform)
         {
             // Handle input
             {
                 float a = -Input.Looking.y;
-#if !ENABLE_TRANSFORM_V1
+
                 gunLocalTransform.Rotation = math.mul(gunLocalTransform.Rotation, quaternion.Euler(math.radians(a), 0, 0));
-#else
-                gunRotation.Value = math.mul(gunRotation.Value, quaternion.Euler(math.radians(a), 0, 0));
-#endif
+
                 gun.IsFiring = Input.Firing > 0f ? 1 : 0;
             }
 
@@ -94,27 +88,21 @@ public partial struct CharacterGunOneToManyInputSystem : ISystem
                 {
                     var e = CommandBufferParallel.Instantiate(chunkIndexInQuery, gun.Bullet);
 
-#if !ENABLE_TRANSFORM_V1
+
                     LocalTransform localTransform = LocalTransform.FromPositionRotationScale(
                         gunTransform.Position + gunTransform.Forward,
                         gunLocalTransform.Rotation,
                         gunLocalTransform.Scale);
-#else
-                    Translation position = new Translation { Value = gunTransform.Position + gunTransform.Forward };
-                    Rotation rotation = new Rotation { Value = gunRotation.Value };
-#endif
+
                     PhysicsVelocity velocity = new PhysicsVelocity
                     {
                         Linear = gunTransform.Forward * gun.Strength,
                         Angular = float3.zero
                     };
 
-#if !ENABLE_TRANSFORM_V1
+
                     CommandBufferParallel.SetComponent(chunkIndexInQuery, e, localTransform);
-#else
-                    CommandBufferParallel.SetComponent(chunkIndexInQuery, e, position);
-                    CommandBufferParallel.SetComponent(chunkIndexInQuery, e, rotation);
-#endif
+
                     CommandBufferParallel.SetComponent(chunkIndexInQuery, e, velocity);
                 }
                 gun.Duration = 0;
@@ -124,27 +112,13 @@ public partial struct CharacterGunOneToManyInputSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var commandBufferParallel = SystemAPI.GetSingleton<EndFixedStepSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
-        var input = SystemAPI.GetSingleton<CharacterGunInput>();
-        float dt = SystemAPI.Time.DeltaTime;
-
-        state.Dependency = new IJobEntity_CharacterGunOneToManyInputSystem
+        state.Dependency = new CharacterGunOneToManyInputSystemJob
         {
-            DeltaTime = dt,
-            Input = input,
-            CommandBufferParallel = commandBufferParallel
+            DeltaTime = SystemAPI.Time.DeltaTime,
+            Input = SystemAPI.GetSingleton<CharacterGunInput>(),
+            CommandBufferParallel = SystemAPI.GetSingleton<EndFixedStepSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
         }.ScheduleParallel(state.Dependency);
     }
 }

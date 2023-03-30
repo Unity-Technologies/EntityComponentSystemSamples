@@ -6,6 +6,7 @@ using Unity.NetCode;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Networking.Transport;
+using UnityEngine.Serialization;
 
 namespace Samples.HelloNetcode
 {
@@ -16,16 +17,11 @@ namespace Samples.HelloNetcode
         const string k_LastPlayedSampleSceneKey = "Frontend.LastPlayedSampleScene";
         const string k_LastSamplePickerDropdownValueKey = "Frontend.LastSamplePickerDropdownValue";
 
-        [SerializeField]
-        InputField m_Address;
-        [SerializeField]
-        Dropdown m_Sample;
-        [SerializeField]
-        Dropdown m_SamplePicker;
-        [SerializeField]
-        Button m_ClientServerButton;
-        [SerializeField]
-        InputField m_Port;
+        public InputField Address;
+        public InputField Port;
+        public Dropdown Sample;
+        public Dropdown SamplePicker;
+        public Button ClientServerButton;
 
         /// <summary>
         /// Stores the old name of the local world (create by initial bootstrap).
@@ -53,9 +49,9 @@ namespace Samples.HelloNetcode
 
         public void Start()
         {
-            m_SamplePicker.value = LastSamplePickerDropdownValue;
-            PopulateSampleDropdown(m_SamplePicker.value);
-            m_ClientServerButton.gameObject.SetActive(ClientServerBootstrap.RequestedPlayType == ClientServerBootstrap.PlayType.ClientAndServer);
+            SamplePicker.value = LastSamplePickerDropdownValue;
+            PopulateSampleDropdown(SamplePicker.value);
+            ClientServerButton.gameObject.SetActive(ClientServerBootstrap.RequestedPlayType == ClientServerBootstrap.PlayType.ClientAndServer);
         }
 
         public void StartClientServer(string sceneName)
@@ -79,7 +75,7 @@ namespace Samples.HelloNetcode
                 World.DefaultGameObjectInjectionWorld = server;
             SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
 
-            var port = ParsePortOrDefault(m_Port.text);
+            var port = ParsePortOrDefault(Port.text);
 
             NetworkEndpoint ep = NetworkEndpoint.AnyIpv4.WithPort(port);
             {
@@ -99,11 +95,11 @@ namespace Samples.HelloNetcode
             StartClientServer(GetAndSaveSceneSelection());
         }
 
-        string GetAndSaveSceneSelection()
+        protected string GetAndSaveSceneSelection()
         {
             // Check whether Samples(0) or HelloNetcodeSamples(1) are selected in the sample picker
-            LastSamplePickerDropdownValue = m_SamplePicker.value;
-            string sceneName = m_Sample.options[m_Sample.value].text;
+            LastSamplePickerDropdownValue = SamplePicker.value;
+            string sceneName = Sample.options[Sample.value].text;
             LastPlayedSampleScene = sceneName;
             PlayerPrefs.Save();
             return sceneName;
@@ -119,7 +115,7 @@ namespace Samples.HelloNetcode
                 World.DefaultGameObjectInjectionWorld = client;
             SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
 
-            var ep = NetworkEndpoint.Parse(m_Address.text, ParsePortOrDefault(m_Port.text));
+            var ep = NetworkEndpoint.Parse(Address.text, ParsePortOrDefault(Port.text));
             {
                 using var drvQuery = client.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
                 drvQuery.GetSingletonRW<NetworkStreamDriver>().ValueRW.Connect(client.EntityManager, ep);
@@ -127,12 +123,12 @@ namespace Samples.HelloNetcode
         }
 
         // Populate the scene dropdown depending on if samples/hellonetcode selection is picked in the first
-        // dropdown. Goes from the scene name prefix "HelloNetcode", and always skip frontend scene
-        // since that's the one which is showing this menu and makes no sense to load.
+        // dropdown. Always skip frontend scene since that's the one which is showing this menu and makes no sense to
+        // load (as well as HUD scenes since they are additively loaded on top of sample scenes)
         public void PopulateSampleDropdown(int value)
         {
             var scenes = SceneManager.sceneCountInBuildSettings;
-            m_Sample.ClearOptions();
+            Sample.ClearOptions();
             if (value == 0)
             {
                 var lastPlayed = LastPlayedSampleScene;
@@ -140,11 +136,11 @@ namespace Samples.HelloNetcode
                 {
                     var sceneName = System.IO.Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i));
                     var isHelloNetcodeScene = SceneUtility.GetScenePathByBuildIndex(i).Contains("HelloNetcode");
-                    if (!sceneName.StartsWith("Frontend") && !isHelloNetcodeScene)
+                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && !isHelloNetcodeScene)
                     {
-                        m_Sample.options.Add(new Dropdown.OptionData { text = sceneName });
+                        Sample.options.Add(new Dropdown.OptionData { text = sceneName });
                         if (string.Equals(sceneName, lastPlayed, StringComparison.OrdinalIgnoreCase))
-                            m_Sample.value = m_Sample.options.Count;
+                            Sample.value = Sample.options.Count;
                     }
                 }
             }
@@ -155,11 +151,11 @@ namespace Samples.HelloNetcode
                 {
                     var sceneName = System.IO.Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i));
                     var isHelloNetcodeScene = SceneUtility.GetScenePathByBuildIndex(i).Contains("HelloNetcode");
-                    if (!sceneName.StartsWith("Frontend") && isHelloNetcodeScene)
+                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && isHelloNetcodeScene)
                     {
-                        m_Sample.options.Add(new Dropdown.OptionData { text = sceneName });
+                        Sample.options.Add(new Dropdown.OptionData { text = sceneName });
                         if (string.Equals(sceneName, lastPlayed, StringComparison.OrdinalIgnoreCase))
-                            m_Sample.value = m_Sample.options.Count;
+                            Sample.value = Sample.options.Count;
                     }
                 }
             }
@@ -168,10 +164,10 @@ namespace Samples.HelloNetcode
                 Debug.LogError("Invalid dropdown value");
             }
 
-            m_Sample.RefreshShownValue();
+            Sample.RefreshShownValue();
         }
 
-        void DestroyLocalSimulationWorld()
+        protected void DestroyLocalSimulationWorld()
         {
             foreach (var world in World.All)
             {

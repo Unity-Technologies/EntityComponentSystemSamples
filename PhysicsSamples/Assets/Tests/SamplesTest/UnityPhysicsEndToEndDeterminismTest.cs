@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Unity.Physics.Samples.Test
+namespace Unity.Physics.Tests
 {
     interface IDeterminismTestSystem
     {
@@ -110,6 +110,8 @@ namespace Unity.Physics.Samples.Test
 
             defaultWorld.Dispose();
             DefaultWorldInitialization.Initialize("Default World", false);
+
+            UnityPhysicsSamplesTest.ExpectURPForwardWarningMessage();
         }
 
         // Demos that make no sense to be tested for determinism

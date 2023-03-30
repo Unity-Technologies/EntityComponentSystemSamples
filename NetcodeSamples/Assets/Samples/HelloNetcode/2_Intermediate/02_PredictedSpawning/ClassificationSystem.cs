@@ -24,15 +24,10 @@ namespace Samples.HelloNetcode
             m_SnapshotDataLookupHelper = new SnapshotDataLookupHelper(ref state);
             m_PredictedGhostSpawnLookup = state.GetBufferLookup<PredictedGhostSpawn>();
             m_GrenadeDataLookup = state.GetComponentLookup<GrenadeData>();
-            state.RequireForUpdate<GhostSpawnQueueComponent>();
+            state.RequireForUpdate<GhostSpawnQueue>();
             state.RequireForUpdate<PredictedGhostSpawnList>();
-            state.RequireForUpdate<NetworkIdComponent>();
+            state.RequireForUpdate<NetworkId>();
             state.RequireForUpdate<GrenadeSpawner>();
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
         }
 
         [BurstCompile]
@@ -67,7 +62,7 @@ namespace Samples.HelloNetcode
             state.Dependency = classificationJob.Schedule(state.Dependency);
         }
 
-        [WithAll(typeof(GhostSpawnQueueComponent))]
+        [WithAll(typeof(GhostSpawnQueue))]
         [BurstCompile]
         partial struct ClassificationJob : IJobEntity
         {

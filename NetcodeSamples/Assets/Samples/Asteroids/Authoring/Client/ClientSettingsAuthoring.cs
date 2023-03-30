@@ -9,14 +9,15 @@ public class ClientSettingsAuthoring : MonoBehaviour
     [RegisterBinding(typeof(ClientSettings), "predictionRadiusMargin")]
     public int predictionRadiusMargin;
 
-    class ClientSettingsBaker : Baker<ClientSettingsAuthoring>
+    class Baker : Baker<ClientSettingsAuthoring>
     {
         public override void Bake(ClientSettingsAuthoring authoring)
         {
             ClientSettings component = default(ClientSettings);
             component.predictionRadius = authoring.predictionRadius;
             component.predictionRadiusMargin = authoring.predictionRadiusMargin;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }

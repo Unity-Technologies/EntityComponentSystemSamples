@@ -14,18 +14,19 @@ public class VerifyNumEventsAuthoring : UnityEngine.MonoBehaviour
     {
         public override void Bake(VerifyNumEventsAuthoring authoring)
         {
-            AddComponent<VerifyNumEvents>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<VerifyNumEvents>(entity);
         }
     }
 }
 
 [UpdateInGroup(typeof(PhysicsSystemGroup))]
 [UpdateAfter(typeof(PhysicsSimulationGroup))]
-public partial class VerifyNumEventsSystem : SystemBase
+public partial struct VerifyNumEventsSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<VerifyNumEvents>();
+        state.RequireForUpdate<VerifyNumEvents>();
     }
 
     [BurstCompile]
@@ -50,9 +51,9 @@ public partial class VerifyNumEventsSystem : SystemBase
         }
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        Dependency.Complete();
+        state.Dependency.Complete();
 
         PhysicsWorld world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
         var numDynamicBodies = world.NumDynamicBodies;

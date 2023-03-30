@@ -32,9 +32,10 @@ class ModifyNarrowphaseContactsBehaviourBaker : Baker<ModifyNarrowphaseContactsB
         if (authoring.enabled)
         {
             var transform = GetComponent<Transform>();
-            AddComponent(new ModifyNarrowphaseContacts
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new ModifyNarrowphaseContacts
             {
-                surfaceEntity = GetEntity(),
+                surfaceEntity = GetEntity(TransformUsageFlags.Dynamic),
                 surfaceNormal = transform.rotation * authoring.SurfaceUpNormal
             });
         }
@@ -44,18 +45,12 @@ class ModifyNarrowphaseContactsBehaviourBaker : Baker<ModifyNarrowphaseContactsB
 // A system which configures the simulation step to rotate certain contact normals
 [UpdateInGroup(typeof(PhysicsSimulationGroup))]
 [UpdateAfter(typeof(PhysicsCreateContactsGroup)), UpdateBefore(typeof(PhysicsCreateJacobiansGroup))]
-[BurstCompile]
 public partial struct ModifyNarrowphaseContactsSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ModifyNarrowphaseContacts>()));
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]

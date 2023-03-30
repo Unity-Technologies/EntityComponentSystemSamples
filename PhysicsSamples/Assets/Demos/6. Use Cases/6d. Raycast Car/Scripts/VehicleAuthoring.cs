@@ -72,35 +72,37 @@ class VehicleAuthoring : MonoBehaviour
     {
         public override void Bake(VehicleAuthoring authoring)
         {
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
             if (authoring.ActiveAtStart)
-                AddComponent<ActiveVehicle>();
+                AddComponent<ActiveVehicle>(entity);
 
-            AddComponent<Vehicle>();
+            AddComponent<Vehicle>(entity);
 
-            AddComponent(new VehicleCameraSettings
+            AddComponent(entity, new VehicleCameraSettings
             {
                 OrientationType = authoring.CameraOrientation,
                 OrbitAngularSpeed = math.radians(authoring.CameraOrbitAngularSpeed)
             });
 
-            AddComponent(new VehicleSpeed
+            AddComponent(entity, new VehicleSpeed
             {
                 TopSpeed = authoring.TopSpeed,
                 Damping = authoring.SpeedDamping
             });
 
-            AddComponent(new VehicleSteering
+            AddComponent(entity, new VehicleSteering
             {
                 MaxSteeringAngle = math.radians(authoring.MaxSteeringAngle),
                 Damping = authoring.SteeringDamping
             });
 
-            AddComponent(new VehicleCameraReferences
+            AddComponent(entity, new VehicleCameraReferences
             {
-                CameraOrbit = GetEntity(authoring.CameraOrbit),
-                CameraTarget = GetEntity(authoring.CameraTarget),
-                CameraTo = GetEntity(authoring.CameraTo),
-                CameraFrom = GetEntity(authoring.CameraFrom)
+                CameraOrbit = GetEntity(authoring.CameraOrbit, TransformUsageFlags.Dynamic),
+                CameraTarget = GetEntity(authoring.CameraTarget, TransformUsageFlags.Dynamic),
+                CameraTo = GetEntity(authoring.CameraTo, TransformUsageFlags.Dynamic),
+                CameraFrom = GetEntity(authoring.CameraFrom, TransformUsageFlags.Dynamic)
             });
         }
     }

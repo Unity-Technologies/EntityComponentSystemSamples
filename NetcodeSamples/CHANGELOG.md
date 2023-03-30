@@ -1,3 +1,10 @@
+# 2022-02-15
+## Changes
+* Upgraded to Netcode for Entities 1.0.0 prerelease version 2, see the [Netcode for Entities changelog](https://docs.unity3d.com/Packages/com.unity.netcode@1.0/changelog/CHANGELOG.html).
+* Two new HelloNetcode samples have been added
+  * _RelaySupport_ which shows how to use the Unity Relay service with Netcode for Entities. It's added to the Frontend sample.
+  * _Importance_ which demonstrates how importance scaling works with many ghosts.
+
 # 2022-11-29
 ## Changes
 * Upgraded to Netcode for Entities 1.0.0 prerelease version, see the [Netcode for Entities changelog](https://docs.unity3d.com/Packages/com.unity.netcode@1.0/changelog/CHANGELOG.html).

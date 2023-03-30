@@ -19,12 +19,13 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyContactsIterator authoring)
             {
-                AddComponent<VerifyContactsIteratorData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<VerifyContactsIteratorData>(entity);
 
 #if HAVOK_PHYSICS_EXISTS
                 Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
                 config.EnableSleeping = 0;
-                AddComponent(config);
+                AddComponent(entity, config);
 #endif
             }
         }
@@ -33,20 +34,20 @@ namespace Unity.Physics.Tests
     [UpdateAfter(typeof(PhysicsCreateContactsGroup))]
     [UpdateBefore(typeof(PhysicsCreateJacobiansGroup))]
     [RequireMatchingQueriesForUpdate]
-    public partial class VerifyContactsIteratorSystem : SystemBase
+    public partial struct VerifyContactsIteratorSystem : ISystem
     {
         public NativeArray<int> CurrentManifoldNumContacts;
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+            state.RequireForUpdate(state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyContactsIteratorData) }
             }));
             CurrentManifoldNumContacts = new NativeArray<int>(2, Allocator.Persistent);
         }
 
-        protected override void OnDestroy()
+        public void OnDestroy(ref SystemState state)
         {
             CurrentManifoldNumContacts.Dispose();
         }
@@ -115,22 +116,22 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
-            Dependency = new VerifyContactsIteratorJob
+            state.Dependency = new VerifyContactsIteratorJob
             {
                 Bodies = worldSingleton.PhysicsWorld.Bodies,
                 CurrentManifoldNumContacts = CurrentManifoldNumContacts,
-                VerificationData = GetComponentLookup<VerifyContactsIteratorData>(true)
-            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
+                VerificationData = SystemAPI.GetComponentLookup<VerifyContactsIteratorData>(true)
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, state.Dependency);
 
-            Dependency = new VerifyNumContactsJob
+            state.Dependency = new VerifyNumContactsJob
             {
                 CurrentManifoldNumContacts = CurrentManifoldNumContacts,
-                VerificationData = GetComponentLookup<VerifyContactsIteratorData>(true)
-            }.Schedule(Dependency);
+                VerificationData = SystemAPI.GetComponentLookup<VerifyContactsIteratorData>(true)
+            }.Schedule(state.Dependency);
         }
     }
 }

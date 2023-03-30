@@ -11,7 +11,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(EnableCharacterOrientationAuthoring authoring)
             {
-                AddComponent<EnableCharacterOrientation>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<EnableCharacterOrientation>(entity);
             }
         }
     }

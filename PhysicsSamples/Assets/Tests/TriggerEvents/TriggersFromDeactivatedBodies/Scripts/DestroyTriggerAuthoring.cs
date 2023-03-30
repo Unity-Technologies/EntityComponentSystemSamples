@@ -21,18 +21,19 @@ public class DestroyTriggerAuthoring : UnityEngine.MonoBehaviour
         {
             DestroyTrigger component = default(DestroyTrigger);
             component.FramesToDestroyIn = authoring.FramesToDestroyIn;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class DestroyTriggerSystem : SystemBase
+public partial struct DestroyTriggerSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<DestroyTrigger>();
+        state.RequireForUpdate<DestroyTrigger>();
     }
 
     public partial struct DestroyTriggerJob : IJobEntity
@@ -41,16 +42,16 @@ public partial class DestroyTriggerSystem : SystemBase
         public EntityCommandBuffer CommandBuffer;
         public ComponentLookup<TriggerEventChecker> TriggerEventComponentLookup;
 
-        public void Execute(Entity e, ref DestroyTrigger destroyComponent)
+        public void Execute(Entity entity, ref DestroyTrigger destroyComponent)
         {
             if (--destroyComponent.FramesToDestroyIn != 0)
             {
                 return;
             }
 
-            CommandBuffer.DestroyEntity(e);
+            CommandBuffer.DestroyEntity(entity);
 
-            int triggerRbIndex = World.GetRigidBodyIndex(e);
+            int triggerRbIndex = World.GetRigidBodyIndex(entity);
             RigidBody triggerBody = World.Bodies[triggerRbIndex];
 
             // Remove the TriggerEventCheckerComponent of all overlapping bodies
@@ -76,22 +77,20 @@ public partial class DestroyTriggerSystem : SystemBase
     }
 
     [BurstCompile]
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        Dependency.Complete();
+        state.Dependency.Complete();
 
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-
             new DestroyTriggerJob
             {
-                World = physicsWorld,
+                World = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld,
                 CommandBuffer = commandBuffer,
                 TriggerEventComponentLookup = SystemAPI.GetComponentLookup<TriggerEventChecker>()
             }.Run();
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

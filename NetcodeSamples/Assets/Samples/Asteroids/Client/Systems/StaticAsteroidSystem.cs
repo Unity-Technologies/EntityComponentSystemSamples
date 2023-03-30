@@ -18,28 +18,18 @@ namespace Asteroids.Client
             state.RequireForUpdate<StaticAsteroid>();
         }
         [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-        [BurstCompile]
         partial struct StaticAsteroidJob : IJobEntity
         {
             public NetworkTick tick;
             public float tickFraction;
             public float frameTime;
-#if !ENABLE_TRANSFORM_V1
+
             public void Execute(ref LocalTransform transform, in StaticAsteroid staticAsteroid)
             {
                 transform.Position = staticAsteroid.GetPosition(tick, tickFraction, frameTime);
                 transform.Rotation = staticAsteroid.GetRotation(tick, tickFraction, frameTime);
             }
-#else
-            public void Execute(ref Translation position, ref Rotation rotation, in StaticAsteroid staticAsteroid)
-            {
-                position.Value = staticAsteroid.GetPosition(tick, tickFraction, frameTime);
-                rotation.Value = staticAsteroid.GetRotation(tick, tickFraction, frameTime);
-            }
-#endif
+
         }
         [BurstCompile]
         public void OnUpdate(ref SystemState state)

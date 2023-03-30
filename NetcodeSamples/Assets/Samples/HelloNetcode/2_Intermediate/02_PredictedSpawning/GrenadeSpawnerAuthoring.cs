@@ -19,7 +19,12 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(GrenadeSpawnerAuthoring authoring)
             {
-                AddComponent(new GrenadeSpawner {Grenade = GetEntity(authoring.Grenade), Explosion = GetEntity(authoring.Explosion)});
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new GrenadeSpawner
+                {
+                    Grenade = GetEntity(authoring.Grenade, TransformUsageFlags.Dynamic),
+                    Explosion = GetEntity(authoring.Explosion, TransformUsageFlags.Dynamic)
+                });
             }
         }
     }

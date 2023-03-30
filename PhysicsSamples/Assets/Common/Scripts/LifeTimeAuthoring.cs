@@ -19,16 +19,17 @@ public class LifeTimeBaker : Baker<LifeTimeAuthoring>
 {
     public override void Bake(LifeTimeAuthoring authoring)
     {
-        AddComponent(new LifeTime { Value = authoring.Value });
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new LifeTime { Value = authoring.Value });
     }
 }
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class LifeTimeSystem : SystemBase
+public partial struct LifeTimeSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
@@ -42,7 +43,7 @@ public partial class LifeTimeSystem : SystemBase
                 }
             }
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

@@ -57,13 +57,14 @@ namespace Unity.Physics.Extensions
     {
         public override void Bake(MouseHoverAuthoring authoring)
         {
-            AddComponent(new MouseHover()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new MouseHover()
             {
                 PreviousEntity = Entity.Null,
                 CurrentEntity = Entity.Null,
                 IgnoreTriggers = authoring.IgnoreTriggers,
                 IgnoreStatic = authoring.IgnoreStatic,
-                HoverEntity = GetEntity(authoring.HoverPrefab),
+                HoverEntity = GetEntity(authoring.HoverPrefab, TransformUsageFlags.Dynamic),
             });
         }
     }

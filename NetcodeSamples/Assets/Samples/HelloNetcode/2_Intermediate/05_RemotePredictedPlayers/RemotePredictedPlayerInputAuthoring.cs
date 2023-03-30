@@ -10,7 +10,8 @@ namespace Samples.HelloNetcode
         {
             public override void Bake(RemotePredictedPlayerInputAuthoring authoring)
             {
-                AddComponent<RemotePredictedPlayerInput>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<RemotePredictedPlayerInput>(entity);
             }
         }
     }

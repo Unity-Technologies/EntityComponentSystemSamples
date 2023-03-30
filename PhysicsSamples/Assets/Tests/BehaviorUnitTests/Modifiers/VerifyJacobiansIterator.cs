@@ -18,12 +18,13 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyJacobiansIterator authoring)
             {
-                AddComponent<VerifyJacobiansIteratorData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<VerifyJacobiansIteratorData>(entity);
 
 #if HAVOK_PHYSICS_EXISTS
                 Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
                 config.EnableSleeping = 0;
-                AddComponent(config);
+                AddComponent(entity, config);
 #endif
             }
         }
@@ -32,11 +33,11 @@ namespace Unity.Physics.Tests
     [UpdateAfter(typeof(PhysicsCreateJacobiansGroup))]
     [UpdateBefore(typeof(PhysicsSolveAndIntegrateGroup))]
     [RequireMatchingQueriesForUpdate]
-    public partial class VerifyJacobiansIteratorSystem : SystemBase
+    public partial struct VerifyJacobiansIteratorSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+            state.RequireForUpdate(state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyJacobiansIteratorData) }
             }));
@@ -77,14 +78,14 @@ namespace Unity.Physics.Tests
             public void Execute(ref ModifiableJacobianHeader header, ref ModifiableTriggerJacobian jacobian) {}
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
-            Dependency = new VerifyJacobiansIteratorJob
+            state.Dependency = new VerifyJacobiansIteratorJob
             {
                 Bodies = worldSingleton.PhysicsWorld.Bodies,
-                VerificationData = GetComponentLookup<VerifyJacobiansIteratorData>(true)
-            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
+                VerificationData = SystemAPI.GetComponentLookup<VerifyJacobiansIteratorData>(true)
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, state.Dependency);
         }
     }
 }

@@ -44,6 +44,8 @@ class HavokPhysicsVDBTest : UnityPhysicsSamplesTest
         yield return new WaitForSeconds(1);
         ResetDefaultWorld();
         yield return new WaitForFixedUpdate();
+
+        ExpectURPForwardWarningMessage();
     }
 
     [UnityTest]

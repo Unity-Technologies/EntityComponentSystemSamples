@@ -53,7 +53,8 @@ namespace Unity.Physics.Extensions
             queryData.InputColliderScale = authoring.InputColliderScale;
             queryData.ColliderDataInitialized = false;
 
-            AddComponentObject(queryData);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, queryData);
         }
     }
 

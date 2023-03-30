@@ -41,8 +41,12 @@ public class EnergyShieldBaker : Baker<EnergyShieldAuthoring>
 {
     public override void Bake(EnergyShieldAuthoring authoring)
     {
+        // The TransformUsageFlags specifies which transform components the 
+        // entity should have. 'None' means that it doesn't need any.
+        var entity = GetEntity(TransformUsageFlags.None);
+
         // This simple baker adds just one component to the entity.
-        AddComponent(new EnergyShield {
+        AddComponent(entity, new EnergyShield {
             HitPoints = authoring.MaxHitPoints,
             MaxHitPoints = authoring.MaxHitPoints,
             RechargeDelay =  authoring.RechargeDelay,
@@ -73,16 +77,19 @@ public class MyBaker : Baker<MyAuthoring>
 {
     public override void Bake(MyAuthoring authoring)
     {
-        // To do this, use the functions that the Baker provides to access other components, instead of the ones provided by GameObject:
-        // In the same way, if you access data from an asset, you need to create a dependency for it, so the Baker reruns if the asset changes.
-        // We want to rebake if anything changes in the mesh itself
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-        var transform = GetComponent<Transform>(authoring.otherGO);
+        // To do this, use the functions that the Baker provides to access other components instead of the ones provided by GameObject:
+        // In the same way, if you access data from an asset, you need to create a dependency for it, so the Baker reruns if the asset changes.
+        // We want to re-bake if anything changes in the mesh itself.
+
+        var transform = GetComponent<LocalTransform>(authoring.otherGO);
         DependsOn(authoring.mesh);
-        AddComponent(new MyComponent
+
+        AddComponent(entity, new MyComponent
         {
             A = authoring.mesh.vertexCount,
-            B = transform.position.x,
+            B = transform.Position.x,
             Prefab = GetEntity(authoring.prefab)   // to register and convert Prefabs, call `GetEntity` in the baker:
         });
     }

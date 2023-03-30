@@ -48,7 +48,8 @@ class ApplyRocketThrustAuthoringBaker : Baker<ApplyRocketThrustAuthoring>
 {
     public override void Bake(ApplyRocketThrustAuthoring authoring)
     {
-        AddComponent(new ApplyRocketThrust
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new ApplyRocketThrust
         {
             Magnitude = authoring.Magnitude,
             Direction = authoring.LocalDirection.normalized,
@@ -67,7 +68,6 @@ public struct ApplyRocketThrust : IComponentData
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct ApplyRocketThrustSystem : ISystem
 {
     [BurstCompile]
@@ -75,7 +75,6 @@ public partial struct ApplyRocketThrustSystem : ISystem
     {
         public float DeltaTime;
 
-        [BurstCompile]
         public void Execute(in ApplyRocketThrust rocket, ref RigidBodyAspect rigidBodyAspect)
         {
             // Newton's 3rd law states that for every action there is an equal and opposite reaction.
@@ -88,23 +87,11 @@ public partial struct ApplyRocketThrustSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
-        float dt = SystemAPI.Time.DeltaTime;
         state.Dependency = new ApplyRocketThurstJob
         {
-            DeltaTime = dt,
+            DeltaTime = SystemAPI.Time.DeltaTime,
         }.Schedule(state.Dependency);
     }
 }

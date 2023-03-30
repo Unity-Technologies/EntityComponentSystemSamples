@@ -19,7 +19,7 @@ namespace Asteroids.Client
         private const float m_PulseMax = 1.2f;
         private const float m_PulseMin = 0.8f;
 
-        ComponentLookup<PredictedGhostComponent> m_PredictedGhostComponentFromEntity;
+        ComponentLookup<PredictedGhost> m_PredictedGhostLookup;
         ComponentLookup<URPMaterialPropertyBaseColor> m_URPMaterialPropertyBaseColorFromEntity;
 
         [BurstCompile]
@@ -27,13 +27,9 @@ namespace Asteroids.Client
         {
             m_Pulse = 1;
             m_PulseDelta = 1;
-            m_PredictedGhostComponentFromEntity = state.GetComponentLookup<PredictedGhostComponent>(true);
+            m_PredictedGhostLookup = state.GetComponentLookup<PredictedGhost>(true);
             m_URPMaterialPropertyBaseColorFromEntity = state.GetComponentLookup<URPMaterialPropertyBaseColor>();
             state.RequireForUpdate<AsteroidTagComponentData>();
-        }
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
         }
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
@@ -54,11 +50,11 @@ namespace Asteroids.Client
             }
             var pulse = m_Pulse;
 
-            m_PredictedGhostComponentFromEntity.Update(ref state);
+            m_PredictedGhostLookup.Update(ref state);
             m_URPMaterialPropertyBaseColorFromEntity.Update(ref state);
             var scaleJob = new ScaleAsteroids
             {
-                predictedFromEntity = m_PredictedGhostComponentFromEntity,
+                predictedFromEntity = m_PredictedGhostLookup,
                 colorFromEntity = m_URPMaterialPropertyBaseColorFromEntity,
                 astrScale = astrScale,
                 pulse = pulse
@@ -69,25 +65,18 @@ namespace Asteroids.Client
         [BurstCompile]
         partial struct ScaleAsteroids : IJobEntity
         {
-            [ReadOnly] public ComponentLookup<PredictedGhostComponent> predictedFromEntity;
+            [ReadOnly] public ComponentLookup<PredictedGhost> predictedFromEntity;
             [NativeDisableParallelForRestriction] public ComponentLookup<URPMaterialPropertyBaseColor> colorFromEntity;
             public float astrScale;
             public float pulse;
-#if !ENABLE_TRANSFORM_V1
+
             public void Execute(Entity ent, ref LocalTransform localTransform)
             {
                 if (colorFromEntity.HasComponent(ent))
                     colorFromEntity[ent] = new URPMaterialPropertyBaseColor{Value = predictedFromEntity.HasComponent(ent) ? new float4(0,1,0,1) : new float4(1,1,1,1)};
                 localTransform.Scale = astrScale * pulse;
             }
-#else
-            public void Execute(Entity ent, ref NonUniformScale scale)
-            {
-                if (colorFromEntity.HasComponent(ent))
-                    colorFromEntity[ent] = new URPMaterialPropertyBaseColor{Value = predictedFromEntity.HasComponent(ent) ? new float4(0,1,0,1) : new float4(1,1,1,1)};
-                scale.Value = new float3(astrScale * pulse);
-            }
-#endif
+
 
         }
     }

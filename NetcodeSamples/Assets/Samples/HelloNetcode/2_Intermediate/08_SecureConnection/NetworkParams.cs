@@ -2,7 +2,7 @@ using Unity.Collections;
 
 namespace Samples.HelloNetcode
 {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || NETCODE_DEBUG
     /// <summary>
     /// DO NOT SHIP GENERATED PRIVATE KEYS AS PART OF YOUR GAME!
     ///

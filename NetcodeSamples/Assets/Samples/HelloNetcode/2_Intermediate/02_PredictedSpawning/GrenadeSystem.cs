@@ -34,24 +34,21 @@ namespace Samples.HelloNetcode
         }
 
         [BurstCompile]
-        public void OnDestroy(ref SystemState state) { }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var commandBuffer = new EntityCommandBuffer(state.WorldUpdateAllocator);
             var time = state.WorldUnmanaged.Time.ElapsedTime;
             var config = SystemAPI.GetSingleton<GrenadeConfig>();
-            foreach (var (data, grenadeTransform, entity) in SystemAPI.Query<RefRO<GrenadeData>, TransformAspect>().WithAll<Simulate>().WithEntityAccess())
+            foreach (var (data, grenadeTransform, entity) in SystemAPI.Query<RefRO<GrenadeData>, RefRO<LocalTransform>>().WithAll<Simulate>().WithEntityAccess())
             {
                 // Destroy the grenade when it reaches the end of it's timer
                 if (time > data.ValueRO.DestroyTimer)
                 {
                     // Calculate which objects are within the blast radius of the grenade and apply explosion effect on
                     // them based on distance. The further away the grenade the less affected by the blast.
-                    foreach (var (velocity, transform) in SystemAPI.Query<RefRW<PhysicsVelocity>, TransformAspect>().WithAll<Simulate>())
+                    foreach (var (velocity, transform) in SystemAPI.Query<RefRW<PhysicsVelocity>, RefRO<LocalTransform>>().WithAll<Simulate>())
                     {
-                        var diff = transform.WorldPosition - grenadeTransform.WorldPosition;
+                        var diff = transform.ValueRO.Position - grenadeTransform.ValueRO.Position;
                         var distanceSqrt = math.lengthsq(diff);
                         if (distanceSqrt < config.BlastRadius && distanceSqrt != 0)
                         {
@@ -76,11 +73,8 @@ namespace Samples.HelloNetcode
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<EnablePredictedSpawning>();
-            state.RequireForUpdate<NetworkIdComponent>();
+            state.RequireForUpdate<NetworkId>();
         }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state) {}
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
@@ -91,12 +85,10 @@ namespace Samples.HelloNetcode
                 // This is the weapon slot and rotating that will make the launcher move correctly (it's anchored on the end)
                 var grenadeLauncher = anchorPoint.ValueRO.WeaponSlot;
                 var followCameraRotation = quaternion.RotateX(-character.Input.Pitch);
-#if !ENABLE_TRANSFORM_V1
+
                 var transform = state.EntityManager.GetComponentData<LocalTransform>(grenadeLauncher);
                 commandBuffer.SetComponent(grenadeLauncher, transform.WithRotation(followCameraRotation));
-#else
-                commandBuffer.SetComponent(grenadeLauncher, new Rotation { Value = followCameraRotation});
-#endif
+
             }
             commandBuffer.Playback(state.EntityManager);
         }
@@ -115,9 +107,6 @@ namespace Samples.HelloNetcode
         }
 
         [BurstCompile]
-        public void OnDestroy(ref SystemState state) {}
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var commandBuffer = new EntityCommandBuffer(state.WorldUpdateAllocator);
@@ -127,15 +116,15 @@ namespace Samples.HelloNetcode
 
             // Add the grenade cleanup component to all grenades when they've arrived in a ghost snapshot (so server has also spawned
             // it), otherwise we might track invalid mis-predicted ghost spawns
-            foreach (var (grenadeData,entity) in SystemAPI.Query<RefRO<GrenadeData>>().WithNone<PredictedGhostSpawnRequestComponent>().WithNone<GrenadeClientCleanupData>().WithEntityAccess())
+            foreach (var (grenadeData,entity) in SystemAPI.Query<RefRO<GrenadeData>>().WithNone<PredictedGhostSpawnRequest>().WithNone<GrenadeClientCleanupData>().WithEntityAccess())
             {
                 commandBuffer.AddComponent<GrenadeClientCleanupData>(entity);
             }
 
             // Record the grenade position every frame so it can be used when instantiating the explosion effect
-            foreach (var (transform, grenadeData) in SystemAPI.Query<TransformAspect, RefRW<GrenadeClientCleanupData>>())
+            foreach (var (transform, grenadeData) in SystemAPI.Query<RefRO<LocalTransform>, RefRW<GrenadeClientCleanupData>>())
             {
-                grenadeData.ValueRW.Position = transform.WorldPosition;
+                grenadeData.ValueRW.Position = transform.ValueRO.Position;
             }
 
             // When a grenade is destroyed (GrenadeData deleted) we'll still see the system component and spawn an explosion
@@ -143,11 +132,9 @@ namespace Samples.HelloNetcode
             foreach (var (grenade, entity) in SystemAPI.Query<RefRO<GrenadeClientCleanupData>>().WithNone<GrenadeData>().WithEntityAccess())
             {
                 var explosion = commandBuffer.Instantiate(explosionPrefab);
-#if !ENABLE_TRANSFORM_V1
+
                 commandBuffer.SetComponent(explosion, LocalTransform.FromPosition(grenade.ValueRO.Position));
-#else
-                commandBuffer.SetComponent(explosion, new Translation {Value = grenade.ValueRO.Position});
-#endif
+
                 commandBuffer.AddComponent(explosion, new ExplosionData(){Timer = (float)time + config.ExplosionTimer});
                 commandBuffer.RemoveComponent<GrenadeClientCleanupData>(entity);
             }

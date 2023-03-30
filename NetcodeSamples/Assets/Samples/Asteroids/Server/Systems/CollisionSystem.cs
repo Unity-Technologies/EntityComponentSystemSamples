@@ -24,45 +24,37 @@ namespace Asteroids.Server
         private EntityQuery settingsQuery;
 
         ComponentTypeHandle<BulletAgeComponent> bulletAgeType;
-#if !ENABLE_TRANSFORM_V1
+
         ComponentTypeHandle<LocalTransform> transformType;
-#else
-        ComponentTypeHandle<Translation> positionType;
-#endif
-        ComponentTypeHandle<GhostOwnerComponent> ghostOwnerType;
+
+        ComponentTypeHandle<GhostOwner> ghostOwnerType;
         ComponentTypeHandle<StaticAsteroid> staticAsteroidType;
         ComponentTypeHandle<CollisionSphereComponent> sphereType;
         ComponentTypeHandle<PlayerIdComponentData> playerIdType;
         EntityTypeHandle entityType;
 
-        ComponentLookup<CommandTargetComponent> commandTarget;
+        ComponentLookup<CommandTarget> commandTarget;
         BufferLookup<LinkedEntityGroup> linkedEntityGroupFromEntity;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             var builder = new EntityQueryBuilder(Allocator.Temp)
-#if !ENABLE_TRANSFORM_V1
-                .WithAll<LocalTransform, CollisionSphereComponent, ShipTagComponentData, GhostOwnerComponent>();
-#else
-                .WithAll<Translation, CollisionSphereComponent, ShipTagComponentData, GhostOwnerComponent>();
-#endif
+
+                .WithAll<LocalTransform, CollisionSphereComponent, ShipTagComponentData, GhostOwner>();
+
             shipQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
-#if !ENABLE_TRANSFORM_V1
-            builder.WithAll<LocalTransform, CollisionSphereComponent, BulletTagComponent, BulletAgeComponent, GhostOwnerComponent>();
-#else
-            builder.WithAll<Translation, CollisionSphereComponent, BulletTagComponent, BulletAgeComponent, GhostOwnerComponent>();
-#endif
+
+            builder.WithAll<LocalTransform, CollisionSphereComponent, BulletTagComponent, BulletAgeComponent, GhostOwner>();
+
             bulletQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
-#if !ENABLE_TRANSFORM_V1
+
             builder.WithAll<LocalTransform, CollisionSphereComponent, AsteroidTagComponentData>();
-#else
-            builder.WithAll<Translation, CollisionSphereComponent, AsteroidTagComponentData>();
-#endif
+
             asteroidQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
@@ -77,18 +69,16 @@ namespace Asteroids.Server
             state.RequireForUpdate(m_LevelQuery);
 
             bulletAgeType = state.GetComponentTypeHandle<BulletAgeComponent>(true);
-#if !ENABLE_TRANSFORM_V1
+
             transformType = state.GetComponentTypeHandle<LocalTransform>(true);
-#else
-            positionType = state.GetComponentTypeHandle<Translation>(true);
-#endif
-            ghostOwnerType = state.GetComponentTypeHandle<GhostOwnerComponent>(true);
+
+            ghostOwnerType = state.GetComponentTypeHandle<GhostOwner>(true);
             staticAsteroidType = state.GetComponentTypeHandle<StaticAsteroid>(true);
             sphereType = state.GetComponentTypeHandle<CollisionSphereComponent>(true);
             playerIdType = state.GetComponentTypeHandle<PlayerIdComponentData>(true);
             entityType = state.GetEntityTypeHandle();
 
-            commandTarget = state.GetComponentLookup<CommandTargetComponent>();
+            commandTarget = state.GetComponentLookup<CommandTarget>();
             linkedEntityGroupFromEntity = state.GetBufferLookup<LinkedEntityGroup>();
         }
 
@@ -104,11 +94,9 @@ namespace Asteroids.Server
             public EntityCommandBuffer.ParallelWriter commandBuffer;
             [ReadOnly] public NativeList<ArchetypeChunk> bulletChunks;
             [ReadOnly] public ComponentTypeHandle<BulletAgeComponent> bulletAgeType;
-#if !ENABLE_TRANSFORM_V1
+
             [ReadOnly] public ComponentTypeHandle<LocalTransform> transformType;
-#else
-            [ReadOnly] public ComponentTypeHandle<Translation> positionType;
-#endif
+
             [ReadOnly] public ComponentTypeHandle<StaticAsteroid> staticAsteroidType;
             [ReadOnly] public ComponentTypeHandle<CollisionSphereComponent> sphereType;
             [ReadOnly] public EntityTypeHandle entityType;
@@ -135,17 +123,12 @@ namespace Asteroids.Server
                 }
                 else
                 {
-#if !ENABLE_TRANSFORM_V1
+
                     var asteroidPos = chunk.GetNativeArray(ref transformType);
                     for (int asteroid = 0; asteroid < asteroidPos.Length; ++asteroid)
                     {
                         var firstPos = asteroidPos[asteroid].Position.xy;
-#else
-                    var asteroidPos = chunk.GetNativeArray(ref positionType);
-                    for (int asteroid = 0; asteroid < asteroidPos.Length; ++asteroid)
-                    {
-                        var firstPos = asteroidPos[asteroid].Value.xy;
-#endif
+
                         var firstRadius = asteroidSphere[asteroid].radius;
                         CheckCollisions(unfilteredChunkIndex, asteroidEntity[asteroid], firstPos, firstRadius);
                     }
@@ -165,21 +148,17 @@ namespace Asteroids.Server
                 {
                     var bulletEntities = bulletChunks[bc].GetNativeArray(entityType);
                     var bulletAge = bulletChunks[bc].GetNativeArray(ref bulletAgeType);
-#if !ENABLE_TRANSFORM_V1
+
                     var bulletTrans = bulletChunks[bc].GetNativeArray(ref transformType);
-#else
-                    var bulletPos = bulletChunks[bc].GetNativeArray(ref positionType);
-#endif
+
                     var bulletSphere = bulletChunks[bc].GetNativeArray(ref sphereType);
                     for (int bullet = 0; bullet < bulletAge.Length; ++bullet)
                     {
                         if (bulletAge[bullet].age > bulletAge[bullet].maxAge)
                             return;
-#if !ENABLE_TRANSFORM_V1
+
                         var secondPos = bulletTrans[bullet].Position.xy;
-#else
-                        var secondPos = bulletPos[bullet].Value.xy;
-#endif
+
                         var secondRadius = bulletSphere[bullet].radius;
                         if (Intersect(firstRadius, secondRadius, firstPos, secondPos))
                         {
@@ -199,12 +178,10 @@ namespace Asteroids.Server
             [ReadOnly] public NativeList<ArchetypeChunk> asteroidChunks;
             [ReadOnly] public NativeList<ArchetypeChunk> bulletChunks;
             [ReadOnly] public ComponentTypeHandle<BulletAgeComponent> bulletAgeType;
-#if !ENABLE_TRANSFORM_V1
+
             [ReadOnly] public ComponentTypeHandle<LocalTransform> transformType;
-#else
-            [ReadOnly] public ComponentTypeHandle<Translation> positionType;
-#endif
-            [ReadOnly] public ComponentTypeHandle<GhostOwnerComponent> ghostOwnerType;
+
+            [ReadOnly] public ComponentTypeHandle<GhostOwner> ghostOwnerType;
             [ReadOnly] public ComponentTypeHandle<StaticAsteroid> staticAsteroidType;
             [ReadOnly] public ComponentTypeHandle<CollisionSphereComponent> sphereType;
             [ReadOnly] public ComponentTypeHandle<PlayerIdComponentData> playerIdType;
@@ -222,27 +199,20 @@ namespace Asteroids.Server
                 // This job is not written to support queries with enableable component types.
                 Assert.IsFalse(useEnabledMask);
 
-#if !ENABLE_TRANSFORM_V1
+
                 var shipTrans = chunk.GetNativeArray(ref transformType);
-#else
-                var shipPos = chunk.GetNativeArray(ref positionType);
-#endif
+
                 var shipSphere = chunk.GetNativeArray(ref sphereType);
                 var shipPlayerId = chunk.GetNativeArray(ref playerIdType);
                 var shipEntity = chunk.GetNativeArray(entityType);
                 var shipGhostOwner = chunk.GetNativeArray(ref ghostOwnerType);
 
-#if !ENABLE_TRANSFORM_V1
+
                 for (int ship = 0; ship < shipTrans.Length; ++ship)
                 {
                     int alive = 1;
                     var firstPos = shipTrans[ship].Position.xy;
-#else
-                for (int ship = 0; ship < shipPos.Length; ++ship)
-                {
-                    int alive = 1;
-                    var firstPos = shipPos[ship].Value.xy;
-#endif
+
                     var firstRadius = shipSphere[ship].radius;
                     if (firstPos.x - firstRadius < 0 || firstPos.y - firstRadius < 0 ||
                         firstPos.x + firstRadius > level[0].levelHeight ||
@@ -261,22 +231,18 @@ namespace Asteroids.Server
                         {
                             var bulletEntities = bulletChunks[bc].GetNativeArray(entityType);
                             var bulletAge = bulletChunks[bc].GetNativeArray(ref bulletAgeType);
-#if !ENABLE_TRANSFORM_V1
+
                             var bulletPos = bulletChunks[bc].GetNativeArray(ref transformType);
-#else
-                            var bulletPos = bulletChunks[bc].GetNativeArray(ref positionType);
-#endif
+
                             var bulletGhostOwner = bulletChunks[bc].GetNativeArray(ref ghostOwnerType);
                             var bulletSphere = bulletChunks[bc].GetNativeArray(ref sphereType);
                             for (int bullet = 0; bullet < bulletAge.Length; ++bullet)
                             {
                                 if (bulletAge[bullet].age > bulletAge[bullet].maxAge || bulletGhostOwner[bullet].NetworkId == shipNetworkId)
                                     continue;
-#if !ENABLE_TRANSFORM_V1
+
                                 var secondPos = bulletPos[bullet].Position.xy;
-#else
-                                var secondPos = bulletPos[bullet].Value.xy;
-#endif
+
                                 var secondRadius = bulletSphere[bullet].radius;
                                 if (Intersect(firstRadius, secondRadius, firstPos, secondPos))
                                 {
@@ -320,17 +286,12 @@ namespace Asteroids.Server
                             }
                             else
                             {
-#if !ENABLE_TRANSFORM_V1
+
                                 var asteroidTrans = asteroidChunks[ac].GetNativeArray(ref transformType);
                                 for (int asteroid = 0; asteroid < asteroidTrans.Length; ++asteroid)
                                 {
                                     var secondPos = asteroidTrans[asteroid].Position.xy;
-#else
-                                var asteroidPos = asteroidChunks[ac].GetNativeArray(ref positionType);
-                                for (int asteroid = 0; asteroid < asteroidPos.Length; ++asteroid)
-                                {
-                                    var secondPos = asteroidPos[asteroid].Value.xy;
-#endif
+
                                     var secondRadius = asteroidSphere[asteroid].radius;
                                     if (Intersect(firstRadius, secondRadius, firstPos, secondPos))
                                     {
@@ -354,7 +315,7 @@ namespace Asteroids.Server
         internal struct ClearShipPointerJob : IJob
         {
             public NativeQueue<Entity> playerClearQueue;
-            public ComponentLookup<CommandTargetComponent> commandTarget;
+            public ComponentLookup<CommandTarget> commandTarget;
             public BufferLookup<LinkedEntityGroup> linkedEntityGroupFromEntity;
 
             public void Execute()
@@ -389,11 +350,9 @@ namespace Asteroids.Server
                 out levelHandle);
 
             bulletAgeType.Update(ref state);
-#if !ENABLE_TRANSFORM_V1
+
             transformType.Update(ref state);
-#else
-            positionType.Update(ref state);
-#endif
+
             ghostOwnerType.Update(ref state);
             staticAsteroidType.Update(ref state);
             sphereType.Update(ref state);
@@ -408,11 +367,9 @@ namespace Asteroids.Server
                 commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter(),
                 bulletChunks = bulletQuery.ToArchetypeChunkListAsync(state.WorldUpdateAllocator, out bulletHandle),
                 bulletAgeType = bulletAgeType,
-#if !ENABLE_TRANSFORM_V1
+
                 transformType = transformType,
-#else
-                positionType = positionType,
-#endif
+
                 staticAsteroidType = staticAsteroidType,
                 sphereType = sphereType,
                 entityType = entityType,
@@ -430,11 +387,9 @@ namespace Asteroids.Server
                 asteroidChunks = asteroidQuery.ToArchetypeChunkListAsync(state.WorldUpdateAllocator, out asteroidHandle),
                 bulletChunks = asteroidJob.bulletChunks,
                 bulletAgeType = asteroidJob.bulletAgeType,
-#if !ENABLE_TRANSFORM_V1
+
                 transformType = asteroidJob.transformType,
-#else
-                positionType = asteroidJob.positionType,
-#endif
+
                 ghostOwnerType = ghostOwnerType,
                 staticAsteroidType = asteroidJob.staticAsteroidType,
                 sphereType = asteroidJob.sphereType,

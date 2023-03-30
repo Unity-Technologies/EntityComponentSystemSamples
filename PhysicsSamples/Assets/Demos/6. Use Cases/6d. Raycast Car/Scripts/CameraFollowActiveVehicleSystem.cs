@@ -3,19 +3,8 @@ using Unity.Entities;
 
 [RequireMatchingQueriesForUpdate]
 [UpdateAfter(typeof(ChangeActiveVehicleSystem))]
-[BurstCompile]
 partial struct CameraFollowActiveVehicleSystem : ISystem
 {
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
