@@ -6,7 +6,6 @@ Starter samples:
 - [Jobs Tutorial](./Tutorials/Jobs/README.md)
 - [Kickball Tutorial](./Tutorials/Kickball/README.md)
 - [Tanks Tutorial](./Tutorials/Tanks/README.md)
-- [Firefighters Tutorial](./Tutorials/Firefighters/README.md)
 
 Additional samples:
 
