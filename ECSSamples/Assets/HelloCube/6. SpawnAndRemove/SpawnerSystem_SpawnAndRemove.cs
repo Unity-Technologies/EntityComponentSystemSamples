@@ -1,4 +1,4 @@
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -58,7 +58,7 @@ public partial class SpawnerSystem_SpawnAndRemove : SystemBase
                         // Place the instantiated in a grid with some noise
                         var position = math.transform(location.Value, new float3(x * 1.3F, noise.cnoise(new float2(x, y) * 0.21F) * 2, y * 1.3F));
                         commandBuffer.SetComponent(entityInQueryIndex, instance, new Translation { Value = position });
-                        commandBuffer.SetComponent(entityInQueryIndex, instance, new LifeTime { Value = random.NextFloat(10.0F, 100.0F) });
+                        commandBuffer.SetComponent(entityInQueryIndex, instance, new LifeTime { Value = random.NextFloat(1.0F, 2.0F) });
                         commandBuffer.SetComponent(entityInQueryIndex, instance, new RotationSpeed_SpawnAndRemove { RadiansPerSecond = math.radians(random.NextFloat(25.0F, 90.0F)) });
                     }
                 }

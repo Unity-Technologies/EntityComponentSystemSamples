@@ -1,9 +1,9 @@
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-struct UserInputData : IComponentData
+public struct UserInputData : IComponentData
 {
     public float2 Move;
 }

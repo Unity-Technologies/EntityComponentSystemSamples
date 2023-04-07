@@ -1,8 +1,9 @@
-using Unity.Entities;
+﻿using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 // Tag used to quickly identify our Player Entity
-struct PlayerTag : IComponentData {}
+struct PlayerTag : IComponentData { }
 
 /// <summary>
 /// "Authoring" component for the player. Part of the GameObject Conversion workflow.
@@ -12,6 +13,7 @@ struct PlayerTag : IComponentData {}
 public class PlayerAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float MovementSpeedMetersPerSecond = 5.0f;
+    public float RotationSpeedDegreesPerSecond = 180.0f;
 
     /// <summary>
     /// A function which converts our Player authoring GameObject to a more optimized Entity representation
@@ -25,9 +27,11 @@ public class PlayerAuthoring : MonoBehaviour, IConvertGameObjectToEntity
         dstManager.AddComponents(entity, new ComponentTypes(
             typeof(PlayerTag),
             typeof(UserInputData),
-            typeof(MovementSpeed)));
+            typeof(MovementSpeed),
+            typeof(RotationSpeed)));
 
         // Set the movement speed value from the authoring component
-        dstManager.SetComponentData(entity, new MovementSpeed {MetersPerSecond = MovementSpeedMetersPerSecond});
+        dstManager.SetComponentData(entity, new MovementSpeed { MetersPerSecond = MovementSpeedMetersPerSecond });
+        dstManager.SetComponentData(entity, new RotationSpeed { RadiansPerSecond = math.radians(RotationSpeedDegreesPerSecond) });
     }
 }

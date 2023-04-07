@@ -1,4 +1,4 @@
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -28,7 +28,7 @@ public partial class LookForPlayerSystem : SystemBase
         // It then schedules a job to be run which will fill that array
         // We pass the output job handle of this function as a dependency of the ForEach below to guarantee it completes before we need the player position
         var playerPosition = m_PlayerQuery.ToComponentDataArrayAsync<Translation>(Allocator.TempJob, out JobHandle getPositionHandle);
-
+      
 
         // ECB which will run at the end of the simulation group. If the player is seen, will change the Guard's state to chasing
         var ecb = m_EndSimECBSystem.CreateCommandBuffer().AsParallelWriter();
@@ -78,7 +78,7 @@ public partial class LookForPlayerSystem : SystemBase
                             // Update the target position of the guard to the player the guard is chasing
                             // Here we use ComponentDataFromEntity because idle guards will not have a TargetPosition
                             // If the guard is already chasing, then we know they have a TargetPosition already and can set its value
-                            targetPositionFromEntity[guardEntity] = new TargetPosition {Value = playerPosition[0].Value};
+                            targetPositionFromEntity[guardEntity] = new TargetPosition { Value = playerPosition[0].Value };
                         }
                         else
                         {
@@ -98,9 +98,9 @@ public partial class LookForPlayerSystem : SystemBase
                         GuardAIUtility.TransitionToIdle(ecb, guardEntity, entityInQueryIndex);
                     }
                 }).ScheduleParallel(getPositionHandle); // Schedule the ForEach with the job system to run
-        // Note here we pass the getPositionHandle as a dependency
-        // This will ensure that the previous ToComponentDataArray
-        // operation will finish before our ForEach runs
+                                                        // Note here we pass the getPositionHandle as a dependency
+                                                        // This will ensure that the previous ToComponentDataArray
+                                                        // operation will finish before our ForEach runs
 
         // EntityCommandBufferSystems need to know about all jobs which write to EntityCommandBuffers it has created
         m_EndSimECBSystem.AddJobHandleForProducer(lookHandle);

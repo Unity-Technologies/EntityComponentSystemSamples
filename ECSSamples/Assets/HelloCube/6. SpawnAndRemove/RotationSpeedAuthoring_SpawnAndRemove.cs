@@ -1,4 +1,4 @@
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -8,6 +8,7 @@ using UnityEngine;
 public class RotationSpeedAuthoring_SpawnAndRemove : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float DegreesPerSecond = 360;
+    public float LifeTime = 1f;
 
     // The MonoBehaviour data is converted to ComponentData on the entity.
     // We are specifically transforming from a good editor representation of the data (Represented in degrees)
@@ -15,6 +16,6 @@ public class RotationSpeedAuthoring_SpawnAndRemove : MonoBehaviour, IConvertGame
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         dstManager.AddComponentData(entity, new RotationSpeed_SpawnAndRemove { RadiansPerSecond = math.radians(DegreesPerSecond) });
-        dstManager.AddComponentData(entity, new LifeTime { Value = 0.0F });
+        dstManager.AddComponentData(entity, new LifeTime { Value = LifeTime });
     }
 }

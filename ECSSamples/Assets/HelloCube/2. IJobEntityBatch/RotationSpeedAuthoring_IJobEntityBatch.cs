@@ -1,10 +1,10 @@
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
 // ReSharper disable once InconsistentNaming
 [AddComponentMenu("DOTS Samples/IJobEntityBatch/Rotation Speed")]
-[ConverterVersion("joe", 1)]
+[ConverterVersion("joe", 1)]    
 public class RotationSpeedAuthoring_IJobEntityBatch : MonoBehaviour, IConvertGameObjectToEntity
 {
     public float DegreesPerSecond = 360.0F;

@@ -1,4 +1,4 @@
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -7,6 +7,11 @@ using Unity.Transforms;
 struct MovementSpeed : IComponentData
 {
     public float MetersPerSecond;
+}
+
+struct RotationSpeed : IComponentData
+{
+    public float RadiansPerSecond;
 }
 
 // System for moving the player based on keyboard input
