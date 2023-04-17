@@ -41,7 +41,7 @@ A component type defined with `IComponentData` or `IBufferElementData` can be ma
 
 A [`World`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.World.html) is a collection of entities. An entity's ID number is only unique within its own world, *i.e.* the entity with a particular ID in one world is entirely unrelated to an entity with the same ID in a different world.
 
-A world also owns a set of [systems](concepts-systems.md), which are units of code that run on the main thread, usually once per frame. The entities of a world are normally only accessed by the world's systems (and the jobs scheduled by those systems), but this is not an enforced restriction.
+A world also owns a set of [systems](systems.md), which are units of code that run on the main thread, usually once per frame. The entities of a world are normally only accessed by the world's systems (and the jobs scheduled by those systems), but this is not an enforced restriction.
 
 The entities in a world are created, destroyed, and modified through the world's [`EntityManager`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityManager.html). Key `EntityManager` methods include:
 
