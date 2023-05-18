@@ -1,3 +1,5 @@
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -15,53 +17,68 @@ public struct ExplosionCountdown : IComponentData
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class ExplosionCountdownSystem : SystemBase
+public partial struct ExplosionCountdownSystem : ISystem
 {
-    private EndFixedStepSimulationEntityCommandBufferSystem m_CommandBufferSystem;
+    private ComponentLookup<LocalTransform> m_LocalTransformLookup;
 
-    protected override void OnCreate()
+    [BurstCompile]
+    private partial struct ExplosionCountdown_TickJob : IJobEntity
     {
-        m_CommandBufferSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
-        RequireForUpdate<ExplosionCountdown>();
+        [ReadOnly] public ComponentLookup<LocalTransform> LocalTransforms;
+
+        private void Execute(Entity entity, ref ExplosionCountdown explosion)
+        {
+            explosion.Countdown--;
+            bool bang = explosion.Countdown <= 0;
+            if (bang && !explosion.Source.Equals(Entity.Null))
+            {
+                explosion.Center = LocalTransforms[explosion.Source].Position;
+            }
+        }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    private partial struct IJobEntity_ExplosionCountdown_Bang : IJobEntity
     {
-        var commandBufferParallel = m_CommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+        public EntityCommandBuffer.ParallelWriter CommandBufferParallel;
+        public float DeltaTime;
+        public float3 Up;
 
-        var timeStep = SystemAPI.Time.DeltaTime;
-        var up = math.up();
+        private void Execute([ChunkIndexInQuery] int chunkInQueryIndex, Entity entity, ref ExplosionCountdown explosion, ref PhysicsVelocity velocity, in PhysicsMass mass,
+            in PhysicsCollider collider, in LocalTransform localTransform)
+        {
+            if (0 < explosion.Countdown) return;
 
-        var positions = GetComponentLookup<Translation>(true);
+            velocity.ApplyExplosionForce(mass, collider, localTransform.Position, localTransform.Rotation,
+                explosion.Force, explosion.Center, 0, DeltaTime, Up);
 
-        Entities
-            .WithName("ExplosionCountdown_Tick")
-            .WithReadOnly(positions)
-            .WithBurst()
-            .ForEach((Entity entity, ref ExplosionCountdown explosion) =>
-            {
-                explosion.Countdown--;
-                bool bang = explosion.Countdown <= 0;
-                if (bang && !explosion.Source.Equals(Entity.Null))
-                {
-                    explosion.Center = positions[explosion.Source].Value;
-                }
-            }).ScheduleParallel();
+            CommandBufferParallel.RemoveComponent<ExplosionCountdown>(chunkInQueryIndex, entity);
+        }
+    }
 
-        Entities
-            .WithName("ExplosionCountdown_Bang")
-            .WithBurst()
-            .ForEach((int entityInQueryIndex, Entity entity,
-                ref ExplosionCountdown explosion, ref PhysicsVelocity pv,
-                in PhysicsMass pm, in PhysicsCollider collider,
-                in Translation pos, in Rotation rot) =>
-                {
-                    if (0 < explosion.Countdown) return;
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        m_LocalTransformLookup = state.GetComponentLookup<LocalTransform>(true);
 
-                    pv.ApplyExplosionForce(pm, collider, pos, rot,
-                        explosion.Force, explosion.Center, 0, timeStep, up);
+        state.RequireForUpdate<ExplosionCountdown>();
+    }
 
-                    commandBufferParallel.RemoveComponent<ExplosionCountdown>(entityInQueryIndex, entity);
-                }).Schedule();
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        m_LocalTransformLookup.Update(ref state);
+
+        state.Dependency = new ExplosionCountdown_TickJob
+        {
+            LocalTransforms = m_LocalTransformLookup,
+        }.ScheduleParallel(state.Dependency);
+
+        state.Dependency = new IJobEntity_ExplosionCountdown_Bang
+        {
+            DeltaTime = SystemAPI.Time.DeltaTime,
+            Up = math.up(),
+            CommandBufferParallel = SystemAPI.GetSingleton<EndFixedStepSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
+        }.Schedule(state.Dependency);
     }
 }

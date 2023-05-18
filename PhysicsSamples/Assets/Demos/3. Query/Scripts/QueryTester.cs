@@ -13,14 +13,523 @@ using Unity.Collections.NotBurstCompatible;
 using static Unity.Physics.CompoundCollider;
 using Random = Unity.Mathematics.Random;
 using static Unity.Physics.Math;
+using System.Collections.Generic;
+using Unity.Transforms;
+using Unity.Physics.Authoring;
 
 namespace Unity.Physics.Extensions
 {
-    /// Simple Behaviour for testing broadphase raycasts. Provides a
-    /// gizmo which can be manipulated to cast a ray during simulation.
-    /// Displays hit positions or the tested line segment.
-    public unsafe class QueryTester : MonoBehaviour
+    public class QueryData : IComponentData
     {
+        // authoring data
+        public float Distance;
+        public float3 Direction;
+        public bool CollectAllHits;
+        public bool DrawSurfaceNormal;
+        public bool HighlightLeafCollider;
+        public bool ColliderQuery;
+        public ColliderType ColliderType;
+        public float InputColliderScale;
+
+        // calculated data
+        public bool ColliderDataInitialized;
+        public BlobAssetReference<Collider> Collider;
+        public BlobAssetReference<Collider>[] ChildrenColliders;
+        public UnityEngine.Mesh[] ColliderMeshes;
+    }
+
+    class QueryTesterBaker : Baker<QueryTester>
+    {
+        public override void Bake(QueryTester authoring)
+        {
+            QueryData queryData = new QueryData();
+            queryData.Distance = authoring.Distance;
+            queryData.Direction = authoring.Direction;
+            queryData.CollectAllHits = authoring.CollectAllHits;
+            queryData.DrawSurfaceNormal = authoring.DrawSurfaceNormal;
+            queryData.HighlightLeafCollider = authoring.HighlightLeafCollider;
+            queryData.ColliderQuery = authoring.ColliderQuery;
+            queryData.ColliderType = authoring.ColliderType;
+            queryData.InputColliderScale = authoring.InputColliderScale;
+            queryData.ColliderDataInitialized = false;
+
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, queryData);
+        }
+    }
+
+    [UpdateInGroup(typeof(PhysicsSimulationGroup))]
+    public partial class QueryTesterSystem : SystemBase
+    {
+#if UNITY_EDITOR
+        private static string k_MeshDisplayMaterialPath = "Assets/Demos/3. Query/Materials/MeshDisplayMaterial.mat";
+        private static UnityEngine.Material k_MeshDisplayMaterial = AssetDatabase.LoadAssetAtPath<UnityEngine.Material>(k_MeshDisplayMaterialPath);
+#endif
+
+        private MeshTrsList m_MeshTrsList;
+
+        protected override void OnCreate()
+        {
+            m_MeshTrsList = new MeshTrsList();
+            RequireForUpdate<QueryData>();
+        }
+
+        protected override void OnUpdate()
+        {
+            // Properly chain up dependencies
+            {
+                if (!SystemAPI.TryGetSingleton<PhysicsDebugDisplayData>(out _))
+                {
+                    var singletonEntity = EntityManager.CreateEntity();
+                    EntityManager.AddComponentData(singletonEntity, new PhysicsDebugDisplayData());
+                }
+                SystemAPI.GetSingletonRW<PhysicsDebugDisplayData>();
+            }
+
+            var meshTrsList = m_MeshTrsList;
+            var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+
+            NativeList<RaycastHit> raycastHits = new NativeList<RaycastHit>(Allocator.TempJob);
+            NativeList<ColliderCastHit> colliderCastHits = new NativeList<ColliderCastHit>(Allocator.TempJob);
+            NativeList<DistanceHit> distanceHits = new NativeList<DistanceHit>(Allocator.TempJob);
+
+            // The generated code doesn't automatically complete the dependency on PhysicsWorldSingleton
+            EntityManager.CompleteDependencyBeforeRO<PhysicsWorldSingleton>();
+
+            foreach (var(qd, localToWorld) in SystemAPI.Query<QueryData, RefRO<LocalToWorld>>())
+            {
+                if (qd.ColliderQuery && !qd.ColliderDataInitialized)
+                {
+                    CreateCollider(qd);
+                    qd.ColliderDataInitialized = true;
+                }
+
+                raycastHits.Clear();
+                colliderCastHits.Clear();
+                distanceHits.Clear();
+
+                RaycastInput raycastInput = default;
+                ColliderCastInput colliderCastInput = default;
+                PointDistanceInput pointDistanceInput = default;
+                ColliderDistanceInput colliderDistanceInput = default;
+
+                RunQueries(physicsWorld, localToWorld.ValueRO.Position, localToWorld.ValueRO.Rotation,
+                    qd, ref raycastInput, ref colliderCastInput,
+                    ref pointDistanceInput, ref colliderDistanceInput, ref raycastHits,
+                    ref colliderCastHits, ref distanceHits);
+
+                DisplayResults(physicsWorld, qd, raycastInput,
+                    colliderCastInput, pointDistanceInput, colliderDistanceInput,
+                    raycastHits, colliderCastHits, distanceHits,
+                    ref meshTrsList);
+            }
+
+            raycastHits.Dispose();
+            colliderCastHits.Dispose();
+            distanceHits.Dispose();
+
+            meshTrsList.DrawAndReset();
+        }
+
+        protected override void OnDestroy()
+        {
+            EntityQuery query = GetEntityQuery(ComponentType.ReadWrite<QueryData>());
+            QueryData[] qdArr = query.ToComponentArray<QueryData>();
+
+            if (qdArr != null)
+            {
+                for (int i = 0; i < qdArr.Length; i++)
+                {
+                    QueryData qd = qdArr[i];
+                    if (qd.ColliderQuery && qd.ColliderDataInitialized)
+                    {
+                        qd.Collider.Dispose();
+
+                        if (qd.ChildrenColliders != null)
+                        {
+                            for (int j = 0; j < qd.ChildrenColliders.Length; j++)
+                            {
+                                qd.ChildrenColliders[j].Dispose();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public class MeshTrsList
+        {
+            internal List<MeshTrs> m_MeshTrsList;
+
+            public MeshTrsList() => m_MeshTrsList = new List<MeshTrs>();
+
+            public void AddMeshTrs(UnityEngine.Mesh mesh, float3 t, quaternion q, float s)
+            {
+                Matrix4x4 trs = default;
+                trs.SetTRS(t, q, new float3(s));
+
+                MeshTrs meshTrs = new MeshTrs
+                {
+                    m_Mesh = mesh,
+                    m_Trs = trs
+                };
+
+                m_MeshTrsList.Add(meshTrs);
+            }
+
+            public void DrawAndReset()
+            {
+#if UNITY_EDITOR
+                for (int i = 0; i < m_MeshTrsList.Count; i++)
+                {
+                    MeshTrs meshTrs = m_MeshTrsList[i];
+
+                    // Using this as DrawMeshInstanced is the only thing that works
+                    Matrix4x4[] trs = new[] { meshTrs.m_Trs };
+                    UnityEngine.Graphics.DrawMeshInstanced(meshTrs.m_Mesh, 0, k_MeshDisplayMaterial, trs);
+                }
+#endif
+                m_MeshTrsList.Clear();
+            }
+
+            internal class MeshTrs
+            {
+                internal UnityEngine.Mesh m_Mesh;
+                internal Matrix4x4 m_Trs;
+            }
+        }
+
+        #region Queries and display
+
+        void RunQueries(in PhysicsWorld world, in float3 pos, in quaternion rot,
+            in QueryData queryData, ref RaycastInput raycastInput, ref ColliderCastInput colliderCastInput,
+            ref PointDistanceInput pointDistanceInput, ref ColliderDistanceInput colliderDistanceInput, ref NativeList<RaycastHit> raycastHits,
+            ref NativeList<ColliderCastHit> colliderCastHits, ref NativeList<DistanceHit> distanceHits)
+        {
+            float3 origin = pos;
+            float3 direction = math.rotate(rot, queryData.Direction) * queryData.Distance;
+
+            if (!queryData.ColliderQuery)
+            {
+                if (math.any(new float3(queryData.Direction) != float3.zero))
+                {
+                    raycastInput = new RaycastInput
+                    {
+                        Start = origin,
+                        End = origin + direction,
+                        Filter = CollisionFilter.Default
+                    };
+
+                    new RaycastJob
+                    {
+                        RaycastInput = raycastInput,
+                        RaycastHits = raycastHits,
+                        CollectAllHits = queryData.CollectAllHits,
+                        World = world
+                    }.Schedule().Complete();
+                }
+                else
+                {
+                    pointDistanceInput = new PointDistanceInput
+                    {
+                        Position = origin,
+                        MaxDistance = queryData.Distance,
+                        Filter = CollisionFilter.Default
+                    };
+
+                    new PointDistanceJob
+                    {
+                        PointDistanceInput = pointDistanceInput,
+                        DistanceHits = distanceHits,
+                        CollectAllHits = queryData.CollectAllHits,
+                        World = world
+                    }.Schedule().Complete();
+                }
+            }
+            else
+            {
+                if (math.any(new float3(queryData.Direction) != float3.zero))
+                {
+                    unsafe
+                    {
+                        colliderCastInput = new ColliderCastInput
+                        {
+                            Collider = queryData.Collider.AsPtr(),
+                            Orientation = rot,
+                            Start = origin,
+                            End = origin + direction,
+                            QueryColliderScale = queryData.InputColliderScale
+                        };
+
+                        new ColliderCastJob
+                        {
+                            Input = colliderCastInput,
+                            ColliderCastHits = colliderCastHits,
+                            CollectAllHits = queryData.CollectAllHits,
+                            World = world
+                        }.Schedule().Complete();
+                    }
+                }
+                else
+                {
+                    unsafe
+                    {
+                        colliderDistanceInput = new ColliderDistanceInput
+                        {
+                            Collider = queryData.Collider.AsPtr(),
+                            Transform = new RigidTransform(rot, origin),
+                            MaxDistance = queryData.Distance,
+                            Scale = queryData.InputColliderScale
+                        };
+
+                        new ColliderDistanceJob
+                        {
+                            Input = colliderDistanceInput,
+                            DistanceHits = distanceHits,
+                            CollectAllHits = queryData.CollectAllHits,
+                            World = world
+                        }.Schedule().Complete();
+                    }
+                }
+            }
+        }
+
+        void DisplayResults(in PhysicsWorld world, in QueryData queryData, in RaycastInput raycastInput,
+            in ColliderCastInput colliderCastInput, in PointDistanceInput pointDistanceInput, in ColliderDistanceInput colliderDistanceInput,
+            in NativeList<RaycastHit> raycastHits, in NativeList<ColliderCastHit> colliderCastHits, in NativeList<DistanceHit> distanceHits,
+            ref MeshTrsList meshTrsList)
+        {
+            // Draw the query
+            bool colliderCast = math.any(new float3(queryData.Direction) != float3.zero);
+            if (queryData.ColliderQuery)
+            {
+                ScaledMTransform worldFromCollider = colliderCast ?
+                    new ScaledMTransform(new RigidTransform(colliderCastInput.Orientation, colliderCastInput.Start), colliderCastInput.QueryColliderScale) :
+                    new ScaledMTransform(colliderDistanceInput.Transform, colliderDistanceInput.Scale);
+
+                if (colliderCast)
+                {
+                    PhysicsDebugDisplaySystem.Line(worldFromCollider.Translation, colliderCastInput.End, Unity.DebugDisplay.ColorIndex.Red);
+                }
+
+                if (queryData.ColliderType != ColliderType.Compound)
+                {
+                    meshTrsList.AddMeshTrs(queryData.ColliderMeshes[0], worldFromCollider.Translation, new quaternion(worldFromCollider.Rotation), queryData.InputColliderScale);
+                }
+                else
+                {
+                    unsafe
+                    {
+                        CompoundCollider* compoundCollider = colliderCast ? (CompoundCollider*)colliderCastInput.Collider : (CompoundCollider*)colliderDistanceInput.Collider;
+                        for (int i = 0; i < compoundCollider->NumChildren; i++)
+                        {
+                            ref Unity.Physics.CompoundCollider.Child child = ref compoundCollider->Children[i];
+                            ScaledMTransform worldFromChild = ScaledMTransform.Mul(worldFromCollider, new MTransform(child.CompoundFromChild));
+
+                            meshTrsList.AddMeshTrs(queryData.ColliderMeshes[i], worldFromChild.Translation, new quaternion(worldFromChild.Rotation), queryData.InputColliderScale);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (math.any(new float3(queryData.Direction) != float3.zero))
+                {
+                    PhysicsDebugDisplaySystem.Line(raycastInput.Start, raycastInput.End, Unity.DebugDisplay.ColorIndex.Red);
+                }
+                else
+                {
+                    PhysicsDebugDisplaySystem.Point(pointDistanceInput.Position, 0.05f, Unity.DebugDisplay.ColorIndex.Red);
+                }
+            }
+
+            // Draw ray hits
+            if (raycastHits.IsCreated)
+            {
+                foreach (RaycastHit hit in raycastHits)
+                {
+                    Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
+                    Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
+
+                    PhysicsDebugDisplaySystem.Line(raycastInput.Start, hit.Position, Unity.DebugDisplay.ColorIndex.Magenta);
+                    PhysicsDebugDisplaySystem.Point(hit.Position, 0.02f, Unity.DebugDisplay.ColorIndex.White);
+
+                    if (queryData.DrawSurfaceNormal)
+                    {
+                        PhysicsDebugDisplaySystem.Line(hit.Position, hit.Position + hit.SurfaceNormal, Unity.DebugDisplay.ColorIndex.Green);
+                    }
+
+                    if (queryData.HighlightLeafCollider && !hit.ColliderKey.Equals(ColliderKey.Empty))
+                    {
+                        DrawLeafCollider(world.Bodies[hit.RigidBodyIndex], hit.ColliderKey);
+
+                        // Need to fix this once Unity.DebugDisplay.Label starts working and is exposed in PhysicsDebugDisplaySystem API [Havok-275]
+                        //GUIStyle style = new GUIStyle();
+                        //style.normal.textColor = Color.yellow;
+                        //Handles.Label(hit.Position, hit.ColliderKey.Value.ToString("X8"), style);
+                    }
+                }
+            }
+
+            // Draw collider hits
+            if (colliderCastHits.IsCreated)
+            {
+                foreach (ColliderCastHit hit in colliderCastHits)
+                {
+                    Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
+                    Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
+
+                    Gizmos.color = Color.magenta;
+                    PhysicsDebugDisplaySystem.Point(hit.Position, 0.02f, Unity.DebugDisplay.ColorIndex.White);
+                    PhysicsDebugDisplaySystem.Point(hit.Position - (colliderCastInput.End - colliderCastInput.Start) * hit.Fraction, 0.02f, Unity.DebugDisplay.ColorIndex.White);
+
+                    if (queryData.Collider.Value.Type == ColliderType.Compound)
+                    {
+                        var colliderkey = hit.QueryColliderKey;
+                        queryData.Collider.Value.GetChild(ref colliderkey, out ChildCollider child);
+
+                        unsafe
+                        {
+                            CompoundCollider* compound = queryData.Collider.AsPtr<CompoundCollider>();
+                            for (int i = 0; i < compound->NumChildren; i++)
+                            {
+                                if (child.Collider->Type == compound->Children[i].Collider->Type)
+                                {
+                                    MTransform compoundFromChild = new MTransform(child.TransformFromChild);
+
+                                    ScaledMTransform worldFromCompoundCastStart = new ScaledMTransform(new RigidTransform(colliderCastInput.Orientation, colliderCastInput.Start), queryData.InputColliderScale);
+                                    ScaledMTransform worldFromCompoundCastEnd = new ScaledMTransform(new RigidTransform(colliderCastInput.Orientation, colliderCastInput.End), queryData.InputColliderScale);
+
+                                    var worldFromChildCastStart = ScaledMTransform.Mul(worldFromCompoundCastStart, compoundFromChild);
+                                    var worldFromChildCastEnd = ScaledMTransform.Mul(worldFromCompoundCastEnd, compoundFromChild);
+
+                                    meshTrsList.AddMeshTrs(queryData.ColliderMeshes[i], math.lerp(worldFromChildCastStart.Translation, worldFromChildCastEnd.Translation, hit.Fraction),
+                                        new quaternion(worldFromChildCastStart.Rotation), queryData.InputColliderScale);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        meshTrsList.AddMeshTrs(queryData.ColliderMeshes[0], math.lerp(colliderCastInput.Start, colliderCastInput.End, hit.Fraction), colliderCastInput.Orientation, queryData.InputColliderScale);
+                    }
+
+                    if (queryData.DrawSurfaceNormal)
+                    {
+                        PhysicsDebugDisplaySystem.Line(hit.Position, hit.Position + hit.SurfaceNormal, Unity.DebugDisplay.ColorIndex.Green);
+                    }
+
+                    if (queryData.HighlightLeafCollider && !hit.ColliderKey.Equals(ColliderKey.Empty))
+                    {
+                        DrawLeafCollider(world.Bodies[hit.RigidBodyIndex], hit.ColliderKey);
+
+                        // Need to fix this once Unity.DebugDisplay.Label starts working and is exposed in PhysicsDebugDisplaySystem API [Havok-275]
+                        //GUIStyle style = new GUIStyle();
+                        //style.normal.textColor = Color.yellow;
+                        //Handles.Label(hit.Position, hit.ColliderKey.Value.ToString("X8"), style);
+                    }
+
+                    // Need to fix this once Unity.DebugDisplay.Label starts working and is exposed in PhysicsDebugDisplaySystem API [Havok-275]
+//#if UNITY_EDITOR
+//                    if (queryData.HighlightLeafCollider && queryData.Collider.Value.CollisionType != CollisionType.Convex && !hit.QueryColliderKey.Equals(ColliderKey.Empty))
+//                    {
+//                        float3 flippedPosition = hit.Position - hit.Fraction * (colliderCastInput.End - colliderCastInput.Start);
+
+//                        GUIStyle style = new GUIStyle();
+//                        style.normal.textColor = Color.yellow;
+//                        Handles.Label(flippedPosition, hit.QueryColliderKey.Value.ToString("X8"), style);
+//                    }
+//#endif
+                }
+            }
+
+            // Draw distance hits
+            if (distanceHits.IsCreated)
+            {
+                foreach (DistanceHit hit in distanceHits)
+                {
+                    Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
+                    Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
+
+                    float maxDistance = queryData.ColliderQuery ? colliderDistanceInput.MaxDistance : pointDistanceInput.MaxDistance;
+                    Assert.IsTrue(hit.Fraction <= maxDistance);
+                    float3 queryPoint = hit.Position + hit.SurfaceNormal * hit.Distance;
+
+                    PhysicsDebugDisplaySystem.Point(hit.Position, 0.02f, Unity.DebugDisplay.ColorIndex.White);
+                    PhysicsDebugDisplaySystem.Point(queryPoint, 0.02f, Unity.DebugDisplay.ColorIndex.White);
+                    PhysicsDebugDisplaySystem.Line(hit.Position, queryPoint, Unity.DebugDisplay.ColorIndex.Magenta);
+
+                    if (queryData.DrawSurfaceNormal)
+                    {
+                        PhysicsDebugDisplaySystem.Line(hit.Position, hit.Position + hit.SurfaceNormal, Unity.DebugDisplay.ColorIndex.Green);
+                    }
+
+                    if (queryData.HighlightLeafCollider && !hit.ColliderKey.Equals(ColliderKey.Empty))
+                    {
+                        DrawLeafCollider(world.Bodies[hit.RigidBodyIndex], hit.ColliderKey);
+
+                        // Need to fix this once Unity.DebugDisplay.Label starts working and is exposed in PhysicsDebugDisplaySystem API [Havok-275]
+                        //GUIStyle style = new GUIStyle();
+                        //style.normal.textColor = Color.yellow;
+                        //Handles.Label(hit.Position, hit.ColliderKey.Value.ToString("X8"), style);
+                    }
+
+                    // Need to fix this once Unity.DebugDisplay.Label starts working and is exposed in PhysicsDebugDisplaySystem API [Havok-275]
+//#if UNITY_EDITOR
+//                    if (queryData.ColliderQuery && queryData.HighlightLeafCollider && queryData.Collider.Value.CollisionType != CollisionType.Convex && !hit.QueryColliderKey.Equals(ColliderKey.Empty))
+//                    {
+//                        float3 flippedPosition = hit.Position + hit.SurfaceNormal * hit.Fraction;
+
+//                        GUIStyle style = new GUIStyle();
+//                        style.normal.textColor = Color.yellow;
+//                        Handles.Label(flippedPosition, hit.QueryColliderKey.Value.ToString("X8"), style);
+//                    }
+//#endif
+                }
+            }
+        }
+
+        void DrawLeafCollider(RigidBody body, ColliderKey key)
+        {
+            unsafe
+            {
+                if (body.Collider.Value.GetLeaf(key, out ChildCollider leaf) && (leaf.Collider == null))
+                {
+                    RigidTransform worldFromLeaf = math.mul(body.WorldFromBody, leaf.TransformFromChild);
+                    if (leaf.Collider->Type == ColliderType.Triangle || leaf.Collider->Type == ColliderType.Quad)
+                    {
+                        PolygonCollider* polygon = (PolygonCollider*)leaf.Collider;
+                        float3 v0 = math.transform(worldFromLeaf, polygon->Vertices[0]);
+                        float3 v1 = math.transform(worldFromLeaf, polygon->Vertices[1]);
+                        float3 v2 = math.transform(worldFromLeaf, polygon->Vertices[2]);
+                        float3 v3 = float3.zero;
+                        if (polygon->IsQuad)
+                        {
+                            v3 = math.transform(worldFromLeaf, polygon->Vertices[3]);
+                        }
+
+                        PhysicsDebugDisplaySystem.Line(v0, v1, Unity.DebugDisplay.ColorIndex.Yellow);
+                        PhysicsDebugDisplaySystem.Line(v1, v2, Unity.DebugDisplay.ColorIndex.Yellow);
+
+                        if (polygon->IsTriangle)
+                        {
+                            PhysicsDebugDisplaySystem.Line(v2, v0, Unity.DebugDisplay.ColorIndex.Yellow);
+                        }
+                        else
+                        {
+                            PhysicsDebugDisplaySystem.Line(v2, v3, Unity.DebugDisplay.ColorIndex.Yellow);
+                            PhysicsDebugDisplaySystem.Line(v3, v0, Unity.DebugDisplay.ColorIndex.Yellow);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Jobs
+
         [BurstCompile]
         public struct RaycastJob : IJob
         {
@@ -107,56 +616,24 @@ namespace Unity.Physics.Extensions
             }
         }
 
-        #region ColliderConstructionParams
-
-        private static readonly float3[] k_TetraherdonVertices =
-        {
-            new float3(-1, 0, 0),
-            new float3(0, 1.0f, 0),
-            new float3(1.0f, -1.0f, -1.0f),
-            new float3(-1.0f, 0, 0),
-            new float3(0, -1.0f, 1.0f),
-            new float3(0, 1.0f, 0),
-            new float3(-1.0f, 0, 0),
-            new float3(1.0f, -1.0f, -1.0f),
-            new float3(0, -1.0f, 1.0f),
-            new float3(0, 1.0f, 0),
-            new float3(0, -1.0f, 1.0f),
-            new float3(1.0f, -1.0f, -1.0f)
-        };
-
-        private static readonly int3[] k_TetrahedronMeshTriangles =
-        {
-            new int3(0, 1, 2),
-            new int3(3, 4, 5),
-            new int3(6, 7, 8),
-            new int3(9, 10, 11)
-        };
-
-        private static readonly float3[] k_TriangleVertices =
-        {
-            new float3(0, 1.0f, 0),
-            new float3(-1.0f, 0, 0),
-            new float3(1.0f, 0, 0)
-        };
-
-        private static readonly float3[] k_QuadVertices =
-        {
-            new float3(0.5f, 0.5f, 0),
-            new float3(0.5f, -0.5f, 0),
-            new float3(-0.5f, -0.5f, 0),
-            new float3(-0.5f, 0.5f, 0)
-        };
-
         #endregion
 
-        private BlobAssetReference<Collider> CreateCollider(ColliderType type)
+        #region Creation
+        private void CreateCollider(QueryData queryData)
         {
-            int numMeshes = type == ColliderType.Compound ? 2 : 1;
-            ColliderMeshes = new Mesh[numMeshes];
+            int numMeshes = 1;
+
+            if (queryData.ColliderType == ColliderType.Compound)
+            {
+                numMeshes = 2;
+                queryData.ChildrenColliders = new BlobAssetReference<Collider>[2];
+            }
+
+            queryData.ColliderMeshes = new Mesh[numMeshes];
+
             BlobAssetReference<Collider> collider = default;
 
-            switch (type)
+            switch (queryData.ColliderType)
             {
                 case ColliderType.Sphere:
                     collider = SphereCollider.Create(new SphereGeometry
@@ -204,7 +681,7 @@ namespace Unity.Physics.Extensions
                         Center = float3.zero,
                         Radius = 0.5f
                     });
-                    ChildrenColliders.Add(child1);
+                    queryData.ChildrenColliders[0] = child1;
 
                     var child2 = BoxCollider.Create(new BoxGeometry
                     {
@@ -213,7 +690,7 @@ namespace Unity.Physics.Extensions
                         Size = new float3(1.0f),
                         BevelRadius = 0.0f
                     });
-                    ChildrenColliders.Add(child2);
+                    queryData.ChildrenColliders[1] = child2;
 
                     NativeArray<ColliderBlobInstance> childrenBlobs = new NativeArray<ColliderBlobInstance>(2, Allocator.TempJob);
                     childrenBlobs[0] = new ColliderBlobInstance
@@ -236,8 +713,8 @@ namespace Unity.Physics.Extensions
                         }
                     };
 
-                    ColliderMeshes[0] = SceneCreationUtilities.CreateMeshFromCollider(child1);
-                    ColliderMeshes[1] = SceneCreationUtilities.CreateMeshFromCollider(child2);
+                    queryData.ColliderMeshes[0] = SceneCreationUtilities.CreateMeshFromCollider(child1);
+                    queryData.ColliderMeshes[1] = SceneCreationUtilities.CreateMeshFromCollider(child2);
 
                     collider = CompoundCollider.Create(childrenBlobs);
                     childrenBlobs.Dispose();
@@ -269,156 +746,61 @@ namespace Unity.Physics.Extensions
                     throw new System.NotImplementedException();
             }
 
-            if (ColliderType != ColliderType.Compound)
+            if (queryData.ColliderType != ColliderType.Compound)
             {
-                ColliderMeshes[0] = SceneCreationUtilities.CreateMeshFromCollider(collider);
+                queryData.ColliderMeshes[0] = SceneCreationUtilities.CreateMeshFromCollider(collider);
             }
 
-            return collider;
+            queryData.Collider = collider;
         }
 
-        void Start()
+        #region ColliderConstructionParams
+
+        private static readonly float3[] k_TetraherdonVertices =
         {
-            Simulating = true;
-            ChildrenColliders = new NativeList<BlobAssetReference<Collider>>(Allocator.Persistent);
+            new float3(-1, 0, 0),
+            new float3(0, 1.0f, 0),
+            new float3(1.0f, -1.0f, -1.0f),
+            new float3(-1.0f, 0, 0),
+            new float3(0, -1.0f, 1.0f),
+            new float3(0, 1.0f, 0),
+            new float3(-1.0f, 0, 0),
+            new float3(1.0f, -1.0f, -1.0f),
+            new float3(0, -1.0f, 1.0f),
+            new float3(0, 1.0f, 0),
+            new float3(0, -1.0f, 1.0f),
+            new float3(1.0f, -1.0f, -1.0f)
+        };
 
-            if (ColliderQuery)
-            {
-                Collider = CreateCollider(ColliderType);
-            }
-
-            RaycastHits = new NativeList<RaycastHit>(Allocator.Persistent);
-            ColliderCastHits = new NativeList<ColliderCastHit>(Allocator.Persistent);
-            DistanceHits = new NativeList<DistanceHit>(Allocator.Persistent);
-        }
-
-        void OnDestroy()
+        private static readonly int3[] k_TetrahedronMeshTriangles =
         {
-            if (RaycastHits.IsCreated)
-            {
-                RaycastHits.Dispose();
-            }
-            if (ColliderCastHits.IsCreated)
-            {
-                ColliderCastHits.Dispose();
-            }
-            if (DistanceHits.IsCreated)
-            {
-                DistanceHits.Dispose();
-            }
-            if (Collider.IsCreated)
-            {
-                Collider.Dispose();
-            }
-            if (ChildrenColliders.IsCreated)
-            {
-                for (int i = 0; i < ChildrenColliders.Length; i++)
-                {
-                    ChildrenColliders[i].Dispose();
-                }
-                ChildrenColliders.Dispose();
-            }
-        }
+            new int3(0, 1, 2),
+            new int3(3, 4, 5),
+            new int3(6, 7, 8),
+            new int3(9, 10, 11)
+        };
 
-        void RunQueries()
+        private static readonly float3[] k_TriangleVertices =
         {
-            EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
-                .WithAll<PhysicsWorldSingleton>();
-            EntityQuery singletonQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(builder);
-            PhysicsWorld world = singletonQuery.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-            float3 origin = transform.position;
-            float3 direction = (transform.rotation * Direction) * Distance;
+            new float3(0, 1.0f, 0),
+            new float3(-1.0f, 0, 0),
+            new float3(1.0f, 0, 0)
+        };
 
-            RaycastHits.Clear();
-            ColliderCastHits.Clear();
-            DistanceHits.Clear();
-            singletonQuery.Dispose();
+        private static readonly float3[] k_QuadVertices =
+        {
+            new float3(0.5f, 0.5f, 0),
+            new float3(0.5f, -0.5f, 0),
+            new float3(-0.5f, -0.5f, 0),
+            new float3(-0.5f, 0.5f, 0)
+        };
 
-            if (!ColliderQuery)
-            {
-                if (math.any(new float3(Direction) != float3.zero))
-                {
-                    RaycastInput = new RaycastInput
-                    {
-                        Start = origin,
-                        End = origin + direction,
-                        Filter = CollisionFilter.Default
-                    };
+        #endregion
+        #endregion
+    }
 
-                    new RaycastJob
-                    {
-                        RaycastInput = RaycastInput,
-                        RaycastHits = RaycastHits,
-                        CollectAllHits = CollectAllHits,
-                        World = world,
-                    }.Schedule().Complete();
-                }
-                else
-                {
-                    PointDistanceInput = new PointDistanceInput
-                    {
-                        Position = origin,
-                        MaxDistance = Distance,
-                        Filter = CollisionFilter.Default
-                    };
-
-                    new PointDistanceJob
-                    {
-                        PointDistanceInput = PointDistanceInput,
-                        DistanceHits = DistanceHits,
-                        CollectAllHits = CollectAllHits,
-                        World = world,
-                    }.Schedule().Complete();
-                }
-            }
-            else
-            {
-                if (math.any(new float3(Direction) != float3.zero))
-                {
-                    unsafe
-                    {
-                        ColliderCastInput = new ColliderCastInput
-                        {
-                            Collider = Collider.AsPtr(),
-                            Orientation = transform.rotation,
-                            Start = origin,
-                            End = origin + direction,
-                            QueryColliderScale = InputColliderScale
-                        };
-
-                        new ColliderCastJob
-                        {
-                            Input = ColliderCastInput,
-                            ColliderCastHits = ColliderCastHits,
-                            CollectAllHits = CollectAllHits,
-                            World = world
-                        }.Schedule().Complete();
-                    }
-                }
-                else
-                {
-                    unsafe
-                    {
-                        ColliderDistanceInput = new ColliderDistanceInput
-                        {
-                            Collider = Collider.AsPtr(),
-                            Transform = new RigidTransform(transform.rotation, origin),
-                            MaxDistance = Distance,
-                            Scale = InputColliderScale
-                        };
-
-                        new ColliderDistanceJob
-                        {
-                            Input = ColliderDistanceInput,
-                            DistanceHits = DistanceHits,
-                            CollectAllHits = CollectAllHits,
-                            World = world,
-                        }.Schedule().Complete();
-                    }
-                }
-            }
-        }
-
+    public unsafe class QueryTester : MonoBehaviour
+    {
         public float Distance = 10.0f;
         public Vector3 Direction = new Vector3(1, 0, 0);
         public bool CollectAllHits = false;
@@ -429,268 +811,12 @@ namespace Unity.Physics.Extensions
         [Tooltip("Applied only if ColliderQuery == true")]
         public float InputColliderScale = 1.0f;
 
-        protected bool Simulating;
-        protected RaycastInput RaycastInput;
-        protected NativeList<RaycastHit> RaycastHits;
-        protected ColliderCastInput ColliderCastInput;
-        protected NativeList<ColliderCastHit> ColliderCastHits;
-        protected PointDistanceInput PointDistanceInput;
-        protected ColliderDistanceInput ColliderDistanceInput;
-        protected NativeList<DistanceHit> DistanceHits;
-        protected BlobAssetReference<Collider> Collider;
-        protected NativeList<BlobAssetReference<Collider>> ChildrenColliders;
-        protected UnityEngine.Mesh[] ColliderMeshes = null;
-
         void OnDrawGizmos()
         {
-            if (Simulating)
-            {
-                RunQueries();
+            Gizmos.color = Color.red;
 
-                EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
-                    .WithAll<PhysicsWorldSingleton>();
-                EntityQuery singletonQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(builder);
-                PhysicsWorld world = singletonQuery.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-
-                // Draw the query
-                Gizmos.color = new Color(0.94f, 0.35f, 0.15f, 0.75f);
-                bool colliderCast = math.any(new float3(Direction) != float3.zero);
-                if (ColliderQuery)
-                {
-                    ScaledMTransform worldFromCollider = colliderCast ?
-                        new ScaledMTransform(new RigidTransform(ColliderCastInput.Orientation, ColliderCastInput.Start), ColliderCastInput.QueryColliderScale) :
-                        new ScaledMTransform(ColliderDistanceInput.Transform, ColliderDistanceInput.Scale);
-
-                    if (colliderCast)
-                    {
-                        Gizmos.DrawRay(worldFromCollider.Translation, ColliderCastInput.End - ColliderCastInput.Start);
-                    }
-
-                    if (ColliderType != ColliderType.Compound)
-                    {
-                        Gizmos.DrawWireMesh(ColliderMeshes[0], worldFromCollider.Translation, new quaternion(worldFromCollider.Rotation), new float3(InputColliderScale));
-                    }
-                    else
-                    {
-                        unsafe
-                        {
-                            CompoundCollider* compoundCollider = colliderCast ? (CompoundCollider*)ColliderCastInput.Collider : (CompoundCollider*)ColliderDistanceInput.Collider;
-                            for (int i = 0; i < compoundCollider->NumChildren; i++)
-                            {
-                                ref Child child = ref compoundCollider->Children[i];
-                                ScaledMTransform worldFromChild = ScaledMTransform.Mul(worldFromCollider, new MTransform(child.CompoundFromChild));
-
-                                Gizmos.DrawWireMesh(ColliderMeshes[i], worldFromChild.Translation, new quaternion(worldFromChild.Rotation), new float3(InputColliderScale));
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (math.any(new float3(Direction) != float3.zero))
-                    {
-                        Gizmos.DrawRay(RaycastInput.Start, RaycastInput.End - RaycastInput.Start);
-                    }
-                    else
-                    {
-                        Gizmos.DrawSphere(PointDistanceInput.Position, 0.05f);
-                    }
-                }
-
-                // Draw ray hits
-                if (RaycastHits.IsCreated)
-                {
-                    foreach (RaycastHit hit in RaycastHits.ToArrayNBC())
-                    {
-                        Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
-                        Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
-
-                        Gizmos.color = Color.magenta;
-                        Gizmos.DrawRay(RaycastInput.Start, hit.Position - RaycastInput.Start);
-                        Gizmos.DrawSphere(hit.Position, 0.02f);
-
-                        if (DrawSurfaceNormal)
-                        {
-                            Gizmos.color = Color.green;
-                            Gizmos.DrawRay(hit.Position, hit.SurfaceNormal);
-                        }
-
-                        if (HighlightLeafCollider && !hit.ColliderKey.Equals(ColliderKey.Empty))
-                        {
-                            Gizmos.color = Color.yellow;
-                            DrawLeafCollider(world.Bodies[hit.RigidBodyIndex], hit.ColliderKey);
-#if UNITY_EDITOR
-                            GUIStyle style = new GUIStyle();
-                            style.normal.textColor = Color.yellow;
-                            Handles.Label(hit.Position, hit.ColliderKey.Value.ToString("X8"), style);
-#endif
-                        }
-                    }
-                }
-
-                // Draw collider hits
-                if (ColliderCastHits.IsCreated)
-                {
-                    foreach (ColliderCastHit hit in ColliderCastHits.ToArrayNBC())
-                    {
-                        Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
-                        Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
-
-                        Gizmos.color = Color.magenta;
-                        Gizmos.DrawSphere(hit.Position, 0.02f);
-                        Gizmos.DrawSphere(hit.Position - (ColliderCastInput.End - ColliderCastInput.Start) * hit.Fraction, 0.02f);
-
-                        if (Collider.Value.Type == ColliderType.Compound)
-                        {
-                            var colliderkey = hit.QueryColliderKey;
-                            Collider.Value.GetChild(ref colliderkey, out ChildCollider child);
-
-                            unsafe
-                            {
-                                CompoundCollider* compound = Collider.AsPtr<CompoundCollider>();
-                                for (int i = 0; i < compound->NumChildren; i++)
-                                {
-                                    if (child.Collider->Type == compound->Children[i].Collider->Type)
-                                    {
-                                        MTransform compoundFromChild = new MTransform(child.TransformFromChild);
-
-                                        ScaledMTransform worldFromCompoundCastStart = new ScaledMTransform(new RigidTransform(ColliderCastInput.Orientation, ColliderCastInput.Start), InputColliderScale);
-                                        ScaledMTransform worldFromCompoundCastEnd = new ScaledMTransform(new RigidTransform(ColliderCastInput.Orientation, ColliderCastInput.End), InputColliderScale);
-
-                                        var worldFromChildCastStart = ScaledMTransform.Mul(worldFromCompoundCastStart, compoundFromChild);
-                                        var worldFromChildCastEnd = ScaledMTransform.Mul(worldFromCompoundCastEnd, compoundFromChild);
-
-                                        Gizmos.DrawWireMesh(ColliderMeshes[i], math.lerp(worldFromChildCastStart.Translation, worldFromChildCastEnd.Translation, hit.Fraction), new quaternion(worldFromChildCastStart.Rotation), new float3(InputColliderScale));
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Gizmos.DrawWireMesh(ColliderMeshes[0], math.lerp(ColliderCastInput.Start, ColliderCastInput.End, hit.Fraction), ColliderCastInput.Orientation, new float3(InputColliderScale));
-                        }
-
-                        if (DrawSurfaceNormal)
-                        {
-                            Gizmos.color = Color.green;
-                            Gizmos.DrawRay(hit.Position, hit.SurfaceNormal);
-                        }
-
-                        if (HighlightLeafCollider && !hit.ColliderKey.Equals(ColliderKey.Empty))
-                        {
-                            Gizmos.color = Color.yellow;
-                            DrawLeafCollider(world.Bodies[hit.RigidBodyIndex], hit.ColliderKey);
-#if UNITY_EDITOR
-                            GUIStyle style = new GUIStyle();
-                            style.normal.textColor = Color.yellow;
-                            Handles.Label(hit.Position, hit.ColliderKey.Value.ToString("X8"), style);
-#endif
-                        }
-
-#if UNITY_EDITOR
-                        if (HighlightLeafCollider && Collider.Value.CollisionType != CollisionType.Convex && !hit.QueryColliderKey.Equals(ColliderKey.Empty))
-                        {
-                            float3 flippedPosition = hit.Position - hit.Fraction * (ColliderCastInput.End - ColliderCastInput.Start);
-
-                            GUIStyle style = new GUIStyle();
-                            style.normal.textColor = Color.yellow;
-                            Handles.Label(flippedPosition, hit.QueryColliderKey.Value.ToString("X8"), style);
-                        }
-#endif
-                    }
-                }
-
-                // Draw distance hits
-                if (DistanceHits.IsCreated)
-                {
-                    foreach (DistanceHit hit in DistanceHits.ToArrayNBC())
-                    {
-                        Assert.IsTrue(hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < world.NumBodies);
-                        Assert.IsTrue(math.abs(math.lengthsq(hit.SurfaceNormal) - 1.0f) < 0.01f);
-
-
-                        float maxDistance = ColliderQuery ? ColliderDistanceInput.MaxDistance : PointDistanceInput.MaxDistance;
-                        Assert.IsTrue(hit.Fraction <= maxDistance);
-                        float3 queryPoint = hit.Position + hit.SurfaceNormal * hit.Distance;
-
-                        Gizmos.color = Color.magenta;
-                        Gizmos.DrawSphere(hit.Position, 0.02f);
-                        Gizmos.DrawSphere(queryPoint, 0.02f);
-                        Gizmos.DrawLine(hit.Position, queryPoint);
-
-                        if (DrawSurfaceNormal)
-                        {
-                            Gizmos.color = Color.green;
-                            Gizmos.DrawRay(hit.Position, hit.SurfaceNormal);
-                        }
-
-                        if (HighlightLeafCollider && !hit.ColliderKey.Equals(ColliderKey.Empty))
-                        {
-                            Gizmos.color = Color.yellow;
-                            DrawLeafCollider(world.Bodies[hit.RigidBodyIndex], hit.ColliderKey);
-#if UNITY_EDITOR
-                            GUIStyle style = new GUIStyle();
-                            style.normal.textColor = Color.yellow;
-                            Handles.Label(hit.Position, hit.ColliderKey.Value.ToString("X8"), style);
-#endif
-                        }
-
-#if UNITY_EDITOR
-                        if (ColliderQuery && HighlightLeafCollider && Collider.Value.CollisionType != CollisionType.Convex && !hit.QueryColliderKey.Equals(ColliderKey.Empty))
-                        {
-                            float3 flippedPosition = hit.Position + hit.SurfaceNormal * hit.Fraction;
-
-                            GUIStyle style = new GUIStyle();
-                            style.normal.textColor = Color.yellow;
-                            Handles.Label(flippedPosition, hit.QueryColliderKey.Value.ToString("X8"), style);
-                        }
-#endif
-                    }
-                }
-            }
-            else
-            {
-                Gizmos.color = Color.red;
-                Transform t = transform;
-
-                Vector3 dir = (t.rotation * Direction) * Distance;
-
-                Gizmos.DrawRay(t.position, dir);
-            }
-        }
-
-        private void DrawLeafCollider(RigidBody body, ColliderKey key)
-        {
-            if (body.Collider.Value.GetLeaf(key, out ChildCollider leaf) && (leaf.Collider == null))
-            {
-                RigidTransform worldFromLeaf = math.mul(body.WorldFromBody, leaf.TransformFromChild);
-                if (leaf.Collider->Type == ColliderType.Triangle || leaf.Collider->Type == ColliderType.Quad)
-                {
-                    PolygonCollider* polygon = (PolygonCollider*)leaf.Collider;
-                    float3 v0 = math.transform(worldFromLeaf, polygon->Vertices[0]);
-                    float3 v1 = math.transform(worldFromLeaf, polygon->Vertices[1]);
-                    float3 v2 = math.transform(worldFromLeaf, polygon->Vertices[2]);
-                    float3 v3 = float3.zero;
-                    if (polygon->IsQuad)
-                    {
-                        v3 = math.transform(worldFromLeaf, polygon->Vertices[3]);
-                    }
-
-                    Gizmos.color = Color.yellow;
-                    Gizmos.DrawLine(v0, v1);
-                    Gizmos.DrawLine(v1, v2);
-                    if (polygon->IsTriangle)
-                    {
-                        Gizmos.DrawLine(v2, v0);
-                    }
-                    else
-                    {
-                        Gizmos.DrawLine(v2, v3);
-                        Gizmos.DrawLine(v3, v0);
-                    }
-                }
-            }
+            Vector3 dir = (transform.rotation * Direction) * Distance;
+            Gizmos.DrawRay(transform.position, dir);
         }
     }
 }

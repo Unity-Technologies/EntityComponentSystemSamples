@@ -32,25 +32,6 @@ namespace Unity.Physics.Authoring
                 PositionInConnectedEntity = math.transform(bFromA, PositionLocal);
             }
         }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            UpdateAuto();
-            PhysicsJoint joint = PhysicsJoint.CreateBallAndSocket(PositionLocal, PositionInConnectedEntity);
-            var constraints = joint.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            joint.SetConstraints(constraints);
-
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                joint
-            );
-        }
     }
 
     public abstract class JointBaker<T> : Baker<T> where T : BaseJoint
@@ -58,8 +39,8 @@ namespace Unity.Physics.Authoring
         protected PhysicsConstrainedBodyPair GetConstrainedBodyPair(BaseJoint authoring)
         {
             return new PhysicsConstrainedBodyPair(
-                GetEntity(),
-                authoring.ConnectedBody == null ? Entity.Null : GetEntity(authoring.ConnectedBody),
+                GetEntity(TransformUsageFlags.Dynamic),
+                authoring.ConnectedBody == null ? Entity.Null : GetEntity(authoring.ConnectedBody, TransformUsageFlags.Dynamic),
                 authoring.EnableCollision
             );
         }
@@ -126,10 +107,10 @@ namespace Unity.Physics.Authoring
             // create all new joints
             var multipleJoints = joints.Length > 1;
 
-            var entity = GetEntity();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
             for (var i = 0; i < joints.Length; ++i)
             {
-                var jointEntity = CreateAdditionalEntity();
+                var jointEntity = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
                 AddSharedComponent(jointEntity, new PhysicsWorldIndex(worldIndex));
 
                 AddComponent(jointEntity, constrainedBodyPair);
@@ -170,6 +151,8 @@ namespace Unity.Physics.Authoring
         {
             authoring.UpdateAuto();
             var physicsJoint = PhysicsJoint.CreateBallAndSocket(authoring.PositionLocal, authoring.PositionInConnectedEntity);
+            physicsJoint.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
+
             var constraintBodyPair = GetConstrainedBodyPair(authoring);
 
             uint worldIndex = GetWorldIndexFromBaseJoint(authoring);

@@ -36,9 +36,9 @@ class ChangeBoxColliderSizeBaker : Baker<ChangeBoxColliderSizeAuthoring>
             Target = math.lerp(authoring.Min, authoring.Max, 0.5f),
         });
 
-        AddComponent(entity, new NonUniformScale
+        AddComponent(entity, new PostTransformMatrix
         {
-            Value = new float3(1)
+            Value = float4x4.identity,
         });
     }
 }
@@ -46,13 +46,12 @@ class ChangeBoxColliderSizeBaker : Baker<ChangeBoxColliderSizeAuthoring>
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct ChangeBoxColliderSizeSystem : ISystem
 {
     [BurstCompile]
     public partial struct ChangeBoxColliderSizeJob : IJobEntity
     {
-        public void Execute(ref PhysicsCollider collider, ref ChangeBoxColliderSize size, ref NonUniformScale scale)
+        public void Execute(ref PhysicsCollider collider, ref ChangeBoxColliderSize size, ref PostTransformMatrix postTransformMatrix)
         {
             // make sure we are dealing with boxes
             if (collider.Value.Value.Type != ColliderType.Box) return;
@@ -60,7 +59,7 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
             // tweak the physical representation of the box
 
             // NOTE: this approach affects all instances using the same BlobAsset
-            // so you cannot simply use this approach for instantiated prefabss
+            // so you cannot simply use this approach for instantiated prefabs
             // if you want to modify prefab instances independently, you need to create
             // unique BlobAssets at run-time and dispose them when you are done
 
@@ -83,12 +82,12 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
             }
 
             // now tweak the graphical representation of the box
-            float3 oldScale = scale.Value;
-            float3 newScale = oldScale;
+            float4x4 oldScale = postTransformMatrix.Value;
 
-            oldScale = math.select(oldScale, new float3(1.0f), oldScale == float3.zero);
-            newScale *= newSize / oldSize;
-            scale.Value = newScale;
+            float3 newScale = newSize / oldSize;
+            postTransformMatrix.Value.c0 *= newScale.x;
+            postTransformMatrix.Value.c1 *= newScale.y;
+            postTransformMatrix.Value.c2 *= newScale.z;
         }
     }
 
@@ -96,15 +95,5 @@ public partial struct ChangeBoxColliderSizeSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         state.Dependency = new ChangeBoxColliderSizeJob().Schedule(state.Dependency);
-    }
-
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 }

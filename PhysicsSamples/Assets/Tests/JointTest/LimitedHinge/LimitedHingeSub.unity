@@ -137,7 +137,6 @@ GameObject:
   - component: {fileID: 306455337}
   - component: {fileID: 306455336}
   - component: {fileID: 306455338}
-  - component: {fileID: 306455339}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -453,19 +452,6 @@ MonoBehaviour:
     z: -0.006757481
   MinAngle: -180
   MaxAngle: 0
---- !u!114 &306455339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 306455332}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!1 &862711854
 GameObject:
   m_ObjectHideFlags: 0
@@ -479,7 +465,6 @@ GameObject:
   - component: {fileID: 862711858}
   - component: {fileID: 862711857}
   - component: {fileID: 862711856}
-  - component: {fileID: 862711855}
   m_Layer: 0
   m_Name: Physics Settings
   m_TagString: Untagged
@@ -487,19 +472,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &862711855
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 862711854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 1
 --- !u!114 &862711856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -517,10 +489,15 @@ MonoBehaviour:
     x: -0
     y: 0
     z: -0
+  m_Stiffness: 100000
+  m_Damping: 500
+  m_Slip: 0.0001
+  m_AngularStiffnessDampingMultiplier: 0.001
   m_SolverIterationCount: 4
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
   m_SynchronizeCollisionWorld: 0
+  m_UseDirectSolver: 0
 --- !u!114 &862711857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -533,7 +510,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1f2299aae95eb4e80de7e4124130c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Highlight: {fileID: 2100000, guid: e889ae5f4d0a97f4fa03330ed4ab2d05, type: 2}
+  HoverPrefab: {fileID: 1191054677816456, guid: 5847e3636a433e3428bdc22fad0f06fe,
+    type: 3}
   IgnoreTriggers: 1
   IgnoreStatic: 1
 --- !u!114 &862711858
@@ -586,3 +564,57 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1395386149
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1395386151}
+  - component: {fileID: 1395386152}
+  m_Layer: 0
+  m_Name: Simulation Validation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1395386151
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1395386149}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1395386152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1395386149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac6bdfff8f25443fa08ae31c4ce351fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnableValidation: 0
+  ValidationTimeRange:
+    x: 0
+    y: 2
+  ValidateJointBehavior: 1
+  ValidateRigidBodiesAtRest: 0
+  LinearVelocityErrorTolerance: 0.005
+  AngularVelocityErrorTolerance: 0.01
+  PositionErrorTolerance: 0.01
+  OrientationErrorTolerance: 0.01

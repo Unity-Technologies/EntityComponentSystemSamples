@@ -22,12 +22,13 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyTriggerEvents authoring)
             {
-                AddComponent(new VerifyTriggerEventsData() { ExpectedValue = authoring.ExpectedValue });
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new VerifyTriggerEventsData() { ExpectedValue = authoring.ExpectedValue });
 
 #if HAVOK_PHYSICS_EXISTS
                 Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
                 config.EnableSleeping = 0;
-                AddComponent(config);
+                AddComponent(entity, config);
 #endif
             }
         }
@@ -36,22 +37,22 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
-    public partial class VerifyTriggerEventsSystem : SystemBase
+    public partial struct VerifyTriggerEventsSystem : ISystem
     {
         EntityQuery m_VerificationGroup;
         public NativeReference<int> NumEvents;
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            m_VerificationGroup = state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyTriggerEventsData) }
             });
             NumEvents = new NativeReference<int>(Allocator.Persistent);
-            RequireForUpdate(m_VerificationGroup);
+            state.RequireForUpdate(m_VerificationGroup);
         }
 
-        protected override void OnDestroy()
+        public void OnDestroy(ref SystemState state)
         {
             NumEvents.Dispose();
         }
@@ -93,20 +94,20 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
-            Dependency = new VerifyTriggerEventsJob
+            state.Dependency = new VerifyTriggerEventsJob
             {
                 NumEvents = NumEvents,
-                VerificationData = GetComponentLookup<VerifyTriggerEventsData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
+                VerificationData = SystemAPI.GetComponentLookup<VerifyTriggerEventsData>(true)
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
 
-            Dependency = new VerifyTriggerEventsPostJob
+            state.Dependency = new VerifyTriggerEventsPostJob
             {
                 NumEvents = NumEvents,
-                VerificationData = GetComponentLookup<VerifyTriggerEventsData>(true),
+                VerificationData = SystemAPI.GetComponentLookup<VerifyTriggerEventsData>(true),
                 Entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob)
-            }.Schedule(Dependency);
+            }.Schedule(state.Dependency);
         }
     }
 }

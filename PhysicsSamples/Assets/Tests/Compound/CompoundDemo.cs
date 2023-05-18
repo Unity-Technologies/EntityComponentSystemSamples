@@ -11,7 +11,8 @@ public class CompoundDemo : SceneCreationAuthoring<CompoundDemoScene>
     {
         public override void Bake(CompoundDemo authoring)
         {
-            AddComponentObject(new CompoundDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new CompoundDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial
@@ -20,7 +21,7 @@ public class CompoundDemo : SceneCreationAuthoring<CompoundDemoScene>
     }
 }
 
-public class CompoundDemoSystem : SceneCreationSystem<CompoundDemoScene>
+public partial class CompoundDemoSystem : SceneCreationSystem<CompoundDemoScene>
 {
     public override void CreateScene(CompoundDemoScene sceneSettings)
     {

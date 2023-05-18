@@ -1,12 +1,10 @@
 using System;
-using Unity.Assertions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics.GraphicsIntegration;
-using Unity.Physics.Systems;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
@@ -14,22 +12,20 @@ using static Unity.Physics.Extensions.PhysicsSamplesExtensions;
 
 namespace Unity.Physics.Extensions
 {
-    public struct MouseHover : ISharedComponentData, IEquatable<MouseHover>
+    public struct MouseHover : IComponentData, IEquatable<MouseHover>
     {
         public bool IgnoreTriggers;
         public bool IgnoreStatic;
-        [System.NonSerialized]
         public Entity PreviousEntity;
-        [System.NonSerialized]
         public Entity CurrentEntity;
-        public UnityEngine.Material HoverMaterial;
-        public UnityEngine.Material OriginalMaterial;
+        public Entity HoverEntity;
+        public MaterialMeshInfo OriginalMeshInfo;
 
         public bool Equals(MouseHover other) =>
             Equals(PreviousEntity, other.PreviousEntity)
             && Equals(CurrentEntity, other.CurrentEntity)
-            && Equals(HoverMaterial, other.HoverMaterial)
-            && Equals(OriginalMaterial, other.OriginalMaterial);
+            && Equals(OriginalMeshInfo, other.OriginalMeshInfo)
+            && Equals(HoverEntity, other.HoverEntity);
 
         public override bool Equals(object obj) => obj is MouseHover other && Equals(other);
 
@@ -41,8 +37,8 @@ namespace Unity.Physics.Extensions
                     PreviousEntity.GetHashCode(),
                     CurrentEntity.GetHashCode()),
                 new int4(
-                    HoverMaterial != null ? HoverMaterial.GetHashCode() : 0,
-                    OriginalMaterial != null ? OriginalMaterial.GetHashCode() : 0,
+                    HoverEntity != Entity.Null ? HoverEntity.GetHashCode() : 0,
+                    OriginalMeshInfo.GetHashCode(),
                     0, 0))
             ));
     }
@@ -50,7 +46,7 @@ namespace Unity.Physics.Extensions
     [DisallowMultipleComponent]
     public class MouseHoverAuthoring : MonoBehaviour
     {
-        public UnityEngine.Material Highlight;
+        public GameObject HoverPrefab;
         public bool IgnoreTriggers = true;
         public bool IgnoreStatic = true;
 
@@ -61,18 +57,21 @@ namespace Unity.Physics.Extensions
     {
         public override void Bake(MouseHoverAuthoring authoring)
         {
-            AddSharedComponentManaged(new MouseHover()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new MouseHover()
             {
                 PreviousEntity = Entity.Null,
                 CurrentEntity = Entity.Null,
-                HoverMaterial = authoring.Highlight,
                 IgnoreTriggers = authoring.IgnoreTriggers,
-                IgnoreStatic = authoring.IgnoreStatic
+                IgnoreStatic = authoring.IgnoreStatic,
+                HoverEntity = GetEntity(authoring.HoverPrefab, TransformUsageFlags.Dynamic),
             });
         }
     }
 
     // Applies any mouse spring as a change in velocity on the entity's motion component
+    // Limitations: works only if the physics objects in the scene come from the same subscene as MouseHoverAuthoring
+    // Will be fixable if there is a Unity.Rendering API that lets you get the UnityEngine.Mesh that an entity is using for renderin.
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial class MouseHoverSystem : SystemBase
     {
@@ -200,9 +199,9 @@ namespace Unity.Physics.Extensions
                             // If this CompoundCollider was instanced from a prefab then the entities
                             // in the compound children would actually reference the original prefab hierarchy.
                             var rootEntityFromLeaf = leafEntity;
-                            while (HasComponent<Parent>(rootEntityFromLeaf))
+                            while (SystemAPI.HasComponent<Parent>(rootEntityFromLeaf))
                             {
-                                rootEntityFromLeaf = GetComponent<Parent>(rootEntityFromLeaf).Value;
+                                rootEntityFromLeaf = SystemAPI.GetComponent<Parent>(rootEntityFromLeaf).Value;
                             }
 
                             // If the root Entity found from the leaf does not match the body Entity
@@ -249,9 +248,9 @@ namespace Unity.Physics.Extensions
             }
 
             // Finally check to see if we have a graphics redirection on the shape Entity.
-            if (HasComponent<PhysicsRenderEntity>(renderEntity))
+            if (SystemAPI.HasComponent<PhysicsRenderEntity>(renderEntity))
             {
-                renderEntity = GetComponent<PhysicsRenderEntity>(renderEntity).Entity;
+                renderEntity = SystemAPI.GetComponent<PhysicsRenderEntity>(renderEntity).Entity;
             }
 
             return renderEntity;
@@ -259,7 +258,7 @@ namespace Unity.Physics.Extensions
 
         protected override void OnUpdate()
         {
-            var collisionWorld = GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
+            var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             Vector2 mousePosition = Input.mousePosition;
             UnityEngine.Ray unityRay = Camera.main.ScreenPointToRay(mousePosition);
             var rayInput = new RaycastInput
@@ -269,8 +268,8 @@ namespace Unity.Physics.Extensions
                 Filter = CollisionFilter.Default,
             };
 
-            var mouseHoverEntity = GetSingletonEntity<MouseHover>();
-            var mouseHover = EntityManager.GetSharedComponentManaged<MouseHover>(mouseHoverEntity);
+            var mouseHoverEntity = SystemAPI.GetSingletonEntity<MouseHover>();
+            var mouseHover = EntityManager.GetComponentData<MouseHover>(mouseHoverEntity);
 
             RaycastHit hit;
             using (var raycastHitRef = new NativeReference<RaycastHit>(Allocator.TempJob))
@@ -298,26 +297,24 @@ namespace Unity.Physics.Extensions
             bool hasPreviousEntity = !mouseHover.PreviousEntity.Equals(Entity.Null);
             bool hasCurrentEntity = !mouseHover.CurrentEntity.Equals(Entity.Null);
 
-            // If there was a previous entity and it had a RenderMesh then reset its Material
-            if (hasPreviousEntity && EntityManager.HasComponent<RenderMesh>(mouseHover.PreviousEntity))
+            if (hasPreviousEntity && EntityManager.HasComponent<MaterialMeshInfo>(mouseHover.PreviousEntity))
             {
-                var renderMesh = EntityManager.GetSharedComponentManaged<RenderMesh>(mouseHover.PreviousEntity);
-                renderMesh.material = mouseHover.OriginalMaterial;
-                EntityManager.SetSharedComponentManaged(mouseHover.PreviousEntity, renderMesh);
+                EntityManager.SetComponentData<MaterialMeshInfo>(mouseHover.PreviousEntity, mouseHover.OriginalMeshInfo);
             }
 
-            // If there was a new current entity and it has a RenderMesh then set its Material
-            if (hasCurrentEntity && EntityManager.HasComponent<RenderMesh>(mouseHover.CurrentEntity))
+            if (hasCurrentEntity && EntityManager.HasComponent<MaterialMeshInfo>(mouseHover.CurrentEntity) && EntityManager.HasComponent<RenderMeshArray>(mouseHover.CurrentEntity))
             {
-                var renderMesh = EntityManager.GetSharedComponentManaged<RenderMesh>(mouseHover.CurrentEntity);
-                mouseHover.OriginalMaterial = renderMesh.material;
                 mouseHover.PreviousEntity = mouseHover.CurrentEntity;
                 mouseHover.CurrentEntity = graphicsEntity;
-                renderMesh.material = mouseHover.HoverMaterial;
-                EntityManager.SetSharedComponentManaged(mouseHover.CurrentEntity, renderMesh);
+                mouseHover.OriginalMeshInfo = EntityManager.GetComponentData<MaterialMeshInfo>(mouseHover.CurrentEntity);
+
+                MaterialMeshInfo newMeshInfo = EntityManager.GetComponentData<MaterialMeshInfo>(mouseHover.HoverEntity);
+                newMeshInfo.Mesh = mouseHover.OriginalMeshInfo.Mesh;
+
+                EntityManager.SetComponentData<MaterialMeshInfo>(mouseHover.CurrentEntity, newMeshInfo);
             }
 
-            EntityManager.SetSharedComponentManaged(mouseHoverEntity, mouseHover);
+            EntityManager.SetComponentData(mouseHoverEntity, mouseHover);
         }
     }
 }

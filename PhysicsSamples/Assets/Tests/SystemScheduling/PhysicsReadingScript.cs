@@ -14,7 +14,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(PhysicsReadingScript authoring)
             {
-                AddComponent<ReadingPhysicsData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<ReadingPhysicsData>(entity);
             }
         }
     }
@@ -22,20 +23,19 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
-    public partial class ReadPhysicsTagsSystem : SystemBase
+    public partial struct ReadPhysicsTagsSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            base.OnCreate();
-            RequireForUpdate<ReadingPhysicsData>();
+            state.RequireForUpdate<ReadingPhysicsData>();
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
-            Dependency = new ReadPhysicsTagsJob
+            state.Dependency = new ReadPhysicsTagsJob
             {
                 PhysicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld
-            }.Schedule(Dependency);
+            }.Schedule(state.Dependency);
         }
 
         struct ReadPhysicsTagsJob : IJob

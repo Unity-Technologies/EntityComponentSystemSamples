@@ -4,9 +4,9 @@ using UnityEngine;
 // This class sets the upper limit of FPS of a demo that is being run.
 // It is used as a workaround for JobTempAlloc issues on CI and to make
 // measuring performance easier.
-public partial class InitializeSamplesSystem : SystemBase
+public partial struct InitializeSamplesSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
         // Currently, JobTempAlloc is raised also when a job takes more than 4 frames to complete, independent of allocation.
         // Setting the target frame rate to 60 means giving each frame more time to complete, therefore the jobs would complete in less than 4 frames.
@@ -14,8 +14,6 @@ public partial class InitializeSamplesSystem : SystemBase
         Application.targetFrameRate = 60;
 
         // Disabling updates because the system has nothing to do in OnUpdate method
-        Enabled = false;
+        state.Enabled = false;
     }
-
-    protected override void OnUpdate() {}
 }

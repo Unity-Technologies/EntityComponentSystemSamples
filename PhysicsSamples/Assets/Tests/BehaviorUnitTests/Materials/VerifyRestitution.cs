@@ -18,8 +18,9 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyRestitution authoring)
             {
-                AddComponent(new VerifyRestitutionData() { MaxY = 0 });
-        }
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new VerifyRestitutionData() { MaxY = 0 });
+            }
         }
     }
 
@@ -32,12 +33,7 @@ namespace Unity.Physics.Tests
         double m_StartSeconds;
         const double kCheckSeconds = 0.9;
 
-        public void ResetStartTime() => m_StartSeconds = SystemAPI.Time.ElapsedTime;
-
-        protected override void OnCreate()
-        {
-            ResetStartTime();
-        }
+        void ResetStartTime() => m_StartSeconds = SystemAPI.Time.ElapsedTime;
 
         protected override void OnUpdate()
         {
@@ -48,22 +44,25 @@ namespace Unity.Physics.Tests
             }
 
             double elapsedSeconds = SystemAPI.Time.ElapsedTime - m_StartSeconds;
-            Entities
-                .WithoutBurst()// asserts don't fire from Burst loops
-                .ForEach((Entity entity, ref VerifyRestitutionData verifyRestitution, in Translation translation, in PhysicsVelocity velocity) =>
-                {
-                    if (velocity.Linear.y > 0)
-                    {
-                        verifyRestitution.MaxY = math.max(verifyRestitution.MaxY, translation.Value.y);
-                    }
 
-                    // the ball shall have reached its apex after a certain amount of time has passed
-                    if (elapsedSeconds > kCheckSeconds)
-                    {
-                        // Biggest bounce should be near the original height, which is 1
-                        Assert.IsTrue(verifyRestitution.MaxY > 0.9f);
-                    }
-                }).Run();
+
+            foreach (var(verifyRestitution, localTransform, velocity, entity) in SystemAPI.Query<RefRW<VerifyRestitutionData>, RefRO<LocalTransform>, RefRO<PhysicsVelocity>>().WithEntityAccess())
+
+            {
+                if (velocity.ValueRO.Linear.y > 0)
+                {
+
+                    verifyRestitution.ValueRW.MaxY = math.max(verifyRestitution.ValueRW.MaxY, localTransform.ValueRO.Position.y);
+
+                }
+
+                // the ball shall have reached its apex after a certain amount of time has passed
+                if (elapsedSeconds > kCheckSeconds)
+                {
+                    // Biggest bounce should be near the original height, which is 1
+                    Assert.IsTrue(verifyRestitution.ValueRW.MaxY > 0.9f);
+                }
+            }
         }
     }
 }

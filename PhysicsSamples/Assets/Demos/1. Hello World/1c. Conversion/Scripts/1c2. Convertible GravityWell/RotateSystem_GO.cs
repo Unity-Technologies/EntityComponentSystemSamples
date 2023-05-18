@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -16,25 +17,22 @@ public class RotateSystem_GO : MonoBehaviour
     }
 }
 
-
 #region ECS
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(GravityWellSystem_GO_ECS))]
-public partial class RotateSystem_GO_ECS : SystemBase
+public partial struct RotateSystem_GO_ECS : ISystem
 {
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         // Create local deltaTime so it is accessible inside the ForEach lambda
         var deltaTime = SystemAPI.Time.DeltaTime;
-
-        Entities
-            .WithBurst()
-            .ForEach((ref Rotation rotation, in RotateComponent_GO_ECS rotator) =>
-            {
-                var av = rotator.LocalAngularVelocity * deltaTime;
-                rotation.Value = math.mul(rotation.Value, quaternion.EulerZXY(av));
-            }).Run();
+        foreach (var(transform, rotator) in SystemAPI.Query<RefRW<LocalTransform>, RefRO<RotateComponent_GO_ECS>>())
+        {
+            var av = rotator.ValueRO.LocalAngularVelocity * deltaTime;
+            transform.ValueRW.Rotation = math.mul(transform.ValueRW.Rotation, quaternion.EulerZXY(av));
+        }
     }
 }
 #endregion

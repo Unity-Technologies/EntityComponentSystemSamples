@@ -133,7 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 314699941}
   - component: {fileID: 314699940}
-  - component: {fileID: 314699942}
   m_Layer: 0
   m_Name: PileSpawner
   m_TagString: Untagged
@@ -174,19 +173,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &314699942
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 314699939}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!1 &820592517 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: 14077e64e9060534fa2478f390ed114b,
@@ -348,7 +334,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!1001 &855055720
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -460,7 +445,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1067623696}
   - component: {fileID: 1067623695}
-  - component: {fileID: 1067623697}
   m_Layer: 0
   m_Name: SphereSpawner
   m_TagString: Untagged
@@ -501,19 +485,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1067623697
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1067623694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!1 &1206023329
 GameObject:
   m_ObjectHideFlags: 0
@@ -527,7 +498,6 @@ GameObject:
   - component: {fileID: 1206023334}
   - component: {fileID: 1206023333}
   - component: {fileID: 1206023332}
-  - component: {fileID: 1206023331}
   - component: {fileID: 1206023330}
   m_Layer: 0
   m_Name: Physics Settings
@@ -549,19 +519,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   StepsPerSecond: 15
---- !u!114 &1206023331
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1206023329}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!114 &1206023332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,7 +552,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1f2299aae95eb4e80de7e4124130c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Highlight: {fileID: 2100000, guid: e889ae5f4d0a97f4fa03330ed4ab2d05, type: 2}
+  HoverPrefab: {fileID: 1191054677816456, guid: 5847e3636a433e3428bdc22fad0f06fe,
+    type: 3}
   IgnoreTriggers: 1
   IgnoreStatic: 1
 --- !u!114 &1206023334
@@ -658,7 +616,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1795942539}
   - component: {fileID: 1795942536}
-  - component: {fileID: 1795942537}
   m_Layer: 0
   m_Name: CubeSpawner
   m_TagString: Untagged
@@ -684,19 +641,6 @@ MonoBehaviour:
     y: 100
     z: 500
   count: 5000
---- !u!114 &1795942537
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1795942535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!4 &1795942539
 Transform:
   m_ObjectHideFlags: 0

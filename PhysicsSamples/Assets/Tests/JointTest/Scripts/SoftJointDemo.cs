@@ -11,7 +11,8 @@ public class SoftJointDemo : SceneCreationAuthoring<SoftJointDemoScene>
     {
         public override void Bake(SoftJointDemo authoring)
         {
-            AddComponentObject(new SoftJointDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new SoftJointDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial
@@ -20,7 +21,7 @@ public class SoftJointDemo : SceneCreationAuthoring<SoftJointDemoScene>
     }
 }
 
-public class SoftJointDemoCreationSystem : SceneCreationSystem<SoftJointDemoScene>
+public partial class SoftJointDemoCreationSystem : SceneCreationSystem<SoftJointDemoScene>
 {
     public override void CreateScene(SoftJointDemoScene sceneSettings)
     {

@@ -22,7 +22,8 @@ public class TriggerGravityFactorAuthoring : MonoBehaviour
     {
         public override void Bake(TriggerGravityFactorAuthoring authoring)
         {
-            AddComponent(new TriggerGravityFactor()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new TriggerGravityFactor()
             {
                 GravityFactor = authoring.GravityFactor,
                 DampingFactor = authoring.DampingFactor,
@@ -37,7 +38,6 @@ public class TriggerGravityFactorAuthoring : MonoBehaviour
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct TriggerGravitySystem : ISystem
 {
     ComponentDataHandles m_Handles;
@@ -68,11 +68,6 @@ public partial struct TriggerGravitySystem : ISystem
     {
         state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<TriggerGravityFactor>()));
         m_Handles = new ComponentDataHandles(ref state);
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]

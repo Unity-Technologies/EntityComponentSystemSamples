@@ -14,6 +14,7 @@ public struct PeriodicallySpawnExplosionComponent : IComponentData, ISpawnSettin
     public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
+    public int RandomSeedOffset { get; set; }
 
     public int SpawnRate { get; set; }
     public int DeathRate { get; set; }
@@ -33,12 +34,13 @@ class PeriodicallySpawnExplosionAuthoringBaking : Baker<PeriodicallySpawnExplosi
     public override void Bake(PeriodicallySpawnExplosionAuthoring authoring)
     {
         var transform = GetComponent<Transform>();
-        AddComponent(new PeriodicallySpawnExplosionComponent
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new PeriodicallySpawnExplosionComponent
         {
             Count = authoring.Count,
             DeathRate = 10,
             Position = transform.position,
-            Prefab = GetEntity(authoring.Prefab),
+            Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
             Range = authoring.Range,
             Rotation = quaternion.identity,
             SpawnRate = authoring.SpawnRate,
@@ -56,14 +58,18 @@ partial class PeriodicallySpawnExplosionsSystem : PeriodicalySpawnRandomObjectsS
         Assert.IsTrue(EntityManager.HasComponent<SpawnExplosionSettings>(instance));
 
         var explosionComponent = EntityManager.GetComponentData<SpawnExplosionSettings>(instance);
-        var pos = EntityManager.GetComponentData<Translation>(instance);
+
+        var localTransform = EntityManager.GetComponentData<LocalTransform>(instance);
+
 
         spawnSettings.Id--;
 
         // Setting the ID of a new explosion group
         // so that the group gets unique collider
         explosionComponent.Id = spawnSettings.Id;
-        explosionComponent.Position = pos.Value;
+
+        explosionComponent.Position = localTransform.Position;
+
 
         EntityManager.SetComponentData(instance, explosionComponent);
     }

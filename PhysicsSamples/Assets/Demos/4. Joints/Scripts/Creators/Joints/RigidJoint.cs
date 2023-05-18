@@ -21,26 +21,6 @@ namespace Unity.Physics.Authoring
                 OrientationInConnectedEntity = math.normalize(OrientationInConnectedEntity);
             }
         }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            UpdateAuto();
-            PhysicsJoint joint = PhysicsJoint.CreateFixed(
-                new RigidTransform(OrientationLocal, PositionLocal),
-                new RigidTransform(OrientationInConnectedEntity, PositionInConnectedEntity)
-            );
-            var constraints = joint.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                joint
-            );
-        }
     }
 
     class RigidJointBaker : JointBaker<RigidJoint>
@@ -53,6 +33,8 @@ namespace Unity.Physics.Authoring
                 new RigidTransform(authoring.OrientationLocal, authoring.PositionLocal),
                 new RigidTransform(authoring.OrientationInConnectedEntity, authoring.PositionInConnectedEntity)
             );
+
+            physicsJoint.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
 
             var constraintBodyPair = GetConstrainedBodyPair(authoring);
 

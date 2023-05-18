@@ -53,16 +53,16 @@ class LinearDashpotBaker : Baker<LinearDashpotBehaviour>
             //       if the parentBody is not a child in the scene hierarchy
             var componentData = new LinearDashpot
             {
-                localEntity = GetEntity(),
+                localEntity = GetEntity(TransformUsageFlags.Dynamic),
                 localOffset = authoring.localOffset,
-                parentEntity = authoring.parentBody == null ? Entity.Null : GetEntity(authoring.parentBody),
+                parentEntity = authoring.parentBody == null ? Entity.Null : GetEntity(authoring.parentBody, TransformUsageFlags.Dynamic),
                 parentOffset = authoring.parentOffset,
                 dontApplyImpulseToParent = authoring.dontApplyImpulseToParent ? 1 : 0,
                 strength = authoring.strength,
                 damping = authoring.damping
             };
 
-            Entity dashpotEntity = CreateAdditionalEntity();
+            Entity dashpotEntity = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
             AddComponent(dashpotEntity, componentData);
         }
     }
@@ -72,7 +72,6 @@ class LinearDashpotBaker : Baker<LinearDashpotBehaviour>
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct LinearDashpotSystem : ISystem
 {
     public EntityQuery LinearDashpotQuery;
@@ -81,8 +80,9 @@ public partial struct LinearDashpotSystem : ISystem
     public struct ComponentHandles
     {
         public ComponentLookup<PhysicsVelocity> Velocities;
-        public ComponentLookup<Translation> Translations;
-        public ComponentLookup<Rotation> Rotations;
+
+        public ComponentLookup<LocalTransform> LocalTransforms;
+
         public ComponentLookup<PhysicsMass> Masses;
         public ComponentLookup<LocalToWorld> LocalToWorlds;
         public ComponentTypeHandle<LinearDashpot> LinearDashpotHandle;
@@ -90,8 +90,9 @@ public partial struct LinearDashpotSystem : ISystem
         public ComponentHandles(ref SystemState state)
         {
             Velocities = state.GetComponentLookup<PhysicsVelocity>(false);
-            Translations = state.GetComponentLookup<Translation>(true);
-            Rotations = state.GetComponentLookup<Rotation>(true);
+
+            LocalTransforms = state.GetComponentLookup<LocalTransform>(true);
+
             Masses = state.GetComponentLookup<PhysicsMass>(true);
             LocalToWorlds = state.GetComponentLookup<LocalToWorld>(true);
             LinearDashpotHandle = state.GetComponentTypeHandle<LinearDashpot>(true);
@@ -100,8 +101,9 @@ public partial struct LinearDashpotSystem : ISystem
         public void Update(ref SystemState state)
         {
             Velocities.Update(ref state);
-            Translations.Update(ref state);
-            Rotations.Update(ref state);
+
+            LocalTransforms.Update(ref state);
+
             Masses.Update(ref state);
             LocalToWorlds.Update(ref state);
             LinearDashpotHandle.Update(ref state);
@@ -113,18 +115,18 @@ public partial struct LinearDashpotSystem : ISystem
     struct LinearDashpotJob : IJobChunk
     {
         public ComponentLookup<PhysicsVelocity> Velocities;
-        [ReadOnly] public ComponentLookup<Translation> Translations;
-        [ReadOnly] public ComponentLookup<Rotation> Rotations;
+
+        [ReadOnly] public ComponentLookup<LocalTransform> LocalTransforms;
+
         [ReadOnly] public ComponentLookup<PhysicsMass> Masses;
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorlds;
         [ReadOnly] public ComponentTypeHandle<LinearDashpot> LinearDashpotHandle;
 
-        [BurstCompile]
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
         {
-            NativeArray<LinearDashpot> chunkLinearDashpots = chunk.GetNativeArray(LinearDashpotHandle);
+            NativeArray<LinearDashpot> chunkLinearDashpots = chunk.GetNativeArray(ref LinearDashpotHandle);
 
-            bool hasChunkLinearDashpotType = chunk.Has(LinearDashpotHandle);
+            bool hasChunkLinearDashpotType = chunk.Has(ref LinearDashpotHandle);
 
             if (!hasChunkLinearDashpotType)
             {
@@ -164,18 +166,21 @@ public partial struct LinearDashpotSystem : ISystem
                     return;
                 }
 
-                Translation positionA = default;
-                Rotation rotationA = new Rotation { Value = quaternion.identity };
+
+                LocalTransform localTransformA = LocalTransform.Identity;
+
                 PhysicsVelocity velocityA = default;
                 PhysicsMass massA = default;
 
-                Translation positionB = positionA;
-                Rotation rotationB = rotationA;
+
+                LocalTransform localTransformB = localTransformA;
+
                 PhysicsVelocity velocityB = velocityA;
                 PhysicsMass massB = massA;
 
-                if (Translations.HasComponent(eA)) positionA = Translations[eA];
-                if (Rotations.HasComponent(eA)) rotationA = Rotations[eA];
+
+                if (LocalTransforms.HasComponent(eA)) localTransformA = LocalTransforms[eA];
+
                 if (Velocities.HasComponent(eA)) velocityA = Velocities[eA];
                 if (Masses.HasComponent(eA)) massA = Masses[eA];
 
@@ -183,29 +188,35 @@ public partial struct LinearDashpotSystem : ISystem
                 {
                     // parent could be static and not have a Translation or Rotation
                     var worldFromBody = Math.DecomposeRigidBodyTransform(LocalToWorlds[eB].Value);
-                    positionB = new Translation { Value = worldFromBody.pos };
-                    rotationB = new Rotation { Value = worldFromBody.rot };
+
+                    localTransformB.Position = worldFromBody.pos;
+                    localTransformB.Rotation = worldFromBody.rot;
                 }
-                if (Translations.HasComponent(eB)) positionB = Translations[eB];
-                if (Rotations.HasComponent(eB)) rotationB = Rotations[eB];
+
+                if (LocalTransforms.HasComponent(eB)) localTransformB = LocalTransforms[eB];
+
                 if (Velocities.HasComponent(eB)) velocityB = Velocities[eB];
                 if (Masses.HasComponent(eB)) massB = Masses[eB];
 
 
-                var posA = math.transform(new RigidTransform(rotationA.Value, positionA.Value), linearDashpot.localOffset);
-                var posB = math.transform(new RigidTransform(rotationB.Value, positionB.Value), linearDashpot.parentOffset);
-                var lvA = velocityA.GetLinearVelocity(massA, positionA, rotationA, posA);
-                var lvB = velocityB.GetLinearVelocity(massB, positionB, rotationB, posB);
+                var posA = math.transform(new RigidTransform(localTransformA.Rotation, localTransformA.Position), linearDashpot.localOffset);
+                var posB = math.transform(new RigidTransform(localTransformB.Rotation, localTransformB.Position), linearDashpot.parentOffset);
+                var lvA = velocityA.GetLinearVelocity(massA, localTransformA.Position, localTransformA.Rotation, posA);
+                var lvB = velocityB.GetLinearVelocity(massB, localTransformB.Position, localTransformB.Rotation, posB);
+
 
                 var impulse = linearDashpot.strength * (posB - posA) + linearDashpot.damping * (lvB - lvA);
                 impulse = math.clamp(impulse, new float3(-100.0f), new float3(100.0f));
 
-                velocityA.ApplyImpulse(massA, positionA, rotationA, impulse, posA);
+
+                velocityA.ApplyImpulse(massA, localTransformA.Position, localTransformA.Rotation, impulse, posA);
+
                 Velocities[eA] = velocityA;
 
                 if (0 == linearDashpot.dontApplyImpulseToParent && hasVelocityB)
                 {
-                    velocityB.ApplyImpulse(massB, positionB, rotationB, -impulse, posB);
+                    velocityB.ApplyImpulse(massB, localTransformB.Position, localTransformB.Rotation, -impulse, posB);
+
                     Velocities[eB] = velocityB;
                 }
             }
@@ -222,11 +233,6 @@ public partial struct LinearDashpotSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         Handles.Update(ref state);
@@ -234,8 +240,9 @@ public partial struct LinearDashpotSystem : ISystem
         state.Dependency = new LinearDashpotJob
         {
             Velocities = Handles.Velocities,
-            Translations = Handles.Translations,
-            Rotations = Handles.Rotations,
+
+            LocalTransforms = Handles.LocalTransforms,
+
             Masses = Handles.Masses,
             LocalToWorlds = Handles.LocalToWorlds,
             LinearDashpotHandle = Handles.LinearDashpotHandle

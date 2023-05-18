@@ -1,17 +1,24 @@
 # Release Notes
 All notable changes to this project will be documented in this file.
 
-
-## [Samples Project for 1.0.0-exp.8] - 2022-09-27
+## [Physics Samples Project for 1.0.0-pre.15]
 ### Changes
-* Packages:
-  * Updated com.unity.physics from `0.51.0-preview.32` to `1.0.0-exp.8`
-  * Updated com.unity.entities.graphics from `0.51.0-preview.32` to `1.0.0-exp.8`
-  * Updated com.unity.render-pipelines.universal from `12.1.7` to `14.0.3`
-* Editor:
-  * Updated Editor version from `2021.3.4f1` to `2022.2.0b8`
+* Added demo scenes for new motor joints under `Assets/Demos/4. Joints/4c. Motors`.
+* Added `SimulationValidationAuthoring` component for physics behavior validation testing, which can be used to confirm that joints behave as expected and that rigid bodies are at rest if desired.
+* Added simulation validation to the following PlayMode tests in the `Assets` folder:
+  * `Tests/Stacking/BasicStacks.unity`
+  * `Tests/JointTest/LimitedHinge/LimitedHingeSub.unity`
+  * `Tests/JointTest/Prismatic.unity`
+  * `Tests/JointTest/Hinge.unity`
+  * `Demos/4. Joints/4a. Joints Parade/4a. Joints Parade SubScene.unity`
+  * `Demos/4. Joints/4c. Motors/4c3. Linear Velocity Motor.unity`
+  * `Demos/4. Joints/4c. Motors/4c4. Angular Velocity Motor.unity`
+* Changed base class of systems from SystemBase to ISystem
+### Fixes
+  * `Demos/5. Modify/5f. Change Surface Velocity.unity` fixed a dependency in the DisplayConveyorBeltJob
+### Known Issues
 
-## [Samples Project for 0.51.0-preview.32] - 2022-06-30
+## [Physics Samples Project for 0.51.0-preview.32] - 2022-06-30
 ### Changes
 * Packages:
   * Updated com.unity.physics from `0.50.0-preview.24` to `0.51.0-preview.32`  
@@ -31,7 +38,7 @@ All notable changes to this project will be documented in this file.
 ### Fixes
 ### Known Issues
 
-## [Samples Project for 0.50.0-preview.24] - 2022-03-25
+## [Physics Samples Project for 0.50.0-preview.24] - 2022-03-25
 ### Changes
 * Project:
   * Updated project name from UnityPhysicsSamples to PhysicsSamples.   
@@ -54,7 +61,7 @@ All notable changes to this project will be documented in this file.
   
 ### Known Issues
 
-## [Samples Project for 0.10.0-preview] - 2021-12-31
+## [Physics Samples Project for 0.10.0-preview] - 2021-12-31
 ### Changes
 * Added `ImmediatePhysicsWorldStepper` utility class for running physics simulation immediately on the current thread.
 * Changed `ProjectIntoFutureOnCueSystem` in Pool demo to use `ImmediatePhysicsWorldStepper`.
@@ -65,7 +72,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 ### Fixes
 ### Known Issues
 
-## [Samples Project for 0.9.0-preview.4] - 2021-05-19
+## [Physics Samples Project for 0.9.0-preview.4] - 2021-05-19
 ### Changes
 * Dependencies
   * Updated Data Flow Graph to `0.21.0-preview.1`
@@ -74,7 +81,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 ### Fixes
 ### Known Issues
 
-## [Samples Project for 0.8.0-preview] - 2021-03-26
+## [Physics Samples Project for 0.8.0-preview] - 2021-03-26
 
 ### Changes
 * Dependencies
@@ -93,7 +100,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
     2. Add a `StatefulTriggerEventBufferAuthoring` component to that entity
     3. At runtime, read from the dynamic buffer of `StatefulTriggerEvent`s
 
-## [Samples Project for 0.7.0-preview.3] - 2021-02-24
+## [Physics Samples Project for 0.7.0-preview.3] - 2021-02-24
 
 ### Changes
 
@@ -113,7 +120,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 
 ### Known Issues
 
-## [Samples Project for 0.6.0-preview.3] - 2021-01-18
+## [Physics Samples Project for 0.6.0-preview.3] - 2021-01-18
 
 ### Changes
 * Dependencies
@@ -126,7 +133,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 
 ### Known Issues
 
-## [Samples Project for 0.5.1-preview.2] - 2020-10-14
+## [Physics Samples Project for 0.5.1-preview.2] - 2020-10-14
 
 ### Changes
 
@@ -139,7 +146,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 
 ### Known Issues
 
-## [Samples Project for 0.5.0-preview] - 2020-09-15
+## [Physics Samples Project for 0.5.0-preview] - 2020-09-15
 
 ### Changes
 
@@ -153,7 +160,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 
 * `RaycastCar` demo has issues that sometimes produce NaN values.
 
-## [Samples Project for 0.4.1-preview] - 2020-07-28
+## [Physics Samples Project for 0.4.1-preview] - 2020-07-28
 
 ### Changes
 
@@ -167,7 +174,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * Added `5d. Change Velocity` demo showing a local velocity change.
 * Added `5f. Change Surface Velocity` sample highlighting a conveyor belt use case with no moving parts.
 
-## [Samples Project for 0.4.0-preview.5] - 2020-06-18
+## [Physics Samples Project for 0.4.0-preview.5] - 2020-06-18
 
 ### Changes
 
@@ -193,7 +200,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * CharacterController body is now using a `CollisionResponse.None` collision response on its body to avoid reporting duplicated collision/trigger events coming from the physics engine.
 * `Demos/2. Setup/2b. Motion Properties/2b1. Motion Properties - Mass`, `Tests/Pyramids` and a group of demos under `Tests/Stacking` now showcase new solver stabilization features/strengths and weaknesses/trade-offs.
 
-## [Samples Project for 0.3.2-preview] - 2020-04-16
+## [Physics Samples Project for 0.3.2-preview] - 2020-04-16
 
 ### Changes
 
@@ -204,13 +211,13 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * Fixed character controller tunnelling issue.
 * Made standalone player quit (with exit code 1) if an exception is caught in BasePhysicsDemo or derived classes.
 
-## [Samples Project for 0.3.1-preview] - 2020-03-19
+## [Physics Samples Project for 0.3.1-preview] - 2020-03-19
 
 ### Changes
 * Fixed a potential character controller tunnelling issue.
 * Removed the Lightweight RP package.
 
-## [Samples Project for 0.3.0-preview] - 2020-03-12
+## [Physics Samples Project for 0.3.0-preview] - 2020-03-12
 
 ### Changes
 
@@ -227,7 +234,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
     * Fixed the support check issue with slopes equal to MaxSlope
     * Fixed the returned support state when there are no supporting planes
 
-## [Samples Project for 0.2.5-preview] - 2019-12-04
+## [Physics Samples Project for 0.2.5-preview] - 2019-12-04
 
 ### Changes
 * Added `CharacterControllerAuthoring.MaxMovementSpeed` to avoid large velocities coming from penetration recovery.
@@ -238,7 +245,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * Character controller is now using native lists instead of native arrays for constraints and query hits to avoid large preallocations.
 * Planet gravity sample now correctly randomizes mass of orbiting bodies.
 
-## [Samples Project for 0.2.4-preview] - 2019-09-19
+## [Physics Samples Project for 0.2.4-preview] - 2019-09-19
 
 ### Changes
 
@@ -246,7 +253,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * When opening the Project with Unity `2019.3` below `0b5` it might be required to update the *Lightweight RP* package (com.unity.render-pipelines.lightweight) to version `7.0.1`  and reimport the `Assets/Common` folder.
 
 
-## [Samples Project for 0.2.2-preview] - 2019-09-06
+## [Physics Samples Project for 0.2.2-preview] - 2019-09-06
 
 ### Changes
 
@@ -299,7 +306,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
    - A reimport of the materials might be required when this is done while the Unity Editor is opened.
 
 
-## [Samples Project for 0.2.0-preview] - 2019-07-18
+## [Physics Samples Project for 0.2.0-preview] - 2019-07-18
 
 ### Changes
 
@@ -311,7 +318,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * Added a loader scene to more easily test all examples on a device.
 
 
-## [Samples Project for 0.1.0-preview] - 2019-05-31
+## [Physics Samples Project for 0.1.0-preview] - 2019-05-31
 
 ### Changes
 
@@ -343,7 +350,7 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * Various tests have been added to confirm API changes and as comparisons for WIP and the upcoming Havok Physics release.
 
 
-## [Samples Project for 0.0.2-preview] - 2019-04-08
+## [Physics Samples Project for 0.0.2-preview] - 2019-04-08
 
 ### Changes
 
@@ -351,6 +358,6 @@ The demo shows different kinematic bars (client-only, dynamic and kinematic ghos
 * Character controller now does another query to check if position returned by the solver can be reached.
 
 
-## [Samples Project for 0.0.1-preview] - 2019-03-12
+## [Physics Samples Project for 0.0.1-preview] - 2019-03-12
 
 * Initial package version and sample project.

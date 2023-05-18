@@ -18,7 +18,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyBodyPairsIterator authoring)
             {
-                AddComponent<VerifyBodyPairsIteratorData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<VerifyBodyPairsIteratorData>(entity);
             }
         }
     }
@@ -26,11 +27,11 @@ namespace Unity.Physics.Tests
     [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
     [UpdateBefore(typeof(PhysicsCreateContactsGroup))]
     [RequireMatchingQueriesForUpdate]
-    public partial class VerifyBodyPairsIteratorSystem : SystemBase
+    public partial struct VerifyBodyPairsIteratorSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+            state.RequireForUpdate(state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyBodyPairsIteratorData) }
             }));
@@ -52,14 +53,14 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
-            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
-            Dependency = new VerifyBodyPairsIteratorJob
+            var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+            state.Dependency = new VerifyBodyPairsIteratorJob
             {
                 Bodies = worldSingleton.PhysicsWorld.Bodies,
-                VerificationData = GetComponentLookup<VerifyBodyPairsIteratorData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, Dependency);
+                VerificationData = SystemAPI.GetComponentLookup<VerifyBodyPairsIteratorData>(true)
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), ref worldSingleton.PhysicsWorld, state.Dependency);
         }
     }
 }

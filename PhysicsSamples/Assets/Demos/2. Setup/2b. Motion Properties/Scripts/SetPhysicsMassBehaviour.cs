@@ -35,16 +35,17 @@ public class SetPhysicsMassBehaviour : MonoBehaviour
         {
             if (HasPhysics())
             {
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
                 if (authoring.IsKinematic || authoring.SetVelocityToZero)
                 {
-                    AddComponent(new PhysicsMassOverride()
+                    AddComponent(entity, new PhysicsMassOverride()
                     {
                         IsKinematic = (byte)(authoring.IsKinematic ? 1 : 0),
                         SetVelocityToZero = (byte)(authoring.SetVelocityToZero ? 1 : 0)
                     });
                 }
 
-                AddComponent(new SetPhysicsMassAuthoring()
+                AddComponent(entity, new SetPhysicsMassAuthoring()
                 {
                     InfiniteInertiaX = authoring.InfiniteInertiaX,
                     InfiniteInertiaY = authoring.InfiniteInertiaY,
@@ -60,19 +61,18 @@ public class SetPhysicsMassBehaviour : MonoBehaviour
 [UpdateAfter(typeof(LegacyRigidbodyBakingSystem))]
 [UpdateAfter(typeof(EndJointBakingSystem))]
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-public partial class SetPhysicsMassBehaviourSystem : SystemBase
+public partial struct SetPhysicsMassBehaviourSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         // Fill in the MassProperties based on the potential calculated value by BuildCompoundColliderBakingSystem
-        Entities
-            .ForEach(
-            (ref PhysicsMass mass, in SetPhysicsMassBehaviour.SetPhysicsMassAuthoring setPhysicsMass) =>
-            {
-                mass.InverseInertia[0] = setPhysicsMass.InfiniteInertiaX ? 0 : mass.InverseInertia[0];
-                mass.InverseInertia[1] = setPhysicsMass.InfiniteInertiaY ? 0 : mass.InverseInertia[1];
-                mass.InverseInertia[2] = setPhysicsMass.InfiniteInertiaZ ? 0 : mass.InverseInertia[2];
-                mass.InverseMass = setPhysicsMass.InfiniteMass ? 0 : mass.InverseMass;
-            }).Run();
+        foreach (var(mass, setPhysicsMass)
+                 in SystemAPI.Query<RefRW<PhysicsMass>, RefRO<SetPhysicsMassBehaviour.SetPhysicsMassAuthoring>>().WithOptions(EntityQueryOptions.IncludePrefab | EntityQueryOptions.IncludeDisabledEntities))
+        {
+            mass.ValueRW.InverseInertia[0] = setPhysicsMass.ValueRO.InfiniteInertiaX ? 0 : mass.ValueRW.InverseInertia[0];
+            mass.ValueRW.InverseInertia[1] = setPhysicsMass.ValueRO.InfiniteInertiaY ? 0 : mass.ValueRW.InverseInertia[1];
+            mass.ValueRW.InverseInertia[2] = setPhysicsMass.ValueRO.InfiniteInertiaZ ? 0 : mass.ValueRW.InverseInertia[2];
+            mass.ValueRW.InverseMass = setPhysicsMass.ValueRO.InfiniteMass ? 0 : mass.ValueRW.InverseMass;
+        }
     }
 }

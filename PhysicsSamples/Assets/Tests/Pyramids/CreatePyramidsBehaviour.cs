@@ -28,7 +28,7 @@ public class CreatePyramidsBehaviour : MonoBehaviour
     {
         public override void Bake(CreatePyramidsBehaviour authoring)
         {
-            var sourceEntity = GetEntity(authoring.boxPrefab);
+            var sourceEntity = GetEntity(authoring.boxPrefab, TransformUsageFlags.Dynamic);
             if (sourceEntity == Entity.Null)
                 return;
 
@@ -48,7 +48,8 @@ public class CreatePyramidsBehaviour : MonoBehaviour
                 StartPosition = authoring.transform.position,
                 BoxSize = boxSize
             };
-            AddComponent(createPyramids);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, createPyramids);
         }
     }
 }
@@ -57,49 +58,53 @@ public class CreatePyramidsBehaviour : MonoBehaviour
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public partial class CreatePyramidsSystem : SystemBase
 {
+    private EntityCommandBufferSystem ECBSystem;
     protected override void OnCreate()
     {
+        ECBSystem = World.GetOrCreateSystemManaged<EndInitializationEntityCommandBufferSystem>();
         RequireForUpdate<CreatePyramids>();
     }
 
     protected override void OnUpdate()
     {
-        Entities
-            .WithoutBurst()
-            .WithStructuralChanges()
-            .ForEach((Entity creatorEntity, in CreatePyramids creator) =>
+        var ecb = ECBSystem.CreateCommandBuffer();
+        foreach (var(creator, creatorEntity) in SystemAPI.Query<RefRO<CreatePyramids>>().WithEntityAccess())
+        {
+            float3 boxSize = creator.ValueRO.BoxSize;
+            int boxCount = creator.ValueRO.Count * (creator.ValueRO.Height * (creator.ValueRO.Height + 1) / 2);
+
+            var positions = new NativeArray<float3>(boxCount, Allocator.Temp);
+
+            int boxIdx = 0;
+            for (int p = 0; p < creator.ValueRO.Count; p++)
             {
-                float3 boxSize = creator.BoxSize;
-                int boxCount = creator.Count * (creator.Height * (creator.Height + 1) / 2);
-
-                var positions = new NativeArray<float3>(boxCount, Allocator.Temp);
-
-                int boxIdx = 0;
-                for (int p = 0; p < creator.Count; p++)
+                for (int i = 0; i < creator.ValueRO.Height; i++)
                 {
-                    for (int i = 0; i < creator.Height; i++)
+                    int rowSize = creator.ValueRO.Height - i;
+                    float3 start = new float3(-rowSize * boxSize.x * 0.5f + boxSize.x * 0.5f, i * boxSize.y, 0);
+                    for (int j = 0; j < rowSize; j++)
                     {
-                        int rowSize = creator.Height - i;
-                        float3 start = new float3(-rowSize * boxSize.x * 0.5f + boxSize.x * 0.5f, i * boxSize.y, 0);
-                        for (int j = 0; j < rowSize; j++)
-                        {
-                            float3 shift = new float3(j * boxSize.x, 0f, p * boxSize.z * creator.Space);
-                            positions[boxIdx] = creator.StartPosition;
-                            positions[boxIdx] += start + shift;
-                            boxIdx++;
-                        }
+                        float3 shift = new float3(j * boxSize.x, 0f, p * boxSize.z * creator.ValueRO.Space);
+                        positions[boxIdx] = creator.ValueRO.StartPosition;
+                        positions[boxIdx] += start + shift;
+                        boxIdx++;
                     }
                 }
+            }
 
-                var pyramidComponent = new PhysicsPyramid();
-                for (int i = 0; i < positions.Length; i++)
-                {
-                    var entity = EntityManager.Instantiate(creator.BoxEntity);
-                    EntityManager.AddComponentData(entity, pyramidComponent);
-                    EntityManager.SetComponentData(entity, new Translation() { Value = positions[i] });
-                }
+            var pyramidComponent = new PhysicsPyramid();
+            for (int i = 0; i < positions.Length; i++)
+            {
+                var entity = EntityManager.Instantiate(creator.ValueRO.BoxEntity);
+                ecb.AddComponent(entity, pyramidComponent);
 
-                EntityManager.DestroyEntity(creatorEntity);
-            }).Run();
+                var transform = EntityManager.GetComponentData<LocalTransform>(entity);
+                transform.Position = positions[i];
+                ecb.SetComponent(entity, transform);
+
+            }
+
+            ecb.DestroyEntity(creatorEntity);
+        }
     }
 }

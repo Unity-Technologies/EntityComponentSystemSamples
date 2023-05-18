@@ -17,7 +17,8 @@ namespace Unity.Physics.Stateful
     {
         public override void Bake(StatefulTriggerEventBufferAuthoring authoring)
         {
-            AddBuffer<StatefulTriggerEvent>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddBuffer<StatefulTriggerEvent>(entity);
         }
     }
 }

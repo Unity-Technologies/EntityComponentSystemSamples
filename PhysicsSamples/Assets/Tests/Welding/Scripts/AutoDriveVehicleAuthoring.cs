@@ -16,7 +16,8 @@ namespace Demos
             {
                 var vehicle = GetComponent<VehicleAuthoring>();
 
-                AddComponent(new VehicleInputOverride
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new VehicleInputOverride
                 {
                     Value = new VehicleInput
                     {
@@ -37,16 +38,16 @@ namespace Demos
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [UpdateAfter(typeof(DemoInputGatheringSystem))]
     [UpdateBefore(typeof(VehicleInputHandlingSystem))]
-    partial class AutoDriveVehicle : SystemBase
+    partial struct AutoDriveVehicle : ISystem
     {
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
-            if (!HasSingleton<VehicleInputOverride>())
+            if (!SystemAPI.HasSingleton<VehicleInputOverride>())
                 return;
 
-            var input = GetSingleton<VehicleInput>();
-            input = GetSingleton<VehicleInputOverride>().Value;
-            SetSingleton(input);
+            var input = SystemAPI.GetSingleton<VehicleInput>();
+            input = SystemAPI.GetSingleton<VehicleInputOverride>().Value;
+            SystemAPI.SetSingleton(input);
         }
     }
 }

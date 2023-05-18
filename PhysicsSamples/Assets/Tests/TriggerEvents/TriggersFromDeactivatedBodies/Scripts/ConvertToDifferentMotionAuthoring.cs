@@ -25,7 +25,8 @@ public class ConvertToDifferentMotionAuthoring : UnityEngine.MonoBehaviour
             ConvertToDifferentMotion component = default(ConvertToDifferentMotion);
             component.ConvertIn = authoring.ConvertIn;
             component.ConversionSettings = authoring.ConversionSettings;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }
@@ -39,57 +40,66 @@ public enum ConversionSettings : byte
 
 [UpdateInGroup(typeof(PhysicsSystemGroup))]
 [UpdateBefore(typeof(TriggerEventCheckerSystem))]
-public partial class ConvertToStaticSystem : SystemBase
+public partial struct ConvertToStaticSystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<ConvertToDifferentMotion>();
+        state.RequireForUpdate<ConvertToDifferentMotion>();
     }
 
-    protected override void OnUpdate()
+    public partial struct ConvertToDifferentMotionJob : IJobEntity
+    {
+        public EntityCommandBuffer CommandBuffer;
+
+        public void Execute(Entity entity, ref ConvertToDifferentMotion tag, ref TriggerEventChecker checkerComponent, ref PhysicsCollider collider)
+        {
+            if (--tag.ConvertIn == 0)
+            {
+                if (tag.ConversionSettings == ConversionSettings.ConvertToStatic ||
+                    tag.ConversionSettings == ConversionSettings.ConvertToStaticDontInvalidateNumExpectedEvents)
+                {
+                    CommandBuffer.RemoveComponent<PhysicsVelocity>(entity);
+
+                    if (tag.ConversionSettings == ConversionSettings.ConvertToStatic)
+                    {
+                        checkerComponent.NumExpectedEvents = 0;
+                    }
+                }
+                else
+                {
+                    CommandBuffer.AddComponent(entity, new PhysicsVelocity
+                    {
+                        Angular = float3.zero,
+                        Linear = float3.zero
+                    });
+
+                    if (collider.Value.Value.Type == ColliderType.Compound)
+                    {
+                        unsafe
+                        {
+                            checkerComponent.NumExpectedEvents = ((CompoundCollider*)collider.ColliderPtr)->NumChildren;
+                        }
+                    }
+                    else
+                    {
+                        checkerComponent.NumExpectedEvents = 1;
+                    }
+                }
+                CommandBuffer.RemoveComponent<ConvertToDifferentMotion>(entity);
+            }
+        }
+    }
+
+    public void OnUpdate(ref SystemState state)
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities
-                .WithName("ConvertToDifferentMotion")
-                .ForEach((ref Entity e, ref ConvertToDifferentMotion tag, ref TriggerEventChecker checkerComponent, ref PhysicsCollider pc) =>
-                {
-                    if (--tag.ConvertIn == 0)
-                    {
-                        if (tag.ConversionSettings == ConversionSettings.ConvertToStatic ||
-                            tag.ConversionSettings == ConversionSettings.ConvertToStaticDontInvalidateNumExpectedEvents)
-                        {
-                            commandBuffer.RemoveComponent<PhysicsVelocity>(e);
+            new ConvertToDifferentMotionJob
+            {
+                CommandBuffer = commandBuffer
+            }.Run();
 
-                            if (tag.ConversionSettings == ConversionSettings.ConvertToStatic)
-                            {
-                                checkerComponent.NumExpectedEvents = 0;
-                            }
-                        }
-                        else
-                        {
-                            commandBuffer.AddComponent(e, new PhysicsVelocity
-                            {
-                                Angular = float3.zero,
-                                Linear = float3.zero
-                            });
-
-                            if (pc.Value.Value.Type == ColliderType.Compound)
-                            {
-                                unsafe
-                                {
-                                    checkerComponent.NumExpectedEvents = ((CompoundCollider*)pc.ColliderPtr)->NumChildren;
-                                }
-                            }
-                            else
-                            {
-                                checkerComponent.NumExpectedEvents = 1;
-                            }
-                        }
-                        commandBuffer.RemoveComponent<ConvertToDifferentMotion>(e);
-                    }
-                }).Run();
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

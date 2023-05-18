@@ -25,8 +25,8 @@ class MotionSmoothingSetup : MonoBehaviour
     {
         public override void Bake(MotionSmoothingSetup authoring)
         {
-            var e = CreateAdditionalEntity();
-            AddComponent(e, new SetFixedTimestep { Timestep = 1f / authoring.StepsPerSecond });
+            var entity = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new SetFixedTimestep { Timestep = 1f / authoring.StepsPerSecond });
         }
     }
 }
@@ -51,12 +51,12 @@ partial class SetFixedTimestepSystem : SystemBase
     protected override void OnUpdate()
     {
         var fixedStepSimulationSystemGroup = m_FixedStepSimulationSystemGroup;
-        Entities
-            .WithStructuralChanges()
-            .ForEach((ref Entity entity, ref SetFixedTimestep setFixedTimestep) =>
-            {
-                fixedStepSimulationSystemGroup.Timestep = setFixedTimestep.Timestep;
-                EntityManager.DestroyEntity(entity);
-            }).Run();
+        var commandBuffer = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+        foreach (var(setFixedTimeStep, entity) in SystemAPI.Query<RefRW<SetFixedTimestep>>().WithEntityAccess())
+        {
+            fixedStepSimulationSystemGroup.Timestep = setFixedTimeStep.ValueRW.Timestep;
+            commandBuffer.DestroyEntity(entity);
+        }
+        commandBuffer.Playback(EntityManager);
     }
 }

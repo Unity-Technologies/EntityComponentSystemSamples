@@ -18,7 +18,8 @@ public class DisplayCollisionText : MonoBehaviour, IReceiveEntity
     {
         public override void Bake(DisplayCollisionText authoring)
         {
-            AddComponent(new DisplayCollisionTextComponent()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new DisplayCollisionTextComponent()
             {
                 CollisionDurationCount = 0,
                 FramesSinceCollisionExit = 0
@@ -29,14 +30,14 @@ public class DisplayCollisionText : MonoBehaviour, IReceiveEntity
 
 [RequireMatchingQueriesForUpdate]
 [UpdateBefore(typeof(TransformSystemGroup))]
-public partial class DisplayCollisionTextSystem : SystemBase
+public partial struct DisplayCollisionTextSystem : ISystem
 {
     EntityQuery _TextMeshQuery;
     EntityQuery _SentEntitiesQuery;
 
     private const int k_FramesToStay = 20;
 
-    private readonly float3 k_TextOffset = new float3(0, 1.5f, 0);
+    private float3 k_TextOffset;
 
     struct CollisionEntities
     {
@@ -45,39 +46,37 @@ public partial class DisplayCollisionTextSystem : SystemBase
         public Entity CollisionEventEntity;
     }
 
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-
-        _TextMeshQuery = GetEntityQuery(typeof(DisplayCollisionTextComponent), typeof(TextMesh));
-        _SentEntitiesQuery = GetEntityQuery(typeof(SentEntity));
+        k_TextOffset = new float3(0, 1.5f, 0);
+        _TextMeshQuery = state.GetEntityQuery(typeof(DisplayCollisionTextComponent), typeof(TextMesh));
+        _SentEntitiesQuery = state.GetEntityQuery(typeof(SentEntity));
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var textEntities = _TextMeshQuery.ToEntityArray(Allocator.Temp);
         var sentEntities = _SentEntitiesQuery.ToEntityArray(Allocator.Temp);
 
         NativeArray<CollisionEntities> eventArray = new NativeArray<CollisionEntities>(textEntities.Length, Allocator.Temp);
 
-        GetEntityMapping(EntityManager, eventArray, textEntities, sentEntities);
+        GetEntityMapping(state.EntityManager, eventArray, textEntities, sentEntities);
 
         for (int idx = 0; idx < eventArray.Length; ++idx)
         {
             var mapping = eventArray[idx];
 
-            if (!EntityManager.Exists(mapping.DisplayEntity) ||
-                !EntityManager.Exists(mapping.CollisionEventEntity))
+            if (!state.EntityManager.Exists(mapping.DisplayEntity) ||
+                !state.EntityManager.Exists(mapping.CollisionEventEntity))
             {
                 continue;
             }
 
-            var displayTransform = EntityManager.GetAspect<TransformAspect>(mapping.DisplayEntity);
-            var buffer = EntityManager.GetBuffer<StatefulCollisionEvent>(mapping.CollisionEventEntity);
+            var displayTransform = state.EntityManager.GetComponentData<LocalTransform>(mapping.DisplayEntity);
+            var buffer = state.EntityManager.GetBuffer<StatefulCollisionEvent>(mapping.CollisionEventEntity);
 
-            var displayCollisionTextComponent = EntityManager.GetComponentData<DisplayCollisionTextComponent>(mapping.TextEntity);
-            var textMesh = EntityManager.GetComponentObject<TextMesh>(mapping.TextEntity);
-            var textTransform = EntityManager.GetAspect<TransformAspect>(mapping.TextEntity);
+            var displayCollisionTextComponent = state.EntityManager.GetComponentData<DisplayCollisionTextComponent>(mapping.TextEntity);
+            var textMesh = state.EntityManager.GetComponentObject<TextMesh>(mapping.TextEntity);
 
             for (int i = 0; i < buffer.Length; i++)
             {
@@ -124,9 +123,10 @@ public partial class DisplayCollisionTextSystem : SystemBase
                 }
             }
 
-            EntityManager.SetComponentData(mapping.TextEntity, displayCollisionTextComponent);
+            state.EntityManager.SetComponentData(mapping.TextEntity, displayCollisionTextComponent);
 
-            textTransform.Position = displayTransform.Position + k_TextOffset;
+            var textTransform = SystemAPI.GetComponentRW<LocalTransform>(mapping.TextEntity, false);
+            textTransform.ValueRW.Position = displayTransform.Position + k_TextOffset;
         }
     }
 

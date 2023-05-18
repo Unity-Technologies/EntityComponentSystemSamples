@@ -21,7 +21,8 @@ public class UpdateBoxRampState : MonoBehaviour
     {
         public override void Bake(UpdateBoxRampState authoring)
         {
-            AddComponent(new EntityUpdater { TimeToDie = authoring.TimeToDie, TimeToMove = authoring.TimeToMove });
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new EntityUpdater { TimeToDie = authoring.TimeToDie, TimeToMove = authoring.TimeToMove });
         }
     }
 }
@@ -29,29 +30,30 @@ public class UpdateBoxRampState : MonoBehaviour
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class EntityUpdaterSystem : SystemBase
+public partial struct EntityUpdaterSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnCreate(ref SystemState state)
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities.ForEach(
-                (Entity entity, ref EntityUpdater updater, ref Translation position) =>
+
+            foreach (var(updater, localTransform, entity) in SystemAPI.Query<RefRW<EntityUpdater>, RefRW<LocalTransform>>().WithEntityAccess())
+
+            {
+                if (updater.ValueRW.TimeToDie-- == 0)
                 {
-                    if (updater.TimeToDie-- == 0)
-                    {
-                        commandBuffer.DestroyEntity(entity);
-                    }
-
-                    if (updater.TimeToMove-- == 0)
-                    {
-                        position.Value += new float3(0, -2, 0);
-                        commandBuffer.SetComponent(entity, position);
-                    }
+                    commandBuffer.DestroyEntity(entity);
                 }
-                ).Run();
 
-            commandBuffer.Playback(EntityManager);
+                if (updater.ValueRW.TimeToMove-- == 0)
+                {
+
+                    localTransform.ValueRW.Position += new float3(0, -2, 0);
+                    commandBuffer.SetComponent(entity, localTransform.ValueRW);
+
+                }
+            }
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

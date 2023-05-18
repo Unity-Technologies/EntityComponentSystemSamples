@@ -18,7 +18,8 @@ public class InvalidPhysicsJointExcludeDemo : SceneCreationAuthoring<InvalidPhys
     {
         public override void Bake(InvalidPhysicsJointExcludeDemo authoring)
         {
-            AddComponentObject(new InvalidPhysicsJointExcludeDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new InvalidPhysicsJointExcludeDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial,
@@ -49,55 +50,47 @@ public struct InvalidPhysicsJointExcludeBodies : IComponentData {}
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class InvalidPhysicsJointExcludeDemoSystem : SystemBase
+public partial struct InvalidPhysicsJointExcludeDemoSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var deltaTime = SystemAPI.Time.DeltaTime;
 
-        Entities
-            .WithName("InvalidPhysicsJointExcludeTimerEvent")
-            .ForEach((ref InvalidPhysicsJointExcludeTimerEvent timer) =>
-            {
-                timer.Tick(deltaTime);
-            }).Run();
+        foreach (var timer in SystemAPI.Query<RefRW<InvalidPhysicsJointExcludeTimerEvent>>())
+        {
+            timer.ValueRW.Tick(deltaTime);
+        }
 
         // add/remove PhysicsExclude
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities
-                .WithName("InvalidPhysicsJointExcludeBodies_Exclude")
-                .WithoutBurst()
-                .WithAll<InvalidPhysicsJointExcludeBodies, PhysicsWorldIndex>()
-                .ForEach((Entity entity, ref InvalidPhysicsJointExcludeTimerEvent timer) =>
+            foreach (var(timer, entity)
+                     in SystemAPI.Query<RefRW<InvalidPhysicsJointExcludeTimerEvent>>().WithEntityAccess().WithAll<InvalidPhysicsJointExcludeBodies, PhysicsWorldIndex>())
+            {
+                if (timer.ValueRW.Fired(true))
                 {
-                    if (timer.Fired(true))
-                    {
-                        // If we want to support multiple worlds, we need to store PhysicsWorldIndex.Value somewhere
-                        commandBuffer.RemoveComponent<PhysicsWorldIndex>(entity);
-                    }
-                }).Run();
+                    // If we want to support multiple worlds, we need to store PhysicsWorldIndex.Value somewhere
+                    commandBuffer.RemoveComponent<PhysicsWorldIndex>(entity);
+                }
+            }
 
-            Entities
-                .WithName("InvalidPhysicsJointExcludeBodies_Include")
-                .WithoutBurst()
-                .WithAll<InvalidPhysicsJointExcludeBodies>()
-                .WithNone<PhysicsWorldIndex>()
-                .ForEach((Entity entity, ref InvalidPhysicsJointExcludeTimerEvent timer) =>
+            foreach (var(timer, entity)
+                     in SystemAPI.Query<RefRW<InvalidPhysicsJointExcludeTimerEvent>>().WithEntityAccess().WithAll<InvalidPhysicsJointExcludeBodies>()
+                         .WithNone<PhysicsWorldIndex>())
+            {
+                if (timer.ValueRW.Fired(true))
                 {
-                    if (timer.Fired(true))
-                    {
-                        commandBuffer.AddSharedComponent(entity, new PhysicsWorldIndex());
-                    }
-                }).Run();
+                    commandBuffer.AddSharedComponent(entity, new PhysicsWorldIndex());
+                }
+            }
 
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }
 
 
-public class InvalidPhyiscsJointExcludeDemoSceneCreationSystem : SceneCreationSystem<InvalidPhysicsJointExcludeDemoScene>
+public partial class InvalidPhyiscsJointExcludeDemoSceneCreationSystem : SceneCreationSystem<InvalidPhysicsJointExcludeDemoScene>
 {
     public override void CreateScene(InvalidPhysicsJointExcludeDemoScene sceneSettings)
     {
@@ -140,9 +133,9 @@ public class InvalidPhyiscsJointExcludeDemoSceneCreationSystem : SceneCreationSy
             }
 
             // add exclude components.
-            EntityManager.AddComponentData(bodyA, new InvalidPhysicsJointExcludeBodies {});
+            EntityManager.AddComponentData(bodyA, new InvalidPhysicsJointExcludeBodies());
             EntityManager.AddComponentData(bodyA, new InvalidPhysicsJointExcludeTimerEvent { TimeLimit = timeToSwap, Timer = timeToSwap });
-            EntityManager.AddComponentData(bodyB, new InvalidPhysicsJointExcludeBodies {});
+            EntityManager.AddComponentData(bodyB, new InvalidPhysicsJointExcludeBodies());
             EntityManager.AddComponentData(bodyB, new InvalidPhysicsJointExcludeTimerEvent { TimeLimit = timeToSwap, Timer = timeToSwap });
         }
     }

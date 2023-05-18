@@ -14,7 +14,7 @@ using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Jobs;
 
-namespace Unity.Physics.Samples.Test
+namespace Unity.Physics.Tests
 {
     // Runs all simulation types on the same cloned physics world for a
     // predefined number of steps and compares results.
@@ -43,8 +43,8 @@ namespace Unity.Physics.Samples.Test
             // Removed as long as Havok plugins are not build with -strict floating point mode
             "RaycastCar", "Joints Parade",
 
-            // Apparently we need a new way of testing to deal with subscenes
-            "ClientServerScene",
+            // These demos do some verifications that would currently fail with UP
+            "AllMotors.unity",
 
 #if UNITY_ANDROID_ARM7V
             // disabled due to sigbuss crashes, something is defo corrupting memory in the allocators
@@ -132,9 +132,12 @@ namespace Unity.Physics.Samples.Test
             }
 
             var stepComponent = PhysicsStep.Default;
-            if (sampler.HasSingleton<PhysicsStep>())
+            using (var query = DefaultWorld.EntityManager.CreateEntityQuery(typeof(PhysicsStep)))
             {
-                stepComponent = sampler.GetSingleton<PhysicsStep>();
+                if (query.HasSingleton<PhysicsStep>())
+                {
+                    stepComponent = query.GetSingleton<PhysicsStep>();
+                }
             }
 
             // Extract original world and make copies
@@ -278,6 +281,9 @@ namespace Unity.Physics.Samples.Test
                 {
                     physicsWorlds[i].Dispose();
                 }
+
+                UnityPhysicsSamplesTest.ExpectURPForwardWarningMessage();
+
                 LogAssert.NoUnexpectedReceived();
             }
         }

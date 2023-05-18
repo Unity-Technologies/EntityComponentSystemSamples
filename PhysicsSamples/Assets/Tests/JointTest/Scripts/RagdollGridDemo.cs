@@ -12,7 +12,8 @@ public class RagdollGridDemo : SceneCreationAuthoring<RagdollGridDemoScene>
     {
         public override void Bake(RagdollGridDemo authoring)
         {
-            AddComponentObject(new RagdollGridDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new RagdollGridDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial
@@ -21,7 +22,7 @@ public class RagdollGridDemo : SceneCreationAuthoring<RagdollGridDemoScene>
     }
 }
 
-public class RagdollGridDemoSceneSystem : SceneCreationSystem<RagdollGridDemoScene>
+public partial class RagdollGridDemoSceneSystem : SceneCreationSystem<RagdollGridDemoScene>
 {
     public override void CreateScene(RagdollGridDemoScene sceneSettings)
     {

@@ -32,9 +32,9 @@ class VisualizeRaycastBaker : Baker<VisualizeRaycastAuthoring>
 {
     public override void Bake(VisualizeRaycastAuthoring authoring)
     {
-        var fullRayEntity = GetEntity(authoring.FullRay);
-        var hitRayEntity = GetEntity(authoring.HitRay);
-        var hitPosEntity = GetEntity(authoring.HitPosition);
+        var fullRayEntity = GetEntity(authoring.FullRay, TransformUsageFlags.Dynamic);
+        var hitRayEntity = GetEntity(authoring.HitRay, TransformUsageFlags.Dynamic);
+        var hitPosEntity = GetEntity(authoring.HitPosition, TransformUsageFlags.Dynamic);
 
         Assert.IsTrue(fullRayEntity != Entity.Null);
         Assert.IsTrue(hitRayEntity != Entity.Null);
@@ -50,6 +50,7 @@ class VisualizeRaycastBaker : Baker<VisualizeRaycastAuthoring>
             HitPositionEntity = hitPosEntity,
         };
 
-        AddComponent(visualizedRaycast);
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, visualizedRaycast);
     }
 }

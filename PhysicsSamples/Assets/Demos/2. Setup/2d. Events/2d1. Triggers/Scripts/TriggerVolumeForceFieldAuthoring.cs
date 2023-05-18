@@ -37,7 +37,8 @@ class TriggerVolumeForceFieldAuthoringBaker : Baker<TriggerVolumeForceFieldAutho
     public override void Bake(TriggerVolumeForceFieldAuthoring authoring)
     {
         var transform = GetComponent<Transform>();
-        AddComponent(new TriggerVolumeForceField
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new TriggerVolumeForceField
         {
             Center = transform.position,
             Strength = authoring.Strength,
@@ -52,7 +53,6 @@ class TriggerVolumeForceFieldAuthoringBaker : Baker<TriggerVolumeForceFieldAutho
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct TriggerVolumeForceFieldSystem : ISystem
 {
     private EntityQuery m_NonTriggerDynamicBodyQuery;
@@ -61,20 +61,23 @@ public partial struct TriggerVolumeForceFieldSystem : ISystem
 
     struct ComponentDataHandles
     {
-        public ComponentLookup<Translation> TranslationFromEntity;
+        public ComponentLookup<LocalTransform> LocalTransformFromEntity;
+
         public ComponentLookup<PhysicsMass> MassFromEntity;
         public ComponentLookup<PhysicsVelocity> VelocityFromEntity;
 
         public ComponentDataHandles(ref SystemState state)
         {
-            TranslationFromEntity = state.GetComponentLookup<Translation>(true);
+            LocalTransformFromEntity = state.GetComponentLookup<LocalTransform>(true);
+
             MassFromEntity = state.GetComponentLookup<PhysicsMass>(true);
             VelocityFromEntity = state.GetComponentLookup<PhysicsVelocity>(false);
         }
 
         public void Update(ref SystemState state)
         {
-            TranslationFromEntity.Update(ref state);
+            LocalTransformFromEntity.Update(ref state);
+
             MassFromEntity.Update(ref state);
             VelocityFromEntity.Update(ref state);
         }
@@ -83,7 +86,7 @@ public partial struct TriggerVolumeForceFieldSystem : ISystem
     public static void ApplyForceField(
         in float dt,
         ref PhysicsVelocity bodyVelocity,
-        in Translation pos, in PhysicsMass bodyMass, in TriggerVolumeForceField forceField
+        in LocalTransform localTransform, in PhysicsMass bodyMass, in TriggerVolumeForceField forceField
     )
     {
         if (forceField.Strength == 0)
@@ -91,7 +94,9 @@ public partial struct TriggerVolumeForceFieldSystem : ISystem
 
         // Don't do anything if in eye
         float3 dir = float3.zero;
-        dir = (forceField.Center - pos.Value);
+
+        dir = (forceField.Center - localTransform.Position);
+
         if (!math.any(dir))
             return;
 
@@ -135,18 +140,16 @@ public partial struct TriggerVolumeForceFieldSystem : ISystem
     partial struct ApplyForceFieldJob : IJobEntity
     {
         public EntityQueryMask NonTriggerDynamicBodyMask;
-
         public PhysicsStep StepComponent;
         public float DeltaTime;
-
-        [ReadOnly] public ComponentLookup<Translation> Translations;
+        [ReadOnly] public ComponentLookup<LocalTransform> LocalTransforms;
         [ReadOnly] public ComponentLookup<PhysicsMass> Masses;
         public ComponentLookup<PhysicsVelocity> Velocities;
 
-        [BurstCompile]
         public void Execute(Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer, ref TriggerVolumeForceField forceField)
         {
-            forceField.Center = Translations[e].Value;
+            forceField.Center = LocalTransforms[e].Position;
+
 
             for (int i = 0; i < triggerEventBuffer.Length; i++)
             {
@@ -162,7 +165,9 @@ public partial struct TriggerVolumeForceFieldSystem : ISystem
 
                 var physicsVelocity = Velocities[otherEntity];
                 var physicsMass = Masses[otherEntity];
-                var pos = Translations[otherEntity];
+
+                var pos = LocalTransforms[otherEntity];
+
 
                 ApplyForceField(DeltaTime, ref physicsVelocity, pos, physicsMass, forceField);
 
@@ -180,7 +185,9 @@ public partial struct TriggerVolumeForceFieldSystem : ISystem
     {
         EntityQueryBuilder builder = new EntityQueryBuilder(Unity.Collections.Allocator.Temp)
             .WithAllRW<PhysicsVelocity>()
-            .WithAll<Translation, PhysicsMass>()
+
+            .WithAll<LocalTransform, PhysicsMass>()
+
             .WithNone<StatefulTriggerEvent>();
         m_NonTriggerDynamicBodyQuery = state.GetEntityQuery(builder);
 
@@ -195,24 +202,20 @@ public partial struct TriggerVolumeForceFieldSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         m_Handles.Update(ref state);
-        var stepComponent = SystemAPI.HasSingleton<PhysicsStep>() ? SystemAPI.GetSingleton<PhysicsStep>() : PhysicsStep.Default;
-        // TODO(DOTS-6141): This expression can't currently be inlined into the IJobEntity initializer
-        float dt = SystemAPI.Time.DeltaTime;
-        state.Dependency = new ApplyForceFieldJob
+
+        var applyForceFieldJob = new ApplyForceFieldJob
         {
             NonTriggerDynamicBodyMask = m_NonTriggerDynamicBodyMask,
 
-            StepComponent = stepComponent,
-            DeltaTime = dt,
+            StepComponent = SystemAPI.HasSingleton<PhysicsStep>() ? SystemAPI.GetSingleton<PhysicsStep>() : PhysicsStep.Default,
+            DeltaTime = SystemAPI.Time.DeltaTime,
 
-            Translations = m_Handles.TranslationFromEntity,
             Masses = m_Handles.MassFromEntity,
             Velocities = m_Handles.VelocityFromEntity
-        }.Schedule(state.Dependency);
-    }
+        };
 
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
+        applyForceFieldJob.LocalTransforms = m_Handles.LocalTransformFromEntity;
+
+        state.Dependency = applyForceFieldJob.Schedule(state.Dependency);
     }
 }

@@ -17,7 +17,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyGravityFactor authoring)
             {
-                AddComponent<VerifyGravityFactorData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<VerifyGravityFactorData>(entity);
             }
         }
     }
@@ -25,30 +26,30 @@ namespace Unity.Physics.Tests
     [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateBefore(typeof(PhysicsSimulationGroup))]
-    public partial class VerifyGravityFactorSystem : SystemBase
+    public partial struct VerifyGravityFactorSystem : ISystem
     {
         EntityQuery m_VerificationGroup;
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            m_VerificationGroup = GetEntityQuery(new EntityQueryDesc
+            m_VerificationGroup = state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyGravityFactorData) }
             });
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             using (var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob))
             {
                 foreach (var entity in entities)
                 {
-                    var translation = EntityManager.GetComponentData<Translation>(entity);
+                    var transform = state.EntityManager.GetComponentData<LocalTransform>(entity);
 
                     // Sphere should never move due to gravity factor being 0
-                    Assert.AreEqual(translation.Value.x, 0.0f);
-                    Assert.AreEqual(translation.Value.y, 1.0f);
-                    Assert.AreEqual(translation.Value.z, 0.0f);
+                    Assert.AreEqual(transform.Position.x, 0.0f);
+                    Assert.AreEqual(transform.Position.y, 1.0f);
+                    Assert.AreEqual(transform.Position.z, 0.0f);
                 }
             }
         }

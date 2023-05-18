@@ -17,7 +17,8 @@ class ModifyBroadphasePairsBehaviourBaker : Baker<ModifyBroadphasePairsBehaviour
 {
     public override void Bake(ModifyBroadphasePairsBehaviour authoring)
     {
-        AddComponent(new ModifyBroadphasePairs());
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new ModifyBroadphasePairs());
     }
 }
 
@@ -27,18 +28,12 @@ class ModifyBroadphasePairsBehaviourBaker : Baker<ModifyBroadphasePairsBehaviour
 [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
 [UpdateBefore(typeof(PhysicsCreateContactsGroup))]
 [RequireMatchingQueriesForUpdate]
-[BurstCompile]
 public partial struct ModifyBroadphasePairsSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate(state.GetEntityQuery(ComponentType.ReadOnly<ModifyBroadphasePairs>()));
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 
     [BurstCompile]

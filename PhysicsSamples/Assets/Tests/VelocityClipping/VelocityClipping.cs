@@ -17,7 +17,8 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VelocityClipping authoring)
             {
-                AddComponent<ClipVelocitiesData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<ClipVelocitiesData>(entity);
             }
         }
     }
@@ -25,11 +26,11 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
-    public partial class VelocityClippingSystem : SystemBase
+    public partial struct VelocityClippingSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+            state.RequireForUpdate(state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(ClipVelocitiesData) }
             }));
@@ -69,26 +70,26 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             var physicsStep = PhysicsStep.Default;
-            if (HasSingleton<PhysicsStep>())
+            if (SystemAPI.HasSingleton<PhysicsStep>())
             {
-                physicsStep = GetSingleton<PhysicsStep>();
+                physicsStep = SystemAPI.GetSingleton<PhysicsStep>();
             }
 
             //var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-            var world = GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
+            var world = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
             // No need for clipping if Havok is used
             if (physicsStep.SimulationType == SimulationType.UnityPhysics)
             {
-                Dependency = new ClipVelocitiesJob
+                state.Dependency = new ClipVelocitiesJob
                 {
                     MotionVelocities = world.MotionVelocities,
                     MotionDatas = world.MotionDatas,
                     TimeStep = SystemAPI.Time.DeltaTime,
                     Gravity = physicsStep.Gravity
-                }.Schedule(Dependency);
+                }.Schedule(state.Dependency);
             }
         }
     }

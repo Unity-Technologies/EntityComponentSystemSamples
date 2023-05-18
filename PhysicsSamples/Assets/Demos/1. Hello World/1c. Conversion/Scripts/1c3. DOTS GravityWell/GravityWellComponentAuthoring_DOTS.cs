@@ -10,11 +10,12 @@ public class GravityWellComponentAuthoring_DOTS : MonoBehaviour
     {
         public override void Bake(GravityWellComponentAuthoring_DOTS authoring)
         {
-            AddComponent(new GravityWellComponent_DOTS
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new GravityWellComponent_DOTS
             {
                 Strength = authoring.Strength,
                 Radius = authoring.Radius,
-                Position = authoring.gameObject.transform.position
+                Position = GetComponent<Transform>().position
             });
         }
     }

@@ -3,27 +3,32 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-public class RotateComponent_GO : MonoBehaviour, IConvertGameObjectToEntity
+public class RotateComponent_GO : MonoBehaviour
 {
     public Vector3 LocalAngularVelocity = Vector3.zero;
 
+    // Added Baker, but is disabled as this is in a redundant sample with ConvertToEntity gone
+    /*
     #region ECS
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    class Baker : Baker<RotateComponent_GO>
     {
-        dstManager.AddComponentData(entity, new RotateComponent_GO_ECS
+        public override void Bake(RotateComponent_GO authoring)
         {
-            // We can convert to radians/sec once here.
-            LocalAngularVelocity = math.radians(LocalAngularVelocity),
-        });
-        // Rotate System updates the Rotation component,
-        // so we add one if one doesn't already exist
-        if (!dstManager.HasComponent<Rotation>(entity))
-        {
-            dstManager.AddComponentData(entity, new Rotation { Value = transform.rotation });
+            AddComponent(new RotateComponent_GO_ECS
+            {
+                // We can convert to radians/sec once here.
+                LocalAngularVelocity = math.radians(authoring.LocalAngularVelocity),
+            });
+            // Rotate System updates the LocalTransform component,
+            // so we add one if one doesn't already exist
+            if (!dstManager.HasComponent<LocalTransform>(entity))
+            {
+                dstManager.AddComponentData(entity, new LocalTransform { Value = TransformData.FromRotation(transform.rotation) });
+            }
         }
     }
-
     #endregion
+    */
 }
 
 #region ECS

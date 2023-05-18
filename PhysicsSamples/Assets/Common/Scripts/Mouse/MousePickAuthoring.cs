@@ -88,7 +88,8 @@ namespace Unity.Physics.Extensions
     {
         public override void Bake(MousePickAuthoring authoring)
         {
-            AddComponent(new MousePick()
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new MousePick()
             {
                 IgnoreTriggers = authoring.IgnoreTriggers,
                 IgnoreStatic = authoring.IgnoreStatic
@@ -176,7 +177,7 @@ namespace Unity.Physics.Extensions
                 Vector2 mousePosition = Input.mousePosition;
                 UnityEngine.Ray unityRay = Camera.main.ScreenPointToRay(mousePosition);
 
-                var world = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+                var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
 
                 // Schedule picking job, after the collision world has been built
                 Dependency = new Pick
@@ -191,7 +192,7 @@ namespace Unity.Physics.Extensions
                     },
                     Near = Camera.main.nearClipPlane,
                     Forward = Camera.main.transform.forward,
-                    IgnoreTriggers = GetSingleton<MousePick>().IgnoreTriggers,
+                    IgnoreTriggers = SystemAPI.GetSingleton<MousePick>().IgnoreTriggers,
                 }.Schedule(Dependency);
 
                 PickJobHandle = Dependency;
@@ -222,8 +223,8 @@ namespace Unity.Physics.Extensions
 
         protected override void OnUpdate()
         {
-            ComponentLookup<Translation> Positions = GetComponentLookup<Translation>(true);
-            ComponentLookup<Rotation> Rotations = GetComponentLookup<Rotation>(true);
+            ComponentLookup<LocalTransform> LocalTransforms = GetComponentLookup<LocalTransform>(true);
+
             ComponentLookup<PhysicsVelocity> Velocities = GetComponentLookup<PhysicsVelocity>();
             ComponentLookup<PhysicsMass> Masses = GetComponentLookup<PhysicsMass>(true);
             ComponentLookup<PhysicsMassOverride> MassOverrides = GetComponentLookup<PhysicsMassOverride>(true);
@@ -255,7 +256,8 @@ namespace Unity.Physics.Extensions
                 }
 
 
-                var worldFromBody = new MTransform(Rotations[entity].Value, Positions[entity].Value);
+                var worldFromBody = new MTransform(LocalTransforms[entity].Rotation, LocalTransforms[entity].Position);
+
 
                 // Body to motion transform
                 var bodyFromMotion = new MTransform(Masses[entity].InertiaOrientation, Masses[entity].CenterOfMass);

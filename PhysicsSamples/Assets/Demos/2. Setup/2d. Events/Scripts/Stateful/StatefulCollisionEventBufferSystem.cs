@@ -17,7 +17,6 @@ namespace Unity.Physics.Stateful
     /// </summary>
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsSimulationGroup))]
-    [BurstCompile]
     public partial struct StatefulCollisionEventBufferSystem : ISystem
     {
         private StatefulSimulationEventBuffers<StatefulCollisionEvent> m_StateFulEventBuffers;

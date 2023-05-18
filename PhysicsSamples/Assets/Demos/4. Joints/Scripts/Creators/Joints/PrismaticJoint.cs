@@ -23,39 +23,6 @@ namespace Unity.Physics.Authoring
                 PerpendicularAxisInConnectedEntity = math.mul(bFromA.rot, PerpendicularAxisLocal);
             }
         }
-
-        public override void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem)
-        {
-            UpdateAuto();
-            PhysicsJoint joint = PhysicsJoint.CreatePrismatic(
-                new BodyFrame
-                {
-                    Axis = AxisLocal,
-                    PerpendicularAxis = PerpendicularAxisLocal,
-                    Position = PositionLocal
-                },
-                new BodyFrame
-                {
-                    Axis = AxisInConnectedEntity,
-                    PerpendicularAxis = PerpendicularAxisInConnectedEntity,
-                    Position = PositionInConnectedEntity
-                },
-                new FloatRange(MinDistanceOnAxis, MaxDistanceOnAxis)
-            );
-            var constraints = joint.GetConstraints();
-            for (int i = 0; i < constraints.Length; ++i)
-            {
-                constraints.ElementAt(i).MaxImpulse = MaxImpulse;
-                constraints.ElementAt(i).EnableImpulseEvents = RaiseImpulseEvents;
-            }
-            joint.SetConstraints(constraints);
-
-            conversionSystem.World.GetOrCreateSystemManaged<EndJointConversionSystem>().CreateJointEntity(
-                this,
-                GetConstrainedBodyPair(conversionSystem),
-                joint
-            );
-        }
     }
 
     class PrismaticJointBaker : JointBaker<PrismaticJoint>
@@ -79,6 +46,9 @@ namespace Unity.Physics.Authoring
                 },
                 new FloatRange(authoring.MinDistanceOnAxis, authoring.MaxDistanceOnAxis)
             );
+
+            physicsJoint.SetImpulseEventThresholdAllConstraints(authoring.MaxImpulse);
+
             var constraintBodyPair = GetConstrainedBodyPair(authoring);
 
             uint worldIndex = GetWorldIndexFromBaseJoint(authoring);

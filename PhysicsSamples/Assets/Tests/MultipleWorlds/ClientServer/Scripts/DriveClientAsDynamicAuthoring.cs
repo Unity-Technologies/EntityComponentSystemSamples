@@ -10,7 +10,8 @@ public class DriveClientAsDynamicBaker : Baker<DriveClientAsDynamicAuthoring>
 {
     public override void Bake(DriveClientAsDynamicAuthoring authoring)
     {
-        AddComponent(new DriveClientAsDynamic {});
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new DriveClientAsDynamic {});
     }
 }
 
@@ -34,39 +35,37 @@ public partial class DriveClientAsDynamicSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var commandBufferSingleton = GetSingleton<BeginFixedStepSimulationEntityCommandBufferSystem.Singleton>();
+        var commandBufferSingleton = SystemAPI.GetSingleton<BeginFixedStepSimulationEntityCommandBufferSystem.Singleton>();
         var commandBuffer = commandBufferSingleton.CreateCommandBuffer(World.Unmanaged);
         m_DriveClientAsDynamic.Update(this);
         m_PhysicsCollider.Update(this);
         m_GravityFactor.Update(this);
         m_PhysicsMass.Update(this);
 
-        Entities
-            .WithoutBurst()
-            .ForEach((ref Entity client, in CustomPhysicsProxyDriver proxyDriver) =>
+        foreach (var(proxyDriver, client) in SystemAPI.Query<RefRO<CustomPhysicsProxyDriver>>().WithEntityAccess())
+        {
+            if (m_DriveClientAsDynamic.TryGetComponent(proxyDriver.ValueRO.rootEntity, out DriveClientAsDynamic driveClientAsDynamic))
             {
-                if (m_DriveClientAsDynamic.TryGetComponent(proxyDriver.rootEntity, out DriveClientAsDynamic driveClientAsDynamic))
+                commandBuffer.RemoveComponent<DriveClientAsDynamic>(proxyDriver.ValueRO.rootEntity);
+                commandBuffer.AddComponent(client, new Simulate {});
+
+                var serverMass = m_PhysicsMass[proxyDriver.ValueRO.rootEntity];
+                if (serverMass.IsKinematic)
                 {
-                    commandBuffer.RemoveComponent<DriveClientAsDynamic>(proxyDriver.rootEntity);
-                    commandBuffer.AddComponent(client, new Simulate {});
-
-                    var serverMass = m_PhysicsMass[proxyDriver.rootEntity];
-                    if (serverMass.IsKinematic)
-                    {
-                        // set something big if we have a kinematic body on server, otherwise take the server mass as it is
-                        serverMass.InverseMass = 1.0f / 10000f;
-                    }
-
-                    commandBuffer.SetComponent(client, serverMass);
-                    if (m_GravityFactor.HasComponent(client))
-                    {
-                        m_GravityFactor[client] = new PhysicsGravityFactor { Value = 0.0f }; // disable gravity
-                    }
-                    else
-                    {
-                        commandBuffer.AddComponent(client, new PhysicsGravityFactor { Value = 0.0f });
-                    }
+                    // set something big if we have a kinematic body on server, otherwise take the server mass as it is
+                    serverMass.InverseMass = 1.0f / 10000f;
                 }
-            }).Run();
+
+                commandBuffer.SetComponent(client, serverMass);
+                if (m_GravityFactor.HasComponent(client))
+                {
+                    m_GravityFactor[client] = new PhysicsGravityFactor { Value = 0.0f }; // disable gravity
+                }
+                else
+                {
+                    commandBuffer.AddComponent(client, new PhysicsGravityFactor { Value = 0.0f });
+                }
+            }
+        }
     }
 }

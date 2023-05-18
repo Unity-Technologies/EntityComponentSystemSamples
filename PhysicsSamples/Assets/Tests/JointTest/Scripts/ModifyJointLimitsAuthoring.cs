@@ -86,7 +86,8 @@ class ModifyJointLimitsBaker : Baker<ModifyJointLimitsAuthoring>
 {
     public override void Bake(ModifyJointLimitsAuthoring authoring)
     {
-        AddComponentObject(new ModifyJointLimitsBakingData
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponentObject(entity, new ModifyJointLimitsBakingData
         {
             AngularRangeScalar = authoring.AngularRangeScalar,
             LinearRangeScalar = authoring.LinearRangeScalar
@@ -97,31 +98,29 @@ class ModifyJointLimitsBaker : Baker<ModifyJointLimitsAuthoring>
 // after joints have been converted, find the entities they produced and add ModifyJointLimits to them
 [UpdateAfter(typeof(EndJointBakingSystem))]
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-partial class ModifyJointLimitsBakingSystem : SystemBase
+partial struct ModifyJointLimitsBakingSystem : ISystem
 {
     private EntityQuery _ModifyJointLimitsBakingDataQuery;
     private EntityQuery _JointEntityBakingQuery;
 
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        _ModifyJointLimitsBakingDataQuery = GetEntityQuery(new EntityQueryDesc
+        _ModifyJointLimitsBakingDataQuery = state.GetEntityQuery(new EntityQueryDesc
         {
             All = new[] { ComponentType.ReadOnly<ModifyJointLimitsBakingData>() },
-            Options = EntityQueryOptions.IncludeDisabledEntities
+            Options = EntityQueryOptions.IncludeDisabledEntities | EntityQueryOptions.IncludePrefab
         });
 
-        _JointEntityBakingQuery = GetEntityQuery(new EntityQueryDesc
+        _JointEntityBakingQuery = state.GetEntityQuery(new EntityQueryDesc
         {
-            All = new[] { ComponentType.ReadOnly<JointEntityBaking>() },
-            Options = EntityQueryOptions.IncludeDisabledEntities
+            All = new[] { ComponentType.ReadOnly<JointEntityBaking>() }
         });
 
         _ModifyJointLimitsBakingDataQuery.AddChangedVersionFilter(typeof(ModifyJointLimitsBakingData));
         _JointEntityBakingQuery.AddChangedVersionFilter(typeof(JointEntityBaking));
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         if (_ModifyJointLimitsBakingDataQuery.IsEmpty && _JointEntityBakingQuery.IsEmpty)
         {
@@ -129,13 +128,14 @@ partial class ModifyJointLimitsBakingSystem : SystemBase
         }
 
         // Collect all the joints
-        NativeMultiHashMap<Entity, (Entity, PhysicsJoint)> jointsLookUp = new NativeMultiHashMap<Entity, (Entity, PhysicsJoint)>(10, Allocator.TempJob);
-        Entities.ForEach((Entity entity, in JointEntityBaking jointEntity, in PhysicsJoint physicsJoint) =>
-        {
-            jointsLookUp.Add(jointEntity.Entity, (entity, physicsJoint));
-        }).Run();
+        NativeParallelMultiHashMap<Entity, (Entity, PhysicsJoint)> jointsLookUp = new NativeParallelMultiHashMap<Entity, (Entity, PhysicsJoint)>(10, Allocator.TempJob);
 
-        Entities.ForEach((Entity entity, ModifyJointLimitsBakingData modifyJointLimits) =>
+        foreach (var(jointEntity, physicsJoint, entity) in SystemAPI.Query<RefRO<JointEntityBaking>, RefRO<PhysicsJoint>>().WithEntityAccess().WithOptions(EntityQueryOptions.IncludeDisabledEntities | EntityQueryOptions.IncludePrefab))
+        {
+            jointsLookUp.Add(jointEntity.ValueRO.Entity, (entity, physicsJoint.ValueRO));
+        }
+
+        foreach (var(modifyJointLimits, entity) in SystemAPI.Query<ModifyJointLimitsBakingData>().WithEntityAccess().WithOptions(EntityQueryOptions.IncludeDisabledEntities | EntityQueryOptions.IncludePrefab))
         {
             var angularModification = new ParticleSystem.MinMaxCurve(
                 multiplier: math.radians(modifyJointLimits.AngularRangeScalar.curveMultiplier),
@@ -145,14 +145,14 @@ partial class ModifyJointLimitsBakingSystem : SystemBase
 
             foreach (var joint in jointsLookUp.GetValuesForKey(entity))
             {
-                EntityManager.SetSharedComponentManaged(joint.Item1, new ModifyJointLimits
+                state.EntityManager.SetSharedComponentManaged(joint.Item1, new ModifyJointLimits
                 {
                     InitialValue = joint.Item2,
                     AngularRangeScalar = angularModification,
                     LinearRangeScalar = modifyJointLimits.LinearRangeScalar
                 });
             }
-        }).WithStructuralChanges().Run();
+        }
 
         jointsLookUp.Dispose();
     }
@@ -162,78 +162,75 @@ partial class ModifyJointLimitsBakingSystem : SystemBase
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-partial class ModifyJointLimitsSystem : SystemBase
+partial struct ModifyJointLimitsSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var time = (float)SystemAPI.Time.ElapsedTime;
 
-        Entities
-            .WithName("ModifyJointLimitsJob")
-            .WithoutBurst()
-            .ForEach((ref PhysicsJoint joint, in ModifyJointLimits modification) =>
-            {
-                var animatedAngularScalar = new FloatRange(
-                    modification.AngularRangeScalar.curveMin.Evaluate(time),
-                    modification.AngularRangeScalar.curveMax.Evaluate(time)
-                );
-                var animatedLinearScalar = new FloatRange(
-                    modification.LinearRangeScalar.curveMin.Evaluate(time),
-                    modification.LinearRangeScalar.curveMax.Evaluate(time)
-                );
+        foreach (var(joint, modification) in SystemAPI.Query<RefRW<PhysicsJoint>, ModifyJointLimits>())
+        {
+            var animatedAngularScalar = new FloatRange(
+                modification.AngularRangeScalar.curveMin.Evaluate(time),
+                modification.AngularRangeScalar.curveMax.Evaluate(time)
+            );
+            var animatedLinearScalar = new FloatRange(
+                modification.LinearRangeScalar.curveMin.Evaluate(time),
+                modification.LinearRangeScalar.curveMax.Evaluate(time)
+            );
 
-                // in each case, get relevant properties from the initial value based on joint type, and apply scalar
-                switch (joint.JointType)
-                {
-                    // Custom type could be anything, so this demo just applies changes to all constraints
-                    case JointType.Custom:
-                        var constraints = modification.InitialValue.GetConstraints();
-                        for (var i = 0; i < constraints.Length; i++)
-                        {
-                            var constraint = constraints[i];
-                            var isAngular = constraint.Type == ConstraintType.Angular;
-                            var scalar = math.select(animatedLinearScalar, animatedAngularScalar, isAngular);
-                            var constraintRange = (FloatRange)(new float2(constraint.Min, constraint.Max) * scalar);
-                            constraint.Min = constraintRange.Min;
-                            constraint.Max = constraintRange.Max;
-                            constraints[i] = constraint;
-                        }
-                        joint.SetConstraints(constraints);
-                        break;
-                    // other types have corresponding getters/setters to retrieve more meaningful data
-                    case JointType.LimitedDistance:
-                        var distanceRange = modification.InitialValue.GetLimitedDistanceRange();
-                        joint.SetLimitedDistanceRange(distanceRange * (float2)animatedLinearScalar);
-                        break;
-                    case JointType.LimitedHinge:
-                        var angularRange = modification.InitialValue.GetLimitedHingeRange();
-                        joint.SetLimitedHingeRange(angularRange * (float2)animatedAngularScalar);
-                        break;
-                    case JointType.Prismatic:
-                        var distanceOnAxis = modification.InitialValue.GetPrismaticRange();
-                        joint.SetPrismaticRange(distanceOnAxis * (float2)animatedLinearScalar);
-                        break;
-                    // ragdoll joints are composed of two separate joints with different meanings
-                    case JointType.RagdollPrimaryCone:
-                        modification.InitialValue.GetRagdollPrimaryConeAndTwistRange(
-                            out var maxConeAngle,
-                            out var angularTwistRange
-                        );
-                        joint.SetRagdollPrimaryConeAndTwistRange(
-                            maxConeAngle * animatedAngularScalar.Max,
-                            angularTwistRange * (float2)animatedAngularScalar
-                        );
-                        break;
-                    case JointType.RagdollPerpendicularCone:
-                        var angularPlaneRange = modification.InitialValue.GetRagdollPerpendicularConeRange();
-                        joint.SetRagdollPerpendicularConeRange(angularPlaneRange * (float2)animatedAngularScalar);
-                        break;
-                    // remaining types have no limits on their Constraint atoms to meaningfully modify
-                    case JointType.BallAndSocket:
-                    case JointType.Fixed:
-                    case JointType.Hinge:
-                        break;
-                }
-            }).Run();
+            // in each case, get relevant properties from the initial value based on joint type, and apply scalar
+            switch (joint.ValueRW.JointType)
+            {
+                // Custom type could be anything, so this demo just applies changes to all constraints
+                case JointType.Custom:
+                    var constraints = modification.InitialValue.GetConstraints();
+                    for (var i = 0; i < constraints.Length; i++)
+                    {
+                        var constraint = constraints[i];
+                        var isAngular = constraint.Type == ConstraintType.Angular;
+                        var scalar = math.select(animatedLinearScalar, animatedAngularScalar, isAngular);
+                        var constraintRange = (FloatRange)(new float2(constraint.Min, constraint.Max) * scalar);
+                        constraint.Min = constraintRange.Min;
+                        constraint.Max = constraintRange.Max;
+                        constraints[i] = constraint;
+                    }
+                    joint.ValueRW.SetConstraints(constraints);
+                    break;
+                // other types have corresponding getters/setters to retrieve more meaningful data
+                case JointType.LimitedDistance:
+                    var distanceRange = modification.InitialValue.GetLimitedDistanceRange();
+                    joint.ValueRW.SetLimitedDistanceRange(distanceRange * (float2)animatedLinearScalar);
+                    break;
+                case JointType.LimitedHinge:
+                    var angularRange = modification.InitialValue.GetLimitedHingeRange();
+                    joint.ValueRW.SetLimitedHingeRange(angularRange * (float2)animatedAngularScalar);
+                    break;
+                case JointType.Prismatic:
+                    var distanceOnAxis = modification.InitialValue.GetPrismaticRange();
+                    joint.ValueRW.SetPrismaticRange(distanceOnAxis * (float2)animatedLinearScalar);
+                    break;
+                // ragdoll joints are composed of two separate joints with different meanings
+                case JointType.RagdollPrimaryCone:
+                    modification.InitialValue.GetRagdollPrimaryConeAndTwistRange(
+                        out var maxConeAngle,
+                        out var angularTwistRange
+                    );
+                    joint.ValueRW.SetRagdollPrimaryConeAndTwistRange(
+                        maxConeAngle * animatedAngularScalar.Max,
+                        angularTwistRange * (float2)animatedAngularScalar
+                    );
+                    break;
+                case JointType.RagdollPerpendicularCone:
+                    var angularPlaneRange = modification.InitialValue.GetRagdollPerpendicularConeRange();
+                    joint.ValueRW.SetRagdollPerpendicularConeRange(angularPlaneRange * (float2)animatedAngularScalar);
+                    break;
+                // remaining types have no limits on their Constraint atoms to meaningfully modify
+                case JointType.BallAndSocket:
+                case JointType.Fixed:
+                case JointType.Hinge:
+                    break;
+            }
+        }
     }
 }

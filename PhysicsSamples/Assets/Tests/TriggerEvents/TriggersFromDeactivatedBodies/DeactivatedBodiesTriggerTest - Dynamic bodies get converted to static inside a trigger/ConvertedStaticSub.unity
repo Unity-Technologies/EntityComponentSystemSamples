@@ -134,7 +134,6 @@ GameObject:
   - component: {fileID: 85738787}
   - component: {fileID: 85738791}
   - component: {fileID: 85738790}
-  - component: {fileID: 85738789}
   - component: {fileID: 85738788}
   m_Layer: 0
   m_Name: Cube (2)
@@ -301,19 +300,6 @@ MonoBehaviour:
         Tag07: 0
     m_SerializedVersion: 1
   m_SerializedVersion: 1
---- !u!114 &85738789
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 85738786}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &85738790
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -506,7 +492,6 @@ GameObject:
   - component: {fileID: 261599692}
   - component: {fileID: 261599691}
   - component: {fileID: 261599690}
-  - component: {fileID: 261599689}
   m_Layer: 0
   m_Name: Physics Settings
   m_TagString: Untagged
@@ -514,19 +499,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &261599689
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 261599688}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 1
 --- !u!114 &261599690
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -560,7 +532,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1f2299aae95eb4e80de7e4124130c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Highlight: {fileID: 2100000, guid: e889ae5f4d0a97f4fa03330ed4ab2d05, type: 2}
+  HoverPrefab: {fileID: 1191054677816456, guid: 5847e3636a433e3428bdc22fad0f06fe,
+    type: 3}
   IgnoreTriggers: 1
   IgnoreStatic: 1
 --- !u!114 &261599692
@@ -729,7 +702,6 @@ GameObject:
   m_Component:
   - component: {fileID: 363783876}
   - component: {fileID: 363783875}
-  - component: {fileID: 363783874}
   m_Layer: 0
   m_Name: DynamicSpawner
   m_TagString: Untagged
@@ -737,19 +709,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &363783874
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 363783873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!114 &363783875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -796,7 +755,6 @@ GameObject:
   - component: {fileID: 510621860}
   - component: {fileID: 510621859}
   - component: {fileID: 510621858}
-  - component: {fileID: 510621857}
   - component: {fileID: 510621856}
   - component: {fileID: 510621855}
   m_Layer: 0
@@ -1000,19 +958,6 @@ MonoBehaviour:
     Tag05: 0
     Tag06: 0
     Tag07: 0
---- !u!114 &510621857
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 510621854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &510621858
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1088,7 +1033,6 @@ GameObject:
   m_Component:
   - component: {fileID: 637093594}
   - component: {fileID: 637093593}
-  - component: {fileID: 637093592}
   m_Layer: 0
   m_Name: StaticSpawner
   m_TagString: Untagged
@@ -1096,19 +1040,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &637093592
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 637093591}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!114 &637093593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1155,7 +1086,6 @@ GameObject:
   - component: {fileID: 723761535}
   - component: {fileID: 723761534}
   - component: {fileID: 723761533}
-  - component: {fileID: 723761532}
   - component: {fileID: 723761531}
   - component: {fileID: 723761530}
   m_Layer: 0
@@ -1359,19 +1289,6 @@ MonoBehaviour:
     Tag05: 0
     Tag06: 0
     Tag07: 0
---- !u!114 &723761532
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 723761529}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &723761533
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1448,7 +1365,6 @@ GameObject:
   - component: {fileID: 945854845}
   - component: {fileID: 945854849}
   - component: {fileID: 945854848}
-  - component: {fileID: 945854847}
   - component: {fileID: 945854846}
   m_Layer: 0
   m_Name: Cube (2)
@@ -1615,19 +1531,6 @@ MonoBehaviour:
         Tag07: 0
     m_SerializedVersion: 1
   m_SerializedVersion: 1
---- !u!114 &945854847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 945854844}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &945854848
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1689,7 +1592,6 @@ GameObject:
   - component: {fileID: 1004403571}
   - component: {fileID: 1004403578}
   - component: {fileID: 1004403577}
-  - component: {fileID: 1004403576}
   - component: {fileID: 1004403575}
   - component: {fileID: 1004403574}
   - component: {fileID: 1004403573}
@@ -1937,19 +1839,6 @@ MonoBehaviour:
         Tag07: 0
     m_SerializedVersion: 1
   m_SerializedVersion: 1
---- !u!114 &1004403576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1004403570}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &1004403577
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2011,7 +1900,6 @@ GameObject:
   - component: {fileID: 1056847235}
   - component: {fileID: 1056847242}
   - component: {fileID: 1056847241}
-  - component: {fileID: 1056847240}
   - component: {fileID: 1056847239}
   - component: {fileID: 1056847238}
   - component: {fileID: 1056847237}
@@ -2259,19 +2147,6 @@ MonoBehaviour:
         Tag07: 0
     m_SerializedVersion: 1
   m_SerializedVersion: 1
---- !u!114 &1056847240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1056847234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &1056847241
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2333,7 +2208,6 @@ GameObject:
   - component: {fileID: 1219609847}
   - component: {fileID: 1219609854}
   - component: {fileID: 1219609853}
-  - component: {fileID: 1219609852}
   - component: {fileID: 1219609851}
   - component: {fileID: 1219609850}
   - component: {fileID: 1219609849}
@@ -2582,19 +2456,6 @@ MonoBehaviour:
         Tag07: 0
     m_SerializedVersion: 1
   m_SerializedVersion: 1
---- !u!114 &1219609852
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1219609846}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &1219609853
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2654,7 +2515,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1285147590}
-  - component: {fileID: 1285147589}
   m_Layer: 0
   m_Name: ConvertToStaticBodyGroup
   m_TagString: Untagged
@@ -2662,19 +2522,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1285147589
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1285147588}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!4 &1285147590
 Transform:
   m_ObjectHideFlags: 0
@@ -2701,7 +2548,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1664982443}
-  - component: {fileID: 1664982442}
   m_Layer: 0
   m_Name: ConvertToStaticBodyGroup (1)
   m_TagString: Untagged
@@ -2709,19 +2555,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1664982442
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664982441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!4 &1664982443
 Transform:
   m_ObjectHideFlags: 0
@@ -2847,7 +2680,6 @@ GameObject:
   - component: {fileID: 2037376102}
   - component: {fileID: 2037376109}
   - component: {fileID: 2037376108}
-  - component: {fileID: 2037376107}
   - component: {fileID: 2037376106}
   - component: {fileID: 2037376105}
   - component: {fileID: 2037376104}
@@ -3096,19 +2928,6 @@ MonoBehaviour:
         Tag07: 0
     m_SerializedVersion: 1
   m_SerializedVersion: 1
---- !u!114 &2037376107
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2037376101}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!23 &2037376108
 MeshRenderer:
   m_ObjectHideFlags: 0

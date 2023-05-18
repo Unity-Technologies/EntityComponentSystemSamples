@@ -18,7 +18,8 @@ public class UserWorldCreator : MonoBehaviour
     {
         public override void Bake(UserWorldCreator authoring)
         {
-            AddComponent<UserWorldSingleton>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent<UserWorldSingleton>(entity);
         }
     }
 }
@@ -43,22 +44,6 @@ public partial class UserPhysicsGroup : CustomPhysicsSystemGroup
     protected override void AddExistingSystemsToUpdate(List<Type> systems)
     {
         systems.Add(typeof(TriggerEventsCountSystem_InPhysicsGroup));
-    }
-
-    protected override void PreGroupUpdateCallback()
-    {
-        base.PreGroupUpdateCallback();
-
-        // Disable data clean in the group which updates after main physics.
-        World.GetExistingSystemManaged<CleanPhysicsDebugDataSystem>().Enabled = false;
-    }
-
-    protected override void PostGroupUpdateCallback()
-    {
-        base.PostGroupUpdateCallback();
-
-        // Restore data clean for the main physics - since it updates after main physics.
-        World.GetExistingSystemManaged<CleanPhysicsDebugDataSystem>().Enabled = true;
     }
 }
 
@@ -106,61 +91,58 @@ public partial struct CountTriggerEventsJob : ITriggerEventsJob
 #region Trigger event systems
 
 [UpdateInGroup(typeof(BeforePhysicsSystemGroup))]
-public partial class TriggerEventsCountSystem_BeforePhysicsGroup : SystemBase
+public partial struct TriggerEventsCountSystem_BeforePhysicsGroup : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<UserWorldSingleton>();
+        state.RequireForUpdate<UserWorldSingleton>();
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         NativeReference<int> eventCount = new NativeReference<int>(0, Allocator.TempJob);
 
-        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
-        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.BeforePhysicsGroup, WorldIndex = (int)GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
-        Dependency = eventCount.Dispose(Dependency);
+        state.Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
+        state.Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.BeforePhysicsGroup, WorldIndex = (int)SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(state.Dependency);
+        state.Dependency = eventCount.Dispose(state.Dependency);
     }
 }
 
 [UpdateInGroup(typeof(PhysicsSystemGroup))]
 [UpdateAfter(typeof(PhysicsSimulationGroup))]
 [UpdateBefore(typeof(ExportPhysicsWorld))]
-public partial class TriggerEventsCountSystem_InPhysicsGroup : SystemBase
+public partial struct TriggerEventsCountSystem_InPhysicsGroup : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<UserWorldSingleton>();
+        state.RequireForUpdate<UserWorldSingleton>();
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         NativeReference<int> eventCount = new NativeReference<int>(0, Allocator.TempJob);
 
-        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
-        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.InPhysicsGroup, WorldIndex = (int)GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
-        Dependency = eventCount.Dispose(Dependency);
+        state.Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
+        state.Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.InPhysicsGroup, WorldIndex = (int)SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(state.Dependency);
+        state.Dependency = eventCount.Dispose(state.Dependency);
     }
 }
 
 [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
-public partial class TriggerEventsCountSystem_AfterPhysicsGroup : SystemBase
+public partial struct TriggerEventsCountSystem_AfterPhysicsGroup : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<UserWorldSingleton>();
+        state.RequireForUpdate<UserWorldSingleton>();
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         NativeReference<int> eventCount = new NativeReference<int>(0, Allocator.TempJob);
 
-        Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
-        Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.AfterPhysicsGroup, WorldIndex = (int)GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(Dependency);
-        Dependency = eventCount.Dispose(Dependency);
+        state.Dependency = new CountTriggerEventsJob { EventCount = eventCount }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
+        state.Dependency = new CheckEventCountJob { EventCount = eventCount, UpdateOrder = SystemUpdateOrderEnum.AfterPhysicsGroup, WorldIndex = (int)SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorldIndex.Value }.Schedule(state.Dependency);
+        state.Dependency = eventCount.Dispose(state.Dependency);
     }
 }
 

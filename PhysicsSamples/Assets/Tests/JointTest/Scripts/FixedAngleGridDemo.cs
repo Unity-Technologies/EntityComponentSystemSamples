@@ -11,7 +11,8 @@ public class FixedAngleGridDemo : SceneCreationAuthoring<FixedAngleGridScene>
     {
         public override void Bake(FixedAngleGridDemo authoring)
         {
-            AddComponentObject(new FixedAngleGridScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new FixedAngleGridScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial
@@ -20,7 +21,7 @@ public class FixedAngleGridDemo : SceneCreationAuthoring<FixedAngleGridScene>
     }
 }
 
-public class FixAngleGridDemoSystem : SceneCreationSystem<FixedAngleGridScene>
+public partial class FixAngleGridDemoSystem : SceneCreationSystem<FixedAngleGridScene>
 {
     public override void CreateScene(FixedAngleGridScene sceneSettings)
     {

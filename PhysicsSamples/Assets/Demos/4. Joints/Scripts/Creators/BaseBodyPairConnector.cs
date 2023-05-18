@@ -28,7 +28,5 @@ namespace Unity.Physics.Authoring
         {
             // included so tick box appears in Editor
         }
-
-        public abstract void Create(EntityManager entityManager, GameObjectConversionSystem conversionSystem);
     }
 }

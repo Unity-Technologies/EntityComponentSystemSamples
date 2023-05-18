@@ -1,7 +1,7 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
@@ -30,11 +30,6 @@ class ChangeScaleBaker : Baker<ChangeScaleAuthoring>
             Max = authoring.Max,
             Target = math.lerp(authoring.Min, authoring.Max, 0.5f),
         });
-
-        AddComponent(entity, new Scale
-        {
-            Value = 1
-        });
     }
 }
 
@@ -42,26 +37,16 @@ class ChangeScaleBaker : Baker<ChangeScaleAuthoring>
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct ChangeScaleSystem : ISystem
 {
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-    }
-
-    [BurstCompile]
     public partial struct ChangeScaleJob : IJobEntity
     {
-        public void Execute(ref ChangeScaleSettings scaleSettings, ref Scale scale)
+        public void Execute(ref ChangeScaleSettings scaleSettings, ref LocalTransform localTransform)
         {
+            float oldScale = localTransform.Scale;
+
             float newScale = 1.0f;
-            float oldScale = scale.Value;
 
             newScale = math.lerp(oldScale, scaleSettings.Target, 0.05f);
 
@@ -71,7 +56,7 @@ public partial struct ChangeScaleSystem : ISystem
                 scaleSettings.Target = scaleSettings.Target == scaleSettings.Min ? scaleSettings.Max : scaleSettings.Min;
             }
 
-            scale.Value = newScale;
+            localTransform.Scale = newScale;
         }
     }
 

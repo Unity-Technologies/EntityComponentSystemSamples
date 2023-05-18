@@ -16,20 +16,21 @@ namespace Unity.Physics
         {
             public override void Bake(VerifyPhasedDispatchPairs authoring)
             {
-                AddComponent<VerifyPhasedDispatchPairsData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<VerifyPhasedDispatchPairsData>(entity);
             }
         }
     }
-    
+
     [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(PhysicsSimulationGroup))]
     [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
     [UpdateBefore(typeof(PhysicsCreateContactsGroup))]
-    public partial class VerifyPhasedDispatchPairsSystem : SystemBase
+    public partial struct VerifyPhasedDispatchPairsSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate(GetEntityQuery(new EntityQueryDesc
+            state.RequireForUpdate(state.GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[] { typeof(VerifyPhasedDispatchPairsData) }
             }));
@@ -65,17 +66,17 @@ namespace Unity.Physics
             }
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
-            var simulationSingleton = GetSingleton<SimulationSingleton>();
-            var worldSingleton = GetSingleton<PhysicsWorldSingleton>();
+            var simulationSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
+            var worldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
-            Dependency = new VerifyPhasedDispatchPairsJob
+            state.Dependency = new VerifyPhasedDispatchPairsJob
             {
-                VerificationData = GetComponentLookup<VerifyPhasedDispatchPairsData>(true),
+                VerificationData = SystemAPI.GetComponentLookup<VerifyPhasedDispatchPairsData>(true),
                 LastStaticPairPerDynamicBody = new NativeArray<int>(worldSingleton.PhysicsWorld.NumDynamicBodies, Allocator.TempJob),
                 IsUnityPhysics = simulationSingleton.Type == SimulationType.UnityPhysics
-            }.Schedule(simulationSingleton, ref worldSingleton.PhysicsWorld, Dependency);
+            }.Schedule(simulationSingleton, ref worldSingleton.PhysicsWorld, state.Dependency);
         }
     }
 }

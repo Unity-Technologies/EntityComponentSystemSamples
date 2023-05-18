@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -33,7 +34,8 @@ class RagdollDemoBaker : Baker<RagdollDemo>
     {
         DependsOn(authoring.RenderMesh);
         DependsOn(authoring.TorsoMesh);
-        AddComponentObject(new RagdollDemoScene
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponentObject(entity, new RagdollDemoScene
         {
             DynamicMaterial = authoring.DynamicMaterial,
             StaticMaterial = authoring.StaticMaterial,
@@ -46,7 +48,7 @@ class RagdollDemoBaker : Baker<RagdollDemo>
     }
 }
 
-public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
+public partial class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
 {
     private enum layer
     {
@@ -87,29 +89,20 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
         EntityManager.RemoveComponent<RenderMesh>(entity);
 
         var renderMesh = new RenderMeshArray(
-            new [] { DynamicMaterial },
-            new [] { isTorso? torsoMesh: mesh });
+            new[] { DynamicMaterial },
+            new[] { isTorso? torsoMesh: mesh });
 
         var renderMeshDescription = new RenderMeshDescription(ShadowCastingMode.On);
+        var scale = EntityManager.GetComponentData<RenderBounds>(entity).Value.Size;
 
         RenderMeshUtility.AddComponents(entity, EntityManager, renderMeshDescription, renderMesh, MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
         EntityManager.AddComponentData(entity, new LocalToWorld());
 
         if (!isTorso)
         {
-            var renderBounds = EntityManager.GetComponentData<RenderBounds>(entity);
-            EntityManager.AddComponentData<NonUniformScale>(entity, new NonUniformScale
-            {
-                Value = renderBounds.Value.Size,
-            });
+            var compositeScale = float4x4.Scale(scale);
+            EntityManager.AddComponentData(entity, new PostTransformMatrix { Value = compositeScale });
         }
-    }
-
-    private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
-        float3 positionOffset, quaternion rotationOffset, int ragdollIndex = 1, bool internalCollisions = false, float rangeGain = 1.0f)
-    {
-        CreateRagdoll(torsoMesh, renderMesh, positionOffset,
-            rotationOffset, float3.zero, ragdollIndex, internalCollisions, rangeGain);
     }
 
     private void CreateRagdoll(Mesh torsoMesh, Mesh renderMesh,
@@ -217,7 +210,6 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
             CreatedColliders.Add(upperArmCollider);
             CreatedColliders.Add(foreArmCollider);
             CreatedColliders.Add(handCollider);
-
 
             for (int i = 0; i < 2; i++)
             {
@@ -431,15 +423,17 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
             {
                 var e = entities[i];
 
-                bool isTorso = (i == 1);
-                SwapRenderMesh(e, isTorso, torsoMesh, renderMesh);
+                SwapRenderMesh(e, i == 1, torsoMesh, renderMesh);
 
-                Translation positionComponent = EntityManager.GetComponentData<Translation>(e);
-                Rotation rotationComponent = EntityManager.GetComponentData<Rotation>(e);
+
+                LocalTransform localTransformComponent = EntityManager.GetComponentData<LocalTransform>(e);
+
                 PhysicsVelocity velocityComponent = EntityManager.GetComponentData<PhysicsVelocity>(e);
 
-                float3 position = positionComponent.Value;
-                quaternion rotation = rotationComponent.Value;
+
+                float3 position = localTransformComponent.Position;
+                quaternion rotation = localTransformComponent.Rotation;
+
 
                 float3 localPosition = position - pelvisPosition;
                 localPosition = math.rotate(rotationOffset, localPosition);
@@ -447,14 +441,17 @@ public class RagdollDemoSystem : SceneCreationSystem<RagdollDemoScene>
                 position = localPosition + pelvisPosition + positionOffset;
                 rotation = math.mul(rotation, rotationOffset);
 
-                positionComponent.Value = position;
-                rotationComponent.Value = rotation;
+
+                localTransformComponent.Position = position;
+                localTransformComponent.Rotation = rotation;
+
 
                 velocityComponent.Linear = initialVelocity;
 
                 EntityManager.SetComponentData<PhysicsVelocity>(e, velocityComponent);
-                EntityManager.SetComponentData<Translation>(e, positionComponent);
-                EntityManager.SetComponentData<Rotation>(e, rotationComponent);
+
+                EntityManager.SetComponentData<LocalTransform>(e, localTransformComponent);
+
             }
         }
     }

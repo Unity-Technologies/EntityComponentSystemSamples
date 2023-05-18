@@ -41,6 +41,7 @@ struct PeriodicSpawnSettings : IComponentData, ISpawnSettings, IPeriodicSpawnSet
     public quaternion Rotation { get; set; }
     public float3 Range { get; set; }
     public int Count { get; set; }
+    public int RandomSeedOffset { get; set; }
     public int SpawnRate { get; set; }
     public int DeathRate { get; set; }
 }
@@ -54,7 +55,10 @@ abstract partial class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjec
     internal override int GetRandomSeed(T spawnSettings)
     {
         int seed = base.GetRandomSeed(spawnSettings);
-        seed = (seed * 397) ^ spawnSettings.Prefab.GetHashCode();
+        // Historical note: this used to be "^ spawnSettings.Prefab.GetHashCode(), but the prefab's hash wasn't stable across code changes.
+        // Now it's hard-coded. If two spawners in the same scene differ only by the prefab they spawn, set their RandomSeedOffset field
+        // to different values to differentiate them.
+        seed = (seed * 397) ^ 220;
         seed = (seed * 397) ^ spawnSettings.DeathRate;
         seed = (seed * 397) ^ spawnSettings.SpawnRate;
         seed = (seed * 397) ^ FrameCount;
@@ -110,8 +114,12 @@ abstract partial class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjec
                     for (int i = 0; i < count; i++)
                     {
                         var instance = instances[i];
-                        EntityManager.SetComponentData(instance, new Translation { Value = positions[i] });
-                        EntityManager.SetComponentData(instance, new Rotation { Value = rotations[i] });
+
+                        var transform = EntityManager.GetComponentData<LocalTransform>(instance);
+                        transform.Position = positions[i];
+                        transform.Rotation = rotations[i];
+                        EntityManager.SetComponentData(instance, transform);
+
                         ConfigureInstance(instance, ref spawnSettings);
                     }
                 }
@@ -125,5 +133,4 @@ abstract partial class PeriodicalySpawnRandomObjectsSystem<T> : SpawnRandomObjec
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-class PeriodicallySpawnRandomShapeSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicSpawnSettings>
-{}
+partial class PeriodicallySpawnRandomShapeSystem : PeriodicalySpawnRandomObjectsSystem<PeriodicSpawnSettings> {}

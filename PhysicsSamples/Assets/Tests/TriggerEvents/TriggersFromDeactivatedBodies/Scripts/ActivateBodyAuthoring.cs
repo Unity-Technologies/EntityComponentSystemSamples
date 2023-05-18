@@ -16,9 +16,7 @@ public class ActivateBodyAuthoring : UnityEngine.MonoBehaviour
 {
     [RegisterBinding(typeof(ActivateBody), "FramesToActivateIn")]
     public int FramesToActivateIn;
-    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement.x", true)]
-    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement.y", true)]
-    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement.z", true)]
+    [RegisterBinding(typeof(ActivateBody), "ActivationDisplacement")]
     public float3 ActivationDisplacement;
 
     class AcitvateBodyBaker : Baker<ActivateBodyAuthoring>
@@ -28,52 +26,63 @@ public class ActivateBodyAuthoring : UnityEngine.MonoBehaviour
             ActivateBody component = default(ActivateBody);
             component.FramesToActivateIn = authoring.FramesToActivateIn;
             component.ActivationDisplacement = authoring.ActivationDisplacement;
-            AddComponent(component);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, component);
         }
     }
 }
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class ActivateBodySystem : SystemBase
+public partial struct ActivateBodySystem : ISystem
 {
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<ActivateBody>();
+        state.RequireForUpdate<ActivateBody>();
     }
 
-    protected override void OnUpdate()
+    public partial struct ActivateBodyJob : IJobEntity
+    {
+        public EntityCommandBuffer CommandBuffer;
+
+
+        public void Execute(Entity entity, ref LocalTransform localTransform, ref ActivateBody activateBody)
+
+        {
+            if (--activateBody.FramesToActivateIn == 0)
+            {
+                CommandBuffer.RemoveComponent<ActivateBody>(entity);
+
+
+                localTransform.Position += activateBody.ActivationDisplacement;
+
+                // Bodies get out of trigger
+                if (activateBody.ActivationDisplacement.y >= 5.0f)
+                {
+                    CommandBuffer.RemoveComponent<TriggerEventChecker>(entity);
+                }
+                else if (activateBody.ActivationDisplacement.x > 0)
+                {
+                    // New bodies enter trigger
+                    CommandBuffer.AddComponent(entity, new TriggerEventChecker
+                    {
+                        NumExpectedEvents = 1
+                    });
+                }
+            }
+        }
+    }
+
+    public void OnUpdate(ref SystemState state)
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities
-                .WithName("ActivateBodies")
-                .WithoutBurst()
-                .WithStructuralChanges()
-                .ForEach((ref Entity e, ref Translation pos, ref ActivateBody activationComponent) =>
-                {
-                    if (--activationComponent.FramesToActivateIn == 0)
-                    {
-                        commandBuffer.RemoveComponent<ActivateBody>(e);
-                        pos.Value += activationComponent.ActivationDisplacement;
+            new ActivateBodyJob
+            {
+                CommandBuffer = commandBuffer
+            }.Run();
 
-                        // Bodies get out of trigger
-                        if (activationComponent.ActivationDisplacement.y >= 5.0f)
-                        {
-                            commandBuffer.RemoveComponent<TriggerEventChecker>(e);
-                        }
-                        else if (activationComponent.ActivationDisplacement.x > 0)
-                        {
-                            // New bodies enter trigger
-                            commandBuffer.AddComponent(e, new TriggerEventChecker
-                            {
-                                NumExpectedEvents = 1
-                            });
-                        }
-                    }
-                }).Run();
-
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

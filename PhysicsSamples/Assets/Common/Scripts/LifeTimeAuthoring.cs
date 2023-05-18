@@ -19,32 +19,31 @@ public class LifeTimeBaker : Baker<LifeTimeAuthoring>
 {
     public override void Bake(LifeTimeAuthoring authoring)
     {
-        AddComponent(new LifeTime { Value = authoring.Value });
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new LifeTime { Value = authoring.Value });
     }
 }
 
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class LifeTimeSystem : SystemBase
+public partial struct LifeTimeSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            Entities
-                .WithName("DestroyExpiredLifeTime")
-                .ForEach((Entity entity, ref LifeTime timer) =>
+            foreach (var(timer, entity) in SystemAPI.Query<RefRW<LifeTime>>().WithEntityAccess())
+            {
+                timer.ValueRW.Value -= 1;
+
+                if (timer.ValueRW.Value < 0f)
                 {
-                    timer.Value -= 1;
+                    commandBuffer.DestroyEntity(entity);
+                }
+            }
 
-                    if (timer.Value < 0f)
-                    {
-                        commandBuffer.DestroyEntity(entity);
-                    }
-                }).Run();
-
-            commandBuffer.Playback(EntityManager);
+            commandBuffer.Playback(state.EntityManager);
         }
     }
 }

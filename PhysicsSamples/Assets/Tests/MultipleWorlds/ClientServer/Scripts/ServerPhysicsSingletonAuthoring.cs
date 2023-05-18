@@ -9,6 +9,7 @@ public class ServerPhysicsSingletonBaker : Baker<ServerPhysicsSingletonAuthoring
 {
     public override void Bake(ServerPhysicsSingletonAuthoring authoring)
     {
-        AddComponent(new ServerPhysicsSingleton {});
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new ServerPhysicsSingleton {});
     }
 }

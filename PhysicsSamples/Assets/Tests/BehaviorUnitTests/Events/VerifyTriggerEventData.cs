@@ -18,12 +18,13 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyTriggerEventData authoring)
             {
-                AddComponent<VerifyTriggerEventDataData>();
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<VerifyTriggerEventDataData>(entity);
 
 #if HAVOK_PHYSICS_EXISTS
                 Havok.Physics.HavokConfiguration config = Havok.Physics.HavokConfiguration.Default;
                 config.EnableSleeping = 0;
-                AddComponent(config);
+                AddComponent(entity, config);
 #endif
             }
         }
@@ -32,11 +33,11 @@ namespace Unity.Physics.Tests
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateAfter(typeof(PhysicsSimulationGroup))]
     [UpdateBefore(typeof(ExportPhysicsWorld))]
-    public partial class VerifyTriggerEventDataSystem : SystemBase
+    public partial struct VerifyTriggerEventDataSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate<VerifyTriggerEventDataData>();
+            state.RequireForUpdate<VerifyTriggerEventDataData>();
         }
 
         struct VerifyTriggerEventDataJob : ITriggerEventsJob
@@ -59,13 +60,13 @@ namespace Unity.Physics.Tests
             }
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
-            Dependency = new VerifyTriggerEventDataJob
+            state.Dependency = new VerifyTriggerEventDataJob
             {
-                Bodies = GetSingleton<PhysicsWorldSingleton>().PhysicsWorld.Bodies,
-                VerificationData = GetComponentLookup<VerifyTriggerEventDataData>(true)
-            }.Schedule(GetSingleton<SimulationSingleton>(), Dependency);
+                Bodies = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld.Bodies,
+                VerificationData = SystemAPI.GetComponentLookup<VerifyTriggerEventDataData>(true)
+            }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
         }
     }
 }

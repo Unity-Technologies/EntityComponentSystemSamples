@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -19,7 +20,8 @@ public class GlobalScaleAuthoring : MonoBehaviour
     {
         public override void Bake(GlobalScaleAuthoring authoring)
         {
-            AddComponent(new GlobalScaleComponent
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new GlobalScaleComponent
             {
                 DynamicUniformScale = authoring.DynamicUniformScale,
                 StaticUniformScale = authoring.StaticUniformScale
@@ -30,43 +32,35 @@ public class GlobalScaleAuthoring : MonoBehaviour
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(PhysicsSystemGroup))]
-public partial class GlobalScaleSystem : SystemBase
+public partial struct GlobalScaleSystem : ISystem
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<GlobalScaleComponent>();
+        state.RequireForUpdate<GlobalScaleComponent>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        GlobalScaleComponent singleton = GetSingleton<GlobalScaleComponent>();
+        GlobalScaleComponent singleton = SystemAPI.GetSingleton<GlobalScaleComponent>();
 
-        EntityCommandBuffer ecb = new EntityCommandBuffer(Unity.Collections.Allocator.TempJob);
-
-        Entities
-            .WithBurst()
-            .ForEach((ref Entity e, ref Translation t, ref PhysicsCollider pc) =>
+        foreach (var(localPosition, collider, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<PhysicsCollider>>().WithEntityAccess())
+        {
+            if (SystemAPI.HasComponent<PhysicsVelocity>(entity))
             {
-                if (!HasComponent<Scale>(e))
+                if (singleton.DynamicUniformScale != 1.0f)
                 {
-                    if (HasComponent<PhysicsVelocity>(e))
-                    {
-                        if (singleton.DynamicUniformScale != 1.0f)
-                        {
-                            ecb.AddComponent(e, new Scale { Value = singleton.DynamicUniformScale});
-                        }
-                    }
-                    else
-                    {
-                        if (singleton.StaticUniformScale != 1.0f)
-                        {
-                            ecb.AddComponent(e, new Scale { Value = singleton.StaticUniformScale});
-                        }
-                    }
+                    localPosition.ValueRW.Scale = singleton.DynamicUniformScale;
                 }
-            }).Run();
-
-        ecb.Playback(EntityManager);
-        ecb.Dispose();
+            }
+            else
+            {
+                if (singleton.StaticUniformScale != 1.0f)
+                {
+                    localPosition.ValueRW.Scale = singleton.StaticUniformScale;
+                }
+            }
+        }
     }
 }

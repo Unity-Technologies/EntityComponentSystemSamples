@@ -10,7 +10,8 @@ public class InvalidPhysicsJointDemo : SceneCreationAuthoring<InvalidPhysicsJoin
     {
         public override void Bake(InvalidPhysicsJointDemo authoring)
         {
-            AddComponentObject(new InvalidPhysicsJointDemoScene
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new InvalidPhysicsJointDemoScene
             {
                 DynamicMaterial = authoring.DynamicMaterial,
                 StaticMaterial = authoring.StaticMaterial
@@ -19,7 +20,7 @@ public class InvalidPhysicsJointDemo : SceneCreationAuthoring<InvalidPhysicsJoin
     }
 }
 
-public class InvalidPhyiscsJointDemoSystem : SceneCreationSystem<InvalidPhysicsJointDemoScene>
+public partial class InvalidPhyiscsJointDemoSystem : SceneCreationSystem<InvalidPhysicsJointDemoScene>
 {
     public override void CreateScene(InvalidPhysicsJointDemoScene sceneSettings)
     {

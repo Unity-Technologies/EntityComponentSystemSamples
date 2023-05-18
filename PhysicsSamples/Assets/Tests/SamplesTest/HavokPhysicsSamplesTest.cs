@@ -1,14 +1,13 @@
 using NUnit.Framework;
 using System.Collections;
 using Unity.Entities;
-using Unity.Physics.Systems;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Unity.Physics.Samples.Test
+namespace Unity.Physics.Tests
 {
-#if HAVOK_PHYSICS_EXISTS && (UNITY_EDITOR || UNITY_ANDROID ||  UNITY_IOS || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX)
+#if HAVOK_PHYSICS_EXISTS && (UNITY_EDITOR || UNITY_ANDROID ||  UNITY_IOS || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_PS5)
 
     [TestFixture]
     class HavokPhysicsSamplesTestMT : UnityPhysicsSamplesTest
@@ -24,18 +23,10 @@ namespace Unity.Physics.Samples.Test
             Debug.Log("Loading " + scenePath);
             LogAssert.Expect(LogType.Log, "Loading " + scenePath);
 
-            // Ensure Havok
-            var world = World.DefaultGameObjectInjectionWorld;
+            // Enable multi threaded Havok simulation
+            ConfigureSimulation(World.DefaultGameObjectInjectionWorld, SimulationType.HavokPhysics, true);
 
-            var system = world.GetOrCreateSystemManaged<EnsureHavokSystem>();
-            system.Enabled = true;
-
-            SceneManager.LoadScene(scenePath);
-            yield return new WaitForSeconds(1);
-            UnityPhysicsSamplesTest.ResetDefaultWorld();
-            yield return new WaitForFixedUpdate();
-
-            LogAssert.NoUnexpectedReceived();
+            yield return LoadSceneAndSimulate(scenePath);
 
             PlayerPrefs.DeleteKey("Havok.Auth.SuppressDialogs");
         }
@@ -55,53 +46,12 @@ namespace Unity.Physics.Samples.Test
             Debug.Log("Loading " + scenePath);
             LogAssert.Expect(LogType.Log, "Loading " + scenePath);
 
-            // Ensure Havok
-            var world = World.DefaultGameObjectInjectionWorld;
-            var system = world.GetOrCreateSystemManaged<EnsureHavokSystem>();
-            system.Enabled = true;
+            // Enable single threaded Havok simulation
+            ConfigureSimulation(World.DefaultGameObjectInjectionWorld, SimulationType.HavokPhysics, false);
 
-            // Ensure ST simulation
-            var stSystem = world.GetExistingSystemManaged<EnsureSTSimulation>();
-            {
-                Assert.IsNull(stSystem, "The 'EnsureSTSimulation' system should only be created by the 'HavokPhysicsSamplesTest.LoadScenes' function!");
-
-                stSystem = new EnsureSTSimulation();
-                world.AddSystemManaged(stSystem);
-                world.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().AddSystemToUpdateList(stSystem);
-            }
-
-            SceneManager.LoadScene(scenePath);
-            yield return new WaitForSeconds(1);
-            UnityPhysicsSamplesTest.ResetDefaultWorld();
-            yield return new WaitForFixedUpdate();
-
-            LogAssert.NoUnexpectedReceived();
+            yield return LoadSceneAndSimulate(scenePath);
 
             PlayerPrefs.DeleteKey("Havok.Auth.SuppressDialogs");
-        }
-    }
-
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-    [UpdateBefore(typeof(PhysicsSystemGroup))]
-    partial class EnsureHavokSystem : SystemBase
-    {
-        protected override void OnCreate()
-        {
-            Enabled = false;
-        }
-
-        protected override void OnUpdate()
-        {
-            if (HasSingleton<PhysicsStep>())
-            {
-                var component = GetSingleton<PhysicsStep>();
-                if (component.SimulationType != SimulationType.HavokPhysics)
-                {
-                    component.SimulationType = SimulationType.HavokPhysics;
-                    SetSingleton(component);
-                }
-                Enabled = false;
-            }
         }
     }
 

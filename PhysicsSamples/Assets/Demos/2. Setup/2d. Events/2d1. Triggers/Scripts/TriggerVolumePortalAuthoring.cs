@@ -30,8 +30,9 @@ class TriggerVolumePortalAuthoringBaker : Baker<TriggerVolumePortalAuthoring>
 {
     public override void Bake(TriggerVolumePortalAuthoring authoring)
     {
-        var companion = GetEntity(authoring.CompanionPortal);
-        AddComponent(new TriggerVolumePortal
+        var companion = GetEntity(authoring.CompanionPortal, TransformUsageFlags.Dynamic);
+        var entity = GetEntity(TransformUsageFlags.Dynamic);
+        AddComponent(entity, new TriggerVolumePortal
         {
             Companion = companion,
             TransferCount = 0
@@ -42,7 +43,6 @@ class TriggerVolumePortalAuthoringBaker : Baker<TriggerVolumePortalAuthoring>
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-[BurstCompile]
 public partial struct TriggerVolumePortalSystem : ISystem
 {
     private EntityQuery m_HierarchyChildQuery;
@@ -56,8 +56,9 @@ public partial struct TriggerVolumePortalSystem : ISystem
         public TriggerVolumePortalComponentLookup(ref SystemState systemState)
         {
             LocalToWorldData = systemState.GetComponentLookup<LocalToWorld>(false);
-            PositionData = systemState.GetComponentLookup<Translation>(false);
-            RotationData = systemState.GetComponentLookup<Rotation>(false);
+
+            LocalTransformData = systemState.GetComponentLookup<LocalTransform>(false);
+
             TriggerVolumePortalData = systemState.GetComponentLookup<TriggerVolumePortal>(false);
             PhysicsVelocityData = systemState.GetComponentLookup<PhysicsVelocity>(false);
             PhysicsGraphicalSmoothingData = systemState.GetComponentLookup<PhysicsGraphicalSmoothing>(false);
@@ -66,16 +67,18 @@ public partial struct TriggerVolumePortalSystem : ISystem
         public void Update(ref SystemState systemState)
         {
             LocalToWorldData.Update(ref systemState);
-            PositionData.Update(ref systemState);
-            RotationData.Update(ref systemState);
+
+            LocalTransformData.Update(ref systemState);
+
             TriggerVolumePortalData.Update(ref systemState);
             PhysicsVelocityData.Update(ref systemState);
             PhysicsGraphicalSmoothingData.Update(ref systemState);
         }
 
         public ComponentLookup<LocalToWorld> LocalToWorldData;
-        public ComponentLookup<Translation> PositionData;
-        public ComponentLookup<Rotation> RotationData;
+
+        public ComponentLookup<LocalTransform> LocalTransformData;
+
         public ComponentLookup<TriggerVolumePortal> TriggerVolumePortalData;
         public ComponentLookup<PhysicsVelocity> PhysicsVelocityData;
         public ComponentLookup<PhysicsGraphicalSmoothing> PhysicsGraphicalSmoothingData;
@@ -88,7 +91,6 @@ public partial struct TriggerVolumePortalSystem : ISystem
         public EntityQueryMask HierarchyChildMask;
         public EntityQueryMask NonTriggerDynamicBodyMask;
 
-        [BurstCompile]
         public void Execute(Entity portalEntity, ref DynamicBuffer<StatefulTriggerEvent> triggerBuffer)
         {
             if (!ComponentDatas.TriggerVolumePortalData.HasComponent(portalEntity))
@@ -122,24 +124,30 @@ public partial struct TriggerVolumePortalSystem : ISystem
                 // a static body may be in a hierarchy, in which case Translation and Rotation may not be in world space
                 var portalTransform = HierarchyChildMask.MatchesIgnoreFilter(portalEntity)
                     ? Math.DecomposeRigidBodyTransform(ComponentDatas.LocalToWorldData[portalEntity].Value)
-                    : new RigidTransform(ComponentDatas.RotationData[portalEntity].Value, ComponentDatas.PositionData[portalEntity].Value);
+
+                    : new RigidTransform(ComponentDatas.LocalTransformData[portalEntity].Rotation, ComponentDatas.LocalTransformData[portalEntity].Position);
+
                 var companionTransform = HierarchyChildMask.MatchesIgnoreFilter(companionEntity)
                     ? Math.DecomposeRigidBodyTransform(ComponentDatas.LocalToWorldData[companionEntity].Value)
-                    : new RigidTransform(ComponentDatas.RotationData[companionEntity].Value, ComponentDatas.PositionData[companionEntity].Value);
+
+                    : new RigidTransform(ComponentDatas.LocalTransformData[companionEntity].Rotation, ComponentDatas.LocalTransformData[companionEntity].Position);
+
 
                 var portalPositionOffset = companionTransform.pos - portalTransform.pos;
                 var portalRotationOffset = math.mul(companionTransform.rot, math.inverse(portalTransform.rot));
 
-                var entityPositionComponent = ComponentDatas.PositionData[otherEntity];
-                var entityRotationComponent = ComponentDatas.RotationData[otherEntity];
+
+                var entityLocalTransformComponent = ComponentDatas.LocalTransformData[otherEntity];
+
                 var entityVelocityComponent = ComponentDatas.PhysicsVelocityData[otherEntity];
 
                 entityVelocityComponent.Linear = math.rotate(portalRotationOffset, entityVelocityComponent.Linear);
-                entityPositionComponent.Value += portalPositionOffset;
-                entityRotationComponent.Value = math.mul(entityRotationComponent.Value, portalRotationOffset);
 
-                ComponentDatas.PositionData[otherEntity] = entityPositionComponent;
-                ComponentDatas.RotationData[otherEntity] = entityRotationComponent;
+                entityLocalTransformComponent.Position += portalPositionOffset;
+                entityLocalTransformComponent.Rotation = math.mul(entityLocalTransformComponent.Rotation, portalRotationOffset);
+
+                ComponentDatas.LocalTransformData[otherEntity] = entityLocalTransformComponent;
+
                 ComponentDatas.PhysicsVelocityData[otherEntity] = entityVelocityComponent;
 
                 if (ComponentDatas.PhysicsGraphicalSmoothingData.HasComponent(otherEntity))
@@ -168,7 +176,9 @@ public partial struct TriggerVolumePortalSystem : ISystem
         m_HierarchyChildMask = m_HierarchyChildQuery.GetEntityQueryMask();
 
         builder = new EntityQueryBuilder(Unity.Collections.Allocator.Temp)
-            .WithAll<Translation, Rotation, PhysicsVelocity>()
+
+            .WithAll<LocalTransform, PhysicsVelocity>()
+
             .WithNone<StatefulTriggerEvent>();
         m_NonTriggerDynamicBodyQuery = state.GetEntityQuery(builder);
 
@@ -191,10 +201,5 @@ public partial struct TriggerVolumePortalSystem : ISystem
             HierarchyChildMask = m_HierarchyChildMask,
             NonTriggerDynamicBodyMask = m_NonTriggerDynamicBodyMask
         }.Schedule(state.Dependency);
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
     }
 }

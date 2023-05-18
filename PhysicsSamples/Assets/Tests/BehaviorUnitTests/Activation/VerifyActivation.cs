@@ -34,12 +34,13 @@ namespace Unity.Physics.Tests
         {
             public override void Bake(VerifyActivation authoring)
             {
-                AddComponentObject(new VerifyActivationScene()
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponentObject(entity, new VerifyActivationScene()
                 {
                     DynamicMaterial = authoring.DynamicMaterial,
                     StaticMaterial = authoring.StaticMaterial
                 });
-                AddComponent(new VerifyActivationData
+                AddComponent(entity, new VerifyActivationData
                 {
                     PureFilter = authoring.PureFilter ? 1 : 0,
                     Remove = authoring.Remove ? 1 : 0,
@@ -61,8 +62,8 @@ namespace Unity.Physics.Tests
             float3 boxSize = new float3(1.0f, 1.0f, 1.0f);
             float mass = 1.0f;
 
-            Entity e = GetSingletonEntity<VerifyActivationScene>();
-            VerifyActivationData data = GetComponent<VerifyActivationData>(e);
+            Entity e = SystemAPI.ManagedAPI.GetSingletonEntity<VerifyActivationScene>();
+            VerifyActivationData data = SystemAPI.GetComponent<VerifyActivationData>(e);
 
             // Ground to do nothing on (other than filter change) and dynamic box over it
             if (data.PureFilter == 1)
@@ -158,11 +159,6 @@ namespace Unity.Physics.Tests
             m_ActivationData = state.GetComponentLookup<VerifyActivationData>(true);
         }
 
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             HandleUpdate(ref state);
@@ -224,9 +220,11 @@ namespace Unity.Physics.Tests
                 // Teleport one ground (3)
                 if (verificationComponentData.Teleport > 0)
                 {
-                    var translationComponent = state.EntityManager.GetComponentData<Translation>(staticEntities[counter]);
-                    translationComponent.Value.y = -10.0f;
-                    state.EntityManager.SetComponentData(staticEntities[counter], translationComponent);
+
+                    var localTransformComponent = state.EntityManager.GetComponentData<LocalTransform>(staticEntities[counter]);
+                    localTransformComponent.Position.y = -10.0f;
+                    state.EntityManager.SetComponentData(staticEntities[counter], localTransformComponent);
+
                     counter++;
                 }
 
@@ -263,8 +261,10 @@ namespace Unity.Physics.Tests
                 var dynamicEntities = bpwData.DynamicEntityGroup.ToEntityArray(Allocator.TempJob);
                 for (int i = 0; i < dynamicEntities.Length; i++)
                 {
-                    var translation = state.EntityManager.GetComponentData<Translation>(dynamicEntities[i]);
-                    Assert.IsTrue(translation.Value.y < 0.99f, "Box didn't start falling!");
+
+                    var localTransform = state.EntityManager.GetComponentData<LocalTransform>(dynamicEntities[i]);
+                    Assert.IsTrue(localTransform.Position.y < 0.99f, "Box didn't start falling!");
+
                 }
 
                 dynamicEntities.Dispose();
