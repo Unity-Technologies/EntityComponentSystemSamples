@@ -7,10 +7,10 @@ namespace Miscellaneous.Splines
     public class SnakeSettingsAuthoring : MonoBehaviour
     {
         public GameObject Prefab;
-        public int Length;
-        public int Count;
-        public float Speed;
-        public float Spacing;
+        public int        NumPartsPerSnake;
+        public int        NumSnakes;
+        public float      Speed;
+        public float      Spacing;
 
         class Baker : Baker<SnakeSettingsAuthoring>
         {
@@ -19,11 +19,11 @@ namespace Miscellaneous.Splines
                 var entity = GetEntity(TransformUsageFlags.None);
                 AddComponent(entity, new SnakeSettings
                 {
-                    Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
-                    NumPartsPerSnake = authoring.Length,
-                    NumSnakes = authoring.Count,
-                    Speed = authoring.Speed,
-                    Spacing = authoring.Spacing
+                    Prefab           = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
+                    NumPartsPerSnake = authoring.NumPartsPerSnake,
+                    NumSnakes        = authoring.NumSnakes,
+                    Speed            = authoring.Speed,
+                    Spacing          = authoring.Spacing
                 });
             }
         }
