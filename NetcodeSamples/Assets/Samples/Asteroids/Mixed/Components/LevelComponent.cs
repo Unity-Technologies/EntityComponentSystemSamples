@@ -37,6 +37,9 @@ public struct LevelComponent : IComponentData
     [UnityEngine.SerializeField] private byte _staticAsteroidOptimization;
     public bool staticAsteroidOptimization => _staticAsteroidOptimization != 0;
 
+    [UnityEngine.SerializeField] private byte _enableGhostImportanceScaling;
+    public bool enableGhostImportanceScaling => _enableGhostImportanceScaling != 0;
+
     public static LevelComponent Default = new LevelComponent
     {
         levelWidth = 2048,

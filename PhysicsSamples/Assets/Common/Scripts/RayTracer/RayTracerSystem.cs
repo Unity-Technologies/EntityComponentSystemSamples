@@ -52,6 +52,57 @@ namespace Unity.Physics.Extensions
             }
         }
 
+        List<RayRequest> m_Requests;
+        List<RayResult> m_Results;
+
+        public bool IsEnabled => m_Requests != null;
+
+        protected override void OnCreate()
+        {
+            m_Requests = new List<RayRequest>();
+            m_Results = new List<RayResult>();
+        }
+
+        protected override void OnDestroy()
+        {
+            for (int i = 0; i < m_Results.Count; ++i)
+                m_Results[i].Dispose();
+
+            m_Requests.Clear();
+            m_Results.Clear();
+        }
+
+        protected override void OnUpdate()
+        {
+            if (m_Requests == null || m_Requests.Count == 0) return;
+
+            var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+            JobHandle combinedJobs = Dependency;
+            for (int i = 0; i < m_Requests.Count; i++)
+            {
+                if (!m_Results[i].m_Assigned)
+                {
+                    JobHandle rcj = new RaycastJob
+                    {
+                        Results = m_Results[i].PixelData.AsWriter(),
+                        Request = m_Requests[i],
+                        World = world.CollisionWorld,
+                        NumDynamicBodies = world.NumDynamicBodies
+                    }.Schedule(m_Results[i].PixelData.ForEachCount, 1, Dependency);
+
+                    combinedJobs = JobHandle.CombineDependencies(combinedJobs, rcj);
+
+                    var res = m_Results[i];
+                    res.m_JobHandle = rcj;
+                    res.m_Assigned = true;
+                    m_Results[i] = res;
+                }
+            }
+
+            Dependency = combinedJobs;
+        }
+
+
         public int AddRequest(RayRequest req)
         {
             int index = -1;
@@ -106,10 +157,6 @@ namespace Unity.Physics.Extensions
             return false;
         }
 
-        List<RayRequest> m_Requests;
-        List<RayResult> m_Results;
-
-        public bool IsEnabled => m_Requests != null;
 
         [BurstCompile]
         protected struct RaycastJob : IJobParallelFor
@@ -236,51 +283,6 @@ namespace Unity.Physics.Extensions
 
                 Results.EndForEachIndex();
             }
-        }
-
-        protected override void OnCreate()
-        {
-            m_Requests = new List<RayRequest>();
-            m_Results = new List<RayResult>();
-        }
-
-        protected override void OnDestroy()
-        {
-            for (int i = 0; i < m_Results.Count; ++i)
-                m_Results[i].Dispose();
-
-            m_Requests.Clear();
-            m_Results.Clear();
-        }
-
-        protected override void OnUpdate()
-        {
-            if (m_Requests == null || m_Requests.Count == 0) return;
-
-            var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-            JobHandle combinedJobs = Dependency;
-            for (int i = 0; i < m_Requests.Count; i++)
-            {
-                if (!m_Results[i].m_Assigned)
-                {
-                    JobHandle rcj = new RaycastJob
-                    {
-                        Results = m_Results[i].PixelData.AsWriter(),
-                        Request = m_Requests[i],
-                        World = world.CollisionWorld,
-                        NumDynamicBodies = world.NumDynamicBodies
-                    }.Schedule(m_Results[i].PixelData.ForEachCount, 1, Dependency);
-
-                    combinedJobs = JobHandle.CombineDependencies(combinedJobs, rcj);
-
-                    var res = m_Results[i];
-                    res.m_JobHandle = rcj;
-                    res.m_Assigned = true;
-                    m_Results[i] = res;
-                }
-            }
-
-            Dependency = combinedJobs;
         }
     }
 }

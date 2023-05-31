@@ -6,7 +6,7 @@ using Unity.Rendering;
 namespace Tutorials.Tanks.Step4
 {
     // Instead of directly accessing the Turret component, we are creating an aspect.
-    // Aspects allows you to provide a customized API for accessing your components.
+    // Aspects allows you to provide a customized API for accessing components.
     public readonly partial struct TurretAspect : IAspect
     {
         // This reference provides read only access to the Turret component.
@@ -15,7 +15,7 @@ namespace Tutorials.Tanks.Step4
 
         // Used in Step 8. Making this Optional means instances of the aspect
         // can represent entities which do not have this component.
-        [Optional] readonly RefRO<URPMaterialPropertyBaseColor> m_BaseColor;
+        readonly RefRO<URPMaterialPropertyBaseColor> m_BaseColor;
 
         public Entity CannonBallSpawn => m_Turret.ValueRO.CannonBallSpawn;
         public Entity CannonBallPrefab => m_Turret.ValueRO.CannonBallPrefab;

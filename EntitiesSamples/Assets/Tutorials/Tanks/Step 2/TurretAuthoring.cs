@@ -32,11 +32,12 @@ namespace Tutorials.Tanks.Step2
     {
         // These fields will be used in step 4.
 
-        // This entity will reference the nozzle of the cannon, where cannon balls should be spawned.
-        public Entity CannonBallSpawn;
 
         // This entity will reference the prefab to be instantiated when the cannon shoots.
         public Entity CannonBallPrefab;
+
+        // This entity will reference the nozzle of the cannon, where cannon balls should be spawned.
+        public Entity CannonBallSpawn;
     }
 
     // This component will be used in Step 8.

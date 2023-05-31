@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Tutorials.Tanks.Step6
 {
-    // The SafeZoneRadius is used in Step 8.
     public class ConfigAuthoring : MonoBehaviour
     {
         public GameObject TankPrefab;
@@ -14,7 +13,7 @@ namespace Tutorials.Tanks.Step6
         {
             public override void Bake(ConfigAuthoring authoring)
             {
-                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                var entity = GetEntity(TransformUsageFlags.None);
                 AddComponent(entity, new Config
                 {
                     TankPrefab = GetEntity(authoring.TankPrefab, TransformUsageFlags.Dynamic),
@@ -29,6 +28,6 @@ namespace Tutorials.Tanks.Step6
     {
         public Entity TankPrefab;
         public int TankCount;
-        public float SafeZoneRadius;
+        public float SafeZoneRadius;   // Used in a later step.
     }
 }

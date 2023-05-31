@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
@@ -9,6 +10,12 @@ namespace Streaming.RuntimeContentManager
     [UpdateInGroup(typeof(PresentationSystemGroup))]
     public partial struct DecorationRenderSystem : ISystem
     {
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<DecorationVisualComponentData>();
+        }
+
         public void OnUpdate(ref SystemState state)
         {
             foreach (var (transform, dec) in

@@ -8,13 +8,13 @@ namespace Tutorials.Jobs.Step4
 {
     public class FindNearest : MonoBehaviour
     {
-        public NativeArray<float3> TargetPositions;
-        public NativeArray<float3> SeekerPositions;
-        public NativeArray<float3> NearestTargetPositions;
+        NativeArray<float3> TargetPositions;
+        NativeArray<float3> SeekerPositions;
+        NativeArray<float3> NearestTargetPositions;
 
-        public void Awake()
+        public void Start()
         {
-            Spawner spawner = Object.FindObjectOfType<Spawner>();
+            Spawner spawner = GetComponent<Spawner>();
             TargetPositions = new NativeArray<float3>(spawner.NumTargets, Allocator.Persistent);
             SeekerPositions = new NativeArray<float3>(spawner.NumSeekers, Allocator.Persistent);
             NearestTargetPositions = new NativeArray<float3>(spawner.NumSeekers, Allocator.Persistent);

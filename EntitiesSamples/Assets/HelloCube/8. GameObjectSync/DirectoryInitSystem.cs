@@ -2,11 +2,13 @@ using System;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Burst;
 
 namespace HelloCube.GameObjectSync
 {
     public partial struct DirectoryInitSystem : ISystem
     {
+        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             // We need to wait for the scene to load before Updating, so we must RequireForUpdate at

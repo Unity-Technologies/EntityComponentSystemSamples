@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,40 +9,22 @@ namespace Samples.HelloNetcode
         void Start()
         {
 #if UNITY_SERVER
-            string defaultSceneName = "Asteroids";
+            string sceneName = "Asteroids";
 #else
-            string defaultSceneName = "Frontend";
+            string sceneName = "Frontend";
 #endif
+
             // Commandline always overrides defaults if it exists
             string commandScene = CommandLineUtils.GetCommandLineValueFromKey("scene");
-            if (string.IsNullOrWhiteSpace(commandScene))
+            if (!string.IsNullOrEmpty(commandScene))
             {
-                SceneManager.LoadScene(defaultSceneName);
-                return;
-            }
-            for (int i = 0; i < SceneManager.sceneCountInBuildSettings; ++i)
-            {
-                var scenePath = SceneUtility.GetScenePathByBuildIndex(i);
-                var scene = Path.GetFileNameWithoutExtension(scenePath);
-                if (commandScene == scene)
-                {
+                var scene = SceneManager.GetSceneByName(commandScene);
 
-                    SceneManager.LoadScene(commandScene);
-                    return;
-                }
+                if (!scene.IsValid())
+                    Debug.LogWarning($"Scene '{commandScene}' not found, using default '{sceneName}' instead");
             }
-            Debug.LogError($"${commandScene} not found. Scenes present in the build\n: {string.Join(',', GetAllScenesInBuild())}");
-            Application.Quit(-1);
-        }
 
-        private IEnumerable<string> GetAllScenesInBuild()
-        {
-
-            for (int i = 0; i < SceneManager.sceneCountInBuildSettings; ++i)
-            {
-                var scenePath = SceneUtility.GetScenePathByBuildIndex(i);
-                yield return Path.GetFileNameWithoutExtension(scenePath);
-            }
+            SceneManager.LoadScene(sceneName);
         }
     }
 }

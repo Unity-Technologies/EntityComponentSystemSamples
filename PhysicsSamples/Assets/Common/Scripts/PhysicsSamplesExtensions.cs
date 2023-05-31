@@ -2,8 +2,6 @@ using Unity.Assertions;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
-
 
 namespace Unity.Physics.Extensions
 {
@@ -12,7 +10,6 @@ namespace Unity.Physics.Extensions
     /// </summary>
     public static class PhysicsSamplesExtensions
     {
-        #region CompoundCollider Utilities
         /// <summary>
         /// Given the root Collider of a hierarchy and a ColliderKey referencing a child in that hierarchy,
         /// this function returns the ColliderKey referencing the parent Collider.
@@ -165,7 +162,5 @@ namespace Unity.Physics.Extensions
                 }
             }
         }
-
-        #endregion
     }
 }

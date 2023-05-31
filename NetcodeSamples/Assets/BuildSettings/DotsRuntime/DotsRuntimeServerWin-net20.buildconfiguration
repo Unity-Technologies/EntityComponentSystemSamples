@@ -1,0 +1,31 @@
+{
+    "Show": true,
+    "Dependencies": [
+        "GlobalObjectId_V1-1-9b3a397188c16436d8802a1edfb882cc-93214019566545601-0"
+    ],
+    "Components": [
+        {
+            "$type": "Unity.Build.DotsRuntime.DotsRuntimeBuildProfile, Unity.Build.DotsRuntime",
+            "Target": "windows-ns21",
+            "Configuration": 2,
+            "UseNewPipeline": false,
+            "PipelineConstructor": null
+        },
+        {
+            "$type": "Unity.Build.Common.GeneralSettings, Unity.Build",
+            "ProductName": "AsteroidsServer-DotsRuntime-Win",
+            "CompanyName": "Unity",
+            "Version": "1.0.0"
+        },
+        {
+            "$type": "Unity.Entities.Runtime.Build.DotsRuntimeScriptingSettings, Unity.Entities.Runtime.Build",
+            "EnableSafetyChecks": 0,
+            "EnableProfiler": 0,
+            "ScriptingDefines": [
+                "UNITY_SERVER",
+                "UNITY_DOTSRUNTIME"
+            ],
+            "EnableMultithreading": true
+        }
+    ]
+}

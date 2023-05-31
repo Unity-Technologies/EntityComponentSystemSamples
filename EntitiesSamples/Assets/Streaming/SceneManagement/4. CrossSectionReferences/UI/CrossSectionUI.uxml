@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="main-container">
+        <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.5); height: auto; width: auto;">
+            <ui:Label tabindex="-1" text="The Cube is in section 0 and is the parent of the Cylinder.&#10;The Cylinder is in section 1 and is the parent of the Sphere.&#10;The Sphere is in section 2.&#10;&#10;Entities in section 0 can be referenced by entities in other sections.&#10;However, entities in other sections cannot be referenced by entities in different sections.&#10;&#10;Consequently, the Sphere here will not follow its parent Cylinder when the Cylinder moves.&#10;(The restriction does not apply while the subscene is open in the Hierarchy.)" display-tooltip-when-elided="true" style="color: rgb(255, 255, 255); padding-left: 4px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

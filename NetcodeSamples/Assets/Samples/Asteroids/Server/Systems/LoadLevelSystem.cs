@@ -32,28 +32,36 @@ namespace Asteroids.Server
         public void OnUpdate(ref SystemState state)
         {
             var settings = SystemAPI.GetSingleton<ServerSettings>();
-            if (!SystemAPI.HasSingleton<GhostImportance>())
+            var hasGhostImportanceScaling = SystemAPI.HasSingleton<GhostImportance>();
+            if (settings.levelData.enableGhostImportanceScaling != hasGhostImportanceScaling)
             {
-                // Try to store a bit less than full chunks to avoid fragmenting the data too much
-                var maxAsteroidsPerTile = 25;
-                var minTileSize = 256;
-                float asteroidsPerPx = (float)settings.levelData.numAsteroids / (float)(settings.levelData.levelWidth*settings.levelData.levelHeight);
-                // We want to make sure that asteroidsPerPx * tileSize * tileSize = maxAsteroidsPerTile
-                int tileSize = math.max(minTileSize, (int)math.ceil(math.sqrt((float)maxAsteroidsPerTile / asteroidsPerPx)));
+                if (hasGhostImportanceScaling)
+                {
+                    state.EntityManager.DestroyEntity(SystemAPI.GetSingletonEntity<GhostImportance>());
+                }
+                else
+                {
+                    // Try to store a bit less than full chunks to avoid fragmenting the data too much
+                    var maxAsteroidsPerTile = 25;
+                    var minTileSize = 256;
+                    float asteroidsPerPx = (float) settings.levelData.numAsteroids / (float) (settings.levelData.levelWidth * settings.levelData.levelHeight);
+                    // We want to make sure that asteroidsPerPx * tileSize * tileSize = maxAsteroidsPerTile
+                    int tileSize = math.max(minTileSize, (int) math.ceil(math.sqrt((float) maxAsteroidsPerTile / asteroidsPerPx)));
 
-                var gridSingleton = state.EntityManager.CreateSingleton(new GhostDistanceData
-                {
-                    TileSize = new int3(tileSize, tileSize, 256),
-                    TileCenter = new int3(0, 0, 128),
-                    TileBorderWidth = new float3(1f, 1f, 1f),
-                });
-                state.EntityManager.AddComponentData(gridSingleton, new GhostImportance
-                {
-                    ScaleImportanceFunction = m_ScaleFunctionPointer,
-                    GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
-                    GhostImportanceDataType = ComponentType.ReadOnly<GhostDistanceData>(),
-                    GhostImportancePerChunkDataType = ComponentType.ReadOnly<GhostDistancePartitionShared>(),
-                });
+                    var gridSingleton = state.EntityManager.CreateSingleton(new GhostDistanceData
+                    {
+                        TileSize = new int3(tileSize, tileSize, 256),
+                        TileCenter = new int3(0, 0, 128),
+                        TileBorderWidth = new float3(1f, 1f, 1f),
+                    });
+                    state.EntityManager.AddComponentData(gridSingleton, new GhostImportance
+                    {
+                        ScaleImportanceFunction = m_ScaleFunctionPointer,
+                        GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
+                        GhostImportanceDataType = ComponentType.ReadOnly<GhostDistanceData>(),
+                        GhostImportancePerChunkDataType = ComponentType.ReadOnly<GhostDistancePartitionShared>(),
+                    });
+                }
             }
 
             if (m_LevelGroup.IsEmptyIgnoreFilter)

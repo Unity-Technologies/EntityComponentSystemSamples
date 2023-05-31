@@ -1,28 +1,26 @@
 # Entities Tutorial: Tanks
 
-![](Images/expected_result.gif)
+[Video: Entities "Tanks" Tutorial walkthrough](https://youtu.be/jAVVxoWU5lo) (23 minutes)
+
+![](Common/Images/expected_result.gif)
 
 - Randomly colored tanks move on a plane and spin their turrets.
 - The tanks shoot colored projectiles which bounce on the ground and despawn after a while.
 
 The text below describes the general idea of each step, but you're strongly encouraged to study the code and read the comments.
 
-<br>
-
 ## **Step 1:** Spawn a single, immobile tank.
 > Introduces instantiation of rendered entities using a baked "sub scene".
 
 In the Step 1 scene, the subscene contains a rendered cube GameObject called "Tank", which has a child sphere called "Turret", which has its own child cylinder named "Cannon". For each of these three GameObjects, baking serializes one entity with transform and rendering components. So be clear that the GameObjects of the sub scene will *not* be loaded at runtime: the tank you see rendered in play mode is comprised of entities, not GameObjects.
 
-![](Images/tank_hierarchy.png)
-
-<br>
+![](Common/Images/tank_hierarchy.png)
 
 ## **Step 2:** Rotate the turret at a fixed rate.
 
 >Introduces unmanaged systems (`ISystem`), queries, and `SystemAPI.Query`.
 
-![](Images/tank_spin_correct.gif)
+![](Common/Images/tank_spin_correct.gif)
 
 New code files:
 
@@ -35,13 +33,11 @@ Scene changes:
 
 When `TurretRotationSystem` updates, it applies rotation to the transform of every entity which has the `Turret` component (defined in "TurretAuthoring.cs").
 
-<br>
-
 ## **Step 3:** Move the tank along a random curvy path.
 
 > Introduces scheduling a parallel job.
 
-![](Images/tank_movement.gif)
+![](Common/Images/tank_movement.gif)
 
 New code files:
 
@@ -54,13 +50,11 @@ Scene changes:
 
 When `TankMovementSystem` updates, it moves every entity which has the `Tank` component (defined in "TurretAuthoring.cs") along a random curve.
 
-<br>
-
 ## **Step 4:** Spawn cannon balls at the tip of the turret at a fixed interval.
 
 >Introduces aspects, entity prefabs, `EntityCommandBuffer`, and `IJobEntity`.
 
-![](Images/cannon_ball_trail.gif)
+![](Common/Images/cannon_ball_trail.gif)
 
 New code files:
 
@@ -74,18 +68,16 @@ Scene changes:
 - The "Cannon" GameObject has a new child "SpawnPoint" GameObject. The "SpawnPoint" transform represents the point at which to spawn the cannon balls.
 - The `TurretAuthoring` field "CannonBallPrefab" is set to reference the new "CannonBall" prefab, and "CannonBallSpawn" is set to reference the "SpawnPoint" GameObject. In baking, the `TurretAuthoring` baker will assign the entities produced from this prefab and this GameObject to the fields of the `Turret` component.
 
-![](Images/turret_authoring.png)
+![](Common/Images/turret_authoring.png)
 
 The `TurretAspect` provides a (minor) abstraction around the components of the turret entity.
 
 When `TurretShootingSystem` updates, it spawns cannon ball entities at the tip of the cannon at regular intervals.
 
-<br>
-
 ## **Step 5:** Move the cannon balls.
 > Introduces scheduling a parallel job with `IJobEntity`.
 
-![](Images/turret_shoot.gif)
+![](Common/Images/turret_shoot.gif)
 
 New code files:
 
@@ -96,12 +88,10 @@ The `CannonBallAspect` provides a (minor) abstraction around the components of t
 
 When `CannonBallSystem` updates, it applies pseudo-gravity to the cannon balls and destroys them after their speed goes below a threshold.
 
-<br>
-
 ## **Step 6:** Spawn many tanks with random colors.
 > Introduces dynamically spawning entities at the start of the game.
 
-![](Images/colored_cannon_balls.png)
+![](Common/Images/colored_cannon_balls.png)
 
 New code files:
 
@@ -115,13 +105,10 @@ Scene changes:
 
 When `TankSpawningSystem` updates, it spawns multiple tanks, setting their `URPMaterialPropertyBaseColor` components a random color value. Because we want the system to only spawn tanks one time, the system sets its `SystemState.Enabled` property to false, which stops it from updating again.
 
-<br>
-
 ## **Step 7:** Prevent the tanks from firing when within a "safe zone" circle area around the origin.
 >Introduces enableable components (`IEnableableComponent`), live conversion, and storing basic configuration data in a singleton.
 
-![](Images/safe_zone.gif)
-
+![](Common/Images/safe_zone.gif)
 
 New code files:
 
@@ -135,16 +122,14 @@ When `SafeZoneSystem` updates, it enables the `Shooting` component of tanks outs
 
 Note that the white circle is only visible if gizmos are enabled:
 
-![](Images/gizmos_enabled.png)
+![](Common/Images/gizmos_enabled.png)
 
-Also note that changing the "safe zone radius" value in play mode triggers a re-bake, so the active value in game is updated live.
-
-<br>
+Also note that changing the "safe zone radius" value in play mode triggers a re-bake, so the active value in game can be updated live.
 
 ## **Step 8:** Move the camera to follow a random tank. Cycle through tanks by hitting space bar.
 >Introduces input handling in a system and simple runtime coordination between ECS and GameObjects.
 
-![](Images/expected_result.gif)
+![](Common/Images/expected_result.gif)
 
 New code files:
 
@@ -158,12 +143,7 @@ Scene changes:
 When `CameraSystem` updates, it picks a different random tank for the camera to follow if the user hits the space bar.
 
 <br>
-<hr>
 
 *END OF TUTORIAL*
 
 *Tanks for reading!*
-
-<br>
-
-

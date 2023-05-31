@@ -50,13 +50,13 @@ namespace Baking.BakingTypes
 
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-                AddComponent(entity, new BoundingBoxComponent()
+                AddComponent(entity, new BoundingBox()
                 {
                     Parent = parentEntity,
                     MinBBVertex = minBoundingBox,
                     MaxBBVertex = maxBoundingBox
                 });
-                AddComponent<ChangesComponent>(entity);
+                AddComponent<Changes>(entity);
             }
         }
     }
@@ -64,7 +64,7 @@ namespace Baking.BakingTypes
     // BakingType components are present in the Baking process, but not in the destination world.
     // It can be used to get data from a Baker to a Baking System.
     [BakingType]
-    public struct BoundingBoxComponent : IComponentData
+    public struct BoundingBox : IComponentData
     {
         public Entity Parent;
         public float3 MinBBVertex;
@@ -73,7 +73,7 @@ namespace Baking.BakingTypes
 
     // TemporaryBakingType components are removed after the Baking systems run.
     [TemporaryBakingType]
-    public struct ChangesComponent : IComponentData
+    public struct Changes : IComponentData
     {
     }
 

@@ -16,6 +16,18 @@ namespace HelloCube.Prefabs
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            // rotation
+            float deltaTime = SystemAPI.Time.DeltaTime;
+            foreach (var (transform, speed) in
+                     SystemAPI.Query<RefRW<LocalTransform>, RefRO<RotationSpeed>>())
+            {
+                // ValueRW and ValueRO both return a ref to the actual component value.
+                // The difference is that ValueRW does a safety check for read-write access while
+                // ValueRO does a safety check for read-only access.
+                transform.ValueRW = transform.ValueRO.RotateY(
+                    speed.ValueRO.RadiansPerSecond * deltaTime);
+            }
+
             // An EntityCommandBuffer created from EntityCommandBufferSystem.Singleton will be
             // played back and disposed by the EntityCommandBufferSystem when it next updates.
             var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();

@@ -3,6 +3,7 @@ using UnityObject = UnityEngine.Object;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEditor;
 using Hash128 = Unity.Entities.Hash128;
 
@@ -63,14 +64,14 @@ namespace Baking.BlobAssetBakingSystem
                 buffer.AddRange(meshVertices.AsArray());
 
                 // Add the hash and scale to for the BlobAsset creation
-                AddComponent(entity, new RawMeshComponent()
+                AddComponent(entity, new RawMesh()
                 {
                     MeshScale = authoring.MeshScale,
                     Hash = hash
                 });
 
                 // Add the Component that will hold the BlobAssetReference later
-                AddComponent(entity, new MeshBBComponent());
+                AddComponent(entity, new MeshBB());
             }
 
             public static GUID UnityEditorResources = new GUID("0000000000000000d000000000000000");
@@ -82,5 +83,29 @@ namespace Baking.BlobAssetBakingSystem
                 g == UnityBuiltinResources ||
                 g == UnityBuiltinExtraResources;
         }
+    }
+
+    public struct MeshBBBlobAsset
+    {
+        public float3 MinBoundingBox;
+        public float3 MaxBoundingBox;
+    }
+
+    public struct MeshBB : IComponentData
+    {
+        public BlobAssetReference<MeshBBBlobAsset> BlobData;
+    }
+
+    [BakingType]
+    public struct RawMesh : IComponentData
+    {
+        public float MeshScale;
+        public Hash128 Hash;
+    }
+
+    [BakingType]
+    public struct MeshVertex : IBufferElementData
+    {
+        public float3 Value;
     }
 }

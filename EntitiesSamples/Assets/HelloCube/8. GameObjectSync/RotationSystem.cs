@@ -17,13 +17,13 @@ namespace HelloCube.GameObjectSync
         // This OnUpdate accesses managed objects, so it cannot be burst compiled.
         public void OnUpdate(ref SystemState state)
         {
-            float deltaTime = SystemAPI.Time.DeltaTime;
-
             var directory = SystemAPI.ManagedAPI.GetSingleton<DirectoryManaged>();
             if (!directory.RotationToggle.isOn)
             {
                 return;
             }
+
+            float deltaTime = SystemAPI.Time.DeltaTime;
 
             foreach (var (transform, speed, go) in
                      SystemAPI.Query<RefRW<LocalTransform>, RefRO<RotationSpeed>, RotatorGO>())

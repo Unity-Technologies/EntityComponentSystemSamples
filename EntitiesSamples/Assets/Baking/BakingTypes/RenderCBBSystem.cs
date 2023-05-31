@@ -12,8 +12,6 @@ namespace Baking.BakingTypes
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<CompoundBBComponent>();
-
-            state.RequireForUpdate<Execute.BakingTypes>();
         }
 
         [BurstCompile]

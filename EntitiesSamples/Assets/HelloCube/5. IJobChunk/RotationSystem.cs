@@ -9,12 +9,9 @@ namespace HelloCube.JobChunk
 {
     public partial struct RotationSystem : ISystem
     {
-        private ComponentTypeHandle<LocalTransform> transformTypeHandle;
-
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            transformTypeHandle = state.GetComponentTypeHandle<LocalTransform>();
             state.RequireForUpdate<Execute.IJobChunk>();
         }
 
@@ -23,17 +20,10 @@ namespace HelloCube.JobChunk
         {
             var spinningCubesQuery = SystemAPI.QueryBuilder().WithAll<RotationSpeed, LocalTransform>().Build();
 
-            // Because we cached the TypeHandle in OnCreate, we have to Update it each frame before use.
-            transformTypeHandle.Update(ref state);
-
-            // The more convenient way to get a type handle is to use SystemAPI,
-            // which handles the caching and Update() for you.
-            var rotationSpeedTypeHandle = SystemAPI.GetComponentTypeHandle<RotationSpeed>(true);
-
             var job = new RotationJob
             {
-                TransformTypeHandle = transformTypeHandle,
-                RotationSpeedTypeHandle = rotationSpeedTypeHandle,
+                TransformTypeHandle = SystemAPI.GetComponentTypeHandle<LocalTransform>(),
+                RotationSpeedTypeHandle = SystemAPI.GetComponentTypeHandle<RotationSpeed>(true),
                 DeltaTime = SystemAPI.Time.DeltaTime
             };
 
@@ -41,16 +31,16 @@ namespace HelloCube.JobChunk
             // Furthermore, IJobChunk does not pass and assign the state.Dependency JobHandle implicitly.
             // (This pattern of passing and assigning state.Dependency ensures that the entity jobs scheduled
             // in different systems will depend upon each other as needed.)
-            state.Dependency = job.ScheduleParallel(spinningCubesQuery, state.Dependency);
+            state.Dependency = job.Schedule(spinningCubesQuery, state.Dependency);
         }
     }
 
     [BurstCompile]
     struct RotationJob : IJobChunk
     {
-        public float DeltaTime;
         public ComponentTypeHandle<LocalTransform> TransformTypeHandle;
         [ReadOnly] public ComponentTypeHandle<RotationSpeed> RotationSpeedTypeHandle;
+        public float DeltaTime;
 
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask,
             in v128 chunkEnabledMask)
@@ -63,12 +53,11 @@ namespace HelloCube.JobChunk
             // someone later changes the query or component types.
             Assert.IsFalse(useEnabledMask);
 
-            var chunkTransforms = chunk.GetNativeArray(ref TransformTypeHandle);
-            var chunkRotationSpeeds = chunk.GetNativeArray(ref RotationSpeedTypeHandle);
+            var transforms = chunk.GetNativeArray(ref TransformTypeHandle);
+            var rotationSpeeds = chunk.GetNativeArray(ref RotationSpeedTypeHandle);
             for (int i = 0, chunkEntityCount = chunk.Count; i < chunkEntityCount; i++)
             {
-                var rotationSpeed = chunkRotationSpeeds[i];
-                chunkTransforms[i] = chunkTransforms[i].RotateY(rotationSpeed.RadiansPerSecond * DeltaTime);
+                transforms[i] = transforms[i].RotateY(rotationSpeeds[i].RadiansPerSecond * DeltaTime);
             }
         }
     }

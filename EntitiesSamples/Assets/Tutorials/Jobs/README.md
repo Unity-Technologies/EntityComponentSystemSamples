@@ -1,13 +1,15 @@
 # Jobs Tutorial
 
+[Video: Jobs Tutorial walkthrough](https://youtu.be/oOgNg2gL2yw) (17 minutes)
+
 The tutorial is split into discrete steps that each build upon the last. Step N is in the `Assets/StepN` directory, *e.g.* step 2 is in the `Assets/Step2` directory.
 
-**The problem we want to solve:**
+### The problem we want to solve:
 
 - Seekers (blue cubes) and Targets (red cubes) each move slowly in a random direction on a 2D plane.
-- A white debug line is drawn from each Seeker to the nearest Target.
+- A white debug line is drawn from each Seeker to its nearest Target.
 
-![each blue seeker finds its nearest red target](./Images/find_target.gif)
+![each blue seeker finds its nearest red target](./Common/Images/find_target.gif)
 
 <br>
 
@@ -24,7 +26,7 @@ The finding algorithm used here is simple brute force: for every seeker, we loop
 
 Here's a profile of a typical frame with 1000 seekers and 1000 targets:
 
-![profile for step 1](./Images/step1_profile.png)
+![profile for step 1](./Common/Images/step1_profile.png)
 
 Each seeker takes ~0.3ms to update, taking over 330ms total.
 
@@ -49,8 +51,6 @@ So here's how our `FindNearestJob` job is defined:
 
 
 ```c#
-// from Assets/Step2/FindNearestJob.cs
-
 public struct FindNearestJob : IJob
 {
     // All the data which a job will access
@@ -77,8 +77,6 @@ The `Update()` of `FindNearest`:
 Here's the excerpt that instantiates, schedules, and completes the job:
 
 ```c#
-// from Assets/Step2/FindNearest.cs
-
 // To schedule a job, we first create an instance and populate its fields.
 FindNearestJob findJob = new FindNearestJob
 {
@@ -103,21 +101,21 @@ findHandle.Complete();
 
 Here's a profile of a typical frame with 1000 seekers and 1000 targets **without Burst compiling the job**:
 
-![profile for step 2 (Burst disabled)](./Images/step2_profile_no_burst.png)
+![profile for step 2 (Burst disabled)](./Common/Images/step2_profile_no_burst.png)
 
 ~30ms is definitely better than the ~330ms we saw before, but next let's **enable Burst compilation** by adding the `[BurstCompile]` attribute on the job struct. **Also make sure that Burst compilation is enabled in the menubar:**
 
-![Enable Burst compilation](./Images/enable_burst.png).
+![Enable Burst compilation](./Common/Images/enable_burst.png).
 
 Here's what we get with Burst:
 
-![profile for step 2 (Burst enabled)](./Images/step2_profile.png)
+![profile for step 2 (Burst enabled)](./Common/Images/step2_profile.png)
 
 At ~1.5ms, we're well within the 16.6ms budget of 60fps.
 
 Since we have so much headroom now,  let's try 10,000 seekers and 10,000 targets:
 
-![profile for step 2 (Burst enabled, 10,000 seekers and targets)](./Images/step2_profile_10000.png)
+![profile for step 2 (Burst enabled, 10,000 seekers and targets)](./Common/Images/step2_profile_10000.png)
 
 A 10-fold increase in seekers and targets results in a 70-fold increase in run time, but this is expected given that every seeker is checking its distance to every target.
 
@@ -146,8 +144,6 @@ The worker threads pull these batches off the queue individually, so the batches
 An `IJobParallelFor`'s `Execute()` method takes an index parameter and is called once for each index, from 0 up to the index count:
 
 ```c#
-// from Assets/Step3/FindNearestJob.cs
-
 public struct FindNearestJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<float3> TargetPositions;
@@ -163,8 +159,6 @@ public struct FindNearestJob : IJobParallelFor
 ```
 
 ```c#
-// from Assets/Step3/FindNearest.cs
-
 // This job processes every seeker, so the
 // seeker array length is used as the index count.
 // A batch size of 100 is semi-arbitrarily chosen here 
@@ -176,7 +170,7 @@ JobHandle findHandle = findJob.Schedule(SeekerPositions.Length, 100);
 
 Profile of a typical frame with 10,000 seekers and 10,000 targets:
 
-![profile for step 3](./Images/step3_profile.png)
+![profile for step 3](./Common/Images/step3_profile.png)
 
 With the work split across 16 cores, it takes ~260ms total CPU time but less than 17ms from start to end.
 
@@ -211,8 +205,6 @@ The `SegmentSortMerge` job should not begin execution until the `SegmentSort` jo
 Our `FindNearestJob` needs to wait for the sorting to finish, so it must depend upon the sorting jobs. Here's our code that creates and schedules the jobs:
 
 ```c#
-// from Assets/Step4/FindNearest.cs
-
 SortJob<float3, AxisXComparer> sortJob = TargetPositions.SortJob(
     new AxisXComparer { });
 
@@ -244,13 +236,13 @@ If we neglect to make the sorting job a dependency of the find job, the job safe
 
 For this solution, here's a profile of a typical frame with 10,000 seekers and 10,000 targets:
 
-![profile for step 4](./Images/step4_profile.png)
+![profile for step 4](./Common/Images/step4_profile.png)
 
 Now the `FindNearestJob` takes just ~7.5ms total CPU time and ~0.5ms from start to end.
 
 Zooming in, we can see the `SegmentSort` and `SegmentSortMerge` jobs:
 
-![profile for step 4 (sorting)](./Images/step4_profile_sort.png)
+![profile for step 4 (sorting)](./Common/Images/step4_profile_sort.png)
 
 The `SegmentSort` takes under a 0.1ms start to end, and the single-threaded `SegmentSortMerge` takes ~0.5ms. Weighed against the enormous improvement in `FindNearestJob`, the extra step of sorting is well worth the additional cost.
 

@@ -11,21 +11,22 @@ namespace Baking.BakingTypes
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Execute.BakingTypes>();
+            state.RequireForUpdate<CompoundBBComponent>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             // Add the cleanup component to every entity contributing the bounding boxes.
-            var missingCleanupQuery = SystemAPI.QueryBuilder().WithAll<BoundingBoxComponent>().WithNone<BoundingBoxCleanup>().Build();
+            var missingCleanupQuery = SystemAPI.QueryBuilder().WithAll<BoundingBox>()
+                .WithNone<BoundingBoxCleanup>().Build();
             state.EntityManager.AddComponent<BoundingBoxCleanup>(missingCleanupQuery);
 
             // Find the parent bounding boxes that have changes in their children and reset their values.
             var changedCBBs = new NativeHashSet<Entity>(1, Allocator.Temp);
             foreach (var (bb, pp) in
-                     SystemAPI.Query<RefRO<BoundingBoxComponent>, RefRW<BoundingBoxCleanup>>()
-                         .WithAll<ChangesComponent>())
+                     SystemAPI.Query<RefRO<BoundingBox>, RefRW<BoundingBoxCleanup>>()
+                         .WithAll<Changes>())
             {
                 var parent = bb.ValueRO.Parent;
                 changedCBBs.Add(parent);
@@ -43,7 +44,7 @@ namespace Baking.BakingTypes
             // If an entity has been destroyed, only its cleanup component is left. The previous parent needs updating.
             foreach (var pp in
                      SystemAPI.Query<RefRO<BoundingBoxCleanup>>()
-                         .WithNone<BoundingBoxComponent>())
+                         .WithNone<BoundingBox>())
             {
                 var previousParent = pp.ValueRO.PreviousParent;
                 if (previousParent != Entity.Null)
@@ -53,7 +54,8 @@ namespace Baking.BakingTypes
             }
 
             // Destroyed entities are kept alive by their cleanup component, so they have to be explicitly removed.
-            var removedEntities = SystemAPI.QueryBuilder().WithAll<BoundingBoxCleanup>().WithNone<BoundingBoxComponent>().Build();
+            var removedEntities = SystemAPI.QueryBuilder().WithAll<BoundingBoxCleanup>()
+                .WithNone<BoundingBox>().Build();
             state.EntityManager.RemoveComponent<BoundingBoxCleanup>(removedEntities);
 
             // Every parent that needs updating has its bounding box reset.
@@ -67,9 +69,9 @@ namespace Baking.BakingTypes
             }
 
             // Calculate the compounded bounding box of all the cubes
-            var componentLookup = SystemAPI.GetComponentLookup<CompoundBBComponent>();
+            var compoundBBLookup = SystemAPI.GetComponentLookup<CompoundBBComponent>();
             foreach (var bb in
-                     SystemAPI.Query<RefRO<BoundingBoxComponent>>())
+                     SystemAPI.Query<RefRO<BoundingBox>>())
             {
                 var parent = bb.ValueRO.Parent;
                 if (!changedCBBs.Contains(parent))
@@ -77,7 +79,7 @@ namespace Baking.BakingTypes
                     continue;
                 }
 
-                var parentBB = componentLookup.GetRefRW(bb.ValueRO.Parent, false);
+                var parentBB = compoundBBLookup.GetRefRW(bb.ValueRO.Parent);
                 ref var parentMin = ref parentBB.ValueRW.MinBBVertex;
                 ref var parentMax = ref parentBB.ValueRW.MaxBBVertex;
                 var min = bb.ValueRO.MinBBVertex;

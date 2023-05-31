@@ -188,10 +188,10 @@ namespace Samples.HelloNetcode
             var serverEndpoint = NetworkEndpoint.Parse(endpoint.Host, (ushort)endpoint.Port);
 
             // UTP uses pointers instead of managed arrays for performance reasons, so we use these helper functions to convert them
-            var allocationIdBytes = RelayUtilities.ConvertFromAllocationIdBytes(allocation.AllocationIdBytes);
-            var connectionData = RelayUtilities.ConvertConnectionData(allocation.ConnectionData);
-            var hostConnectionData = RelayUtilities.ConvertConnectionData(allocation.HostConnectionData);
-            var key = RelayUtilities.ConvertFromHMAC(allocation.Key);
+            var allocationIdBytes = RelayAllocationId.FromByteArray(allocation.AllocationIdBytes);
+            var connectionData = RelayConnectionData.FromByteArray(allocation.ConnectionData);
+            var hostConnectionData = RelayConnectionData.FromByteArray(allocation.HostConnectionData);
+            var key = RelayHMACKey.FromByteArray(allocation.Key);
 
             // Prepare the Relay server data and compute the nonce values
             // A player joining the host passes its own connectionData as well as the host's

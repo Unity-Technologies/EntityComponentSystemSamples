@@ -1,0 +1,151 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af3fb43bbe643e348bd0c915d0e1bcf9, type: 3}
+  m_Name: Stand
+  m_EditorClassIdentifier: 
+  animIdle: {fileID: 7400000, guid: b252938db9b3a184a9699056fdac4c3b, type: 3}
+  animTurnL: {fileID: 7400000, guid: 8ea766e284e022a41b6c8b2c67c4843a, type: 3}
+  animTurnR: {fileID: 7400000, guid: e870cd3602b198140bb67a0373793b9e, type: 3}
+  animAimLeft: {fileID: 7400002, guid: 3ccb9bf678c96bd428e5dd121ee06f8a, type: 3}
+  animAimMid: {fileID: 7400000, guid: d7563e98628ac8e44b0db10c9bbe3e74, type: 3}
+  animAimRight: {fileID: 7400002, guid: a208c97bc7dc5194fa6f30320b2a2dc6, type: 3}
+  animShootPose: {fileID: 7400000, guid: cc852c9bfd3035b4e9f732094d9d1532, type: 3}
+  animTurnAngle: 90
+  aimTurnLocalThreshold: 90
+  aimYawAngle: 90
+  turnSpeed: 120
+  turnThreshold: 120
+  turnTransitionSpeed: 16
+  shootPoseMagnitude: 0.75
+  shootPoseEnterSpeed: 3.5
+  shootPoseExitSpeed: 4.5
+  shootPoseEnter:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1.365743
+      outSlope: 1.365743
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.05466667
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  shootPoseExit:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.051999986
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  blendOutAimOnReloadPitch: 0.25
+  blendOutAimOnReloadYaw: 0.45
+  blendOutAimOnReload:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 1
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.15466666
+    - serializedVersion: 3
+      time: 0.17678154
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.6589878
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.84332633
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.07733333
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  footIK:
+    leftToeStandPos: {x: 0.18, y: 0.042, z: 0.315}
+    rightToeStandPos: {x: -0.18, y: 0.042, z: -0.49}
+    debugIdlePos: 0
+    enabled: 1
+    emitRayOffset: 0.5
+    maxRayDistance: 0.75
+    debugRayCast: 0
+    maxStepSize: 0.55
+    weightShiftAngle: 17.5
+    weightShiftHorizontal: -0.5
+    weightShiftVertical: -0.35
+    maxFootRotationOffset: 30
+    enterStateEaseIn: 0.65
+  leftToeBone: Left_Toes
+  rightToeBone: Right_Toes
+  actionAnimations:
+  - action: 1
+    animation: {fileID: 7400000, guid: c2a7d124360c75b408d599b3806112d2, type: 3}
+    restartTimeOffset: 0
+  - action: 2
+    animation: {fileID: 7400000, guid: 02922de4e92e61544bc7867382458fd5, type: 3}
+    restartTimeOffset: 0
+  - action: 3
+    animation: {fileID: 7400000, guid: 421b05ab0cfb4d043a47fa1a0f3d4393, type: 3}
+    restartTimeOffset: 0
+  - action: 4
+    animation: {fileID: 7400000, guid: 982381c34e64fe842bd874d507252c80, type: 3}
+    restartTimeOffset: 0

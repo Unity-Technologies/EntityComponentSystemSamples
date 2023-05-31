@@ -8,14 +8,14 @@ namespace HelloCube.Prefabs
 {
     public partial struct SpawnSystem : ISystem
     {
-        EntityQuery m_SpinningCubes;
-        uint m_UpdateCounter;
+        uint updateCounter;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            // This makes the system not update unless at least one entity exists that has the Spawner component.
+            // This call makes the system not update unless at least one entity in the world exists that has the Spawner component.
             state.RequireForUpdate<Spawner>();
+
             state.RequireForUpdate<Execute.Prefabs>();
         }
 
@@ -36,12 +36,12 @@ namespace HelloCube.Prefabs
 
                 // Unlike new Random(), CreateFromIndex() hashes the random seed
                 // so that similar seeds don't produce similar results.
-                var random = Random.CreateFromIndex(m_UpdateCounter++);
+                var random = Random.CreateFromIndex(updateCounter++);
 
                 foreach (var entity in instances)
                 {
                     // Update the entity's LocalTransform component with the new position.
-                    var transform = SystemAPI.GetComponentRW<LocalTransform>(entity, false);
+                    var transform = SystemAPI.GetComponentRW<LocalTransform>(entity);
                     transform.ValueRW.Position = (random.NextFloat3() - new float3(0.5f, 0, 0.5f)) * 20;
                 }
             }

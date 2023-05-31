@@ -7,7 +7,7 @@ namespace HelloCube.EnableableComponents
     public partial struct RotationSystem : ISystem
     {
         float timer;
-        private const float interval = 1.3f;
+        const float interval = 1.3f;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
