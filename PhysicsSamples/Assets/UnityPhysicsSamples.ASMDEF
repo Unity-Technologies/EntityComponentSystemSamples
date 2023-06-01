@@ -1,23 +1,25 @@
 {
     "name": "Unity.Physics.Samples",
     "references": [
+        "Havok.Physics",
+        "Havok.Physics.Editor",
+        "Havok.Physics.Hybrid",
         "Unity.Burst",
+        "Unity.Collections",
         "Unity.Entities",
         "Unity.Entities.Editor",
+        "Unity.Entities.Graphics",
         "Unity.Entities.Hybrid",
+        "Unity.InputSystem",
         "Unity.Mathematics",
         "Unity.Mathematics.Extensions",
         "Unity.Mathematics.Extensions.Hybrid",
         "Unity.Transforms",
-        "Unity.InputSystem",
-        "Unity.Collections",
-        "Unity.Entities.Graphics",
         "Unity.Physics",
+        "Unity.Physics.EditModeTests",
         "Unity.Physics.Editor",
         "Unity.Physics.Hybrid",
-        "Havok.Physics",
-        "Havok.Physics.Editor",
-        "Havok.Physics.Hybrid"
+        "Unity.Physics.Custom"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -25,7 +27,8 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [ "UNITY_PHYSICS_CUSTOM"
+    ],
     "versionDefines": [
         {
             "name": "com.havok.physics",

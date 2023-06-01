@@ -28,7 +28,6 @@ public partial struct PredictionSwitchingSystem : ISystem
         if (playerEnt == Entity.Null)
             return;
 
-
         var playerPos = state.EntityManager.GetComponentData<LocalTransform>(playerEnt).Position;
 
         var ghostPredictionSwitchingQueues = SystemAPI.GetSingletonRW<GhostPredictionSwitchingQueues>().ValueRW;
@@ -78,17 +77,12 @@ public partial struct PredictionSwitchingSystem : ISystem
         public float transitionDurationSeconds;
         public byte ballColorChangingEnabled;
 
-
         void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform, in GhostInstance ghostInstance)
-
         {
             if (ghostInstance.ghostType < 0) return;
 
-
             if (math.distancesq(playerPos, transform.Position) < enterRadiusSq)
-
             {
-                transitionDurationSeconds = 1.0f;
                 predictedQueue.Enqueue(new ConvertPredictionEntry
                 {
                     TargetEntity = ent,
@@ -114,18 +108,13 @@ public partial struct PredictionSwitchingSystem : ISystem
 
         [ReadOnly]
         public ComponentLookup<GhostOwner> ghostOwnerFromEntity;
-
         public float transitionDurationSeconds;
 
-
         void Execute(Entity ent, [EntityIndexInQuery] int entityIndexInQuery, in LocalTransform transform, in GhostInstance ghostInstance)
-
         {
             if (ghostInstance.ghostType < 0) return;
 
-
             if (math.distancesq(playerPos, transform.Position) > exitRadiusSq)
-
             {
                 interpolatedQueue.Enqueue(new ConvertPredictionEntry
                 {

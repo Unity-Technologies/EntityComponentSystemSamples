@@ -9,6 +9,8 @@ namespace Samples.HelloNetcode
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateInGroup(typeof(GhostSimulationSystemGroup))]
     [UpdateAfter(typeof(GhostSpawnClassificationSystem))]
+    [CreateAfter(typeof(GhostCollectionSystem))]
+    [CreateAfter(typeof(GhostReceiveSystem))]
     [BurstCompile]
     public partial struct ClassificationSystem : ISystem
     {
@@ -21,7 +23,9 @@ namespace Samples.HelloNetcode
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            m_SnapshotDataLookupHelper = new SnapshotDataLookupHelper(ref state);
+            m_SnapshotDataLookupHelper = new SnapshotDataLookupHelper(ref state,
+                SystemAPI.GetSingletonEntity<GhostCollection>(),
+                SystemAPI.GetSingletonEntity<SpawnedGhostEntityMap>());
             m_PredictedGhostSpawnLookup = state.GetBufferLookup<PredictedGhostSpawn>();
             m_GrenadeDataLookup = state.GetComponentLookup<GrenadeData>();
             state.RequireForUpdate<GhostSpawnQueue>();
@@ -48,12 +52,9 @@ namespace Samples.HelloNetcode
             m_SnapshotDataLookupHelper.Update(ref state);
             m_PredictedGhostSpawnLookup.Update(ref state);
             m_GrenadeDataLookup.Update(ref state);
-            var ghostCollection = SystemAPI.GetSingletonEntity<GhostCollection>();
             var classificationJob = new ClassificationJob
             {
-                ghostMap = SystemAPI.GetSingleton<SpawnedGhostEntityMap>().Value,
                 snapshotDataLookupHelper = m_SnapshotDataLookupHelper,
-                ghostCollectionSingleton = ghostCollection,
                 spawnListEntity = SystemAPI.GetSingletonEntity<PredictedGhostSpawnList>(),
                 PredictedSpawnListLookup = m_PredictedGhostSpawnLookup,
                 grenadeDataLookup = m_GrenadeDataLookup,
@@ -66,9 +67,7 @@ namespace Samples.HelloNetcode
         [BurstCompile]
         partial struct ClassificationJob : IJobEntity
         {
-            public NativeParallelHashMap<SpawnedGhost, Entity>.ReadOnly ghostMap;
             public SnapshotDataLookupHelper snapshotDataLookupHelper;
-            public Entity ghostCollectionSingleton;
             public Entity spawnListEntity;
             public BufferLookup<PredictedGhostSpawn> PredictedSpawnListLookup;
             public ComponentLookup<GrenadeData> grenadeDataLookup;
@@ -76,8 +75,8 @@ namespace Samples.HelloNetcode
 
             public void Execute(DynamicBuffer<GhostSpawnBuffer> ghosts, DynamicBuffer<SnapshotDataBuffer> data)
             {
-                var inspector = snapshotDataLookupHelper.CreateSnapshotBufferLookup(ghostCollectionSingleton, ghostMap);
                 var predictedSpawnList = PredictedSpawnListLookup[spawnListEntity];
+                var snapshotDataLookup = snapshotDataLookupHelper.CreateSnapshotBufferLookup();
                 for (int i = 0; i < ghosts.Length; ++i)
                 {
                     var newGhostSpawn = ghosts[i];
@@ -99,7 +98,7 @@ namespace Samples.HelloNetcode
                     {
                         if (newGhostSpawn.GhostType == predictedSpawnList[j].ghostType)
                         {
-                            if (inspector.TryGetComponentDataFromSnapshotHistory(newGhostSpawn.GhostType, data, out GrenadeData grenadeData, i))
+                            if (snapshotDataLookup.TryGetComponentDataFromSnapshotHistory(newGhostSpawn.GhostType, data, out GrenadeData grenadeData, i))
                             {
                                 var spawnIdFromList = grenadeDataLookup[predictedSpawnList[j].entity].SpawnId;
                                 if (grenadeData.SpawnId == spawnIdFromList)

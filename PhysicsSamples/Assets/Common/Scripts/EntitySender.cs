@@ -1,38 +1,46 @@
 using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public interface IReceiveEntity
+namespace Common.Scripts
 {
-}
-
-public struct SentEntity : IBufferElementData
-{
-    public Entity Target;
-}
-
-public class EntitySender : MonoBehaviour
-{
-    public GameObject[] EntityReceivers;
-
-    class EntitySenderBaker : Baker<EntitySender>
+    public class EntitySender : MonoBehaviour
     {
-        public override void Bake(EntitySender authoring)
+        [FormerlySerializedAs("EntityReceivers")]
+        public GameObject[] Receivers;
+
+        class Baker : Baker<EntitySender>
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
-            var sentEntities = AddBuffer<SentEntity>(entity);
-            foreach (var entityReceiver in authoring.EntityReceivers)
+            public override void Bake(EntitySender authoring)
             {
-                List<MonoBehaviour> potentialReceivers = new List<MonoBehaviour>();
-                GetComponents<MonoBehaviour>(entityReceiver, potentialReceivers);
-                foreach (var potentialReceiver in potentialReceivers)
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                var sentEntities = AddBuffer<TargetEntity>(entity);
+                foreach (var receiver in authoring.Receivers)
                 {
-                    if (potentialReceiver is IReceiveEntity)
+                    List<MonoBehaviour> mbs = new List<MonoBehaviour>();
+                    GetComponents<MonoBehaviour>(receiver, mbs);
+                    foreach (var mb in mbs)
                     {
-                        sentEntities.Add(new SentEntity() {Target = GetEntity(entityReceiver, TransformUsageFlags.Dynamic)});
+                        if (mb is IReceiveEntity)
+                        {
+                            sentEntities.Add(new TargetEntity()
+                            {
+                                Value = GetEntity(mb, TransformUsageFlags.Dynamic)
+                            });
+                        }
                     }
                 }
             }
         }
+    }
+
+    public struct TargetEntity : IBufferElementData
+    {
+        public Entity Value;
+    }
+
+    public interface IReceiveEntity
+    {
     }
 }

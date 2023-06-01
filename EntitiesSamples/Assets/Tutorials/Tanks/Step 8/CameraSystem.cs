@@ -4,7 +4,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
-using Camera = Tutorials.Tanks.Execute.Camera;
 using Random = Unity.Mathematics.Random;
 
 namespace Tutorials.Tanks.Step8
@@ -12,7 +11,6 @@ namespace Tutorials.Tanks.Step8
     // This system should run after the transform system has been updated, otherwise the camera
     // will lag one frame behind the tank.
     [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-    [BurstCompile]
     public partial struct CameraSystem : ISystem
     {
         Entity target;
@@ -21,12 +19,11 @@ namespace Tutorials.Tanks.Step8
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Camera>();
-
-            random = Random.CreateFromIndex(1234);
+            state.RequireForUpdate<Execute.Camera>();
+            random = new Random(123);
         }
 
-        // Because this OnUpdate accesses managed objects, it cannot be Burst compiled.
+        // Because this OnUpdate accesses managed objects, it cannot be Burst-compiled.
         public void OnUpdate(ref SystemState state)
         {
             if (target == Entity.Null || Input.GetKeyDown(KeyCode.Space))

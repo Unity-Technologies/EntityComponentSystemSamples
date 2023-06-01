@@ -1,19 +1,22 @@
 using UnityEngine;
 
-public class Pauser : MonoBehaviour
+namespace Common.Scripts
 {
-    void FixedUpdate()
+    public class Pauser : MonoBehaviour
     {
-    }
-
-    void Update()
-    {
-        if (++CurrentStep == PauseStep)
+        void FixedUpdate()
         {
-            Debug.Break();
         }
-    }
 
-    public int CurrentStep;
-    public int PauseStep;
+        void Update()
+        {
+            if (++CurrentStep == PauseStep)
+            {
+                Debug.Break();
+            }
+        }
+
+        public int CurrentStep;
+        public int PauseStep;
+    }
 }

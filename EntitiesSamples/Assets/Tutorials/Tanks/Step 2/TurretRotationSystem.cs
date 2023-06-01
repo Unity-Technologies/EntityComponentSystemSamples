@@ -1,4 +1,3 @@
-using Tutorials.Tanks.Execute;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -10,7 +9,6 @@ namespace Tutorials.Tanks.Step2
     // so we have to explicitly opt into Burst compilation with the [BurstCompile] attribute.
     // It has to be added on BOTH the struct AND the OnCreate/OnDestroy/OnUpdate functions to be
     // effective.
-    [BurstCompile]
     public partial struct TurretRotationSystem : ISystem
     {
         [BurstCompile]
@@ -22,7 +20,7 @@ namespace Tutorials.Tanks.Step2
             // This pattern effectively allows each scene to choose whether a system should update.
             // (In this tutorial, we only want the systems from the current step and earlier to update for a given scene,
             // e.g. when running the Step 5 scene, we only want systems from steps 1-5 to update.)
-            state.RequireForUpdate<TurretRotation>();
+            state.RequireForUpdate<Execute.TurretRotation>();
         }
 
         // This system doesn't need an OnDestroy method, so it uses the default empty one defined in ISystem.

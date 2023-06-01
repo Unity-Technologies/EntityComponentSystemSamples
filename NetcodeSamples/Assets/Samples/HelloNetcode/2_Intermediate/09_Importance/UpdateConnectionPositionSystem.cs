@@ -11,38 +11,60 @@ namespace Samples.HelloNetcode
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct UpdateConnectionPositionSystem : ISystem
     {
-        public void OnCreate(ref SystemState state)
-        {
-            var grid = state.EntityManager.CreateEntity();
-            var m_ScaleFunctionPointer = GhostDistanceImportance.ScaleFunctionPointer;
-            state.EntityManager.SetName(grid, "GhostImportanceSingleton");
-            state.EntityManager.AddComponentData(grid, new GhostDistanceData
-            {
-                TileSize = new int3(5, 5, 5),
-                TileCenter = new int3(0, 0, 0),
-                TileBorderWidth = new float3(1f, 1f, 1f),
-            });
-            state.EntityManager.AddComponentData(grid, new GhostImportance
-            {
-                ScaleImportanceFunction = m_ScaleFunctionPointer,
-                GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
-                GhostImportanceDataType = ComponentType.ReadOnly<GhostDistanceData>(),
-                GhostImportancePerChunkDataType = ComponentType.ReadOnly<GhostDistancePartitionShared>(),
-            });
-        }
+        private EntityQuery m_NetworkIdsWithoutGhostConnectionPositionQuery;
 
         [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            var builder = new EntityQueryBuilder(Allocator.Temp)
+                .WithAll<NetworkId>()
+                .WithNone<GhostConnectionPosition>();
+            m_NetworkIdsWithoutGhostConnectionPositionQuery = state.EntityManager.CreateEntityQuery(builder);
+            // Note: CreateEntityQuery ensures we run this system even if we do not have any entities matching this query (i.e. clients),
+            // which allows the EnableImportance flag to still work.
+        }
+
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
-            foreach (var (_, entity) in SystemAPI.Query<NetworkId>().WithNone<GhostConnectionPosition>().WithEntityAccess())
+            // Note: This is handled in OnUpdate as we cannot guarantee that the EnableImportance singleton exists during OnCreate, as it's enabled via a sub-scene.
+            var shouldEnableImportanceScaling = SystemAPI.HasSingleton<EnableImportance>();
+            var hasEnabledImportanceScaling = SystemAPI.TryGetSingletonEntity<GhostImportance>(out var existingImportanceSingletonEntity);
+            if (shouldEnableImportanceScaling != hasEnabledImportanceScaling)
             {
-                ecb.AddComponent(entity, new GhostConnectionPosition
+                if (shouldEnableImportanceScaling)
                 {
-                    Position = new float3(),
-                });
+                    var grid = state.EntityManager.CreateSingleton(new GhostDistanceData
+                    {
+                        TileSize = new int3(5, 5, 5),
+                        TileCenter = new int3(0, 0, 0),
+                        TileBorderWidth = new float3(1f, 1f, 1f),
+                    });
+                    state.EntityManager.AddComponentData(grid, new GhostImportance
+                    {
+                        ScaleImportanceFunction = GhostDistanceImportance.ScaleFunctionPointer,
+                        GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
+                        GhostImportanceDataType = ComponentType.ReadOnly<GhostDistanceData>(),
+                        GhostImportancePerChunkDataType = ComponentType.ReadOnly<GhostDistancePartitionShared>(),
+                    });
+
+                    // Note: If you ALWAYS want the "Distance Importance Scaling" feature enabled:
+                    // - It is safe to move the above code into OnCreate.
+                    // - But, you must delete the EnableImportance component (and Authoring), as you cannot sample it via OnCreate.
+
+                }
+                else
+                {
+                    state.EntityManager.DestroyEntity(existingImportanceSingletonEntity);
+                }
             }
-            ecb.Playback(state.EntityManager);
+
+            if (shouldEnableImportanceScaling)
+            {
+                state.EntityManager.AddComponent<GhostConnectionPosition>(m_NetworkIdsWithoutGhostConnectionPositionQuery);
+                // Note: In a real game (and assuming your clients character controller moves and/or rotates),
+                // you'd need to update your GhostConnectionPosition values every frame.
+                // In this sample, the character controller is in a fixed position, which happens to be default(float3).
+            }
         }
     }
 }

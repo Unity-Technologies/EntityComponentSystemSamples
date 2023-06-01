@@ -10,7 +10,9 @@ namespace Streaming.RuntimeContentManager
         {
             Camera.main.transform.Translate(0, 0, Time.deltaTime * speed);
             if (Camera.main.transform.position.z > 800)
+            {
                 Camera.main.transform.position = new Vector3(0, 0, -800);
+            }
         }
     }
 }

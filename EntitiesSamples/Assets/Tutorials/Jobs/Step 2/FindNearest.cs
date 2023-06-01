@@ -10,11 +10,11 @@ namespace Tutorials.Jobs.Step2
         // The size of our arrays does not need to vary, so rather than create
         // new arrays every field, we'll create the arrays in Awake() and store them
         // in these fields.
-        public NativeArray<float3> TargetPositions;
-        public NativeArray<float3> SeekerPositions;
-        public NativeArray<float3> NearestTargetPositions;
+        NativeArray<float3> TargetPositions;
+        NativeArray<float3> SeekerPositions;
+        NativeArray<float3> NearestTargetPositions;
 
-        public void Awake()
+        public void Start()
         {
             Spawner spawner = Object.FindObjectOfType<Spawner>();
             // We use the Persistent allocator because these arrays must

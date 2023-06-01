@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Streaming.RuntimeContentManager
 {
-    //Creates jobs that compute visibility of the entities
+    // Creates jobs that compute visibility of the entities
     [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor)]
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [RequireMatchingQueriesForUpdate]
@@ -17,9 +17,9 @@ namespace Streaming.RuntimeContentManager
         {
             new DecorationVisibilityJob
             {
-                camPos = Camera.main.transform.position,
-                loadRadius = Camera.main.farClipPlane,
-                camFwd = Camera.main.transform.forward
+                CamPos = Camera.main.transform.position,
+                LoadRadius = Camera.main.farClipPlane,
+                CamForward = Camera.main.transform.forward
             }.ScheduleParallel();
         }
     }
@@ -28,17 +28,18 @@ namespace Streaming.RuntimeContentManager
     [BurstCompile]
     partial struct DecorationVisibilityJob : IJobEntity
     {
-        public float loadRadius;
-        public float3 camPos;
-        public float3 camFwd;
+        public float LoadRadius;
+        public float3 CamPos;
+        public float3 CamForward;
 
         void Execute(ref DecorationVisualComponentData dec, in LocalToWorld transform)
         {
             // "in view" just means within distance in this sample.
-            var distToCamera = math.distance(transform.Position, camPos);
-            var newWithinLoadRange = distToCamera < loadRadius;
+            var distToCamera = math.distance(transform.Position, CamPos);
+            var newWithinLoadRange = distToCamera < LoadRadius;
             if (dec.withinLoadRange && !newWithinLoadRange)
             {
+                dec.withinLoadRange = false;
                 dec.shouldRender = false;
                 dec.loaded = false;
                 dec.mesh.Release();
@@ -46,6 +47,7 @@ namespace Streaming.RuntimeContentManager
             }
             else if (!dec.withinLoadRange && newWithinLoadRange)
             {
+                dec.withinLoadRange = true;
                 dec.mesh.LoadAsync();
                 dec.material.LoadAsync();
             }
@@ -59,8 +61,8 @@ namespace Streaming.RuntimeContentManager
                                  dec.mesh.LoadingStatus >= ObjectLoadingStatus.Completed;
                 }
 
-                dec.shouldRender = distToCamera < loadRadius * .25f ||
-                                   math.distance(transform.Position, camPos + camFwd * loadRadius) < loadRadius;
+                dec.shouldRender = distToCamera < LoadRadius * .25f ||
+                                   math.distance(transform.Position, CamPos + CamForward * LoadRadius) < LoadRadius;
             }
         }
     }

@@ -12,8 +12,7 @@ namespace Baking.BlobAssetBakingSystem
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<MeshBBComponent>();
-            state.RequireForUpdate<Execute.BlobAssetBaker>();
+            state.RequireForUpdate<MeshBB>();
         }
 
         [BurstCompile]
@@ -26,7 +25,7 @@ namespace Baking.BlobAssetBakingSystem
     [BurstCompile]
     public partial struct DrawBBJob : IJobEntity
     {
-        public void Execute(in MeshBBComponent meshBB, in LocalToWorld t)
+        public void Execute(in MeshBB meshBB, in LocalToWorld t)
         {
             if (!meshBB.BlobData.IsCreated)
             {

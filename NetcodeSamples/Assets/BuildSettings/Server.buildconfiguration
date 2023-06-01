@@ -1,0 +1,28 @@
+{
+    "Show": true,
+    "Dependencies": [],
+    "Components": [
+        {
+            "$type": "NetCodeConversionSettings, Unity.NetCode.Authoring.Hybrid",
+            "Target": 1
+        },
+        {
+            "$type": "Unity.Build.Classic.EnableHeadlessMode, Unity.Build.Classic"
+        },
+        {
+            "$type": "Unity.Build.Common.PlayerScriptingDefines, Unity.Build",
+            "Defines": [
+                "UNITY_SERVER"
+            ]
+        },
+        {
+            "$type": "Unity.Entities.Conversion.ConversionSystemFilterSettings, Unity.Entities.Hybrid",
+            "ExcludedConversionSystemAssemblies": [
+                "GlobalObjectId_V1-1-7a450cf7ca9694b5a8bfa3fd83ec635a-5897886265953266890-0",
+                "GlobalObjectId_V1-1-c52403dffb9bc4f33a799f71eca4ab9a-5897886265953266890-0",
+                "GlobalObjectId_V1-1-8281b45ed5ac44d5b9f06391156a3007-5897886265953266890-0",
+                "GlobalObjectId_V1-1-308a44c6d7c754f2bb0e69df7e894c78-5897886265953266890-0"
+            ]
+        }
+    ]
+}

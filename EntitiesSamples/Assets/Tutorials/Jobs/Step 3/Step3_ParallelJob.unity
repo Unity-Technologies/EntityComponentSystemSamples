@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 705507995}
   - component: {fileID: 705507994}
+  - component: {fileID: 705507996}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -217,6 +218,29 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &705507996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 705507993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,8 +390,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9810eb555a94440b3b99d4d62bd6793c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SeekerPrefab: {fileID: 6799008890615508230, guid: 265799596ba044b83b3aefb9605005b1, type: 3}
-  TargetPrefab: {fileID: 6799008890615508230, guid: 442de73e07b96454581bb5f8a98825ab, type: 3}
-  NumSeekers: 1000
-  NumTargets: 1000
+  SeekerPrefab: {fileID: 6799008890615508230, guid: 265799596ba044b83b3aefb9605005b1,
+    type: 3}
+  TargetPrefab: {fileID: 6799008890615508230, guid: 442de73e07b96454581bb5f8a98825ab,
+    type: 3}
+  NumSeekers: 5000
+  NumTargets: 5000
   Bounds: {x: 500, y: 500}

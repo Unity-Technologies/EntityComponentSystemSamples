@@ -16,7 +16,7 @@ namespace Tutorials.Tanks.Step3
     }
 
     // A tag component to identify the tank entities.
-    struct Tank : IComponentData
+    public struct Tank : IComponentData
     {
     }
 }

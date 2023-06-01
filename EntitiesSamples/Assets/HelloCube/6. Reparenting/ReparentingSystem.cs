@@ -9,7 +9,7 @@ namespace HelloCube.Reparenting
     {
         bool attached;
         float timer;
-        private const float interval = 0.7f;
+        const float interval = 0.7f;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)

@@ -8,7 +8,6 @@ using UnityEngine;
 namespace Samples.HelloNetcode
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
-    [UpdateInGroup(typeof(PresentationSystemGroup))]
     [UpdateAfter(typeof(CharacterControllerCameraSystem))]
     public partial class HitMarkSystem : SystemBase
     {

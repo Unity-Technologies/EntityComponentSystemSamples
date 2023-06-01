@@ -97,9 +97,9 @@ namespace Samples.HelloNetcode
                 }
                 case ConnectionState.SetupClient:
                 {
-                    var isServerHostedLocally = !string.IsNullOrEmpty(m_HostServerSystem?.RelayServerData.Endpoint.Address);
+                    var isServerHostedLocally = m_HostServerSystem?.RelayServerData.Endpoint.IsValid;
                     var enteredJoinCode = !string.IsNullOrEmpty(Address.text);
-                    if (isServerHostedLocally)
+                    if (isServerHostedLocally.GetValueOrDefault())
                     {
                         SetupClient();
                         m_HostClientSystem.GetJoinCodeFromHost();
@@ -117,8 +117,8 @@ namespace Samples.HelloNetcode
                 }
                 case ConnectionState.JoinGame:
                 {
-                    var hasClientConnectedToRelayService = !string.IsNullOrEmpty(m_HostClientSystem?.RelayClientData.Endpoint.Address);
-                    if (hasClientConnectedToRelayService)
+                    var hasClientConnectedToRelayService = m_HostClientSystem?.RelayClientData.Endpoint.IsValid;
+                    if (hasClientConnectedToRelayService.GetValueOrDefault())
                     {
                         ConnectToRelayServer();
                         m_State = ConnectionState.Unknown;
@@ -127,8 +127,8 @@ namespace Samples.HelloNetcode
                 }
                 case ConnectionState.JoinLocalGame:
                 {
-                    var hasClientConnectedToRelayService = !string.IsNullOrEmpty(m_HostClientSystem?.RelayClientData.Endpoint.Address);
-                    if (hasClientConnectedToRelayService)
+                    var hasClientConnectedToRelayService = m_HostClientSystem?.RelayClientData.Endpoint.IsValid;
+                    if (hasClientConnectedToRelayService.GetValueOrDefault())
                     {
                         SetupRelayHostedServerAndConnect();
                         m_State = ConnectionState.Unknown;

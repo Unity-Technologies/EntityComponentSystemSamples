@@ -1,0 +1,24 @@
+{
+    "Show": true,
+    "Dependencies": [],
+    "Components": [
+        {
+            "$type": "NetCodeConversionSettings, Unity.NetCode.Authoring.Hybrid",
+            "Target": 2
+        },
+        {
+            "$type": "Unity.Build.Common.PlayerScriptingDefines, Unity.Build",
+            "Defines": [
+                "UNITY_CLIENT",
+                "ENABLE_HYBRID_RENDERER_V2"
+            ]
+        },
+        {
+            "$type": "Unity.Entities.Conversion.ConversionSystemFilterSettings, Unity.Entities.Hybrid",
+            "ExcludedConversionSystemAssemblies": [
+                "GlobalObjectId_V1-1-b7d127909f4a04725b3edab4d8700bed-5897886265953266890-0",
+                "GlobalObjectId_V1-1-78161aee92fd144059f0fc99d4018d7b-5897886265953266890-0"
+            ]
+        }
+    ]
+}

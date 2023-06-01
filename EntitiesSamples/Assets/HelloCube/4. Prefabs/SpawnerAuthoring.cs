@@ -4,7 +4,6 @@ using UnityEngine;
 namespace HelloCube.Prefabs
 {
     // An authoring component is just a normal MonoBehavior that has a Baker<T> class.
-    [AddComponentMenu("HelloCube/Spawner")]
     public class SpawnerAuthoring : MonoBehaviour
     {
         public GameObject Prefab;

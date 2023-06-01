@@ -26,6 +26,6 @@ namespace Tutorials.Tanks.Step4
     // Like for tanks, we are creating a component to identify the cannon ball entities.
     public struct CannonBall : IComponentData
     {
-        public float3 Velocity; // We don't use the Velocity in Step 4, but we'll use it later.
+        public float3 Velocity; // Used in a later step.
     }
 }

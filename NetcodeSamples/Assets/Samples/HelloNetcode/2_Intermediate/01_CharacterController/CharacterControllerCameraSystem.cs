@@ -7,7 +7,7 @@ using Unity.NetCode;
 namespace Samples.HelloNetcode
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
-    [UpdateInGroup(typeof(PresentationSystemGroup))]
+    [UpdateAfter(typeof(PresentationSystemGroup))]
     [BurstCompile]
     partial struct CharacterControllerCameraSystem : ISystem
     {

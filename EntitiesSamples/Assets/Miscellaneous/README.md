@@ -1,6 +1,10 @@
-# Miscellaneous Entities samples
+# Entities miscellaneous samples
 
 *Various small samples demonstrating basic ECS code patterns.*
+
+## AnimateGameObject sample
+
+This sample demonstrates an entity that logically controls an animated GameObject.
 
 ## ClosestTarget sample
 
@@ -14,36 +18,35 @@ In the subscene, the "Simulation" GameObject has a "SettingsAuthoring" component
 
 Spatial partitioning allows each Seeker to find its closest target without having to consider *every* Target. Even the simple partitioning solution scales much better than if we use no partitioning at all, and the k-d tree solution performs even better at very large scales. For example, with 30,000 Seekers and 30,000 Targets on my 8-core CPU, the `TargetingSystem` is about twice as fast using the k-d tree solution compared to the simple solution, and more than a hundred times faster compared to the no partitioning solution.
 
-<br>
-
 
 ## CrossQuery sample
 
-At runtime:
+Demonstrates how to compare entities from two separate queries. At runtime:
 
 - The `SpawnSystem` creates two sets of boxes: 10 white boxes and 10 black boxes.
 - The `MoveSystem` moves the white and black boxes back and forth starting in opposite directions.
 - The `CollisionSystem` changes the color of a box when it intersects another: white boxes become pink and black boxes become green.
 
-The `CollisionSystem` performs the intersection tests in one of two ways, toggled by a `#if` in the code:
+The `CollisionSystem` performs the intersection tests in one of two ways, toggled by an `#if` in the code:
 
 - The `#if true` solution copies the entity id's and transforms of the boxes to arrays, then it loops over every box (using [`SystemAPI.Query`]()) to compare its position against every other box.
-- The `#if false` solution does the work in a job and avoids having to copy the boxes by passing the box entity chunks to the job.
+- The `#if false` solution does the work in a job and avoids having to copy the boxes by passing the entity chunks to the job.
 
-<br>
+## CustomTransforms
+
+A simple custom transform system specialized for 2D instead of 3D.
 
 ## FirstPersonController sample
 
 A very simple first-person controller that demonstrates basic input handling and coordination with a GameObject (the camera).
 
-
-<br>
-
 ## FixedTimestep sample
 
 This sample demonstrates how to update systems at a fixed rate, similar to the `MonoBehaviour.FixedUpdate` method.
 
-<br>
+## ProceduralMesh sample
+
+Sets an entity to render a mesh generated at runtime.
 
 ## RandomSpawn sample
 
@@ -54,25 +57,17 @@ At runtime:
 
 Because the boxes are positioned in a parallel job, randomly positioning the boxes requires a unique random seed value for every box.
 
-<br>
-
 ## RenderSwap sample
 
 Change the material of rendered entities at runtime.
-
-<br>
 
 ## ShaderGraph sample
 
 This sample defines material override components, which allow you to control shader parameters by setting the override component values.
 
-<br>
-
 ## Splines sample
 
 This sample uses baking to define a spline. At runtime, boxes move along the spline paths. 
-
-<br>
 
 ## StateChange samples
 
@@ -81,12 +76,11 @@ These samples demonstrate different ways of expressing state changes. Numerous c
 - **Enableable component**: The cube state is represented by enabling and disabling a component.
 - **Structural change**: The cube state is represented by adding and removing a component.
 - **Value change**: The cube state is represented by a component value.
-- **Profiling**: This variant exists just for comparing performance of the other three variants. (For easier profiling, the cube state is set every frame rather than only when the user clicks.)
-
-<br>
 
 ## TextureUpdate sample
 
 This sample uses Burst-compiled jobs to efficiently generate a texture.
 
-<br>
+## WireframeBlob sample
+
+This sample constructs a blob wireframe for a complex mesh. Enable Gizmos to see the wireframe. In game, click on the ground to spawn additional instances.

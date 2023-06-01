@@ -24,7 +24,7 @@ namespace HelloCube.Aspects
             foreach (var (transform, speed) in
                      SystemAPI.Query<RefRW<LocalTransform>, RefRO<RotationSpeed>>())
             {
-                transform.ValueRW.RotateY(speed.ValueRO.RadiansPerSecond * deltaTime);
+                transform.ValueRW = transform.ValueRO.RotateY(speed.ValueRO.RadiansPerSecond * deltaTime);
             }
 
             // Rotate the cube using the aspect.

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Entities;
+using UnityEngine.Serialization;
 
 namespace Miscellaneous.Execute
 {
@@ -16,10 +17,7 @@ namespace Miscellaneous.Execute
         public bool RenderSwap;
         public bool ShaderGraph;
         public bool Splines;
-        public bool StateChangeEnableable;
-        public bool StateChangeStructural;
-        public bool StateChangeValue;
-        public bool StateChangeProfiling;
+        public bool StateChange;
         public bool TextureUpdate;
 
         class Baker : Baker<ExecuteAuthoring>
@@ -38,10 +36,7 @@ namespace Miscellaneous.Execute
                 if (authoring.RenderSwap) AddComponent<RenderSwap>(entity);
                 if (authoring.ShaderGraph) AddComponent<ShaderGraph>(entity);
                 if (authoring.Splines) AddComponent<Splines>(entity);
-                if (authoring.StateChangeEnableable) AddComponent<StateChangeEnableable>(entity);
-                if (authoring.StateChangeStructural) AddComponent<StateChangeStructural>(entity);
-                if (authoring.StateChangeValue) AddComponent<StateChangeValue>(entity);
-                if (authoring.StateChangeProfiling) AddComponent<StateChangeProfiling>(entity);
+                if (authoring.StateChange) AddComponent<StateChange>(entity);
                 if (authoring.TextureUpdate) AddComponent<TextureUpdater>(entity);
             }
         }
@@ -91,19 +86,7 @@ namespace Miscellaneous.Execute
     {
     }
 
-    public struct StateChangeEnableable : IComponentData
-    {
-    }
-
-    public struct StateChangeStructural : IComponentData
-    {
-    }
-
-    public struct StateChangeValue : IComponentData
-    {
-    }
-
-    public struct StateChangeProfiling : IComponentData
+    public struct StateChange : IComponentData
     {
     }
 

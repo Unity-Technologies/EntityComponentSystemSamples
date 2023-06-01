@@ -10,7 +10,7 @@ namespace Baking.BlobAssetBaker
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Execute.BlobAssetBaker>();
+            state.RequireForUpdate<Animation>();
         }
 
         [BurstCompile]

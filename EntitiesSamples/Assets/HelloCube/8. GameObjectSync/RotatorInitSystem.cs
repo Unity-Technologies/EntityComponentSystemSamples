@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -7,8 +8,6 @@ namespace HelloCube.GameObjectSync
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial struct RotatorInitSystem : ISystem
     {
-        private EntityQuery query;
-
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
@@ -19,10 +18,8 @@ namespace HelloCube.GameObjectSync
         // This OnUpdate accesses managed objects, so it cannot be burst compiled.
         public void OnUpdate(ref SystemState state)
         {
-            var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-
             var directory = SystemAPI.ManagedAPI.GetSingleton<DirectoryManaged>();
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
 
             // Instantiate the associated GameObject from the prefab.
             foreach (var (goPrefab, entity) in
@@ -35,6 +32,8 @@ namespace HelloCube.GameObjectSync
                 // We can't add components to entities as we iterate over them, so we defer the change with an ECB.
                 ecb.AddComponent(entity, new RotatorGO(go));
             }
+
+            ecb.Playback(state.EntityManager);
         }
     }
 
