@@ -697,7 +697,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 1336750971}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -1295,7 +1294,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 56193537}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -2429,7 +2427,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 780814449}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -3034,7 +3031,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 1110103479}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -3625,7 +3621,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 2123973863}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -3954,7 +3949,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 1000761868}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -4371,7 +4365,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 629709944}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -4960,7 +4953,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 487187772}
   EnableCollision: 1
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -5290,7 +5282,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 1644420482}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -6150,7 +6141,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 534096495}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -6713,7 +6703,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 322180620}
   EnableCollision: 0
-  RaiseImpulseEvents: 1
   MaxImpulse:
     x: Infinity
     y: 0
@@ -6815,7 +6804,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 465190218}
   EnableCollision: 1
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -7407,7 +7395,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 1188811466}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -7821,7 +7808,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 0}
   EnableCollision: 0
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
@@ -7852,60 +7838,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2101594842
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2101594844}
-  - component: {fileID: 2101594843}
-  m_Layer: 0
-  m_Name: Simulation Validation
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2101594843
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2101594842}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac6bdfff8f25443fa08ae31c4ce351fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  EnableValidation: 0
-  ValidationTimeRange:
-    x: 0.25
-    y: 4
-  ValidateJointBehavior: 1
-  ValidateRigidBodiesAtRest: 0
-  LinearVelocityErrorTolerance: 0.005
-  AngularVelocityErrorTolerance: 0.01
-  PositionErrorTolerance: 0.05
-  OrientationErrorTolerance: 0.02
---- !u!4 &2101594844
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2101594842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2118711692
 GameObject:
@@ -7942,7 +7874,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedBody: {fileID: 686085655}
   EnableCollision: 1
-  RaiseImpulseEvents: 0
   MaxImpulse:
     x: Infinity
     y: Infinity
