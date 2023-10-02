@@ -16,7 +16,7 @@ namespace HelloCube
             public override void Bake(RotationSpeedAuthoring authoring)
             {
                 // The entity will be moved
-                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                var entity = GetEntity(TransformUsageFlags.Dynamic | TransformUsageFlags.NonUniformScale);
                 AddComponent(entity, new RotationSpeed
                 {
                     RadiansPerSecond = math.radians(authoring.DegreesPerSecond)
