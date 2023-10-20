@@ -15,6 +15,7 @@ A few short videos introduce the basic concepts of the job system and ECS:
 1. [Video: The C# Job system](https://youtu.be/jdW66hA-Qu8) (11 minutes)
 1. [Video: ECS Entities and components](https://youtu.be/jzCEzNoztzM) (10 minutes)
 1. [Video: ECS Systems](https://youtu.be/k07I-DpCcvE) (7 minutes)
+1. [Video: ECS Baking](https://youtu.be/r337nXZFYeA) (6 minutes)
 
 You may also want to read the [Entities API overview](./EntitiesSamples/Assets/README.md#entities-api-overview), which is briefer and more sequentially structured than the [manual](https://docs.unity3d.com/Packages/com.unity.entities@latest/).
 

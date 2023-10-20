@@ -39,6 +39,7 @@
 1. [Video: The C# Job system](https://youtu.be/jdW66hA-Qu8) (11 minutes)
 1. [Video: ECS Entities and components](https://youtu.be/jzCEzNoztzM) (10 minutes)
 1. [Video: ECS Systems](https://youtu.be/k07I-DpCcvE) (7 minutes)
+1. [Video: ECS Baking](https://youtu.be/r337nXZFYeA) (6 minutes)
 1. [Video: Jobs Tutorial](https://youtu.be/oOgNg2gL2yw) (17 minutes)
 1. [Video: Entities "HelloCube" samples](https://youtu.be/32TLgtA9yUM) (30 minutes)
 1. [Video: Entities "Tanks" tutorial](https://youtu.be/jAVVxoWU5lo) (23 minutes)
