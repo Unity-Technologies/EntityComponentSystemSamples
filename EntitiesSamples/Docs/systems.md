@@ -2,7 +2,7 @@
 
 A **system** is a unit of code which belongs to a [world]() and which runs on the main thread (usually once per frame). Normally, a system will only access entities of its own world, but this is not an enforced restriction.
 
-&#x1F579; *[See example systems](./examples/components_systems.md#system-and-systemgroup).*
+&#x1F579; *[See example systems](../Assets/ExampleCode/ComponentsSystems.cs).*
 
 A system is defined as a struct implementing the [`ISystem`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ISystem.html) interface, which has three key methods:
 
@@ -24,8 +24,6 @@ A system may additionally implement `ISystemStartStop`, which has these methods:
 ## System groups and system update order
 
 The systems of a world are organized into **system groups**. Each system group has an ordered list of systems and other system groups as its children, so the system groups form a hierarchy, which determines the update order. A system group is defined as a class inheriting from [`ComponentSystemGroup`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ComponentSystemGroup.html).
-
-&#x1F579; *[See example system groups](./examples/components_systems.md#system-and-systemgroup).*
 
 When a system group is updated, the group normally updates its children in their sorted order, but this default behavior can be overridden by overriding the group's update method.
 
@@ -60,8 +58,6 @@ When automatic bootstrapping is disabled, your code is responsible for:
 - Registering top-level system groups (like `SimulationSystemGroup`) to update in the Unity [PlayerLoop](https://docs.unity3d.com/ScriptReference/LowLevel.PlayerLoop.html).
 
 Alternatively, automatic bootstrapping can be customized by creating a class that implements [`ICustomBootstrap`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICustomBootstrap.html).
-
-&#x1F579; *[See examples of world creation and customized bootstrapping](./examples/bootstrapping.md).*
 
 <br>
 
@@ -109,7 +105,5 @@ The `SystemAPI` methods rely upon [source generators](https://docs.microsoft.com
 | If you get confused about where to look for key Entities functionality, the general rule is to check `SystemAPI` first. If `SystemAPI` doesn't have what you're looking for, look in `SystemState`, and if what you're looking for isn't there, look in the `EntityManager` and `World`. |
 
 `SystemAPI` also provides a special [`Query()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SystemAPI.Query.html) method that, through source generation, helps conveniently create a foreach loop over the entities and components matching a query.
-
-&#x1F579; *[See examples of using `SystemAPI.Query()`](./examples/components_systems.md#querying-for-entities).*
 
 <br>

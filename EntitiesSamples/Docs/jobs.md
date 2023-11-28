@@ -40,13 +40,13 @@ When instantiating an unmanaged collection, you must specify an *allocator*. Dif
 
 # C# Jobs and Job Dependencies
 
+&#x1F579;  *[See example jobs](../Assets/ExampleCode/Jobs.cs).*
+
 The C# Jobs system allows us to schedule work to be executed in a pool of worker threads:
 
 - When a worker thread finishes its current work, the thread will pull a waiting job off the queue and invoke the job's `Execute()` method to run the job.
 - A job type is created by defining a struct that implements [`IJob`](https://docs.unity3d.com/ScriptReference/Unity.Jobs.IJob.html) or one of the other job interfaces (`IJobParallelFor`, `IJobEntity`, `IJobChunk`...).
 - To put a job instance on the job queue, call the extension method `Schedule()`. Jobs can only be scheduled from the main thread, not from within other jobs.
-
-&#x1F579;  *[See an example IJob](./examples/jobs.md#ijob).*
 
 <br>
 
@@ -149,8 +149,6 @@ JobHandle handle = job.Schedule(
         myArray.Length,    // count
         100);              // batch size
 ```
-
-&#x1F579;  *[See more examples of IJobParallelFor](./examples/jobs.md#ijobparallelfor).*
 
 When the job runs, its `Execute()` will be called *`count`* times, with all values from 0 up to *count* passed to `index`.
 

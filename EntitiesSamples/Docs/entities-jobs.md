@@ -1,12 +1,11 @@
-
 # Accessing entities in jobs
+
+&#x1F579;  *[See example jobs](../Assets/ExampleCode/Jobs.cs).*
 
 You can offload the processing of entity data to worker threads with the [C# Job System](https://docs.unity3d.com/Manual/JobSystem.html). The Entities package has two interfaces for defining jobs that access entities:
 
 - [`IJobChunk`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IJobChunk.html), whose `Execute()` method is called once for each individual chunk matching the query.
 - [`IJobEntity`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IJobEntity.html), whose `Execute()` method is called once for each entity entity matching the query. 
-
-&#x1F579; *[See examples of IJobChunk](./examples/jobs.md#ijobchunk) [and IJobEntity](./examples/jobs.md#ijobentity).*
 
 Although `IJobEntity` is generally more convenient to write and use, `IJobChunk` provides more precise control. In most cases, their performance is identical for equivalent work.
 

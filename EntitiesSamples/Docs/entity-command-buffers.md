@@ -17,8 +17,6 @@ An `EntityCommandBuffer` has many (but not all) of the same methods as `EntityMa
 | [`AddBuffer()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityCommandBuffer.AddBuffer.html) | Returns a `DynamicBuffer` which is stored in the recorded command, and the contents of this buffer will be copied to the entity's actual buffer when it is created in playback. Effectively, writing to the returned buffer allows you to set the initial contents of the component. |
 | [`SetBuffer()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityCommandBuffer.SetBuffer.html)  | Like `AddBuffer()`, but it assumes the entity already has a buffer of the component type. In playback, the entity's already existing buffer content is overwritten by the contents of the returned buffer. |
 
-&#x1F579; *[See examples of creating and using an `EntityCommandBuffer`](./examples/jobs.md#ijobchunk).*
-
 | &#x1F4DD; NOTE |
 | :- |
 | Some `EntityManager` methods have no `EntityCommandBuffer` equivalent because an equivalent wouldn’t be feasible or make sense. For example, there are no `EntityCommandBuffer` methods for getting component values because *reading* data is not something that can be usefully deferred. |
@@ -81,8 +79,6 @@ If an `EntityCommandBuffer` is created with the `PlaybackPolicy.MultiPlayback` o
 ## EntityCommandBufferSystem
 
 An [`EntityCommandBufferSystem`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityCommandBufferSystem.html) is a system that provides a convenient way to defer `EntityCommandBuffer` playback. An `EntityCommandBuffer` instance created from an `EntityCommandBufferSystem` will be played back and disposed the next time the `EntityCommandBufferSystem` updates.
-
-&#x1F579; *[See examples of creating and using an `EntityCommandBufferSystem`](./examples/components_systems.md#entitycommandbuffersystems).*
 
 You rarely need to create any `EntityCommandBufferSystem`'s yourself because the automatic bootstrapping process puts these five into the default world:
 

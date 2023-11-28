@@ -41,7 +41,7 @@ A component type defined with `IComponentData` or `IBufferElementData` can be ma
 
 A [`World`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.World.html) is a collection of entities. An entity's ID number is only unique within its own world, *i.e.* the entity with a particular ID in one world is entirely unrelated to an entity with the same ID in a different world.
 
-A world also owns a set of [systems](concepts-systems.md), which are units of code that run on the main thread, usually once per frame. The entities of a world are normally only accessed by the world's systems (and the jobs scheduled by those systems), but this is not an enforced restriction.
+A world also owns a set of [systems](concepts-systems.md), which are units of code that run on the main thread, usually once per frame. The entities of a world are normally only accessed by the world's systems and the jobs scheduled by those systems, but this is not an enforced restriction.
 
 The entities in a world are created, destroyed, and modified through the world's [`EntityManager`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.EntityManager.html). Key `EntityManager` methods include:
 
@@ -118,9 +118,6 @@ An [`EntityQuery`](https://docs.unity3d.com/Packages/com.unity.entities@latest?s
 
 A query can also specify component types to *exclude* from the matching archetypes. For example, if a query looks for all entities having component types *A* and *B* but *not* having component type *C*, the query would match entities with component types *A* and *B*, but the query would *not* match entities with component types *A*, *B*, and *C*.
 
-&#x1F579; *[See examples of creating and using queries](./examples/components_systems.md#querying-for-entities).*
-
-
 <br>
 
 # Entity ID's
@@ -138,8 +135,6 @@ In order to allow entity indexes to be reused after an entity is destroyed, each
 # `IComponentData`
 
 The most common, basic kind of component type is defined as a struct implementing [`IComponentData`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IComponentData.html).
-
-&#x1F579;  *[See examples of creating and using `IComponentData` components.](./examples/components_systems.md#icomponentdata)*
 
 An `IComponentData` struct is expected to be unmanaged, so it cannot contain any managed field types. Specifically, the allowed field types are:
 
@@ -174,8 +169,6 @@ If a managed component type implements `ICloneable`, then any resources it conta
 # DynamicBuffer components
 
 A [`DynamicBuffer`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.DynamicBuffer-1.html) is a component type which is a resizable array. To define a `DynamicBuffer` component type, create a struct that implements the [`IBufferElementData`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.IBufferElementData.html) interface.
-
-&#x1F579;  *[See examples of creating and using `DynamicBuffer` components](./examples/components_systems.md#dynamicbuffers-ibufferelementdata).*
 
 The buffer of each entity stores a `Length`, a `Capacity`, and a pointer:
 
@@ -223,8 +216,6 @@ A `DynamicBuffer<T>` can be '[reinterpreted](https://docs.unity3d.com/Packages/c
 # Aspects
 
 An aspect is an object-like wrapper over a subset of an entity's components. Aspects can be useful for simplifying queries and component-related code. The [`TransformAspect`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.TransformAspect.html), for example, groups together the standard transform components ([`LocalTransform`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.LocalTransform.html), [`ParentTransform`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.ParentTransform.html), and [`WorldTransform`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Transforms.WorldTransform.html)).
-
-&#x1F579;  *[See examples of creating and using aspects](./examples/components_systems.md#aspects)*.
 
 Including an aspect in a query is the same as including the components wrapped by the aspect, *e.g.* a query that includes `TransformAspect` includes the standard transform matrix components.
 

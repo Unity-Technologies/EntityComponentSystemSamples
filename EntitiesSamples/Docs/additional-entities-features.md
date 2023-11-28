@@ -39,8 +39,6 @@ For instance, the `EntityManager` has these key methods:
 | :- |
 | For the sake of the job safety checks, read or write access of a component's enabled state requires read or write access of the component type itself. |
 
-&#x1F579; *[See examples of checking and setting the enabled state of components](./examples/components_systems.md#enableable-components).*
-
 In an `IJobChunk`, the `Execute` method parameters signal which entities in the chunk match the query:
 
 - If the `useEnableMask` parameter is false, all entities in the chunk match the query. 
@@ -49,8 +47,6 @@ In an `IJobChunk`, the `Execute` method parameters signal which entities in the 
 | &#x1F4DD; NOTE |
 | :- |
 | The `chunkEnabledMask` is a *composite* of all the enabled states of the enableable components included in the query of the job. To check enabled states of individual components, use the `IsComponentEnabled()` and `SetComponentEnabled()` methods of the `ArchetypeChunk`. |
-
-&#x1F579; *[See an example `IJobChunk` that correctly accounts for disabled components](./examples/jobs.md#ijobchunk).*
 
 <br>
 

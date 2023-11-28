@@ -1,5 +1,7 @@
 # Baking and entity scenes
 
+&#x1F579;  *[See examples of baking and authoring components](../Assets/ExampleCode/Baking.cs).*
+
 **Baking** is a build-time process that transforms **sub scenes** into **entity scenes** using **bakers** and **baking systems**:
 
 - A **sub scene** is a Unity scene asset that's embedded in another scene by the [SubScene](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SubScene.html) MonoBehaviour.
@@ -12,8 +14,6 @@ Baking a sub scene is done in a few main steps:
 1. For each GameObject of the sub scene, a corresponding entity is created.
 2. The baker of each authoring component in the sub scene is executed. Each baker can read the authoring component and add components to the corresponding entity.
 2. The baking systems execute. Each system can read and modify the baked entities in any way: set components, add components, remove components, create additional entities, or destroy entities. Unlike bakers, baking systems should not access the original GameObjects of the sub scene.
-
-&#x1F579; *[See examples of authoring components, bakers, and baking systems.](./examples/baking.md)*
 
 When modified, a sub scene is re-baked:
 
@@ -69,8 +69,6 @@ The [`SceneSystem`](https://docs.unity3d.com/Packages/com.unity.entities@latest?
 | [`GetSceneGUID()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupComponent.html)  | Returns the GUID representing a scene asset (specified by its file path). |
 | [`GetScenePath()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupComponent.html)  | Returns the path of a scene asset (specified by its GUID). |
 | [`GetSceneEntity()`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ICleanupComponent.html)  | Returns the entity representing a scene (specified by its GUID). |
-
-&#x1F579; *[See examples of loading and unloading entity scenes and sections.](./examples/baking.md#scene-loading)*
 
 | &#x26A0; IMPORTANT |
 | :- |
