@@ -28,6 +28,14 @@ namespace Tutorials.Firefighters
         public Entity Bucket;      // The bucket that the bot is carrying.
         public bool IsCarrying;    // True if carrying a bucket.
         public Entity Team;        // The team to which the bot belongs.
+
+        public readonly bool IsMoving()
+        {
+            return !(State == BotState.IDLE
+                     || State == BotState.CLAIM_BUCKET
+                     || State == BotState.WAIT_IN_LINE
+                     || State == BotState.FILL_BUCKET);
+        }
     }
 
     public enum BotState

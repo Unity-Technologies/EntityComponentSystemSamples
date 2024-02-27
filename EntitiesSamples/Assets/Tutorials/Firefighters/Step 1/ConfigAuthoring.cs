@@ -41,6 +41,7 @@ namespace Tutorials.Firefighters
         public GameObject BucketPrefab;
         public GameObject PondPrefab;
         public GameObject GroundCellPrefab;
+        public GameObject BotAnimatedPrefabGO;
 
         class Baker : Baker<ConfigAuthoring>
         {
@@ -76,6 +77,9 @@ namespace Tutorials.Firefighters
                     PondPrefab = GetEntity(authoring.PondPrefab, TransformUsageFlags.Dynamic),
                     GroundCellPrefab = GetEntity(authoring.GroundCellPrefab, TransformUsageFlags.Dynamic),
                 });
+                var configManaged = new ConfigManaged();
+                configManaged.BotAnimatedPrefabGO = authoring.BotAnimatedPrefabGO;
+                AddComponentObject(entity, configManaged);
             }
         }
     }
@@ -109,5 +113,11 @@ namespace Tutorials.Firefighters
         public Entity BucketPrefab;
         public Entity PondPrefab;
         public Entity GroundCellPrefab;
+    }
+
+    public class ConfigManaged : IComponentData
+    {
+        public GameObject BotAnimatedPrefabGO;
+        public UIController UIController;
     }
 }

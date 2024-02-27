@@ -55,12 +55,12 @@ namespace Tutorials.Firefighters
                     for (int i = 1; i <= douserIdx; i++)
                     {
                         var ratio = (float)i / (douserIdx + 1);
-                        var offsetScale = math.sin(math.lerp(0, math.PI, ratio));
+                        var offset = math.sin(math.lerp(0, config.LineMaxOffset, ratio)) * offsetVec;
                         var pos = math.lerp(randomPondPos, nearestFirePos, ratio);
 
                         var bot = SystemAPI.GetComponentRW<Bot>(members[i].Bot);
                         bot.ValueRW.State = BotState.MOVE_TO_LINE;
-                        bot.ValueRW.LinePos = pos + offsetScale * offsetVec;
+                        bot.ValueRW.LinePos = pos + offset;
 
                         if (bot.ValueRO.IsDouser)
                         {
@@ -69,7 +69,7 @@ namespace Tutorials.Firefighters
 
                         var otherBot = SystemAPI.GetComponentRW<Bot>(members[^i].Bot);
                         otherBot.ValueRW.State = BotState.MOVE_TO_LINE;
-                        otherBot.ValueRW.LinePos = pos - offsetScale * offsetVec;
+                        otherBot.ValueRW.LinePos = pos - offset;
                     }
 
                     var filler = SystemAPI.GetComponentRW<Bot>(team.ValueRO.Filler);

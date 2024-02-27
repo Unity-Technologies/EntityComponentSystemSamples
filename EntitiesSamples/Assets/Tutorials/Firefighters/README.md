@@ -19,3 +19,7 @@ This step adds code to spread the fire. Three solutions are demonstrated:
 # Step 3: Bot behaviour
 
 This step adds behiour to the bots, who are organized into teams. Each team forms a line between a pond and the closest fire. A bucket is filled at the pond and then passed up the line.
+
+# Step 4: Animation and UI
+
+This step replaces the bot capsules with animated characters. A UI HUD element displays the total count of fires that have been doused.

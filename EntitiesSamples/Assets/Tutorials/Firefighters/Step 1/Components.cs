@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using UnityEngine;
 
 namespace Tutorials.Firefighters
 {
@@ -7,6 +8,7 @@ namespace Tutorials.Firefighters
         public Entity Filler;
         public Entity Douser;
         public bool HasBucket;
+        public int NumFiresDoused;
     }
 
     // all bots in the team (including the Filler and Douser) in order of passing, starting with the Filler
@@ -23,5 +25,10 @@ namespace Tutorials.Firefighters
     public struct Heat : IBufferElementData
     {
         public float Value;
+    }
+    
+    public class BotAnimation : IComponentData
+    {
+        public GameObject AnimatedGO;   // the GO that is rendered and animated
     }
 }

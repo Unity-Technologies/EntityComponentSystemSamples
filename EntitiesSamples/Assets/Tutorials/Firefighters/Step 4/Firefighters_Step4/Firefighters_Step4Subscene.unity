@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -89,15 +89,15 @@ LightmapSettings:
     m_PVREnvironmentMIS: 1
     m_PVRCulling: 1
     m_PVRFilteringGaussRadiusDirect: 1
-    m_PVRFilteringGaussRadiusIndirect: 1
-    m_PVRFilteringGaussRadiusAO: 1
+    m_PVRFilteringGaussRadiusIndirect: 5
+    m_PVRFilteringGaussRadiusAO: 2
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
+  m_LightingDataAsset: {fileID: 0}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -123,7 +123,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &1127853403
+--- !u!1001 &1013315371
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -135,6 +135,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Config
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905523592888443407, guid: 564374f1656a67c498c706bc5dd35446,
+        type: 3}
+      propertyPath: ExecuteUISystem
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4905523592888443407, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
@@ -154,6 +159,11 @@ PrefabInstance:
     - target: {fileID: 4905523592888443407, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
       propertyPath: ExecuteBucketSystem
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905523592888443407, guid: 564374f1656a67c498c706bc5dd35446,
+        type: 3}
+      propertyPath: ExecuteAnimationSystem
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6783663000442884203, guid: 564374f1656a67c498c706bc5dd35446,
@@ -209,50 +219,51 @@ PrefabInstance:
     - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
       propertyPath: NumTeams
-      value: 12
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
-      propertyPath: NumBuckets
-      value: 140
-      objectReference: {fileID: 0}
+      propertyPath: BotPrefab
+      value: 
+      objectReference: {fileID: 7617736419631500257, guid: 11c94bbf6254f8c49a0856eb8249f822,
+        type: 3}
     - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
       propertyPath: BotMoveSpeed
-      value: 20
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
       propertyPath: GroundNumRows
-      value: 200
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
       propertyPath: HeatSpreadSpeed
-      value: 0.01
+      value: 0.03
       objectReference: {fileID: 0}
     - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
       propertyPath: NumPondsPerEdge
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
-        type: 3}
-      propertyPath: GroundNumColumns
-      value: 200
-      objectReference: {fileID: 0}
-    - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
-        type: 3}
-      propertyPath: NumPassersPerTeam
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
         type: 3}
-      propertyPath: NumInitialCellsOnFire
-      value: 40
+      propertyPath: GroundNumColumns
+      value: 70
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 7014638666242036355, guid: 564374f1656a67c498c706bc5dd35446, type: 3}
+    - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
+        type: 3}
+      propertyPath: NumPassersPerTeam
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709179001885154505, guid: 564374f1656a67c498c706bc5dd35446,
+        type: 3}
+      propertyPath: BotAnimatedPrefabGO
+      value: 
+      objectReference: {fileID: 5701704621631426976, guid: 36e93c435d1648a4c86d516057a9cbe2,
+        type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -261,4 +272,4 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1127853403}
+  - {fileID: 1013315371}

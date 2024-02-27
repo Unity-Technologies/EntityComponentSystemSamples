@@ -2,6 +2,8 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using Unity.VisualScripting;
+using UnityEngine;
 
 namespace Tutorials.Firefighters
 {
@@ -105,6 +107,8 @@ namespace Tutorials.Firefighters
                             HeatSystem.DouseFire(bot.ValueRO.TargetPos, heatBuffer, numRows, numCols);
 
                             SystemAPI.SetComponentEnabled<RepositionLine>(bot.ValueRO.Team, true);
+                            var team = SystemAPI.GetComponentRW<Team>(bot.ValueRO.Team);
+                            team.ValueRW.NumFiresDoused++;
 
                             bot.ValueRW.State = BotState.MOVE_TO_LINE;
                         }
@@ -189,7 +193,16 @@ namespace Tutorials.Firefighters
         {
             var pos = botTrans.Position;
             var dir = targetPos - pos.xz;
-            var moveVector = math.normalizesafe(dir) * moveSpeed;
+            var moveVectorNormalized = math.normalizesafe(dir);
+            var moveVector = moveVectorNormalized * moveSpeed;
+            
+            // The the animated model faces up the z axis, so we need to rotate it 90 degrees clockwise.
+            var modelRotation = math.radians(90);
+            
+            // atan2 returns a counter-clockwise angle of rotation, so we negate to make it clockwise
+            var facingRotation = -math.atan2(moveVectorNormalized.y, moveVectorNormalized.x);   
+            
+            botTrans.Rotation = quaternion.RotateY(modelRotation + facingRotation);
 
             if (math.lengthsq(moveVector) >= math.lengthsq(dir))
             {
