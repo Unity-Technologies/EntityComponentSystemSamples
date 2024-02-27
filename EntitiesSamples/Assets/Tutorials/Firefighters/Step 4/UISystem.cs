@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Tutorials.Firefighters
 {
+    [UpdateBefore(typeof(LineSystem))]
     public partial struct UISystem : ISystem
     {
         private bool initialized;
@@ -29,10 +30,19 @@ namespace Tutorials.Firefighters
                 configManaged.UIController = GameObject.FindObjectOfType<UIController>();
             }
 
+            var shouldReposition = configManaged.UIController.ShouldReposition();
             var totalFiresDoused = 0;
-            foreach (var team in SystemAPI.Query<RefRO<Team>>())
+            
+            foreach (var (team, entity) in 
+                     SystemAPI.Query<RefRO<Team>>()
+                         .WithEntityAccess())
             {
                 totalFiresDoused += team.ValueRO.NumFiresDoused;
+                
+                if (shouldReposition)
+                {
+                    SystemAPI.SetComponentEnabled<RepositionLine>(entity, true);
+                }    
             }
             
             configManaged.UIController.SetNumFiresDoused(totalFiresDoused);

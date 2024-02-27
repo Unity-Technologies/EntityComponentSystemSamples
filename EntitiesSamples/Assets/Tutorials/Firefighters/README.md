@@ -22,4 +22,4 @@ This step adds behiour to the bots, who are organized into teams. Each team form
 
 # Step 4: Animation and UI
 
-This step replaces the bot capsules with animated characters. A UI HUD element displays the total count of fires that have been doused.
+This step replaces the bot capsules with animated characters. A UI HUD element displays the total count of fires that have been doused. Clicking a HUD button triggers repositioning of the bucket brigade lines.
