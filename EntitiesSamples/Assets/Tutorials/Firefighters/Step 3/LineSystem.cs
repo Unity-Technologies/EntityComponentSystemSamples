@@ -26,7 +26,8 @@ namespace Tutorials.Firefighters
         public void OnUpdate(ref SystemState state)
         {
             var config = SystemAPI.GetSingleton<Config>();
-            var rand = new Random(123 + seed++);  // seed is incremented to get different random values in different frames
+            var rand = new Random(123 +
+                                  seed++); // seed is incremented to get different random values in different frames
 
             var pondQuery = SystemAPI.QueryBuilder().WithAll<Pond, LocalTransform>().Build();
             var pondPositions = pondQuery.ToComponentDataArray<LocalTransform>(Allocator.Temp);
@@ -38,7 +39,7 @@ namespace Tutorials.Firefighters
             foreach (var (team, members, respositionLineState) in
                      SystemAPI.Query<RefRO<Team>, DynamicBuffer<TeamMember>, EnabledRefRW<RepositionLine>>())
             {
-                respositionLineState.ValueRW = false;  // disable RepositionLine
+                respositionLineState.ValueRW = false; // disable RepositionLine
 
                 // set LinePos of the team's bots and set their bot state
                 {
@@ -55,7 +56,7 @@ namespace Tutorials.Firefighters
                     for (int i = 1; i <= douserIdx; i++)
                     {
                         var ratio = (float)i / (douserIdx + 1);
-                        var offset = math.sin(math.lerp(0, config.LineMaxOffset, ratio)) * offsetVec;
+                        var offset = math.sin(math.lerp(0, math.PI, ratio)) * offsetVec * config.LineMaxOffset;
                         var pos = math.lerp(randomPondPos, nearestFirePos, ratio);
 
                         var bot = SystemAPI.GetComponentRW<Bot>(members[i].Bot);
