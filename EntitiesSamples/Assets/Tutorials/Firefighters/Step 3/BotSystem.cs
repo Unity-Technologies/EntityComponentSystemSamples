@@ -2,8 +2,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Unity.VisualScripting;
-using UnityEngine;
 
 namespace Tutorials.Firefighters
 {
@@ -42,38 +40,18 @@ namespace Tutorials.Firefighters
             {
                 switch (bot.ValueRO.State)
                 {
-                    case BotState.CLAIM_BUCKET:
-                    {
-                        // (only put the filler into this state if the team doesn't yet have a bucket)
-                        foreach (var (bucket, bucketTrans, bucketEntity) in
-                                 SystemAPI.Query<RefRW<Bucket>, RefRO<LocalTransform>>()
-                                     .WithEntityAccess())
-                        {
-                            // claim first unclaimed bucket
-                            if (bucket.ValueRO.CarryingBot == Entity.Null)
-                            {
-                                bucket.ValueRW.CarryingBot = botEntity;
-                                bot.ValueRW.Bucket = bucketEntity;
-                                bot.ValueRW.TargetPos = bucketTrans.ValueRO.Position.xz;
-                                bot.ValueRW.State = BotState.MOVE_TO_BUCKET;
-
-                                var team = SystemAPI.GetComponentRW<Team>(bot.ValueRO.Team);
-                                team.ValueRW.HasBucket = true;
-
-                                break;
-                            }
-                        }
-
-                        break;
-                    }
                     case BotState.MOVE_TO_BUCKET:
                     {
                         if (MoveToTarget(ref botTrans.ValueRW, bot.ValueRO.TargetPos, moveSpeed))
                         {
-                            var bucket = SystemAPI.GetComponentRW<Bucket>(bot.ValueRO.Bucket);
+                            var team = SystemAPI.GetComponent<Team>(bot.ValueRO.Team);
+                            
+                            var bucket = SystemAPI.GetComponentRW<Bucket>(team.Bucket);
+                            bucket.ValueRW.CarryingBot = botEntity;
                             bucket.ValueRW.IsCarried = true;
+                            
+                            bot.ValueRW.Bucket = team.Bucket;
                             bot.ValueRW.IsCarrying = true;
-
                             bot.ValueRW.TargetPos = bot.ValueRO.LinePos; // was set in TeamSystem
                             bot.ValueRW.State = BotState.MOVE_TO_LINE;
                         }

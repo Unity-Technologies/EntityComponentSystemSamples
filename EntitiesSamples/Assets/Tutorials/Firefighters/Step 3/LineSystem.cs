@@ -75,13 +75,16 @@ namespace Tutorials.Firefighters
 
                     var filler = SystemAPI.GetComponentRW<Bot>(team.ValueRO.Filler);
                     filler.ValueRW.LinePos = randomPondPos;
-                    if (team.ValueRO.HasBucket)
+                    
+                    var bucket = SystemAPI.GetComponentRW<Bucket>(team.ValueRO.Bucket);
+                    if (bucket.ValueRO.IsCarried)
                     {
                         filler.ValueRW.State = BotState.MOVE_TO_LINE;
                     }
                     else
                     {
-                        filler.ValueRW.State = BotState.CLAIM_BUCKET;
+                        filler.ValueRW.TargetPos = SystemAPI.GetComponent<LocalTransform>(team.ValueRO.Bucket).Position.xz;
+                        filler.ValueRW.State = BotState.MOVE_TO_BUCKET;
                     }
                 }
             }

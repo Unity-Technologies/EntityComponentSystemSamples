@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Tutorials.Firefighters
 {
-    [UpdateBefore(typeof(LineSystem))]
     public partial struct UISystem : ISystem
     {
         private bool initialized;

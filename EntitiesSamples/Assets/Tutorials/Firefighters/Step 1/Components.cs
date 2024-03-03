@@ -6,8 +6,7 @@ namespace Tutorials.Firefighters
     public struct Team : IComponentData
     {
         public Entity Filler;
-        public Entity Douser;
-        public bool HasBucket;
+        public Entity Bucket;
         public int NumFiresDoused;
     }
 

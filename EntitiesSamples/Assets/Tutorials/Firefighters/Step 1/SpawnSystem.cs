@@ -24,6 +24,27 @@ namespace Tutorials.Firefighters
             var config = SystemAPI.GetSingleton<Config>();
             var rand = new Random(123);
 
+            var bucketEntities = new NativeArray<Entity>(config.NumBuckets, Allocator.Temp);
+            
+            // spawn buckets
+            {
+                // struct components are returned and passed by value (as copies)!
+                var bucketTransform = state.EntityManager.GetComponentData<LocalTransform>(config.BucketPrefab);
+                bucketTransform.Position.y = (bucketTransform.Scale / 2); // will be same for every bucket
+
+                for (int i = 0; i < config.NumBuckets; i++)
+                {
+                    var bucketEntity = state.EntityManager.Instantiate(config.BucketPrefab);
+                    bucketEntities[i] = bucketEntity;
+
+                    bucketTransform.Position.x = rand.NextFloat(0.5f, config.GroundNumColumns - 0.5f);
+                    bucketTransform.Position.z = rand.NextFloat(0.5f, config.GroundNumRows - 0.5f);
+                    bucketTransform.Scale = config.BucketEmptyScale;
+
+                    state.EntityManager.SetComponentData(bucketEntity, bucketTransform);
+                }
+            }
+
             // spawn teams
             {
                 int numBotsPerTeam = config.NumPassersPerTeam + 1;
@@ -31,7 +52,10 @@ namespace Tutorials.Firefighters
                 for (int teamIdx = 0; teamIdx < config.NumTeams; teamIdx++)
                 {
                     var teamEntity = state.EntityManager.CreateEntity();
-                    var team = new Team();
+                    var team = new Team
+                    {
+                        Bucket = bucketEntities[teamIdx]
+                    };
                     state.EntityManager.AddComponent<RepositionLine>(teamEntity);
                     var memberBuffer = state.EntityManager.AddBuffer<TeamMember>(teamEntity);
                     memberBuffer.Capacity = numBotsPerTeam;
@@ -51,14 +75,10 @@ namespace Tutorials.Firefighters
                             Value = teamColor
                         });
 
-                        // designate the filler and the douser
+                        // designate the filler
                         if (botIdx == 0)
                         {
                             team.Filler = botEntity;
-                        }
-                        else if (botIdx == douserIdx)
-                        {
-                            team.Douser = botEntity;
                         }
 
                         memberBuffer.Add(new TeamMember { Bot = botEntity });
@@ -87,24 +107,6 @@ namespace Tutorials.Firefighters
                     }
 
                     state.EntityManager.AddComponentData(teamEntity, team);
-                }
-            }
-
-            // spawn buckets
-            {
-                // struct components are returned and passed by value (as copies)!
-                var bucketTransform = state.EntityManager.GetComponentData<LocalTransform>(config.BucketPrefab);
-                bucketTransform.Position.y = (bucketTransform.Scale / 2); // will be same for every bucket
-
-                for (int i = 0; i < config.NumBuckets; i++)
-                {
-                    var bucketEntity = state.EntityManager.Instantiate(config.BucketPrefab);
-
-                    bucketTransform.Position.x = rand.NextFloat(0.5f, config.GroundNumColumns - 0.5f);
-                    bucketTransform.Position.z = rand.NextFloat(0.5f, config.GroundNumRows - 0.5f);
-                    bucketTransform.Scale = config.BucketEmptyScale;
-
-                    state.EntityManager.SetComponentData(bucketEntity, bucketTransform);
                 }
             }
 

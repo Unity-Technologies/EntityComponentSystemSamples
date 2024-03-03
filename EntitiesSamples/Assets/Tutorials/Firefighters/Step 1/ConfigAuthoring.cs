@@ -1,22 +1,21 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Tutorials.Firefighters
 {
     public class ConfigAuthoring : MonoBehaviour
     {
-        [Header("Ponds")]
+        [Header("Ponds")] 
         public int NumPondsPerEdge;
 
-        [Header("Bots")]
+        [Header("Bots")] 
         public int NumTeams;
         public int NumPassersPerTeam;
         public int BotMoveSpeed = 3; // units per second
         public float LineMaxOffset = 4;
 
-        [Header("Buckets")]
+        [Header("Buckets")] 
         public float BucketFillRate;
         public int NumBuckets;
         public Color BucketEmptyColor;
@@ -24,11 +23,11 @@ namespace Tutorials.Firefighters
         public float BucketEmptyScale;
         public float BucketFullScale;
 
-        [Header("Ground")]
+        [Header("Ground")] 
         public int GroundNumColumns;
         public int GroundNumRows;
 
-        [Header("Heat")]
+        [Header("Heat")] 
         public Color MinHeatColor;
         public Color MaxHeatColor;
         public float HeatSpreadSpeed;
@@ -36,7 +35,7 @@ namespace Tutorials.Firefighters
         public int NumInitialCellsOnFire;
         public float HeatDouseTargetMin;
 
-        [Header("Prefabs")]
+        [Header("Prefabs")] 
         public GameObject BotPrefab;
         public GameObject BucketPrefab;
         public GameObject PondPrefab;
@@ -48,18 +47,20 @@ namespace Tutorials.Firefighters
             public override void Bake(ConfigAuthoring authoring)
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.None);
+                var numTeams = math.max(authoring.NumTeams, 1);
                 AddComponent(entity, new Config
                 {
                     GroundNumColumns = authoring.GroundNumColumns,
                     GroundNumRows = authoring.GroundNumRows,
                     NumPondsPerEdge = authoring.NumPondsPerEdge,
-                    NumTeams = math.max(authoring.NumTeams, 1),
+                    NumTeams = numTeams,
                     NumPassersPerTeam =
                         (math.max(authoring.NumPassersPerTeam, 4) / 2) *
                         2, // round down to even number and set min to 4
                     BotMoveSpeed = authoring.BotMoveSpeed,
                     LineMaxOffset = authoring.LineMaxOffset,
-                    NumBuckets = authoring.NumBuckets,
+                    NumBuckets =
+                        math.max(authoring.NumBuckets, numTeams), // make sure there's at least one bucket per team
                     BucketFillRate = authoring.BucketFillRate,
                     MinHeatColor = (Vector4)authoring.MinHeatColor,
                     MaxHeatColor = (Vector4)authoring.MaxHeatColor,

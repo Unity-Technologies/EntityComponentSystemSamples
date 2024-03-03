@@ -1,8 +1,6 @@
 ﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Entities.Graphics;
-using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
@@ -16,12 +14,13 @@ namespace Tutorials.Firefighters
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<Config>();
             state.RequireForUpdate<Bot>();
             state.RequireForUpdate<ExecuteAnimation>();
         }
 
         // Because this update accesses managed objects, it cannot be Burst compiled,
-        // so we do not add the [BurstCompiled] attribute.
+        // so we do not add the [BurstCompile] attribute.
         public void OnUpdate(ref SystemState state)
         {
             if (!isInitialized)
@@ -43,7 +42,7 @@ namespace Tutorials.Firefighters
                     botAnimation.AnimatedGO = go;
                     go.transform.localPosition = (Vector3)transform.ValueRO.Position;
                     ecb.AddComponent(entity, botAnimation);
-
+                    
                     // disable rendering
                     ecb.RemoveComponent<MaterialMeshInfo>(entity);
                 }
