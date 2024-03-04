@@ -171,33 +171,35 @@ namespace Unity.Physics.Authoring
                 meshes.Add(shape.CustomMesh);
                 childrenToShape.Add(float4x4.identity);
             }
-
-            // Try to get all the meshes in the children
-            var meshFilters = GetComponentsInChildren<MeshFilter>();
-
-            foreach (var meshFilter in meshFilters)
+            else
             {
-                if (meshFilter != null && meshFilter.sharedMesh != null)
+                // Try to get all the meshes in the children
+                var meshFilters = GetComponentsInChildren<MeshFilter>();
+    
+                foreach (var meshFilter in meshFilters)
                 {
-                    var shapeAuthoring = GetComponent<PhysicsShapeAuthoring>(meshFilter);
-                    if (shapeAuthoring != null && shapeAuthoring != shape)
+                    if (meshFilter != null && meshFilter.sharedMesh != null)
                     {
-                        // Skip this case, since it will be treated independently
-                        continue;
+                        var shapeAuthoring = GetComponent<PhysicsShapeAuthoring>(meshFilter);
+                        if (shapeAuthoring != null && shapeAuthoring != shape)
+                        {
+                            // Skip this case, since it will be treated independently
+                            continue;
+                        }
+    
+                        meshes.Add(meshFilter.sharedMesh);
+    
+                        // Don't calculate the children to shape if not needed, to avoid approximation that could prevent collider to be shared
+                        if (shape.transform.localToWorldMatrix.Equals(meshFilter.transform.localToWorldMatrix))
+                            childrenToShape.Add(float4x4.identity);
+                        else
+                        {
+                            var transform = math.mul(shape.transform.worldToLocalMatrix, meshFilter.transform.localToWorldMatrix);
+                            childrenToShape.Add(transform);
+                        }
+    
+                        DependsOn(meshes.Last());
                     }
-
-                    meshes.Add(meshFilter.sharedMesh);
-
-                    // Don't calculate the children to shape if not needed, to avoid approximation that could prevent collider to be shared
-                    if (shape.transform.localToWorldMatrix.Equals(meshFilter.transform.localToWorldMatrix))
-                        childrenToShape.Add(float4x4.identity);
-                    else
-                    {
-                        var transform = math.mul(shape.transform.worldToLocalMatrix, meshFilter.transform.localToWorldMatrix);
-                        childrenToShape.Add(transform);
-                    }
-
-                    DependsOn(meshes.Last());
                 }
             }
 
