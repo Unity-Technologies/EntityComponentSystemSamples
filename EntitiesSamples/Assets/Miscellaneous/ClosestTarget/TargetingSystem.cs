@@ -138,7 +138,7 @@ namespace Miscellaneous.ClosestTarget
                 }
 
                 Scratch.Neighbours.Clear();
-                Tree.GetEntriesInRangeWithHeap(unfilteredChunkIndex, transforms[i].Position, float.MaxValue,
+                Tree.GetEntriesInRangeWithHeap(-1, transforms[i].Position, float.MaxValue,
                     ref Scratch.Neighbours);
                 var nearest = Scratch.Neighbours.Peek().index;
                 targets[i] = new Target { Value = TargetEntities[nearest] };
