@@ -69,45 +69,29 @@ namespace Boids
                 var copyTargetPositions       = CollectionHelper.CreateNativeArray<float3, RewindableAllocator>(targetCount, ref world.UpdateAllocator);
                 var copyObstaclePositions     = CollectionHelper.CreateNativeArray<float3, RewindableAllocator>(obstacleCount, ref world.UpdateAllocator);
 
-                // The following jobs all run in parallel because the same JobHandle is passed for their
-                // input dependencies when the jobs are scheduled; thus, they can run in any order (or concurrently).
-                // The concurrency is property of how they're scheduled, not of the job structs themselves.
-
-                var boidChunkBaseEntityIndexArray = boidQuery.CalculateBaseEntityIndexArrayAsync(
-                    world.UpdateAllocator.ToAllocator, state.Dependency,
-                    out var boidChunkBaseIndexJobHandle);
-                var targetChunkBaseEntityIndexArray = targetQuery.CalculateBaseEntityIndexArrayAsync(
-                    world.UpdateAllocator.ToAllocator, state.Dependency,
-                    out var targetChunkBaseIndexJobHandle);
-                var obstacleChunkBaseEntityIndexArray = obstacleQuery.CalculateBaseEntityIndexArrayAsync(
-                    world.UpdateAllocator.ToAllocator, state.Dependency,
-                    out var obstacleChunkBaseIndexJobHandle);
                 // These jobs extract the relevant position, heading component
                 // to NativeArrays so that they can be randomly accessed by the `MergeCells` and `Steer` jobs.
                 // These jobs are defined using the IJobEntity syntax.
                 var initialBoidJob = new InitialPerBoidJob
                 {
-                    ChunkBaseEntityIndices = boidChunkBaseEntityIndexArray,
                     CellAlignment = cellAlignment,
                     CellSeparation = cellSeparation,
                     ParallelHashMap = hashMap.AsParallelWriter(),
                     InverseBoidCellRadius = 1.0f / boidSettings.CellRadius,
                 };
-                var initialBoidJobHandle = initialBoidJob.ScheduleParallel(boidQuery, boidChunkBaseIndexJobHandle);
+                var initialBoidJobHandle = initialBoidJob.ScheduleParallel(boidQuery, state.Dependency);
 
                 var initialTargetJob = new InitialPerTargetJob
                 {
-                    ChunkBaseEntityIndices = targetChunkBaseEntityIndexArray,
                     TargetPositions = copyTargetPositions,
                 };
-                var initialTargetJobHandle = initialTargetJob.ScheduleParallel(targetQuery, targetChunkBaseIndexJobHandle);
+                var initialTargetJobHandle = initialTargetJob.ScheduleParallel(targetQuery, state.Dependency);
 
                 var initialObstacleJob = new InitialPerObstacleJob
                 {
-                    ChunkBaseEntityIndices = obstacleChunkBaseEntityIndexArray,
                     ObstaclePositions = copyObstaclePositions,
                 };
-                var initialObstacleJobHandle = initialObstacleJob.ScheduleParallel(obstacleQuery, obstacleChunkBaseIndexJobHandle);
+                var initialObstacleJobHandle = initialObstacleJob.ScheduleParallel(obstacleQuery, state.Dependency);
 
                 var initialCellCountJob = new MemsetNativeArray<int>
                 {
@@ -139,7 +123,6 @@ namespace Boids
                 // the standard boid flocking algorithm.
                 var steerBoidJob = new SteerBoidJob
                 {
-                    ChunkBaseEntityIndices = boidChunkBaseEntityIndexArray,
                     CellIndices = cellIndices,
                     CellCount = cellCount,
                     CellAlignment = cellAlignment,
@@ -247,14 +230,12 @@ namespace Boids
         [BurstCompile]
         partial struct InitialPerBoidJob : IJobEntity
         {
-            [ReadOnly] public NativeArray<int> ChunkBaseEntityIndices;
-            [NativeDisableParallelForRestriction] public NativeArray<float3> CellAlignment;
-            [NativeDisableParallelForRestriction] public NativeArray<float3> CellSeparation;
+            public NativeArray<float3> CellAlignment;
+            public NativeArray<float3> CellSeparation;
             public NativeParallelMultiHashMap<int, int>.ParallelWriter ParallelHashMap;
             public float InverseBoidCellRadius;
-            void Execute([ChunkIndexInQuery] int chunkIndexInQuery, [EntityIndexInChunk] int entityIndexInChunk, in LocalToWorld localToWorld)
+            void Execute([EntityIndexInQuery] int entityIndexInQuery, in LocalToWorld localToWorld)
             {
-                int entityIndexInQuery = ChunkBaseEntityIndices[chunkIndexInQuery] + entityIndexInChunk;
                 CellAlignment[entityIndexInQuery] = localToWorld.Forward;
                 CellSeparation[entityIndexInQuery] = localToWorld.Position;
                 // Populates a hash map, where each bucket contains the indices of all Boids whose positions quantize
@@ -271,11 +252,9 @@ namespace Boids
         [BurstCompile]
         partial struct InitialPerTargetJob : IJobEntity
         {
-            [ReadOnly] public NativeArray<int> ChunkBaseEntityIndices;
-            [NativeDisableParallelForRestriction] public NativeArray<float3> TargetPositions;
-            void Execute([ChunkIndexInQuery] int chunkIndexInQuery, [EntityIndexInChunk] int entityIndexInChunk, in LocalToWorld localToWorld)
+            public NativeArray<float3> TargetPositions;
+            void Execute([EntityIndexInQuery] int entityIndexInQuery, in LocalToWorld localToWorld)
             {
-                int entityIndexInQuery = ChunkBaseEntityIndices[chunkIndexInQuery] + entityIndexInChunk;
                 TargetPositions[entityIndexInQuery] = localToWorld.Position;
             }
         }
@@ -283,11 +262,9 @@ namespace Boids
         [BurstCompile]
         partial struct InitialPerObstacleJob : IJobEntity
         {
-            [ReadOnly] public NativeArray<int> ChunkBaseEntityIndices;
-            [NativeDisableParallelForRestriction] public NativeArray<float3> ObstaclePositions;
-            void Execute([ChunkIndexInQuery] int chunkIndexInQuery, [EntityIndexInChunk] int entityIndexInChunk, in LocalToWorld localToWorld)
+            public NativeArray<float3> ObstaclePositions;
+            void Execute([EntityIndexInQuery] int entityIndexInQuery, in LocalToWorld localToWorld)
             {
-                int entityIndexInQuery = ChunkBaseEntityIndices[chunkIndexInQuery] + entityIndexInChunk;
                 ObstaclePositions[entityIndexInQuery] = localToWorld.Position;
             }
         }
@@ -295,7 +272,6 @@ namespace Boids
         [BurstCompile]
         partial struct SteerBoidJob : IJobEntity
         {
-            [ReadOnly] public NativeArray<int> ChunkBaseEntityIndices;
             [ReadOnly] public NativeArray<int> CellIndices;
             [ReadOnly] public NativeArray<int> CellCount;
             [ReadOnly] public NativeArray<float3> CellAlignment;
@@ -308,9 +284,8 @@ namespace Boids
             public Boid CurrentBoidVariant;
             public float DeltaTime;
             public float MoveDistance;
-            void Execute([ChunkIndexInQuery] int chunkIndexInQuery, [EntityIndexInChunk] int entityIndexInChunk, ref LocalToWorld localToWorld)
+            void Execute([EntityIndexInQuery] int entityIndexInQuery, ref LocalToWorld localToWorld)
             {
-                int entityIndexInQuery = ChunkBaseEntityIndices[chunkIndexInQuery] + entityIndexInChunk;
                 // temporarily storing the values for code readability
                 var forward                           = localToWorld.Forward;
                 var currentPosition                   = localToWorld.Position;

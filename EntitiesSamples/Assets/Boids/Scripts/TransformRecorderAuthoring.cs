@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using Unity.Collections;
 using Unity.Entities;
 using UnityEditor;
@@ -61,3 +63,5 @@ namespace Boids
         }
     }
 }
+
+#endif

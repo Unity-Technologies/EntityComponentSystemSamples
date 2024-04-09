@@ -16,7 +16,7 @@ namespace HelloCube.Prefabs
             // This call makes the system not update unless at least one entity in the world exists that has the Spawner component.
             state.RequireForUpdate<Spawner>();
 
-            state.RequireForUpdate<Execute.Prefabs>();
+            state.RequireForUpdate<ExecutePrefabs>();
         }
 
         [BurstCompile]

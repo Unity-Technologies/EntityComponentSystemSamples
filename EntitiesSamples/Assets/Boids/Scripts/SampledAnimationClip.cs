@@ -17,7 +17,6 @@ namespace Boids
         public BlobAssetReference<TransformSamples> TransformSamplesBlob;
     }
 
-    [WriteGroup(typeof(LocalTransform))]
     public struct TransformSamples
     {
         public BlobArray<float3> TranslationSamples;

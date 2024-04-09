@@ -6,6 +6,7 @@ using Unity.Burst;
 
 namespace HelloCube.GameObjectSync
 {
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public partial struct DirectoryInitSystem : ISystem
     {
         [BurstCompile]
@@ -14,7 +15,7 @@ namespace HelloCube.GameObjectSync
             // We need to wait for the scene to load before Updating, so we must RequireForUpdate at
             // least one component type loaded from the scene.
 
-            state.RequireForUpdate<Execute.GameObjectSync>();
+            state.RequireForUpdate<ExecuteGameObjectSync>();
         }
 
         public void OnUpdate(ref SystemState state)
@@ -48,4 +49,5 @@ namespace HelloCube.GameObjectSync
         {
         }
     }
+#endif
 }

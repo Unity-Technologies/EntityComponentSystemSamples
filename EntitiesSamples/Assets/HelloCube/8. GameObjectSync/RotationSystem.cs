@@ -5,13 +5,14 @@ using Unity.Transforms;
 
 namespace HelloCube.GameObjectSync
 {
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public partial struct RotationSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<DirectoryManaged>();
-            state.RequireForUpdate<Execute.GameObjectSync>();
+            state.RequireForUpdate<ExecuteGameObjectSync>();
         }
 
         // This OnUpdate accesses managed objects, so it cannot be burst compiled.
@@ -36,4 +37,5 @@ namespace HelloCube.GameObjectSync
             }
         }
     }
+#endif
 }

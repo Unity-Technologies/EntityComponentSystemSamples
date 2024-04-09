@@ -10,7 +10,6 @@ using UnityEngine.SceneManagement;
 namespace Streaming.AssetManagement
 {
 #if !UNITY_DISABLE_MANAGED_COMPONENTS
-
     public partial struct AssetLoadingSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)

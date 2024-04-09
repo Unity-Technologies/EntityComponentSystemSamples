@@ -9,6 +9,7 @@ using Hash128 = Unity.Entities.Hash128;
 
 namespace Baking.BlobAssetBakingSystem
 {
+#if UNITY_EDITOR
     public class MeshBBAuthoring : MonoBehaviour
     {
         public float MeshScale = 1;
@@ -70,7 +71,7 @@ namespace Baking.BlobAssetBakingSystem
                     Hash = hash
                 });
 
-                // Add the Component that will hold the BlobAssetReference later
+                // Add the Component that will hold the BlobAssetReference later 
                 AddComponent(entity, new MeshBB());
             }
 
@@ -84,6 +85,7 @@ namespace Baking.BlobAssetBakingSystem
                 g == UnityBuiltinExtraResources;
         }
     }
+#endif
 
     public struct MeshBBBlobAsset
     {

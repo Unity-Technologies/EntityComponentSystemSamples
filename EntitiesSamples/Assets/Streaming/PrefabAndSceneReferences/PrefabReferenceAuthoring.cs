@@ -1,11 +1,10 @@
 using Unity.Entities;
 using Unity.Entities.Serialization;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-#if UNITY_EDITOR
 namespace Streaming.PrefabAndSceneReferences
 {
+#if UNITY_EDITOR
     public class PrefabReferenceAuthoring : MonoBehaviour
     {
         public GameObject Prefab;
@@ -25,10 +24,15 @@ namespace Streaming.PrefabAndSceneReferences
             }
         }
     }
+#endif
 
     struct PrefabReference : IComponentData
     {
         public EntityPrefabReference Value;
     }
+
+    struct CleanupPrefabReference : ICleanupComponentData
+    {
+        public Entity PrefabToUnload;
+    }
 }
-#endif

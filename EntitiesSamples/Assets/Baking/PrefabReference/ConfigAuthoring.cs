@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Baking.PrefabReference
 {
+#if UNITY_EDITOR
     public class ConfigAuthoring : MonoBehaviour
     {
         public GameObject Prefab;
@@ -27,6 +28,7 @@ namespace Baking.PrefabReference
             }
         }
     }
+#endif
 
     public struct Config : IComponentData
     {

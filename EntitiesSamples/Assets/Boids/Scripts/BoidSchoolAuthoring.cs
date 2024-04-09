@@ -16,7 +16,7 @@ namespace Boids
                 var entity = GetEntity(TransformUsageFlags.Renderable);
                 AddComponent(entity, new BoidSchool
                 {
-                    Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
+                    Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Renderable|TransformUsageFlags.WorldSpace),
                     Count = authoring.Count,
                     InitialRadius = authoring.InitialRadius
                 });

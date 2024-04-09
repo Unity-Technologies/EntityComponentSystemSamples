@@ -7,8 +7,6 @@ namespace Tutorials.Firefighters
 {
     public partial struct BotSystem : ISystem
     {
-        private uint seed;
-
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {

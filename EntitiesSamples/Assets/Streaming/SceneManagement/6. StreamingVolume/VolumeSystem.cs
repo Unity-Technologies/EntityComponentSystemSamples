@@ -13,7 +13,7 @@ namespace Streaming.SceneManagement.StreamingVolume
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<RelevantEntity>();
+            state.RequireForUpdate<Relevant>();
         }
 
         [BurstCompile]
@@ -22,7 +22,7 @@ namespace Streaming.SceneManagement.StreamingVolume
             // Check which volumes contain any relevant entities.
             NativeHashSet<Entity> activeVolumes = new NativeHashSet<Entity>(100, Allocator.Temp);
 
-            var relevantQuery = SystemAPI.QueryBuilder().WithAll<RelevantEntity, LocalToWorld>().Build();
+            var relevantQuery = SystemAPI.QueryBuilder().WithAll<Relevant, LocalToWorld>().Build();
             var relevantLocalToWorlds = relevantQuery.ToComponentDataArray<LocalToWorld>(Allocator.Temp);
 
             foreach (var (transform, volume, volumeEntity) in

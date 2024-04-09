@@ -16,7 +16,7 @@ namespace Tutorials.Jobs.Step2
 
         public void Start()
         {
-            Spawner spawner = Object.FindObjectOfType<Spawner>();
+            Spawner spawner = Object.FindFirstObjectByType<Spawner>();
             // We use the Persistent allocator because these arrays must
             // exist for the run of the program.
             TargetPositions = new NativeArray<float3>(spawner.NumTargets, Allocator.Persistent);

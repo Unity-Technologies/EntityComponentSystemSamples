@@ -10,7 +10,7 @@ namespace HelloCube.Prefabs
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Execute.Prefabs>();
+            state.RequireForUpdate<ExecutePrefabs>();
         }
 
         [BurstCompile]

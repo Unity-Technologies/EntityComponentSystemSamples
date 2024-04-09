@@ -9,7 +9,7 @@ namespace HelloCube.Reparenting
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Execute.Reparenting>();
+            state.RequireForUpdate<ExecuteReparenting>();
         }
 
         [BurstCompile]

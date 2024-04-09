@@ -65,7 +65,7 @@ namespace Streaming.SceneManagement.CompleteSample
                         {
                             Scene = sceneReferences[selectedTile],
                             Position = tileSize * new float2(x, y),
-                            Rotation = random.NextFloat(-2, 2) * (math.PI / 2f),
+                            Rotation = random.NextInt(4) * (math.PI / 2f),  // 0, 90, 180, or 270 degrees
                             LoadingDistanceSq = loadingDistance * loadingDistance,
                             UnloadingDistanceSq = unloadingDistance * unloadingDistance
                         });

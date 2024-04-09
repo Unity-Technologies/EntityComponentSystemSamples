@@ -3,9 +3,9 @@ using Unity.Entities.Serialization;
 using UnityEditor;
 using UnityEngine;
 
-#if UNITY_EDITOR
 namespace Streaming.PrefabAndSceneReferences
 {
+#if UNITY_EDITOR
     public class SceneReferenceAuthoring : MonoBehaviour
     {
         public SceneAsset SceneAsset;
@@ -23,10 +23,15 @@ namespace Streaming.PrefabAndSceneReferences
             }
         }
     }
+#endif
 
     struct SceneReference : IComponentData
     {
         public EntitySceneReference Value;
     }
+
+    struct CleanupSceneReference : ICleanupComponentData
+    {
+        public Entity SceneToUnload;
+    }
 }
-#endif

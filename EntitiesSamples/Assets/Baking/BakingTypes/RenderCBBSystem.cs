@@ -1,6 +1,5 @@
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Baking.BakingTypes

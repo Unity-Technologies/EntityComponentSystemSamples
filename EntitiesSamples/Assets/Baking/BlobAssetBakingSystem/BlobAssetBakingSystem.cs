@@ -56,14 +56,14 @@ namespace Baking.BlobAssetBakingSystem
                 }
             }
 
-            // Create the BlobAssets and BlobAssetReference for each unique and new BlobAsset
+            // Create the BlobAssets and BlobAssetReference for each new, unique BlobAsset
             new ComputeBlobDataJob()
             {
                 BlobAssetReferences = m_BlobAssetReferences,
                 EntitiesToProcess = m_EntitiesToProcess.AsArray(),
                 BufferLookup = SystemAPI.GetBufferLookup<MeshVertex>(),
                 ComponentLookup = SystemAPI.GetComponentLookup<RawMesh>(),
-            }.ScheduleParallel(m_EntitiesToProcess.Length, 1, default(JobHandle)).Complete();
+            }.Schedule(m_EntitiesToProcess.Length, 1).Complete();
 
             // Assign the BlobAssetReferences to all the entities that have a different BlobAsset than last run
             foreach (var (rawMesh, meshBB) in
@@ -81,7 +81,7 @@ namespace Baking.BlobAssetBakingSystem
     }
 
     [BurstCompile]
-    public struct ComputeBlobDataJob : IJobFor
+    public struct ComputeBlobDataJob : IJobParallelFor
     {
         [NativeDisableParallelForRestriction]
         public NativeParallelHashMap<Hash128, BlobAssetReference<MeshBBBlobAsset>> BlobAssetReferences;

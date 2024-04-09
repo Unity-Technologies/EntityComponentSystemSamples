@@ -4,20 +4,19 @@ using Unity.Entities.Content;
 using Unity.Entities.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 namespace Streaming.AssetManagement
 {
     public class AssetAuthoring : MonoBehaviour
     {
-        [FormerlySerializedAs("AssetReferences")] [SerializeField] public References references;
+        [SerializeField] public References References;
 
         class Baker : Baker<AssetAuthoring>
         {
             public override void Bake(AssetAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.None);
-                AddComponent(entity, authoring.references);
+                AddComponent(entity, authoring.References);
             }
         }
     }

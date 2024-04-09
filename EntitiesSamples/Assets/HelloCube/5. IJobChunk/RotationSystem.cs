@@ -12,7 +12,7 @@ namespace HelloCube.JobChunk
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Execute.IJobChunk>();
+            state.RequireForUpdate<ExecuteIJobChunk>();
         }
 
         [BurstCompile]

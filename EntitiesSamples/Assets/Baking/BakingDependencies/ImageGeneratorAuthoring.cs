@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Baking.BakingDependencies
 {
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public class ImageGeneratorAuthoring : MonoBehaviour
     {
         // The image is expected to have compression set to none and read/write enabled.
@@ -14,13 +15,6 @@ namespace Baking.BakingDependencies
 
         class Baker : Baker<ImageGeneratorAuthoring>
         {
-            static ComponentTypeSet s_ComponentsToAdd = new(new ComponentType[]
-            {
-                typeof(LocalTransform),
-                typeof(LocalToWorld),
-                typeof(URPMaterialPropertyBaseColor)
-            });
-
             public override void Bake(ImageGeneratorAuthoring authoring)
             {
                 // The following 4 things should cause this baker to rerun:
@@ -68,6 +62,10 @@ namespace Baking.BakingDependencies
                 var mainEntity = GetEntity(TransformUsageFlags.None);
                 var entities = AddBuffer<ImageGeneratorEntity>(mainEntity);
 
+                var typeSet = new ComponentTypeSet(typeof(LocalTransform),
+                    typeof(LocalToWorld),
+                    typeof(URPMaterialPropertyBaseColor));
+
                 for (int y = 0; y < sizeY; y++)
                 {
                     for (int x = 0; x < sizeX; x++)
@@ -83,7 +81,8 @@ namespace Baking.BakingDependencies
 
                         // Adding all the components at once and subsequently setting their values is more efficient
                         // than adding them one by one. We avoid moving the entity across multiple archetypes this way.
-                        AddComponent(entity, s_ComponentsToAdd);
+
+                        AddComponent(entity, typeSet);
 
                         float3 localPosition = (axisX * x + axisY * y + centerOffset) * (1 + spacing);
 
@@ -130,4 +129,5 @@ namespace Baking.BakingDependencies
         public static implicit operator Entity(ImageGeneratorEntity e) => e.m_Value;
         public static implicit operator ImageGeneratorEntity(Entity e) => new() { m_Value = e };
     }
+#endif
 }

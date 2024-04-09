@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
+using UnityEngine;
 
 namespace HelloCube.Reparenting
 {
@@ -16,7 +17,8 @@ namespace HelloCube.Reparenting
         {
             timer = interval;
             attached = true;
-            state.RequireForUpdate<Execute.Reparenting>();
+            state.RequireForUpdate<ExecuteReparenting>();
+            state.RequireForUpdate<RotationSpeed>();
         }
 
         [BurstCompile]
@@ -45,6 +47,13 @@ namespace HelloCube.Reparenting
                     // the DynamicBuffer after every EntityManager.RemoveComponent() call.
                     ecb.RemoveComponent<Parent>(children[i].Value);
                 }
+
+                // Alternative solution instead of the above loop:
+                // A single call that removes the Parent component from all entities in the array.
+                // Because the method expects a NativeArray<Entity>, we create a NativeArray<Entity> alias of the DynamicBuffer.
+                /*
+                ecb.RemoveComponent<Parent>(children.AsNativeArray().Reinterpret<Entity>());
+                */
             }
             else
             {
@@ -58,6 +67,13 @@ namespace HelloCube.Reparenting
                 {
                     ecb.AddComponent(entity, new Parent { Value = rotatorEntity });
                 }
+
+                // Alternative solution instead of the above loop:
+                // Add a Parent value to all entities matching a query.
+                /*
+                var query = SystemAPI.QueryBuilder().WithAll<LocalTransform>().WithNone<RotationSpeed>().Build();
+                ecb.AddComponent(query, new Parent { Value = rotatorEntity });
+                */
             }
 
             ecb.Playback(state.EntityManager);

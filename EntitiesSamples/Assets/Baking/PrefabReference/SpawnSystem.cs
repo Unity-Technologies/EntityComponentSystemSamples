@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Scenes;
@@ -7,11 +6,11 @@ using Unity.Transforms;
 
 namespace Baking.PrefabReference
 {
-    [BurstCompile]
     public partial struct SpawnSystem : ISystem
     {
         float timer;
 
+        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<Config>();

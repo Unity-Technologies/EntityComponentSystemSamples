@@ -22,25 +22,25 @@ namespace Baking.BlobAssetBaker
             foreach (var (anim, transform) in
                      SystemAPI.Query<RefRW<Animation>, RefRW<LocalTransform>>())
             {
-                anim.ValueRW.T += dt;
-                transform.ValueRW.Position.y = Evaluate(anim.ValueRO.T, anim.ValueRO.AnimBlobReference);
+                anim.ValueRW.Time += dt;
+                transform.ValueRW.Position.y = Evaluate(anim.ValueRO.Time, anim.ValueRO.AnimBlobReference);
             }
         }
 
-        static float Evaluate(float t, BlobAssetReference<AnimationBlobData> anim)
+        static float Evaluate(float time, BlobAssetReference<AnimationBlobData> anim)
         {
             // normalize t (when t exceeds the curve time, repeat it)
-            t *= anim.Value.InvLength;
-            t -= math.floor(t);
+            time *= anim.Value.InvLength;
+            time -= math.floor(time);
 
             // Find index and interpolation value in the array
-            float sampleT = t * anim.Value.KeyCount;
+            float sampleT = time * anim.Value.KeyCount;
             var sampleTFloor = math.floor(sampleT);
 
-            float interp = sampleT - sampleTFloor;
+            float interpolation = sampleT - sampleTFloor;
             var index = (int) sampleTFloor;
 
-            return math.lerp(anim.Value.Keys[index], anim.Value.Keys[index + 1], interp);
+            return math.lerp(anim.Value.Keys[index], anim.Value.Keys[index + 1], interpolation);
         }
     }
 }

@@ -1,3 +1,5 @@
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
+
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -65,3 +67,5 @@ namespace Streaming.SceneManagement.SubsceneInstancing
         }
     }
 }
+
+#endif

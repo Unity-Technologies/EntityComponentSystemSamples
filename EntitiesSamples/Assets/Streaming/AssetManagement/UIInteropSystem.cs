@@ -1,10 +1,9 @@
-using Unity.Collections;
 using Unity.Entities;
-using UnityEditor.Rendering;
 using UnityEngine;
 
 namespace Streaming.AssetManagement
 {
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public partial struct UIInteropSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
@@ -20,7 +19,7 @@ namespace Streaming.AssetManagement
 
             if (ui.LoadButton == null)
             {
-                ui.LoadButton = GameObject.FindObjectOfType<LoadButton>();
+                ui.LoadButton = GameObject.FindFirstObjectByType<LoadButton>();
                 if (ui.LoadButton == null)
                 {
                     return;
@@ -31,6 +30,7 @@ namespace Streaming.AssetManagement
             {
                 return;
             }
+
             ui.LoadButton.Toggle = false;
 
             var unloadQuery = SystemAPI.QueryBuilder().WithAll<References, Loading>().WithNone<RequestUnload>().Build();
@@ -53,4 +53,5 @@ namespace Streaming.AssetManagement
     {
         public LoadButton LoadButton;
     }
+#endif
 }

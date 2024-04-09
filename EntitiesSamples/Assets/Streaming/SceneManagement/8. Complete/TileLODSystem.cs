@@ -1,9 +1,9 @@
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
+
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Scenes;
-using Unity.Transforms;
 
 namespace Streaming.SceneManagement.CompleteSample
 {
@@ -112,3 +112,5 @@ namespace Streaming.SceneManagement.CompleteSample
         }
     }
 }
+
+#endif

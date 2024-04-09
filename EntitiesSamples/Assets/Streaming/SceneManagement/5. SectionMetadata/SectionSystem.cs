@@ -30,7 +30,7 @@ namespace Streaming.SceneManagement.SectionMetadata
             // Find all the sections that should be loaded based on the distances to the sphere
             foreach (var transform in
                      SystemAPI.Query<RefRO<LocalTransform>>()
-                         .WithAll<RelevantEntity>())
+                         .WithAll<Relevant>())
             {
                 for (int index = 0; index < circles.Length; ++index)
                 {

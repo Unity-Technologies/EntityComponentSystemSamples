@@ -10,7 +10,7 @@ namespace HelloCube.JobEntity
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Execute.IJobEntity>();
+            state.RequireForUpdate<ExecuteIJobEntity>();
         }
 
         [BurstCompile]

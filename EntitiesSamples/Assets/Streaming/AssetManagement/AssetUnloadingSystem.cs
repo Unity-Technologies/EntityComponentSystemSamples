@@ -7,7 +7,6 @@ using UnityEngine;
 namespace Streaming.AssetManagement
 {
 #if !UNITY_DISABLE_MANAGED_COMPONENTS
-
     public partial struct AssetUnloadingSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)

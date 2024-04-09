@@ -43,8 +43,8 @@ namespace Baking.BlobAssetBaker
                     var array = blobBuilder.Allocate(ref root.Keys, keyCount + 1);
                     for (int i = 0; i < keyCount; i++)
                     {
-                        float t = (float)i / (float)(keyCount - 1) * endTime;
-                        array[i] = curve.Evaluate(t);
+                        float time = (float)i / (float)(keyCount - 1) * endTime;
+                        array[i] = curve.Evaluate(time);
                     }
 
                     array[keyCount] = array[keyCount - 1];
@@ -59,7 +59,7 @@ namespace Baking.BlobAssetBaker
     public struct Animation : IComponentData
     {
         public BlobAssetReference<AnimationBlobData> AnimBlobReference;
-        public float T;
+        public float Time;
     }
 
     // The root struct of our blob.

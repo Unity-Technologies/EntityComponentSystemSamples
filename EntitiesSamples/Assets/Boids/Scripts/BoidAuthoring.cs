@@ -18,7 +18,7 @@ namespace Boids
         {
             public override void Bake(BoidAuthoring authoring)
             {
-                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                var entity = GetEntity(TransformUsageFlags.Renderable | TransformUsageFlags.WorldSpace);
                 AddSharedComponent(entity, new Boid
                 {
                     CellRadius = authoring.CellRadius,
@@ -33,7 +33,6 @@ namespace Boids
     }
 
     [Serializable]
-    [WriteGroup(typeof(LocalToWorld))]
     public struct Boid : ISharedComponentData
     {
         public float CellRadius;

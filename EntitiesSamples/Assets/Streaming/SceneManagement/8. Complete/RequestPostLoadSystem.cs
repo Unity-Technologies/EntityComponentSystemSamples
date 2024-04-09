@@ -1,3 +1,5 @@
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
+
 using Unity.Collections;
 using Unity.Entities;
 
@@ -35,3 +37,5 @@ namespace Streaming.SceneManagement.CompleteSample
         }
     }
 }
+
+#endif

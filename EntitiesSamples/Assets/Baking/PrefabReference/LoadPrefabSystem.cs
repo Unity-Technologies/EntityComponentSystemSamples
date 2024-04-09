@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Scenes;
 
@@ -7,6 +6,7 @@ namespace Baking.PrefabReference
 {
     public partial struct LoadPrefabSystem : ISystem
     {
+        [BurstCompile]
          public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<Config>();

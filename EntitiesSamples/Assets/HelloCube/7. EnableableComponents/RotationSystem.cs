@@ -13,7 +13,7 @@ namespace HelloCube.EnableableComponents
         public void OnCreate(ref SystemState state)
         {
             timer = interval;
-            state.RequireForUpdate<Execute.EnableableComponents>();
+            state.RequireForUpdate<ExecuteEnableableComponents>();
         }
 
         [BurstCompile]

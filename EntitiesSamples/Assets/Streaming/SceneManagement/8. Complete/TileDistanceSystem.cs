@@ -34,7 +34,7 @@ namespace Streaming.SceneManagement.CompleteSample
 
                 foreach (var transform in
                          SystemAPI.Query<RefRO<LocalTransform>>()
-                             .WithAll<RelevantEntity>())
+                             .WithAll<Relevant>())
                 {
                     for (int index = 0; index < tiles.Length; ++index)
                     {

@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Streaming.SceneManagement.StreamingVolume
 {
+#if UNITY_EDITOR
     public class VolumeSetAuthoring : MonoBehaviour
     {
         public List<VolumeAuthoring> volumes;
@@ -17,7 +18,8 @@ namespace Streaming.SceneManagement.StreamingVolume
                 var subScene = GetComponent<SubScene>();
                 if (subScene != null && authoring.volumes != null && authoring.volumes.Count > 0)
                 {
-                    var sceneEntity = CreateAdditionalEntity(TransformUsageFlags.None, false, $"{subScene.SceneAsset.name}_Loader");
+                    var sceneEntity = CreateAdditionalEntity(TransformUsageFlags.None, false,
+                        $"{subScene.SceneAsset.name}_Loader");
                     AddComponent(sceneEntity, new LevelInfo
                     {
                         sceneReference = new EntitySceneReference(subScene.SceneAsset)
@@ -44,6 +46,7 @@ namespace Streaming.SceneManagement.StreamingVolume
             }
         }
     }
+#endif
 
     public struct LevelInfo : IComponentData
     {

@@ -10,7 +10,7 @@ namespace HelloCube.Aspects
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<Execute.Aspects>();
+            state.RequireForUpdate<ExecuteAspects>();
         }
 
         [BurstCompile]
