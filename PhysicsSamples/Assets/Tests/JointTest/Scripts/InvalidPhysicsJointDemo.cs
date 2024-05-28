@@ -1,0 +1,87 @@
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Physics;
+
+public class InvalidPhysicsJointDemoScene : SceneCreationSettings {}
+
+public class InvalidPhysicsJointDemo : SceneCreationAuthoring<InvalidPhysicsJointDemoScene>
+{
+    class InvalidPhysicsJointDemoBaker : Baker<InvalidPhysicsJointDemo>
+    {
+        public override void Bake(InvalidPhysicsJointDemo authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new InvalidPhysicsJointDemoScene
+            {
+                DynamicMaterial = authoring.DynamicMaterial,
+                StaticMaterial = authoring.StaticMaterial
+            });
+        }
+    }
+}
+
+public partial class InvalidPhyiscsJointDemoSystem : SceneCreationSystem<InvalidPhysicsJointDemoScene>
+{
+    public override void CreateScene(InvalidPhysicsJointDemoScene sceneSettings)
+    {
+        float colliderSize = 0.25f;
+
+        BlobAssetReference<Collider> collider = BoxCollider.Create(new BoxGeometry
+        {
+            Center = float3.zero,
+            Orientation = quaternion.identity,
+            Size = new float3(colliderSize),
+            BevelRadius = 0.0f
+        });
+        CreatedColliders.Add(collider);
+
+        // Add a dynamic body constrained to the world that will die
+        // Once the dynamic body is destroyed the joint will be invalid
+        {
+            // Create a dynamic body
+            float3 pivotWorld = new float3(-2f, 0, 0);
+            Entity body = CreateDynamicBody(pivotWorld, quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
+
+            // create extra dynamic body to trigger Havok sync after the first one is destroyed
+            CreateDynamicBody(pivotWorld * 2.0f, quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
+
+            // add timeout on dynamic body after 15 frames.
+            EntityManager.AddComponentData(body, new LifeTime { Value = 15 });
+
+            // Create the joint
+            float3 pivotLocal = float3.zero;
+            var joint = PhysicsJoint.CreateBallAndSocket(pivotLocal, pivotWorld);
+            var jointEntity = CreateJoint(joint, body, Entity.Null);
+
+            // add timeout on joint entity after 30 frames.
+            EntityManager.AddComponentData(jointEntity, new LifeTime { Value = 30 });
+        }
+
+        // Add two static bodies constrained together
+        // The joint is invalid immediately
+        {
+            // Create a body
+            Entity bodyA = CreateStaticBody(new float3(0, 0.0f, 0), quaternion.identity, collider);
+            Entity bodyB = CreateStaticBody(new float3(0, 1.0f, 0), quaternion.identity, collider);
+
+            // Create the joint
+            float3 pivotLocal = float3.zero;
+            var joint = PhysicsJoint.CreateBallAndSocket(pivotLocal, pivotLocal);
+            var jointEntity = CreateJoint(joint, bodyA, bodyB);
+
+            // add timeout on joint entity after 15 frames.
+            EntityManager.AddComponentData(jointEntity, new LifeTime { Value = 15 });
+        }
+
+        // Add two dynamic bodies constrained together with 0 dimension
+        {
+            // Create a body
+            Entity bodyA = CreateDynamicBody(new float3(0, 5.0f, 0), quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
+            Entity bodyB = CreateDynamicBody(new float3(0, 6.0f, 0), quaternion.identity, collider, float3.zero, float3.zero, 1.0f);
+
+            // Create the joint
+            var joint = PhysicsJoint.CreateLimitedDOF(RigidTransform.identity, new bool3(false), new bool3(false));
+            CreateJoint(joint, bodyA, bodyB);
+        }
+    }
+}

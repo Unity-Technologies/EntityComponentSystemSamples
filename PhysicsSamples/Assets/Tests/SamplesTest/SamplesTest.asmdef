@@ -1,0 +1,45 @@
+{
+    "name": "Unity.Physics.Samples.Test",
+    "references": [
+        "Havok.Physics",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Entities.Tests",
+        "Unity.Mathematics",
+        "Unity.PerformanceTesting",
+        "Unity.Physics",
+        "Unity.Physics.Hybrid",
+        "Unity.Physics.Samples",
+        "Unity.Profiling.Core",
+        "Unity.Scenes",
+        "Unity.Transforms",
+        "UnityEditor.TestRunner",
+        "UnityEngine.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS", "UNITY_PHYSICS_CUSTOM"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.havok.physics",
+            "expression": "0.0.0",
+            "define": "HAVOK_PHYSICS_EXISTS"
+        },
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "0.0.0",
+            "define": "UNITY_INPUT_SYSTEM_EXISTS"
+        }
+    ],
+    "noEngineReferences": false
+}

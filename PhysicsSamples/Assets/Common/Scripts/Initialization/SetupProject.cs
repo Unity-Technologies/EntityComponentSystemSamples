@@ -26,6 +26,7 @@ class Initialization
             // don't modify the project when entering playmode
             return;
         }
+        // else:
 
         // Find Unity Physics package samples and auto-import them if not yet imported.
         // Note: we are setting packageVersion to null here to ignore the version of the package.
@@ -34,8 +35,7 @@ class Initialization
             if (!sample.isImported)
             {
                 //sample.importPath = Application.dataPath + "/Authoring";
-                var success = sample.Import(Sample.ImportOptions.HideImportWindow |
-                                            Sample.ImportOptions.OverridePreviousImports);
+                var success = sample.Import(Sample.ImportOptions.HideImportWindow |  Sample.ImportOptions.OverridePreviousImports);
                 if (!success)
                 {
                     Debug.LogWarning("Failed to import Unity Physics package samples");

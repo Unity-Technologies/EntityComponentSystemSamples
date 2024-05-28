@@ -1,46 +1,41 @@
 using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace Common.Scripts
+public class EntitySender : MonoBehaviour
 {
-    public class EntitySender : MonoBehaviour
-    {
-        [FormerlySerializedAs("EntityReceivers")]
-        public GameObject[] Receivers;
+    public GameObject[] EntityReceivers;
 
-        class Baker : Baker<EntitySender>
+    class EntitySenderBaker : Baker<EntitySender>
+    {
+        public override void Bake(EntitySender authoring)
         {
-            public override void Bake(EntitySender authoring)
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var sentEntities = AddBuffer<SentEntity>(entity);
+            foreach (var entityReceiver in authoring.EntityReceivers)
             {
-                var entity = GetEntity(TransformUsageFlags.Dynamic);
-                var sentEntities = AddBuffer<TargetEntity>(entity);
-                foreach (var receiver in authoring.Receivers)
+                List<MonoBehaviour> potentialReceivers = new List<MonoBehaviour>();
+                GetComponents<MonoBehaviour>(entityReceiver, potentialReceivers);
+                foreach (var potentialReceiver in potentialReceivers)
                 {
-                    List<MonoBehaviour> mbs = new List<MonoBehaviour>();
-                    GetComponents<MonoBehaviour>(receiver, mbs);
-                    foreach (var mb in mbs)
+                    if (potentialReceiver is IReceiveEntity)
                     {
-                        if (mb is IReceiveEntity)
+                        sentEntities.Add(new SentEntity()
                         {
-                            sentEntities.Add(new TargetEntity()
-                            {
-                                Value = GetEntity(mb, TransformUsageFlags.Dynamic)
-                            });
-                        }
+                            Target = GetEntity(entityReceiver, TransformUsageFlags.Dynamic)
+                        });
                     }
                 }
             }
         }
     }
+}
 
-    public struct TargetEntity : IBufferElementData
-    {
-        public Entity Value;
-    }
+public interface IReceiveEntity
+{
+}
 
-    public interface IReceiveEntity
-    {
-    }
+public struct SentEntity : IBufferElementData
+{
+    public Entity Target;
 }
