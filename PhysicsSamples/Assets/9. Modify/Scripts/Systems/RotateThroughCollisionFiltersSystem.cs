@@ -91,9 +91,8 @@ public partial class RotateThroughCollisionFiltersSystem : SystemBase
 
                 if (index > -1)
                 {
-                    var newMeshInfo = MaterialMeshInfo.FromRenderMeshArrayIndices(
-                        index, 0);
-                    EntityManager.SetComponentData(entity, newMeshInfo);
+                    var newMeshInfo = EntityManager.GetComponentData<MaterialMeshInfo>(entity);
+                    newMeshInfo.Material = MaterialMeshInfo.ArrayIndexToStaticIndex(index);
                 }
             }
         }
