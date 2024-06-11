@@ -2,6 +2,8 @@ using Unity.Assertions;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
+
 
 namespace Unity.Physics.Extensions
 {
@@ -10,6 +12,7 @@ namespace Unity.Physics.Extensions
     /// </summary>
     public static class PhysicsSamplesExtensions
     {
+        #region CompoundCollider Utilities
         /// <summary>
         /// Given the root Collider of a hierarchy and a ColliderKey referencing a child in that hierarchy,
         /// this function returns the ColliderKey referencing the parent Collider.
@@ -90,25 +93,13 @@ namespace Unity.Physics.Extensions
         }
 
         /// <summary>
-        /// Remaps the Entity references baked into a CompoundCollider from one hierarchy to a new one.
+        /// Sets the Entity references in a CompoundCollider according to the provided collider key entity pairs.
         /// </summary>
-        /// <param name="compoundColliderPtr">A <see cref="CompoundCollider"/> with old Entity references, e.g. a new instance.</param>
+        /// <param name="compoundColliderPtr">A <see cref="CompoundCollider"/>.</param>
         /// <param name="keyEntityPairs">An array of <see cref="ColliderKey"/> and <see cref="Entity"/> pairs.</param>
         public static unsafe void RemapColliderEntityReferences(
             CompoundCollider* compoundColliderPtr, in NativeArray<PhysicsColliderKeyEntityPair> keyEntityPairs) =>
             RemapCompoundColliderEntityReferences(compoundColliderPtr, keyEntityPairs, ColliderKey.Empty);
-
-        /// <summary>
-        /// Remaps the Entity references baked into a CompoundCollider from one hierarchy to a new one, via the LinkedEntityGroup arrays.
-        /// </summary>
-        /// <param name="compoundColliderPtr">A <see cref="CompoundCollider"/> with old Entity references, e.g. a new instance.</param>
-        /// <param name="oldLinkedEntityGroup">An array of <see cref="LinkedEntityGroup"/> from an original hierarchy e.g. a prefab.</param>
-        /// <param name="newLinkedEntityGroup">An array of <see cref="LinkedEntityGroup"/> from a new hierarchy e.g. an instance.</param>
-        public static unsafe void RemapCompoundColliderEntityReferences(
-            CompoundCollider* compoundColliderPtr,
-            in NativeArray<LinkedEntityGroup> oldLinkedEntityGroup,
-            in NativeArray<LinkedEntityGroup> newLinkedEntityGroup) =>
-            RemapCompoundColliderEntityReferences(compoundColliderPtr, oldLinkedEntityGroup, newLinkedEntityGroup, ColliderKey.Empty);
 
         internal static unsafe void RemapCompoundColliderEntityReferences(
             CompoundCollider* compoundColliderPtr,
@@ -134,33 +125,6 @@ namespace Unity.Physics.Extensions
             }
         }
 
-        internal static unsafe void RemapCompoundColliderEntityReferences(
-            CompoundCollider* compoundColliderPtr,
-            in NativeArray<LinkedEntityGroup> oldLinkedEntityGroup,
-            in NativeArray<LinkedEntityGroup> newLinkedEntityGroup,
-            in ColliderKey key)
-        {
-            Assert.IsTrue(oldLinkedEntityGroup.Length == newLinkedEntityGroup.Length);
-
-            for (int childIndex = 0; childIndex < compoundColliderPtr->Children.Length; childIndex++)
-            {
-                ref CompoundCollider.Child child = ref compoundColliderPtr->Children[childIndex];
-                var childKey = key; childKey.PushSubKey(compoundColliderPtr->NumColliderKeyBits, (uint)childIndex);
-                for (int i = 0; i < oldLinkedEntityGroup.Length; i++)
-                {
-                    if (child.Entity.Equals(childKey.Equals(oldLinkedEntityGroup[i].Value)))
-                    {
-                        child.Entity = newLinkedEntityGroup[i].Value;
-                        break;
-                    }
-                }
-                if (child.Collider->Type == ColliderType.Compound)
-                {
-                    RemapCompoundColliderEntityReferences(
-                        (CompoundCollider*)child.Collider,
-                        oldLinkedEntityGroup, newLinkedEntityGroup, childKey);
-                }
-            }
-        }
+        #endregion
     }
 }

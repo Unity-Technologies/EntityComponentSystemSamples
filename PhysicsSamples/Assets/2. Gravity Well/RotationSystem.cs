@@ -10,6 +10,12 @@ namespace Conversion
     public partial struct RotationSystem : ISystem
     {
         [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<Rotation>();
+        }
+
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             new RotationJob

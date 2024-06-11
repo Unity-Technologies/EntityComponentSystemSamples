@@ -1,4 +1,6 @@
 using System;
+using Unity.Collections;
+using Unity.Entities;
 
 namespace Unity.Physics.Systems
 {
