@@ -2,7 +2,7 @@
 
 This sample demonstrates using a Mesh with multiple sub-meshes with Entities Graphics.
 
-<img src="../../../../READMEimages/Submesh.PNG" width="600">
+<img src="../../../../READMEimages/Submesh.png" width="600">
 
 ## What does it show?
 
