@@ -108,14 +108,9 @@ namespace Samples.HelloNetcode.Hybrid
                 else
                     standData.remainingTurnAngle -= deltaAngle;
 
-#if !ENABLE_TRANSFORM_V1
                 var transform = m_controller.GetEntityComponentData<LocalTransform>();
                 if (!m_controller.ApplyRootMotion && input.Movement.x == 0 && input.Movement.y == 0 && character.OnGround == 1)
                     m_controller.SetEntityComponentData(transform.WithRotation(math.mul(quaternion.Euler(0, deltaAngle*math.PI / 180.0f, 0), rot)));
-#else
-                if (!m_controller.ApplyRootMotion && input.Movement.x == 0 && input.Movement.y == 0 && character.OnGround == 1)
-                    m_controller.SetEntityComponentData(new Rotation{Value = math.mul(quaternion.Euler(0, deltaAngle*math.PI / 180.0f, 0), rot)});
-#endif
             }
         }
 

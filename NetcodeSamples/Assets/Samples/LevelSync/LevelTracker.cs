@@ -20,10 +20,8 @@ public partial class ServerLevelTracker : SystemBase
 
     protected override void OnCreate()
     {
-#if !UNITY_DOTSRUNTIME
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "LevelSync_Bootstrap")
             Enabled = false;
-#endif
         m_Loader = World.GetExistingSystemManaged<LevelLoader>();
     }
 
@@ -72,10 +70,8 @@ public partial class ClientLevelTracker : SystemBase
 
     protected override void OnCreate()
     {
-#if !UNITY_DOTSRUNTIME
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "LevelSync_Bootstrap")
             Enabled = false;
-#endif
         m_Loader = World.GetExistingSystemManaged<LevelLoader>();
     }
 
@@ -110,13 +106,11 @@ public partial class LevelLoader : SystemBase
 
     protected override void OnCreate()
     {
-#if !UNITY_DOTSRUNTIME
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "LevelSync_Bootstrap")
         {
             Enabled = false;
             return;
         }
-#endif
         m_Levels = new NativeParallelMultiHashMap<int, Level>(2, Allocator.Persistent);
 
         RequireForUpdate<LevelSyncStateComponent>();

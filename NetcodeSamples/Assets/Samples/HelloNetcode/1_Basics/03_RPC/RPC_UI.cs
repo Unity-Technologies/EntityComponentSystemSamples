@@ -17,26 +17,16 @@ namespace Samples.HelloNetcode
         public ScrollRect m_ScrollRect;
         public GameObject m_ChatWindowPrefab;
 
-        List<World> m_ClientWorlds = new List<World>();
         private int m_CurrentUserSlot = 0;
         private int m_UserSlotHorizontalSpace = -13;
         private int m_OwnUser = -1;
 
-        void Start()
-        {
-            foreach (var world in World.All)
-            {
-                if (world.IsClient() && !world.IsThinClient())
-                    m_ClientWorlds.Add(world);
-            }
-        }
-
         void Update()
         {
-            if (m_OwnUser == -1)
+            if (m_OwnUser == -1 && ClientServerBootstrap.ClientWorld != null)
             {
                 // Non-thin client will always be first in the list
-                var connectionQuery = m_ClientWorlds[0].EntityManager
+                var connectionQuery = ClientServerBootstrap.ClientWorld.EntityManager
                     .CreateEntityQuery(ComponentType.ReadOnly<NetworkId>());
                 var connectionIds = connectionQuery.ToComponentDataArray<NetworkId>(Allocator.Temp);
                 if (connectionIds.Length > 0)
@@ -76,8 +66,7 @@ namespace Samples.HelloNetcode
 
         public void SendChatMessage()
         {
-            if (m_ClientWorlds.Count > 0)
-                SendRPC(m_ClientWorlds[0], m_InputText.text);
+            SendRPC(ClientServerBootstrap.ClientWorld, m_InputText.text);
             // Clear the input text as the message has been sent, and place the UI focus back on it
             // so it's ready to accept the next message
             m_InputText.text = "";

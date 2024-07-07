@@ -55,6 +55,10 @@ namespace Unity.NetCode.Samples.PlayerList
                     return "BadProtocolVersion!";
                 case NetworkStreamDisconnectReason.InvalidRpc:
                     return "InvalidRpc!";
+                case NetworkStreamDisconnectReason.AuthenticationFailure:
+                    return "Authentication failure!";
+                case NetworkStreamDisconnectReason.ProtocolError:
+                    return "ProtocolError!";
                 default:
                     var s = (FixedString32Bytes) "Err[";
                     s.Append((int) rpc.Reason);

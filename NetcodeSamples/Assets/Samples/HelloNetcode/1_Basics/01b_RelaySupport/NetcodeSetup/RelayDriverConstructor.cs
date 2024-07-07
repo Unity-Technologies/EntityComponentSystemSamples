@@ -31,12 +31,16 @@ namespace Samples.HelloNetcode
         {
             var settings = DefaultDriverBuilder.GetNetworkSettings();
             settings.WithRelayParameters(ref m_RelayClientData);
-            DefaultDriverBuilder.RegisterClientUdpDriver(world, ref driverStore, netDebug, settings);
+            DefaultDriverBuilder.RegisterClientDriver(world, ref driverStore, netDebug, settings);
         }
 
         public void CreateServerDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
+            #if !UNITY_WEBGL || UNITY_EDITOR
             DefaultDriverBuilder.RegisterServerDriver(world, ref driverStore, netDebug, ref m_RelayServerData);
+            #else
+            throw new System.NotSupportedException("It is not allowed to create a server NetworkDriver for WebGL build.");
+            #endif
         }
     }
 }

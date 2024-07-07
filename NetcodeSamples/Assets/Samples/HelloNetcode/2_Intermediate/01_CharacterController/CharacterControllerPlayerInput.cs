@@ -60,12 +60,17 @@ namespace Samples.HelloNetcode
                 {
                     lookDelta = TouchInput.GetStick(TouchInput.StickCode.RightStick) * SystemAPI.Time.DeltaTime;
                 }
-                #if !UNITY_IOS && !UNITY_ANDROID
+#if !UNITY_IOS && !UNITY_ANDROID
                 else
                 {
-                    lookDelta = new float2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+                    lookDelta = new float2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
+                    // You'll want to expose userSpecifiedMouseSensitivity in your games UI.
+                    // The server doesn't need to know about it.
+                    // Example valid range: 0.002 - 0.4.
+                    const float userSpecifiedMouseSensitivity = .04f;
+                    lookDelta *= userSpecifiedMouseSensitivity;
                 }
-                #endif
+#endif
                 input.ValueRW.Pitch = math.clamp(input.ValueRW.Pitch+lookDelta.y, -math.PI/2, math.PI/2);
                 input.ValueRW.Yaw = math.fmod(input.ValueRW.Yaw + lookDelta.x, 2*math.PI);
 

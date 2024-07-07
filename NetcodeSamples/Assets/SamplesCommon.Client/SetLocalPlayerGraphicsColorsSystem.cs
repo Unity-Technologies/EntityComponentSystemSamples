@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Unity.NetCode.Samples.Common
 {
-    [WorldSystemFilter(WorldSystemFilterFlags.Presentation)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateInGroup(typeof(PresentationSystemGroup))]
     public partial class SetLocalPlayerGraphicsColorsSystem : SystemBase
     {

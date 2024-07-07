@@ -210,9 +210,11 @@ namespace Samples.MultyPhysicsWorld
     public partial class ParticleEmitterSystem : SystemBase
     {
         private BeginSimulationEntityCommandBufferSystem m_Barrier;
+        private ComponentLookup<LocalTransform> m_TransformLookup;
         protected override void OnCreate()
         {
             m_Barrier = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
+            m_TransformLookup = GetComponentLookup<LocalTransform>(true);
             RequireForUpdate<PhysicsSpawner>();
             RequireForUpdate<GhostCollection>();
             RequireForUpdate<ParticleEmitter>();
@@ -223,6 +225,7 @@ namespace Samples.MultyPhysicsWorld
             float deltaTime = SystemAPI.Time.DeltaTime;
             var commandBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter();
             var elapsedTime = SystemAPI.Time.ElapsedTime;
+            m_TransformLookup.Update(this);
 
             Entities.ForEach((Entity entity, int nativeThreadIndex, ref ParticleAge age) =>
             {
@@ -231,7 +234,10 @@ namespace Samples.MultyPhysicsWorld
             }).ScheduleParallel();
             m_Barrier.AddJobHandleForProducer(Dependency);
 
-            Entities.ForEach((Entity entity, int nativeThreadIndex, ref ParticleEmitter emitter, in LocalTransform transform) =>
+            var transformLookup = m_TransformLookup;
+            Entities
+                .WithReadOnly(transformLookup)
+                .ForEach((Entity entity, int nativeThreadIndex, ref ParticleEmitter emitter, in LocalTransform transform) =>
 
             {
                 emitter.accumulator += deltaTime * emitter.emissionRate + 0.5f;
@@ -246,10 +252,12 @@ namespace Samples.MultyPhysicsWorld
                     // Create the first particle, then instantiate the rest based on its value
                     var particle = commandBuffer.Instantiate(nativeThreadIndex, emitter.prefab);
                     float3 randomSpread = emitter.random.NextFloat3();
+                    var originalScale = transformLookup[emitter.prefab];
 
                     var pos = new float3(transform.Position.x + randomSpread.x*3f, transform.Position.y, transform.Position.z + randomSpread.z);
                     commandBuffer.AddComponent(nativeThreadIndex, particle, new ParticleAge{deadTime = elapsedTime + emitter.particleAge});
-                    commandBuffer.SetComponent(nativeThreadIndex, particle, LocalTransform.FromPositionRotation(pos, transform.Rotation));
+                    commandBuffer.SetComponent(nativeThreadIndex, particle, LocalTransform.FromPositionRotationScale(
+                        pos, transform.Rotation, originalScale.Scale));
 
                 }
             }).Schedule();

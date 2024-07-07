@@ -21,40 +21,46 @@ namespace Samples.HelloNetcode
                 return;
             while (ConnectionMonitorUIData.Connections.Data.TryDequeue(out var con))
             {
-                var buttonGo = UnityEngine.GameObject.Instantiate(m_Button, m_Canvas.transform, false);
-                buttonGo.GetComponent<RectTransform>().anchoredPosition3D +=
-                    new Vector3(con.WorldIndex * m_VerticalSpace, (con.Id - 1) * m_HorizontalSpace, 0);
-                buttonGo.name = $"{con.WorldIndex} {con.Id}";
-                buttonGo.GetComponentInChildren<Text>().text = $"Disconnect {con.Id}";
-                buttonGo.onClick.AddListener(() => Disconnect(con));
+                if (con.ConnectionDeleted)
+                {
+                    GameObject buttonToDelete = GameObject.Find(con.Id.ToString());
+                    if (buttonToDelete != null)
+                    {
+                        Destroy(buttonToDelete);
+                    }
+                }
+                else
+                {
+                    var parent = new GameObject(con.Id.ToString());
+                    parent.AddComponent<VerticalLayoutGroup>();
+                    parent.transform.SetParent(m_Canvas.transform);
+                    var buttonGo = Instantiate(m_Button, parent.transform, false);
+                    buttonGo.GetComponent<RectTransform>().anchoredPosition3D += new Vector3(con.WorldIndex * m_VerticalSpace, (con.Id - 1) * m_HorizontalSpace, 0);
+                    buttonGo.name = $"{con.WorldIndex} {con.Id}";
+                    buttonGo.GetComponentInChildren<Text>().text = $"Disconnect {con.Id}";
+                    buttonGo.onClick.AddListener(() => Disconnect(con));
 
-                var textGo = UnityEngine.GameObject.Instantiate(m_Text, m_Canvas.transform, false);
-                textGo.GetComponent<RectTransform>().anchoredPosition3D +=
-                    new Vector3(con.WorldIndex * m_VerticalSpace, 0, 0);
-                textGo.name = $"{con.WorldIndex} {con.Id}";
-                textGo.text = con.WorldName.Value;
+                    var textGo = Instantiate(m_Text, parent.transform, false);
+                    textGo.GetComponent<RectTransform>().anchoredPosition3D += new Vector3(con.WorldIndex * m_VerticalSpace, 0, 0);
+                    textGo.name = $"{con.WorldIndex} {con.Id}";
+                    textGo.text = con.World.Name.Value;
+                }
             }
         }
 
         public void Disconnect(Connection con)
         {
-            UnityEngine.Debug.Log($"[{con.WorldName}] Disconnecting {con.Id}");
-            foreach (var world in World.All)
-            {
-                if (world.Name == con.WorldName)
-                {
-                    var connection = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>(),
-                        ComponentType.ReadOnly<NetworkStreamConnection>());
-                    var connectionIds = connection.ToComponentDataArray<NetworkId>(Allocator.Temp);
-                    var connectionEntities = connection.ToEntityArray(Allocator.Temp);
-                    for (int i = 0; i < connectionIds.Length; ++i)
-                    {
-                        if (connectionIds[i].Value == con.Id)
-                            world.EntityManager.AddComponent<NetworkStreamRequestDisconnect>(connectionEntities[i]);
-                    }
-                }
-            }
+            Debug.Log($"[{con.World.Name.Value}] Disconnecting {con.Id}");
 
+            var connection = con.World.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>(),
+                ComponentType.ReadOnly<NetworkStreamConnection>());
+            var connectionIds = connection.ToComponentDataArray<NetworkId>(Allocator.Temp);
+            var connectionEntities = connection.ToEntityArray(Allocator.Temp);
+            for (int i = 0; i < connectionIds.Length; ++i)
+            {
+                if (connectionIds[i].Value == con.Id)
+                    con.World.EntityManager.AddComponent<NetworkStreamRequestDisconnect>(connectionEntities[i]);
+            }
         }
     }
 }

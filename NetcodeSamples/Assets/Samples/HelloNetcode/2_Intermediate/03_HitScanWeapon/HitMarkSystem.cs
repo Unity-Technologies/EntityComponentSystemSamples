@@ -8,6 +8,7 @@ using UnityEngine;
 namespace Samples.HelloNetcode
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+    [UpdateInGroup(typeof(PresentationSystemGroup))]
     [UpdateAfter(typeof(CharacterControllerCameraSystem))]
     public partial class HitMarkSystem : SystemBase
     {
@@ -32,11 +33,11 @@ namespace Samples.HelloNetcode
         }
         bool FindGameObjects()
         {
-            m_Canvas = Object.FindObjectOfType<Canvas>();
+            m_Canvas = Object.FindFirstObjectByType<Canvas>();
             if (m_Canvas == null)
                 return false;
             m_CanvasRect = m_Canvas.GetComponent<RectTransform>();
-            var hitMarkSpawner = Object.FindObjectOfType<HitMarkSpawner>();
+            var hitMarkSpawner = Object.FindFirstObjectByType<HitMarkSpawner>();
             if (hitMarkSpawner == null)
                 return false;
             m_ServerHitPrefab = hitMarkSpawner.ServerMarkPrefab;
@@ -60,7 +61,7 @@ namespace Samples.HelloNetcode
                 {
                     continue;
                 }
-                SpawnHitMark(hitMarkerValueRw.Entity, hitMarkerValueRw.HitPoint, m_ServerHitPrefab);
+                SpawnHitMark(hitMarkerValueRw.Victim, hitMarkerValueRw.HitPoint, m_ServerHitPrefab);
                 hitMarker.ValueRW.AppliedClientTick = hitMarkerValueRw.ServerHitTick;
             }
 
@@ -71,7 +72,7 @@ namespace Samples.HelloNetcode
                 {
                     continue;
                 }
-                SpawnHitMark(hitMarkerValueRw.Entity, hitMarkerValueRw.HitPoint, m_ClientHitPrefab);
+                SpawnHitMark(hitMarkerValueRw.Victim, hitMarkerValueRw.HitPoint, m_ClientHitPrefab);
                 hitMarker.ValueRW.AppliedClientTick = hitMarkerValueRw.ClientHitTick;
             }
 

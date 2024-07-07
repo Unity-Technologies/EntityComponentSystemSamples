@@ -12,7 +12,7 @@ namespace Samples.HelloNetcode
 {
     public struct CharacterControllerConfig : IComponentData
     {
-        public float Speed;
+        public float MoveSpeed;
         public float JumpSpeed;
         public float Gravity;
     }
@@ -135,7 +135,7 @@ namespace Samples.HelloNetcode
                 m_MarkerGroundCheck.End();
 
                 float2 input = character.Input.Movement;
-                float3 wantedMove = new float3(input.x, 0, input.y) * controllerConfig.Speed * SystemAPI.Time.DeltaTime;
+                float3 wantedMove = new float3(input.x, 0, input.y) * controllerConfig.MoveSpeed * SystemAPI.Time.DeltaTime;
 
                 // Wanted movement is relative to camera
                 wantedMove = math.rotate(quaternion.RotateY(character.Input.Yaw), wantedMove);

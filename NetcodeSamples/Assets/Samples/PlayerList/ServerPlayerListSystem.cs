@@ -81,9 +81,7 @@ namespace Unity.NetCode.Samples.PlayerList
                 // We only add new players IF they send us a username. This ensures that they will always have a valid username from the start.
                 m_PlayerListEntryFromEntity.Update(ref state);
                 m_NetworkIdFromEntity.Update(ref state);
-
-                var playerListEntries = m_PlayerListQuery.ToComponentDataListAsync<PlayerListEntry>(state.WorldUpdateAllocator, out var gatherPlayerListsHandle);
-                var dependency = JobHandle.CombineDependencies(state.Dependency, gatherPlayerListsHandle);
+                var playerListEntries = m_PlayerListQuery.ToComponentDataListAsync<PlayerListEntry>(state.WorldUpdateAllocator, state.Dependency, out var gatherPlayerListsHandle);
                 state.Dependency = new HandleNewJoinersJob
                 {
                     ecb = ecb,
@@ -93,7 +91,7 @@ namespace Unity.NetCode.Samples.PlayerList
                     playerListEntries = m_PlayerListEntryFromEntity,
                     networkIds = m_NetworkIdFromEntity,
                     existingPlayerListEntries = playerListEntries,
-                }.Schedule(dependency);
+                }.Schedule(gatherPlayerListsHandle);
             }
         }
 
@@ -113,7 +111,11 @@ namespace Unity.NetCode.Samples.PlayerList
 
             public void Execute(Entity rpcEntity, ref PlayerListEntry.ClientRegisterUsernameRpc rpc, in ReceiveRpcCommandRequest req)
             {
-                var networkId = networkIds[req.SourceConnection];
+                if (!networkIds.TryGetComponent(req.SourceConnection, out var networkId))
+                {
+                    netDbg.DebugLog("Server received a ClientRegisterUsernameRpc from a client who has since disconnected. Ignoring!");
+                    return;
+                }
 
                 // Auto-patch here rather than kicking the player as players don't pick their default names.
                 var originalUsername = rpc.Value;

@@ -13,13 +13,13 @@ namespace Samples.HelloNetcode
     {
         public Transform HealthBar;
         public Image HealthSlider;
-        public float3 Offset;
-        
+        public float OpponentHeightOffset;
+        public float PlayerHeightOffset;
+        public float PlayerTowardCameraOffset;
+
         public void Dispose()
         {
-            //The Healbar is disposed by the client in two cases:
-            //- By the DespawnHealthBarSystem (if the healt < 0)
-            //- When a character is respawn (so the ghost get destroyed). Being the HealthUI this method is called in that case.
+            // As this is IDisposable, we can trigger the destruction of the HealthBar when this ghost entity is destroyed.
             if (HealthBar != null)
                 Object.Destroy(HealthBar.gameObject);
         }
@@ -28,11 +28,11 @@ namespace Samples.HelloNetcode
         {
             if (HealthBar == null || HealthBar.gameObject == null)
                 return new HealthUI();
-            var newHealtbar = Object.Instantiate(HealthBar.gameObject);
+            var newHealthBar = Object.Instantiate(HealthBar.gameObject);
             var images = HealthBar.gameObject.GetComponentsInChildren<Image>();
             return new HealthUI
             {
-                HealthBar = newHealtbar.GetComponent<Transform>(),
+                HealthBar = newHealthBar.GetComponent<Transform>(),
                 HealthSlider = images[1]
             };
         }
@@ -62,7 +62,9 @@ namespace Samples.HelloNetcode
                 {
                     HealthBar = go.transform,
                     HealthSlider = image[1],
-                    Offset = spawner.Offset,
+                    OpponentHeightOffset = spawner.OpponentHeightOffset,
+                    PlayerTowardCameraOffset = spawner.PlayerTowardCameraOffset,
+                    PlayerHeightOffset = spawner.PlayerHeightOffset,
                 });
             }
             ecb.Playback(state.EntityManager);

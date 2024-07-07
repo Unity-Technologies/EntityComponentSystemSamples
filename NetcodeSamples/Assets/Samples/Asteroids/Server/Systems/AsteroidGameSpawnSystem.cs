@@ -27,12 +27,12 @@ namespace Asteroids.Server
         float m_AsteroidRadius;
         float m_ShipRadius;
 
+        private NativeReference<Random> randomReference;
         ComponentLookup<PlayerStateComponentData> playerStateFromEntity;
         ComponentLookup<CommandTarget> commandTargetFromEntity;
         ComponentLookup<NetworkId> networkIdFromEntity;
         ComponentLookup<LocalTransform> localTransformLookup;
 
-        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             var builder = new EntityQueryBuilder(Allocator.Temp).WithAll<LocalTransform, ShipStateComponentData>();
@@ -63,10 +63,22 @@ namespace Asteroids.Server
             state.RequireForUpdate(m_LevelQuery);
             state.RequireForUpdate<AsteroidsSpawner>();
 
+            // Ensure every random is seeded uniquely (not Burst compatible)...
+            // AND that the random feedbacks into itself, ensuring better quality randomness for Asteroid spawns.
+            var fileTimeUtc = System.DateTime.UtcNow.ToFileTimeUtc();
+            randomReference = new NativeReference<Random>(Random.CreateFromIndex((uint) fileTimeUtc), Allocator.Persistent);
+
             playerStateFromEntity = state.GetComponentLookup<PlayerStateComponentData>();
             commandTargetFromEntity = state.GetComponentLookup<CommandTarget>();
             networkIdFromEntity = state.GetComponentLookup<NetworkId>();
             localTransformLookup = state.GetComponentLookup<LocalTransform>(true);
+        }
+
+        [BurstCompile]
+        public void OnDestroy(ref SystemState state)
+        {
+            randomReference.Dispose();
+            // Others are disposed automatically.
         }
 
         [BurstCompile]
@@ -132,7 +144,6 @@ namespace Asteroids.Server
             state.Dependency = JobHandle.CombineDependencies(state.Dependency, combinedDependencies);
 
             var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
-            var random = new Random(tick.SerializedData);
 
             SystemAPI.TryGetSingleton<ClientServerTickRate>(out var tickRate);
             tickRate.ResolveDefaults();
@@ -165,7 +176,7 @@ namespace Asteroids.Server
                 dynamicAsteroidEntities = dynamicAsteroidEntities,
                 staticAsteroidEntities = staticAsteroidEntities,
                 level = level,
-                random = random,
+                random = randomReference,
                 tick = tick,
                 shipPrefab = m_ShipPrefab,
                 fixedDeltaTime = fixedDeltaTime,
@@ -183,7 +194,7 @@ namespace Asteroids.Server
                 shipTransformsList = shipTransformsList,
                 localTransformLookup = localTransformLookup,
                 level = level,
-                random = random,
+                random = randomReference,
                 tick = tick,
                 asteroidPrefab = m_AsteroidPrefab,
                 asteroidLevelPadding = asteroidLevelPadding,
@@ -207,6 +218,7 @@ namespace Asteroids.Server
         }
 
         [BurstCompile]
+        [WithAll(typeof(PlayerSpawnRequest))]
         internal partial struct SpawnPlayerShips : IJobEntity
         {
             public EntityCommandBuffer ecb;
@@ -221,7 +233,7 @@ namespace Asteroids.Server
             [ReadOnly] public NativeList<Entity> staticAsteroidEntities;
             [ReadOnly] public NativeList<LevelComponent> level;
 
-            public Random random;
+            public NativeReference<Random> random;
             public NetworkTick tick;
             public Entity shipPrefab;
             public float fixedDeltaTime;
@@ -229,7 +241,7 @@ namespace Asteroids.Server
             public float minShipAsteroidSpawnDistance;
             public float minShipToShipSpawnDistance;
 
-            void Execute(Entity entity, in PlayerSpawnRequest request, in ReceiveRpcCommandRequest requestSource)
+            void Execute(Entity entity, in ReceiveRpcCommandRequest requestSource)
             {
                 // Destroy the spawn request:
                 ecb.DestroyEntity(entity);
@@ -243,7 +255,9 @@ namespace Asteroids.Server
 
                 // Try find a random spawn position for the Ship that isn't near another player.
                 // Don't allow failure though, just take a "bad" position instead.
-                TryFindSpawnPos(ref random, shipTransforms.AsArray(), level[0], shipLevelPadding, minShipToShipSpawnDistance, out var validShipPos);
+                var rand = random.Value;
+                TryFindSpawnPos(ref rand, shipTransforms.AsArray(), level[0], shipLevelPadding, minShipToShipSpawnDistance, out var validShipPos);
+                random.Value = rand;
 
                 // Instantiate ship:
                 var shipEntity = ecb.Instantiate(shipPrefab);
@@ -293,7 +307,7 @@ namespace Asteroids.Server
             [ReadOnly] public ComponentLookup<LocalTransform> localTransformLookup;
             [ReadOnly] public NativeList<LevelComponent> level;
 
-            public Random random;
+            public NativeReference<Random> random;
             public NetworkTick tick;
             public Entity asteroidPrefab;
             public float asteroidLevelPadding;
@@ -305,15 +319,16 @@ namespace Asteroids.Server
             public void Execute()
             {
                 var currentNumAsteroids = staticAsteroidEntities.Length + dynamicAsteroidEntities.Length;
+                var rand = random.Value;
                 for (int i = currentNumAsteroids; i < numAsteroids; ++i)
                 {
                     // Spawn asteroid at random pos, assuming we can find a valid one that isn't under a ship.
                     // Don't treat this as an error (because it may happen occasionally by chance, or if the map is packed with ships).
                     // Instead, just stop attempting to spawn any more this frame.
-                    if (!TryFindSpawnPos(ref random, shipTransformsList.AsArray(), level[0], asteroidLevelPadding, minShipAsteroidSpawnDistance, out var validAsteroidPos))
-                        return;
+                    if (!TryFindSpawnPos(ref rand, shipTransformsList.AsArray(), level[0], asteroidLevelPadding, minShipAsteroidSpawnDistance, out var validAsteroidPos))
+                        break;
 
-                    var angle = random.NextFloat(-0.0f, 359.0f);
+                    var angle = rand.NextFloat(-0.0f, 359.0f);
                     //@ronald. this is necessary since the meshes are not backing the correct scaling factor
                     var originalScale = localTransformLookup[asteroidPrefab].Scale;
                     var trans = LocalTransform.FromPositionRotationScale(
@@ -335,6 +350,8 @@ namespace Asteroids.Server
                     else
                         ecb.SetComponent(e, vel);
                 }
+
+                random.Value = rand;
             }
         }
 

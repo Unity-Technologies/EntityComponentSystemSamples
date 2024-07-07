@@ -30,7 +30,7 @@ namespace Samples.HelloNetcode
                 var controllerConfig = SystemAPI.GetComponent<CharacterControllerConfig>(character.Character.ControllerConfig);
 
                 float2 input = character.Input.Movement;
-                float3 wantedMove = new float3(input.x, 0, input.y) * controllerConfig.Speed * SystemAPI.Time.DeltaTime;
+                float3 wantedMove = new float3(input.x, 0, input.y) * controllerConfig.MoveSpeed * SystemAPI.Time.DeltaTime;
 
                 // Wanted movement is relative to camera
                 wantedMove = math.rotate(quaternion.RotateY(character.Input.Yaw), wantedMove);

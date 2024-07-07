@@ -1,4 +1,3 @@
-using AOT;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
@@ -23,7 +22,7 @@ public struct RpcLevelLoaded : IComponentData, IRpcCommandSerializer<RpcLevelLoa
     }
 
     [BurstCompile(DisableDirectCall = true)]
-    [MonoPInvokeCallback(typeof(RpcExecutor.ExecuteDelegate))]
+    [AOT.MonoPInvokeCallback(typeof(RpcExecutor.ExecuteDelegate))]
     private static void InvokeExecute(ref RpcExecutor.Parameters parameters)
     {
         var rpcData = default(RpcLevelLoaded);

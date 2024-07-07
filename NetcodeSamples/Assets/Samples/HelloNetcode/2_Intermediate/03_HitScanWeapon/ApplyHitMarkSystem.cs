@@ -24,20 +24,20 @@ namespace Samples.HelloNetcode
             var isServer = state.WorldUnmanaged.IsServer();
             foreach (var (hit, serverHitMarker, clientHitMarker) in SystemAPI.Query<RefRO<Hit>, RefRW<ServerHitMarker>, RefRW<ClientHitMarker>>().WithAll<Simulate>())
             {
-                if (hit.ValueRO.Entity == Entity.Null)
+                if (hit.ValueRO.Victim == Entity.Null)
                 {
                     continue;
                 }
 
                 if (isServer)
                 {
-                    serverHitMarker.ValueRW.Entity = hit.ValueRO.Entity;
+                    serverHitMarker.ValueRW.Victim = hit.ValueRO.Victim;
                     serverHitMarker.ValueRW.HitPoint = hit.ValueRO.HitPoint;
                     serverHitMarker.ValueRW.ServerHitTick = hit.ValueRO.Tick;
                 }
                 else
                 {
-                    clientHitMarker.ValueRW.Entity = hit.ValueRO.Entity;
+                    clientHitMarker.ValueRW.Victim = hit.ValueRO.Victim;
                     clientHitMarker.ValueRW.HitPoint = hit.ValueRO.HitPoint;
                     clientHitMarker.ValueRW.ClientHitTick = hit.ValueRO.Tick;
                 }

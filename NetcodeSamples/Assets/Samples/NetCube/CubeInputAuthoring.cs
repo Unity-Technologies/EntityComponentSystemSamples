@@ -4,7 +4,6 @@ using Unity.NetCode;
 using Unity.NetCode.Samples.Common;
 using UnityEngine;
 
-[GhostComponent(PrefabType=GhostPrefabType.AllPredicted)]
 public struct CubeInput : IInputComponentData
 {
     public int Horizontal;

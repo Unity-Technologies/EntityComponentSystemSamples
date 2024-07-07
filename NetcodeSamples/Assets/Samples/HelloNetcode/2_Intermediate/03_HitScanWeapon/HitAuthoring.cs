@@ -5,9 +5,13 @@ using UnityEngine;
 
 namespace Samples.HelloNetcode
 {
+    /// <summary>
+    /// Stores the raw last hit data from the <see cref="ShootingSystem"/>, to be processed into either
+    /// <see cref="ClientHitMarker"/> or <see cref="ServerHitMarker"/> by <see cref="ApplyHitMarkSystem"/>.
+    /// </summary>
     public struct Hit : IComponentData
     {
-        public Entity Entity;
+        public Entity Victim;
         public NetworkTick Tick;
         public float3 HitPoint;
     }

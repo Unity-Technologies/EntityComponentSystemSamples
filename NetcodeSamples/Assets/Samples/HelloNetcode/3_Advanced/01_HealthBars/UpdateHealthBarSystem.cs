@@ -1,6 +1,9 @@
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Samples.HelloNetcode
 {
@@ -24,16 +27,46 @@ namespace Samples.HelloNetcode
 
             var mainCamera = Camera.main;
 
-            foreach (var (ui, health, localTransform) in SystemAPI.Query<HealthUI, RefRO<Health>, RefRO<LocalTransform>>())
+            foreach (var (ui, health, act, owner, ltw, entity) in SystemAPI.Query<HealthUI, RefRO<Health>, RefRO<AutoCommandTarget>, RefRO<GhostOwner>, RefRO<LocalToWorld>>().WithEntityAccess())
             {
-                if (health.ValueRO.CurrentHitPoints <= 0)
+
+                if (state.EntityManager.IsComponentEnabled<GhostOwnerIsLocal>(entity))
                 {
-                    continue;
+                    // Move the UI on top of the local player, so that you can see.
+                    var targetHealthBarPos = ltw.ValueRO.Position;
+                    targetHealthBarPos.y += ui.PlayerHeightOffset;
+                    var n = mainCamera.transform.position - ui.HealthBar.position;
+                    targetHealthBarPos += (float3)(n.normalized * ui.PlayerTowardCameraOffset);
+                    ui.HealthBar.SetPositionAndRotation(targetHealthBarPos, Quaternion.LookRotation(n));
                 }
-                ui.HealthBar.position = localTransform.ValueRO.Position + ui.Offset;
-                var n = mainCamera.transform.position - ui.HealthBar.position;
-                ui.HealthBar.rotation = Quaternion.LookRotation(n);
-                ui.HealthSlider.fillAmount = health.ValueRO.CurrentHitPoints / health.ValueRO.MaximumHitPoints;
+                else
+                {
+                    // Move the UI above the players head.
+                    var targetHealthBarPos = ltw.ValueRO.Position;
+                    targetHealthBarPos.y += ui.OpponentHeightOffset;
+                    var n = mainCamera.transform.position - ui.HealthBar.position;
+                    ui.HealthBar.SetPositionAndRotation(targetHealthBarPos, Quaternion.LookRotation(n));
+                }
+
+                var hpNormalized = math.saturate((float)health.ValueRO.CurrentHitPoints / health.ValueRO.MaximumHitPoints);
+                var playerColor = NetworkIdDebugColorUtility.GetColor(owner.ValueRO.NetworkId);
+
+                // Killed by server:
+                if (act.ValueRO.Enabled)
+                {
+                    // Set to players color:
+                    ui.HealthSlider.color = playerColor;
+                }
+                else
+                {
+                    // Set to 0 regardless of prediction, and change the background to an authoritative dead.
+                    // Note that we only do this once AutoCommandTarget is set. Why? We're waiting for server confirmation.
+                    hpNormalized = 0;
+                    playerColor.a = 0.3f;
+                    ui.HealthSlider.transform.parent.GetComponent<Image>().color = playerColor;
+                }
+
+                ui.HealthSlider.fillAmount = hpNormalized;
             }
 
         }

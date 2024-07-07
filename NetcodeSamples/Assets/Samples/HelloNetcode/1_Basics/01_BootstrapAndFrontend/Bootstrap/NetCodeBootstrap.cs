@@ -25,6 +25,11 @@ namespace Samples.HelloNetcode
         // The initialize method is what entities calls to create the default worlds
         public override bool Initialize(string defaultWorldName)
         {
+            // If the user added an OverrideDefaultNetcodeBootstrap MonoBehaviour to their active scene,
+            // or disabled Bootstrapping project-wide, we should respect that here.
+            if (!DetermineIfBootstrappingEnabled())
+                return false;
+
 #if UNITY_EDITOR
             // If we are in the editor, we check if the loaded scene is "Frontend",
             // if we are in a player we assume it is in the frontend if FRONTEND_PLAYER_BUILD
@@ -41,7 +46,7 @@ namespace Samples.HelloNetcode
             {
                 // This will enable auto connect. We only enable auto connect if we are not going through frontend.
                 // The frontend will parse and validate the address before connecting manually.
-                // Using this auto connect feature will deal with the client only connect address from Multiplayer PlayMode Tools
+                // Using this auto connect feature will deal with the client only connect address from PlayMode Tools
                 AutoConnectPort = 7979;
 
                 // Use "-port 8000" when running a build from commandline to specify the port to use
@@ -51,7 +56,7 @@ namespace Samples.HelloNetcode
                     AutoConnectPort = UInt16.Parse(commandPort);
 
 
-                // Create the default client and server worlds, depending on build type in a player or the Multiplayer PlayMode Tools in the editor
+                // Create the default client and server worlds, depending on build type in a player or the PlayMode Tools in the editor
                 CreateDefaultClientServerWorlds();
             }
             else

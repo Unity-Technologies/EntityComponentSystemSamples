@@ -18,6 +18,7 @@ namespace Asteroids.Server
     {
         private EntityQuery m_LevelGroup;
         private PortableFunctionPointer<GhostImportance.ScaleImportanceDelegate> m_ScaleFunctionPointer;
+        private PortableFunctionPointer<GhostImportance.BatchScaleImportanceDelegate> m_BatchScaleFunction;
 
         public void OnCreate(ref SystemState state)
         {
@@ -26,6 +27,7 @@ namespace Asteroids.Server
 
             state.RequireForUpdate<ServerSettings>();
             m_ScaleFunctionPointer = GhostDistanceImportance.ScaleFunctionPointer;
+            m_BatchScaleFunction = GhostDistanceImportance.BatchScaleFunctionPointer;
         }
 
         [BurstCompile]
@@ -56,6 +58,7 @@ namespace Asteroids.Server
                     });
                     state.EntityManager.AddComponentData(gridSingleton, new GhostImportance
                     {
+                        BatchScaleImportanceFunction = settings.levelData.useBatchScalingFunction ? m_BatchScaleFunction: default,
                         ScaleImportanceFunction = m_ScaleFunctionPointer,
                         GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
                         GhostImportanceDataType = ComponentType.ReadOnly<GhostDistanceData>(),

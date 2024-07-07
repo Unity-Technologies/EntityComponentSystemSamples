@@ -1,8 +1,8 @@
-#if !UNITY_SERVER
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -18,7 +18,12 @@ namespace Samples.HelloNetcode
     /// A bootstrap world is constructed to run the jobs for setting up host and client configuration for relay server.
     /// Once this is done the game can be launched and the configuration can be retrieved from the constructed world.
     /// </summary>
-    public class RelayFrontend : Frontend
+    public class RelayFrontend :
+#if UNITY_SERVER
+        MonoBehaviour
+#else
+        Frontend
+#endif
     {
         public string HostConnectionStatus
         {
@@ -49,6 +54,7 @@ namespace Samples.HelloNetcode
             JoinLocalGame,
         }
 
+#if !UNITY_SERVER
         public void OnRelayEnable(Toggle value)
         {
             TogglePersistentState(!value.isOn);
@@ -251,6 +257,6 @@ namespace Samples.HelloNetcode
             // For a locally hosted server, the client would need to connect to NetworkEndpoint.AnyIpv4, and the relayClientData.Endpoint in all other cases.
             client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = relayClientData.Endpoint });
         }
+#endif
     }
 }
-#endif

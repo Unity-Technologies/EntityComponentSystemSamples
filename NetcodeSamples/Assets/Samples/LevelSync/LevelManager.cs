@@ -1,4 +1,4 @@
-#if !UNITY_DOTSRUNTIME && (!UNITY_SERVER || UNITY_EDITOR)
+#if (!UNITY_SERVER || UNITY_EDITOR)
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,120 +21,79 @@ public class LevelManager : MonoBehaviour
     public Button ClientSyncButton;
     public Button ServerSyncButton;
 
-    private World m_ServerWorld;
-    private World ServerWorld
-    {
-        get
-        {
-            if (m_ServerWorld == null)
-            {
-                foreach (var world in World.All)
-                {
-                    if (world.IsServer())
-                    {
-                        m_ServerWorld = world;
-                        break;
-                    }
-                }
-            }
-            return m_ServerWorld;
-        }
-    }
-
     public void SendLoadNextLevelCommand()
     {
-        World clientOne = null;
-        foreach (var world in World.All)
-        {
-            if (world.IsClient() && !world.IsThinClient())
-            {
-                clientOne = world;
-                break;
-            }
-        }
-        if (clientOne == null)
+        if (ClientServerBootstrap.ClientWorld == null)
         {
             UnityEngine.Debug.LogError("No client world found");
             return;
         }
 
-        var rpcCmd = clientOne.EntityManager.CreateEntity();
-        clientOne.EntityManager.AddComponentData(rpcCmd, new LoadNextLevelCommand());
-        clientOne.EntityManager.AddComponent<SendRpcCommandRequest>(rpcCmd);
+        var rpcCmd = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntity();
+        ClientServerBootstrap.ClientWorld.EntityManager.AddComponentData(rpcCmd, new LoadNextLevelCommand());
+        ClientServerBootstrap.ClientWorld.EntityManager.AddComponent<SendRpcCommandRequest>(rpcCmd);
     }
 
     public void ServerLoadLevel(int number)
     {
-        ServerWorld.GetExistingSystemManaged<LevelLoader>().LoadLevel(number);
+        if (ClientServerBootstrap.ServerWorld != null)
+            ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<LevelLoader>().LoadLevel(number);
     }
 
     public void AllClientsLoadLevel(int number)
     {
-        foreach (var world in World.All)
-        {
-            if (world.IsClient())
-                world.GetExistingSystemManaged<LevelLoader>().LoadLevel(number);
-        }
+        if (ClientServerBootstrap.ClientWorld != null)
+            ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<LevelLoader>().LoadLevel(number);
     }
 
     public void ServerUnloadLevel(int number)
     {
-        ServerWorld.GetExistingSystemManaged<LevelLoader>().UnloadLevel(number);
+        if (ClientServerBootstrap.ServerWorld != null)
+            ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<LevelLoader>().UnloadLevel(number);
     }
 
     public void AllClientsUnloadLevel(int number)
     {
-        foreach (var world in World.All)
-        {
-            if (world.IsClient())
-                world.GetExistingSystemManaged<LevelLoader>().UnloadLevel(number);
-        }
+        if (ClientServerBootstrap.ClientWorld != null)
+            ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<LevelLoader>().UnloadLevel(number);
     }
 
     public void ServerToggleSync()
     {
-        ServerWorld.GetExistingSystemManaged<LevelLoader>().ToggleSync();
+        if (ClientServerBootstrap.ServerWorld != null)
+            ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<LevelLoader>().ToggleSync();
     }
 
     public void AllClientsToggleSync()
     {
-        World clientOne = null;
-        foreach (var world in World.All)
-        {
-            if (world.IsClient())
-            {
-                world.GetExistingSystemManaged<LevelLoader>().ToggleSync();
-                if (clientOne == null)
-                    clientOne = world;
-            }
-        }
+        if (ClientServerBootstrap.ClientWorld == null)
+            return;
+
+        ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<LevelLoader>().ToggleSync();
 
         bool toggleOn = false;
-        if (clientOne != null)
+        var conQuery = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>());
+        var cons = conQuery.ToEntityArray(Allocator.Temp);
+        if (cons.Length != 1)
         {
-            var conQuery = clientOne.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>());
-            var cons = conQuery.ToEntityArray(Allocator.Temp);
-            if (cons.Length != 1)
-            {
-                UnityEngine.Debug.LogError($"First client {clientOne} goes not have any connection established");
-                return;
-            }
-            if (clientOne.EntityManager.HasComponent<NetworkStreamInGame>(cons[0]))
-                toggleOn = true;
+            UnityEngine.Debug.LogError($"First client {ClientServerBootstrap.ClientWorld} goes not have any connection established");
+            return;
+        }
+        if (ClientServerBootstrap.ClientWorld.EntityManager.HasComponent<NetworkStreamInGame>(cons[0]))
+            toggleOn = true;
 
-            // When switching all clients off the server sync on their connections must be disabled as well or bad things happen
-            if (!toggleOn)
+        // When switching all clients off the server sync on their connections must be disabled as well or bad things happen
+        if (!toggleOn)
+        {
+            conQuery = ClientServerBootstrap.ServerWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>());
+            cons = conQuery.ToEntityArray(Allocator.Temp);
+            var conIds = conQuery.ToComponentDataArray<NetworkId>(Allocator.Temp);
+            for (int i=0; i < cons.Length; ++i)
             {
-                conQuery = ServerWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>());
-                cons = conQuery.ToEntityArray(Allocator.Temp);
-                var conIds = conQuery.ToComponentDataArray<NetworkId>(Allocator.Temp);
-                for (int i=0; i < cons.Length; ++i)
+                if (ClientServerBootstrap.ServerWorld.EntityManager.HasComponent<NetworkStreamInGame>(cons[i]))
                 {
-                    if (ServerWorld.EntityManager.HasComponent<NetworkStreamInGame>(cons[i]))
-                    {
-                        UnityEngine.Debug.Log($"[{ServerWorld}] Disable sync on {conIds[i].Value}");
-                        ServerWorld.EntityManager.RemoveComponent<NetworkStreamInGame>(cons[i]);
-                    }
+                    UnityEngine.Debug.Log($"[{ClientServerBootstrap.ServerWorld}] Disable sync on {conIds[i].Value}");
+                    ClientServerBootstrap.ServerWorld.EntityManager.RemoveComponent<NetworkStreamInGame>(cons[i]);
                 }
             }
         }

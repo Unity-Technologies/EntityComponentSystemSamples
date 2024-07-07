@@ -25,9 +25,7 @@ namespace Samples.HelloNetcode
         NetworkEndpoint m_Endpoint;
         NetworkConnection m_ClientConnection;
         public RelayServerData RelayClientData;
-#if !UNITY_SERVER
         public RelayFrontend UIBehaviour;
-#endif
 
         [Flags]
         enum ClientStatus

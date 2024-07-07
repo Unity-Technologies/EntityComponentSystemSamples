@@ -33,7 +33,7 @@ namespace Samples.HelloNetcode
             {
                 if (character.Input.SecondaryFire.IsSet)
                 {
-                    hitComponent.ValueRW.Entity = character.Self;
+                    hitComponent.ValueRW.Victim = character.Self;
                     hitComponent.ValueRW.Tick = predictingTick;
                     continue;
                 }
@@ -87,7 +87,7 @@ namespace Samples.HelloNetcode
 
                 }
 
-                hitComponent.ValueRW.Entity = hitEntity;
+                hitComponent.ValueRW.Victim = hitEntity;
                 hitComponent.ValueRW.HitPoint = hitPoint;
                 hitComponent.ValueRW.Tick = predictingTick;
             }
