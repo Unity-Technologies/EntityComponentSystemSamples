@@ -47,7 +47,7 @@ namespace Samples.HelloNetcode
     }
 
     // The input processing but run in the PredictedPhysicsSystemGroup instead of the
-    // GhostPredictionSystemGroup like usually. This ensure the simulation is correctly
+    // PredictionSystemGroup like usually. This ensure the simulation is correctly
     // built and stepped for each tick as the prediction runs.
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateBefore(typeof(PhysicsInitializeGroup))]

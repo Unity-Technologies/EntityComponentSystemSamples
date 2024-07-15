@@ -165,8 +165,10 @@ public static class NetcodeLevelSync
         var connectionsQuery =
             serverWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<NetworkId>());
         var connectionEntities = connectionsQuery.ToEntityArray(Allocator.Temp);
-        for (int i = 0; i < connectionEntities.Length; ++i)
-            serverWorld.EntityManager.AddComponentData(connectionEntities[i], new LevelLoadingInProgress());
+        foreach (var connection in connectionEntities)
+        {
+            serverWorld.EntityManager.AddComponentData(connection, new LevelLoadingInProgress());
+        }
     }
 
     public static void SetLevelState(LevelSyncState state, World world)

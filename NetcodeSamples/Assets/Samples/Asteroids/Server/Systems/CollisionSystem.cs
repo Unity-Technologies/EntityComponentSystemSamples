@@ -3,8 +3,10 @@ using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Entities;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Transforms;
 using Unity.NetCode;
 
@@ -80,6 +82,8 @@ namespace Asteroids.Server
 
             commandTarget = state.GetComponentLookup<CommandTarget>();
             linkedEntityGroupFromEntity = state.GetBufferLookup<LinkedEntityGroup>();
+
+            state.RequireForUpdate<AsteroidScore>();
         }
 
         [BurstCompile]
@@ -102,6 +106,8 @@ namespace Asteroids.Server
             [ReadOnly] public EntityTypeHandle entityType;
 
             [ReadOnly] public NativeList<LevelComponent> level;
+            [NativeSetThreadIndex] public int ThreadIndex;
+            [NativeDisableParallelForRestriction] public NativeArray<int> asteroidDestructCounter;
             public NetworkTick tick;
             public float fixedDeltaTime;
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
@@ -163,6 +169,7 @@ namespace Asteroids.Server
                         if (Intersect(firstRadius, secondRadius, firstPos, secondPos))
                         {
                             commandBuffer.DestroyEntity(unfilteredChunkIndex, asteroidEntity);
+                            asteroidDestructCounter[ThreadIndex]++;
 
                             if(level[0].bulletsDestroyedOnContact)
                                 commandBuffer.DestroyEntity(unfilteredChunkIndex, bulletEntities[bullet]);
@@ -336,6 +343,26 @@ namespace Asteroids.Server
         }
 
         [BurstCompile]
+        internal struct GatherAsteroidDestructCounter : IJob
+        {
+            [ReadOnly] public NativeArray<int> asteroidDestructCounter;
+            public EntityCommandBuffer commandBuffer;
+            [ReadOnly] public int currentScore;
+            [ReadOnly] public Entity scoreSingleton;
+
+            public void Execute()
+            {
+                int total = currentScore;
+                for (int i = 1; i < asteroidDestructCounter.Length; ++i)
+                {
+                    total += asteroidDestructCounter[i];
+                }
+
+                commandBuffer.SetComponent(scoreSingleton, new AsteroidScore { Value = total });
+            }
+        }
+
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             JobHandle bulletHandle;
@@ -361,6 +388,11 @@ namespace Asteroids.Server
 
             commandTarget.Update(ref state);
             linkedEntityGroupFromEntity.Update(ref state);
+            
+            int chunkCount = asteroidQuery.CalculateChunkCountWithoutFiltering();
+            int maxThreadCount = JobsUtility.ThreadIndexCount;
+
+            var asteroidDestroyCounter = CollectionHelper.CreateNativeArray<int>(maxThreadCount, Allocator.TempJob);
 
             var asteroidJob = new DestroyAsteroidJob
             {
@@ -369,6 +401,7 @@ namespace Asteroids.Server
                 bulletAgeType = bulletAgeType,
 
                 transformType = transformType,
+                asteroidDestructCounter = asteroidDestroyCounter,
 
                 staticAsteroidType = staticAsteroidType,
                 sphereType = sphereType,
@@ -407,14 +440,26 @@ namespace Asteroids.Server
             var h1 = asteroidJob.ScheduleParallel(asteroidQuery, asteroidDep);
             var h2 = shipJob.ScheduleParallel(shipQuery, shipDep);
 
-            var handle = JobHandle.CombineDependencies(h1, h2);
-
             var cleanupShipJob = new ClearShipPointerJob
             {
                 playerClearQueue = playerClearQueue,
                 commandTarget = commandTarget,
                 linkedEntityGroupFromEntity = linkedEntityGroupFromEntity
             };
+
+            var asteroidScore = SystemAPI.GetSingleton<AsteroidScore>();
+
+            var updateScore = new GatherAsteroidDestructCounter
+            {
+                commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged),
+                asteroidDestructCounter = asteroidDestroyCounter,
+                currentScore = asteroidScore.Value,
+                scoreSingleton = SystemAPI.GetSingletonEntity<AsteroidScore>()
+            };
+            var scoreHandle = updateScore.Schedule(dependsOn: h1);
+            var cleanupHandle = asteroidDestroyCounter.Dispose(scoreHandle);
+
+            var handle = JobHandle.CombineDependencies(h1, h2, cleanupHandle);
             state.Dependency = JobHandle.CombineDependencies(cleanupShipJob.Schedule(h2), handle);
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Entities;
+using Unity.Rendering;
 
 namespace Unity.NetCode.Samples.Common
 {
@@ -18,6 +19,7 @@ namespace Unity.NetCode.Samples.Common
                 SetPlayerToDebugColor component = default(SetPlayerToDebugColor);
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(entity, component);
+                AddComponent(entity, new URPMaterialPropertyBaseColor {Value = 1});
             }
         }
     }

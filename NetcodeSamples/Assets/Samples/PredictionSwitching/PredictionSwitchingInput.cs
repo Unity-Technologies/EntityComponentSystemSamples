@@ -51,6 +51,45 @@ public partial class PredictionSwitchingSampleInputSystem : SystemBase
     }
 }
 
+[UpdateInGroup(typeof(GhostInputSystemGroup))]
+[WorldSystemFilter(WorldSystemFilterFlags.ThinClientSimulation)]
+public partial class PredictionSwitchingThinInputSystem : SystemBase
+{
+    protected override void OnCreate()
+    {
+        RequireForUpdate<NetworkStreamInGame>();
+        RequireForUpdate<PredictionSwitchingSettings>();
+    }
+
+    protected override void OnUpdate()
+    {
+        var networkTime = SystemAPI.GetSingleton<NetworkTime>();
+        if (!networkTime.ServerTick.IsValid)
+            return;
+
+        var inputTargetTick = networkTime.ServerTick;
+        if (!SystemAPI.TryGetSingletonBuffer<PredictionSwitchingInput>(out var input))
+        {
+            if (SystemAPI.TryGetSingletonRW<CommandTarget>(out var commandTarget))
+            {
+                if (commandTarget.ValueRO.targetEntity == Entity.Null)
+                    commandTarget.ValueRW.targetEntity = EntityManager.CreateEntity(ComponentType.ReadOnly<PredictionSwitchingInput>(), ComponentType.ReadOnly<CommandTarget>());
+                input = EntityManager.AddBuffer<PredictionSwitchingInput>(commandTarget.ValueRW.targetEntity); // Returns GetBuffer if the buffer already exists.
+            }
+        }
+
+        var horizontal = (int) (networkTime.ServerTick.TickIndexForValidTick % 400);
+        if (horizontal < 100)
+            horizontal = 0;
+        else if (horizontal < 200)
+            horizontal = -1;
+        else if (horizontal < 300)
+            horizontal = 0;
+        else horizontal = 1;
+        input.AddCommandData(new PredictionSwitchingInput {Tick = inputTargetTick, horizontal = horizontal, vertical = 0});
+    }
+}
+
 [UpdateInGroup(typeof(PhysicsSystemGroup))]
 [UpdateBefore(typeof(PhysicsInitializeGroup))]
 public partial class PredictionSwitchingApplyInputSystem : SystemBase

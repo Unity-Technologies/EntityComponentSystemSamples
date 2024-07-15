@@ -1,4 +1,4 @@
-#if !UNITY_DOTSRUNTIME && (!UNITY_SERVER || UNITY_EDITOR)
+#if (!UNITY_SERVER || UNITY_EDITOR)
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
@@ -17,7 +17,7 @@ public partial class LevelStatusSystem : SystemBase
 
     protected override void OnCreate()
     {
-        var levelManager = UnityEngine.GameObject.FindObjectOfType<LevelManager>();
+        var levelManager = Object.FindFirstObjectByType<LevelManager>();
         if (levelManager == null)
         {
             Enabled = false;

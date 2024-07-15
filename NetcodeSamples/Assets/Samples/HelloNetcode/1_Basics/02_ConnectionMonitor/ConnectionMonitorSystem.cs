@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace Samples.HelloNetcode
 {
     [UpdateInGroup(typeof(HelloNetcodeSystemGroup))]
-    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
     public partial class ConnectionMonitorSystem : SystemBase
     {
         private BeginSimulationEntityCommandBufferSystem m_CommandBufferSystem;
@@ -35,7 +35,7 @@ namespace Samples.HelloNetcode
         protected override void OnUpdate()
         {
             if (m_ConnectionUI == null)
-                m_ConnectionUI = GameObject.FindObjectOfType<ConnectionUI>();
+                m_ConnectionUI = GameObject.FindFirstObjectByType<ConnectionUI>();
 
             var buffer = m_CommandBufferSystem.CreateCommandBuffer();
             Entities.WithName("AddConnectionStateToNewConnections").WithNone<ConnectionState>().ForEach((Entity entity,
@@ -45,6 +45,7 @@ namespace Samples.HelloNetcode
             }).Run();
 
             FixedString32Bytes worldName = World.Name;
+            var unmanagedWorld = World.Unmanaged;
             // Buttons are laid out in columns according to worlds, Server,ClientWorld0,ClientWorld1 and so on
             int worldIndex = 0;
             if (int.TryParse(World.Name[World.Name.Length - 1].ToString(), out worldIndex))
@@ -55,12 +56,15 @@ namespace Samples.HelloNetcode
                 UnityEngine.Debug.Log($"[{worldName}] New connection ID:{id.Value}");
 
                 // Not thread safe, so all UI logic is kept on main thread
-                ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = id.Value, WorldIndex = worldIndex, WorldName = worldName});
+                ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = id.Value, WorldIndex = worldIndex, World = unmanagedWorld});
             }).Run();
 
             Entities.WithName("HandleDisconnect").WithNone<NetworkStreamConnection>().ForEach((Entity entity, in ConnectionState state) =>
             {
-                UnityEngine.Debug.Log($"[{worldName}] Connection disconnected ID:{state.NetworkId} Reason:{DisconnectReasonEnumToString.Convert((int)state.DisconnectReason)}");
+                UnityEngine.Debug.Log($"[{worldName}] Connection disconnected ID:{state.NetworkId} Reason:{state.DisconnectReason.ToFixedString()}");
+
+                // Not thread safe, so all UI logic is kept on main thread
+                ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = state.NetworkId, WorldIndex = worldIndex, World = unmanagedWorld, ConnectionDeleted = true});
                 buffer.RemoveComponent<ConnectionState>(entity);
             }).Run();
 
@@ -86,6 +90,15 @@ namespace Samples.HelloNetcode
             return settings;
         }
 
+        private void CreateDriver(out NetworkDriver driver, NetworkSettings settings)
+        {
+#if !UNITY_WEBGL
+            driver = NetworkDriver.Create(new UDPNetworkInterface(), settings);
+#else
+            driver = NetworkDriver.Create(new WebSocketNetworkInterface(), settings);
+#endif
+        }
+
         public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             var driverInstance = new NetworkDriverStore.NetworkDriverInstance();
@@ -95,17 +108,17 @@ namespace Samples.HelloNetcode
             if (NetworkSimulatorSettings.Enabled)
             {
                 NetworkSimulatorSettings.SetSimulatorSettings(ref settings);
-                driverInstance.driver = NetworkDriver.Create(new UDPNetworkInterface(), settings);
+                CreateDriver(out driverInstance.driver, settings);
                 DefaultDriverBuilder.CreateClientSimulatorPipelines(ref driverInstance);
             }
             else
             {
-                driverInstance.driver = NetworkDriver.Create(new UDPNetworkInterface(), settings);
+                CreateDriver(out driverInstance.driver, settings);
                 DefaultDriverBuilder.CreateClientPipelines(ref driverInstance);
             }
 #else
             var settings = CreateNetworkSettings();
-            driverInstance.driver = NetworkDriver.Create(new UDPNetworkInterface(), settings);
+            CreateDriver(out driverInstance.driver, settings);
             DefaultDriverBuilder.CreateClientPipelines(ref driverInstance);
 #endif
             driverStore.RegisterDriver(TransportType.Socket, driverInstance);
@@ -113,11 +126,15 @@ namespace Samples.HelloNetcode
 
         public void CreateServerDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
+#if UNITY_EDITOR || !UNITY_WEBGL
             var settings = CreateNetworkSettings();
             var driverInstance = new NetworkDriverStore.NetworkDriverInstance();
-            driverInstance.driver = NetworkDriver.Create(new UDPNetworkInterface(), settings);
+            CreateDriver(out driverInstance.driver, settings);
             DefaultDriverBuilder.CreateServerPipelines(ref driverInstance);
             driverStore.RegisterDriver(TransportType.Socket, driverInstance);
+#else
+            throw new System.NotSupportedException("It is not allowed to create a server NetworkDriver for WebGL build.");
+#endif
         }
     }
 
@@ -149,7 +166,8 @@ namespace Samples.HelloNetcode
     {
         public int Id;
         public int WorldIndex;
-        public FixedString32Bytes WorldName;
+        public WorldUnmanaged World;
+        public bool ConnectionDeleted;
     }
 
     public abstract class ConnectionMonitorUIData

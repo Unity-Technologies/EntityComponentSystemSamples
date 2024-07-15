@@ -15,11 +15,9 @@ public partial class LevelSync_ServerConnectionSystem : SystemBase
 
     protected override void OnCreate()
     {
-#if !UNITY_DOTSRUNTIME
         var sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         if (!(sceneName.Contains("LevelSync") || sceneName.Contains("JumpOff")))
             Enabled = false;
-#endif
 
         m_CommandBuffer = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
     }

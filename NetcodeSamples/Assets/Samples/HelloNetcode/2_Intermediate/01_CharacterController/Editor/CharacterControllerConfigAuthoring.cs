@@ -1,10 +1,12 @@
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.Serialization;
+
 namespace Samples.HelloNetcode
 {
     public class CharacterControllerConfigAuthoring : MonoBehaviour
     {
-        public float Speed = 5;
+        [FormerlySerializedAs("Speed")] public float MoveSpeed = 5;
         public float JumpSpeed = 5;
         public float Gravity = 9.82f;
     }
@@ -14,7 +16,7 @@ namespace Samples.HelloNetcode
         public override void Bake(CharacterControllerConfigAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
-            AddComponent(entity, new CharacterControllerConfig{Speed = authoring.Speed, JumpSpeed = authoring.JumpSpeed, Gravity = authoring.Gravity});
+            AddComponent(entity, new CharacterControllerConfig{MoveSpeed = authoring.MoveSpeed, JumpSpeed = authoring.JumpSpeed, Gravity = authoring.Gravity});
         }
     }
 }

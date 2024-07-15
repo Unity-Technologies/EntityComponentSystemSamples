@@ -25,9 +25,7 @@ namespace Samples.HelloNetcode
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     public partial class HostServer : SystemBase
     {
-#if !UNITY_SERVER
         public RelayFrontend UIBehaviour;
-#endif
         const int RelayMaxConnections = 5;
         public string JoinCode;
 
@@ -48,7 +46,6 @@ namespace Samples.HelloNetcode
             SigningIn,
             FailedToHost,
             Ready,
-            GettingRegions,
             Allocating,
             GettingJoinCode,
             GetRelayData,
@@ -99,15 +96,7 @@ namespace Samples.HelloNetcode
 #if !UNITY_SERVER
                     UIBehaviour.HostConnectionStatus = "Logging in anonymously";
 #endif
-                    m_HostStatus = WaitForSignIn(m_SignInTask, out m_RegionsTask);
-                    return;
-                }
-                case HostStatus.GettingRegions:
-                {
-#if !UNITY_SERVER
-                    UIBehaviour.HostConnectionStatus = "Waiting for regions";
-#endif
-                    m_HostStatus = WaitForRegions(m_RegionsTask, out m_AllocationTask);
+                    m_HostStatus = WaitForSignIn(m_SignInTask, out m_AllocationTask);
                     return;
                 }
                 case HostStatus.Allocating:
@@ -140,11 +129,11 @@ namespace Samples.HelloNetcode
             }
         }
 
-        static HostStatus WaitForSignIn(Task signInTask, out Task<List<Region>> regionTask)
+        static HostStatus WaitForSignIn(Task signInTask, out Task<Allocation> allocationTask)
         {
+            allocationTask = default;
             if (!signInTask.IsCompleted)
             {
-                regionTask = default;
                 return HostStatus.SigningIn;
             }
 
@@ -152,13 +141,13 @@ namespace Samples.HelloNetcode
             {
                 Debug.LogError("Signing in failed");
                 Debug.LogException(signInTask.Exception);
-                regionTask = default;
                 return HostStatus.FailedToHost;
             }
 
-            // Request list of valid regions
-            regionTask = RelayService.Instance.ListRegionsAsync();
-            return HostStatus.GettingRegions;
+            // Request an allocation to the Relay service
+            // with a maximum of 5 peer connections, for a maximum of 6 players.
+            allocationTask = RelayService.Instance.CreateAllocationAsync(RelayMaxConnections);
+            return HostStatus.Allocating;
         }
 
         static HostStatus WaitForInitialization(Task initializeTask, out Task nextTask)
@@ -247,32 +236,6 @@ namespace Samples.HelloNetcode
             var allocation = allocationTask.Result;
             joinCodeTask = RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             return HostStatus.GettingJoinCode;
-        }
-
-        static HostStatus WaitForRegions(Task<List<Region>> collectRegionTask, out Task<Allocation> allocationTask)
-        {
-            if (!collectRegionTask.IsCompleted)
-            {
-                allocationTask = null;
-                return HostStatus.GettingRegions;
-            }
-
-            if (collectRegionTask.IsFaulted)
-            {
-                Debug.LogError("List regions request failed");
-                Debug.LogException(collectRegionTask.Exception);
-                allocationTask = null;
-                return HostStatus.FailedToHost;
-            }
-
-            var regionList = collectRegionTask.Result;
-            // pick a region from the list
-            var targetRegion = regionList[0].Id;
-
-            // Request an allocation to the Relay service
-            // with a maximum of 5 peer connections, for a maximum of 6 players.
-            allocationTask = RelayService.Instance.CreateAllocationAsync(RelayMaxConnections, targetRegion);
-            return HostStatus.Allocating;
         }
 
         // connectionType also supports udp, but this is not recommended

@@ -41,7 +41,7 @@ namespace Unity.NetCode.Samples.PlayerList
             ref var entry = ref GetOrCreateEntry(players, localPlayerNetworkId);
 
             netDebug.DebugLog($"Client {localPlayerNetworkId} has connected, so sending their DesiredUsername '{desiredUsername.Value}' to the server!");
-            SendUsernameRpc(state, ref desiredUsername, ref entry, "SetUsernameRpc");
+            SendUsernameRpc(ref state, ref desiredUsername, ref entry, "SetUsernameRpc");
         }
 
         [BurstCompile]
@@ -87,7 +87,7 @@ namespace Unity.NetCode.Samples.PlayerList
                 if (localPlayerEntry.State.Username.Value != desiredUsername.Value)
                 {
                     netDebug.DebugLog($"Client {localPlayerNetworkId} has changed their DesiredUsername '{desiredUsername.Value}', so notifying server of change.");
-                    SendUsernameRpc(state, ref desiredUsername, ref localPlayerEntry, "NotifyUsernameChangedRpc");
+                    SendUsernameRpc(ref state, ref desiredUsername, ref localPlayerEntry, "NotifyUsernameChangedRpc");
                 }
             }
 
@@ -120,7 +120,7 @@ namespace Unity.NetCode.Samples.PlayerList
             }
         }
 
-        void SendUsernameRpc(SystemState state, ref DesiredUsername desiredUsername, ref PlayerListEntry localPlayerEntry, in FixedString64Bytes rpcName)
+        void SendUsernameRpc(ref SystemState state, ref DesiredUsername desiredUsername, ref PlayerListEntry localPlayerEntry, in FixedString64Bytes rpcName)
         {
             localPlayerEntry.State.Username.Value = desiredUsername.Value = UsernameSanitizer.SanitizeUsername(desiredUsername.Value, localPlayerEntry.State.NetworkId, out _);
 

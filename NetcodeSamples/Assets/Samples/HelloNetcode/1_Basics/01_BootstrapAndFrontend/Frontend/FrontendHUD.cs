@@ -40,20 +40,17 @@ namespace Samples.HelloNetcode
 
         public void Start()
         {
-            foreach (var world in World.All)
+            if (ClientServerBootstrap.ClientWorld != null)
             {
-                if (world.IsClient() && !world.IsThinClient())
-                {
-                    var sys = world.GetOrCreateSystemManaged<FrontendHUDSystem>();
-                    sys.UIBehaviour = this;
-                    var simGroup = world.GetExistingSystemManaged<SimulationSystemGroup>();
-                    simGroup.AddSystemToUpdateList(sys);
-                }
+                var sys = ClientServerBootstrap.ClientWorld.GetOrCreateSystemManaged<FrontendHUDSystem>();
+                sys.UIBehaviour = this;
+                var simGroup = ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<SimulationSystemGroup>();
+                simGroup.AddSystemToUpdateList(sys);
             }
 
             // We must always have an event system (DOTS-7177), but some scenes will already have one,
             // so we only enable ours if we can't find someone else's.
-            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>(false) == null)
+            if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
                 m_EventSystem.gameObject.SetActive(true);
         }
     }

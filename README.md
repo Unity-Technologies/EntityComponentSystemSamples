@@ -1,7 +1,7 @@
 # DOTS Samples
 
 - [Entities samples](./EntitiesSamples/Assets/README.md)
-- [Netcode samples](./NetcodeSamples/Assets/README.md)
+- [Netcode samples](./NetcodeSamples/README.md)
 - [Physics samples](./PhysicsSamples/README.md)
 - [Entities.Graphics HDRP samples](./GraphicsSamples/HDRPSamples/README.md)
 - [Entities.Graphics URP samples](./GraphicsSamples/URPSamples/README.md)

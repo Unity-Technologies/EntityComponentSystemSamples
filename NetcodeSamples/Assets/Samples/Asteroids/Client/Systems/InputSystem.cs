@@ -84,12 +84,15 @@ namespace Asteroids.Client
         {
             if (SystemAPI.TryGetSingleton<CommandTarget>(out var commandTarget))
             {
-                if (commandTarget.targetEntity == Entity.Null ||
-                    !EntityManager.HasComponent<ShipCommandData>(commandTarget.targetEntity))
+                if (commandTarget.targetEntity == Entity.Null)
                 {
-                    // No ghosts are spawned, so create a placeholder struct to store the commands in
-                    var ent = EntityManager.CreateEntity();
-                    EntityManager.AddBuffer<ShipCommandData>(ent);
+                    // No ghosts are spawned, so we need to create a placeholder input component to store commands in.
+                    // If the thin client timed out, and reconnected, we need to ensure this is not already created.
+                    if (!SystemAPI.TryGetSingletonEntity<ShipCommandData>(out var ent))
+                    {
+                        ent = EntityManager.CreateEntity();
+                        EntityManager.AddBuffer<ShipCommandData>(ent);
+                    }
                     SystemAPI.SetSingleton(new CommandTarget{targetEntity = ent});
                 }
             }

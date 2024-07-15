@@ -223,6 +223,14 @@ namespace Unity.NetCode.Samples.PlayerList
                         notificationText = $"{username} had invalid protocol version!";
                         color = new Color(0.39f, 0.01f, 0.63f);
                         break;
+                    case NetworkStreamDisconnectReason.AuthenticationFailure:
+                        notificationText = $"{username} could not be authenticated!";
+                        color = new Color(0.39f, 0.01f, 0.63f);
+                        break;
+                    case NetworkStreamDisconnectReason.ProtocolError:
+                        notificationText = $"{username} had a low-level transport error!";
+                        color = new Color(0.39f, 0.01f, 0.63f);
+                        break;
                     default:
                         notificationText = $"{username} disconnected with error {(int) entry.Event.Reason}!";
                         color = new Color(0.39f, 0.01f, 0.63f);
