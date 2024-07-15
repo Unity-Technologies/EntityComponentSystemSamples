@@ -93,7 +93,7 @@ public partial class ComputeSkinMatricesBakingSystem : SystemBase
             // Override the material color of the deformation materials
             foreach (var rendererEntity in additionalEntities.AsNativeArray())
             {
-                if (EntityManager.HasComponent<RenderMesh>(rendererEntity.Value))
+                if (EntityManager.HasComponent<RenderMeshUnmanaged>(rendererEntity.Value))
                 {
                     ecb.AddComponent(rendererEntity.Value, new URPMaterialPropertyBaseColor { Value = deformColor.Value });
                 }
