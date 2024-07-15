@@ -41,4 +41,4 @@ Finally, there's the [ECS Network Racing sample](https://github.com/Unity-Techno
 
 # Release notes
 
-This is the samples release for Unity 2022.3 LTS and the 1.0 release of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.
+This is the samples release for Unity 2022.3 LTS and the 1.2 release of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.
