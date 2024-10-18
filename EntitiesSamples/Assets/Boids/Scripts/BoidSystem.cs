@@ -221,8 +221,8 @@ namespace Boids
             public void ExecuteNext(int cellIndex, int index)
             {
                 cellCount[cellIndex]      += 1;
-                cellAlignment[cellIndex]  += cellAlignment[cellIndex];
-                cellSeparation[cellIndex] += cellSeparation[cellIndex];
+                cellAlignment[cellIndex]  += cellAlignment[index];
+                cellSeparation[cellIndex] += cellSeparation[index];
                 cellIndices[index]        = cellIndex;
             }
         }
