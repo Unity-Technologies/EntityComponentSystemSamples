@@ -14,12 +14,17 @@ namespace Unity.NetCode.Samples.PlayerList
         public GUISkin skin;
         public bool debugShowThinClients;
 
-        GUILayoutOption m_LabelWidth = GUILayout.Width(300-40);
-        GUILayoutOption m_NetIdWidth = GUILayout.Width(35);
-        GUILayoutOption m_ScoreboardWidth = GUILayout.Width(300);
+        const int k_ScoreboardWidth = 220;
+        const int k_NetIdWidth = 33;
+        static readonly GUILayoutOption s_UsernameWidth = GUILayout.Width(k_ScoreboardWidth-(k_NetIdWidth+5));
+        static readonly GUILayoutOption s_NetIdWidth = GUILayout.Width(k_NetIdWidth);
+        static readonly GUILayoutOption s_ScoreboardWidth = GUILayout.Width(k_ScoreboardWidth);
+        static readonly GUILayoutOption s_NotificationWidth = GUILayout.Width(k_ScoreboardWidth);
 
         Dictionary<World, WorldCache> m_WorldCaches = new Dictionary<World, WorldCache>(1);
         ulong m_LastSequenceNumber;
+        private int m_ScreenWidth;
+        private int m_ScreenHeight;
 
         class WorldCache
         {
@@ -80,6 +85,8 @@ namespace Unity.NetCode.Samples.PlayerList
 
         void OnGUI()
         {
+            m_ScreenWidth = Screen.width;
+            m_ScreenHeight = Screen.height;
             GUI.skin = skin;
 
             GUILayout.BeginHorizontal();
@@ -90,6 +97,8 @@ namespace Unity.NetCode.Samples.PlayerList
                     GUILayout.BeginVertical();
                     DrawPlayerListForClientWorld(worldKvp);
                     GUILayout.EndVertical();
+
+                    if (IsGuiFullyOffScreen()) break;
                 }
             }
             GUILayout.FlexibleSpace();
@@ -104,12 +113,12 @@ namespace Unity.NetCode.Samples.PlayerList
 
             GUI.color = Color.yellow;
             if(debugShowThinClients) GUILayout.Box(world.Name);
-            GUILayout.Box("PLAYER LIST", m_ScoreboardWidth);
+            GUILayout.Box("PLAYER LIST", s_ScoreboardWidth);
 
             if (!cache.IsModifying)
                 cache.DesiredUsername = cache.DesiredUsernameQuery.GetSingleton<DesiredUsername>().Value.ToString();
 
-            var newNameString = GUILayout.TextField(cache.DesiredUsername, m_ScoreboardWidth);
+            var newNameString = GUILayout.TextField(cache.DesiredUsername, s_ScoreboardWidth);
             if (newNameString != cache.DesiredUsername)
             {
                 cache.DesiredUsername = newNameString;
@@ -147,100 +156,121 @@ namespace Unity.NetCode.Samples.PlayerList
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
 
-            var notifications = worldCache.PlayerListNotificationBufferQuery.GetSingletonBuffer<PlayerListNotificationBuffer>();
             GUI.color = Color.yellow;
-            GUILayout.Box("NOTIFICATIONS");
-            GUI.color = Color.white;
+            GUILayout.Box("NOTIFICATIONS", s_NotificationWidth);
+            var notifications = worldCache.PlayerListNotificationBufferQuery.GetSingletonBuffer<PlayerListNotificationBuffer>();
 
-            var now = Stopwatch.GetTimestamp();
+            GUI.color = Color.white;
             foreach (var entry in notifications)
-                DrawNotification(entry, now);
+            {
+                DrawNotification(entry);
+                if (IsGuiFullyOffScreen()) break;
+            }
         }
 
         void DrawPlayerList(WorldCache cache)
         {
-            if (cache.PlayerListBufferEntryQuery.IsEmptyIgnoreFilter) return;
-
-            var players = cache.PlayerListBufferEntryQuery.GetSingletonBuffer<PlayerListBufferEntry>();
-
-            var drawnPlayers = 0;
-            GUI.color = Color.white;
-            for (var i = 0; i < players.Length; i++)
+            if (cache.PlayerListBufferEntryQuery.IsEmptyIgnoreFilter)
             {
-                var entry = players[i];
-                if (!entry.IsCreated || !entry.State.IsConnected) continue;
-
-                drawnPlayers++;
-                GUILayout.BeginHorizontal();
-                {
-                    GUI.color = entry.State.IsConnected ? entry.State.Username.Value.IsEmpty ? Color.grey : Color.white : Color.red;
-
-                    GUILayout.Box(entry.State.NetworkId.ToString(), m_NetIdWidth);
-
-                    GUILayout.Label(entry.State.Username.Value.Value, m_LabelWidth);
-                }
-                GUILayout.EndHorizontal();
+                GUI.color = Color.red;
+                GUILayout.Box($"No PlayerListBufferEntry!", s_ScoreboardWidth);
+                return;
             }
 
-            if (drawnPlayers == 0) GUILayout.Box("No players.");
+            var playerEntries = cache.PlayerListBufferEntryQuery.GetSingletonBuffer<PlayerListBufferEntry>();
+            GUILayout.Box($"{PlayerListBufferEntry.CountNumConnectedPlayers(playerEntries)} Players in Game", s_ScoreboardWidth);
+
+            for (var i = 0; i < playerEntries.Length; i++)
+            {
+                var entry = playerEntries[i];
+                if (!entry.IsCreated || !entry.State.IsConnected) continue;
+                GUILayout.BeginHorizontal();
+                {
+                    GUI.color = Color.grey;
+                    GUILayout.Box(entry.State.NetworkId.ToString(), s_NetIdWidth);
+                    GUI.color = Color.white;
+                    GUILayout.Box(entry.State.Username.Value.Value, s_UsernameWidth);
+                }
+                GUILayout.EndHorizontal();
+                if (IsGuiFullyOffScreen()) break;
+            }
         }
 
-        void DrawNotification(PlayerListNotificationBuffer entry, long now)
+        private bool IsGuiFullyOffScreen()
+        {
+            var min = GUILayoutUtility.GetLastRect().min;
+            return min.x > m_ScreenWidth || min.y > m_ScreenHeight;
+        }
+
+        void DrawNotification(PlayerListNotificationBuffer entry)
         {
             string notificationText;
             var username = entry.Event.Username.Value;
             Color color;
-            if (entry.Event.IsConnected)
+            switch (entry.Event.ChangeType)
             {
-                notificationText = $"{username} connected!";
-                color = Color.green;
-            }
-            else
-            {
-                switch (entry.Event.Reason)
-                {
-                    case NetworkStreamDisconnectReason.Timeout:
-                        notificationText = $"{username} timed out!";
-                        color = Color.red;
-                        break;
-                    case NetworkStreamDisconnectReason.MaxConnectionAttempts:
-                        notificationText = $"{username} exceeded max connection attempts!";
-                        color = Color.red;
-                        break;
-                    case NetworkStreamDisconnectReason.ClosedByRemote:
-                        notificationText = $"{username} quit!";
-                        color = new Color(1f, 0.39f, 0.43f);
-                        break;
-                    case NetworkStreamDisconnectReason.ConnectionClose:
-                        notificationText = $"{username} was disconnected by server!";
-                        color = new Color(1f, 0.39f, 0.43f);
-                        break;
-                    case NetworkStreamDisconnectReason.InvalidRpc:
-                        notificationText = $"{username} had invalid RPC!";
-                        color = new Color(0.39f, 0.01f, 0.63f);
-                        break;
-                    case NetworkStreamDisconnectReason.BadProtocolVersion:
-                        notificationText = $"{username} had invalid protocol version!";
-                        color = new Color(0.39f, 0.01f, 0.63f);
-                        break;
-                    case NetworkStreamDisconnectReason.AuthenticationFailure:
-                        notificationText = $"{username} could not be authenticated!";
-                        color = new Color(0.39f, 0.01f, 0.63f);
-                        break;
-                    case NetworkStreamDisconnectReason.ProtocolError:
-                        notificationText = $"{username} had a low-level transport error!";
-                        color = new Color(0.39f, 0.01f, 0.63f);
-                        break;
-                    default:
-                        notificationText = $"{username} disconnected with error {(int) entry.Event.Reason}!";
-                        color = new Color(0.39f, 0.01f, 0.63f);
-                        break;
-                }
+                case PlayerListEntry.ChangedRpc.UpdateType.PlayerDisconnect:
+                    switch (entry.Event.Reason)
+                    {
+                        case NetworkStreamDisconnectReason.Timeout:
+                            notificationText = $"{username} timed out!";
+                            color = Color.red;
+                            break;
+                        case NetworkStreamDisconnectReason.MaxConnectionAttempts:
+                            notificationText = $"{username} exceeded max connection attempts!";
+                            color = Color.red;
+                            break;
+                        case NetworkStreamDisconnectReason.ClosedByRemote:
+                            notificationText = $"{username} quit!";
+                            color = new Color(1f, 0.39f, 0.43f);
+                            break;
+                        case NetworkStreamDisconnectReason.ConnectionClose:
+                            notificationText = $"{username} was disconnected by server!";
+                            color = new Color(1f, 0.39f, 0.43f);
+                            break;
+                        case NetworkStreamDisconnectReason.InvalidRpc:
+                            notificationText = $"{username} had invalid RPC!";
+                            color = new Color(0.39f, 0.01f, 0.63f);
+                            break;
+                        case NetworkStreamDisconnectReason.BadProtocolVersion:
+                            notificationText = $"{username} had invalid protocol version!";
+                            color = new Color(0.39f, 0.01f, 0.63f);
+                            break;
+                        case NetworkStreamDisconnectReason.AuthenticationFailure:
+                            notificationText = $"{username} could not be authenticated!";
+                            color = new Color(0.39f, 0.01f, 0.63f);
+                            break;
+                        case NetworkStreamDisconnectReason.ProtocolError:
+                            notificationText = $"{username} had a low-level transport error!";
+                            color = new Color(0.39f, 0.01f, 0.63f);
+                            break;
+                        default:
+                            notificationText = $"{username} disconnected with error {(int) entry.Event.Reason}!";
+                            color = new Color(0.39f, 0.01f, 0.63f);
+                            break;
+                    }
+                    break;
+                case PlayerListEntry.ChangedRpc.UpdateType.NewJoiner:
+                    notificationText = $"{username} connected!";
+                    color = Color.green;
+                    break;
+                case PlayerListEntry.ChangedRpc.UpdateType.ExistingPlayer:
+                    notificationText = $"{username} already here!";
+                    color = new Color(0f, 0.89f, 1f);
+                    break;
+                case PlayerListEntry.ChangedRpc.UpdateType.UsernameChange:
+                    notificationText = $"{username} changed names!";
+                    color = Color.white;
+                    break;
+                default:
+                    notificationText = $"{username} made unrecognised change {entry.Event.ChangeType}!";
+                    color = Color.red;
+                    break;
             }
 
             var targetAlpha = notificationOpacityCurve.Evaluate(entry.DurationLeft);
             GUI.color = Color.LerpUnclamped(Color.clear, color, targetAlpha);
-            GUILayout.Box(notificationText, m_ScoreboardWidth);
+            GUILayout.Box(notificationText, s_NotificationWidth);
         }
     }
 }

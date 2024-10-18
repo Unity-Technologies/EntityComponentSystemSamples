@@ -48,8 +48,10 @@ class HavokPhysicsVDBTest : UnityPhysicsSamplesTest
 
     [UnityTest]
     [Timeout(240000)]
-    public override IEnumerator LoadScenes([ValueSource(nameof(GetVDBScenes))] string scenePath)
+    public IEnumerator LoadScenes([ValueSource(nameof(GetVDBScenes))] string scenePath)
     {
+        VerifyConsoleMessages.ClearMessagesInConsole();
+
         var vdbProcess = new System.Diagnostics.Process();
 
         // Close any existing instances of the VDB and make a new one

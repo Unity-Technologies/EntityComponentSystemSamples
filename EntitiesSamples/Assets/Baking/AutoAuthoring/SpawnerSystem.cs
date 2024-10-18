@@ -53,7 +53,7 @@ namespace Baking.AutoAuthoring
 
                     var materialMeshInfo = em.GetComponentData<MaterialMeshInfo>(entity);
                     var renderMeshArray = em.GetSharedComponentManaged<RenderMeshArray>(entity);
-                    renderMeshArray.Materials[MaterialMeshInfo.StaticIndexToArrayIndex(materialMeshInfo.Material)] =
+                    renderMeshArray.MaterialReferences[MaterialMeshInfo.StaticIndexToArrayIndex(materialMeshInfo.Material)] =
                         spawner.Material;
                     renderMeshArray.ResetHash128();
 

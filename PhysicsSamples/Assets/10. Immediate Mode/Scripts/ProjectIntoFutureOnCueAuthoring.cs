@@ -78,11 +78,21 @@ public class ProjectIntoFutureOnCueData : IComponentData
     }
 }
 
+[DisableAutoCreation]
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-public partial struct ProjectIntoFutureOnCueSystem : ISystem
+public partial class ProjectIntoFutureOnCueSystem : SystemBase
 {
+    public ProjectIntoFutureOnCueData Data;
+
+    ProjectIntoFutureOnCueAuthoring m_Authoring;
+
+    public ProjectIntoFutureOnCueSystem(ProjectIntoFutureOnCueAuthoring authoring)
+    {
+        m_Authoring = authoring;
+    }
+
     [BurstCompile]
     [WithAll(typeof(ProjectIntoFutureTrail))]
     private partial struct ProjectIntoFutureTrailJob : IJobEntity
@@ -200,9 +210,9 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
     }
 #endif
 
-    public void OnCreate(ref SystemState state)
+    protected override void OnCreate()
     {
-        state.EntityManager.AddComponentObject(state.SystemHandle, new ProjectIntoFutureOnCueData
+        Data = new ProjectIntoFutureOnCueData
         {
             NeedsUpdate = true,
             NumSteps = 0,
@@ -212,57 +222,59 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
             LocalWorld = new PhysicsWorld(),
             Positions = new NativeArray<float3>(),
             GhostMaterial = default,
-        });
+        };
+
+        RequireForUpdate<PhysicsWorldSingleton>();
+        RequireForUpdate<BuildPhysicsWorldData>();
     }
 
-    public void OnDestroy(ref SystemState state)
+    protected override void OnDestroy()
     {
-        state.CompleteDependency();
+        CompleteDependency();
 
-        var projectIntoFutureOnCueData = state.EntityManager.GetComponentObject<ProjectIntoFutureOnCueData>(state.SystemHandle);
-        if (projectIntoFutureOnCueData.Positions.IsCreated) projectIntoFutureOnCueData.Positions.Dispose();
-        if (projectIntoFutureOnCueData.LocalWorld.NumBodies != 0) projectIntoFutureOnCueData.LocalWorld.Dispose();
-        if (projectIntoFutureOnCueData.ImmediatePhysicsStepper.Created) projectIntoFutureOnCueData.ImmediatePhysicsStepper.Dispose();
+        if (Data.Positions.IsCreated) Data.Positions.Dispose();
+        if (Data.LocalWorld.NumBodies != 0) Data.LocalWorld.Dispose();
+        if (Data.ImmediatePhysicsStepper.Created) Data.ImmediatePhysicsStepper.Dispose();
+
+        m_Authoring.OnSystemDestroyed();
     }
 
-    public void OnUpdate(ref SystemState state)
+    protected override void OnUpdate()
     {
         // Make PhysicsWorld safe to read
         // Complete the local simulation trails from the previous step.
-        state.Dependency.Complete();
+        Dependency.Complete();
 
-        var projectIntoFutureOnCueData = state.EntityManager.GetComponentObject<ProjectIntoFutureOnCueData>(state.SystemHandle);
         bool bUpdate = true;
-        bUpdate &= (projectIntoFutureOnCueData.IsInitialized && projectIntoFutureOnCueData.NeedsUpdate);
-        bUpdate &= !projectIntoFutureOnCueData.WhiteBallVelocity.Equals(float3.zero);
+        bUpdate &= (Data.IsInitialized && Data.NeedsUpdate);
+        bUpdate &= !Data.WhiteBallVelocity.Equals(float3.zero);
         if (!bUpdate)
             return;
 
         var world = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-        projectIntoFutureOnCueData.CheckEntityPool(state.EntityManager, world.NumDynamicBodies);
+        Data.CheckEntityPool(EntityManager, world.NumDynamicBodies);
 
         // Clear the trails ready for a new simulation prediction
-        new ResetPositionsJob { Positions = projectIntoFutureOnCueData.Positions}.Run();
+        new ResetPositionsJob { Positions = Data.Positions}.Run();
 
         // If a local world was previously cloned get rid of it and make a new one.
-        if (projectIntoFutureOnCueData.LocalWorld.NumBodies > 0)
+        if (Data.LocalWorld.NumBodies > 0)
         {
-            projectIntoFutureOnCueData.LocalWorld.Dispose();
+            Data.LocalWorld.Dispose();
         }
-        projectIntoFutureOnCueData.LocalWorld = world.Clone();
+        Data.LocalWorld = world.Clone();
 
         float timeStep = SystemAPI.Time.DeltaTime;
 
-        PhysicsStep stepComponent = PhysicsStep.Default;
-        if (SystemAPI.HasSingleton<PhysicsStep>())
+        if (!SystemAPI.TryGetSingleton(out PhysicsStep stepComponent))
         {
-            stepComponent = SystemAPI.GetSingleton<PhysicsStep>();
+            stepComponent = PhysicsStep.Default;
         }
 
         var bpwData = SystemAPI.GetSingleton<BuildPhysicsWorldData>();
         var stepInput = new SimulationStepInput
         {
-            World = projectIntoFutureOnCueData.LocalWorld,
+            World = Data.LocalWorld,
             TimeStep = timeStep,
             NumSolverIterations = stepComponent.SolverIterationCount,
             SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
@@ -272,18 +284,18 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
         };
 
         // Assign the requested cue ball velocity to the local simulation
-        projectIntoFutureOnCueData.LocalWorld.SetLinearVelocity(projectIntoFutureOnCueData.LocalWorld.GetRigidBodyIndex(projectIntoFutureOnCueData.WhiteBallEntity), projectIntoFutureOnCueData.WhiteBallVelocity);
+        Data.LocalWorld.SetLinearVelocity(Data.LocalWorld.GetRigidBodyIndex(Data.WhiteBallEntity), Data.WhiteBallVelocity);
 
         // Sync the CollisionWorld before the initial step.
         // As stepInput.SynchronizeCollisionWorld is true the simulation will
         // automatically sync the CollisionWorld on subsequent steps.
         // This is only needed as we have modified the cue ball velocity.
-        projectIntoFutureOnCueData.LocalWorld.CollisionWorld.ScheduleUpdateDynamicTree(
-            ref projectIntoFutureOnCueData.LocalWorld, stepInput.TimeStep, stepInput.Gravity, default, false)
+        Data.LocalWorld.CollisionWorld.ScheduleUpdateDynamicTree(
+            ref Data.LocalWorld, stepInput.TimeStep, stepInput.Gravity, default, false)
             .Complete();
 
         // Step the local world
-        for (int i = 0; i < projectIntoFutureOnCueData.NumSteps; i++)
+        for (int i = 0; i < Data.NumSteps; i++)
         {
             if (stepComponent.SimulationType == SimulationType.UnityPhysics)
             {
@@ -292,41 +304,41 @@ public partial struct ProjectIntoFutureOnCueSystem : ISystem
 
                 // Dispose and reallocate input velocity buffer, if dynamic body count has increased.
                 // Dispose previous collision and trigger event streams and allocator new streams.
-                projectIntoFutureOnCueData.ImmediatePhysicsStepper.SimulationContext.Reset(stepInput);
+                Data.ImmediatePhysicsStepper.SimulationContext.Reset(stepInput);
 
                 new StepLocalWorldJob()
                 {
                     StepInput = stepInput,
-                    SimulationContext = projectIntoFutureOnCueData.ImmediatePhysicsStepper.SimulationContext,
+                    SimulationContext = Data.ImmediatePhysicsStepper.SimulationContext,
                     StepIndex = i,
-                    NumSteps = projectIntoFutureOnCueData.NumSteps,
-                    TrailPositions = projectIntoFutureOnCueData.Positions
+                    NumSteps = Data.NumSteps,
+                    TrailPositions = Data.Positions
                 }.Run();
             }
 #if HAVOK_PHYSICS_EXISTS
             else
             {
-                projectIntoFutureOnCueData.ImmediatePhysicsStepper.HavokSimulationContext.Reset(ref projectIntoFutureOnCueData.LocalWorld);
+                Data.ImmediatePhysicsStepper.HavokSimulationContext.Reset(ref Data.LocalWorld);
                 new StepLocalWorldHavokJob()
                 {
                     StepInput = stepInput,
-                    SimulationContext = projectIntoFutureOnCueData.ImmediatePhysicsStepper.HavokSimulationContext,
+                    SimulationContext = Data.ImmediatePhysicsStepper.HavokSimulationContext,
                     StepIndex = i,
-                    NumSteps = projectIntoFutureOnCueData.NumSteps,
-                    TrailPositions = projectIntoFutureOnCueData.Positions
+                    NumSteps = Data.NumSteps,
+                    TrailPositions = Data.Positions
                 }.Run();
             }
 #endif
         }
 
-        state.Dependency = new ProjectIntoFutureTrailJob
+        Dependency = new ProjectIntoFutureTrailJob
         {
-            Positions = projectIntoFutureOnCueData.Positions,
-            TrailScale = projectIntoFutureOnCueData.TrailScale,
-            NumSteps = projectIntoFutureOnCueData.NumSteps
-        }.Schedule(state.Dependency);
+            Positions = Data.Positions,
+            TrailScale = Data.TrailScale,
+            NumSteps = Data.NumSteps
+        }.Schedule(Dependency);
 
-        projectIntoFutureOnCueData.NeedsUpdate = false;
+        Data.NeedsUpdate = false;
     }
 }
 
@@ -339,12 +351,12 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour
     public int NumSteps = 25;
     public float TrailScale = 0.1f;
 
-    private Entity WhiteBallEntity = Entity.Null;
-    private EntityQuery WhiteBallQuery;
-    private EntityQuery ProjectIntoFutureOnCueDataQuery;
-    private EntityQuery m_PhysicsVelocityQuery;
+    Entity m_WhiteBallEntity = Entity.Null;
+    EntityQuery m_WhiteBallQuery;
+    ProjectIntoFutureOnCueSystem m_ProjectIntoFutureOnCueSystem;
+    EntityQuery m_PhysicsVelocityQuery;
 
-    private bool m_DidStart = false;
+    bool m_DidStart = false;
 
     private float3 GetVelocityFromSliders()
     {
@@ -355,41 +367,60 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour
         return velocity;
     }
 
-    void Start()
+    void OnEnable()
     {
         m_DidStart = true;
 
-        WhiteBallQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(typeof(WhiteBall));
-        ProjectIntoFutureOnCueDataQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(typeof(ProjectIntoFutureOnCueData));
+        m_WhiteBallQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(typeof(WhiteBall));
         m_PhysicsVelocityQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(typeof(PhysicsVelocity));
+
+        m_ProjectIntoFutureOnCueSystem = new ProjectIntoFutureOnCueSystem(this);
+        World.DefaultGameObjectInjectionWorld.AddSystemManaged(m_ProjectIntoFutureOnCueSystem);
+        var group = World.DefaultGameObjectInjectionWorld
+            .GetExistingSystemManaged<FixedStepSimulationSystemGroup>();
+        group.AddSystemToUpdateList(m_ProjectIntoFutureOnCueSystem);
     }
 
-    void OnDestroy()
+    public void OnSystemDestroyed()
+    {
+        m_ProjectIntoFutureOnCueSystem = null;
+        OnDisable();
+    }
+
+    void OnDisable()
     {
         if (World.DefaultGameObjectInjectionWorld?.IsCreated == true)
         {
-            if (World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(WhiteBallQuery))
+            if (World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(m_WhiteBallQuery))
             {
-                WhiteBallQuery.Dispose();
-            }
-            if (World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(ProjectIntoFutureOnCueDataQuery))
-            {
-                ProjectIntoFutureOnCueDataQuery.Dispose();
+                m_WhiteBallQuery.Dispose();
             }
             if (World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(m_PhysicsVelocityQuery))
             {
                 m_PhysicsVelocityQuery.Dispose();
             }
+
+            if (m_ProjectIntoFutureOnCueSystem != null)
+            {
+                World.DefaultGameObjectInjectionWorld.DestroySystemManaged(m_ProjectIntoFutureOnCueSystem);
+            }
         }
+
+        m_WhiteBallEntity = Entity.Null;
+        m_WhiteBallQuery = default;
+        m_PhysicsVelocityQuery = default;
+        m_ProjectIntoFutureOnCueSystem = null;
+
+        m_DidStart = false;
     }
 
     void Update()
     {
-        if (WhiteBallEntity.Equals(Entity.Null) &&
-            World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(WhiteBallQuery) &&
-            !WhiteBallQuery.IsEmpty)
+        if (m_WhiteBallEntity.Equals(Entity.Null) &&
+            World.DefaultGameObjectInjectionWorld.EntityManager.IsQueryValid(m_WhiteBallQuery) &&
+            !m_WhiteBallQuery.IsEmpty)
         {
-            WhiteBallEntity = WhiteBallQuery.GetSingletonEntity();
+            m_WhiteBallEntity = m_WhiteBallQuery.GetSingletonEntity();
         }
 
         ProjectIntoFutureOnCueData data = GetData();
@@ -397,7 +428,7 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour
         {
             data.TrailScale = TrailScale;
 
-            if (!data.IsInitialized && !WhiteBallEntity.Equals(Entity.Null))
+            if (!data.IsInitialized && !m_WhiteBallEntity.Equals(Entity.Null))
             {
                 EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
                     .WithAll<PhysicsWorldSingleton>();
@@ -405,7 +436,7 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour
                 PhysicsWorld physicsWorld = singletonQuery.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
                 if (physicsWorld.NumDynamicBodies > 0)
                 {
-                    data.Initialize(World.DefaultGameObjectInjectionWorld.EntityManager, WhiteBallEntity, NumSteps, ReferenceMesh, ReferenceMaterial, in physicsWorld);
+                    data.Initialize(World.DefaultGameObjectInjectionWorld.EntityManager, m_WhiteBallEntity, NumSteps, ReferenceMesh, ReferenceMaterial, in physicsWorld);
                     data.WhiteBallVelocity = GetVelocityFromSliders();
                     data.NeedsUpdate = true;
                 }
@@ -414,13 +445,12 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour
         }
     }
 
-    public ProjectIntoFutureOnCueData GetData()
+    ProjectIntoFutureOnCueData GetData()
     {
-        SystemHandle handle = World.DefaultGameObjectInjectionWorld.GetExistingSystem(typeof(ProjectIntoFutureOnCueSystem));
-        return World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentObject<ProjectIntoFutureOnCueData>(handle);
+        return m_ProjectIntoFutureOnCueSystem?.Data;
     }
 
-    public void CullVelocity()
+    void CullVelocity()
     {
         int entityCount = m_PhysicsVelocityQuery.CalculateEntityCount();
         NativeArray<PhysicsVelocity> velocities = new NativeArray<PhysicsVelocity>(entityCount, Allocator.Temp);
@@ -460,9 +490,9 @@ public class ProjectIntoFutureOnCueAuthoring : MonoBehaviour
                 var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
                 // assign the required velocity to the white ball in the main simulation
-                var velocity = entityManager.GetComponentData<PhysicsVelocity>(WhiteBallEntity);
+                var velocity = entityManager.GetComponentData<PhysicsVelocity>(m_WhiteBallEntity);
                 velocity.Linear = GetVelocityFromSliders();
-                entityManager.SetComponentData(WhiteBallEntity, velocity);
+                entityManager.SetComponentData(m_WhiteBallEntity, velocity);
 
                 data.WhiteBallVelocity = float3.zero;
                 data.NeedsUpdate = true;

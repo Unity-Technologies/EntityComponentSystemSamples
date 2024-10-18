@@ -47,7 +47,6 @@ public partial struct ActivateBodySystem : ISystem
 
 
         public void Execute(Entity entity, ref LocalTransform localTransform, ref ActivateBody activateBody)
-
         {
             if (--activateBody.FramesToActivateIn == 0)
             {
@@ -77,10 +76,13 @@ public partial struct ActivateBodySystem : ISystem
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            new ActivateBodyJob
+            var jobHandle = new ActivateBodyJob
             {
                 CommandBuffer = commandBuffer
-            }.Run();
+            }.Schedule(state.Dependency);
+
+            state.Dependency = jobHandle;
+            jobHandle.Complete();
 
             commandBuffer.Playback(state.EntityManager);
         }

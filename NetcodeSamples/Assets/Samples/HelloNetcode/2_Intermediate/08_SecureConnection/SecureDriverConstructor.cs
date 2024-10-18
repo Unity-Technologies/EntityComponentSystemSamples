@@ -1,9 +1,10 @@
+//#define ENABLE_NETCODE_SAMPLE_SECURE
 using Unity.Entities;
 using Unity.NetCode;
 
 namespace Samples.HelloNetcode
 {
-#if UNITY_EDITOR || NETCODE_DEBUG
+#if ENABLE_NETCODE_SAMPLE_SECURE
     /// <summary>
     /// Register client and server using TLS configuration.
     /// The configuration is retrieved from <see cref="SecureParameters"/>.

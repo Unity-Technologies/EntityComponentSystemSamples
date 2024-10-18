@@ -28,19 +28,22 @@ namespace Unity.Physics.Extensions
         {
             public override void Bake(QueryTesterAuthoring authoring)
             {
-                QueryData queryData = new QueryData();
-                queryData.Distance = authoring.Distance;
-                queryData.Direction = authoring.Direction;
-                queryData.CollectAllHits = authoring.CollectAllHits;
-                queryData.DrawSurfaceNormal = authoring.DrawSurfaceNormal;
-                queryData.HighlightLeafCollider = authoring.HighlightLeafCollider;
-                queryData.ColliderQuery = authoring.ColliderQuery;
-                queryData.ColliderType = authoring.ColliderType;
-                queryData.InputColliderScale = authoring.InputColliderScale;
-                queryData.ColliderDataInitialized = false;
+                if (IsBakingForEditor())
+                {
+                    QueryData queryData = new QueryData();
+                    queryData.Distance = authoring.Distance;
+                    queryData.Direction = authoring.Direction;
+                    queryData.CollectAllHits = authoring.CollectAllHits;
+                    queryData.DrawSurfaceNormal = authoring.DrawSurfaceNormal;
+                    queryData.HighlightLeafCollider = authoring.HighlightLeafCollider;
+                    queryData.ColliderQuery = authoring.ColliderQuery;
+                    queryData.ColliderType = authoring.ColliderType;
+                    queryData.InputColliderScale = authoring.InputColliderScale;
+                    queryData.ColliderDataInitialized = false;
 
-                var entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponentObject(entity, queryData);
+                    var entity = GetEntity(TransformUsageFlags.Dynamic);
+                    AddComponentObject(entity, queryData);
+                }
             }
         }
     }

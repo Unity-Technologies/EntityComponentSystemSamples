@@ -137,8 +137,12 @@ namespace Samples.HelloNetcode
                 float2 input = character.Input.Movement;
                 float3 wantedMove = new float3(input.x, 0, input.y) * controllerConfig.MoveSpeed * SystemAPI.Time.DeltaTime;
 
+                var characterRotation = quaternion.RotateY(character.Input.Yaw);
+                // The character controllers yaw rotation can always be set, even when in the air:
+                character.Transform.ValueRW.Rotation = characterRotation;
+
                 // Wanted movement is relative to camera
-                wantedMove = math.rotate(quaternion.RotateY(character.Input.Yaw), wantedMove);
+                wantedMove = math.rotate(characterRotation, wantedMove);
 
                 float3 wantedVelocity = wantedMove / SystemAPI.Time.DeltaTime;
                 wantedVelocity.y = character.Character.Velocity.y;

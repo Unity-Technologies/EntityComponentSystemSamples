@@ -56,6 +56,7 @@ namespace Samples.HelloNetcode
 
         public void StartClientServer(string sceneName)
         {
+            Debug.Log($"[StartClientServer] Called with '{sceneName}'.");
             if (ClientServerBootstrap.RequestedPlayType != ClientServerBootstrap.PlayType.ClientAndServer)
             {
                 Debug.LogError($"Creating client/server worlds is not allowed if playmode is set to {ClientServerBootstrap.RequestedPlayType}");
@@ -80,6 +81,7 @@ namespace Samples.HelloNetcode
             NetworkEndpoint ep = NetworkEndpoint.AnyIpv4.WithPort(port);
             {
                 using var drvQuery = server.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
+                drvQuery.GetSingletonRW<NetworkStreamDriver>().ValueRW.RequireConnectionApproval = sceneName.Contains("ConnectionApproval", StringComparison.OrdinalIgnoreCase);
                 drvQuery.GetSingletonRW<NetworkStreamDriver>().ValueRW.Listen(ep);
             }
 
@@ -107,13 +109,15 @@ namespace Samples.HelloNetcode
 
         public void ConnectToServer()
         {
+            Debug.Log($"[ConnectToServer] Called on '{Address.text}:{Port.text}'.");
             var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
             SceneManager.LoadScene("FrontendHUD");
             DestroyLocalSimulationWorld();
-            ;
+
             if (World.DefaultGameObjectInjectionWorld == null)
                 World.DefaultGameObjectInjectionWorld = client;
-            SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
+            var sceneName = GetAndSaveSceneSelection();
+            SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
 
             var ep = NetworkEndpoint.Parse(Address.text, ParsePortOrDefault(Port.text));
             {

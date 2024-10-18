@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -15,6 +16,9 @@ namespace Samples.HelloNetcode
         [GhostField] public InputEvent SecondaryFire;
         [GhostField] public float Pitch;
         [GhostField] public float Yaw;
+
+        /// <summary>Implemented to get better packet dump info.</summary>
+        public FixedString512Bytes ToFixedString() => $"move({Movement}, j:{Jump.Count}), shoot(p:{PrimaryFire.Count}, s{SecondaryFire.Count}), mouse(pitch:{Pitch}, yaw:{Yaw})";
     }
 
     [UpdateInGroup(typeof(HelloNetcodeInputSystemGroup))]

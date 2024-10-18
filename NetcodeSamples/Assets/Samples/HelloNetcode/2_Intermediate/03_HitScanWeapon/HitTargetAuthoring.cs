@@ -7,7 +7,6 @@ namespace Samples.HelloNetcode
     {
         public float Speed;
         public float MovingRange;
-        public float Moved;
     }
 
     public class HitTargetAuthoring : MonoBehaviour

@@ -40,6 +40,8 @@ namespace Samples.HelloNetcode
             var localToWorldTransformLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
             var time = state.WorldUnmanaged.Time;
             m_TransformLookup.Update(ref state);
+
+            state.CompleteDependency();
             var originalGranadeScale = m_TransformLookup[grenadePrefab].Scale;
 
             foreach (var (character, inputBuffer, anchorPoint) in SystemAPI.Query<CharacterAspect,

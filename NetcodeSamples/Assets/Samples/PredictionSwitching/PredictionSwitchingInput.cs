@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
@@ -13,6 +14,8 @@ public struct PredictionSwitchingInput : ICommandData
     [GhostField] public NetworkTick Tick{get; set;}
     [GhostField] public int horizontal;
     [GhostField] public int vertical;
+
+    public FixedString512Bytes ToFixedString() => $"h:{horizontal},v:{vertical}";
 }
 
 [UpdateInGroup(typeof(GhostInputSystemGroup))]

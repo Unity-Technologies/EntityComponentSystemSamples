@@ -11,15 +11,12 @@ namespace Unity.NetCode.Samples.Common
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [CreateAfter(typeof(RpcSystem))]
-    public partial class SetRpcSystemDynamicAssemblyListSystem : SystemBase
+    public partial struct SetRpcSystemDynamicAssemblyListSystem : ISystem
     {
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
             SystemAPI.GetSingletonRW<RpcCollection>().ValueRW.DynamicAssemblyList = true;
-
-            Enabled = false;
+            state.Enabled = false;
         }
-
-        protected override void OnUpdate() { }
     }
 }

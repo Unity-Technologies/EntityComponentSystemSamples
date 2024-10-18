@@ -94,10 +94,13 @@ public partial struct ConvertToStaticSystem : ISystem
     {
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            new ConvertToDifferentMotionJob
+            var jobHandle = new ConvertToDifferentMotionJob
             {
                 CommandBuffer = commandBuffer
-            }.Run();
+            }.Schedule(state.Dependency);
+
+            state.Dependency = jobHandle;
+            jobHandle.Complete();
 
             commandBuffer.Playback(state.EntityManager);
         }

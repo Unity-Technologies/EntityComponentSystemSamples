@@ -104,6 +104,8 @@ namespace Samples.MultyPhysicsWorld
         public int horizontal;
         public int vertical;
         public int rotation;
+
+        public FixedString512Bytes ToFixedString() => $"h:{horizontal},v:{vertical},rot:{rotation}";
     }
 
     // When server receives go in game request, go in game and delete request

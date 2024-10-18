@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.NetCode.Samples.Common;
@@ -8,6 +9,8 @@ public struct CubeInput : IInputComponentData
 {
     public int Horizontal;
     public int Vertical;
+
+    public FixedString512Bytes ToFixedString() => $"→{Horizontal} ↑{Vertical}";
 }
 
 [DisallowMultipleComponent]
@@ -29,7 +32,7 @@ public partial struct SampleCubeInput : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<NetworkStreamInGame>();
-        state.RequireForUpdate<NetCubeSpawner>();
+        state.RequireForUpdate<CubeSpawner>();
     }
 
     public void OnUpdate(ref SystemState state)

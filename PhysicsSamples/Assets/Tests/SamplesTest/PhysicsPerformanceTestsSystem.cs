@@ -22,30 +22,31 @@ namespace Unity.Physics.Tests.PerformanceTests
         [BurstCompile]
         private readonly struct ContactCountJob : IJob
         {
-            private readonly ContactCounter Contacts;
-            private readonly NativeStream Simulation;
+            [WriteOnly] private readonly ContactCounter ContactCounter;
+            [ReadOnly] private readonly NativeStream Contacts;
 
-            public ContactCountJob(ref ContactCounter contactCounter, NativeStream simulation)
+            public ContactCountJob(ref ContactCounter contactCounter, NativeStream contacts)
             {
-                Contacts = contactCounter;
-                Simulation = simulation;
+                ContactCounter = contactCounter;
+                Contacts = contacts;
             }
 
             public void Execute()
             {
-                if (Simulation.IsCreated)
+                if (Contacts.IsCreated)
                 {
-                    Contacts.Value = Simulation.Count();
+                    ContactCounter.Value = Contacts.Count();
                 }
             }
         }
 
-        void OnCreate(ref SystemState state)
+        public void OnCreate(ref SystemState state)
         {
             ContactCounter = new ContactCounter(k_PhysicsContactCountName);
         }
 
-        void OnUpdate(ref SystemState state)
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
         {
             if (!SystemAPI.TryGetSingleton(out PhysicsStep physicsStep))
             {

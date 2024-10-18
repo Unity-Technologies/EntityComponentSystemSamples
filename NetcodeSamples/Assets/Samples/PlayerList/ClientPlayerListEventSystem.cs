@@ -71,32 +71,13 @@ namespace Unity.NetCode.Samples.PlayerList
                 var netDebug = SystemAPI.GetSingleton<NetDebug>();
                 foreach (var rpc in m_PlayerListEntryChangedRpc.ToComponentDataArray<PlayerListEntry.ChangedRpc>(Allocator.Temp))
                 {
-                    if (ShouldRaiseNotification(rpc, netDebug))
-                    {
-                        Assertions.Assert.AreNotEqual(default, playerListsFeature.EventListEntryDurationSeconds);
-                        eventList.Add(new PlayerListNotificationBuffer
+                    Assertions.Assert.AreNotEqual(default, playerListsFeature.EventListEntryDurationSeconds);
+                    eventList.Add(new PlayerListNotificationBuffer
                         {
                             Event = rpc,
                             DurationLeft = (float) playerListsFeature.EventListEntryDurationSeconds,
                         });
-                    }
                 }
-            }
-        }
-
-        static bool ShouldRaiseNotification(PlayerListEntry.ChangedRpc rpc, NetDebug netDebug)
-        {
-            switch (rpc.ChangeType)
-            {
-                case PlayerListEntry.ChangedRpc.UpdateType.PlayerDisconnect:
-                case PlayerListEntry.ChangedRpc.UpdateType.NewJoiner:
-                    return true;
-                case PlayerListEntry.ChangedRpc.UpdateType.ExistingPlayer:
-                case PlayerListEntry.ChangedRpc.UpdateType.UsernameChange:
-                    return false;
-                default:
-                    netDebug.LogError($"ShouldRaiseNotification unknown RPC ChangeType: {(int) rpc.ChangeType}!");
-                    return false;
             }
         }
     }

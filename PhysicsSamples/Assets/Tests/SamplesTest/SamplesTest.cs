@@ -22,22 +22,18 @@ namespace Unity.Physics.Tests
     {
         public SimulationType SimulationType;
         public bool MultiThreaded;
+        public bool IncrementalDynamicBroadphase;
+        public bool IncrementalStaticBroadphase;
 
         protected override void OnUpdate()
         {
             if (SystemAPI.HasSingleton<PhysicsStep>())
             {
                 var component = SystemAPI.GetSingletonRW<PhysicsStep>();
-                if (component.ValueRO.SimulationType != SimulationType)
-                {
-                    component.ValueRW.SimulationType = SimulationType;
-                }
-
-                byte mt = (byte)(MultiThreaded ? 1 : 0);
-                if (component.ValueRO.MultiThreaded != mt)
-                {
-                    component.ValueRW.MultiThreaded = mt;
-                }
+                component.ValueRW.SimulationType = SimulationType;
+                component.ValueRW.MultiThreaded = (byte)(MultiThreaded ? 1 : 0);
+                component.ValueRW.IncrementalDynamicBroadphase = IncrementalDynamicBroadphase;
+                component.ValueRW.IncrementalStaticBroadphase = IncrementalStaticBroadphase;
             }
             else
             {
@@ -50,37 +46,6 @@ namespace Unity.Physics.Tests
     abstract class UnityPhysicsSamplesTest
     {
         protected static World DefaultWorld => World.DefaultGameObjectInjectionWorld;
-
-        protected static IEnumerable GetPerformanceScenes()
-        {
-            var scenes = new List<string>();
-
-            var sceneCount = SceneManager.sceneCountInBuildSettings;
-            for (int sceneIndex = 0; sceneIndex < sceneCount; ++sceneIndex)
-            {
-                var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
-                if (scenePath.Contains("Tests/Performance"))
-                {
-#if UNITY_STANDALONE_LINUX
-                    // [DOTS-9376] Currently hanging with Unity.Physics.Tests.PerformanceTests.Havok_PerformanceTest_Parallel.LoadScenes
-                    if (scenePath.Contains("/ConvexCollisionPerformanceTest.unity") ||
-                        scenePath.Contains("/RagdollPerformanceTest.unity") ||
-                        scenePath.Contains("/SphereCollisionPerformanceTest.unity") ||
-                        scenePath.Contains("/CubeCollisionPerformanceTest.unity"))
-                        continue;
-#endif
-#if UNITY_IOS
-                    if (scenePath.Contains("/RagdollPerformanceTest.unity"))
-                        continue;
-#endif
-
-                    scenes.Add(scenePath);
-                }
-            }
-            scenes.Sort();
-
-            return scenes;
-        }
 
         protected static IEnumerable GetScenes()
         {
@@ -115,8 +80,8 @@ namespace Unity.Physics.Tests
                     scenePath.Contains("/Raycast Car.unity"))
                     continue;
 
-                //SIGSEGV/SIGBUSS error looks like there's some alignment/out of bounds acceess somewhere
-                //Sample tests seem to randomly trigger it on CI, at the moment of this comment it is not reproductible locally
+                //SIGSEGV/SIGBUSS error looks like there's some alignment/out of bounds access somewhere
+                //Sample tests seem to randomly trigger it on CI, at the moment of this comment it is not reproducible locally
                 if (scenePath.Contains("/Animation.unity")
                     || scenePath.Contains("/ClientServer.unity")
                     || scenePath.Contains("/DeactivatedBodiesTriggerTest")) //all trigger test scenes
@@ -124,6 +89,10 @@ namespace Unity.Physics.Tests
 #endif
 
 #if UNITY_IOS
+                // Disabled due to iOS device specific crash on 2023.3.0a17: DOTS-9820
+                if (scenePath.Contains("/Pyramids.unity"))
+                    continue;
+
                 // Tests we're skipping with HavokPhysics
                 if (scenePath.Contains("/Joints - Ragdolls.unity") ||
                     scenePath.Contains("/ChangeGroundFilter.unity") ||
@@ -144,15 +113,23 @@ namespace Unity.Physics.Tests
                     scenePath.Contains("/Terrain_VertexSamples.unity"))
                     continue;
 #endif
+
+#if UNITY_STANDALONE_WIN
+                // DOTS-10318 RagdollPerformanceTest is failing on Windows Standalone
+                if (scenePath.Contains("/RagdollPerformanceTest.unity"))
+                    continue;
+#endif
+
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+                // [DOTS-10612] TreeLifetimePerformanceTest frequently crashes in standalone tests for Windows and macOS
+                if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
+                    continue;
+#endif
                 scenes.Add(scenePath);
             }
             scenes.Sort();
             return scenes;
         }
-
-        [UnityTest]
-        [Timeout(240000)]
-        public abstract IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath);
 
         [TearDown]
         public void TearDown()
@@ -162,6 +139,8 @@ namespace Unity.Physics.Tests
 
         protected IEnumerator LoadSceneAndSimulate(string scenePath)
         {
+            VerifyConsoleMessages.ClearMessagesInConsole();
+
             SceneManager.LoadScene(scenePath);
             // Skip a frame in order to trigger loading so that the Sub Scene loading process is started and we can find
             // the corresponding scene entities below.
@@ -246,14 +225,21 @@ namespace Unity.Physics.Tests
             DefaultWorldInitialization.Initialize("Default World", false);
         }
 
-        protected static void ConfigureSimulation(in World world, in SimulationType simulationType, in bool multiThreaded = true)
+        protected static void ConfigureSimulation(in World world, in SimulationType simulationType, in bool multiThreaded = true,
+            in bool incrementalDynamicBroadphase = false, in bool incrementalStaticBroadphase = false)
         {
             var configSystem = world.GetExistingSystemManaged<SimulationConfigurationSystem>();
 
             Assert.IsNull(configSystem,
                 $"The '{nameof(SimulationConfigurationSystem)}' system should only be created by the '{nameof(ConfigureSimulation)}' function!");
 
-            configSystem = new SimulationConfigurationSystem() { SimulationType = simulationType, MultiThreaded = multiThreaded };
+            configSystem = new SimulationConfigurationSystem
+            {
+                SimulationType = simulationType,
+                MultiThreaded = multiThreaded,
+                IncrementalDynamicBroadphase = incrementalDynamicBroadphase,
+                IncrementalStaticBroadphase = incrementalStaticBroadphase
+            };
             world.AddSystemManaged(configSystem);
             world.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().AddSystemToUpdateList(configSystem);
         }
@@ -264,7 +250,7 @@ namespace Unity.Physics.Tests
     {
         [UnityTest]
         [Timeout(240000)]
-        public override IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
+        public IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
         {
             // Log scene name in case Unity crashes and test results aren't written out.
             Debug.Log("Loading " + scenePath);
@@ -282,7 +268,7 @@ namespace Unity.Physics.Tests
     {
         [UnityTest]
         [Timeout(240000)]
-        public override IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
+        public IEnumerator LoadScenes([ValueSource(nameof(GetScenes))] string scenePath)
         {
             // Log scene name in case Unity crashes and test results aren't written out.
             Debug.Log("Loading " + scenePath);

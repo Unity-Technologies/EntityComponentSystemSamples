@@ -1,6 +1,6 @@
 # DOTS Samples
 
-- [Entities samples](./EntitiesSamples/Assets/README.md)
+- [Entities samples](./EntitiesSamples/README.md)
 - [Netcode samples](./NetcodeSamples/README.md)
 - [Physics samples](./PhysicsSamples/README.md)
 - [Entities.Graphics HDRP samples](./GraphicsSamples/HDRPSamples/README.md)
@@ -8,7 +8,7 @@
 
 # Learning DOTS
 
-For those new to DOTS, here's the recommended sequence to follow through the introductory material in the [Entities samples project](./EntitiesSamples/Assets/README.md):
+For those new to DOTS, here's the recommended sequence to follow through the introductory material in the [Entities samples project](./EntitiesSamples/README.md):
 
 A few short videos introduce the basic concepts of the job system and ECS:
 
@@ -17,7 +17,7 @@ A few short videos introduce the basic concepts of the job system and ECS:
 1. [Video: ECS Systems](https://youtu.be/k07I-DpCcvE) (7 minutes)
 1. [Video: ECS Baking](https://youtu.be/r337nXZFYeA) (6 minutes)
 
-You may also want to read the [Entities API overview](./EntitiesSamples/Assets/README.md#entities-api-overview), which is briefer and more sequentially structured than the [manual](https://docs.unity3d.com/Packages/com.unity.entities@latest/).
+You may also want to read the [Entities API overview](./EntitiesSamples/README.md#entities-api-overview), which is briefer and more sequentially structured than the [manual](https://docs.unity3d.com/Packages/com.unity.entities@latest/).
 
 These starter samples each have an explanatory video:
 

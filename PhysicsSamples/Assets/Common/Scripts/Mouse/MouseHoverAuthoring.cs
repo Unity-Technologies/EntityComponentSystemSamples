@@ -68,9 +68,11 @@ namespace Unity.Physics.Extensions
 
             public void Execute()
             {
-                var mousePickCollector = new MousePickCollector(1.0f, CollisionWorld.Bodies, CollisionWorld.NumDynamicBodies);
-                mousePickCollector.IgnoreTriggers = IgnoreTriggers;
-                mousePickCollector.IgnoreStatic = IgnoreStatic;
+                var mousePickCollector = new MousePickCollector(CollisionWorld.NumDynamicBodies)
+                {
+                    IgnoreTriggers = IgnoreTriggers,
+                    IgnoreStatic = IgnoreStatic
+                };
 
                 if (CollisionWorld.CastRay(RayInput, ref mousePickCollector))
                 {
@@ -320,7 +322,7 @@ namespace Unity.Physics.Extensions
                 // use the material id from the hover entity, but the mesh id from the current entity
                 var newMeshInfo = MaterialMeshInfo.FromRenderMeshArrayIndices(hoverMeshInfo.Material, mouseHover.OriginalMeshInfo.Mesh);
 
-                // apply the new render info the the current entity
+                // apply the new render info to the current entity
                 EntityManager.SetComponentData(mouseHover.CurrentEntity, newMeshInfo);
                 EntityManager.SetSharedComponentManaged(mouseHover.CurrentEntity, newRenderMeshes);
             }

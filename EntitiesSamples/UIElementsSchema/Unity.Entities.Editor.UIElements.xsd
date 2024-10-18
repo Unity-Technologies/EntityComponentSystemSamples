@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:editor="UnityEditor.UIElements" xmlns:engine="UnityEngine.UIElements" xmlns="UnityEditor.ShortcutManagement" elementFormDefault="qualified" targetNamespace="Unity.Entities.Editor.UIElements" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:editor="UnityEditor.UIElements" xmlns:engine="UnityEngine.UIElements" xmlns="UnityEditor.Overlays" elementFormDefault="qualified" targetNamespace="Unity.Entities.Editor.UIElements" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
-  <xs:simpleType name="SearchField_keyboard-type_Type">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Default" />
-      <xs:enumeration value="ASCIICapable" />
-      <xs:enumeration value="NumbersAndPunctuation" />
-      <xs:enumeration value="URL" />
-      <xs:enumeration value="NumberPad" />
-      <xs:enumeration value="PhonePad" />
-      <xs:enumeration value="NamePhonePad" />
-      <xs:enumeration value="EmailAddress" />
-      <xs:enumeration value="NintendoNetworkAccount" />
-      <xs:enumeration value="Social" />
-      <xs:enumeration value="Search" />
-      <xs:enumeration value="DecimalPad" />
-      <xs:enumeration value="OneTimeCode" />
-    </xs:restriction>
-  </xs:simpleType>
   <xs:complexType name="SearchFieldType">
     <xs:complexContent mixed="false">
       <xs:restriction base="engine:VisualElementType">
@@ -42,13 +25,10 @@
         <xs:attribute default="*" name="mask-character" type="xs:string" use="optional" />
         <xs:attribute default="false" name="readonly" type="xs:boolean" use="optional" />
         <xs:attribute default="false" name="is-delayed" type="xs:boolean" use="optional" />
-        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" use="optional" />
-        <xs:attribute default="Default" name="keyboard-type" xmlns:q1="Unity.Entities.Editor.UIElements" type="q1:SearchField_keyboard-type_Type" use="optional" />
-        <xs:attribute default="false" name="auto-correction" type="xs:boolean" use="optional" />
         <xs:attribute default="false" name="multiline" type="xs:boolean" use="optional" />
         <xs:anyAttribute processContents="lax" />
       </xs:restriction>
     </xs:complexContent>
   </xs:complexType>
-  <xs:element name="SearchField" substitutionGroup="engine:VisualElement" xmlns:q2="Unity.Entities.Editor.UIElements" type="q2:SearchFieldType" />
+  <xs:element name="SearchField" substitutionGroup="engine:VisualElement" xmlns:q1="Unity.Entities.Editor.UIElements" type="q1:SearchFieldType" />
 </xs:schema>

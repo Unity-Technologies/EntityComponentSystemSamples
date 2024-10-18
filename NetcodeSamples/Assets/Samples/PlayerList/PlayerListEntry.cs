@@ -31,10 +31,14 @@ namespace Unity.NetCode.Samples.PlayerList
 
             public enum UpdateType : byte
             {
+                /// <summary>A player (who I'm aware of) disconnected.</summary>
                 PlayerDisconnect = 0,
+                /// <summary>This is a new joiner, who joined AFTER me.</summary>
                 NewJoiner,
+                /// <summary>This is an existing player, who joined the game BEFORE me.</summary>
                 ExistingPlayer,
-                UsernameChange
+                /// <summary>A player changed their username.</summary>
+                UsernameChange,
             }
 
             public UpdateType ChangeType;

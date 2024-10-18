@@ -63,7 +63,7 @@ public class AddComponentsExample : MonoBehaviour
             receiveShadows: false);
 
         int objCount = m_w * m_h;
-        var matList = new List<Material>();
+        var matList = new List<UnityObjectRef<Material>>();
         if ( m_differentMaterial )
         {
             for (int i=0;i<objCount;i++)
@@ -83,7 +83,7 @@ public class AddComponentsExample : MonoBehaviour
 
 
 
-        var meshArray = new RenderMeshArray() { Materials = matList.ToArray(), Meshes = new[] { Mesh } };
+        var meshArray = new RenderMeshArray() { MaterialReferences = matList.ToArray(), MeshReferences = new[] { (UnityObjectRef<Mesh>)Mesh } };
         meshArray.ResetHash128();
 
         // Create empty base entity

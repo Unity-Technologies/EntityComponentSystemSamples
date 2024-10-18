@@ -26,7 +26,7 @@ namespace Tutorials.Firefighters
             {
                 initialized = true;
 
-                configManaged.UIController = GameObject.FindObjectOfType<UIController>();
+                configManaged.UIController = GameObject.FindFirstObjectByType<UIController>();
             }
 
             var shouldReposition = configManaged.UIController.ShouldReposition();

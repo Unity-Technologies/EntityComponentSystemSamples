@@ -61,7 +61,11 @@ public partial class RotateThroughCollisionFiltersSystem : SystemBase
             return;
 
         // Change the CollisionFilter of the static cubes
-        new RotateFilterCountDownJob().Run();
+        var jobHandle = new RotateFilterCountDownJob()
+            .Schedule(Dependency);
+
+        Dependency = jobHandle;
+        jobHandle.Complete();
 
         // Change the Material(colour) of the colliders based on their CollisionFilter
         foreach (var(collider, _, countdown, entity)
@@ -93,6 +97,7 @@ public partial class RotateThroughCollisionFiltersSystem : SystemBase
                 {
                     var newMeshInfo = EntityManager.GetComponentData<MaterialMeshInfo>(entity);
                     newMeshInfo.Material = MaterialMeshInfo.ArrayIndexToStaticIndex(index);
+                    EntityManager.SetComponentData(entity, newMeshInfo);
                 }
             }
         }

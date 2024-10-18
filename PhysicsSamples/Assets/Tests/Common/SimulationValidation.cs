@@ -120,7 +120,6 @@ namespace Unity.Physics.Tests
                 return;
             }
 
-
             var bodyAWorld = bodyPair.EntityA != Entity.Null
                 ? TransformLookup[bodyPair.EntityA].ToMatrix()
                 : float4x4.identity;
@@ -310,7 +309,6 @@ namespace Unity.Physics.Tests
                     break;
             }
 
-
             // target validation for PhysicsJoints
             switch (joint.JointType)
             {
@@ -371,18 +369,27 @@ namespace Unity.Physics.Tests
                     ValidateConstraintType(motorConstraint, ConstraintType.RotationMotor);
                     int constrainedAxisIndex = motorConstraint.ConstrainedAxis1D;
                     var targetAngle = motorConstraint.Target[constrainedAxisIndex];
-                    var rotAxis = new float3x3(anchorAWorld.rot)[constrainedAxisIndex];
-                    var qTargetRel = quaternion.AxisAngle(rotAxis, targetAngle);
 
-                    // If the rotational motor has reached its target (which we assume here), then rotating B by qTargetRel should get us to A
-                    var qTargetWorld = math.normalize(math.mul(qTargetRel, anchorBWorld.rot));
-                    var qDelta = math.normalize(math.mul(math.inverse(anchorAWorld.rot), qTargetWorld));
-                    ((Quaternion)qDelta).ToAngleAxis(out var deltaAngle, out var axis);
-                    deltaAngle = math.radians(deltaAngle);
-                    var cosAngle = math.cos(deltaAngle);
-                    if (cosAngle < OrientationErrorTolCos)
+                    // Calculate angle between the joint attachment frames.
+                    // Note: we already confirmed that the joint axis is aligned in both anchor frames in the pose validation above.
+                    var qDelta = math.normalize(math.mul(math.inverse(anchorBWorld.rot), anchorAWorld.rot));
+                    ((Quaternion)qDelta).ToAngleAxis(out var currentAngle, out var axis);
+                    // account for flip of axis in ToAngleAxis calculation
+                    currentAngle *= axis[constrainedAxisIndex];
+                    currentAngle = math.radians(currentAngle);
+                    var deltaAngle = currentAngle - targetAngle;
+                    var deltaAngleCos = math.cos(deltaAngle);
+                    // Note: below we exclude compliant joints, since these won't be able to reach their targets with reasonable accuracy in the general case.
+                    var compliantJoint = motorConstraint.SpringFrequency < 1e3;
+                    if (deltaAngleCos < OrientationErrorTolCos && !compliantJoint)
                     {
                         Errors.Add($"Validation (RotationalMotor): angle between anchor frames differs from target angle {targetAngle} radians by {deltaAngle} radians, which exceeds the orientation error tolerance of {OrientationErrorTol} radians.");
+                    }
+
+                    // check if we are within the limits
+                    if (currentAngle + OrientationErrorTol <= motorConstraint.Min || currentAngle - OrientationErrorTol >= motorConstraint.Max)
+                    {
+                        Errors.Add($"Validation (RotationalMotor): angle between anchor frames {currentAngle} is out of admissible (min, max) range ({motorConstraint.Min}, {motorConstraint.Max}) by more than orientation error tolerance of {OrientationErrorTol} radians.");
                     }
                     break;
                 }

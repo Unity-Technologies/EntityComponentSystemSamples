@@ -1,6 +1,16 @@
 # Release Notes
 All notable changes to this project will be documented in this file.
 
+## [Physics Samples Project for 1.3.0]
+### Changes
+* Added demo scene `Modify Collider Geometry.unity` demonstrating runtime collider deformations. In the demo, the geometry of various types of colliders are modified via the new `ColliderBakeTransformAuthoring` component, which lets you create cyclic animations during which a game object's collider and its visuals are deformed over time. This is achieved through use of the `Collider.BakeTransform` function, which applies an affine transformation to a collider, correspondingly rotating, translating, scaling and shearing its geometry in the process. 
+* Added support for spring and damping for motors in the custom authoring components. In the motor demos, these fields are used now.
+* Demo scenes with motors now have examples of how to author using built-in components or custom components
+
+### Fixes
+* Modify Runtime - Collision Filter demo: fixed a bug where the render mesh of the cubes was being incorrectly changed to a sphere.
+* Fixed a memory leak in the ColliderBakeTransformSystem caused by the subscene being disposed before the OnDestroy could properly dispose a collider blob
+
 ## [Physics Samples Project for 1.2.0]
 ### Changes
 * Reorganized the samples, with cleanup of various samples' code and scenes.

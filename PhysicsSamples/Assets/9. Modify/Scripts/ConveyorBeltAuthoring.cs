@@ -2,7 +2,6 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using Unity.Burst;
@@ -114,7 +113,7 @@ public struct ConveyorBeltDebugDisplayData : IComponentData
     public float Offset;
 }
 
-// Displays conveyor belt data in Runtime, where it is impossible to do so using OnDrawGizmos().
+// Displays conveyor belt data at Runtime
 [UpdateInGroup(typeof(PhysicsSimulationGroup))]
 public partial struct DisplayConveyorBeltSystem : ISystem
 {
@@ -168,6 +167,7 @@ public partial struct DisplayConveyorBeltSystem : ISystem
         return true;
     }
 
+#if UNITY_EDITOR
     [BurstCompile]
     public partial struct DisplayConveyorBeltJob : IJobEntity
     {
@@ -183,6 +183,7 @@ public partial struct DisplayConveyorBeltSystem : ISystem
             }
         }
     }
+#endif
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -196,6 +197,7 @@ public partial struct DisplayConveyorBeltSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+#if UNITY_EDITOR
         // Properly chain up dependencies
         {
             if (!SystemAPI.TryGetSingleton<PhysicsDebugDisplayData>(out _))
@@ -210,6 +212,7 @@ public partial struct DisplayConveyorBeltSystem : ISystem
         {
             DeltaTime = SystemAPI.Time.fixedDeltaTime
         }.Schedule(state.Dependency);
+#endif
     }
 }
 

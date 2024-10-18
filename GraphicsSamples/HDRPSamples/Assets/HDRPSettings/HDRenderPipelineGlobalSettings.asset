@@ -12,13 +12,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 781cc897cf8675041a751163b51f97dd, type: 3}
   m_Name: HDRenderPipelineGlobalSettings
   m_EditorClassIdentifier: 
-  m_DefaultVolumeProfile: {fileID: 11400000, guid: 582adbd84082fdb4faf7cd4beb1ccd14,
-    type: 2}
-  m_LookDevVolumeProfile: {fileID: 0}
-  m_RenderingPathDefaultCameraFrameSettings:
+  m_CustomPostProcessOrdersSettings:
+    m_Version: 0
+    m_BeforeTransparentCustomPostProcesses:
+      m_InjectionPoint: 0
+      m_CustomPostProcessTypesAsString: []
+    m_BeforeTAACustomPostProcesses:
+      m_InjectionPoint: 3
+      m_CustomPostProcessTypesAsString: []
+    m_BeforePostProcessCustomPostProcesses:
+      m_InjectionPoint: 1
+      m_CustomPostProcessTypesAsString: []
+    m_AfterPostProcessBlursCustomPostProcesses:
+      m_InjectionPoint: 4
+      m_CustomPostProcessTypesAsString: []
+    m_AfterPostProcessCustomPostProcesses:
+      m_InjectionPoint: 2
+      m_CustomPostProcessTypesAsString: []
+  beforeTransparentCustomPostProcesses: []
+  beforePostProcessCustomPostProcesses: []
+  afterPostProcessBlursCustomPostProcesses: []
+  afterPostProcessCustomPostProcesses: []
+  beforeTAACustomPostProcesses: []
+  m_ShaderStrippingSetting:
+    m_Version: 0
+    m_ExportShaderVariants: 1
+    m_ShaderVariantLogLevel: 0
+    m_StripRuntimeDebugShaders: 1
+  m_ShaderVariantLogLevel: 0
+  m_SupportRuntimeDebugDisplay: 0
+  m_ExportShaderVariants: 1
+  m_StripDebugVariants: 1
+  DLSSProjectId: 000000
+  useDLSSCustomProjectId: 0
+  supportProbeVolumes: 0
+  autoRegisterDiffusionProfiles: 0
+  analyticDerivativeEmulation: 0
+  analyticDerivativeDebugOutput: 0
+  lensAttenuationMode: 0
+  colorGradingSpace: 0
+  m_ObsoleteDiffusionProfileSettingsList: []
+  specularFade: 0
+  rendererListCulling: 0
+  m_ObsoleteDefaultVolumeProfile: {fileID: 0}
+  m_ObsoleteLookDevVolumeProfile: {fileID: 0}
+  m_ObsoleteRenderingPathDefaultCameraFrameSettings:
     bitDatas:
       data1: 140649441525597
-      data2: 4539628434053070872
+      data2: 4575659395735552024
     lodBias: 1
     lodBiasMode: 0
     lodBiasQualityLevel: 0
@@ -28,9 +69,10 @@ MonoBehaviour:
     sssQualityMode: 0
     sssQualityLevel: 0
     sssCustomSampleBudget: 20
+    sssCustomDownsampleSteps: 0
     msaaMode: 1
     materialQuality: 0
-  m_RenderingPathDefaultBakedOrCustomReflectionFrameSettings:
+  m_ObsoleteRenderingPathDefaultBakedOrCustomReflectionFrameSettings:
     bitDatas:
       data1: 135310787769117
       data2: 4539628424389459992
@@ -43,9 +85,10 @@ MonoBehaviour:
     sssQualityMode: 0
     sssQualityLevel: 0
     sssCustomSampleBudget: 20
+    sssCustomDownsampleSteps: 0
     msaaMode: 1
     materialQuality: 0
-  m_RenderingPathDefaultRealtimeReflectionFrameSettings:
+  m_ObsoleteRenderingPathDefaultRealtimeReflectionFrameSettings:
     bitDatas:
       data1: 140060864290589
       data2: 4539628424389459992
@@ -58,16 +101,114 @@ MonoBehaviour:
     sssQualityMode: 0
     sssQualityLevel: 0
     sssCustomSampleBudget: 20
+    sssCustomDownsampleSteps: 0
     msaaMode: 1
     materialQuality: 0
-  m_RenderPipelineResources: {fileID: 11400000, guid: 3ce144cff5783da45aa5d4fdc2da14b7,
-    type: 2}
-  m_RenderPipelineRayTracingResources: {fileID: 0}
-  beforeTransparentCustomPostProcesses: []
-  beforePostProcessCustomPostProcesses: []
-  afterPostProcessBlursCustomPostProcesses: []
-  afterPostProcessCustomPostProcesses: []
-  beforeTAACustomPostProcesses: []
+  m_ObsoleteRenderingPath:
+    m_Version: 0
+    m_Camera:
+      bitDatas:
+        data1: 140649441525597
+        data2: 4575659395735552024
+      lodBias: 1
+      lodBiasMode: 0
+      lodBiasQualityLevel: 0
+      maximumLODLevel: 0
+      maximumLODLevelMode: 0
+      maximumLODLevelQualityLevel: 0
+      sssQualityMode: 0
+      sssQualityLevel: 0
+      sssCustomSampleBudget: 20
+      sssCustomDownsampleSteps: 0
+      msaaMode: 1
+      materialQuality: 0
+    m_CustomOrBakedReflection:
+      bitDatas:
+        data1: 135310787769117
+        data2: 4539628424389459992
+      lodBias: 1
+      lodBiasMode: 0
+      lodBiasQualityLevel: 0
+      maximumLODLevel: 0
+      maximumLODLevelMode: 0
+      maximumLODLevelQualityLevel: 0
+      sssQualityMode: 0
+      sssQualityLevel: 0
+      sssCustomSampleBudget: 20
+      sssCustomDownsampleSteps: 0
+      msaaMode: 1
+      materialQuality: 0
+    m_RealtimeReflection:
+      bitDatas:
+        data1: 140060864290589
+        data2: 4539628424389459992
+      lodBias: 1
+      lodBiasMode: 0
+      lodBiasQualityLevel: 0
+      maximumLODLevel: 0
+      maximumLODLevelMode: 0
+      maximumLODLevelQualityLevel: 0
+      sssQualityMode: 0
+      sssQualityLevel: 0
+      sssCustomSampleBudget: 20
+      sssCustomDownsampleSteps: 0
+      msaaMode: 1
+      materialQuality: 0
+  m_Settings:
+    m_SettingsList:
+      m_List:
+      - rid: 6391757267836862464
+      - rid: 6391757267836862465
+      - rid: 6391757267836862466
+      - rid: 6391757267836862467
+      - rid: 6391757267836862468
+      - rid: 6391757267836862469
+      - rid: 6391757267836862470
+      - rid: 6391757267836862471
+      - rid: 6391757267836862472
+      - rid: 6391757267836862473
+      - rid: 6391757267836862474
+      - rid: 6391757267836862475
+      - rid: 6391757267836862476
+      - rid: 6391757267836862477
+      - rid: 6391757267836862478
+      - rid: 6391757267836862479
+      - rid: 6391757267836862480
+      - rid: 6391757267836862481
+      - rid: 6391757267836862482
+      - rid: 6391757267836862483
+      - rid: 6391757267836862484
+      - rid: 6391757267836862485
+      - rid: 6391757267836862486
+      - rid: 6391757267836862487
+      - rid: 6391757267836862488
+      - rid: 6391757267836862489
+      - rid: 6391757267836862490
+      - rid: 6391757267836862491
+      - rid: 6391757267836862492
+      - rid: 6391757267836862493
+      - rid: 6391757267836862494
+      - rid: 6391757267836862495
+      - rid: 6391757267836862496
+    m_RuntimeSettings:
+      m_List: []
+  renderingLayerNames:
+  - Light Layer default
+  - Light Layer 1
+  - Light Layer 2
+  - Light Layer 3
+  - Light Layer 4
+  - Light Layer 5
+  - Light Layer 6
+  - Light Layer 7
+  - Decal Layer default
+  - Decal Layer 1
+  - Decal Layer 2
+  - Decal Layer 3
+  - Decal Layer 4
+  - Decal Layer 5
+  - Decal Layer 6
+  - Decal Layer 7
   lightLayerName0: Light Layer default
   lightLayerName1: Light Layer 1
   lightLayerName2: Light Layer 2
@@ -84,22 +225,930 @@ MonoBehaviour:
   decalLayerName5: Decal Layer 5
   decalLayerName6: Decal Layer 6
   decalLayerName7: Decal Layer 7
-  lensAttenuationMode: 0
-  colorGradingSpace: 0
-  m_ObsoleteDiffusionProfileSettingsList: []
-  rendererListCulling: 0
-  DLSSProjectId: 000000
-  useDLSSCustomProjectId: 0
-  supportProbeVolumes: 0
-  supportRuntimeDebugDisplay: 0
-  autoRegisterDiffusionProfiles: 0
   apvScenesData:
-    serializedBounds: []
-    serializedHasVolumes: []
-    serializedProfiles: []
-    serializedBakeSettings: []
-    serializedBakingSets: []
-    m_LightingScenario: Default
-  m_Version: 5
-  m_ShaderVariantLogLevel: 0
-  m_ExportShaderVariants: 1
+    obsoleteSceneBounds:
+      m_Keys: []
+      m_Values: []
+    obsoleteHasProbeVolumes:
+      m_Keys: []
+      m_Values: 
+  m_Version: 14
+  references:
+    version: 2
+    RefIds:
+    - rid: 6391757267836862464
+      type: {class: LensSettings, ns: UnityEngine.Rendering.HighDefinition, asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_LensAttenuationMode: 0
+    - rid: 6391757267836862465
+      type: {class: WaterSystemGlobalSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 1
+        m_EnableMaskAndCurrentWaterDecals: 0
+    - rid: 6391757267836862466
+      type: {class: HDRenderPipelineEditorTextures, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_MoonAlbedo: {fileID: 2800000, guid: cce9f0cf7e606e547a7317aedb4ad6d9, type: 3}
+    - rid: 6391757267836862467
+      type: {class: LookDevVolumeProfileSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_VolumeProfile: {fileID: 11400000, guid: 06600e076ab553d45a32b8fcb788d504,
+          type: 2}
+    - rid: 6391757267836862468
+      type: {class: WaterSystemRuntimeResources, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_WaterMaterial: {fileID: -876546973899608171, guid: 3fda5e465882bec4d8e64161b681806c,
+          type: 3}
+        m_WaterExclusionMaterial: {fileID: 2100000, guid: 1e520c84f7fd17c46af5586f6632155c,
+          type: 2}
+        m_WaterDecalMaterial: {fileID: -876546973899608171, guid: 7e2c0d424490bfc4698c37245b8c63ed,
+          type: 3}
+        m_WaterSimulationCS: {fileID: 7200000, guid: 32ac7f445960a854595586a600c24034,
+          type: 3}
+        m_FourierTransformCS: {fileID: 7200000, guid: bc2ee21836a0b5147900ef35a6e1f508,
+          type: 3}
+        m_WaterEvaluationCS: {fileID: 7200000, guid: c24e765a2bbaace4d9a0ecec600e1967,
+          type: 3}
+        m_WaterPS: {fileID: -6465566751694194690, guid: 3fda5e465882bec4d8e64161b681806c,
+          type: 3}
+        m_WaterLightingCS: {fileID: 7200000, guid: 05d00ad19f202ee4891fdaa90d6d1b23,
+          type: 3}
+        m_WaterLineCS: {fileID: 7200000, guid: 1e7e38362b5026d44ab4f3ff4a612026, type: 3}
+        m_WaterCausticsPS: {fileID: 4800000, guid: 020d64d10886f754e91664d240248c13,
+          type: 3}
+        m_WaterDecalPS: {fileID: 4800000, guid: cf863cbd7bbd44a43b414caed214ba29,
+          type: 3}
+        m_WaterDeformationCS: {fileID: 7200000, guid: 9b8063fa5834d4243bfca8c68a92d9f1,
+          type: 3}
+        m_WaterFoamCS: {fileID: 7200000, guid: 0d16d14b783e65f4d81dbcece2bd0ef9, type: 3}
+        m_WaterDecalMigrationShader: {fileID: -6465566751694194690, guid: 9f1661ed5b4d6ee4685ad5683b09a903,
+          type: 3}
+        m_FoamMask: {fileID: 2800000, guid: ca1d72d84c34dba4390eab4c86e62f62, type: 3}
+    - rid: 6391757267836862469
+      type: {class: HDRenderPipelineEditorShaders, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_GpuInlineDebugDrawerLine: {fileID: 4800000, guid: 039c5248164c71b4aa6d780131c1bfaf,
+          type: 3}
+        m_AutodeskInteractive: {fileID: 4800000, guid: 7252379db4c18b641b517f2c91bb57e1,
+          type: 3}
+        m_AutodeskInteractiveTransparent: {fileID: 4800000, guid: ee2ce0be66f45d9449d71ba9b49c2acd,
+          type: 3}
+        m_AutodeskInteractiveMasked: {fileID: 4800000, guid: 29c4adff654862b40a2e9fb2015a42c3,
+          type: 3}
+        m_DefaultSpeedTree8Shader: {fileID: -6465566751694194690, guid: 4819724840ee9444f9da841b477038ce,
+          type: 3}
+        m_DefaultSpeedTree9Shader: {fileID: -6465566751694194690, guid: d81c74dd5f463104ca482aa23ef2c798,
+          type: 3}
+    - rid: 6391757267836862470
+      type: {class: AnalyticDerivativeSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_AnalyticDerivativeEmulation: 0
+        m_AnalyticDerivativeDebugOutput: 0
+    - rid: 6391757267836862471
+      type: {class: CustomPostProcessOrdersSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_BeforeTransparentCustomPostProcesses:
+          m_InjectionPoint: 0
+          m_CustomPostProcessTypesAsString: []
+        m_BeforeTAACustomPostProcesses:
+          m_InjectionPoint: 3
+          m_CustomPostProcessTypesAsString: []
+        m_BeforePostProcessCustomPostProcesses:
+          m_InjectionPoint: 1
+          m_CustomPostProcessTypesAsString: []
+        m_AfterPostProcessBlursCustomPostProcesses:
+          m_InjectionPoint: 4
+          m_CustomPostProcessTypesAsString: []
+        m_AfterPostProcessCustomPostProcesses:
+          m_InjectionPoint: 2
+          m_CustomPostProcessTypesAsString: []
+    - rid: 6391757267836862472
+      type: {class: RenderGraphSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_DynamicRenderPassCulling: 0
+    - rid: 6391757267836862473
+      type: {class: DiffusionProfileDefaultSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_AutoRegisterDiffusionProfiles: 0
+    - rid: 6391757267836862474
+      type: {class: HDRenderPipelineRuntimeMaterials, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_PBRSkyMaterial: {fileID: -876546973899608171, guid: 02532cbb810fb404db49da84f1efe41e,
+          type: 3}
+        m_AreaLightMaterial: {fileID: 2100000, guid: ef5f65c980e25304098a95e28f3bd20b,
+          type: 2}
+        m_AreaLightCookieMaterial: {fileID: 2100000, guid: 78c6825c5d9c3664f9879ae8609618c7,
+          type: 2}
+    - rid: 6391757267836862475
+      type: {class: HDRenderPipelineEditorAssets, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_DefaultSettingsVolumeProfile: {fileID: 11400000, guid: f940a8037e6cda542891dc1aac1fa4e8,
+          type: 2}
+        m_LookDevDefaultLookDevVolumeProfile: {fileID: 11400000, guid: 254c4fe87beb7be4fa72e1681edbed02,
+          type: 2}
+        m_DefaultDiffusionProfileSettingsList:
+        - {fileID: 11400000, guid: 404820c4cf36ad944862fa59c56064f0, type: 2}
+        - {fileID: 11400000, guid: 2384dbf2c1c420f45a792fbc315fbfb1, type: 2}
+    - rid: 6391757267836862476
+      type: {class: VolumetricCloudsRuntimeResources, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_VolumetricCloudsCS: {fileID: 7200000, guid: f911a8577fa9a4546a6b255bcf888baf,
+          type: 3}
+        m_VolumetricCloudsTraceCS: {fileID: 7200000, guid: 66eaa9becc91a8646a88c15375af8b86,
+          type: 3}
+        m_VolumetricCloudsTraceShadowsCS: {fileID: 7200000, guid: f350c5c3b41fd1b408aac9076f96610e,
+          type: 3}
+        m_VolumetricCloudsShadowFilterCS: {fileID: 7200000, guid: 771ea9a52996c024095906ac37a8a71f,
+          type: 3}
+        m_VolumetricCloudMapGeneratorCS: {fileID: 7200000, guid: 6b22771f0aa98744cb09f455a5a818cb,
+          type: 3}
+        m_VolumetricCloudsCombinePS: {fileID: 4800000, guid: 12f1a69ddf916f042ae6ce8a994506f3,
+          type: 3}
+        m_CloudLutRainAO: {fileID: 2800000, guid: e0bcfddf26ed5584ba3d8b94d3200114,
+          type: 3}
+        m_WorleyNoise128RGBA: {fileID: 11700000, guid: 1fe54a721d0e2504e89f121c723404a8,
+          type: 3}
+        m_WorleyNoise32RGB: {fileID: 11700000, guid: ec156c314a242914dbb706f73ad78cf2,
+          type: 3}
+        m_PerlinNoise32RGB: {fileID: 11700000, guid: d1aae012f8a4f23478471851f17ff915,
+          type: 3}
+    - rid: 6391757267836862477
+      type: {class: ColorGradingSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_ColorGradingSpace: 0
+    - rid: 6391757267836862478
+      type: {class: HDRenderPipelineRuntimeAssets, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_DefaultDiffusionProfile: {fileID: 11400000, guid: 2b7005ba3a4d8474b8cdc34141ad766e,
+          type: 2}
+        m_ComputeMaterialLibrary: {fileID: 11400000, guid: 833ab0ec618db411699ea8cb1a221d0d,
+          type: 2}
+        m_EmissiveCylinderMesh: {fileID: 2534964839176971238, guid: accb6d90f0d50fe4ca0f68159b4323de,
+          type: 3}
+        m_EmissiveQuadMesh: {fileID: 4300000, guid: 1d5a8595286f94f4bb54171d49f473c3,
+          type: 3}
+        m_SphereMesh: {fileID: 4300000, guid: 9e0af751bc36ea146940ba245193e28c, type: 3}
+    - rid: 6391757267836862479
+      type: {class: HDRenderPipelineRuntimeTextures, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_DebugFontTex: {fileID: 2800000, guid: a3ad2df0e49aaa341a3b3a80f93b3f66,
+          type: 3}
+        m_ColorGradient: {fileID: 2800000, guid: 4ea52e665573c1644bf05dd9b11fd2a4,
+          type: 3}
+        m_MatcapTex: {fileID: 2800000, guid: e655445a13b501944a2641ea144edda5, type: 3}
+        m_BlueNoise16LTex:
+        - {fileID: 2800000, guid: efa2ea5416a18da46b64f1266464ffc7, type: 3}
+        - {fileID: 2800000, guid: 0330b95d1d741fc4281eac4aec9d2eae, type: 3}
+        - {fileID: 2800000, guid: 8a51abfa06f36a24e8621796aa6cd4b3, type: 3}
+        - {fileID: 2800000, guid: 29f15236a89d7d748abaa25d8f69f614, type: 3}
+        - {fileID: 2800000, guid: 6abadf255584bba4c944b1e00436ef03, type: 3}
+        - {fileID: 2800000, guid: 979eec7b1833b0441a2cc73bf8db2544, type: 3}
+        - {fileID: 2800000, guid: 8f520abb155364c46b0f0748ef34ec0d, type: 3}
+        - {fileID: 2800000, guid: 8b7bdf66a62cb51409d47548bb0d542f, type: 3}
+        - {fileID: 2800000, guid: fed7135c4936ff947b1477236ec392cd, type: 3}
+        - {fileID: 2800000, guid: 3c2108b42cf27e3479d8587367508c6f, type: 3}
+        - {fileID: 2800000, guid: b6fa54cec31997445a1b5fd8e2887484, type: 3}
+        - {fileID: 2800000, guid: 79f42a2cc0e32614ba4e0fee3e0f88b9, type: 3}
+        - {fileID: 2800000, guid: a75de30c08d74744c9e973e42c2e00e5, type: 3}
+        - {fileID: 2800000, guid: c6c47a7f59293a847a8471bb74b9a262, type: 3}
+        - {fileID: 2800000, guid: 55e474b0d2c992240aed7e3bcbebb78a, type: 3}
+        - {fileID: 2800000, guid: b987ab952dc89bc439eebfaf7b977f51, type: 3}
+        - {fileID: 2800000, guid: f242013130364874486ad0854d54b5d9, type: 3}
+        - {fileID: 2800000, guid: 5e40f3339a0a5be4ea4442562c53575a, type: 3}
+        - {fileID: 2800000, guid: 6f6e861d2ff8cd641b424245a18393a0, type: 3}
+        - {fileID: 2800000, guid: 96b4b7db9e972c54db03d280a7924fb8, type: 3}
+        - {fileID: 2800000, guid: f8c387db83f623d4c875b355974b1398, type: 3}
+        - {fileID: 2800000, guid: ba5d54ee870713c41a40c8435ad4fdea, type: 3}
+        - {fileID: 2800000, guid: 98de916e94bbf4541981fe7c1bd7008f, type: 3}
+        - {fileID: 2800000, guid: e013b0f34384ea242b2366eafe8d66b4, type: 3}
+        - {fileID: 2800000, guid: 08e7f74e876f85247ad1104f35322e19, type: 3}
+        - {fileID: 2800000, guid: eaed38d1a2336e14b8fd351f65d3eddb, type: 3}
+        - {fileID: 2800000, guid: 9b47ce76307ef714d9c08f1f7d37a173, type: 3}
+        - {fileID: 2800000, guid: 4cf893d4f07705d40a404330fb6694d5, type: 3}
+        - {fileID: 2800000, guid: 4ba6dd9a348fff64aba90f736da533bd, type: 3}
+        - {fileID: 2800000, guid: faedd3bf25384dc47b38a94a658e19fc, type: 3}
+        - {fileID: 2800000, guid: cb7d595d4b67de146abf1b1f4d45f417, type: 3}
+        - {fileID: 2800000, guid: a836cbb14cfefd54a8b9ca37d6aadde6, type: 3}
+        m_BlueNoise16RGBTex:
+        - {fileID: 2800000, guid: b232903ea527aba4786ab9a725e610e9, type: 3}
+        - {fileID: 2800000, guid: fe6c6d7fed228ae4c9034639926613ff, type: 3}
+        - {fileID: 2800000, guid: 1dae10311eb6da5428b4247f883f9f0c, type: 3}
+        - {fileID: 2800000, guid: 668a0101474cc3149bdf7b69bdaad1eb, type: 3}
+        - {fileID: 2800000, guid: a3a352512b3774b44aeeb7414aafce58, type: 3}
+        - {fileID: 2800000, guid: f3767acdf061ed14380a360366ffe91c, type: 3}
+        - {fileID: 2800000, guid: a0d5f1353077a9d4d9bf0fdfbc07d718, type: 3}
+        - {fileID: 2800000, guid: 5a195bcf888979144a5db9a99c43a747, type: 3}
+        - {fileID: 2800000, guid: 8d79e4efe64973b4ab5c6e3982b15772, type: 3}
+        - {fileID: 2800000, guid: eaf67a58951a945428cb394e81ed3765, type: 3}
+        - {fileID: 2800000, guid: 287dda93fa25eea4fbb9f7f5ef014718, type: 3}
+        - {fileID: 2800000, guid: 4cb7c602f368c2d44b42c51c353e5b2c, type: 3}
+        - {fileID: 2800000, guid: 3fa94aebb9c04c54aa0cebde90c210ff, type: 3}
+        - {fileID: 2800000, guid: aa35bbfe9eac94d49bb95cd8804c51a7, type: 3}
+        - {fileID: 2800000, guid: ba3b2a48f5297c74eb3b4b2771629d60, type: 3}
+        - {fileID: 2800000, guid: 17165acde01c02f4bb45d0ffd25d5158, type: 3}
+        - {fileID: 2800000, guid: 280a79ac7e2b6e940a7199b8f7e10407, type: 3}
+        - {fileID: 2800000, guid: b75a320b602f27c4ab28904a10142a98, type: 3}
+        - {fileID: 2800000, guid: 226149deca448e745a7c377133e6ca7f, type: 3}
+        - {fileID: 2800000, guid: 059fba768df29964e9f07bd4fffb5776, type: 3}
+        - {fileID: 2800000, guid: 9dee14979276d81489a17afa605f3030, type: 3}
+        - {fileID: 2800000, guid: 3963568f414ac1545b64e5f1ff5daf5d, type: 3}
+        - {fileID: 2800000, guid: a96a5d146fa164d4ebd67318a957a75a, type: 3}
+        - {fileID: 2800000, guid: b5fa2a735b9278349a91f3dbb77691c0, type: 3}
+        - {fileID: 2800000, guid: d3c864eb1f6e4b34c91d1931ad0064a3, type: 3}
+        - {fileID: 2800000, guid: 97f308a7009457545a975a9a498499ce, type: 3}
+        - {fileID: 2800000, guid: daa405d7e1e253a40952bed9e9ca63cc, type: 3}
+        - {fileID: 2800000, guid: 4dbadef8044229d47b9a391147dad1c4, type: 3}
+        - {fileID: 2800000, guid: 7ce9507d3d1997743b39f335a7f868fd, type: 3}
+        - {fileID: 2800000, guid: 7641a2b116fafd64d9c3d6459fdfe801, type: 3}
+        - {fileID: 2800000, guid: c6a5e40e6746fef4fa486e8f620ee8d4, type: 3}
+        - {fileID: 2800000, guid: fd4189357c6dfb94fa2d36afbce72086, type: 3}
+        m_OwenScrambledRGBATex: {fileID: 2800000, guid: b0fe077c1ee7d80428f3d8dfa28a027d,
+          type: 3}
+        m_OwenScrambled256Tex: {fileID: 2800000, guid: 2a205358e67aa9e4a94a128ac9362f4e,
+          type: 3}
+        m_ScramblingTex: {fileID: 2800000, guid: bf25cd6288e2c8d43854a61a8496a830,
+          type: 3}
+        m_RankingTile1SPP: {fileID: 2800000, guid: f2fe0251f704c4c478a8063775cffedb,
+          type: 3}
+        m_ScramblingTile1SPP: {fileID: 2800000, guid: 6185473f62ad3e74da4acac5d482917a,
+          type: 3}
+        m_RankingTile8SPP: {fileID: 2800000, guid: af4bd638a4b3eb14781e6441adcdfbb9,
+          type: 3}
+        m_ScramblingTile8SPP: {fileID: 2800000, guid: 152f8b933250a7b448fc2d4d301b9944,
+          type: 3}
+        m_RankingTile256SPP: {fileID: 2800000, guid: 1e604a266c415cd46b36d97cd9220aa8,
+          type: 3}
+        m_ScramblingTile256SPP: {fileID: 2800000, guid: 882fb55d7b3e7c94598a318df9376e32,
+          type: 3}
+        m_EyeCausticLUT: {fileID: 11700000, guid: d4ec12283a044584794485916f4142a9,
+          type: 3}
+        m_HairAttenuationLUT: {fileID: 11700000, guid: d37662e2b254e594abf839dddc5ab653,
+          type: 2}
+        m_HairAzimuthalScatteringLUT: {fileID: 11700000, guid: d217deac7ff61094080126811521ab5b,
+          type: 2}
+        m_HairLongitudinalScatteringLUT: {fileID: 11700000, guid: 0da412d38ea6ba3459322abe6984ca9b,
+          type: 2}
+        m_FilmGrainTex:
+        - {fileID: 2800000, guid: 284a1ac236869fa4eacf377d73c7dff8, type: 3}
+        - {fileID: 2800000, guid: bd74961b009b93145a998ae93a5fc186, type: 3}
+        - {fileID: 2800000, guid: 58c1a5135746f854e8841c70a4b588b9, type: 3}
+        - {fileID: 2800000, guid: bdc6fb6e37de5824bb06e17ac19a8a1d, type: 3}
+        - {fileID: 2800000, guid: e4d8303457ba4854090965d854a7a741, type: 3}
+        - {fileID: 2800000, guid: 75e19bf5d3ef41d489aa05586243b58b, type: 3}
+        - {fileID: 2800000, guid: 6cafd4bed3e420a45a5702d61df0762c, type: 3}
+        - {fileID: 2800000, guid: a187955d1d88a954cb32c3c4e5f0aeda, type: 3}
+        - {fileID: 2800000, guid: 3f3cb0f4924d7a241b82a9081875f30d, type: 3}
+        - {fileID: 2800000, guid: a35bdcb2008832646b3c8d2eb11e38a9, type: 3}
+        m_SMAASearchTex: {fileID: 2800000, guid: dc95d70472e232b438d0fd38651e7ec2,
+          type: 3}
+        m_SMAAAreaTex: {fileID: 2800000, guid: 92e0d85ab4eca874098e7fcf6f8f674e, type: 3}
+        m_DefaultHDRISky: {fileID: 8900000, guid: 8253d41e6e8b11a4cbe77a4f8f82934d,
+          type: 3}
+        m_DefaultCloudMap: {fileID: 2800000, guid: 57a33fc2476a01644865bfde5f06e2f4,
+          type: 3}
+    - rid: 6391757267836862480
+      type: {class: HDRenderPipelineEditorMaterials, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_DefaultMaterial: {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17,
+          type: 2}
+        m_DefaultParticleMaterial: {fileID: 2100000, guid: b739a3f02ff77bf48b7636e64c3e3b4c,
+          type: 2}
+        m_DefaultTerrainMaterial: {fileID: 2100000, guid: 22ff8771d87ef27429e670136399094b,
+          type: 2}
+        m_DefaultMirrorMat: {fileID: 2100000, guid: 6b17274157b33bc45b6a40e7d4ff51fe,
+          type: 2}
+        m_DefaultDecalMat: {fileID: 2100000, guid: 500e733574922d04ea961553b1b26a63,
+          type: 2}
+        m_GUITextureBlit2SRGB: {fileID: 2100000, guid: 6e95c04e4e686554e8bed96ee69f690c,
+          type: 2}
+    - rid: 6391757267836862481
+      type: {class: RenderingPathFrameSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_Camera:
+          bitDatas:
+            data1: 140649441525597
+            data2: 4575659395735552024
+          lodBias: 1
+          lodBiasMode: 0
+          lodBiasQualityLevel: 0
+          maximumLODLevel: 0
+          maximumLODLevelMode: 0
+          maximumLODLevelQualityLevel: 0
+          sssQualityMode: 0
+          sssQualityLevel: 0
+          sssCustomSampleBudget: 20
+          sssCustomDownsampleSteps: 0
+          msaaMode: 1
+          materialQuality: 0
+        m_CustomOrBakedReflection:
+          bitDatas:
+            data1: 135310787769117
+            data2: 4539628424389459992
+          lodBias: 1
+          lodBiasMode: 0
+          lodBiasQualityLevel: 0
+          maximumLODLevel: 0
+          maximumLODLevelMode: 0
+          maximumLODLevelQualityLevel: 0
+          sssQualityMode: 0
+          sssQualityLevel: 0
+          sssCustomSampleBudget: 20
+          sssCustomDownsampleSteps: 0
+          msaaMode: 1
+          materialQuality: 0
+        m_RealtimeReflection:
+          bitDatas:
+            data1: 140060864290589
+            data2: 4539628424389459992
+          lodBias: 1
+          lodBiasMode: 0
+          lodBiasQualityLevel: 0
+          maximumLODLevel: 0
+          maximumLODLevelMode: 0
+          maximumLODLevelQualityLevel: 0
+          sssQualityMode: 0
+          sssQualityLevel: 0
+          sssCustomSampleBudget: 20
+          sssCustomDownsampleSteps: 0
+          msaaMode: 1
+          materialQuality: 0
+    - rid: 6391757267836862482
+      type: {class: HDRPDefaultVolumeProfileSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_VolumeProfile: {fileID: 11400000, guid: 582adbd84082fdb4faf7cd4beb1ccd14,
+          type: 2}
+    - rid: 6391757267836862483
+      type: {class: HDRPRayTracingResources, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_ReflectionRayTracingRT: {fileID: 4807578003741378534, guid: 1a500e5079fba734aa90fe92e70ea131,
+          type: 3}
+        m_ReflectionRayTracingCS: {fileID: 7200000, guid: 591207652a75a4844a89c0b9f45a61f2,
+          type: 3}
+        m_ReflectionBilateralFilterCS: {fileID: 7200000, guid: 07c445e7aa373284a9cc1584ca9b3f84,
+          type: 3}
+        m_ShadowRayTracingRT: {fileID: 4807578003741378534, guid: 6f93cb4dc095de14993f8d2baa972d5b,
+          type: 3}
+        m_ContactShadowRayTracingRT: {fileID: 4807578003741378534, guid: acaf840af875ab541b8f10069b7444c8,
+          type: 3}
+        m_ShadowRayTracingCS: {fileID: 7200000, guid: fc95b5dff16ba594896e211a389c03fc,
+          type: 3}
+        m_ShadowFilterCS: {fileID: 7200000, guid: f71fd853a538bf74e9e5a7228fc14dae,
+          type: 3}
+        m_ForwardRayTracing: {fileID: 4807578003741378534, guid: d3a89a2d3f73b3e4da6f191e844fe68c,
+          type: 3}
+        m_LightClusterBuildCS: {fileID: 7200000, guid: c0625ea908b52854bbf1d456e34026e4,
+          type: 3}
+        m_LightClusterDebugS: {fileID: 4800000, guid: c4d81c6e573560444bb1ea11ae4acfcb,
+          type: 3}
+        m_LightClusterDebugCS: {fileID: 7200000, guid: d48a3a5496d98a44c89f335934805d10,
+          type: 3}
+        m_IndirectDiffuseRayTracingOffRT: {fileID: 4807578003741378534, guid: fbcaf423d9f8e3843b2c046420608293,
+          type: 3}
+        m_IndirectDiffuseRayTracingL1RT: {fileID: 4807578003741378534, guid: 653044b9878c5764e818b20399112284,
+          type: 3}
+        m_IndirectDiffuseRaytracingL2RT: {fileID: 4807578003741378534, guid: 866a72c4868acec4088b0956b9ca73f9,
+          type: 3}
+        m_IndirectDiffuseRayTracingCS: {fileID: 7200000, guid: c5ad968b7cd39114d85dd860b3809087,
+          type: 3}
+        m_AoRayTracingRT: {fileID: 4807578003741378534, guid: 82dc8cd069971d2488c502b0f32b94fb,
+          type: 3}
+        m_AoRayTracingCS: {fileID: 7200000, guid: 10c05366baf9b0a44a827f3ef890b9e6,
+          type: 3}
+        m_SubSurfaceRayTracingRT: {fileID: 4807578003741378534, guid: b29a18f967c92364492508dddf78cff7,
+          type: 3}
+        m_SubSurfaceRayTracingCS: {fileID: 7200000, guid: 4e5684a8dba46fe42a47642f9b0a6b89,
+          type: 3}
+        m_SimpleDenoiserCS: {fileID: 7200000, guid: 74a980f1da9a4f842996035350fe756c,
+          type: 3}
+        m_ReflectionDenoiserCS: {fileID: 7200000, guid: 1b12fb238086d0f49983b4aa72768349,
+          type: 3}
+        m_DiffuseShadowDenoiserCS: {fileID: 7200000, guid: 9af806eab5889a74dad838edc9b07d07,
+          type: 3}
+        m_ReblurPreBlurCS: {fileID: 7200000, guid: 0be88ddf5240d49468d9159340465bfd,
+          type: 3}
+        m_ReblurTemporalAccumulationCS: {fileID: 7200000, guid: 11794ae415a38c747ba65d57d1bb60f9,
+          type: 3}
+        m_ReblurMipGenerationCS: {fileID: 7200000, guid: 44195ddb6d9240646847cbf4f38dfa98,
+          type: 3}
+        m_ReblurHistoryFixCS: {fileID: 7200000, guid: 4cc204b99166a9c40819bc04927c4feb,
+          type: 3}
+        m_ReblurBlurCS: {fileID: 7200000, guid: cff077c60ac76074893014e2f49e3159,
+          type: 3}
+        m_ReblurPostBlurCS: {fileID: 7200000, guid: 965700f9b9e0fec4bb31415ae91f0e09,
+          type: 3}
+        m_ReblurCopyHistoryCS: {fileID: 7200000, guid: 0d5230c403883b84cbf9d1d3b9e57beb,
+          type: 3}
+        m_ReblurTemporalStabilizationCS: {fileID: 7200000, guid: 4feaa605aeff33840b659850ce6bfcc2,
+          type: 3}
+        m_GBufferRayTracingRT: {fileID: 4807578003741378534, guid: e4c61a77b91f35845bbb546b848b18e5,
+          type: 3}
+        m_DeferredRayTracingCS: {fileID: 7200000, guid: 6e5ef632062bc484f812c7976f450ed1,
+          type: 3}
+        m_PathTracingRT: {fileID: 4807578003741378534, guid: c4f4525a058009a409fea974f9ad8d03,
+          type: 3}
+        m_PathTracingSkySamplingDataCS: {fileID: 7200000, guid: 8ef71a4b666992544ac5575a0e599a68,
+          type: 3}
+        m_RayMarchingCS: {fileID: 7200000, guid: 78d9a89700295a4418d0921bf27e1857,
+          type: 3}
+        m_RayBinningCS: {fileID: 7200000, guid: cddcb515ffe9a914893d6d8fc1d85454,
+          type: 3}
+        m_CountTracedRaysCS: {fileID: 7200000, guid: e1f3fa867f1dfbd4ab7dd4d39d2b96d8,
+          type: 3}
+        m_ReflectionFilterMappingTexture: {fileID: 2800000, guid: 82eec49626a00b047ba86244607816c8,
+          type: 3}
+        m_RtasDebugRT: {fileID: 4807578003741378534, guid: 7f98079d20376fd4f8590d58be99ab0d,
+          type: 3}
+    - rid: 6391757267836862484
+      type: {class: SpecularFadeSettings, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_Version: 0
+        m_SpecularFade: 0
+    - rid: 6391757267836862485
+      type: {class: HDRenderPipelineRuntimeShaders, ns: UnityEngine.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Runtime}
+      data:
+        m_DefaultShader: {fileID: 4800000, guid: 6e4ae4064600d784cac1e41a9e6f2e59,
+          type: 3}
+        m_CameraMotionVectorsPS: {fileID: 4800000, guid: 035941b63024d1943af48811c1db20d9,
+          type: 3}
+        m_ColorPyramidPS: {fileID: 4800000, guid: 2fcfb8d92f45e4549b3f0bad5d0654bf,
+          type: 3}
+        m_ColorPyramidCS: {fileID: 7200000, guid: 4e3267a1135742441a14298d8dcac04a,
+          type: 3}
+        m_DepthPyramidCS: {fileID: 7200000, guid: 64a553bb564274041906f78ffba955e4,
+          type: 3}
+        m_MaxZCS: {fileID: 7200000, guid: e95abf8c7230c344595f41c4dd5ff517, type: 3}
+        m_ApplyDistortionPS: {fileID: 4800000, guid: 02ae56f4306413c4a96dcf005cde1971,
+          type: 3}
+        m_CustomPassUtils: {fileID: 4800000, guid: 7e3722d0388000848acb25fd3cc8c088,
+          type: 3}
+        m_CustomPassRenderersUtils: {fileID: 4800000, guid: cef5ba33ee5063d4c8b495d2292e394d,
+          type: 3}
+        m_ClearStencilBufferPS: {fileID: 4800000, guid: 8ea49ef16606acd489439e676ab84040,
+          type: 3}
+        m_CopyStencilBufferPS: {fileID: 4800000, guid: 3d1574f1cdfa0ce4995f9bc79ed7f8ec,
+          type: 3}
+        m_CopyDepthBufferPS: {fileID: 4800000, guid: 42dfcc8fe803ece4096c58630689982f,
+          type: 3}
+        m_BlitPS: {fileID: 4800000, guid: e22fc1942c664490980b8793dd4a163d, type: 3}
+        m_BlitColorAndDepthPS: {fileID: 4800000, guid: b22ad378c678348729d3a3f981b9f270,
+          type: 3}
+        m_DownsampleDepthPS: {fileID: 4800000, guid: 67d6171b0acc6554aad48c845ec7e67f,
+          type: 3}
+        m_UpsampleTransparentPS: {fileID: 4800000, guid: 2ad7ce40f0dbaf64dadef1f58d8524d3,
+          type: 3}
+        m_ResolveStencilCS: {fileID: 7200000, guid: 65b89cac5f286b043a31bf8041776ee7,
+          type: 3}
+        m_DebugDisplayLatlongPS: {fileID: 4800000, guid: c1d1d149a043a5349ba367da6c2051ba,
+          type: 3}
+        m_DebugViewMaterialGBufferPS: {fileID: 4800000, guid: 439949ea1bfa91b4ba0d04269fcde33d,
+          type: 3}
+        m_DebugViewTilesPS: {fileID: 4800000, guid: c7c2bd17b06ceb4468e14081aaf1b96f,
+          type: 3}
+        m_DebugFullScreenPS: {fileID: 4800000, guid: e874aca2df8300a488258738c31f85cf,
+          type: 3}
+        m_DebugColorPickerPS: {fileID: 4800000, guid: 8137b807709e178498f22ed710864bb0,
+          type: 3}
+        m_DebugExposurePS: {fileID: 4800000, guid: 0ef322534f047a34c96d29419d56d17a,
+          type: 3}
+        m_DebugHDRPS: {fileID: 4800000, guid: 9bc5229549892084da43ad706d84f1bc, type: 3}
+        m_DebugLightVolumePS: {fileID: 4800000, guid: 8e706c0e71fcec34a8f5c9713e5e2943,
+          type: 3}
+        m_DebugLightVolumeCS: {fileID: 7200000, guid: f5d5d21faef5cf445ac2c5d8ff9c4184,
+          type: 3}
+        m_DebugBlitQuad: {fileID: 4800000, guid: cf5ca5b6ef18b3f429ed707ee9ceac9f,
+          type: 3}
+        m_DebugViewVirtualTexturingBlit: {fileID: 4800000, guid: 55d195396b03b804eb78c92d468e3c8e,
+          type: 3}
+        m_MaterialError: {fileID: 4800000, guid: 79a966a5200a456188dec0d48d805614,
+          type: 3}
+        m_MaterialLoading: {fileID: 4800000, guid: 392325671f122f540be9033ca5ae7a56,
+          type: 3}
+        m_ClearDebugBufferCS: {fileID: 7200000, guid: 7fc6041d5cf70004aa33bb1ac64e3c06,
+          type: 3}
+        m_DebugWaveformPS: {fileID: 4800000, guid: 0024f9d09a828734192f3e1cd5931745,
+          type: 3}
+        m_DebugWaveformCS: {fileID: 7200000, guid: 62b785f79355903428a21d5d8f8aeabe,
+          type: 3}
+        m_DebugVectorscopePS: {fileID: 4800000, guid: 7a09af24008164d40ae85ccd6bf87e17,
+          type: 3}
+        m_DebugVectorscopeCS: {fileID: 7200000, guid: 6a70efb18a2b2964c8eb0fc04aba20e9,
+          type: 3}
+        m_DebugImageHistogramCS: {fileID: 7200000, guid: 52cc17ef5a5ffc443a5c142f9b745a85,
+          type: 3}
+        m_DebugHDRxyMappingCS: {fileID: 7200000, guid: f055d2983d992b64494f1a03fc725cde,
+          type: 3}
+        m_ProbeVolumeSamplingDebugComputeShader: {fileID: 7200000, guid: 22de19bc461f84742857dd64c56b0397,
+          type: 3}
+        m_PlanarReflectionFilteringCS: {fileID: 7200000, guid: 9f3f8a01b8caaaa4595591dc96d43dd2,
+          type: 3}
+        m_ScreenSpaceGlobalIlluminationCS: {fileID: 7200000, guid: 96170a954eb538b40a5ff369552c3629,
+          type: 3}
+        m_ScreenSpaceReflectionsCS: {fileID: 7200000, guid: d1de9ac7d9016204da289affe9677942,
+          type: 3}
+        m_ClearDispatchIndirectCS: {fileID: 7200000, guid: fc1f553acb80a6446a32d33e403d0656,
+          type: 3}
+        m_ClearLightListsCS: {fileID: 7200000, guid: 743eb3491795b9545955695d591195a1,
+          type: 3}
+        m_BuildDispatchIndirectCS: {fileID: 7200000, guid: 4eb1b418be7044c40bb5200496c50f14,
+          type: 3}
+        m_BuildScreenAABBCS: {fileID: 7200000, guid: 728dce960f8a9c44bbc3abb3b851d8f6,
+          type: 3}
+        m_BuildPerTileLightListCS: {fileID: 7200000, guid: 65af3444cbf4b3747a4dead7ee00cfee,
+          type: 3}
+        m_BuildPerBigTileLightListCS: {fileID: 7200000, guid: 5ee1f9d6e09abe045b2f5e0b784b9072,
+          type: 3}
+        m_BuildPerVoxelLightListCS: {fileID: 7200000, guid: 0bb1b7e0ddcd5c44baf3ddc7456eb196,
+          type: 3}
+        m_LightListClusterClearAtomicIndexCS: {fileID: 7200000, guid: 1e3472a94b14a334a93230bbc700d7b2,
+          type: 3}
+        m_BuildMaterialFlagsCS: {fileID: 7200000, guid: fb3eda953cd6e634e877fb777be2cd08,
+          type: 3}
+        m_DeferredCS: {fileID: 7200000, guid: 0b64f79746d2daf4198eaf6eab9af259, type: 3}
+        m_VolumeVoxelizationCS: {fileID: 7200000, guid: c20b371db720da244b73830ec74a343a,
+          type: 3}
+        m_VolumetricLightingCS: {fileID: 7200000, guid: b4901a10df2d1e24282725e9fbc77c97,
+          type: 3}
+        m_VolumetricLightingFilteringCS: {fileID: 7200000, guid: ef9a910d0ec6ebb41ae3f5c7a69daf46,
+          type: 3}
+        m_DefaultFogVolumeShader: {fileID: -6465566751694194690, guid: 95060fe3e070428418e64e6bed27b111,
+          type: 3}
+        m_ScreenSpaceMultipleScatteringCS: {fileID: 7200000, guid: 29c79555731a206478f0ea448352340c,
+          type: 3}
+        m_SubsurfaceScatteringCS: {fileID: 7200000, guid: b06a7993621def248addd55d0fe931b1,
+          type: 3}
+        m_SubsurfaceScatteringDownsampleCS: {fileID: 7200000, guid: 4f8aaf0160a259e499fdfac512ca2692,
+          type: 3}
+        m_CombineLightingPS: {fileID: 4800000, guid: 2e37131331fbdca449b1a2bc47a639ca,
+          type: 3}
+        m_BlitCubemapPS: {fileID: 4800000, guid: d05913e251bed7a4992c921c62e1b647,
+          type: 3}
+        m_OpaqueAtmosphericScatteringPS: {fileID: 4800000, guid: 32f724728cf19904291226f239ec16f0,
+          type: 3}
+        m_HdriSkyPS: {fileID: 4800000, guid: 9bd32a6ece529fd4f9408b8d7e00c10d, type: 3}
+        m_IntegrateHdriSkyPS: {fileID: 4800000, guid: 48db2705cf2856d4e893eb30a6892d1b,
+          type: 3}
+        m_SkyboxCubemapPS: {fileID: 103, guid: 0000000000000000f000000000000000, type: 0}
+        m_GradientSkyPS: {fileID: 4800000, guid: 2b5d4f1b26f03dc4a873b093e0c4adb1,
+          type: 3}
+        m_AmbientProbeConvolutionCS: {fileID: 7200000, guid: 6d048f7b1bd45e840b4e79ec92639fa8,
+          type: 3}
+        m_GroundIrradiancePrecomputationCS: {fileID: 7200000, guid: eb6ae6f326207ee4d987a3e5adddf63a,
+          type: 3}
+        m_InScatteredRadiancePrecomputationCS: {fileID: 7200000, guid: 70c69d514688f8545855680760d77418,
+          type: 3}
+        m_PhysicallyBasedSkyPS: {fileID: 4800000, guid: a06934a4863e778498be65d8f865b7a4,
+          type: 3}
+        m_CloudLayerPS: {fileID: 4800000, guid: 001a47fa123e95a4bba13ecb0442d944,
+          type: 3}
+        m_BakeCloudTextureCS: {fileID: 7200000, guid: 09a7f6850ee9fb4439e5ebd632127da5,
+          type: 3}
+        m_BakeCloudShadowsCS: {fileID: 7200000, guid: 3e7317e0800c066448ee07a3e47f102b,
+          type: 3}
+        m_SkyLUTGenerator: {fileID: 7200000, guid: 79224112d91b32241be6b65802863db4,
+          type: 3}
+        m_LineStagePrepareCS: {fileID: 7200000, guid: 53231d98bbe64477aacc1adc14ba2619,
+          type: 3}
+        m_LineStageSetupSegmentCS: {fileID: 7200000, guid: 028836c66d494d8d94e1b2ca7d5382ae,
+          type: 3}
+        m_LineStageShadingSetupCS: {fileID: 7200000, guid: fefde0fac988da24a93bc2d8d6e0a0a1,
+          type: 3}
+        m_LineStageRasterBinCS: {fileID: 7200000, guid: 17d1e3e43f0e4c878b40b52848a58a77,
+          type: 3}
+        m_LineStageWorkQueueCS: {fileID: 7200000, guid: dae4ea8aeff24b16be3f0b2948e0acc5,
+          type: 3}
+        m_LineStageRasterFineCS: {fileID: 7200000, guid: 8691ac13e67d457abb92eca75e88e995,
+          type: 3}
+        m_LineCompositePS: {fileID: 4800000, guid: 8d9fbe0862434a2298748d335b9abea5,
+          type: 3}
+        m_PreIntegratedFGD_GGXDisneyDiffusePS: {fileID: 4800000, guid: 123f13d52852ef547b2962de4bd9eaad,
+          type: 3}
+        m_PreIntegratedFGD_CharlieFabricLambertPS: {fileID: 4800000, guid: 3b3bf235775cf8b4baae7f3306787ab0,
+          type: 3}
+        m_PreIntegratedFGD_WardPS: {fileID: 4800000, guid: d279c46a545b0af4f9f0c4fa82cd489e,
+          type: 3}
+        m_PreIntegratedFGD_CookTorrancePS: {fileID: 4800000, guid: a6402c19b020b4a4fb7073aaa2e26aba,
+          type: 3}
+        m_PreIntegratedFGD_MarschnerPS: {fileID: 4800000, guid: 31f36caf0a5e7f848a1b5328b6ad3eb8,
+          type: 3}
+        m_PreIntegratedFiberScatteringCS: {fileID: 7200000, guid: 4a087c9d074552c48aeb85184d56312e,
+          type: 3}
+        m_VolumetricMaterialCS: {fileID: 7200000, guid: 26f18c9cb0bccbf4481f8c84579affb1,
+          type: 3}
+        m_EyeMaterialCS: {fileID: 7200000, guid: 76f78ba05cea1ed449c1ef613ab90597,
+          type: 3}
+        m_FilterAreaLightCookiesPS: {fileID: 4800000, guid: c243aac96dda5fa40bed693ed5ba02c4,
+          type: 3}
+        m_BuildProbabilityTablesCS: {fileID: 7200000, guid: b9f26cf340afe9145a699753531b2a4c,
+          type: 3}
+        m_ComputeGgxIblSampleDataCS: {fileID: 7200000, guid: 764a24bb47ef5ba4781d9ae82ca07445,
+          type: 3}
+        m_GGXConvolvePS: {fileID: 4800000, guid: 123ed592ad5c2494b8aed301fd609e7b,
+          type: 3}
+        m_CharlieConvolvePS: {fileID: 4800000, guid: 5685fd17e71045e4ca9fefca38a7c177,
+          type: 3}
+        m_GpuPrefixSumCS: {fileID: 7200000, guid: 76fcf27f72d24907b1846939a7a2d83f,
+          type: 3}
+        m_GpuSortCS: {fileID: 7200000, guid: e485b8d649234276ababbd36fcec8c1a, type: 3}
+        m_BilateralUpsampleCS: {fileID: 7200000, guid: 68e831c555284d741b985e05369f0e63,
+          type: 3}
+        m_TemporalFilterCS: {fileID: 7200000, guid: 741979ff70f7bd6489fbcb464280ecff,
+          type: 3}
+        m_DiffuseDenoiserCS: {fileID: 7200000, guid: b4ed2382141619f40af1f743a84ccaea,
+          type: 3}
+        m_FurnaceTestCS: {fileID: 7200000, guid: 9c19385e40e70ea41811a942a46b04a3,
+          type: 3}
+        m_ObjectIDPS: {fileID: -6465566751694194690, guid: 89daf81f8e8f6634da726cbca859ca38,
+          type: 3}
+        m_ComputeThicknessPS: {fileID: 4800000, guid: 4d2c6daf0d4968748bb5b82d5016fdea,
+          type: 3}
+        m_CopyChannelCS: {fileID: 7200000, guid: a4d45eda75e8e474dbe24a31f741f3b4,
+          type: 3}
+        m_ClearBuffer2D: {fileID: 7200000, guid: fa9b66253270e9c47a67ae142f669eb4,
+          type: 3}
+        m_EncodeBC6HCS: {fileID: 7200000, guid: aa922d239de60304f964e24488559eeb,
+          type: 3}
+        m_CubeToPanoPS: {fileID: 4800000, guid: 595434cc3b6405246b6cd3086d0b6f7d,
+          type: 3}
+        m_BlitCubeTextureFacePS: {fileID: 4800000, guid: d850d0a2481878d4bbf17e5126b04163,
+          type: 3}
+        m_ClearUIntTextureCS: {fileID: 7200000, guid: d067ad4b88af51c498875426894aef76,
+          type: 3}
+        m_Texture3DAtlasCS: {fileID: 7200000, guid: 81522e314a83afd4a8ed43bd00757051,
+          type: 3}
+        m_XrMirrorViewPS: {fileID: 4800000, guid: e6255f98cf405eb45ab6f9006cf11e1f,
+          type: 3}
+        m_XrOcclusionMeshPS: {fileID: 4800000, guid: 46a45b32bb110604fb36216b63bcdb81,
+          type: 3}
+        m_ContactShadowCS: {fileID: 7200000, guid: 3e6900e06dc185a4380af4dacb4db0a4,
+          type: 3}
+        m_ScreenSpaceShadowPS: {fileID: 4800000, guid: bfa43a48695613b4ea19c58858ae1a61,
+          type: 3}
+        m_ShadowClearPS: {fileID: 4800000, guid: e3cab24f27741f44d8af1e94d006267c,
+          type: 3}
+        m_EvsmBlurCS: {fileID: 7200000, guid: fb36979473602464fa32deacb9630c08, type: 3}
+        m_DebugHDShadowMapPS: {fileID: 4800000, guid: 93d40cc9a6e13994f86f576a624efa18,
+          type: 3}
+        m_DebugLocalVolumetricFogAtlasPS: {fileID: 4800000, guid: 8371b763f09c7304889c22aa97ebdfd2,
+          type: 3}
+        m_MomentShadowsCS: {fileID: 7200000, guid: 4dea53e2ff15ed0448817c2aa4246e53,
+          type: 3}
+        m_ShadowBlitPS: {fileID: 4800000, guid: ca059f1af4587a24b9a9eed3b66cff0f,
+          type: 3}
+        m_DecalNormalBufferPS: {fileID: 4800000, guid: fd532bf1795188c4daaa66ea798b8b0a,
+          type: 3}
+        m_GTAOCS: {fileID: 7200000, guid: 6710b06492bd58c4bb8aec0fdc1fced3, type: 3}
+        m_GTAOSpatialDenoiseCS: {fileID: 7200000, guid: 2cb33c21587d12b4388d7866ab6c65f6,
+          type: 3}
+        m_GTAOTemporalDenoiseCS: {fileID: 7200000, guid: 31e0ca4c210f97c468037d11a5b832bb,
+          type: 3}
+        m_GTAOCopyHistoryCS: {fileID: 7200000, guid: 7f43be57ffd12ff469d4fc175c00c4b4,
+          type: 3}
+        m_GTAOBlurAndUpsample: {fileID: 7200000, guid: 9eb1abde882538a4ea46fa23e49ab9fa,
+          type: 3}
+        m_CopyAlphaCS: {fileID: 7200000, guid: c2c7eb6611725264187721ef9df0354b, type: 3}
+        m_NanKillerCS: {fileID: 7200000, guid: 83982f199acf927499576a99abc9bea9, type: 3}
+        m_ExposureCS: {fileID: 7200000, guid: 976d7bce54fae534fb9ec67e9c18570c, type: 3}
+        m_HistogramExposureCS: {fileID: 7200000, guid: 222da48299136f34b8e3fb75ae9f8ac7,
+          type: 3}
+        m_ApplyExposureCS: {fileID: 7200000, guid: 1a6fea1dc099b984d8f2b27d504dc096,
+          type: 3}
+        m_UberPostCS: {fileID: 7200000, guid: f1bf52f7c71bffd4f91e6cd90d12a4f7, type: 3}
+        m_LutBuilder3DCS: {fileID: 7200000, guid: 37f2b1b0ecd6f1c439e4c1b4f2fdb524,
+          type: 3}
+        m_DepthOfFieldKernelCS: {fileID: 7200000, guid: 7869415cc3e4eaa4d82ac21a752a2780,
+          type: 3}
+        m_DepthOfFieldCoCCS: {fileID: 7200000, guid: 048b235b54fbfaa4d80ec85ea847d4f8,
+          type: 3}
+        m_DepthOfFieldCoCReprojectCS: {fileID: 7200000, guid: 4980decaa3878d6448569489f5fc7931,
+          type: 3}
+        m_DepthOfFieldDilateCS: {fileID: 7200000, guid: 1c93af4338c0c1b42b92464992eebc10,
+          type: 3}
+        m_DepthOfFieldMipCS: {fileID: 7200000, guid: d3ef53de069ded64e8377cba6eb951fa,
+          type: 3}
+        m_DepthOfFieldMipSafeCS: {fileID: 7200000, guid: 2d24ee7b2c804d947a5c371c12ed46bd,
+          type: 3}
+        m_DepthOfFieldPrefilterCS: {fileID: 7200000, guid: f2b89d19910854346b792fe7177ce634,
+          type: 3}
+        m_DepthOfFieldTileMaxCS: {fileID: 7200000, guid: 84f84585ea8a7a849bea4a581adb93a7,
+          type: 3}
+        m_DepthOfFieldGatherCS: {fileID: 7200000, guid: 486be52dddc4e054fb10a7b9b78788c2,
+          type: 3}
+        m_DepthOfFieldCombineCS: {fileID: 7200000, guid: c8049ca85c4c7d047ba28f34d800c663,
+          type: 3}
+        m_DepthOfFieldPreCombineFarCS: {fileID: 7200000, guid: 3b4a2acd03d1ce2438d93c325d588735,
+          type: 3}
+        m_DepthOfFieldClearIndirectArgsCS: {fileID: 7200000, guid: 69905045e1d0a65458b205d6ab55502b,
+          type: 3}
+        m_PaniniProjectionCS: {fileID: 7200000, guid: 0ddbf72c8fbb6e44b983f470c8384ef6,
+          type: 3}
+        m_DofCircleOfConfusion: {fileID: 7200000, guid: 75332b7b315c80d4babe506820aa0bfd,
+          type: 3}
+        m_DofGatherCS: {fileID: 7200000, guid: 1e6b16a7970a1494db74b1d3d007d1cc, type: 3}
+        m_DofCoCMinMaxCS: {fileID: 7200000, guid: c70dd492c3d2fe94589d6ca8d4e37915,
+          type: 3}
+        m_DofMinMaxDilateCS: {fileID: 7200000, guid: 757a3f81b35177b44b2b178909b49172,
+          type: 3}
+        m_DofCombineCS: {fileID: 7200000, guid: d9b940a90a2d0884f94990a0dde43a53,
+          type: 3}
+        m_DofComputeSlowTilesCS: {fileID: 7200000, guid: b89f86a76de81ee42ae16daad78eb382,
+          type: 3}
+        m_DofComputeApertureShapeCS: {fileID: 7200000, guid: dd5acecb27e20334fa3be332e85172df,
+          type: 3}
+        m_MotionBlurMotionVecPrepCS: {fileID: 7200000, guid: ed9438fa777911d48933402087203b15,
+          type: 3}
+        m_MotionBlurGenTileCS: {fileID: 7200000, guid: 336e1fdbb3a1b8647b06208415f87804,
+          type: 3}
+        m_MotionBlurMergeTileCS: {fileID: 7200000, guid: cd14ddf849edeed43b0e3ccf66023038,
+          type: 3}
+        m_MotionBlurNeighborhoodTileCS: {fileID: 7200000, guid: 5ea9865df3e53b448856785b88f8e7b9,
+          type: 3}
+        m_MotionBlurCS: {fileID: 7200000, guid: 2af5c49c7865edb4b823826970ec176a,
+          type: 3}
+        m_BloomPrefilterCS: {fileID: 7200000, guid: 243b24008041aaa4a91800690f63c684,
+          type: 3}
+        m_BloomBlurCS: {fileID: 7200000, guid: 133a68380d324de4ea8d3ff8657b02d8, type: 3}
+        m_BloomUpsampleCS: {fileID: 7200000, guid: 5dbb0ac12cb11f84084b7e5633481bd1,
+          type: 3}
+        m_DepthValuesPS: {fileID: 4800000, guid: 6e6a4a3dbb788234594aa74f2d6aeb6f,
+          type: 3}
+        m_ColorResolvePS: {fileID: 4800000, guid: dd7047092f3c82b40b3a07868f9c4de2,
+          type: 3}
+        m_ResolveMotionVecPS: {fileID: 4800000, guid: ea18ca9826385e943979c46cf98968cc,
+          type: 3}
+        m_FXAACS: {fileID: 7200000, guid: 1535d29f35ea86b4282b6ca652002e2a, type: 3}
+        m_FinalPassPS: {fileID: 4800000, guid: 5ac9ef0c50282754b93c7692488e7ee7, type: 3}
+        m_ClearBlackPS: {fileID: 4800000, guid: 3330c1503ea8c6d4d9408df3f64227eb,
+          type: 3}
+        m_SMAAPS: {fileID: 4800000, guid: 9655f4aa89a469c49aceaceabf9bc77b, type: 3}
+        m_TemporalAntialiasingPS: {fileID: 4800000, guid: 3dd9fd928fdb83743b1f27d15df22179,
+          type: 3}
+        m_SharpeningCS: {fileID: 7200000, guid: 667941138a753f447bad3bf94052f590,
+          type: 3}
+        m_LensFlareDataDrivenPS: {fileID: 4800000, guid: 85330b3de0cfebc4ba78b2d61b1a2899,
+          type: 3}
+        m_LensFlareScreenSpacePS: {fileID: 4800000, guid: 97abfc9f0525e1849b417eaae10f0329,
+          type: 3}
+        m_LensFlareMergeOcclusionCS: {fileID: 7200000, guid: 07492750f384d9a4da9aaf5d2feeed4a,
+          type: 3}
+        m_DLSSBiasColorMaskPS: {fileID: 4800000, guid: 017a05924c0b0484ca29717ed0c60343,
+          type: 3}
+        m_CompositeUIAndOETFApplyPS: {fileID: 4800000, guid: 08b7ad21d2b8e9142b730b22d7355821,
+          type: 3}
+        m_ContrastAdaptiveSharpenCS: {fileID: 7200000, guid: 560896aec2f412c48995be35551a4ac6,
+          type: 3}
+        m_EdgeAdaptiveSpatialUpsamplingCS: {fileID: 7200000, guid: f054fa9fe2c85bb42b9489e2f9ffb643,
+          type: 3}
+        m_VTFeedbackDownsample: {fileID: 7200000, guid: 32d963548086c2c439aeb23a93e9a00a,
+          type: 3}
+        m_AccumulationCS: {fileID: 7200000, guid: ed80add7a217efa468d137d6f7c668f3,
+          type: 3}
+        m_BlitAndExposeCS: {fileID: 7200000, guid: 4b9a355e064de034dbfafe4583ba766b,
+          type: 3}
+        m_AlphaInjectionPS: {fileID: 4800000, guid: 4edd96259a5e8b44c90479928f0cd11e,
+          type: 3}
+        m_ChromaKeyingPS: {fileID: 4800000, guid: 49feb6b111e82ec4eb6d3d08e4b6903e,
+          type: 3}
+        m_CustomClearPS: {fileID: 4800000, guid: 9cef3686fa32c8840947ed99b561195c,
+          type: 3}
+    - rid: 6391757267836862486
+      type: {class: HDRenderingLayersLimitSettings, ns: UnityEditor.Rendering.HighDefinition,
+        asm: Unity.RenderPipelines.HighDefinition.Editor}
+      data:
+        m_Version: 0
+    - rid: 6391757267836862487
+      type: {class: GPUResidentDrawerResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.GPUDriven.Runtime}
+      data:
+        m_Version: 0
+        m_InstanceDataBufferCopyKernels: {fileID: 7200000, guid: f984aeb540ded8b4fbb8a2047ab5b2e2,
+          type: 3}
+        m_InstanceDataBufferUploadKernels: {fileID: 7200000, guid: 53864816eb00f2343b60e1a2c5a262ef,
+          type: 3}
+        m_TransformUpdaterKernels: {fileID: 7200000, guid: 2a567b9b2733f8d47a700c3c85bed75b,
+          type: 3}
+        m_WindDataUpdaterKernels: {fileID: 7200000, guid: fde76746e4fd0ed418c224f6b4084114,
+          type: 3}
+        m_OccluderDepthPyramidKernels: {fileID: 7200000, guid: 08b2b5fb307b0d249860612774a987da,
+          type: 3}
+        m_InstanceOcclusionCullingKernels: {fileID: 7200000, guid: f6d223acabc2f974795a5a7864b50e6c,
+          type: 3}
+        m_OcclusionCullingDebugKernels: {fileID: 7200000, guid: b23e766bcf50ca4438ef186b174557df,
+          type: 3}
+        m_DebugOcclusionTestPS: {fileID: 4800000, guid: d3f0849180c2d0944bc71060693df100,
+          type: 3}
+        m_DebugOccluderPS: {fileID: 4800000, guid: b3c92426a88625841ab15ca6a7917248,
+          type: 3}
+    - rid: 6391757267836862488
+      type: {class: RenderGraphGlobalSettings, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_version: 0
+        m_EnableCompilationCaching: 1
+        m_EnableValidityChecks: 1
+    - rid: 6391757267836862489
+      type: {class: ProbeVolumeRuntimeResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_Version: 1
+        probeVolumeBlendStatesCS: {fileID: 7200000, guid: a3f7b8c99de28a94684cb1daebeccf5d,
+          type: 3}
+        probeVolumeUploadDataCS: {fileID: 7200000, guid: 0951de5992461754fa73650732c4954c,
+          type: 3}
+        probeVolumeUploadDataL2CS: {fileID: 7200000, guid: 6196f34ed825db14b81fb3eb0ea8d931,
+          type: 3}
+    - rid: 6391757267836862490
+      type: {class: IncludeAdditionalRPAssets, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_version: 0
+        m_IncludeReferencedInScenes: 1
+        m_IncludeAssetsByLabel: 1
+        m_LabelToInclude: HDRP:IncludeInBuild
+    - rid: 6391757267836862491
+      type: {class: ProbeVolumeBakingResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_Version: 1
+        dilationShader: {fileID: 7200000, guid: 6bb382f7de370af41b775f54182e491d,
+          type: 3}
+        subdivideSceneCS: {fileID: 7200000, guid: bb86f1f0af829fd45b2ebddda1245c22,
+          type: 3}
+        voxelizeSceneShader: {fileID: 4800000, guid: c8b6a681c7b4e2e4785ffab093907f9e,
+          type: 3}
+        traceVirtualOffsetCS: {fileID: -6772857160820960102, guid: ff2cbab5da58bf04d82c5f34037ed123,
+          type: 3}
+        traceVirtualOffsetRT: {fileID: -5126288278712620388, guid: ff2cbab5da58bf04d82c5f34037ed123,
+          type: 3}
+        skyOcclusionCS: {fileID: -6772857160820960102, guid: 5a2a534753fbdb44e96c3c78b5a6999d,
+          type: 3}
+        skyOcclusionRT: {fileID: -5126288278712620388, guid: 5a2a534753fbdb44e96c3c78b5a6999d,
+          type: 3}
+        renderingLayerCS: {fileID: -6772857160820960102, guid: 94a070d33e408384bafc1dea4a565df9,
+          type: 3}
+        renderingLayerRT: {fileID: -5126288278712620388, guid: 94a070d33e408384bafc1dea4a565df9,
+          type: 3}
+    - rid: 6391757267836862492
+      type: {class: STP/RuntimeResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_setupCS: {fileID: 7200000, guid: 33be2e9a5506b2843bdb2bdff9cad5e1, type: 3}
+        m_preTaaCS: {fileID: 7200000, guid: a679dba8ec4d9ce45884a270b0e22dda, type: 3}
+        m_taaCS: {fileID: 7200000, guid: 3923900e2b41b5e47bc25bfdcbcdc9e6, type: 3}
+    - rid: 6391757267836862493
+      type: {class: RenderGraphUtilsResources, ns: UnityEngine.Rendering.RenderGraphModule.Util,
+        asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_Version: 0
+        m_CoreCopyPS: {fileID: 4800000, guid: 12dc59547ea167a4ab435097dd0f9add, type: 3}
+    - rid: 6391757267836862494
+      type: {class: ProbeVolumeDebugResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_Version: 1
+        probeVolumeDebugShader: {fileID: 4800000, guid: 3b21275fd12d65f49babb5286f040f2d,
+          type: 3}
+        probeVolumeFragmentationDebugShader: {fileID: 4800000, guid: 3a80877c579b9144ebdcc6d923bca303,
+          type: 3}
+        probeVolumeSamplingDebugShader: {fileID: 4800000, guid: bf54e6528c79a224e96346799064c393,
+          type: 3}
+        probeVolumeOffsetDebugShader: {fileID: 4800000, guid: db8bd7436dc2c5f4c92655307d198381,
+          type: 3}
+        probeSamplingDebugMesh: {fileID: -3555484719484374845, guid: 20be25aac4e22ee49a7db76fb3df6de2,
+          type: 3}
+        numbersDisplayTex: {fileID: 2800000, guid: 73fe53b428c5b3440b7e87ee830b608a,
+          type: 3}
+    - rid: 6391757267836862495
+      type: {class: ProbeVolumeGlobalSettings, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_Version: 1
+        m_ProbeVolumeDisableStreamingAssets: 0
+    - rid: 6391757267836862496
+      type: {class: ShaderStrippingSetting, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_Version: 0
+        m_ExportShaderVariants: 1
+        m_ShaderVariantLogLevel: 0
+        m_StripRuntimeDebugShaders: 1

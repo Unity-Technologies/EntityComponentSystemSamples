@@ -21,5 +21,21 @@ namespace Unity.NetCode.Samples.PlayerList
         public PlayerListEntry.ChangedRpc State;
 
         public bool IsCreated => State.NetworkId != default;
+
+        /// <summary>
+        /// Returns the number of connected players.
+        /// Why? The buffer can also contain disconnected players.
+        /// </summary>
+        /// <param name="playerListBufferEntries"></param>
+        /// <returns></returns>
+        public static int CountNumConnectedPlayers(DynamicBuffer<PlayerListBufferEntry> playerListBufferEntries)
+        {
+            var count = 0;
+            foreach (var entry in playerListBufferEntries)
+            {
+                if (entry.IsCreated && entry.State.IsConnected) count++;
+            }
+            return count;
+        }
     }
 }

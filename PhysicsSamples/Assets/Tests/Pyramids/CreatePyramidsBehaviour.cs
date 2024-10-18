@@ -2,6 +2,7 @@ using Unity.Entities;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 
 public struct PhysicsPyramid : IComponentData {}
@@ -101,7 +102,6 @@ public partial class CreatePyramidsSystem : SystemBase
                 var transform = EntityManager.GetComponentData<LocalTransform>(entity);
                 transform.Position = positions[i];
                 ecb.SetComponent(entity, transform);
-
             }
 
             ecb.DestroyEntity(creatorEntity);

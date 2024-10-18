@@ -1,4 +1,5 @@
 using Unity.Entities;
+using UnityEditor;
 using UnityEngine;
 
 namespace Graphical.Splines
@@ -26,5 +27,41 @@ namespace Graphical.Splines
                 });
             }
         }
+
+#if UNITY_EDITOR
+        [CustomEditor(typeof(SnakeSettingsAuthoring))]
+        public class SnakeSettingsAuthoringEditor : Editor
+        {
+            SerializedProperty Prefab;
+            SerializedProperty Length;
+            SerializedProperty Count;
+            SerializedProperty Speed;
+            SerializedProperty Spacing;
+
+            void OnEnable()
+            {
+                Prefab = serializedObject.FindProperty("Prefab");
+                Length = serializedObject.FindProperty("Length");
+                Count = serializedObject.FindProperty("Count");
+                Speed = serializedObject.FindProperty("Speed");
+                Spacing = serializedObject.FindProperty("Spacing");
+            }
+
+            public override void OnInspectorGUI()
+            {
+                // This custom editor disables editing of these properties in play mode.
+                serializedObject.Update();
+                EditorGUI.BeginDisabledGroup(Application.isPlaying);
+                EditorGUILayout.PropertyField(Prefab);
+                EditorGUILayout.PropertyField(Length);
+                EditorGUILayout.PropertyField(Count);
+                EditorGUI.EndDisabledGroup();
+
+                EditorGUILayout.PropertyField(Speed);
+                EditorGUILayout.PropertyField(Spacing);
+                serializedObject.ApplyModifiedProperties();
+            }
+        }
+#endif
     }
 }

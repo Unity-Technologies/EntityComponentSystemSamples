@@ -1,8 +1,9 @@
-﻿using Unity.Burst;
-using Unity.Entities;
-using Unity.NetCode;
+﻿using UnityEngine;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Transforms;
 
 // RPC request from client to server for game to go "in game" and send snapshots / inputs
@@ -18,7 +19,9 @@ public partial struct GoInGameClientSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<NetCubeSpawner>();
+        // Run only on entities with a CubeSpawner component data
+        state.RequireForUpdate<CubeSpawner>();
+
         var builder = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<NetworkId>()
             .WithNone<NetworkStreamInGame>();
@@ -50,7 +53,8 @@ public partial struct GoInGameServerSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<NetCubeSpawner>();
+        state.RequireForUpdate<CubeSpawner>();
+
         var builder = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<GoInGameRequest>()
             .WithAll<ReceiveRpcCommandRequest>();
@@ -61,7 +65,10 @@ public partial struct GoInGameServerSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var prefab = SystemAPI.GetSingleton<NetCubeSpawner>().Cube;
+        // Get the prefab to instantiate
+        var prefab = SystemAPI.GetSingleton<CubeSpawner>().Cube;
+
+        // Ge the name of the prefab being instantiated
         state.EntityManager.GetName(prefab, out var prefabName);
         var worldName = state.WorldUnmanaged.Name;
 
@@ -71,11 +78,15 @@ public partial struct GoInGameServerSystem : ISystem
         foreach (var (reqSrc, reqEntity) in SystemAPI.Query<RefRO<ReceiveRpcCommandRequest>>().WithAll<GoInGameRequest>().WithEntityAccess())
         {
             commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
+            // Get the NetworkId for the requesting client
             var networkId = networkIdFromEntity[reqSrc.ValueRO.SourceConnection];
 
-            UnityEngine.Debug.Log($"'{worldName}' setting connection '{networkId.Value}' to in game, spawning a Ghost '{prefabName}' for them!");
+            // Log information about the connection request that includes the client's assigned NetworkId and the name of the prefab spawned.
+            Debug.Log($"'{worldName}' setting connection '{networkId.Value}' to in game, spawning a Ghost '{prefabName}' for them!");
 
+            // Instantiate the prefab
             var player = commandBuffer.Instantiate(prefab);
+            // Associate the instantiated prefab with the connected client's assigned NetworkId
             commandBuffer.SetComponent(player, new GhostOwner { NetworkId = networkId.Value});
 
             // Add the player to the linked entity group so it is destroyed automatically on disconnect
@@ -90,11 +101,9 @@ public partial struct GoInGameServerSystem : ISystem
                 var preventZFighting = -0.01f * networkId.Value;
 
                 commandBuffer.SetComponent(player, LocalTransform.FromPosition(new float3(staggeredXPos, preventZFighting, 0)));
-
             }
             commandBuffer.DestroyEntity(reqEntity);
         }
         commandBuffer.Playback(state.EntityManager);
     }
 }
-

@@ -8,8 +8,8 @@ using UnityEngine;
 namespace Unity.NetCode.Samples.PlayerList
 {
     /// <summary>
-    ///     Manages the <see cref="PlayerListEntry" /> component and RPC's, which allows clients to view the names and
-    ///     connection statuses of other clients.
+    ///     Manages the <see cref="PlayerListEntry" /> component and RPCs,
+    ///     which allows clients to view the names and connection statuses of other clients.
     /// </summary>
     [BurstCompile]
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
@@ -18,20 +18,14 @@ namespace Unity.NetCode.Samples.PlayerList
         EntityArchetype m_InvalidUsernameRpcArchetype;
         EntityArchetype m_RpcArchetype;
         EntityQuery m_PlayerListQuery;
-        EntityQuery m_NewNetworkStreamConnectionsQuery;
         ComponentLookup<PlayerListEntry> m_PlayerListEntryFromEntity;
         ComponentLookup<NetworkId> m_NetworkIdFromEntity;
         EntityQuery m_ClientRegisterUsernameRpcQuery;
-        EntityQuery m_DisconnectsQuery;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             m_PlayerListQuery = state.GetEntityQuery(ComponentType.ReadOnly<PlayerListEntry>());
-            using var builder = new EntityQueryBuilder(Allocator.Temp)
-                .WithAll<NetworkStreamConnection>()
-                .WithNone<ConnectionState>();
-            m_NewNetworkStreamConnectionsQuery = state.GetEntityQuery(builder);
 
             var archetypeTypes = new NativeArray<ComponentType>(2, Allocator.Temp);
             archetypeTypes[0] = ComponentType.ReadOnly<PlayerListEntry.ChangedRpc>();
@@ -39,18 +33,12 @@ namespace Unity.NetCode.Samples.PlayerList
             m_RpcArchetype = state.EntityManager.CreateArchetype(archetypeTypes);
             archetypeTypes[0] = ComponentType.ReadOnly<PlayerListEntry.InvalidUsernameResponseRpc>();
             m_InvalidUsernameRpcArchetype = state.EntityManager.CreateArchetype(archetypeTypes);
-
-            archetypeTypes[0] = ComponentType.ReadWrite<PlayerListEntry>();
-            archetypeTypes[1] = ComponentType.ReadOnly<ConnectionState>();
-            m_DisconnectsQuery = state.GetEntityQuery(archetypeTypes);
-            m_DisconnectsQuery.AddChangedVersionFilter(archetypeTypes[1]);
             archetypeTypes.Dispose();
 
             m_PlayerListEntryFromEntity = state.GetComponentLookup<PlayerListEntry>(true);
             m_NetworkIdFromEntity = state.GetComponentLookup<NetworkId>(true);
 
             m_ClientRegisterUsernameRpcQuery = state.GetEntityQuery(ComponentType.ReadOnly<PlayerListEntry.ClientRegisterUsernameRpc>());
-
 
             state.RequireForUpdate<EnablePlayerListsFeature>();
         }
@@ -63,22 +51,23 @@ namespace Unity.NetCode.Samples.PlayerList
             var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             var netDbg = SystemAPI.GetSingleton<NetDebug>();
 
-            // Ensure every NetworkConnection also has a ConnectionState so we can track disconnects.
-            state.EntityManager.AddComponent<ConnectionState>(m_NewNetworkStreamConnectionsQuery);
-
-            if (!m_DisconnectsQuery.IsEmpty)
+            var connectionEventsForTick = SystemAPI.GetSingleton<NetworkStreamDriver>().ConnectionEventsForTick;
+            if (connectionEventsForTick.Length > 0)
             {
                 state.Dependency = new NotifyPlayersOfDisconnectsJob
                 {
                     netDbg = netDbg,
                     ecb = ecb,
                     rpcArchetype = rpcArchetype,
-                }.Schedule(m_DisconnectsQuery, state.Dependency); // TODO: When error is fixed, remove the manual query.
+                    connectionEventsForTick = connectionEventsForTick,
+                    playerListEntryLookup = SystemAPI.GetComponentLookup<PlayerListEntry>(),
+                }.Schedule(state.Dependency);
             }
 
             if (!m_ClientRegisterUsernameRpcQuery.IsEmptyIgnoreFilter)
             {
-                // We only add new players IF they send us a username. This ensures that they will always have a valid username from the start.
+                // We only add new players IF they send us a username.
+                // This ensures that they will always have a valid username from the start.
                 m_PlayerListEntryFromEntity.Update(ref state);
                 m_NetworkIdFromEntity.Update(ref state);
                 var playerListEntries = m_PlayerListQuery.ToComponentDataListAsync<PlayerListEntry>(state.WorldUpdateAllocator, state.Dependency, out var gatherPlayerListsHandle);
@@ -117,17 +106,17 @@ namespace Unity.NetCode.Samples.PlayerList
                     return;
                 }
 
-                // Auto-patch here rather than kicking the player as players don't pick their default names.
+                // Auto-patch here rather than kicking the player, as players don't pick their default names.
                 var originalUsername = rpc.Value;
                 rpc.Value = UsernameSanitizer.SanitizeUsername(rpc.Value, networkId.Value, out var usernameWasSanitized);
 
                 if (usernameWasSanitized)
                     netDbg.LogError($"Server received a PlayerListEntry.ClientRegisterUsernameRpc with an invalid username '{originalUsername}', sanitized to '{rpc.Value}'!");
 
-                // Note that a ClientRegisterUsernameRpc can mean either a:
+                // Note that a ClientRegisterUsernameRpc can mean either:
                 if (!playerListEntries.TryGetComponent(req.SourceConnection, out var entry))
                 {
-                    // NEW JOINER:
+                    // A NEW JOINER:
                     entry.State = new PlayerListEntry.ChangedRpc
                     {
                         ChangeType = PlayerListEntry.ChangedRpc.UpdateType.NewJoiner,
@@ -141,7 +130,7 @@ namespace Unity.NetCode.Samples.PlayerList
                 }
                 else
                 {
-                    // EXISTING PLAYER with a new username:
+                    // AN EXISTING PLAYER with a new username:
                     if (entry.State.Username.Value == rpc.Value)
                     {
                         netDbg.LogWarning($"Server received a PlayerListEntry.ChangedRpc from existing player {entry.State.NetworkId} but username '{rpc.Value}' is identical to cached value. Ignoring.");
@@ -183,27 +172,36 @@ namespace Unity.NetCode.Samples.PlayerList
         }
 
         [BurstCompile]
-        public partial struct NotifyPlayersOfDisconnectsJob : IJobEntity
+        public partial struct NotifyPlayersOfDisconnectsJob : IJob
         {
             public NetDebug netDbg;
             public EntityCommandBuffer ecb;
             public EntityArchetype rpcArchetype;
-
-            public void Execute(Entity netIdEntity, ref PlayerListEntry entry, in ConnectionState connectionState)
+            public NativeArray<NetCodeConnectionEvent>.ReadOnly connectionEventsForTick;
+            public ComponentLookup<PlayerListEntry> playerListEntryLookup;
+            public void Execute()
             {
-                if (connectionState.CurrentState == ConnectionState.State.Disconnected)
+                foreach (var evt in connectionEventsForTick)
                 {
-                    netDbg.DebugLog($"Server: Established player {connectionState.NetworkId} disconnected with reason {connectionState.DisconnectReason}! Notifying other players.");
-                    entry.State.Reason = connectionState.DisconnectReason;
-                    entry.State.ChangeType = PlayerListEntry.ChangedRpc.UpdateType.PlayerDisconnect;
+                    if (evt.State == ConnectionState.State.Disconnected)
+                    {
+                        var entryRef = playerListEntryLookup.GetRefRWOptional(evt.ConnectionEntity);
+                        // Ignore if it has not had a PlayerListEntry added to it.
+                        if (!entryRef.IsValid) continue;
+                        ref var entry = ref entryRef.ValueRW;
 
-                    // Broadcast notify of state:
-                    var rpcEntity = ecb.CreateEntity(rpcArchetype);
-                    ecb.SetComponent(rpcEntity, entry.State);
+                        netDbg.DebugLog($"Server: Established player {evt.ConnectionId} disconnected with reason {evt.DisconnectReason}! Notifying other players.");
 
-                    // Cleanup.
-                    ecb.RemoveComponent<ConnectionState>(netIdEntity);
-                    ecb.RemoveComponent<PlayerListEntry>(netIdEntity);
+                        entry.State.Reason = evt.DisconnectReason;
+                        entry.State.ChangeType = PlayerListEntry.ChangedRpc.UpdateType.PlayerDisconnect;
+
+                        // Broadcast notify of state:
+                        var rpcEntity = ecb.CreateEntity(rpcArchetype);
+                        ecb.SetComponent(rpcEntity, entry.State);
+
+                        // Cleanup the cleanup component (which will also trigger entity deletion).
+                        ecb.RemoveComponent<PlayerListEntry>(evt.ConnectionEntity);
+                    }
                 }
             }
         }

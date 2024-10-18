@@ -92,6 +92,7 @@ namespace Samples.HelloNetcode
                 {
                     hitInformation.Age = 1;
                 }
+
                 var pos = camera.WorldToViewportPoint(worldPos);
 
                 var canvasRectSize = m_CanvasRect.sizeDelta;

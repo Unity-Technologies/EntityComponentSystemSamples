@@ -15,21 +15,12 @@ namespace Unity.Physics.Tests
     {
         [UnityTest]
         [Timeout(240000)]
-        public override IEnumerator LoadScenes([ValueSource(nameof(UnityPhysicsSamplesTest.GetScenes))] string scenePath)
+        public IEnumerator LoadScenes([ValueSource(nameof(UnityPhysicsSamplesTest.GetScenes))] string scenePath)
         {
-            // Tests we're skipping with HavokPhysics
-            if (scenePath.Contains("/StaticOptimize.unity"))
-            {
-                Debug.Log("Skipping " + scenePath);
-                LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
-                yield break;
-            }
-
 #if UNITY_GAMECORE
             // Tests we're skipping with HavokPhysics
             if (scenePath.Contains("/Modify - Surface Velocity.unity") ||
                 scenePath.Contains("/Modify - Contact Jacobians.unity") ||
-                scenePath.Contains("/Modify Joints.unity") ||  // todo temp until fixing DOTS-10451
                 scenePath.Contains("/JacobianModifiersUT.unity") ||
                 scenePath.Contains("/Animation/Animation.unity"))
             {
@@ -58,6 +49,16 @@ namespace Unity.Physics.Tests
                 scenePath.Contains("/SingleThreadedRagdoll.unity") ||
                 scenePath.Contains("/Terrain_Triangles.unity") ||
                 scenePath.Contains("/Terrain_VertexSamples.unity"))
+            {
+                Debug.Log("Skipping " + scenePath);
+                LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
+                yield break;
+            }
+#endif
+
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+            // [DOTS-10612] Tests we're skipping with HavokPhysics due to a player crash
+            if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
             {
                 Debug.Log("Skipping " + scenePath);
                 LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
@@ -86,7 +87,7 @@ namespace Unity.Physics.Tests
     {
         [UnityTest]
         [Timeout(240000)]
-        public override IEnumerator LoadScenes([ValueSource(nameof(UnityPhysicsSamplesTest.GetScenes))] string scenePath)
+        public IEnumerator LoadScenes([ValueSource(nameof(UnityPhysicsSamplesTest.GetScenes))] string scenePath)
         {
 #if UNITY_GAMECORE
             // Tests we're skipping with HavokPhysics
@@ -120,6 +121,16 @@ namespace Unity.Physics.Tests
                 scenePath.Contains("/SingleThreadedRagdoll.unity") ||
                 scenePath.Contains("/Terrain_Triangles.unity") ||
                 scenePath.Contains("/Terrain_VertexSamples.unity"))
+            {
+                Debug.Log("Skipping " + scenePath);
+                LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
+                yield break;
+            }
+#endif
+
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+            // [DOTS-10612] Tests we're skipping with HavokPhysics due to a player crash
+            if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
             {
                 Debug.Log("Skipping " + scenePath);
                 LogAssert.Expect(LogType.Log, "Skipping " + scenePath);

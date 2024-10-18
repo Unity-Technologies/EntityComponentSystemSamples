@@ -8,11 +8,12 @@ using Unity.Entities;
 [UpdateAfter(typeof(DemoInputGatheringSystem))]
 public partial struct CharacterControllerOneToManyInputSystem : ISystem
 {
-    public partial struct CharacterControllerOneToManyInputSystemJobParallel : IJobEntity
+    [BurstCompile]
+    partial struct CharacterControllerOneToManyInputSystemJobParallel : IJobEntity
     {
         public CharacterControllerInput Input;
 
-        public void Execute(ref CharacterControllerInternalData ccData)
+        void Execute(ref CharacterControllerInternalData ccData)
         {
             ccData.Input.Movement = Input.Movement;
             ccData.Input.Looking = Input.Looking;
@@ -20,6 +21,12 @@ public partial struct CharacterControllerOneToManyInputSystem : ISystem
             if (Input.Jumped != 0)
                 ccData.Input.Jumped = 1;
         }
+    }
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        state.RequireForUpdate<CharacterControllerInput>();
     }
 
     [BurstCompile]

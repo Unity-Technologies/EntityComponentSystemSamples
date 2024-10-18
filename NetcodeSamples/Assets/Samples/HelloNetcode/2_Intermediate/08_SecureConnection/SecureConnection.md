@@ -23,7 +23,7 @@ This sample shows the modification needed to the bootstrap functionality to enab
 This sample contains no scene as nothing needs to be added to the scene to enable this feature.
 
 To set up a secure connection on the network driver a custom/manual driver needs to be set up so different network parameters can be passed to it.
-The custom driver constructor needs to be set up in the bootstrap to be there early enough to replace the default driver. This is done in _SecureBootStrapExtension.cs_ but it's disabled with the _ENABLE_NETCODE_SAMPLE_SECURE_ define at the top of the file, since enabling it means it's enforced globally through the whole project. To enable it just uncomment the define.
+The custom driver constructor needs to be set up in the bootstrap to be there early enough to replace the default driver. This is done in _SecureBootStrapExtension.cs_ but it's disabled with the _ENABLE_NETCODE_SAMPLE_SECURE_ define at the top of the file, since enabling it means it's enforced globally through the whole project. To enable it just uncomment the define there as well as in _NetworkParams.cs_ and _SecureDriverConstructor.cs_.
 
 ### Generating secure parameters
 
@@ -34,5 +34,5 @@ It is very easy for a malicious user to decompile the source code even if obfusc
 
 ### Passing secure parameters
 
-The generated certificates are passed to the network driver in _HelloNetcode_SecureDriverConstructor.cs_. This is using a helper function to set up default values on the network settings.
+The generated certificates are passed to the network driver in _SecureDriverConstructor.cs_. This is using a helper function to set up default values on the network settings.
 You can change this to manually construct the network driver instance, or pass in your own network settings using the appropriate override.

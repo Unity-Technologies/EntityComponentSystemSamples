@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
@@ -20,6 +21,12 @@ namespace Samples.HelloNetcode
         private int m_CurrentUserSlot = 0;
         private int m_UserSlotHorizontalSpace = -13;
         private int m_OwnUser = -1;
+        List<Text> m_CachedUserTexts;
+
+        void Start()
+        {
+            m_CachedUserTexts = m_Canvas.GetComponentsInChildren<Text>().ToList();
+        }
 
         void Update()
         {
@@ -53,8 +60,7 @@ namespace Samples.HelloNetcode
 
             if (RpcUiData.Users.Data.IsCreated && RpcUiData.Users.Data.TryDequeue(out var user))
             {
-                var userText = Instantiate(m_UserPrefab, m_Canvas.transform, false);
-                userText.GetComponent<RectTransform>().anchoredPosition3D += new Vector3(0,m_CurrentUserSlot*m_UserSlotHorizontalSpace, 0);
+                var userText = GetUserText();
                 userText.text = $"User {user}";
                 m_CurrentUserSlot++;
 
@@ -62,6 +68,22 @@ namespace Samples.HelloNetcode
                 if (user == m_OwnUser)
                     userText.color = Color.blue;
             }
+        }
+
+        Text GetUserText()
+        {
+            foreach (var text in m_CachedUserTexts)
+            {
+                if (!text.enabled)
+                {
+                    text.enabled = true;
+                    return text;
+                }
+            }
+            var newText = Instantiate(m_UserPrefab, m_Canvas.transform, false);
+            newText.GetComponent<RectTransform>().anchoredPosition3D += new Vector3(0,m_CurrentUserSlot*m_UserSlotHorizontalSpace, 0);
+            m_CachedUserTexts.Add(newText);
+            return newText;
         }
 
         public void SendChatMessage()

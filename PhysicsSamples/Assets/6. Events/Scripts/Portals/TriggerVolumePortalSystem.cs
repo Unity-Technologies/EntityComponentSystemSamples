@@ -1,5 +1,6 @@
 using Unity.Assertions;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -71,10 +72,18 @@ public partial struct TriggerVolumePortalSystem : ISystem
             var companionEntity = triggerVolumePortal.Companion;
             var companionTriggerVolumePortal = ComponentDatas.TriggerVolumePortalData[companionEntity];
 
+            using var processedEntities = new NativeHashSet<Entity>(256, Allocator.Temp);
             for (int i = 0; i < triggerBuffer.Length; i++)
             {
                 var triggerEvent = triggerBuffer[i];
                 var otherEntity = triggerEvent.GetOtherEntity(portalEntity);
+
+                // check if we have already processed and potentially teleported this entity.
+                // If yes, skip. This can occur if the entity contains a compound collider.
+                if (!processedEntities.Add(otherEntity))
+                {
+                    continue;
+                }
 
                 // exclude other triggers, static bodies and processed events
                 if (triggerEvent.State != StatefulEventState.Enter || !NonTriggerDynamicBodyMask.MatchesIgnoreFilter(otherEntity))

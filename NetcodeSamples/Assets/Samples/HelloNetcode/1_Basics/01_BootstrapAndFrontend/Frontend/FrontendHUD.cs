@@ -22,6 +22,7 @@ namespace Samples.HelloNetcode
 
         public void ReturnToFrontend()
         {
+            Debug.Log("[ReturnToFrontend] Called.");
             var clientServerWorlds = new List<World>();
             foreach (var world in World.All)
             {
@@ -35,7 +36,7 @@ namespace Samples.HelloNetcode
             if (string.IsNullOrEmpty(Frontend.OldFrontendWorldName))
                 Frontend.OldFrontendWorldName = "DefaultWorld";
             ClientServerBootstrap.CreateLocalWorld(Frontend.OldFrontendWorldName);
-            SceneManager.LoadScene("Frontend");
+            SceneManager.LoadScene("Frontend", LoadSceneMode.Single);
         }
 
         public void Start()

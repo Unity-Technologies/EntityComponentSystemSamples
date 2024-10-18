@@ -34,11 +34,12 @@ public partial struct DestroyTriggerSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<DestroyTrigger>();
+        state.RequireForUpdate<PhysicsWorldSingleton>();
     }
 
     public partial struct DestroyTriggerJob : IJobEntity
     {
-        public PhysicsWorld World;
+        [ReadOnly] public PhysicsWorld World;
         public EntityCommandBuffer CommandBuffer;
         public ComponentLookup<TriggerEventChecker> TriggerEventComponentLookup;
 
@@ -83,12 +84,15 @@ public partial struct DestroyTriggerSystem : ISystem
 
         using (var commandBuffer = new EntityCommandBuffer(Allocator.TempJob))
         {
-            new DestroyTriggerJob
+            var jobHandle = new DestroyTriggerJob
             {
                 World = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld,
                 CommandBuffer = commandBuffer,
                 TriggerEventComponentLookup = SystemAPI.GetComponentLookup<TriggerEventChecker>()
-            }.Run();
+            }.Schedule(state.Dependency);
+
+            state.Dependency = jobHandle;
+            jobHandle.Complete();
 
             commandBuffer.Playback(state.EntityManager);
         }

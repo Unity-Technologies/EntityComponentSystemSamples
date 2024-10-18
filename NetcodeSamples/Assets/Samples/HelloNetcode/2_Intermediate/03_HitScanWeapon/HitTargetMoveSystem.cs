@@ -15,20 +15,9 @@ namespace Samples.HelloNetcode
 
         public void OnUpdate(ref SystemState state)
         {
-            var timeDeltaTime = SystemAPI.Time.DeltaTime;
-
-            foreach (var (trans, hitTarget) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<HitTarget>>())
-
+            foreach (var (trans, hitTarget) in SystemAPI.Query<RefRW<LocalTransform>, RefRO<HitTarget>>())
             {
-                var deltaMove = timeDeltaTime * hitTarget.ValueRW.Speed;
-                hitTarget.ValueRW.Moved += deltaMove;
-
-                trans.ValueRW.Position.x += deltaMove;
-
-                if (math.abs(hitTarget.ValueRW.Moved) > hitTarget.ValueRW.MovingRange)
-                {
-                    hitTarget.ValueRW.Speed = -hitTarget.ValueRW.Speed;
-                }
+                trans.ValueRW.Position.x = (float) math.sin(SystemAPI.Time.ElapsedTime * hitTarget.ValueRO.Speed) * hitTarget.ValueRO.MovingRange;
             }
         }
     }
