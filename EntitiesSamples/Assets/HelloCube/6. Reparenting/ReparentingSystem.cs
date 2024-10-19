@@ -60,12 +60,16 @@ namespace HelloCube.Reparenting
                 // Attach all the small cubes to the rotator by adding a Parent component to the cubes.
                 // (The next time TransformSystemGroup updates, it will update the Child buffer and transforms accordingly.)
 
-                foreach (var (transform, entity) in
-                         SystemAPI.Query<RefRO<LocalTransform>>()
+                var parentLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(rotatorEntity);
+                
+                foreach (var (localToWorld, entity) in
+                         SystemAPI.Query<RefRO<LocalToWorld>>()
                              .WithNone<RotationSpeed>()
                              .WithEntityAccess())
                 {
                     ecb.AddComponent(entity, new Parent { Value = rotatorEntity });
+                    float3 localPosition = math.transform(math.inverse(parentLocalToWorld.Value), localToWorld.ValueRO.Position);
+                    ecb.SetComponent(entity, new LocalTransform { Position = localPosition, Rotation = quaternion.identity, Scale = 0.5f });
                 }
 
                 // Alternative solution instead of the above loop:
