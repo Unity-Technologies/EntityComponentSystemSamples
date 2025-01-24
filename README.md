@@ -1,16 +1,15 @@
 
+*The sample projects in this repo use Unity 6.0 and the 1.3 releases of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.*
+
 # DOTS Samples
 
-The DOTS package sample projects contain many small samples that cover most of the package functionality:
+The DOTS package sample projects contain many small samples that cover most of the functionality in the packages:
 
 - [Entities samples](./EntitiesSamples/README.md)
 - [Physics samples](./PhysicsSamples/README.md)
 - [Netcode samples](./NetcodeSamples/README.md)
 - [Entities.Graphics HDRP samples](./GraphicsSamples/HDRPSamples/README.md)
 - [Entities.Graphics URP samples](./GraphicsSamples/URPSamples/README.md)
-
-*The sample projects in this repo use Unity 6.0 and the 1.3 releases of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.*
-
 
 For those new to DOTS, we recommend starting with the DOTS 101 sample projects and materials:
 
@@ -35,7 +34,7 @@ For those new to DOTS, we recommend starting with the DOTS 101 sample projects a
 Additional Entities material on Unity Learn:
 
 - [Tanks tutorial](https://learn.unity.com/tutorial/65b3e48fedbc2a611fc291a7) and [walkthrough video](https://youtu.be/jAVVxoWU5lo) (23 minutes)
-- [DOTS Bootcamp](https://learn.unity.com/tutorial/dots-bootcamp) ([code](./Dots101/Entities101/Assets/Firefighters/))
+- [DOTS Bootcamp](https://learn.unity.com/tutorial/dots-bootcamp) ([code](./Dots101/Entities101/Assets/Firefighters/README.md))
 
 ## Physics 101
 
@@ -46,7 +45,7 @@ Additional Entities material on Unity Learn:
 
 - [Document: Unity Netcode for Entities 101](https://docs.google.com/document/d/17AYh_Lc7Phgtg66sX9TrSrtCS7PZn0y-XuVL2A6cXCw/edit?usp=sharing)
 - [Sample project: Unity Netcode for Entities 101](./Dots101/Netcode101/)
-- [Video: Netcode 101]()
+- [Video: Netcode 101](https://youtu.be/f-4NR30ieWg)
 
 ## Additional content 
 

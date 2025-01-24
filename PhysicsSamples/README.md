@@ -1,5 +1,7 @@
 # Unity Physics Samples
 
+*For more Phyiscs and DOTS starter material, see the [main page of this repo](../README.md).*
+
 ## Controls 
 
 In the *Game* window:

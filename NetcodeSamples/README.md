@@ -1,5 +1,7 @@
 ### Unity Netcode for Entities Samples
 
+*For more Netcode and DOTS starter material, see the [main page of this repo](../README.md).*
+
 The Netcode for Entities package provides the multiplayer features needed to implement
 world synchronization in an [entities]((https://docs.unity3d.com/Packages/com.unity.entities@latest))-based multiplayer game. It uses the transport package
 for the socket level functionality, Unity Physics for networked physics simulation, Logging package for packet dump logs. Key Netcode for Entities features include:
