@@ -1,44 +1,67 @@
+
 # DOTS Samples
 
+The DOTS package sample projects contain many small samples that cover most of the package functionality:
+
 - [Entities samples](./EntitiesSamples/README.md)
-- [Netcode samples](./NetcodeSamples/README.md)
 - [Physics samples](./PhysicsSamples/README.md)
+- [Netcode samples](./NetcodeSamples/README.md)
 - [Entities.Graphics HDRP samples](./GraphicsSamples/HDRPSamples/README.md)
 - [Entities.Graphics URP samples](./GraphicsSamples/URPSamples/README.md)
 
-# Learning DOTS
+*The sample projects in this repo use Unity 6.0 and the 1.3 releases of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.*
 
-For those new to DOTS, here's the recommended sequence to follow through the introductory material in the [Entities samples project](./EntitiesSamples/README.md):
 
-A few short videos introduce the basic concepts of the job system and ECS:
+For those new to DOTS, we recommend starting with the DOTS 101 sample projects and materials:
 
-1. [Video: The C# Job system](https://youtu.be/jdW66hA-Qu8) (11 minutes)
-1. [Video: ECS Entities and components](https://youtu.be/jzCEzNoztzM) (10 minutes)
-1. [Video: ECS Systems](https://youtu.be/k07I-DpCcvE) (7 minutes)
-1. [Video: ECS Baking](https://youtu.be/r337nXZFYeA) (6 minutes)
+## The Job System 101
 
-You may also want to read the [Entities API overview](./EntitiesSamples/README.md#entities-api-overview), which is briefer and more sequentially structured than the [manual](https://docs.unity3d.com/Packages/com.unity.entities@latest/).
+- [Document: Unity Job System 101](https://docs.google.com/document/d/1gtXwUwsuQTfpBUmdFd5ieZaL7v3UdYTKq9H5P0M57Mg/edit?usp=sharing)
+- [Sample project: Unity Job System 101](./Dots101/Jobs101/)
+- [Video: The C# Job system](https://youtu.be/jdW66hA-Qu8) (11 minutes)
+- [Video: Walkthrough of the jobs sample](https://youtu.be/oOgNg2gL2yw) (17 minutes)
 
-These starter samples each have an explanatory video:
+## Entities 101
 
-- The [Jobs Tutorial sample](./EntitiesSamples/Assets/Tutorials/Jobs/README.md) (17 minute [walkthrough video](https://youtu.be/oOgNg2gL2yw)) demonstrates creation and scheduling of jobs.
-- The [HelloCube samples](./EntitiesSamples/Assets/HelloCube/README.md) (30 minute [walkthrough video](https://youtu.be/32TLgtA9yUM)) demonstrate very basic Entities usage, such as creating and moving rendered entities in systems and jobs.
-- The [Tanks tutorial](./EntitiesSamples/Assets/Tutorials/Tanks/README.md) (23 minute [walkthrough video](https://youtu.be/jAVVxoWU5lo)) puts the basic elements of Entities and jobs together to demonstrate a small simulation.
-- The [Kickball tutorial](./EntitiesSamples/Assets/Tutorials/Kickball/README.md) (55 minute [walkthrough video](https://youtu.be/P6_3L7RTcm0)) also demonstrates a small simulation, but with a bit more depth. 
-- The [StateChange sample](./EntitiesSamples/Assets/Miscellaneous/StateChange/) (14 minute [walkthrough video](https://youtu.be/KC-EyCh5TrY)) demonstrates three different ways to handle state representation in Entities. 
+- [Document: Unity Entities 101](https://docs.google.com/document/d/1R6E4IDpfLatwHITlCND0i5TuMVG0CMGsentFL-3RQT0/edit?usp=sharing)
+- [Sample project: Unity Entities 101](./Dots101/Entities101/)
+- [Video: ECS Entities and components](https://youtu.be/jzCEzNoztzM) (10 minutes)
+- [Video: ECS Systems](https://youtu.be/k07I-DpCcvE) (7 minutes)
+- [Video: ECS Baking](https://youtu.be/r337nXZFYeA) (6 minutes)
+- [Video: HelloCube samples](https://youtu.be/32TLgtA9yUM) (30 minutes) ([code](./Dots101/Entities101/Assets/HelloCube/)) 
+- [Video: Kickball sample](https://youtu.be/P6_3L7RTcm0) (55 minutes) ([code](./Dots101/Entities101/Assets/Kickball/)) 
+- [Video: StateChange sample](https://youtu.be/KC-EyCh5TrY) (14 minutes) ([code](./Dots101/Entities101/Assets/HelloCube/14.%20StateChange/)) 
 
-Beyond the above starter samples, there are samples covering [Baking](./EntitiesSamples/Assets/Baking/README.md), [Streaming](./EntitiesSamples/Assets/Streaming/README.md) (for large worlds and scene management), and [Miscellaneous](./EntitiesSamples/Assets/Miscellaneous/README.md).
+Additional Entities material on Unity Learn:
 
-For quick reference of basic API usage, use these example code snippets and cheat sheets:
+- [Tanks tutorial](https://learn.unity.com/tutorial/65b3e48fedbc2a611fc291a7) and [walkthrough video](https://youtu.be/jAVVxoWU5lo) (23 minutes)
+- [DOTS Bootcamp](https://learn.unity.com/tutorial/dots-bootcamp) ([code](./Dots101/Entities101/Assets/Firefighters/))
 
-- [Example code: jobs](./EntitiesSamples/Assets/ExampleCode/Jobs.cs)
-- [Example code: components and systems](./EntitiesSamples/Assets/ExampleCode/ComponentsSystems.cs)
-- [Example code: baking](./EntitiesSamples/Assets/ExampleCode/Baking.cs)
+## Physics 101
+
+- [Document: Unity Physics 101](https://docs.google.com/document/d/1nHJoDBetbrmvO-KsOJ2S_p0tJI2UzRrp6T3oZSPoyg8/edit?usp=sharing)
+- [Sample project: Unity Physics 101](./Dots101/Physics101/)
+
+## Netcode 101
+
+- [Document: Unity Netcode for Entities 101](https://docs.google.com/document/d/17AYh_Lc7Phgtg66sX9TrSrtCS7PZn0y-XuVL2A6cXCw/edit?usp=sharing)
+- [Sample project: Unity Netcode for Entities 101](./Dots101/Netcode101/)
+- [Video: Netcode 101]()
+
+## Additional content 
+
+- [Document: Misconceptions about DOTS and Entities](https://docs.google.com/document/d/18hFIQipNxTsKsWk9eRroRwkGgswWs6m40X8N4Kkjhy4/edit?usp=sharing)
+- [Document: Performance checklist](https://docs.google.com/document/d/1QQZz6xzmWpe6NMdL3t2o7RXmya6UFyl_Xgo3KPfGxzQ/edit?usp=sharing)
 - [Cheat sheet: collections](./EntitiesSamples/Docs/cheatsheet/collections.md)
 - [Cheat sheet: mathematics](./EntitiesSamples/Docs/cheatsheet/mathematics.md)
+- [Sample project: ECS Network Racing](https://github.com/Unity-Technologies/ECS-Network-Racing-Sample): A working DOTS game using Netcode for Entities and Unity Physics.
 
-Finally, there's the [ECS Network Racing sample](https://github.com/Unity-Technologies/ECS-Network-Racing-Sample), which is a working DOTS game using DOTS Netcode and Physics.
+## Package manuals
 
-# Release notes
+- [Entities manual and API reference](https://docs.unity3d.com/Packages/com.unity.entities@latest/)
+- [Collections manual and API reference](https://docs.unity3d.com/Packages/com.unity.collections@latest/)
+- [Burst manual and API reference](https://docs.unity3d.com/Packages/com.unity.burst@latest/)
+- [Mathematics manual and API reference](https://docs.unity3d.com/Packages/com.unity.mathematics@latest/)
+- [Job system manual](https://docs.unity3d.com/Manual/JobSystem.html)
 
-This is the samples release for Unity 2022.3 LTS and the 1.2 release of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.
+
