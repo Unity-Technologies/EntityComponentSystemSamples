@@ -52,7 +52,10 @@ namespace Samples.HelloNetcode
             SamplePicker.value = LastSamplePickerDropdownValue;
             PopulateSampleDropdown(SamplePicker.value);
             ClientServerButton.gameObject.SetActive(ClientServerBootstrap.RequestedPlayType == ClientServerBootstrap.PlayType.ClientAndServer);
+            OnStart();
         }
+
+        protected virtual void OnStart() { }
 
         public void StartClientServer(string sceneName)
         {
@@ -138,9 +141,12 @@ namespace Samples.HelloNetcode
                 var lastPlayed = LastPlayedSampleScene;
                 for (var i = 0; i < scenes; ++i)
                 {
-                    var sceneName = System.IO.Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i));
-                    var isHelloNetcodeScene = SceneUtility.GetScenePathByBuildIndex(i).Contains("HelloNetcode");
-                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && !isHelloNetcodeScene)
+                    var scenePathByBuildIndex = SceneUtility.GetScenePathByBuildIndex(i);
+
+                    var sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePathByBuildIndex);
+                    var isHelloNetcodeScene = scenePathByBuildIndex.Contains("HelloNetcode");
+                    var isDisableBootstrapScene = scenePathByBuildIndex.Contains("DisableBootstrap");
+                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && !isHelloNetcodeScene && !isDisableBootstrapScene)
                     {
                         Sample.options.Add(new Dropdown.OptionData { text = sceneName });
                         if (string.Equals(sceneName, lastPlayed, StringComparison.OrdinalIgnoreCase))
@@ -153,9 +159,12 @@ namespace Samples.HelloNetcode
                 string lastPlayed = LastPlayedHelloNetcodeScene;
                 for (var i = 0; i < scenes; ++i)
                 {
-                    var sceneName = System.IO.Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i));
-                    var isHelloNetcodeScene = SceneUtility.GetScenePathByBuildIndex(i).Contains("HelloNetcode");
-                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && isHelloNetcodeScene)
+                    var scenePathByBuildIndex = SceneUtility.GetScenePathByBuildIndex(i);
+
+                    var sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePathByBuildIndex);
+                    var isHelloNetcodeScene = scenePathByBuildIndex.Contains("HelloNetcode");
+                    var isDisableBootstrapScene = scenePathByBuildIndex.Contains("DisableBootstrap");
+                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && isHelloNetcodeScene && !isDisableBootstrapScene)
                     {
                         Sample.options.Add(new Dropdown.OptionData { text = sceneName });
                         if (string.Equals(sceneName, lastPlayed, StringComparison.OrdinalIgnoreCase))

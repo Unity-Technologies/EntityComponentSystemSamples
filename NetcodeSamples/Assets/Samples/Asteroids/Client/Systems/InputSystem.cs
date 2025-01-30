@@ -15,6 +15,7 @@ namespace Asteroids.Client
         {
             m_Barrier = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
             RequireForUpdate<NetworkStreamInGame>();
+            RequireForUpdate<NetworkId>();
             // Just to make sure this system does not run in other scenes
             RequireForUpdate<LevelComponent>();
         }

@@ -85,12 +85,30 @@ namespace Samples.HelloNetcode
             }
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
 
+            var isReconnected = SystemAPI.GetComponentLookup<IsReconnected>();
+
+            var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             foreach (var character in SystemAPI.Query<CharacterAspect>().WithAll<Simulate>())
             {
                 if (!character.AutoCommandTarget.Enabled)
                 {
                     character.Velocity.Linear = float3.zero;
-                    return;
+                    continue;
+                }
+
+                if (isReconnected.HasComponent(character.Self))
+                {
+                    var characterPrefabQuery = SystemAPI.QueryBuilder().WithAll<CharacterControllerConfig, Prefab>().Build();
+                    if (characterPrefabQuery.CalculateEntityCount() == 1)
+                    {
+                        UnityEngine.Debug.Log($"Reconnecting character controller config entity was:{character.Character.ControllerConfig} is now:{characterPrefabQuery.GetSingletonEntity()}");
+                        character.Character.ControllerConfig = characterPrefabQuery.GetSingletonEntity();
+                        commandBuffer.RemoveComponent<IsReconnected>(character.Self);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogError($"Failed to reconnect character controller config entity was:{character.Character.ControllerConfig}");
+                    }
                 }
 
                 var controllerConfig = SystemAPI.GetComponent<CharacterControllerConfig>(character.Character.ControllerConfig);
@@ -177,6 +195,7 @@ namespace Samples.HelloNetcode
                 // Set the physics velocity and let physics move the kinematic object based on that
                 character.Velocity.Linear = (ccTransform.pos - character.Transform.ValueRO.Position) / SystemAPI.Time.DeltaTime;
             }
+            commandBuffer.Playback(state.EntityManager);
         }
 
         /// <summary>

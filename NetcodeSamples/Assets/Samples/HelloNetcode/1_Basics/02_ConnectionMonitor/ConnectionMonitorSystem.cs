@@ -104,7 +104,6 @@ namespace Samples.HelloNetcode
             var driverInstance = new NetworkDriverStore.NetworkDriverInstance();
 #if UNITY_EDITOR || NETCODE_DEBUG
             var settings = CreateNetworkSettings(100);
-            driverInstance.simulatorEnabled = NetworkSimulatorSettings.Enabled;
             if (NetworkSimulatorSettings.Enabled)
             {
                 NetworkSimulatorSettings.SetSimulatorSettings(ref settings);

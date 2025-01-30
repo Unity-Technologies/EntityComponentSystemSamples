@@ -8,6 +8,7 @@ public class AsteroidsSpawnerAuthoring : MonoBehaviour
     public GameObject Bullet;
     public GameObject Asteroid;
     public GameObject StaticAsteroid;
+    public GameObject HostConfig;
 
     class Baker : Baker<AsteroidsSpawnerAuthoring>
     {
@@ -18,6 +19,7 @@ public class AsteroidsSpawnerAuthoring : MonoBehaviour
             component.Bullet = GetEntity(authoring.Bullet, TransformUsageFlags.Dynamic);
             component.Asteroid = GetEntity(authoring.Asteroid, TransformUsageFlags.Dynamic);
             component.StaticAsteroid = GetEntity(authoring.StaticAsteroid, TransformUsageFlags.Dynamic);
+            component.HostConfig = GetEntity(authoring.HostConfig, TransformUsageFlags.Dynamic);
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, component);
         }

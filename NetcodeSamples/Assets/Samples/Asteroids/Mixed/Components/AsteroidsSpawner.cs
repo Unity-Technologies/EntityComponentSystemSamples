@@ -6,4 +6,5 @@ public struct AsteroidsSpawner : IComponentData
     public Entity Bullet;
     public Entity Asteroid;
     public Entity StaticAsteroid;
+    public Entity HostConfig;
 }

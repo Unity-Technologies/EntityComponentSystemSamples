@@ -159,8 +159,8 @@ namespace Samples.HelloNetcode
             m_OwnsData = !RpcUiData.Users.Data.IsCreated;
             if (m_OwnsData)
             {
-                RpcUiData.Users.Data = new UnsafeRingQueue<int>(32, Allocator.Persistent);
-                RpcUiData.Messages.Data = new UnsafeRingQueue<FixedString128Bytes>(32, Allocator.Persistent);
+                RpcUiData.Users.Data = new UnsafeQueue<int>(Allocator.Persistent);
+                RpcUiData.Messages.Data = new UnsafeQueue<FixedString128Bytes>(Allocator.Persistent);
             }
             Enabled = false;
         }
@@ -179,8 +179,8 @@ namespace Samples.HelloNetcode
 
     public abstract class RpcUiData
     {
-        public static readonly SharedStatic<UnsafeRingQueue<FixedString128Bytes>> Messages = SharedStatic<UnsafeRingQueue<FixedString128Bytes>>.GetOrCreate<MessagesKey>();
-        public static readonly SharedStatic<UnsafeRingQueue<int>> Users = SharedStatic<UnsafeRingQueue<int>>.GetOrCreate<UsersKey>();
+        public static readonly SharedStatic<UnsafeQueue<FixedString128Bytes>> Messages = SharedStatic<UnsafeQueue<FixedString128Bytes>>.GetOrCreate<MessagesKey>();
+        public static readonly SharedStatic<UnsafeQueue<int>> Users = SharedStatic<UnsafeQueue<int>>.GetOrCreate<UsersKey>();
 
         // Identifiers for the shared static fields
         private class MessagesKey {}

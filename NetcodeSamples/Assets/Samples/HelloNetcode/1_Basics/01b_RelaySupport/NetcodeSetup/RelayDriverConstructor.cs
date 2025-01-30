@@ -25,11 +25,11 @@ namespace Samples.HelloNetcode
         /// This method will ensure that we only register a UDP driver. This forces the client to always go through the
         /// relay service. In a setup with client-hosted servers it will make sense to allow for IPC connections and
         /// UDP both, which is what invoking
-        /// <see cref="DefaultDriverBuilder.RegisterClientDriver(World, ref NetworkDriverStore, NetDebug, ref RelayServerData)"/> will do.
+        /// <see cref="DefaultDriverBuilder.RegisterClientDriver(World, ref NetworkDriverStore, NetDebug, ref Unity.Networking.Transport.Relay.RelayServerData)"/> will do.
         /// </summary>
         public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
-            var settings = DefaultDriverBuilder.GetNetworkSettings();
+            var settings = DefaultDriverBuilder.GetNetworkClientSettings();
             settings.WithRelayParameters(ref m_RelayClientData);
             DefaultDriverBuilder.RegisterClientDriver(world, ref driverStore, netDebug, settings);
         }

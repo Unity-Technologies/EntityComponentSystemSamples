@@ -59,6 +59,8 @@ namespace Samples.HelloNetcode
                 // to wait for Approval state). It's also ok to send this even when connection approval is turned off.
                 if (evt.State == ConnectionState.State.Approval)
                     m_ApprovalIsRequired = m_SendApprovalWhenReady = true;
+                else if (evt.State == ConnectionState.State.Disconnected)
+                    m_SendApprovalWhenReady = false;
             }
 
             // If player authentication service is enabled wait until the auth data for the approval payload has been set

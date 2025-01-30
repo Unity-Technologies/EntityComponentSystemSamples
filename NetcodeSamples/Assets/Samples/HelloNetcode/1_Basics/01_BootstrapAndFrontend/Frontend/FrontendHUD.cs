@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Entities;
 using Unity.NetCode;
 using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
 namespace Samples.HelloNetcode
 {
@@ -31,7 +33,11 @@ namespace Samples.HelloNetcode
             }
 
             foreach (var world in clientServerWorlds)
+            {
+                Debug.Log($"Disposing World {world.Name}");
                 world.Dispose();
+            }
+
 
             if (string.IsNullOrEmpty(Frontend.OldFrontendWorldName))
                 Frontend.OldFrontendWorldName = "DefaultWorld";
@@ -63,17 +69,23 @@ namespace Samples.HelloNetcode
     {
         public FrontendHUD UIBehaviour;
         string m_PingText;
+        private DateTime m_LastDisconnectTime;
 
         protected override void OnUpdate()
         {
             CompleteDependency();
             if (!SystemAPI.TryGetSingletonEntity<NetworkStreamConnection>(out var connectionEntity))
             {
-                UIBehaviour.ConnectionStatus = "Not connected!";
+                if (m_LastDisconnectTime == default)
+                {
+                    m_LastDisconnectTime = DateTime.Now;
+                }
+                UIBehaviour.ConnectionStatus = $"Not connected! [{DateTime.Now.Subtract(m_LastDisconnectTime)}]";
                 m_PingText = default;
             }
             else
             {
+                m_LastDisconnectTime = default;
                 var connection = EntityManager.GetComponentData<NetworkStreamConnection>(connectionEntity);
                 var address = SystemAPI.GetSingletonRW<NetworkStreamDriver>().ValueRO.GetRemoteEndPoint(connection).Address;
                 if (EntityManager.HasComponent<NetworkId>(connectionEntity))

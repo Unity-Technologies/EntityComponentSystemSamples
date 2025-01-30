@@ -20,6 +20,7 @@ namespace Asteroids.Server
         EntityQuery m_ShipQuery;
         EntityQuery m_DynamicAsteroidsQuery;
         EntityQuery m_StaticAsteroidsQuery;
+        EntityQuery m_HostMigrationQuery;
 
         Entity m_AsteroidPrefab;
         Entity m_ShipPrefab;
@@ -32,6 +33,7 @@ namespace Asteroids.Server
         ComponentLookup<CommandTarget> commandTargetFromEntity;
         ComponentLookup<NetworkId> networkIdFromEntity;
         ComponentLookup<LocalTransform> localTransformLookup;
+        ComponentLookup<PlayerColor> playerColorLookup;
 
         public void OnCreate(ref SystemState state)
         {
@@ -60,6 +62,14 @@ namespace Asteroids.Server
 
             m_ConnectionQuery = state.GetEntityQuery(builder);
 
+            builder.Reset();
+            builder.WithAll<IsReconnected>();
+
+            builder.Reset();
+            builder.WithAll<HostMigrationInProgress>();
+
+            m_HostMigrationQuery = state.GetEntityQuery(builder);
+
             state.RequireForUpdate(m_LevelQuery);
             state.RequireForUpdate<AsteroidsSpawner>();
 
@@ -68,6 +78,7 @@ namespace Asteroids.Server
             var fileTimeUtc = System.DateTime.UtcNow.ToFileTimeUtc();
             randomReference = new NativeReference<Random>(Random.CreateFromIndex((uint) fileTimeUtc), Allocator.Persistent);
 
+            playerColorLookup = state.GetComponentLookup<PlayerColor>();
             playerStateFromEntity = state.GetComponentLookup<PlayerStateComponentData>();
             commandTargetFromEntity = state.GetComponentLookup<CommandTarget>();
             networkIdFromEntity = state.GetComponentLookup<NetworkId>();
@@ -92,6 +103,10 @@ namespace Asteroids.Server
                 return;
             }
 
+            // If there is a host migration in progress skip any spawning here until it's done
+            if (!m_HostMigrationQuery.IsEmptyIgnoreFilter)
+                return;
+
             var settings = SystemAPI.GetSingleton<ServerSettings>();
             if (m_AsteroidPrefab == Entity.Null || m_ShipPrefab == Entity.Null)
             {
@@ -109,6 +124,7 @@ namespace Asteroids.Server
             var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged);
 
+            playerColorLookup.Update(ref state);
             playerStateFromEntity.Update(ref state);
             commandTargetFromEntity.Update(ref state);
             networkIdFromEntity.Update(ref state);
@@ -147,7 +163,7 @@ namespace Asteroids.Server
 
             SystemAPI.TryGetSingleton<ClientServerTickRate>(out var tickRate);
             tickRate.ResolveDefaults();
-            var fixedDeltaTime = 1.0f / (float) tickRate.SimulationTickRate;
+            var fixedDeltaTime = tickRate.SimulationFixedTimeStep;
 
             var shipLevelPadding = m_ShipRadius + 50;
             var asteroidLevelPadding = m_AsteroidRadius + 3;
@@ -166,6 +182,7 @@ namespace Asteroids.Server
             var spawnPlayerShips = new SpawnPlayerShips
             {
                 ecb = ecb,
+                playerColorLookup = playerColorLookup,
                 playerStateFromEntity = playerStateFromEntity,
                 commandTargetFromEntity = commandTargetFromEntity,
                 networkIdFromEntity = networkIdFromEntity,
@@ -222,6 +239,7 @@ namespace Asteroids.Server
         internal partial struct SpawnPlayerShips : IJobEntity
         {
             public EntityCommandBuffer ecb;
+            [ReadOnly] public ComponentLookup<PlayerColor> playerColorLookup;
             public ComponentLookup<PlayerStateComponentData> playerStateFromEntity;
             public ComponentLookup<CommandTarget> commandTargetFromEntity;
             public ComponentLookup<NetworkId> networkIdFromEntity;
@@ -268,6 +286,9 @@ namespace Asteroids.Server
                         quaternion.RotateZ(math.radians(90f)),
                         originalScale
                     );
+
+                // The connection has the color which this player owns, this will be applied to the ship on each spawn
+                ecb.SetComponent(shipEntity, new PlayerColor {Value = playerColorLookup[requestSource.SourceConnection].Value});
 
                 ecb.SetComponent(shipEntity, trans);
                 ecb.SetComponent(shipEntity, new GhostOwner {NetworkId = networkIdFromEntity[requestSource.SourceConnection].Value});

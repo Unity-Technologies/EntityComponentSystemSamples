@@ -58,7 +58,7 @@ namespace Samples.HelloNetcode
                 m_ScrollRect.verticalNormalizedPosition = 0f;
             }
 
-            if (RpcUiData.Users.Data.IsCreated && RpcUiData.Users.Data.TryDequeue(out var user))
+            while (RpcUiData.Users.Data.IsCreated && RpcUiData.Users.Data.TryDequeue(out var user))
             {
                 var userText = GetUserText();
                 userText.text = $"User {user}";
