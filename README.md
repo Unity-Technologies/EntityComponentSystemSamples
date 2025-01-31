@@ -11,7 +11,7 @@ The DOTS package sample projects contain many small samples that cover most of t
 - [Entities.Graphics HDRP samples](./GraphicsSamples/HDRPSamples/README.md)
 - [Entities.Graphics URP samples](./GraphicsSamples/URPSamples/README.md)
 
-For those new to DOTS, we recommend starting with the DOTS 101 sample projects and materials:
+For those new to DOTS, we recommend starting with the DOTS 101 sample projects and materials below:
 
 ## The Job System 101
 
@@ -49,6 +49,7 @@ Additional Entities material on Unity Learn:
 
 ## Additional content 
 
+- [Document: Introduction to DOTS Ebook](https://unity.com/resources/introduction-to-dots-ebook)
 - [Document: Misconceptions about DOTS and Entities](https://docs.google.com/document/d/18hFIQipNxTsKsWk9eRroRwkGgswWs6m40X8N4Kkjhy4/edit?usp=sharing)
 - [Document: Performance checklist](https://docs.google.com/document/d/1QQZz6xzmWpe6NMdL3t2o7RXmya6UFyl_Xgo3KPfGxzQ/edit?usp=sharing)
 - [Cheat sheet: collections](./EntitiesSamples/Docs/cheatsheet/collections.md)
