@@ -81,7 +81,7 @@ namespace Unity.Physics.Stateful
                     var addToEntityA = EventLookup.HasBuffer(statefulEvent.EntityA) &&
                         (!UseExcludeComponent || !EventExcludeLookup.HasComponent(statefulEvent.EntityA));
                     var addToEntityB = EventLookup.HasBuffer(statefulEvent.EntityB) &&
-                        (!UseExcludeComponent || !EventExcludeLookup.HasComponent(statefulEvent.EntityA));
+                        (!UseExcludeComponent || !EventExcludeLookup.HasComponent(statefulEvent.EntityB));
 
                     if (addToEntityA)
                     {
