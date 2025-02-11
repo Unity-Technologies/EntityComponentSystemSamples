@@ -34,7 +34,7 @@ namespace Samples.HelloNetcode
         public bool WaitForInitialJoin { get; set; }
 
         // By default use the Datagram Transport Layer Security (dtls) connection type with the network transport
-        public string ConnectionType { get; } = "udp";
+        public string ConnectionType { get; } = "dtls";
 
         public int MaxPlayers
         {
@@ -145,10 +145,10 @@ namespace Samples.HelloNetcode
                 m_LastUpdateTime = stats.LastDataUpdateTime;
                 m_MigrationDataBlob.Length = 0;
                 var arrayData = m_MigrationDataBlob.AsArray();
-                HostMigration.TryGetHostMigrationData(ref arrayData, out var migrationDataSize);
+                HostMigration.TryGetHostMigrationData(ClientServerBootstrap.ServerWorld, ref arrayData, out var migrationDataSize);
                 m_MigrationDataBlob.ResizeUninitialized(migrationDataSize);
                 arrayData = m_MigrationDataBlob.AsArray();
-                if (!HostMigration.TryGetHostMigrationData(ref arrayData, out migrationDataSize))
+                if (!HostMigration.TryGetHostMigrationData(ClientServerBootstrap.ServerWorld, ref arrayData, out migrationDataSize))
                 {
                     Debug.LogError($"Migration data doesn't fit into given buffer (required size = {migrationDataSize}, destination buffer = {arrayData.Length})");
                     return;
@@ -443,7 +443,6 @@ namespace Samples.HelloNetcode
                     // TODO: There should always be a client world at this point, but seems this does happen and needs debugging
                     if (ClientServerBootstrap.ClientWorld != null)
                     {
-                        Debug.LogWarning("[HostMigration] No client world found during migration event. Creating a new world.");
                         var relayEntity = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
                         ClientServerBootstrap.ClientWorld.EntityManager.AddComponentData(relayEntity, new WaitForRelayConnection() { WaitForJoinCode = true, OldJoinCode = RelayJoinCode, IsHostMigration = true, StartTime = Time.realtimeSinceStartup});
 
@@ -452,6 +451,10 @@ namespace Samples.HelloNetcode
                         var clientMigrationSystem = ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<ClientHostMigrationHUDSystem>();
                         clientMigrationSystem.StatsText = statsText;
                         clientMigrationSystem.Controller = this;
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[HostMigration] No client world found during migration event.");
                     }
 
                     // CheckLobbyDataForNewRelayHost() will be called next to see if the present changes include a new
@@ -600,6 +603,14 @@ namespace Samples.HelloNetcode
             }
         }
 
+        /// <summary>
+        /// Sanity check on the current world status before a client becomes as host during
+        /// a host migration event.
+        /// - Can't already have a server world as we'll be creating a new one
+        /// - Thin clients are not supported
+        /// - Client world must exist, it will switch from relay connection setup (old host)
+        ///   to an IPC to the local server world
+        /// </summary>
         static bool ValidateWorldsForMigration()
         {
             World clientWorld = default;

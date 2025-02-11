@@ -58,6 +58,8 @@ namespace Samples.HelloNetcode
 
         public void OnEnableHostMigration(Toggle value)
         {
+            if (hostMigrationController == null)
+                hostMigrationController = FindFirstObjectByType<HostMigrationController>();
             DontDestroyOnLoad(hostMigrationController);
             EnableRelay.gameObject.SetActive(!value.isOn);
             Port.gameObject.SetActive(!value.isOn);
