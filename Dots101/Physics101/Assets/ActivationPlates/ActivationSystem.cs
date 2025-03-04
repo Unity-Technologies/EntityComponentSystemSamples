@@ -17,7 +17,7 @@ namespace ActivationPlates
         {
             state.RequireForUpdate<SimulationSingleton>();
             state.RequireForUpdate<ActivationPlates.Config>();
-            physicsUpdateCount = 1; // this prevents generating an erroneous Exit zone state in the first update
+            physicsUpdateCount = 1; // start at 1 to prevent generating an erroneous Exit zone state in the first update
         }
 
         [BurstCompile]

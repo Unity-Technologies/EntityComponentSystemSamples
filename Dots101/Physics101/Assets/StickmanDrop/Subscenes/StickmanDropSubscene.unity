@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -42,8 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 1
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -66,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -140,6 +137,11 @@ PrefabInstance:
       propertyPath: m_BreakTorque
       value: Infinity
       objectReference: {fileID: 0}
+    - target: {fileID: 1331215023733624457, guid: c5f4142b6217c4026860a32dd52cc3ed,
+        type: 3}
+      propertyPath: m_EnablePreprocessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2914766863262144476, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
       propertyPath: m_Name
@@ -155,6 +157,11 @@ PrefabInstance:
       propertyPath: m_BreakTorque
       value: Infinity
       objectReference: {fileID: 0}
+    - target: {fileID: 2930345963083664843, guid: c5f4142b6217c4026860a32dd52cc3ed,
+        type: 3}
+      propertyPath: m_EnablePreprocessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3270501068965181726, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
       propertyPath: m_BreakForce
@@ -164,6 +171,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_BreakTorque
       value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 3270501068965181726, guid: c5f4142b6217c4026860a32dd52cc3ed,
+        type: 3}
+      propertyPath: m_EnablePreprocessing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3380364614489159693, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
@@ -175,6 +187,11 @@ PrefabInstance:
       propertyPath: m_BreakTorque
       value: Infinity
       objectReference: {fileID: 0}
+    - target: {fileID: 3380364614489159693, guid: c5f4142b6217c4026860a32dd52cc3ed,
+        type: 3}
+      propertyPath: m_EnablePreprocessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5893671024960936606, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
       propertyPath: m_BreakForce
@@ -184,6 +201,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_BreakTorque
       value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893671024960936606, guid: c5f4142b6217c4026860a32dd52cc3ed,
+        type: 3}
+      propertyPath: m_EnablePreprocessing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6133105214196658841, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
@@ -260,7 +282,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2707614726728472830, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d1a10035c251e4c5995f1a444ea92161, type: 2}
     - target: {fileID: 2914766863262144476, guid: c5f4142b6217c4026860a32dd52cc3ed,
@@ -300,22 +322,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3965086217897146431, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d1a10035c251e4c5995f1a444ea92161, type: 2}
     - target: {fileID: 5095480732539229770, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d1a10035c251e4c5995f1a444ea92161, type: 2}
     - target: {fileID: 5341407098219216550, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d1a10035c251e4c5995f1a444ea92161, type: 2}
     - target: {fileID: 5421757769858772247, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d1a10035c251e4c5995f1a444ea92161, type: 2}
     - target: {fileID: 5893671024960936606, guid: c5f4142b6217c4026860a32dd52cc3ed,
@@ -380,7 +402,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7581547801504845335, guid: c5f4142b6217c4026860a32dd52cc3ed,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d1a10035c251e4c5995f1a444ea92161, type: 2}
     m_RemovedComponents: []
@@ -445,6 +467,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

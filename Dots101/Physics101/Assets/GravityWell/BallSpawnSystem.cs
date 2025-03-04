@@ -11,7 +11,7 @@ namespace GravityWell
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<global::GravityWell.Config>();
+            state.RequireForUpdate<Config>();
         }
 
         [BurstCompile]

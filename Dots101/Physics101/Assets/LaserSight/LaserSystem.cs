@@ -24,20 +24,24 @@ namespace LaserSight
             {
                 float3 input = new float3(Input.GetAxis($"Horizontal"), 0, Input.GetAxis($"Vertical"));
                 var speed = config.PlayerMoveSpeed * SystemAPI.Time.DeltaTime;
-                foreach (var (playerTransform, player) in
-                         SystemAPI.Query<RefRW<LocalTransform>, RefRO<Player>>())
+                foreach (var playerTransform in
+                         SystemAPI.Query<RefRW<LocalTransform>>()
+                             .WithAll<Player>())
                 {
                     playerTransform.ValueRW.Position += input * speed;
                 }
             }
+
+            float laserLength = 0;
 
             // raycast to determine the laser length
             {
                 // to perform raycasts or other collision queries, we need the collision world
                 var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
                 
-                foreach (var (playerTransform, player) in
-                         SystemAPI.Query<RefRO<LocalTransform>, RefRW<Player>>())
+                foreach (var playerTransform in
+                         SystemAPI.Query<RefRO<LocalTransform>>()
+                             .WithAll<Player>())
                 {
                     var raycast = new RaycastInput
                     {
@@ -51,13 +55,12 @@ namespace LaserSight
                     if (collisionWorld.CastRay(raycast, out var closestHit))
                     {
                         // set laser length to the distance of the closest hit
-                        player.ValueRW.LaserLength =
-                            math.distance(playerTransform.ValueRO.Position, closestHit.Position);
+                        laserLength = math.distance(playerTransform.ValueRO.Position, closestHit.Position);
                     }
                     else
                     {
                         // no hit detected, so just set the laser to max length
-                        player.ValueRW.LaserLength = config.MaxLaserLength;
+                        laserLength = config.MaxLaserLength;
                     }
                 }
             }
@@ -67,6 +70,7 @@ namespace LaserSight
                 foreach (var (playerTransform, player) in
                          SystemAPI.Query<RefRW<LocalTransform>, RefRW<Player>>())
                 {
+                    // init the laser ref
                     if (!player.ValueRW.Laser.IsValid())
                     {
                         player.ValueRW.Laser = GameObject.FindFirstObjectByType<LineRenderer>();
@@ -74,9 +78,7 @@ namespace LaserSight
 
                     var laser = player.ValueRO.Laser.Value;
                     laser.SetPosition(0, playerTransform.ValueRO.Position);
-                    laser.SetPosition(1,
-                        playerTransform.ValueRO.Position + new float3(0, 0, player.ValueRO.LaserLength)
-                    );
+                    laser.SetPosition(1, playerTransform.ValueRO.Position + new float3(0, 0, laserLength));
                 }
             }
         }

@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Physics;
 using Unity.Transforms;
 using Unity.Mathematics;
+using Unity.Physics.Extensions;
 
 namespace Blender
 {
@@ -19,13 +20,14 @@ namespace Blender
             float deltaTime = SystemAPI.Time.DeltaTime;
 
             foreach (var (buoyant, transform, velocity, mass) in
-                     SystemAPI.Query<RefRO<Buoyancy>, RefRW<LocalTransform>, RefRW<PhysicsVelocity>, RefRO<PhysicsMass>>())
+                     SystemAPI
+                         .Query<RefRO<Buoyancy>, RefRW<LocalTransform>, RefRW<PhysicsVelocity>, RefRO<PhysicsMass>>())
             {
                 float3 currentPos = transform.ValueRW.Position;
-                
+
                 float depth = buoyant.ValueRO.WaterLevel - currentPos.y;
-                float buoyancyForce = depth * buoyant.ValueRO.BuoyancyForce;
-                velocity.ValueRW.Linear.y += buoyancyForce * deltaTime / mass.ValueRO.InverseMass;
+                float buoyancyForce = depth * buoyant.ValueRO.BuoyancyForce * deltaTime;
+                velocity.ValueRW.ApplyLinearImpulse(mass.ValueRO, new float3(0, buoyancyForce, 0));
 
                 // apply water drag
                 velocity.ValueRW.Linear *= 1.0f - buoyant.ValueRO.Drag * deltaTime;

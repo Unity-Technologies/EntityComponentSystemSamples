@@ -1,12 +1,13 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Blender
 {
     public class BladeAuthoring : MonoBehaviour
     {
-        public Vector3 RotatationAxis;
+        public Vector3 AngularVelocity;
         
         public class Baker : Baker<BladeAuthoring>
         {
@@ -15,7 +16,7 @@ namespace Blender
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(entity, new Blade
                 {
-                    RotationAxis = authoring.RotatationAxis,
+                    AngularVelocity = authoring.AngularVelocity,
                 });
             }
         }
@@ -23,7 +24,7 @@ namespace Blender
 
     public struct Blade : IComponentData
     {
-        public float3 RotationAxis;
+        public float3 AngularVelocity;
     }
 }
 

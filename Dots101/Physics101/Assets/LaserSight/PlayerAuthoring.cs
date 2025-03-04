@@ -19,6 +19,5 @@ namespace LaserSight
     public struct Player : IComponentData
     {
         public UnityObjectRef<LineRenderer> Laser;
-        public float LaserLength;
     }
 }

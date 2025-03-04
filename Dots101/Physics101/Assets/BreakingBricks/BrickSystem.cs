@@ -47,17 +47,17 @@ namespace BreakingBricks
                     brickTransform.ValueRW.Position = pos;
 
                     color.ValueRW.Value = config.FullHitpointsColor;
-                    
-                    collider.ValueRO.Value.Value.SetCollisionResponse(CollisionResponsePolicy.CollideRaiseCollisionEvents);
                 }
             }
-
-            // get the collision events
-            var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
+            
+            // needed to get the collision events
             var sim = SystemAPI.GetSingleton<SimulationSingleton>().AsSimulation();
             
             // to access the collisions events on main thread, we must sync any outstanding physics sim jobs
             sim.FinalJobHandle.Complete(); 
+            
+            // needed to get details of the collision events (estimated impulse)
+            var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
 
             const float minImpactThreshold = 2f; // ignore impacts below this (to effectively ignore resting contacts) 
             var strengthModifier = config.ImpactStrength;
