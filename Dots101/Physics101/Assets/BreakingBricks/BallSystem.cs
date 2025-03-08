@@ -1,7 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
 using Random = Unity.Mathematics.Random;
 
@@ -10,11 +9,13 @@ namespace BreakingBricks
     public partial struct BallSystem : ISystem
     {
         private float spawnTimer;
+        private uint seed;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<BreakingBricks.Config>();
+            seed = 1;
         }
 
         [BurstCompile]
@@ -29,8 +30,7 @@ namespace BreakingBricks
 
                 var newBalls =
                     state.EntityManager.Instantiate(config.BallPrefab, config.NumBallsSpawn, Allocator.Temp);
- 
-                var rand = new Random((uint)math.max(1, math.ceil(SystemAPI.Time.ElapsedTime)));
+                var rand = Random.CreateFromIndex(++seed);
 
                 var min = config.SpawnBoundsMin;
                 var max = config.SpawnBoundsMax;

@@ -31,7 +31,7 @@ namespace LaserSight
                     playerTransform.ValueRW.Position += input * speed;
                 }
             }
-
+            
             float laserLength = 0;
 
             // raycast to determine the laser length

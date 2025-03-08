@@ -20,8 +20,7 @@ namespace Blender
             float deltaTime = SystemAPI.Time.DeltaTime;
 
             foreach (var (buoyant, transform, velocity, mass) in
-                     SystemAPI
-                         .Query<RefRO<Buoyancy>, RefRW<LocalTransform>, RefRW<PhysicsVelocity>, RefRO<PhysicsMass>>())
+                     SystemAPI.Query<RefRO<Buoyancy>, RefRW<LocalTransform>, RefRW<PhysicsVelocity>, RefRO<PhysicsMass>>())
             {
                 float3 currentPos = transform.ValueRW.Position;
 

@@ -23,7 +23,7 @@ namespace BreakingBricks
             state.RequireForUpdate<PhysicsWorldSingleton>();
             state.RequireForUpdate<BreakingBricks.Config>();
         }
-
+ 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {

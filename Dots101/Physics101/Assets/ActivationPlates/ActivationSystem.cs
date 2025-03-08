@@ -130,6 +130,7 @@ namespace ActivationPlates
                         if (zone.ValueRO.LastTriggerTime == 0)
                         {
                             spawnBox = true;
+                            zone.ValueRW.LastTriggerTime = (float)elapsedTime;
                         }
                     }
                     else if (type == ZoneType.Continuous && zoneState == ZoneState.Inside)
