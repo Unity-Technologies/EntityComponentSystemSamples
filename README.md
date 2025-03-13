@@ -40,6 +40,7 @@ Additional Entities material on Unity Learn:
 
 - [Document: Unity Physics 101](https://docs.google.com/document/d/1nHJoDBetbrmvO-KsOJ2S_p0tJI2UzRrp6T3oZSPoyg8/edit?usp=sharing)
 - [Sample project: Unity Physics 101](./Dots101/Physics101/)
+- [Video: Physics 101](https://youtu.be/EGcHDZeDTtA)
 
 ## Netcode 101
 
