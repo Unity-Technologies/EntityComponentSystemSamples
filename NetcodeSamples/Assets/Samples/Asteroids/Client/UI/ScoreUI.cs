@@ -19,7 +19,10 @@ namespace Samples.Asteroids.Client.UI
         void Update()
         {
             if (ClientServerBootstrap.ClientWorld == null)
+            {
+                m_ScoreQuery = default;
                 return;
+            }
             if (m_ScoreQuery == default)
                 m_ScoreQuery = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntityQuery(typeof(AsteroidScore));
             if (m_ScoreQuery.IsEmpty)

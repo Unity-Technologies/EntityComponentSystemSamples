@@ -43,7 +43,9 @@ namespace Samples.HelloNetcode
             #if !UNITY_WEBGL || UNITY_EDITOR
             DefaultDriverBuilder.RegisterServerDriver(world, ref driverStore, netDebug, ref m_RelayServerData);
             #else
-            throw new System.NotSupportedException("It is not allowed to create a server NetworkDriver for WebGL build.");
+            throw new NotSupportedException(
+                "Creating a server driver for a WebGL build is not supported. You can't listen on a WebSocket in the browser." +
+                " WebGL builds should be ideally client-only (has UNITY_CLIENT define) and in case a Client/Server build is made, only client worlds should be created.");
             #endif
         }
     }

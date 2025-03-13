@@ -39,7 +39,7 @@ namespace Samples.HelloNetcode
         public Toggle EnableRelay;
 
         // The time, in seconds, we'll wait for a host join code when doing the initial connect
-        const int k_InitialHostJoinWaitTimeout = 10;
+        const int k_InitialHostJoinWaitTimeout = 30;
         const string k_LobbyName = "TestLobby";
         string m_PreviousAddressText;
         string m_OldValue;
@@ -95,6 +95,9 @@ namespace Samples.HelloNetcode
             }
         }
 
+        /// <summary>
+        /// Initial setup for the host of the game session.
+        /// </summary>
         async void SetupRelayAndLobbyAsHost()
         {
             HostConnectionStatus = "Initializing services";
@@ -119,6 +122,13 @@ namespace Samples.HelloNetcode
             SceneManager.LoadScene("HostMigrationHUD", LoadSceneMode.Additive);
         }
 
+        /// <summary>
+        /// Initial service initialization. This only needs to be done once. When running in a standalone player
+        /// we need to use a different player profile or else the lobby will treat this player as the same identity
+        /// as the editor or other players (would remove everyone from the lobby for example when one player instance
+        /// disconnects/leaves). A random profile name will be generated unless the -userprofile argument is passed
+        /// to the process in which case the given name will be used.
+        /// </summary>
         async Task InitializeServices()
         {
             var userprofile = CommandLineUtils.GetCommandLineValueFromKey("userprofile");
@@ -145,6 +155,9 @@ namespace Samples.HelloNetcode
             }
         }
 
+        /// <summary>
+        /// Initial setup for clients joining a game session.
+        /// </summary>
         async void JoinLobbyAndConnectWithRelayAsClient()
         {
             ClientConnectionStatus = "Initializing services";
@@ -214,78 +227,88 @@ namespace Samples.HelloNetcode
         /// </summary>
         void SetupRelayHostedServerAndConnect(RelayServerData relayServerData)
         {
-            if (ClientServerBootstrap.RequestedPlayType != ClientServerBootstrap.PlayType.ClientAndServer)
-            {
-                UnityEngine.Debug.LogError($"Creating client/server worlds is not allowed if playmode is set to {ClientServerBootstrap.RequestedPlayType}");
-                return;
-            }
-
             var oldConstructor = NetworkStreamReceiveSystem.DriverConstructor;
-            var driverConstructor = new HostMigrationDriverConstructor(relayServerData, new RelayServerData());
-            NetworkStreamReceiveSystem.DriverConstructor = driverConstructor;
-            var server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
-            var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
-            NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
-
-            SceneManager.LoadScene("FrontendHUD");
-
-            //Destroy the local simulation world to avoid the game scene to be loaded into it
-            //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
-            //and other issues.
-            DestroyLocalSimulationWorld();
-            if (World.DefaultGameObjectInjectionWorld == null)
-                World.DefaultGameObjectInjectionWorld = server;
-
-            SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
-
-            using var driverQuery = server.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
-            var serverDriver = driverQuery.GetSingletonRW<NetworkStreamDriver>();
-            if (!serverDriver.ValueRW
-                    .Listen(NetworkEndpoint.AnyIpv4))
+            try
             {
-                Debug.LogError($"NetworkStreamDriver.Listen() failed");
-                return;
+                var driverConstructor = new HostMigrationDriverConstructor(relayServerData, new RelayServerData());
+                NetworkStreamReceiveSystem.DriverConstructor = driverConstructor;
+                var server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
+                var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
+
+                SceneManager.LoadScene("FrontendHUD");
+
+                //Destroy the local simulation world to avoid the game scene to be loaded into it
+                //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
+                //and other issues.
+                DestroyLocalSimulationWorld();
+                if (World.DefaultGameObjectInjectionWorld == null)
+                    World.DefaultGameObjectInjectionWorld = server;
+
+                SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
+
+                using var driverQuery = server.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
+                var serverDriver = driverQuery.GetSingletonRW<NetworkStreamDriver>();
+                if (!serverDriver.ValueRW
+                        .Listen(NetworkEndpoint.AnyIpv4))
+                {
+                    Debug.LogError($"NetworkStreamDriver.Listen() failed");
+                    return;
+                }
+
+                // Update the UI with the status of connecting to the relay
+                var relayEntity = ClientServerBootstrap.ServerWorld.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
+                ClientServerBootstrap.ServerWorld.EntityManager.SetComponentData(relayEntity, new WaitForRelayConnection() { StartTime = Time.realtimeSinceStartup });
+
+                var ipcPort = serverDriver.ValueRW.GetLocalEndPoint(serverDriver.ValueRW.DriverStore.FirstDriver).Port;
+                var networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
+                client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");
+                client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = NetworkEndpoint.LoopbackIpv4.WithPort(ipcPort) });
             }
-
-            // Update the UI with the status of connecting to the relay
-            var relayEntity = ClientServerBootstrap.ServerWorld.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
-            ClientServerBootstrap.ServerWorld.EntityManager.SetComponentData(relayEntity, new WaitForRelayConnection() { StartTime = Time.realtimeSinceStartup });
-
-            var ipcPort = serverDriver.ValueRW.GetLocalEndPoint(serverDriver.ValueRW.DriverStore.FirstDriver).Port;
-            var networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
-            client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");
-            client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = NetworkEndpoint.LoopbackIpv4.WithPort(ipcPort) });
+            finally
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
+            }
         }
 
+        /// <summary>
+        /// Connect to the relay server and the given server endpoint.
+        /// </summary>
         void ConnectToServerWithRelay(RelayServerData relayServerData)
         {
             var oldConstructor = NetworkStreamReceiveSystem.DriverConstructor;
-            NetworkStreamReceiveSystem.DriverConstructor = new HostMigrationDriverConstructor(new RelayServerData(), relayServerData);
-            var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
-            NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
+            try
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = new HostMigrationDriverConstructor(new RelayServerData(), relayServerData);
+                var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
 
-            client.EntityManager.CreateEntity(ComponentType.ReadOnly<EnableHostMigration>());
+                client.EntityManager.CreateEntity(ComponentType.ReadOnly<EnableHostMigration>());
 
-            SceneManager.LoadScene("FrontendHUD");
+                SceneManager.LoadScene("FrontendHUD");
 
-            //Destroy the local simulation world to avoid the game scene to be loaded into it
-            //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
-            //and other issues.
-            DestroyLocalSimulationWorld();
-            if (World.DefaultGameObjectInjectionWorld == null)
-                World.DefaultGameObjectInjectionWorld = client;
+                //Destroy the local simulation world to avoid the game scene to be loaded into it
+                //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
+                //and other issues.
+                DestroyLocalSimulationWorld();
+                if (World.DefaultGameObjectInjectionWorld == null)
+                    World.DefaultGameObjectInjectionWorld = client;
 
-            SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
+                SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
 
-            // Update the UI with the status of connecting to the relay
-            var relayEntity = client.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
-            client.EntityManager.SetComponentData(relayEntity, new WaitForRelayConnection() { StartTime = Time.realtimeSinceStartup });
+                // Update the UI with the status of connecting to the relay
+                var relayEntity = client.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
+                client.EntityManager.SetComponentData(relayEntity, new WaitForRelayConnection() { StartTime = Time.realtimeSinceStartup });
 
-            var networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
-            client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");
-            // For IPC this will not work and give an error in the transport layer. For this sample we force the client to connect through the relay service.
-            // For a locally hosted server, the client would need to connect to NetworkEndpoint.AnyIpv4, and the relayClientData.Endpoint in all other cases.
-            client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = relayServerData.Endpoint });
+                var networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
+                client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");
+
+                // For IPC this will not work and give an error in the transport layer. For this sample we force the client to connect through the relay service.
+                // For a locally hosted server, the client would need to connect to NetworkEndpoint.AnyIpv4, and the relayClientData.Endpoint in all other cases.
+                client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = relayServerData.Endpoint });
+            }
+            finally
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
+            }
         }
 #endif
     }

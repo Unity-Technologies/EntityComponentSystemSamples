@@ -5,16 +5,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
+using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
+using Unity.Scenes;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Unity.Services.Core;
+using UnityEngine.SceneManagement;
+using Hash128 = Unity.Entities.Hash128;
 
 namespace Samples.HelloNetcode
 {
@@ -29,7 +33,53 @@ namespace Samples.HelloNetcode
         public const string RelayHost = "relay.host";
     }
 
-    public class HostMigrationController : MonoBehaviour
+    /// <summary>
+    /// Client and server driver constructors for the host migration scenario. This
+    /// will use IPC direct connections between client and server in the same process even
+    /// with a simulator enabled (which usually will default to UDP). Clients running
+    /// alone will use the relay settings.
+    /// </summary>
+    public class HostMigrationDriverConstructor : INetworkStreamDriverConstructor
+    {
+        RelayServerData m_RelayClientData;
+        RelayServerData m_RelayServerData;
+
+        public HostMigrationDriverConstructor(RelayServerData serverData, RelayServerData clientData)
+        {
+            m_RelayServerData = serverData;
+            m_RelayClientData = clientData;
+        }
+
+        /// <summary>
+        /// Connect directly to a local server using IPC or via UDP relay when connecting to remote server.
+        /// </summary>
+        public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        {
+            var settings = DefaultDriverBuilder.GetNetworkClientSettings();
+            // If this is the local client on the server we'll use IPC otherwise use relay data
+            if (ClientServerBootstrap.ServerWorld == null || !ClientServerBootstrap.ServerWorld.IsCreated)
+                DefaultDriverBuilder.RegisterClientDriver(world, ref driverStore, netDebug, ref m_RelayClientData);
+            else
+                DefaultDriverBuilder.RegisterClientIpcDriver(world, ref driverStore, netDebug, settings);
+        }
+
+        /// <summary>
+        /// Create a server which will listen for IPC connections and connect to the relay data set
+        /// here via the constructor.
+        /// </summary>
+        public void CreateServerDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        {
+            #if !UNITY_WEBGL || UNITY_EDITOR
+            DefaultDriverBuilder.RegisterServerDriver(world, ref driverStore, netDebug, ref m_RelayServerData);
+            #else
+            throw new NotSupportedException(
+                "Creating a server driver for a WebGL build is not supported. You can't listen on a WebSocket in the browser." +
+                " WebGL builds should be ideally client-only (has UNITY_CLIENT define) and in case a Client/Server build is made, only client worlds should be created.");
+            #endif
+        }
+    }
+
+    public class SimpleHostMigrationController : MonoBehaviour
     {
         public Lobby CurrentLobby => m_CurrentLobby;
         public string RelayJoinCode { get; set; }
@@ -40,9 +90,7 @@ namespace Samples.HelloNetcode
         /// </summary>
         public bool WaitForInitialJoin { get; set; }
 
-        /// <summary>
-        /// By default use the Datagram Transport Layer Security (dtls) connection type with the network transport
-        /// </summary>
+        // By default use the Datagram Transport Layer Security (dtls) connection type with the network transport
         public string ConnectionType { get; } = "dtls";
 
         public int MaxPlayers
@@ -57,9 +105,8 @@ namespace Samples.HelloNetcode
         Lobby m_CurrentLobby;
         Coroutine m_Heartbeat;
         bool m_HostMigrationEnabled;
-        HostMigrationFrontend m_HostMigrationFrontend;
 
-        public int InitialDataSize { get; set; } = 100_000;
+        public int InitialDataSize { get; set; } = 10_000;
 
         // Interval at which Lobby heartbeats are performed.
         // This must be done at least once every 30s.
@@ -74,18 +121,19 @@ namespace Samples.HelloNetcode
         // The timeout for establishing a relay connection after a host migration
         const double k_TimeoutForRelayConnectionSeconds = 60;
 
-        // When retrying service API calls use this delay between the calls
-        const int k_ServiceRetryDelayMS = 1000;
+        // The time to give a new relay join code to be reported during a host migration event
+        const int k_InitialHostJoinWaitTimeoutSeconds = 10;
 
-        // The retry count limit for service API calls
-        const int k_ServiceRetryCount = 10;
-
+        string m_LobbyName;
         MigrationDataInfo m_MigrationConfig;
         EntityQuery m_HostMigrationStatsQuery;
         NativeList<byte> m_MigrationDataBlob;
         Task<LobbyUploadMigrationDataResults> m_UploadTask;
 
         string m_PrevHostId;
+
+        // List of scenes found in the local world before starting client/server worlds
+        List<Hash128> m_SceneGuids = new List<Hash128>();
 
         public string CurrentHostId => m_CurrentLobby == null ? "" : m_CurrentLobby.HostId;
         public bool IsHost => CurrentHostId == CurrentPlayerId;
@@ -98,43 +146,39 @@ namespace Samples.HelloNetcode
 
         void Start()
         {
-            if (ClientServerBootstrap.AutoConnectPort != 0)
-                Debug.LogError("Host migration sample can't run via auto connect (play scene directly) but most be loaded via the frontend");
+            // Disable this simple host migration controller as there are already worlds created (frontend controller could be in use)
+            if (ClientServerBootstrap.ServerWorld != null || ClientServerBootstrap.ClientWorld != null)
+                gameObject.SetActive(false);
             if (ClientServerBootstrap.RequestedPlayType != ClientServerBootstrap.PlayType.ClientAndServer)
                 Debug.LogError($"[HostMigration] Creating client/server worlds is not allowed if playmode is set to {ClientServerBootstrap.RequestedPlayType}");
             m_MigrationDataBlob = new NativeList<byte>(InitialDataSize, Allocator.Persistent);
-            m_HostMigrationFrontend = FindFirstObjectByType<HostMigrationFrontend>();
+            m_LobbyName = SceneManager.GetActiveScene().name;
         }
 
-        internal void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        async void OnGUI()
         {
-            if (scene.name == "Frontend")
+            if (GUILayout.Button("Start Host"))
             {
-                Debug.Log("[HostMigration] Re-entering frontend scene, leaving lobby");
-                m_HostMigrationFrontend = FindFirstObjectByType<HostMigrationFrontend>();
-                StopHeartbeat();
-                if (m_CurrentLobby != null && !string.IsNullOrEmpty(CurrentLobbyId))
-                    LobbyService.Instance.RemovePlayerAsync(CurrentLobbyId, AuthenticationService.Instance.PlayerId);
-                m_HostMigrationStatsQuery = default;
+                await SetupRelayAndLobbyAsHost();
             }
-            // When going from frontend to another scene the feature should be enabled, by now both the client and server worlds will have been created
-            else
+            else if (GUILayout.Button("Connect to host"))
             {
-                var controller = FindFirstObjectByType<HostMigrationController>();
-                if (controller != null && !controller.m_HostMigrationEnabled)
-                    controller.StartCoroutine(EnableHostMigration());
+                await JoinLobbyAndConnectWithRelayAsClient();
+            }
+            else if (GUILayout.Button("Leave"))
+            {
+                if (ClientServerBootstrap.ServerWorld != null)
+                    ClientServerBootstrap.ServerWorld.Dispose();
+                if (ClientServerBootstrap.ClientWorld != null)
+                    ClientServerBootstrap.ClientWorld.Dispose();
+                if (!string.IsNullOrEmpty(CurrentLobbyId) && !string.IsNullOrEmpty(AuthenticationService.Instance.PlayerId))
+                    await LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, AuthenticationService.Instance.PlayerId);
             }
         }
 
         void OnKickedFromLobby()
         {
             Debug.Log("[HostMigration] Left lobby");
-            if (FindFirstObjectByType<HostMigrationFrontend>() == null)
-            {
-                Debug.Log($"[HostMigration] Re-entering frontend scene as we've left the lobby now");
-                var frontendHud = FindFirstObjectByType<FrontendHUD>();
-                frontendHud?.ReturnToFrontend();
-            }
         }
 
         async void OnLobbyChanged(ILobbyChanges changes)
@@ -158,49 +202,15 @@ namespace Samples.HelloNetcode
 
         void OnDestroy()
         {
-            Debug.Log($"[HostMigration] OnDestroy");
-            SceneManager.sceneLoaded -= OnSceneLoaded;
-            StopHeartbeat();
-
+            if (m_Heartbeat != null)
+                StopCoroutine(m_Heartbeat);
             if (!string.IsNullOrEmpty(CurrentLobbyId) && !string.IsNullOrEmpty(AuthenticationService.Instance.PlayerId))
                 LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, AuthenticationService.Instance.PlayerId);
         }
 
-        void StartHeartbeat()
-        {
-            StopHeartbeat();
-            Debug.Log($"[HostMigration] Starting heartbeat coroutine.");
-            m_Heartbeat = StartCoroutine(HeartbeatLobbyCoroutine());
-        }
-
-        void StopHeartbeat()
-        {
-            if (m_Heartbeat != null)
-            {
-                Debug.Log($"[HostMigration] Stopping heartbeat coroutine.");
-                StopCoroutine(m_Heartbeat);
-                m_Heartbeat = null;
-            }
-        }
-
-        public IEnumerator EnableHostMigration()
-        {
-            if (m_HostMigrationEnabled) yield return null;
-            while (!m_HostMigrationEnabled)
-            {
-                if (ClientServerBootstrap.ServerWorld != null)
-                {
-                    ClientServerBootstrap.ServerWorld.EntityManager.CreateEntity(ComponentType.ReadOnly<EnableHostMigration>());
-                    m_HostMigrationEnabled = true;
-                }
-                foreach (var world in ClientServerBootstrap.ClientWorlds)
-                {
-                    world.EntityManager.CreateEntity(ComponentType.ReadOnly<EnableHostMigration>());
-                    m_HostMigrationEnabled = true;
-                }
-                yield return new WaitForSeconds(1f);
-            }
-        }
+        //
+        // Host migration handling. Upload host migration data to service at set intervals. React to host migration events
+        //
 
         void Update()
         {
@@ -243,8 +253,7 @@ namespace Samples.HelloNetcode
                     return;
                 }
 
-                // Subtract a minute from expiration time to be sure we update the migration URL in time
-                if (m_MigrationConfig.Expires.AddMinutes(-1) < DateTime.Now)
+                if (m_MigrationConfig.Expires < DateTime.Now)
                 {
                     Debug.Log($"[HostMigration] Refreshing migration config as it has expired.");
                     m_MigrationConfig = await LobbyService.Instance.GetMigrationDataInfoAsync(CurrentLobbyId);
@@ -252,10 +261,8 @@ namespace Samples.HelloNetcode
                 }
 
                 var uploadData = m_MigrationDataBlob.AsArray().ToArray();
-                //var startTime = Time.realtimeSinceStartup;
                 m_UploadTask = LobbyService.Instance.UploadMigrationDataAsync(m_MigrationConfig, uploadData, new LobbyUploadMigrationDataOptions());
-                await m_UploadTask;
-                //Debug.Log($"[HostMigration][DEBUG] Uploaded migration data, size={uploadData.Length} time={Time.realtimeSinceStartup - startTime}");
+                Debug.Log($"[HostMigration][DEBUG] Uploaded migration data, size={uploadData.Length}");
             }
             catch (LobbyServiceException ex)
             {
@@ -267,58 +274,6 @@ namespace Samples.HelloNetcode
                 Debug.LogError($"[HostMigration] Lobby exception thrown while trying to upload migration data: {ex.Message}");
                 Debug.LogException(ex);
             }
-        }
-
-        async Task<byte[]> DownloadMigrationDataWithRetry()
-        {
-            var migrationData = await DownloadMigrationData();
-            var retryCount = 0;
-            while (migrationData?.Data == null || migrationData.Data.Length == 0)
-            {
-                if (retryCount++ == k_ServiceRetryCount)
-                {
-                    Debug.LogError($"[HostMigration] Received 0 bytes migration data after {retryCount} attempts. Failed to download migration data.");
-                    break;
-                }
-                Debug.LogWarning($"[HostMigration] Received 0 bytes migration data. Will retry download (retry count = {retryCount}).");
-                await Task.Delay(k_ServiceRetryDelayMS);
-                migrationData = await DownloadMigrationData();
-            }
-            if (migrationData != null && migrationData.Data != null)
-                return migrationData.Data;
-
-            return Array.Empty<byte>();
-        }
-
-        async Task<LobbyMigrationData> DownloadMigrationData()
-        {
-            try
-            {
-                return await LobbyService.Instance.DownloadMigrationDataAsync(m_MigrationConfig, new LobbyDownloadMigrationDataOptions());
-            }
-            catch (LobbyServiceException ex)
-            {
-                Debug.Log($"[HostMigration] Failed to download migration data: {ex.Message}");
-            }
-            return null;
-        }
-
-        internal static RelayConnectionStatus GetRelayConnectionStatus(World world)
-        {
-            using var drvQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
-            var networkStreamDriver =drvQuery.GetSingleton<NetworkStreamDriver>();
-
-            // Get the server driver with the UDPNetworkInterface and with relay enabled
-            RelayConnectionStatus status = RelayConnectionStatus.NotUsingRelay;
-            for (var i = networkStreamDriver.DriverStore.FirstDriver;
-                 status == RelayConnectionStatus.NotUsingRelay && i < networkStreamDriver.DriverStore.LastDriver;
-                 ++i)
-            {
-                var networkDriver = networkStreamDriver.DriverStore.GetDriverRO(i);
-                world.EntityManager.CompleteAllTrackedJobs();
-                status = networkDriver.GetRelayConnectionStatus();
-            }
-            return status;
         }
 
         /// <summary>
@@ -363,25 +318,20 @@ namespace Samples.HelloNetcode
                     }
 
                     // Take over heartbeat duties
-                    StartHeartbeat();
-
-                    // It will take a bit of time to download data and do lobby updates, update the UI with what's happening (this will happen in client world as the server world is only created at the end)
-                    var clientRelayEntity = SetWaitForRelayConnection(new WaitForRelayConnection() { WaitForHostSetup = true, IsHostMigration = true, StartTime = Time.realtimeSinceStartup});
+                    m_Heartbeat = StartCoroutine(HeartbeatLobbyCoroutine());
 
                     Debug.Log($"[HostMigration] Fetching migration data information");
                     m_MigrationConfig = await LobbyService.Instance.GetMigrationDataInfoAsync(CurrentLobbyId);
-                    Debug.Log($"[HostMigration] Migration Data Information: Expires:{m_MigrationConfig.Expires} (Now:{DateTime.Now}) MaxSize:{m_MigrationConfig.MaxSize} ReadUrl:{m_MigrationConfig.Read} WriteUrl:{m_MigrationConfig.Write}");
 
-                    var data = await DownloadMigrationDataWithRetry();
-                    if (!ValidateWorldsForMigration()) return;
+                    Debug.Log($"[HostMigration] Migration Data Information: Expires:{m_MigrationConfig.Expires} (Now:{DateTime.Now}) MaxSize:{m_MigrationConfig.MaxSize} ReadUrl:{m_MigrationConfig.Read} WriteUrl:{m_MigrationConfig.Write}");
+                    var migrationData = await LobbyService.Instance.DownloadMigrationDataAsync(m_MigrationConfig, new LobbyDownloadMigrationDataOptions());
+                    var data = Array.Empty<byte>();
+                    if (migrationData != null && migrationData.Data != null)
+                        data = migrationData.Data;
+
                     Debug.Log($"[HostMigration] Received {data.Length} bytes host migration data. Switching self to host role.");
                     var success = await ListenAndConnectWithRelayAsHost(data);
-                    if (!success)
-                    {
-                        if (m_CurrentLobby != null && !string.IsNullOrEmpty(CurrentLobbyId))
-                            await LobbyService.Instance.RemovePlayerAsync(CurrentLobbyId, AuthenticationService.Instance.PlayerId);
-                        return;
-                    }
+                    if (!success) return;
 
                     if (ClientServerBootstrap.ServerWorld == null)
                     {
@@ -391,25 +341,13 @@ namespace Samples.HelloNetcode
 
                     // TODO: Wait for cooldown, multiple requests queued, etc
 
-                    using var waitEntityQuery = ClientServerBootstrap.ServerWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<WaitForRelayConnection>());
-                    if (!waitEntityQuery.TryGetSingletonEntity<WaitForRelayConnection>(out var serverRelayEntity))
-                        serverRelayEntity = ClientServerBootstrap.ServerWorld.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
-                    ClientServerBootstrap.ServerWorld.EntityManager.AddComponentData(serverRelayEntity, new WaitForRelayConnection() { IsHostMigration = true, StartTime = Time.realtimeSinceStartup});
-                    ClientServerBootstrap.ClientWorld.EntityManager.DestroyEntity(clientRelayEntity); // cleanup as this is no longer needed
-
-                    // Connect the server migration stats HUD
-                    var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
-                    ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<ServerHostMigrationHUDSystem>().StatsText = statsText;
-
-                    // Disable the client status HUD
-                    ClientServerBootstrap.ClientWorld.GetOrCreateSystemManaged<ClientHostMigrationHUDSystem>().Enabled = false;
-
                     await UpdateJoinCodeWhenReady();
                 }
                 else
                 {
                     // Not the host; stop sending lobby heartbeats if we were
-                    StopHeartbeat();
+                    if (m_Heartbeat != null)
+                        StopCoroutine(m_Heartbeat);
 
                     // In a forced migration, this host is still alive and well but
                     // should stop being a server
@@ -419,42 +357,11 @@ namespace Samples.HelloNetcode
                         ClientServerBootstrap.ServerWorld.Dispose();
                     }
 
-                    // TODO: There should always be a client world at this point, but seems this does happen and needs debugging
-                    if (ClientServerBootstrap.ClientWorld != null)
-                    {
-                        SetWaitForRelayConnection(new WaitForRelayConnection() { WaitForJoinCode = true, OldJoinCode = RelayJoinCode, IsHostMigration = true, StartTime = Time.realtimeSinceStartup});
-
-                        // Connect the migration stats HUD
-                        var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
-                        var clientMigrationSystem = ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<ClientHostMigrationHUDSystem>();
-                        clientMigrationSystem.StatsText = statsText;
-                        clientMigrationSystem.Controller = this;
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[HostMigration] No client world found during migration event.");
-                    }
-
                     // CheckLobbyDataForNewRelayHost() will be called next to see if the present changes include a new
                     // join code. More likely though, a separate change event will be arriving soon.
                     Debug.Log("[HostMigration] Host migration triggered, waiting for updates from new host before connecting");
                 }
             }
-        }
-
-        /// <summary>
-        /// There could already be a WaitForRelayConnection if we got a host migration event but the host failed and another one was picked
-        /// </summary>
-        Entity SetWaitForRelayConnection(WaitForRelayConnection waitComponent)
-        {
-            using var relayEntityQuery = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<WaitForRelayConnection>());
-            var relayEntity = Entity.Null;
-            if (!relayEntityQuery.IsEmptyIgnoreFilter)
-                relayEntity = relayEntityQuery.ToEntityArray(Allocator.Temp)[0];
-            else
-                relayEntity = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
-            ClientServerBootstrap.ClientWorld.EntityManager.AddComponentData(relayEntity, waitComponent);
-            return relayEntity;
         }
 
         /// <summary>
@@ -467,24 +374,12 @@ namespace Samples.HelloNetcode
         {
             var serverWorld = ClientServerBootstrap.ServerWorld;
             using var drvQuery = serverWorld.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
-            var networkStreamDriver = drvQuery.GetSingletonRW<NetworkStreamDriver>();
+            var networkStreamDriver = drvQuery.GetSingleton<NetworkStreamDriver>();
 
-            // Find which driver is using the relay
-            int relayDriverNr = 0;
-            for (var i = networkStreamDriver.ValueRO.DriverStore.FirstDriver;
-                 i < networkStreamDriver.ValueRO.DriverStore.LastDriver;
-                 ++i)
-            {
-                if (networkStreamDriver.ValueRO.DriverStore.GetDriverRO(i).GetRelayConnectionStatus() != RelayConnectionStatus.NotUsingRelay)
-                {
-                    relayDriverNr = i;
-                    break;
-                }
-            }
             Debug.Log("[HostMigration] Waiting for relay connection before join code update");
 
             // Wait until connection is established
-            var relayNetworkDriver = networkStreamDriver.ValueRO.DriverStore.GetDriverRO(relayDriverNr);
+            var relayNetworkDriver = networkStreamDriver.DriverStore.GetDriverRO(2); // On servers by default the first driver is IPC, second is UDP/relay
             var startTime = Time.realtimeSinceStartup;
             serverWorld.EntityManager.CompleteAllTrackedJobs();
             var status = relayNetworkDriver.GetRelayConnectionStatus();
@@ -600,47 +495,6 @@ namespace Samples.HelloNetcode
         }
 
         /// <summary>
-        /// Sanity check on the current world status before a client becomes as host during
-        /// a host migration event.
-        /// - Can't already have a server world as we'll be creating a new one
-        /// - Thin clients are not supported
-        /// - Client world must exist, it will switch from relay connection setup (old host)
-        ///   to an IPC to the local server world
-        /// </summary>
-        static bool ValidateWorldsForMigration()
-        {
-            World clientWorld = default;
-            foreach (var world in World.All)
-            {
-                if (world.IsServer())
-                {
-                    Debug.LogError("Server already present during host migration start. Aborting host migration.");
-                    return false;
-                }
-                if (world.IsThinClient())
-                {
-                    Debug.LogError("Cannot migrate thin client to server! Aborting host migration.");
-                    return false;
-                }
-                if (world.IsClient())
-                {
-                    if (clientWorld != default)
-                    {
-                        Debug.LogError("More than one client world present, this is not allowed. Aborting host migration.");
-                        return false;
-                    }
-                    clientWorld = world;
-                }
-            }
-            if (clientWorld == default)
-            {
-                Debug.LogError("No client world found during host migration. Aborting host migration.");
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
         /// The host migration routine for clients who remain as clients.
         ///   - No new client world is created but the current one kept intact
         ///   - Reset the client driver store with the new relay allocation/joincode
@@ -733,14 +587,61 @@ namespace Samples.HelloNetcode
             }
         }
 
+        //
+        // Initial world creation / bootstrapping, setting up server and client connections, setting up lobby and relay services.
+        //
+
+        /// <summary>
+        /// Initial service initialization. This only needs to be done once. When running in a standalone player
+        /// we need to use a different player profile or else the lobby will treat this player as the same identity
+        /// as the editor or other players (would remove everyone from the lobby for example when one player instance
+        /// disconnects/leaves). A random profile name will be generated.
+        /// </summary>
+        async Task InitializeServices()
+        {
+            if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.LinuxPlayer)
+            {
+                string userprofile = Environment.UserName.Substring(0, math.min(Environment.UserName.Length, 18));
+                var random = new System.Random((int)System.Diagnostics.Stopwatch.GetTimestamp());
+                for (int i = 0; i < 10; ++i)
+                    userprofile += (char)random.Next(65, 90);
+                Debug.Log($"[HostMigration] Using random user profile {userprofile}");
+                var options = new InitializationOptions();
+                options.SetProfile(userprofile);
+                await UnityServices.InitializeAsync(options);
+            }
+            else
+            {
+                await UnityServices.InitializeAsync();
+            }
+        }
+
+        /// <summary>
+        /// Initial setup for the host of the game session.
+        /// </summary>
+        async Task SetupRelayAndLobbyAsHost()
+        {
+            await InitializeServices();
+            if (!AuthenticationService.Instance.IsSignedIn)
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log($"[HostMigration] Signed in as {AuthenticationService.Instance.PlayerId}");
+
+            var allocation = await RelayService.Instance.CreateAllocationAsync(MaxPlayers - 1);
+            var joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            Debug.Log($"[HostMigration] Created allocation {allocation.AllocationId} with join code {joinCode}");
+
+            SetupRelayHostedServerAndConnect(allocation.ToRelayServerData(ConnectionType));
+            Debug.Log($"[HostMigration] Creating lobby with name {m_LobbyName}");
+            await CreateLobbyAsync(joinCode, allocation.AllocationId.ToString());
+            await SubscribeToLobbyEvents();
+        }
+
         /// <summary>
         /// Initial lobby creation. The same lobby will be kept throughout host migrations so it will only need to be
         /// created once.
         /// </summary>
         public async Task CreateLobbyAsync(string joinCode, string allocationId)
         {
-            // TODO: Handle potentially hitting rate limit, wait until this succeeds
-
             RelayJoinCode = joinCode;
             var playerId = AuthenticationService.Instance.PlayerId;
 
@@ -752,15 +653,15 @@ namespace Samples.HelloNetcode
             };
             options.Player = new Player(id: playerId, allocationId: allocationId);
 
-            m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(m_HostMigrationFrontend.Address.text, k_DefaultMaxLobbyPlayers, options);
-            Debug.Log($"[HostMigration] Created lobby {m_CurrentLobby.Id} with name '{m_HostMigrationFrontend.Address.text}'");
+            m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(m_LobbyName, k_DefaultMaxLobbyPlayers, options);
+            Debug.Log($"[HostMigration] Created lobby {m_CurrentLobby.Id} with name '{m_LobbyName}'");
             m_PrevHostId = CurrentHostId;
 
             m_MigrationConfig = await LobbyService.Instance.GetMigrationDataInfoAsync(m_CurrentLobby.Id);
             Debug.Log($"[HostMigration] Migration Data Information: Expires:{m_MigrationConfig.Expires} (Now:{DateTime.Now}) MaxSize:{m_MigrationConfig.MaxSize} ReadUrl:{m_MigrationConfig.Read} WriteUrl:{m_MigrationConfig.Write}");
 
             // Host is responsible for heartbeating the lobby to keep it alive
-            StartHeartbeat();
+            m_Heartbeat = StartCoroutine(HeartbeatLobbyCoroutine());
         }
 
         /// <summary>
@@ -790,6 +691,57 @@ namespace Samples.HelloNetcode
         }
 
         /// <summary>
+        /// Initial setup for clients joining a game session.
+        /// </summary>
+        async Task JoinLobbyAndConnectWithRelayAsClient()
+        {
+            await InitializeServices();
+            if (!AuthenticationService.Instance.IsSignedIn)
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log($"[HostMigration] Signed in as {AuthenticationService.Instance.PlayerId}");
+
+            await JoinLobbyByNameAsync(m_LobbyName);
+            await SubscribeToLobbyEvents();
+
+            if (CurrentLobby != null && CurrentLobby.Players != null)
+            {
+                if (!CurrentLobby.Data.ContainsKey(LobbyKeys.RelayHost) ||
+                    !CurrentLobby.Data.ContainsKey(LobbyKeys.RelayJoinCode))
+                {
+                    Debug.LogError($"[HostMigration] Lobby data missing entries for '{LobbyKeys.RelayHost}' and/or '{LobbyKeys.RelayJoinCode}'");
+                    return;
+                }
+
+                // If the lobby data has invalid joincode (probably the previous host) then it has not
+                // been updated by the current host. A migration is likely taking place and we should wait for
+                // the proper join code as normally clients do during a host migration
+                if (CurrentLobby.Data[LobbyKeys.RelayHost].Value != CurrentLobby.HostId)
+                {
+                    Debug.Log("[HostMigration] Relay host does not match lobby host. Will wait for join code");
+                    WaitForInitialJoin = true;
+                    var timeout = Time.realtimeSinceStartup + k_InitialHostJoinWaitTimeoutSeconds;
+                    while (CurrentLobby.Data[LobbyKeys.RelayHost].Value != CurrentLobby.HostId)
+                    {
+                        if (Time.realtimeSinceStartup > timeout)
+                        {
+                            Debug.LogError("[HostMigration] Relay host does not match lobby host, timeout while waiting for updated join code.");
+                            WaitForInitialJoin = false;
+                            return;
+                        }
+                        await Task.Delay(100);
+                    }
+                    WaitForInitialJoin = false;
+                }
+                var relayJoinCode = CurrentLobby.Data[LobbyKeys.RelayJoinCode].Value;
+                Debug.Log($"[HostMigration] Using relay join code {relayJoinCode} from lobby data");
+                RelayJoinCode = relayJoinCode;
+                var allocation = await RelayService.Instance.JoinAllocationAsync(relayJoinCode);
+                ConnectToServerWithRelay(allocation.ToRelayServerData(ConnectionType));
+                await UpdatePlayerAllocationId(allocation.AllocationId);
+            }
+        }
+
+        /// <summary>
         /// Initial join handling for a specific lobby name. The clients will only need to join the lobby once during
         /// a game session as the host migration will keep using the same lobby. This will fail if the exact lobby
         /// name is not found.
@@ -815,7 +767,6 @@ namespace Samples.HelloNetcode
                 else
                 {
                     Debug.LogError($"[HostMigration] Lobby not found: '{lobbyName}'.");
-                    m_HostMigrationFrontend.ClientConnectionStatus = $"Lobby '{lobbyName}' not found. Found {lobbies.Results.Count} other lobbies.";
                     foreach (var lobby in lobbies.Results)
                         Debug.LogWarning($"[HostMigration] Name:{lobby.Name} ID:{lobby.Id} HostID:{lobby.HostId}");
                     return;
@@ -829,32 +780,142 @@ namespace Samples.HelloNetcode
             catch (LobbyServiceException ex)
             {
                 if (ex.Reason == LobbyExceptionReason.LobbyFull)
-                {
                     Debug.LogError($"[HostMigration] Failed to join lobby because it is full");
-                    m_HostMigrationFrontend.ClientConnectionStatus = "Lobby is full!";
-                }
-                else if (ex.Reason == LobbyExceptionReason.RateLimited)
-                {
+                if (ex.Reason == LobbyExceptionReason.RateLimited)
                     Debug.LogWarning($"[HostMigration] Hit lobby query rate limit while trying to join lobby '{lobbyName}', try again.");
-                    return;
-                }
-                // TODO: This is mostly debugging info in case this exception is unexpectedly hit (remove later)
-                if (m_CurrentLobby == null)
-                    Debug.Log("DEBUG: No lobby instance found.");
-                var joinedLobbies = await LobbyService.Instance.GetJoinedLobbiesAsync();
-                if (joinedLobbies.Count > 0)
-                {
-                    foreach (var lobby in joinedLobbies)
-                        Debug.Log($"DEBUG: Already joined lobby: {lobby}");
-                    Debug.Log($"DEBUG: Getting first lobby: {joinedLobbies[0]}");
-                    m_CurrentLobby = await LobbyService.Instance.GetLobbyAsync(joinedLobbies[0]);
-                }
-                else
-                {
-                    return;
-                }
+                return;
             }
             Debug.Log($"[HostMigration] Joined lobby ID:{m_CurrentLobby.Id} HostID:{CurrentHostId}");
+        }
+
+        /// <summary>
+        /// Connect to the relay server and the given server endpoint.
+        /// </summary>
+        void ConnectToServerWithRelay(RelayServerData relayServerData)
+        {
+            var oldConstructor = NetworkStreamReceiveSystem.DriverConstructor;
+            try
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = new HostMigrationDriverConstructor(new RelayServerData(), relayServerData);
+                var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
+
+                client.EntityManager.CreateEntity(ComponentType.ReadOnly<EnableHostMigration>());
+
+                if (!TryGetAllScenes())
+                    return;
+
+                DestroyLocalWorlds();
+
+                if (World.DefaultGameObjectInjectionWorld == null)
+                    World.DefaultGameObjectInjectionWorld = client;
+
+                // Load the previously saved scene into the client world
+                foreach (var sceneGuid in m_SceneGuids)
+                    SceneSystem.LoadSceneAsync(client.Unmanaged, sceneGuid);
+
+                var networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
+                client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");
+                client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = relayServerData.Endpoint });
+            }
+            finally
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
+            }
+        }
+
+        /// <summary>
+        /// Collect relay server end point from completed systems. Set up server with relay support and connect client
+        /// to hosted server through relay server.
+        /// Both client and server world is manually created to allow us to override the <see cref="DriverConstructor"/>.
+        ///
+        /// Two singleton entities are constructed with listen and connect requests. These will be executed asynchronously.
+        /// Connecting to relay server will not be bound immediately. The Request structs will ensure that we
+        /// continuously poll until the connection is established.
+        /// </summary>
+        void SetupRelayHostedServerAndConnect(RelayServerData relayServerData)
+        {
+            var oldConstructor = NetworkStreamReceiveSystem.DriverConstructor;
+            try
+            {
+                var driverConstructor = new HostMigrationDriverConstructor(relayServerData, new RelayServerData());
+                NetworkStreamReceiveSystem.DriverConstructor = driverConstructor;
+                var server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
+                var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
+                NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
+
+                if (!TryGetAllScenes())
+                    return;
+
+                DestroyLocalWorlds();
+
+                if (World.DefaultGameObjectInjectionWorld == null)
+                    World.DefaultGameObjectInjectionWorld = server;
+
+                // Load the previously saved scene into the client/server worlds
+                Debug.Log("[HostMigration] Loading scenes in client/server worlds");
+                foreach (var sceneGuid in m_SceneGuids)
+                {
+                    SceneSystem.LoadSceneAsync(server.Unmanaged, sceneGuid);
+                    SceneSystem.LoadSceneAsync(client.Unmanaged, sceneGuid);
+                }
+
+                server.EntityManager.CreateEntity(ComponentType.ReadWrite<EnableHostMigration>());
+
+                using var driverQuery = server.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
+                var serverDriver = driverQuery.GetSingletonRW<NetworkStreamDriver>();
+                if (!serverDriver.ValueRW
+                        .Listen(NetworkEndpoint.AnyIpv4))
+                {
+                    Debug.LogError($"[HostMigration] NetworkStreamDriver.Listen() failed");
+                    return;
+                }
+
+                var ipcPort = serverDriver.ValueRW.GetLocalEndPoint(serverDriver.ValueRW.DriverStore.FirstDriver).Port;
+                var networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
+                client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");
+                client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = NetworkEndpoint.LoopbackIpv4.WithPort(ipcPort) });
+            }
+            finally
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
+            }
+        }
+
+        bool TryGetAllScenes()
+        {
+            if (m_SceneGuids.Count == 0)
+            {
+                if (!World.DefaultGameObjectInjectionWorld.IsCreated)
+                {
+                    Debug.Log("[HostMigration] No local world found. No entity scenes will be loaded in client/server worlds.");
+                    return false;
+                }
+                // Save the current scenes (currently loaded in the local world)
+                World.DefaultGameObjectInjectionWorld.EntityManager.GetAllUniqueSharedComponents<SceneSection>(out var sections, Allocator.Temp);
+                foreach (var scene in sections)
+                {
+                    if (scene.SceneGUID.IsValid)
+                        m_SceneGuids.Add(scene.SceneGUID);
+                }
+                if (m_SceneGuids.Count == 0)
+                {
+                    Debug.LogError("[HostMigration] Failed to find any entity scenes in the local world");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        static void DestroyLocalWorlds()
+        {
+            foreach (var world in World.All)
+            {
+                if (world.Flags == WorldFlags.Game)
+                {
+                    world.Dispose();
+                    break;
+                }
+            }
         }
 #endif
     }
