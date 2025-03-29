@@ -1,7 +1,5 @@
 # DOTS and UI Toolkit Integration Sample
 
-![banner](https://github.com/user-attachments/assets/9ddafd87-b277-4f14-ab6a-2c17aba86d8a)
-
 This sample demonstrates the use of UI Toolkit within an Entities-based project. In the game, the player controls a wizard who collects ingredients for his magical soup.
 
 To understand this sample, you'll need some basic prior knowledge of both UI Toolkit and Entities:
@@ -10,8 +8,6 @@ To understand this sample, you'll need some basic prior knowledge of both UI Too
 - [Entities introductory material](https://github.com/Unity-Technologies/EntityComponentSystemSamples)
 
 The code of the project resides under the `Assets/Scripts` directory, which has three subdirectories: `Gameplay`, `ScriptableObjects`, and `UI`. The entity components are mainly defined in the `Gameplay/Components` subdirectory.
-
-![tutorial](https://github.com/user-attachments/assets/d8c52e46-cb2d-4c44-96ae-f050646a4ede)
 
 For a walkthrough of the project, see [this video](https://youtu.be/72EaJ1OW9Nw) (18 minutes).
 
@@ -83,13 +79,9 @@ A wrapper for the dialogue UI element that appears at the start and end of the g
 
 A wrapper for the help UI element (the help screen that appears when you click the question mark button).
 
-![help](https://github.com/user-attachments/assets/38bdbeeb-1191-49a1-bf79-e9dece9b8a8d)
-
 ### `UI/HintScreen.cs`
 
 A wrapper for the hint UI element (the text that appears next to an ingredient when it's near the player).
-
-![interact](https://github.com/user-attachments/assets/bf15455a-ec3e-496e-8d07-a5641e18e31f)
 
 ### `UI/HUDScreen.cs`
 
@@ -106,8 +98,6 @@ A wrapper for the UI elements representing a slot of the inventory.
 ### `UI/QuestScreen.cs`
 
 A wrapper for the quest UI element (the quest status info in the top-right).
-
-![quest](https://github.com/user-attachments/assets/6783a8de-2331-4063-bec5-ae20a90905d6)
 
 ### `UI/SplashScreen.cs`
 
