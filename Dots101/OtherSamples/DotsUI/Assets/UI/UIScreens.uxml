@@ -1,0 +1,25 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <engine:Template name="Splash" src="project://database/Assets/UI/SplashScreen.uxml?fileID=9197481963319205126&amp;guid=208f013f5a3240d4c83af48616525f45&amp;type=3#SplashScreen" />
+    <engine:Template name="Game" src="project://database/Assets/UI/HUDScreen.uxml?fileID=9197481963319205126&amp;guid=b59325df20c775941b6ce3a9467b0a5e&amp;type=3#HUDScreen" />
+    <engine:Template name="Inventory" src="project://database/Assets/UI/InventoryScreen.uxml?fileID=9197481963319205126&amp;guid=856d56716658eda48ad0d09d669f70b7&amp;type=3#InventoryScreen" />
+    <engine:Template name="Quest" src="project://database/Assets/UI/QuestScreen.uxml?fileID=9197481963319205126&amp;guid=efdebf2a873848e4186e10cc215a2973&amp;type=3#QuestScreen" />
+    <engine:Template name="DialogueScreen" src="project://database/Assets/UI/DialogueScreen.uxml?fileID=9197481963319205126&amp;guid=09bf8c8a6c1d97d4881f08ebb23d13f4&amp;type=3#DialogueScreen" />
+    <engine:Template name="HelpScreen" src="project://database/Assets/UI/HelpScreen.uxml?fileID=9197481963319205126&amp;guid=304db84c14682a54aa2c4aa3b89567fe&amp;type=3#HelpScreen" />
+    <Style src="project://database/Assets/UI/Styles.uss?fileID=7433441132597879392&amp;guid=70ab586a5e4c9e24d982fa67a9b12eac&amp;type=3#Styles" />
+    <engine:Instance template="Splash" picking-mode="Ignore" name="Splash" class="full-screen" />
+    <engine:Instance template="Game" name="HUD" picking-mode="Ignore" class="full-screen">
+        <AttributeOverrides element-name="hud__container" enabled="false" />
+    </engine:Instance>
+    <engine:Instance template="Inventory" name="Inventory" picking-mode="Ignore" class="full-screen">
+        <AttributeOverrides element-name="inventory__container" enabled="false" />
+    </engine:Instance>
+    <engine:Instance template="Quest" name="Quest" picking-mode="Ignore" class="full-screen">
+        <AttributeOverrides element-name="quest__container" enabled="false" />
+    </engine:Instance>
+    <engine:Instance template="DialogueScreen" name="Dialogue" picking-mode="Ignore" class="full-screen">
+        <AttributeOverrides element-name="dialogue__container" enabled="false" />
+    </engine:Instance>
+    <engine:Instance template="HelpScreen" picking-mode="Ignore" name="Help" class="full-screen">
+        <AttributeOverrides element-name="help__container" enabled="false" />
+    </engine:Instance>
+</engine:UXML>

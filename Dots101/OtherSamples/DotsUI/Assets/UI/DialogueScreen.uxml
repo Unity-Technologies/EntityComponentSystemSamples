@@ -1,0 +1,11 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles.uss?fileID=7433441132597879392&amp;guid=70ab586a5e4c9e24d982fa67a9b12eac&amp;type=3#Styles" />
+    <engine:VisualElement name="dialogue__container" picking-mode="Ignore" class="full-screen center screen-fade" style="background-color: rgba(42, 31, 31, 0.68); display: none;">
+        <engine:VisualElement name="dialogue__window" picking-mode="Ignore" class="window" style="width: 600px;">
+            <engine:VisualElement name="dialogue__avatar" style="background-image: url(&quot;project://database/Assets/Art/Textures/avatar.png?fileID=21300000&amp;guid=418d02679578113469ccaa92038bd096&amp;type=3#avatar&quot;); width: 120px; height: 200px; -unity-background-scale-mode: scale-and-crop; position: absolute; top: -100px; left: -85px;" />
+            <engine:Label name="dialogue__text-label" style="font-size: 20px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 20px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; white-space: normal;" />
+            <engine:Button text="X" name="dialogue__close-button" class="back-button button" style="width: 40px; height: 40px; position: absolute; top: -40px; right: -40px;" />
+        </engine:VisualElement>
+        <engine:Button text="ACCEPT" name="dialogue__accept-button" class="back-button button" />
+    </engine:VisualElement>
+</engine:UXML>

@@ -1,0 +1,16 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles.uss?fileID=7433441132597879392&amp;guid=70ab586a5e4c9e24d982fa67a9b12eac&amp;type=3#Styles" />
+    <engine:VisualElement name="inventory__container" class="full-screen screen-fade center" style="flex-grow: 1; background-color: rgba(42, 31, 31, 0.68); display: none;">
+        <engine:VisualElement name="inventory__window" class="window" style="width: 260px;">
+            <engine:VisualElement style="align-items: center;">
+                <engine:Label text="INVENTORY" />
+            </engine:VisualElement>
+            <engine:VisualElement name="inventory__slots-container" style="flex-direction: row; flex-wrap: wrap; justify-content: center;" />
+            <engine:VisualElement style="flex-direction: row; justify-content: flex-end; align-items: center;">
+                <engine:VisualElement style="width: 30px; height: 30px; background-image: url(&quot;project://database/Assets/Art/Textures/energy.png?fileID=21300000&amp;guid=aaaaea17fb0b83847867f6188068e604&amp;type=3#energy&quot;);" />
+                <engine:Label text="0" name="inventory__energy-label" style="font-size: 18px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
+            </engine:VisualElement>
+        </engine:VisualElement>
+        <engine:Button text="BACK" name="inventory__back-button" class="back-button button" />
+    </engine:VisualElement>
+</engine:UXML>

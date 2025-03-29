@@ -48,14 +48,19 @@ Additional Entities material on Unity Learn:
 - [Sample project: Unity Netcode for Entities 101](./Dots101/Netcode101/)
 - [Video: Netcode 101](https://youtu.be/f-4NR30ieWg)
 
-## Additional content 
+## Other samples
+
+- [Sample project: DOTS UI](./Dots101/OtherSamples/DotsUI/Assets/README.md): Demonstrates the use of UI Toolkit in an ECS context.
+- [Video: DOTS UI (walkthrough)](https://youtu.be/72EaJ1OW9Nw)
+- [Sample project: ECS Network Racing](https://github.com/Unity-Technologies/ECS-Network-Racing-Sample): A small DOTS game using Netcode for Entities and Unity Physics.
+
+## Additional material 
 
 - [Document: Introduction to DOTS Ebook](https://unity.com/resources/introduction-to-dots-ebook)
 - [Document: Misconceptions about DOTS and Entities](https://docs.google.com/document/d/18hFIQipNxTsKsWk9eRroRwkGgswWs6m40X8N4Kkjhy4/edit?usp=sharing)
 - [Document: Performance checklist](https://docs.google.com/document/d/1QQZz6xzmWpe6NMdL3t2o7RXmya6UFyl_Xgo3KPfGxzQ/edit?usp=sharing)
 - [Cheat sheet: collections](./EntitiesSamples/Docs/cheatsheet/collections.md)
 - [Cheat sheet: mathematics](./EntitiesSamples/Docs/cheatsheet/mathematics.md)
-- [Sample project: ECS Network Racing](https://github.com/Unity-Technologies/ECS-Network-Racing-Sample): A working DOTS game using Netcode for Entities and Unity Physics.
 
 ## Package manuals
 

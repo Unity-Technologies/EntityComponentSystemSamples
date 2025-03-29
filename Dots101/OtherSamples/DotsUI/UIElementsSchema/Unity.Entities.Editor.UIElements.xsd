@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:editor="UnityEditor.UIElements" xmlns:engine="UnityEngine.UIElements" xmlns="UnityEditor.Accessibility" elementFormDefault="qualified" targetNamespace="Unity.Entities.Editor.UIElements" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:simpleType name="SearchField_vertical-scroller-visibility_Type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Auto" />
+      <xs:enumeration value="AlwaysVisible" />
+      <xs:enumeration value="Hidden" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SearchField_keyboard-type_Type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Default" />
+      <xs:enumeration value="ASCIICapable" />
+      <xs:enumeration value="NumbersAndPunctuation" />
+      <xs:enumeration value="URL" />
+      <xs:enumeration value="NumberPad" />
+      <xs:enumeration value="PhonePad" />
+      <xs:enumeration value="NamePhonePad" />
+      <xs:enumeration value="EmailAddress" />
+      <xs:enumeration value="NintendoNetworkAccount" />
+      <xs:enumeration value="Social" />
+      <xs:enumeration value="Search" />
+      <xs:enumeration value="DecimalPad" />
+      <xs:enumeration value="OneTimeCode" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SearchFieldType">
+    <xs:complexContent mixed="false">
+      <xs:restriction base="engine:VisualElementType">
+        <xs:attribute default="" name="name" type="xs:string" use="optional" />
+        <xs:attribute default="true" name="enabled" type="xs:boolean" use="optional" />
+        <xs:attribute default="" name="view-data-key" type="xs:string" use="optional" />
+        <xs:attribute default="Ignore" name="picking-mode" type="engine:VisualElement_picking-mode_Type" use="optional" />
+        <xs:attribute default="" name="tooltip" type="xs:string" use="optional" />
+        <xs:attribute default="None" name="usage-hints" type="engine:VisualElement_usage-hints_Type" use="optional" />
+        <xs:attribute default="0" name="tabindex" type="xs:int" use="optional" />
+        <xs:attribute default="true" name="focusable" type="xs:boolean" use="optional" />
+        <xs:attribute default="Inherit" name="language-direction" type="engine:VisualElement_language-direction_Type" use="optional" />
+        <xs:attribute default="" name="data-source" type="xs:string" use="optional" />
+        <xs:attribute default="" name="data-source-path" type="xs:string" use="optional" />
+        <xs:attribute default="" name="data-source-type" type="xs:string" use="optional" />
+        <xs:attribute default="" name="binding-path" type="xs:string" use="optional" />
+        <xs:attribute default="" name="label" type="xs:string" use="optional" />
+        <xs:attribute default="" name="value" type="xs:string" use="optional" />
+        <xs:attribute default="-1" name="max-length" type="xs:int" use="optional" />
+        <xs:attribute default="false" name="password" type="xs:boolean" use="optional" />
+        <xs:attribute default="*" name="mask-character" type="xs:string" use="optional" />
+        <xs:attribute default="" name="placeholder-text" type="xs:string" use="optional" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" use="optional" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" use="optional" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" use="optional" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" xmlns:q1="Unity.Entities.Editor.UIElements" type="q1:SearchField_vertical-scroller-visibility_Type" use="optional" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" use="optional" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" use="optional" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" use="optional" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" use="optional" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" use="optional" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" use="optional" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q2="Unity.Entities.Editor.UIElements" type="q2:SearchField_keyboard-type_Type" use="optional" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" use="optional" />
+        <xs:attribute default="false" name="multiline" type="xs:boolean" use="optional" />
+        <xs:attribute default="" name="content-container" type="xs:string" use="optional" />
+        <xs:attribute default="" name="class" type="xs:string" use="optional" />
+        <xs:attribute default="" name="style" type="xs:string" use="optional" />
+        <xs:anyAttribute processContents="lax" />
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SearchField" substitutionGroup="engine:VisualElement" xmlns:q3="Unity.Entities.Editor.UIElements" type="q3:SearchFieldType" />
+</xs:schema>

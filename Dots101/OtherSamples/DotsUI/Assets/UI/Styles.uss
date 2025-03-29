@@ -1,0 +1,133 @@
+* {
+    -unity-font-definition: url("project://database/Assets/Art/Fonts/Satoshi-Black.otf?fileID=12800000&guid=79f0df249fa55324b8f777e4c8b7bc7c&type=3#Satoshi-Black");
+    font-size: 30px;
+    color: rgb(209, 205, 196);
+}
+
+.screen-fade.screen-visible {
+    transition-property: all;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+    opacity: 1;
+}
+
+.screen-fade.screen-hidden {
+    transition-property: all;
+    opacity: 0;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+.center {
+    align-items: center;
+    justify-content: center;
+}
+
+.full-screen {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.window {
+    padding: 20px;
+    background-color: rgb(42, 31, 31);
+}
+
+.button {
+    font-size: 20px;
+    margin: 10px;
+    color: rgb(42, 31, 31);
+    background-color: rgb(175, 163, 137);
+    border-width: 0;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+
+.button:hover {
+    background-color: rgb(209, 205, 196);
+    color: rgb(42, 31, 42);
+}
+
+.inventory-slot {
+    margin: 2px;
+    width: 50px;
+    height: 50px;
+    padding: 5px;
+    background-color: rgb(175, 163, 137);
+    align-items: center;
+    justify-content: center;
+}
+
+.ghost-icon {
+    visibility: hidden;
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-image: none;
+    top: 0;
+    left: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.inventory-slot-quantity {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    font-size: 16px;
+    color: rgb(42, 31, 42);
+}
+
+.quest-title {
+    font-size: 20px;
+    color: rgb(209, 205, 196);
+    text-shadow: 1px 1px 1px rgb(42, 31, 31);
+}
+
+.quest-collectable {
+    font-size: 16px;
+    color: rgb(209, 205, 196);
+    margin: 0;
+    padding: 0;
+    text-shadow: 1px 1px 1px rgb(42, 31, 31);
+}
+
+.quest-collectable-completed {
+    opacity: 0.5;
+    color: rgb(219, 255, 111);
+}
+
+.help-key {
+    width: 50px;
+    height: 50px;
+    background-color: rgb(175, 163, 137);
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    margin: 2px;
+}
+
+.help-key .unity-label {
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    color: rgb(42, 31, 42);
+}
+
+.hud-button {
+    color: rgb(42, 31, 31);
+    background-color: rgb(175, 163, 137);
+    border-width: 0;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+    padding: 10px;
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    margin: 5px;
+}
+
+.hud-button:hover {
+    background-color: rgb(209, 205, 196);
+    color: rgb(42, 31, 42);
+}
