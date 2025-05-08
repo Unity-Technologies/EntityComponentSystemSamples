@@ -119,7 +119,6 @@ namespace Samples.HelloNetcode
             Debug.Log($"[HostMigration] Creating lobby with name {Address.text}");
             await hostMigrationController.CreateLobbyAsync(joinCode, allocation.AllocationId.ToString());
             await hostMigrationController.SubscribeToLobbyEvents();
-            SceneManager.LoadScene("HostMigrationHUD", LoadSceneMode.Additive);
         }
 
         /// <summary>
@@ -203,6 +202,11 @@ namespace Samples.HelloNetcode
                         await Task.Delay(100);
                     }
                     hostMigrationController.WaitForInitialJoin = false;
+                    if (hostMigrationController.CurrentLobby.Data[LobbyKeys.RelayHost].Value == AuthenticationService.Instance.PlayerId)
+                    {
+                        Debug.Log("Elected as host while trying to join as client. Will abort the client join flow as the host flow from host migration election will take over.");
+                        return;
+                    }
                 }
                 var relayJoinCode = hostMigrationController.CurrentLobby.Data[LobbyKeys.RelayJoinCode].Value;
                 Debug.Log($"[HostMigration] Using relay join code {relayJoinCode} from lobby data");
@@ -212,7 +216,6 @@ namespace Samples.HelloNetcode
                 ClientConnectionStatus = "Binding to relay server";
                 ConnectToServerWithRelay(allocation.ToRelayServerData(hostMigrationController.ConnectionType));
                 await hostMigrationController.UpdatePlayerAllocationId(allocation.AllocationId);
-                SceneManager.LoadScene("HostMigrationHUD", LoadSceneMode.Additive);
             }
         }
 
@@ -235,16 +238,7 @@ namespace Samples.HelloNetcode
                 var server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
                 var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
 
-                SceneManager.LoadScene("FrontendHUD");
-
-                //Destroy the local simulation world to avoid the game scene to be loaded into it
-                //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
-                //and other issues.
-                DestroyLocalSimulationWorld();
-                if (World.DefaultGameObjectInjectionWorld == null)
-                    World.DefaultGameObjectInjectionWorld = server;
-
-                SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
+                _ = LoadScenes(server);
 
                 using var driverQuery = server.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
                 var serverDriver = driverQuery.GetSingletonRW<NetworkStreamDriver>();
@@ -281,18 +275,7 @@ namespace Samples.HelloNetcode
                 NetworkStreamReceiveSystem.DriverConstructor = new HostMigrationDriverConstructor(new RelayServerData(), relayServerData);
                 var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
 
-                client.EntityManager.CreateEntity(ComponentType.ReadOnly<EnableHostMigration>());
-
-                SceneManager.LoadScene("FrontendHUD");
-
-                //Destroy the local simulation world to avoid the game scene to be loaded into it
-                //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
-                //and other issues.
-                DestroyLocalSimulationWorld();
-                if (World.DefaultGameObjectInjectionWorld == null)
-                    World.DefaultGameObjectInjectionWorld = client;
-
-                SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
+                _ = LoadScenes(client);
 
                 // Update the UI with the status of connecting to the relay
                 var relayEntity = client.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
@@ -309,6 +292,32 @@ namespace Samples.HelloNetcode
             {
                 NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
             }
+        }
+
+        /// <summary>
+        /// Load all scenes we'll be using, the normal frontend HUD UI scene, the selected sample scene and the
+        /// host migration HUD UI scene. The local simulation world will be destroyed and the default game object
+        /// injection world replaced with the world parameter.
+        /// </summary>
+        public async Task LoadScenes(World defaultInjectionWorld)
+        {
+            var loadasync = SceneManager.LoadSceneAsync("FrontendHUD");
+            while (loadasync != null && !loadasync.isDone)
+                await Task.Yield();
+
+            //Destroy the local simulation world to avoid the game scene to be loaded into it
+            //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
+            //and other issues.
+            DestroyLocalSimulationWorld();
+            if (World.DefaultGameObjectInjectionWorld == null)
+                World.DefaultGameObjectInjectionWorld = defaultInjectionWorld;
+
+            loadasync = SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
+            while (loadasync != null && !loadasync.isDone)
+                await Task.Yield();
+            loadasync = SceneManager.LoadSceneAsync("HostMigrationHUD", LoadSceneMode.Additive);
+            while (loadasync != null && !loadasync.isDone)
+                await Task.Yield();
         }
 #endif
     }

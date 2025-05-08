@@ -93,6 +93,8 @@ namespace Samples.HelloNetcode
         public string CurrentPlayerId => UnityServices.State == ServicesInitializationState.Initialized ?
             AuthenticationService.Instance.PlayerId : "";
 
+        public bool FailNextHostMigration { get; set; }
+
 #if !UNITY_SERVER
         double m_LastUpdateTime = 0.01;
 
@@ -358,7 +360,15 @@ namespace Samples.HelloNetcode
 
                     if (ClientServerBootstrap.ClientWorld == null)
                     {
-                        Debug.LogError($"No client world found during host migration event processing. Aborting.");
+                        Debug.Log($"No client world found during host migration event processing. Will initialize a new world.");
+
+                        var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
+                        await m_HostMigrationFrontend.LoadScenes(client);
+                    }
+
+                    if (FailNextHostMigration)
+                    {
+                        Debug.Log("[HostMigration] Manual host migration failure has been triggered. Aborting migration.");
                         return;
                     }
 

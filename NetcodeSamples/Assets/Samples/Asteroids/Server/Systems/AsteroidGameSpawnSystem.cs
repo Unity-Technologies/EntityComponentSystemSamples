@@ -63,9 +63,6 @@ namespace Asteroids.Server
             m_ConnectionQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
-            builder.WithAll<IsReconnected>();
-
-            builder.Reset();
             builder.WithAll<HostMigrationInProgress>();
 
             m_HostMigrationQuery = state.GetEntityQuery(builder);

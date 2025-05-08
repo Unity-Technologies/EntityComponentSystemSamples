@@ -21,12 +21,12 @@ namespace Asteroids.Client
         {
             foreach (var evt in SystemAPI.GetSingleton<NetworkStreamDriver>().ConnectionEventsForTick)
             {
-                var reconnected = SystemAPI.GetComponentLookup<IsReconnected>();
+                var reconnected = SystemAPI.GetComponentLookup<NetworkStreamIsReconnected>();
                 if (evt.State == ConnectionState.State.Connected && reconnected.HasComponent(evt.ConnectionEntity))
                 {
                     state.EntityManager.AddComponent<NetworkStreamInGame>(evt.ConnectionEntity);
                     // Remove the reconnection tag as we're done with it
-                    state.EntityManager.RemoveComponent<IsReconnected>(evt.ConnectionEntity);
+                    state.EntityManager.RemoveComponent<NetworkStreamIsReconnected>(evt.ConnectionEntity);
                 }
             }
         }

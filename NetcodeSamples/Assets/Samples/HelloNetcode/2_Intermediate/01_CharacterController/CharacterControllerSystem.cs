@@ -85,7 +85,7 @@ namespace Samples.HelloNetcode
             }
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
 
-            var isReconnected = SystemAPI.GetComponentLookup<IsReconnected>();
+            var isMigratedLookup = SystemAPI.GetComponentLookup<IsMigrated>();
 
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             foreach (var character in SystemAPI.Query<CharacterAspect>().WithAll<Simulate>())
@@ -96,14 +96,14 @@ namespace Samples.HelloNetcode
                     continue;
                 }
 
-                if (isReconnected.HasComponent(character.Self))
+                if (isMigratedLookup.HasComponent(character.Self))
                 {
                     var characterPrefabQuery = SystemAPI.QueryBuilder().WithAll<CharacterControllerConfig, Prefab>().Build();
                     if (characterPrefabQuery.CalculateEntityCount() == 1)
                     {
                         UnityEngine.Debug.Log($"Reconnecting character controller config entity was:{character.Character.ControllerConfig} is now:{characterPrefabQuery.GetSingletonEntity()}");
                         character.Character.ControllerConfig = characterPrefabQuery.GetSingletonEntity();
-                        commandBuffer.RemoveComponent<IsReconnected>(character.Self);
+                        commandBuffer.RemoveComponent<IsMigrated>(character.Self);
                     }
                     else
                     {

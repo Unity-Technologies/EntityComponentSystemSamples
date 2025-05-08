@@ -26,9 +26,24 @@ namespace Samples.HelloNetcode
                 var hudSystem = ClientServerBootstrap.ClientWorld.GetOrCreateSystemManaged<ClientHostMigrationHUDSystem>();
                 hudSystem.StatsText = StatsText;
             }
+        }
 
-            hostMigrationController = FindFirstObjectByType<HostMigrationController>();
-            LobbyNameText.text = hostMigrationController.CurrentLobby.Name;
+        void Update()
+        {
+            if (!hostMigrationController)
+            {
+                var controller = FindFirstObjectByType<HostMigrationController>();
+                if (controller && controller.CurrentLobby != null)
+                {
+                    LobbyNameText.text = controller.CurrentLobby.Name;
+                    hostMigrationController = controller;
+                }
+            }
+        }
+
+        public void ToggleFailNextMigration(bool shouldFail)
+        {
+            hostMigrationController.FailNextHostMigration = shouldFail;
         }
     }
 

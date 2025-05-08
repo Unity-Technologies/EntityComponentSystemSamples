@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.1] - 2025-05-08
+
+### Host migration (HelloNetcode)
+
+#### Changed
+- Added test/debug toggle in Frontend menu to manually fail a host migration when elected as host
+- Updated for API changes in Netcode for Entities 1.5.1, added ENABLE_HOST_MIGRATION define to player settings to enable the host migration feature
+
+#### Fixed
+- Fixed case where a client joins while a host migration is in progress, but the new host fails to become a host, then the client might be elected as the new host, but it would be in the middle of the join-as-client flow and have no client world or scenes loaded yet. 
+
 ## [1.5.0-exp.101] - 2025-03-13
 
 ### Host migration (HelloNetcode)

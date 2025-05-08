@@ -10,9 +10,6 @@ namespace Samples.HelloNetcode
 {
     public class FrontendHUD : MonoBehaviour
     {
-        [SerializeField]
-        UnityEngine.EventSystems.EventSystem m_EventSystem;
-
         public string ConnectionStatus
         {
             get { return m_ConnectionLabel.text; }
@@ -54,11 +51,6 @@ namespace Samples.HelloNetcode
                 var simGroup = ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<SimulationSystemGroup>();
                 simGroup.AddSystemToUpdateList(sys);
             }
-
-            // We must always have an event system (DOTS-7177), but some scenes will already have one,
-            // so we only enable ours if we can't find someone else's.
-            if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
-                m_EventSystem.gameObject.SetActive(true);
         }
     }
 

@@ -14,10 +14,10 @@ namespace Asteroids.Server
     [UpdateInGroup(typeof(GhostSimulationSystemGroup))]
     public partial struct PlayerColorSystem : ISystem
     {
-        ComponentLookup<IsReconnected> m_IsReconnectedLookup;
+        ComponentLookup<NetworkStreamIsReconnected> m_IsReconnectedLookup;
         public void OnCreate(ref SystemState state)
         {
-            m_IsReconnectedLookup = state.GetComponentLookup<IsReconnected>();
+            m_IsReconnectedLookup = state.GetComponentLookup<NetworkStreamIsReconnected>();
             state.RequireForUpdate<AsteroidsSpawner>();
             state.RequireForUpdate<NetworkStreamDriver>();
         }
@@ -40,7 +40,7 @@ namespace Asteroids.Server
                 ecb.AddComponent(entity, new PlayerColor{Value = nextColor.ValueRW.Value++});
                 m_IsReconnectedLookup.Update(ref state);
                 if (m_IsReconnectedLookup.HasComponent(entity))
-                    ecb.RemoveComponent<IsReconnected>(entity);
+                    ecb.RemoveComponent<NetworkStreamIsReconnected>(entity);
             }
             ecb.Playback(state.EntityManager);
         }

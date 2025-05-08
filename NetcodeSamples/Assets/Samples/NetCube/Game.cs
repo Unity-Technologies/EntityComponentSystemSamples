@@ -49,7 +49,7 @@ public partial struct GoInGameClientSystem : ISystem
 public partial struct GoInGameServerSystem : ISystem
 {
     private ComponentLookup<NetworkId> networkIdLookup;
-    private ComponentLookup<IsReconnected> reconnectedLookup;
+    private ComponentLookup<NetworkStreamIsReconnected> reconnectedLookup;
     private ComponentLookup<CubeColor> cubeColorLookup;
 
     [BurstCompile]
@@ -62,7 +62,7 @@ public partial struct GoInGameServerSystem : ISystem
             .WithAll<ReceiveRpcCommandRequest>();
         state.RequireForUpdate(state.GetEntityQuery(builder));
         networkIdLookup = state.GetComponentLookup<NetworkId>(true);
-        reconnectedLookup = state.GetComponentLookup<IsReconnected>(true);
+        reconnectedLookup = state.GetComponentLookup<NetworkStreamIsReconnected>(true);
         cubeColorLookup = state.GetComponentLookup<CubeColor>(true);
     }
 

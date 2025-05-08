@@ -23,10 +23,10 @@ public struct CubeColorNext : IComponentData
 [UpdateInGroup(typeof(GhostSimulationSystemGroup))]
 public partial struct ServerCubeColorSystem : ISystem
 {
-    ComponentLookup<IsReconnected> isReconnectedLookup;
+    ComponentLookup<NetworkStreamIsReconnected> isReconnectedLookup;
     public void OnCreate(ref SystemState state)
     {
-        isReconnectedLookup = state.GetComponentLookup<IsReconnected>();
+        isReconnectedLookup = state.GetComponentLookup<NetworkStreamIsReconnected>();
         state.RequireForUpdate<CubeSpawner>();
         state.RequireForUpdate<NetworkStreamDriver>();
     }
@@ -50,7 +50,7 @@ public partial struct ServerCubeColorSystem : ISystem
                 ecb.AddComponent(entity, new CubeColor{Value = nextColor.ValueRW.NextColorValue++});
                 isReconnectedLookup.Update(ref state);
                 if (isReconnectedLookup.HasComponent(entity))
-                    ecb.RemoveComponent<IsReconnected>(entity);
+                    ecb.RemoveComponent<NetworkStreamIsReconnected>(entity);
             }
         }
         ecb.Playback(state.EntityManager);
