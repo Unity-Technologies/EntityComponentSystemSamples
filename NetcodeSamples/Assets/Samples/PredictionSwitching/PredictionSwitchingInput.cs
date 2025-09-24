@@ -29,28 +29,27 @@ public partial class PredictionSwitchingSampleInputSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
+        var tick = SystemAPI.GetSingleton<NetworkTime>().InputTargetTick;
         var connection = SystemAPI.GetSingletonEntity<CommandTarget>();
-        Entities
-            .WithoutBurst()
-            .WithAll<GhostOwnerIsLocal>()
-            .ForEach((Entity entity, DynamicBuffer<PredictionSwitchingInput> inputBuffer) => {
-                var input = default(PredictionSwitchingInput);
-                input.Tick = tick;
-                if (UnityEngine.Input.GetKey("left") || TouchInput.GetKey(TouchInput.KeyCode.Left))
-                    input.horizontal -= 1;
-                if (UnityEngine.Input.GetKey("right") || TouchInput.GetKey(TouchInput.KeyCode.Right))
-                    input.horizontal += 1;
-                if (UnityEngine.Input.GetKey("down") || TouchInput.GetKey(TouchInput.KeyCode.Down))
-                    input.vertical -= 1;
-                if (UnityEngine.Input.GetKey("up") || TouchInput.GetKey(TouchInput.KeyCode.Up))
-                    input.vertical += 1;
-                inputBuffer.AddCommandData(input);
-                if (EntityManager.GetComponentData<CommandTarget>(connection).targetEntity == Entity.Null)
-                {
-                    EntityManager.SetComponentData(connection, new CommandTarget{targetEntity = entity});
-                }
-        }).Run();
+        foreach (var (inputBuffer, entity) in SystemAPI.Query<DynamicBuffer<PredictionSwitchingInput>>()
+                     .WithEntityAccess().WithAll<GhostOwnerIsLocal>())
+        {
+            var input = default(PredictionSwitchingInput);
+            input.Tick = tick;
+            if (UnityEngine.Input.GetKey("left") || TouchInput.GetKey(TouchInput.KeyCode.Left))
+                input.horizontal -= 1;
+            if (UnityEngine.Input.GetKey("right") || TouchInput.GetKey(TouchInput.KeyCode.Right))
+                input.horizontal += 1;
+            if (UnityEngine.Input.GetKey("down") || TouchInput.GetKey(TouchInput.KeyCode.Down))
+                input.vertical -= 1;
+            if (UnityEngine.Input.GetKey("up") || TouchInput.GetKey(TouchInput.KeyCode.Up))
+                input.vertical += 1;
+            inputBuffer.AddCommandData(input);
+            if (EntityManager.GetComponentData<CommandTarget>(connection).targetEntity == Entity.Null)
+            {
+                EntityManager.SetComponentData(connection, new CommandTarget{targetEntity = entity});
+            }
+        }
     }
 }
 
@@ -67,10 +66,10 @@ public partial class PredictionSwitchingThinInputSystem : SystemBase
     protected override void OnUpdate()
     {
         var networkTime = SystemAPI.GetSingleton<NetworkTime>();
-        if (!networkTime.ServerTick.IsValid)
+        if (!networkTime.InputTargetTick.IsValid)
             return;
 
-        var inputTargetTick = networkTime.ServerTick;
+        var inputTargetTick = networkTime.InputTargetTick;
         if (!SystemAPI.TryGetSingletonBuffer<PredictionSwitchingInput>(out var input))
         {
             if (SystemAPI.TryGetSingletonRW<CommandTarget>(out var commandTarget))
@@ -103,14 +102,13 @@ public partial class PredictionSwitchingApplyInputSystem : SystemBase
         RequireForUpdate<NetworkTime>();
     }
 
-    protected override void OnUpdate()
+    [WithAll(typeof(Simulate))]
+    public partial struct ApplyInputJob : IJobEntity
     {
-        var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
-        var speed = SystemAPI.GetSingleton<PredictionSwitchingSettings>().PlayerSpeed;
-
-        Entities
-            .WithAll<Simulate>()
-            .ForEach((DynamicBuffer<PredictionSwitchingInput> inputBuffer, ref PhysicsVelocity vel) => {
+        public NetworkTick tick;
+        public float speed;
+        public void Execute(DynamicBuffer<PredictionSwitchingInput> inputBuffer, ref PhysicsVelocity vel)
+        {
             inputBuffer.GetDataAtTick(tick, out var input);
             float3 dir = default;
             if (input.horizontal > 0)
@@ -128,7 +126,18 @@ public partial class PredictionSwitchingApplyInputSystem : SystemBase
             }
             vel.Linear.x = dir.x;
             vel.Linear.z = dir.z;
-        }).Schedule();
+        }
+    }
+
+    protected override void OnUpdate()
+    {
+        var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
+        var speed = SystemAPI.GetSingleton<PredictionSwitchingSettings>().PlayerSpeed;
+        Dependency = new ApplyInputJob()
+        {
+            tick = tick,
+            speed = speed,
+        }.Schedule(Dependency);
     }
 }
 
@@ -158,12 +167,10 @@ public partial class PredictionSwitchingCameraFollowSystem : SystemBase
             else return;
         }
 
-        Entities
-            .WithoutBurst()
-            .WithAll<GhostOwnerIsLocal>()
-            .WithAll<PredictionSwitchingInput>()
-            .ForEach((ref LocalToWorld trans) => {
+        foreach (var trans in SystemAPI.Query<LocalToWorld>().WithAll<GhostOwnerIsLocal, PredictionSwitchingInput>())
+        {
             m_CameraTransform.transform.position = trans.Position + m_CameraOffset;
-        }).Run();
+
+        }
     }
 }

@@ -35,6 +35,8 @@ namespace Samples.HelloNetcode
         }
         public void OnUpdate(ref SystemState state)
         {
+            var networkTime = SystemAPI.GetSingleton<NetworkTime>();
+            var netDebug = SystemAPI.GetSingleton<NetDebug>();
             foreach (var input in SystemAPI.Query<RefRW<CharacterControllerPlayerInput>>().WithAll<GhostOwnerIsLocal>())
             {
                 input.ValueRW.Movement = default;
@@ -87,6 +89,10 @@ namespace Samples.HelloNetcode
                     )
                 {
                     input.ValueRW.PrimaryFire.Set();
+                    if (netDebug.LogLevel == NetDebug.LogLevelType.Debug)
+                    {
+                        netDebug.DebugLog($"[{state.WorldUnmanaged.Name}] PrimaryFire on tick:{networkTime.ServerTick.ToFixedString()}, fr:{Time.frameCount}!");
+                    }
                 }
                 if ((secondaryFireTouch && !m_WasSecondaryFireTouch)
                 #if !UNITY_IOS && !UNITY_ANDROID
@@ -95,6 +101,10 @@ namespace Samples.HelloNetcode
                     )
                 {
                     input.ValueRW.SecondaryFire.Set();
+                    if (netDebug.LogLevel == NetDebug.LogLevelType.Debug)
+                    {
+                        netDebug.DebugLog($"[{state.WorldUnmanaged.Name}] SecondaryFire on tick:{networkTime.ServerTick.ToFixedString()}, fr:{Time.frameCount}!");
+                    }
                 }
                 m_WasFireTouch = fireTouch;
                 m_WasSecondaryFireTouch = secondaryFireTouch;

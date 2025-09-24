@@ -1,7 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.NetCode;
 
 namespace Samples.HelloNetcode
@@ -16,6 +15,7 @@ namespace Samples.HelloNetcode
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<EnableImportance>();
             var builder = new EntityQueryBuilder(Allocator.Temp)
                 .WithAll<NetworkId>()
                 .WithNone<GhostConnectionPosition>();
@@ -27,21 +27,16 @@ namespace Samples.HelloNetcode
         public void OnUpdate(ref SystemState state)
         {
             // Note: This is handled in OnUpdate as we cannot guarantee that the EnableImportance singleton exists during OnCreate, as it's enabled via a sub-scene.
-            var shouldEnableImportanceScaling = SystemAPI.HasSingleton<EnableImportance>();
+            var enableImportance = SystemAPI.GetSingleton<EnableImportance>();
             var hasEnabledImportanceScaling = SystemAPI.TryGetSingletonEntity<GhostImportance>(out var existingImportanceSingletonEntity);
-            if (shouldEnableImportanceScaling != hasEnabledImportanceScaling)
+            if (enableImportance.Enabled != hasEnabledImportanceScaling)
             {
-                if (shouldEnableImportanceScaling)
+                if (enableImportance.Enabled)
                 {
-                    var grid = state.EntityManager.CreateSingleton(new GhostDistanceData
-                    {
-                        TileSize = new int3(5, 5, 5),
-                        TileCenter = new int3(0, 0, 0),
-                        TileBorderWidth = new float3(1f, 1f, 1f),
-                    });
+                    var grid = state.EntityManager.CreateSingleton(enableImportance.TilingConfiguration);
                     state.EntityManager.AddComponentData(grid, new GhostImportance
                     {
-                        ScaleImportanceFunction = GhostDistanceImportance.ScaleFunctionPointer,
+                        BatchScaleImportanceFunction = enableImportance.UseBatchedImportanceFunction ? GhostDistanceImportance.BatchScaleFunctionPointer : default,
                         GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
                         GhostImportanceDataType = ComponentType.ReadOnly<GhostDistanceData>(),
                         GhostImportancePerChunkDataType = ComponentType.ReadOnly<GhostDistancePartitionShared>(),
@@ -49,22 +44,31 @@ namespace Samples.HelloNetcode
 
                     // Note: If you ALWAYS want the "Distance Importance Scaling" feature enabled:
                     // - It is safe to move the above code into OnCreate.
-                    // - But, you must delete the EnableImportance component (and Authoring), as you cannot sample it via OnCreate.
+                    // - But, you must delete the EnableImportance component (and Authoring), as you cannot sample it via OnCreate
+                    // (as the sub scene will not be loaded yet, in builds).
 
+                    // Disable the automatic adding of the importance shared component.
+                    GhostDistancePartitioningSystem.AutomaticallyAddGhostDistancePartitionSharedComponent = false;
                 }
                 else
                 {
                     state.EntityManager.DestroyEntity(existingImportanceSingletonEntity);
+                    GhostDistancePartitioningSystem.AutomaticallyAddGhostDistancePartitionSharedComponent = true;
                 }
             }
 
-            if (shouldEnableImportanceScaling)
+            if (enableImportance.Enabled)
             {
                 state.EntityManager.AddComponent<GhostConnectionPosition>(m_NetworkIdsWithoutGhostConnectionPositionQuery);
                 // Note: In a real game (and assuming your clients character controller moves and/or rotates),
                 // you'd need to update your GhostConnectionPosition values every frame.
                 // In this sample, the character controller is in a fixed position, which happens to be default(float3).
             }
+        }
+
+        public void OnDestroy(ref SystemState state)
+        {
+            GhostDistancePartitioningSystem.AutomaticallyAddGhostDistancePartitionSharedComponent = true;
         }
     }
 }

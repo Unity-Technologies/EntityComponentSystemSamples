@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.NetCode;
+using Unity.NetCode.HostMigration;
 using Unity.Transforms;
 
 namespace Asteroids.Server
@@ -20,6 +21,7 @@ namespace Asteroids.Server
         EntityQuery m_ShipQuery;
         EntityQuery m_DynamicAsteroidsQuery;
         EntityQuery m_StaticAsteroidsQuery;
+        EntityQuery m_HostMigrationQuery;
 
         Entity m_AsteroidPrefab;
         Entity m_ShipPrefab;
@@ -56,9 +58,14 @@ namespace Asteroids.Server
             m_LevelQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
-            builder.WithAllRW<NetworkStreamConnection>();
+            builder.WithAllRW<NetworkId>(); // can't use NetworkStreamConnection, doesn't work for single world host.
 
             m_ConnectionQuery = state.GetEntityQuery(builder);
+
+            builder.Reset();
+            builder.WithAll<HostMigrationInProgress>();
+
+            m_HostMigrationQuery = state.GetEntityQuery(builder);
 
             state.RequireForUpdate(m_LevelQuery);
             state.RequireForUpdate<AsteroidsSpawner>();
@@ -91,6 +98,10 @@ namespace Asteroids.Server
                 state.EntityManager.DestroyEntity(m_DynamicAsteroidsQuery);
                 return;
             }
+
+            // If there is a host migration in progress skip any spawning here until it's done
+            if (!m_HostMigrationQuery.IsEmptyIgnoreFilter)
+                return;
 
             var settings = SystemAPI.GetSingleton<ServerSettings>();
             if (m_AsteroidPrefab == Entity.Null || m_ShipPrefab == Entity.Null)
@@ -147,7 +158,7 @@ namespace Asteroids.Server
 
             SystemAPI.TryGetSingleton<ClientServerTickRate>(out var tickRate);
             tickRate.ResolveDefaults();
-            var fixedDeltaTime = 1.0f / (float) tickRate.SimulationTickRate;
+            var fixedDeltaTime = tickRate.SimulationFixedTimeStep;
 
             var shipLevelPadding = m_ShipRadius + 50;
             var asteroidLevelPadding = m_AsteroidRadius + 3;

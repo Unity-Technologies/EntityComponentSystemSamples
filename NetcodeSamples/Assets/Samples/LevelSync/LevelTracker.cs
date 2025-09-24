@@ -30,12 +30,12 @@ public partial class ServerLevelTracker : SystemBase
         // Handle RPCs from client with next level load commands
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var shouldLoadNext = false;
-        Entities.WithoutBurst().ForEach((Entity entity, in LoadNextLevelCommand level, in ReceiveRpcCommandRequest req) =>
+        foreach (var (level, req, entity) in SystemAPI.Query<LoadNextLevelCommand, ReceiveRpcCommandRequest>().WithEntityAccess())
         {
             UnityEngine.Debug.Log("Server received command to load next level");
             shouldLoadNext = true;
             ecb.DestroyEntity(entity);
-        }).Run();
+        }
         ecb.Playback(EntityManager);
         if (shouldLoadNext)
         {
@@ -48,11 +48,11 @@ public partial class ServerLevelTracker : SystemBase
             // Disable sync on all connections
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             FixedString32Bytes worldName = World.Name;
-            Entities.WithAll<NetworkStreamInGame>().ForEach((Entity entity, in NetworkId netId) =>
+            foreach (var (netId, entity) in SystemAPI.Query<NetworkId>().WithEntityAccess().WithAll<NetworkStreamInGame>())
             {
                 UnityEngine.Debug.Log($"[{worldName}] disable sync on {netId.Value}");
                 commandBuffer.RemoveComponent<NetworkStreamInGame>(entity);
-            }).Run();
+            }
             commandBuffer.Playback(EntityManager);
 
             m_Loader.UnloadAndLoadNext(levelState.CurrentLevel);

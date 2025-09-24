@@ -38,11 +38,11 @@ namespace Samples.HelloNetcode
                 m_ConnectionUI = GameObject.FindFirstObjectByType<ConnectionUI>();
 
             var buffer = m_CommandBufferSystem.CreateCommandBuffer();
-            Entities.WithName("AddConnectionStateToNewConnections").WithNone<ConnectionState>().ForEach((Entity entity,
-                in NetworkStreamConnection state) =>
+            foreach (var (_, entity) in SystemAPI.Query<RefRO<NetworkStreamConnection>>().WithEntityAccess().WithNone<ConnectionState>())
             {
                 buffer.AddComponent<ConnectionState>(entity);
-            }).Run();
+
+            }
 
             FixedString32Bytes worldName = World.Name;
             var unmanagedWorld = World.Unmanaged;
@@ -50,23 +50,24 @@ namespace Samples.HelloNetcode
             int worldIndex = 0;
             if (int.TryParse(World.Name[World.Name.Length - 1].ToString(), out worldIndex))
                 worldIndex++;
-            Entities.WithName("InitializeNewConnection").WithNone<InitializedConnection>().ForEach((Entity entity, in NetworkId id) =>
+            foreach (var (id, entity) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess().WithNone<InitializedConnection>())
             {
                 buffer.AddComponent(entity, new InitializedConnection());
-                UnityEngine.Debug.Log($"[{worldName}] New connection ID:{id.Value}");
+                UnityEngine.Debug.Log($"[{worldName}] New connection ID:{id.ValueRO.Value}");
 
                 // Not thread safe, so all UI logic is kept on main thread
-                ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = id.Value, WorldIndex = worldIndex, World = unmanagedWorld});
-            }).Run();
+                ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = id.ValueRO.Value, WorldIndex = worldIndex, World = unmanagedWorld});
+            }
 
-            Entities.WithName("HandleDisconnect").WithNone<NetworkStreamConnection>().ForEach((Entity entity, in ConnectionState state) =>
+            foreach (var (stateRef, entity) in SystemAPI.Query<RefRO<ConnectionState>>().WithEntityAccess().WithNone<NetworkStreamConnection>())
             {
+                var state = stateRef.ValueRO;
                 UnityEngine.Debug.Log($"[{worldName}] Connection disconnected ID:{state.NetworkId} Reason:{state.DisconnectReason.ToFixedString()}");
 
                 // Not thread safe, so all UI logic is kept on main thread
                 ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = state.NetworkId, WorldIndex = worldIndex, World = unmanagedWorld, ConnectionDeleted = true});
                 buffer.RemoveComponent<ConnectionState>(entity);
-            }).Run();
+            }
 
             m_CommandBufferSystem.AddJobHandleForProducer(Dependency);
         }
@@ -104,7 +105,6 @@ namespace Samples.HelloNetcode
             var driverInstance = new NetworkDriverStore.NetworkDriverInstance();
 #if UNITY_EDITOR || NETCODE_DEBUG
             var settings = CreateNetworkSettings(100);
-            driverInstance.simulatorEnabled = NetworkSimulatorSettings.Enabled;
             if (NetworkSimulatorSettings.Enabled)
             {
                 NetworkSimulatorSettings.SetSimulatorSettings(ref settings);

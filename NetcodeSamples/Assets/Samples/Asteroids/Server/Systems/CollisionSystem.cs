@@ -1,3 +1,4 @@
+using System.Threading;
 using Unity.Assertions;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
@@ -42,21 +43,15 @@ namespace Asteroids.Server
         public void OnCreate(ref SystemState state)
         {
             var builder = new EntityQueryBuilder(Allocator.Temp)
-
                 .WithAll<LocalTransform, CollisionSphereComponent, ShipTagComponentData, GhostOwner>();
-
             shipQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
-
             builder.WithAll<LocalTransform, CollisionSphereComponent, BulletTagComponent, BulletAgeComponent, GhostOwner>();
 
             bulletQuery = state.GetEntityQuery(builder);
-
             builder.Reset();
-
             builder.WithAll<LocalTransform, CollisionSphereComponent, AsteroidTagComponentData>();
-
             asteroidQuery = state.GetEntityQuery(builder);
 
             builder.Reset();
@@ -71,15 +66,12 @@ namespace Asteroids.Server
             state.RequireForUpdate(m_LevelQuery);
 
             bulletAgeType = state.GetComponentTypeHandle<BulletAgeComponent>(true);
-
             transformType = state.GetComponentTypeHandle<LocalTransform>(true);
-
             ghostOwnerType = state.GetComponentTypeHandle<GhostOwner>(true);
             staticAsteroidType = state.GetComponentTypeHandle<StaticAsteroid>(true);
             sphereType = state.GetComponentTypeHandle<CollisionSphereComponent>(true);
             playerIdType = state.GetComponentTypeHandle<PlayerIdComponentData>(true);
             entityType = state.GetEntityTypeHandle();
-
             commandTarget = state.GetComponentLookup<CommandTarget>();
             linkedEntityGroupFromEntity = state.GetBufferLookup<LinkedEntityGroup>();
 
@@ -106,15 +98,16 @@ namespace Asteroids.Server
             [ReadOnly] public EntityTypeHandle entityType;
 
             [ReadOnly] public NativeList<LevelComponent> level;
-            [NativeSetThreadIndex] public int ThreadIndex;
-            [NativeDisableParallelForRestriction] public NativeArray<int> asteroidDestructCounter;
+            [NativeDisableUnsafePtrRestriction] public RefRW<AsteroidScore> asteroidScore;
             public NetworkTick tick;
             public float fixedDeltaTime;
+
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
                 // This job is not written to support queries with enableable component types.
                 Assert.IsFalse(useEnabledMask);
 
+                var destroyedAsteroidCounter = 0;
                 var asteroidSphere = chunk.GetNativeArray(ref sphereType);
                 var asteroidEntity = chunk.GetNativeArray(entityType);
                 var staticAsteroid = chunk.GetNativeArray(ref staticAsteroidType);
@@ -124,7 +117,7 @@ namespace Asteroids.Server
                     {
                         var firstPos = staticAsteroid[asteroid].GetPosition(tick, 1, fixedDeltaTime).xy;
                         var firstRadius = asteroidSphere[asteroid].radius;
-                        CheckCollisions(unfilteredChunkIndex, asteroidEntity[asteroid], firstPos, firstRadius);
+                        CheckCollisions(unfilteredChunkIndex, asteroidEntity[asteroid], firstPos, firstRadius, ref destroyedAsteroidCounter);
                     }
                 }
                 else
@@ -136,11 +129,17 @@ namespace Asteroids.Server
                         var firstPos = asteroidPos[asteroid].Position.xy;
 
                         var firstRadius = asteroidSphere[asteroid].radius;
-                        CheckCollisions(unfilteredChunkIndex, asteroidEntity[asteroid], firstPos, firstRadius);
+                        CheckCollisions(unfilteredChunkIndex, asteroidEntity[asteroid], firstPos, firstRadius, ref destroyedAsteroidCounter);
                     }
                 }
+
+                // This sum theoretically causes thread contention, but said contention should be minimal (as bullets
+                // destroying asteroids is relatively rare).
+                if(destroyedAsteroidCounter > 0)
+                    Interlocked.Add(ref asteroidScore.ValueRW.Value, destroyedAsteroidCounter);
             }
-            private void CheckCollisions(int unfilteredChunkIndex, Entity asteroidEntity, float2 firstPos, float firstRadius)
+
+            private void CheckCollisions(int unfilteredChunkIndex, Entity asteroidEntity, float2 firstPos, float firstRadius, ref int destroyedAsteroidCounter)
             {
                 if (firstPos.x - firstRadius < 0 || firstPos.y - firstRadius < 0 ||
                     firstPos.x + firstRadius > level[0].levelHeight ||
@@ -169,7 +168,7 @@ namespace Asteroids.Server
                         if (Intersect(firstRadius, secondRadius, firstPos, secondPos))
                         {
                             commandBuffer.DestroyEntity(unfilteredChunkIndex, asteroidEntity);
-                            asteroidDestructCounter[ThreadIndex]++;
+                            destroyedAsteroidCounter++;
 
                             if(level[0].bulletsDestroyedOnContact)
                                 commandBuffer.DestroyEntity(unfilteredChunkIndex, bulletEntities[bullet]);
@@ -185,22 +184,18 @@ namespace Asteroids.Server
             [ReadOnly] public NativeList<ArchetypeChunk> asteroidChunks;
             [ReadOnly] public NativeList<ArchetypeChunk> bulletChunks;
             [ReadOnly] public ComponentTypeHandle<BulletAgeComponent> bulletAgeType;
-
             [ReadOnly] public ComponentTypeHandle<LocalTransform> transformType;
-
             [ReadOnly] public ComponentTypeHandle<GhostOwner> ghostOwnerType;
             [ReadOnly] public ComponentTypeHandle<StaticAsteroid> staticAsteroidType;
             [ReadOnly] public ComponentTypeHandle<CollisionSphereComponent> sphereType;
             [ReadOnly] public ComponentTypeHandle<PlayerIdComponentData> playerIdType;
             [ReadOnly] public EntityTypeHandle entityType;
-
             [ReadOnly] public NativeList<ServerSettings> serverSettings;
-
             public NativeQueue<Entity>.ParallelWriter playerClearQueue;
-
             [ReadOnly] public NativeList<LevelComponent> level;
             public NetworkTick tick;
             public float fixedDeltaTime;
+
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
                 // This job is not written to support queries with enableable component types.
@@ -343,26 +338,6 @@ namespace Asteroids.Server
         }
 
         [BurstCompile]
-        internal struct GatherAsteroidDestructCounter : IJob
-        {
-            [ReadOnly] public NativeArray<int> asteroidDestructCounter;
-            public EntityCommandBuffer commandBuffer;
-            [ReadOnly] public int currentScore;
-            [ReadOnly] public Entity scoreSingleton;
-
-            public void Execute()
-            {
-                int total = currentScore;
-                for (int i = 1; i < asteroidDestructCounter.Length; ++i)
-                {
-                    total += asteroidDestructCounter[i];
-                }
-
-                commandBuffer.SetComponent(scoreSingleton, new AsteroidScore { Value = total });
-            }
-        }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             JobHandle bulletHandle;
@@ -370,6 +345,7 @@ namespace Asteroids.Server
             JobHandle levelHandle;
             JobHandle settingsHandle;
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
+            var asteroidScoreRef = SystemAPI.GetSingletonRW<AsteroidScore>();
             SystemAPI.TryGetSingleton<ClientServerTickRate>(out var tickRate);
             tickRate.ResolveDefaults();
 
@@ -388,21 +364,14 @@ namespace Asteroids.Server
 
             commandTarget.Update(ref state);
             linkedEntityGroupFromEntity.Update(ref state);
-            
-            int chunkCount = asteroidQuery.CalculateChunkCountWithoutFiltering();
-            int maxThreadCount = JobsUtility.ThreadIndexCount;
-
-            var asteroidDestroyCounter = CollectionHelper.CreateNativeArray<int>(maxThreadCount, Allocator.TempJob);
 
             var asteroidJob = new DestroyAsteroidJob
             {
                 commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter(),
                 bulletChunks = bulletQuery.ToArchetypeChunkListAsync(state.WorldUpdateAllocator, out bulletHandle),
                 bulletAgeType = bulletAgeType,
-
                 transformType = transformType,
-                asteroidDestructCounter = asteroidDestroyCounter,
-
+                asteroidScore = asteroidScoreRef,
                 staticAsteroidType = staticAsteroidType,
                 sphereType = sphereType,
                 entityType = entityType,
@@ -420,9 +389,7 @@ namespace Asteroids.Server
                 asteroidChunks = asteroidQuery.ToArchetypeChunkListAsync(state.WorldUpdateAllocator, out asteroidHandle),
                 bulletChunks = asteroidJob.bulletChunks,
                 bulletAgeType = asteroidJob.bulletAgeType,
-
                 transformType = asteroidJob.transformType,
-
                 ghostOwnerType = ghostOwnerType,
                 staticAsteroidType = asteroidJob.staticAsteroidType,
                 sphereType = asteroidJob.sphereType,
@@ -444,23 +411,10 @@ namespace Asteroids.Server
             {
                 playerClearQueue = playerClearQueue,
                 commandTarget = commandTarget,
-                linkedEntityGroupFromEntity = linkedEntityGroupFromEntity
+                linkedEntityGroupFromEntity = linkedEntityGroupFromEntity,
             };
-
-            var asteroidScore = SystemAPI.GetSingleton<AsteroidScore>();
-
-            var updateScore = new GatherAsteroidDestructCounter
-            {
-                commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged),
-                asteroidDestructCounter = asteroidDestroyCounter,
-                currentScore = asteroidScore.Value,
-                scoreSingleton = SystemAPI.GetSingletonEntity<AsteroidScore>()
-            };
-            var scoreHandle = updateScore.Schedule(dependsOn: h1);
-            var cleanupHandle = asteroidDestroyCounter.Dispose(scoreHandle);
-
-            var handle = JobHandle.CombineDependencies(h1, h2, cleanupHandle);
-            state.Dependency = JobHandle.CombineDependencies(cleanupShipJob.Schedule(h2), handle);
+            var h3 = cleanupShipJob.Schedule(h2);
+            state.Dependency = JobHandle.CombineDependencies(h1, h2, h3);
         }
 
         private static bool Intersect(float firstRadius, float secondRadius, float2 firstPos, float2 secondPos)

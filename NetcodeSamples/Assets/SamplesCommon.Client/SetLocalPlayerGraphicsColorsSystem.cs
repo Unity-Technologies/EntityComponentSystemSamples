@@ -23,7 +23,12 @@ namespace Unity.NetCode.Samples.Common
             if (SetOutlineToLocalPlayerColor.All.Count <= 0)
                 return;
 
-            SystemAPI.TryGetSingleton(out NetworkId networkId);
+            NetworkId networkId = default;
+            if (SystemAPI.TryGetSingletonEntity<LocalConnection>(out var connectionEntity))
+            {
+                networkId = SystemAPI.GetComponent<NetworkId>(connectionEntity);
+            }
+
             if (networkId.Value != m_LastNetworkId)
             {
                 m_LastNetworkId = networkId.Value;

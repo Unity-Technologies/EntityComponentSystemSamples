@@ -34,6 +34,7 @@ namespace Samples.HelloNetcode
             if (!networkTime.IsFirstTimeFullyPredictingTick)
                 return;
 
+            var netDebug = SystemAPI.GetSingleton<NetDebug>();
             var config = SystemAPI.GetSingleton<GrenadeConfig>();
             var commandBuffer = new EntityCommandBuffer(state.WorldUpdateAllocator);
             var grenadePrefab = SystemAPI.GetSingleton<GrenadeSpawner>().Grenade;
@@ -47,7 +48,6 @@ namespace Samples.HelloNetcode
             foreach (var (character, inputBuffer, anchorPoint) in SystemAPI.Query<CharacterAspect,
                          DynamicBuffer<InputBufferData<CharacterControllerPlayerInput>>, RefRO<AnchorPoint>>().WithAll<Simulate>())
             {
-
                 // We must fetch the quantity of grenades to spawn from the Count value of the SecondaryFire InputEvent (which stores this exact delta).
                 // Why? Because:
                 // - Users may drop packets, so a users click counter can increment more than once (representing that they've clicked on previous 'not yet acked' ticks).
@@ -65,13 +65,17 @@ namespace Samples.HelloNetcode
                 const int maxGrenadesPerPlayerPerServerTick = 5;
                 if (grenadesToSpawn > maxGrenadesPerPlayerPerServerTick)
                 {
-                    SystemAPI.GetSingleton<NetDebug>().Log($"Clamping player input, as they're attempting to spawn {grenadesToSpawn} grenades in one tick (max: {maxGrenadesPerPlayerPerServerTick})!");
+                    netDebug.LogWarning($"Clamping player input, as they're attempting to spawn {grenadesToSpawn} grenades in one tick (max: {maxGrenadesPerPlayerPerServerTick})!");
                     grenadesToSpawn = maxGrenadesPerPlayerPerServerTick;
                 }
 
                 // Batch Instantiate:
                 using var grenadeEntities = new NativeArray<Entity>((int) grenadesToSpawn, Allocator.Temp);
                 commandBuffer.Instantiate(grenadePrefab, grenadeEntities);
+                if (netDebug.LogLevel == NetDebug.LogLevelType.Debug)
+                {
+                    netDebug.DebugLog($"[{state.WorldUnmanaged.Name}] Spawned {grenadesToSpawn} grenades on {networkTime.ServerTick.ToFixedString()}, fr:{UnityEngine.Time.frameCount}, {networkTime.ToFixedString()}!");
+                }
 
                 for (int spawnId = 0; spawnId < grenadesToSpawn; spawnId++)
                 {

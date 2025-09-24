@@ -1,6 +1,5 @@
 using Unity.Entities;
 using Unity.NetCode;
-using Unity.Networking.Transport;
 using UnityEngine;
 
 public struct LevelSync_InitializedConnection : IComponentData
@@ -22,15 +21,25 @@ public partial class LevelSync_ServerConnectionSystem : SystemBase
         m_CommandBuffer = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
     }
 
-    protected override void OnUpdate()
+    [WithNone(typeof(LevelSync_InitializedConnection))]
+    partial struct ConnectionJob : IJobEntity
     {
-        var commandBuffer = m_CommandBuffer.CreateCommandBuffer();
-        Entities.WithNone<LevelSync_InitializedConnection>().ForEach((Entity entity, ref NetworkStreamConnection state) =>
+        public EntityCommandBuffer commandBuffer;
+        void Execute(Entity entity, ref NetworkStreamConnection state)
         {
             commandBuffer.AddComponent(entity, new LevelSync_InitializedConnection());
             Debug.Log($"New connection accepted: {state.Value.ToFixedString()}");
-        }).Schedule();
-        m_CommandBuffer.AddJobHandleForProducer(Dependency);
+        }
+    }
 
+    protected override void OnUpdate()
+    {
+        var ecb = m_CommandBuffer.CreateCommandBuffer();
+        var job = new ConnectionJob()
+        {
+            commandBuffer = ecb
+        };
+        Dependency = job.Schedule(this.Dependency);
+        m_CommandBuffer.AddJobHandleForProducer(Dependency);
     }
 }

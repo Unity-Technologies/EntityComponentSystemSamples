@@ -6,6 +6,7 @@ using Unity.NetCode;
 
 namespace Samples.HelloNetcode
 {
+#pragma warning disable CS0618 // Disable Aspects obsolete warnings
     readonly partial struct CharacterWithHealth : IAspect
     {
         readonly RefRW<AutoCommandTarget> m_AutoCommandTarget;
@@ -22,6 +23,7 @@ namespace Samples.HelloNetcode
             return m_Health.ValueRO.CurrentHitPoints > 0;
         }
     }
+#pragma warning restore CS0618
 
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [RequireMatchingQueriesForUpdate]

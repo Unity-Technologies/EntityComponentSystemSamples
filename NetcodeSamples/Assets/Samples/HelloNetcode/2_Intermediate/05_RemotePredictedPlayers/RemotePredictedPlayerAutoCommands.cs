@@ -33,26 +33,25 @@ namespace Samples.HelloNetcode
             // only players with a ghost owner component and with an ID which matches the
             // local connection. For that we are using the GhostOwnerIsLocal tag, that is added
             // automatically to all entities owned by the users.
-            Entities
-                .WithName("GatherInput")
-                .WithAll<GhostOwnerIsLocal>()
-                .ForEach((ref RemotePredictedPlayerInput inputData) =>
-                {
-                    inputData = default;
+            foreach (var inputDataRef in SystemAPI.Query<RefRW<RemotePredictedPlayerInput>>().WithAll<GhostOwnerIsLocal>())
+            {
+                ref var inputData = ref inputDataRef.ValueRW;
+                inputData = default;
 
-                    if (jump)
-                        inputData.Jump.Set();
-                    if (left)
-                        inputData.Horizontal -= 1;
-                    if (right)
-                        inputData.Horizontal += 1;
-                    if (down)
-                        inputData.Vertical -= 1;
-                    if (up)
-                        inputData.Vertical += 1;
-                    // if (jump || left || right || down || up)
-                    //     UnityEngine.Debug.Log($"{tick} GatherInput jump={jump} left={left} right={right} down={down} up={up}");
-                }).ScheduleParallel();
+                if (jump)
+                    inputData.Jump.Set();
+                if (left)
+                    inputData.Horizontal -= 1;
+                if (right)
+                    inputData.Horizontal += 1;
+                if (down)
+                    inputData.Vertical -= 1;
+                if (up)
+                    inputData.Vertical += 1;
+
+                // if (jump || left || right || down || up)
+                //     UnityEngine.Debug.Log($"{tick} GatherInput jump={jump} left={left} right={right} down={down} up={up}");
+            }
         }
     }
 
@@ -74,41 +73,40 @@ namespace Samples.HelloNetcode
             var velocityDecrementStep = 60 / tickRate.SimulationTickRate;
             var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
             FixedString32Bytes world = World.Name;
-            Entities.WithAll<Simulate>().WithName("ProcessInputForTick").ForEach(
+            foreach (var (inputRef, transRef, movement) in SystemAPI.Query<RefRO<RemotePredictedPlayerInput>, RefRO<LocalTransform>, RefRW<PlayerMovement>>().WithAll<Simulate>())
+            {
+                var input = inputRef.ValueRO;
+                var trans = transRef.ValueRO;
+                if (input.Jump.IsSet)
+                    movement.ValueRW.JumpVelocity = 10;
 
-                (ref RemotePredictedPlayerInput input, ref LocalTransform trans, ref PlayerMovement movement) =>
-
+                // Simple jump mechanism, when jump event is set the jump velocity is set to 10
+                // then on each tick it is decremented. It results in an input value being set either
+                // in the upward or downward direction (just like left/right movement).
+                var verticalMovement = 0f;
+                if (movement.ValueRO.JumpVelocity > 0)
                 {
-                    if (input.Jump.IsSet)
-                        movement.JumpVelocity = 10;
+                    movement.ValueRW.JumpVelocity -= velocityDecrementStep;
+                    verticalMovement = 1;
+                }
+                else
+                {
+                    if (trans.Position.y > 0)
+                        verticalMovement = -1;
+                }
 
-                    // Simple jump mechanism, when jump event is set the jump velocity is set to 10
-                    // then on each tick it is decremented. It results in an input value being set either
-                    // in the upward or downward direction (just like left/right movement).
-                    var verticalMovement = 0f;
-                    if (movement.JumpVelocity > 0)
-                    {
-                        movement.JumpVelocity -= velocityDecrementStep;
-                        verticalMovement = 1;
-                    }
-                    else
-                    {
+                var moveInput = new float3(input.Horizontal, verticalMovement, input.Vertical);
+                moveInput = math.normalizesafe(moveInput) * movementSpeed;
 
-                        if (trans.Position.y > 0)
-                            verticalMovement = -1;
+                // Ensure we don't go through the ground when landing (and stick to it when close)
 
-                    }
-                    var moveInput = new float3(input.Horizontal, verticalMovement, input.Vertical);
-                    moveInput = math.normalizesafe(moveInput) * movementSpeed;
-                    // Ensure we don't go through the ground when landing (and stick to it when close)
+                if (movement.ValueRO.JumpVelocity <= 0 && (trans.Position.y + moveInput.y < 0 || trans.Position.y + moveInput.y < 0.05))
+                    moveInput.y = trans.Position.y = 0;
+                trans.Position += new float3(moveInput.x, moveInput.y, moveInput.z);
+                if (trans.Position.y != 0)
+                    UnityEngine.Debug.Log($"[{world}][{tick}] ({trans.Position.x}, {trans.Position.y}, {trans.Position.z}) velocity={movement.ValueRO.JumpVelocity}");
 
-                    if (movement.JumpVelocity <= 0 && (trans.Position.y + moveInput.y < 0 || trans.Position.y + moveInput.y < 0.05))
-                        moveInput.y = trans.Position.y = 0;
-                    trans.Position += new float3(moveInput.x, moveInput.y, moveInput.z);
-                    if (trans.Position.y != 0)
-                        UnityEngine.Debug.Log($"[{world}][{tick}] ({trans.Position.x}, {trans.Position.y}, {trans.Position.z}) velocity={movement.JumpVelocity}");
-
-                }).ScheduleParallel();
+            }
         }
     }
 }

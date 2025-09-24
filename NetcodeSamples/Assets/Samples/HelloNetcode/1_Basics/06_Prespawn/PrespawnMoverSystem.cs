@@ -14,14 +14,11 @@ namespace Samples.HelloNetcode
             RequireForUpdate<EnablePrespawn>();
         }
 
-        protected override void OnUpdate()
+        partial struct MovePrespawnJob : IJobEntity
         {
-            var time = SystemAPI.Time.ElapsedTime;
-            var deltaTime = SystemAPI.Time.DeltaTime;
-
-            Entities.WithName("MovePrespawnBarrels").ForEach((Entity entity, ref GhostInstance ghost, ref LocalTransform transform,
-
-                ref PrespawnData data) =>
+            public double time;
+            public float deltaTime;
+            void Execute(ref GhostInstance ghost, ref LocalTransform transform, ref PrespawnData data)
             {
                 // After 2 seconds make the barrels slide between -2 and 2 on the x axis
                 if (time > 2)
@@ -33,9 +30,19 @@ namespace Samples.HelloNetcode
                     else if (transform.Position.x < -2f)
                         data.Direction = 1f;
                     transform.Position = new float3(transform.Position.x + deltaTime * data.Direction, transform.Position.y, transform.Position.z);
-
                 }
-            }).Schedule();
+            }
+        }
+        protected override void OnUpdate()
+        {
+            double time = SystemAPI.Time.ElapsedTime;
+            float deltaTime = SystemAPI.Time.DeltaTime;
+
+            Dependency = new MovePrespawnJob()
+            {
+                time = time,
+                deltaTime = deltaTime,
+            }.Schedule(Dependency);
         }
     }
 }

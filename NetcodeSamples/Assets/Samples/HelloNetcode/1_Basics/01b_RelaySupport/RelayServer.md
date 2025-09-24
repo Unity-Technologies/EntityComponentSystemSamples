@@ -27,9 +27,14 @@ Inside the NetCodeSetup/RelayHUD.cs is the entry for the checkbox behaviour. The
 > In play mode you might notice the sample scene taking longer to appear than without the relay support enabled. This delay is caused by the roundtrip time to the relay server.
 
 ## Design decisions
-This sample is forcing a UDP connection on the client, on both server and client builds and in the editor. This is to showcase the feature of using the relay service.
- 
-In a game with client hosted game the local client would join using IPC, to avoid the roundtrip time to the relay server and then reach the same machine.
-In this sample, `RelayDriverConstructor` is enforcing this behaviour.
-Changing it to invoke `RegisterClientDriver` as explained in the comment will make the local client use IPC and standalone clients use UDP.
+This sample enable to choose two different options to test the relay connection:
+1. self-hosting using relay for in-going connection, but use IPC to connect the client to the local server connection.
+2. emulate a "client" connecting to a remote server, by using relay to connect client to the local server connection. 
+
+The Frontend menu has a specific toogle to select the desired modality.
+
+### Web build constraints
+
+When running the sample using Web build, the start client/server button is disable until the use of relay is checked. 
+
 In `NetcodeSetup/RelayHUD.cs` the client connection endpoint is set to the relay server, which will have to change as described there for the local client. 

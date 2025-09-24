@@ -16,6 +16,7 @@ namespace Asteroids.Client
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<StaticAsteroid>();
+            state.RequireForUpdate<NetworkId>();
         }
         [BurstCompile]
         partial struct StaticAsteroidJob : IJobEntity
@@ -29,19 +30,19 @@ namespace Asteroids.Client
                 transform.Position = staticAsteroid.GetPosition(tick, tickFraction, frameTime);
                 transform.Rotation = staticAsteroid.GetRotation(tick, tickFraction, frameTime);
             }
-
         }
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            var networkTime = SystemAPI.GetSingleton<NetworkTime>();
+            if (!networkTime.InterpolationTick.IsValid) return;
             SystemAPI.TryGetSingleton<ClientServerTickRate>(out var tickRate);
             tickRate.ResolveDefaults();
-            var networkTime = SystemAPI.GetSingleton<NetworkTime>();
             var asteroidJob = new StaticAsteroidJob
             {
                 tick = networkTime.InterpolationTick,
                 tickFraction = networkTime.InterpolationTickFraction,
-                frameTime = tickRate.SimulationFixedTimeStep
+                frameTime = tickRate.SimulationFixedTimeStep,
             };
             state.Dependency = asteroidJob.ScheduleParallel(state.Dependency);
         }

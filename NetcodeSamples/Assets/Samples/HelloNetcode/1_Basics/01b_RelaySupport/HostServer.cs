@@ -182,10 +182,15 @@ namespace Samples.HelloNetcode
         static HostStatus BindToHost(Task<Allocation> allocationTask, out RelayServerData relayServerData)
         {
             var allocation = allocationTask.Result;
+#if !UNITY_WEBGL
+            var connectionType = "dtls";
+#else
+            var connectionType = "wss";
+#endif
             try
             {
                 // Format the server data, based on desired connectionType
-                relayServerData = HostRelayData(allocation);
+                relayServerData = HostRelayData(allocation, connectionType);
             }
             catch (Exception e)
             {
@@ -247,19 +252,12 @@ namespace Samples.HelloNetcode
             {
                 throw new InvalidOperationException($"endpoint for connectionType {connectionType} not found");
             }
-
-            // Prepare the server endpoint using the Relay server IP and port
-            var serverEndpoint = NetworkEndpoint.Parse(endpoint.Host, (ushort)endpoint.Port);
-
-            // UTP uses pointers instead of managed arrays for performance reasons, so we use these helper functions to convert them
-            var allocationIdBytes = RelayAllocationId.FromByteArray(allocation.AllocationIdBytes);
-            var connectionData = RelayConnectionData.FromByteArray(allocation.ConnectionData);
-            var key = RelayHMACKey.FromByteArray(allocation.Key);
-
             // Prepare the Relay server data and compute the nonce value
             // The host passes its connectionData twice into this function
-            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationIdBytes, ref connectionData,
-                ref connectionData, ref key, connectionType == "dtls");
+            var isWebSocket = connectionType == "wss" || connectionType == "ws";
+            var relayServerData = new RelayServerData(endpoint.Host, (ushort)endpoint.Port,
+                allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData,
+                allocation.Key, endpoint.Secure, isWebSocket);
 
             return relayServerData;
         }

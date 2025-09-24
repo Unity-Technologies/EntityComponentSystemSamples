@@ -24,7 +24,7 @@ namespace Samples.HelloNetcode
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<EnableOptimization>();
+            state.RequireForUpdate<EnableImportance>();
         }
 
         [BurstCompile]

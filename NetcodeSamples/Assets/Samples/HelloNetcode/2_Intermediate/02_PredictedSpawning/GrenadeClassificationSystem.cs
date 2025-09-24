@@ -110,8 +110,7 @@ namespace Samples.HelloNetcode
                                 if (grenadeData.SpawnId == spawnIdFromList)
                                 {
                                     newGhostSpawn.PredictedSpawnEntity = predictedSpawnList[j].entity;
-                                    predictedSpawnList[j] = predictedSpawnList[predictedSpawnList.Length - 1];
-                                    predictedSpawnList.RemoveAt(predictedSpawnList.Length - 1);
+                                    predictedSpawnList.RemoveAtSwapBack(j);
                                     break;
                                 }
                             }

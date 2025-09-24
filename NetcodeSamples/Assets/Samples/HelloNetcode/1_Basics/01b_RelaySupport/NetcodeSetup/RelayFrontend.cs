@@ -1,3 +1,4 @@
+using System;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Networking.Transport;
@@ -39,8 +40,13 @@ namespace Samples.HelloNetcode
         public Button JoinExistingGame;
         public Text HostConnectionLabel;
         public Text ClientConnectionLabel;
+        public Toggle UseRelayForLocalConnection;
+        public Toggle EnableRelay;
+        public Toggle EnableHostMigration;
 
         string m_OldValue;
+        bool m_UseRelayForLocalClient;
+        bool m_IsHosting;
         ConnectionState m_State;
         HostServer m_HostServerSystem;
         ConnectingPlayer m_HostClientSystem;
@@ -55,23 +61,42 @@ namespace Samples.HelloNetcode
         }
 
 #if !UNITY_SERVER
+        public override void Start()
+        {
+            base.Start();
+#if UNITY_WEBGL
+            ClientServerButton.interactable = false;
+#endif
+        }
+        public void OnUseRelayForLocalClient(Toggle value)
+        {
+            m_UseRelayForLocalClient = value.isOn;
+        }
         public void OnRelayEnable(Toggle value)
         {
             TogglePersistentState(!value.isOn);
             if (value.isOn)
             {
                 Port.gameObject.SetActive(false);
+                EnableHostMigration.gameObject.SetActive(false);
+                UseRelayForLocalConnection.interactable = true;
                 m_OldValue = Address.text;
                 Address.text = string.Empty;
                 Address.placeholder.GetComponent<Text>().text = "Join Code for Host Server";
+                ClientServerButton.interactable = true;
                 ClientServerButton.onClick.AddListener(() => { m_State = ConnectionState.SetupHost; });
                 JoinExistingGame.onClick.AddListener(() => { m_State = ConnectionState.SetupClient; });
             }
             else
             {
                 Port.gameObject.SetActive(true);
+                EnableHostMigration.gameObject.SetActive(true);
+                UseRelayForLocalConnection.interactable = false;
                 Address.text = m_OldValue;
                 Address.placeholder.GetComponent<Text>().text = string.Empty;
+#if UNITY_WEBGL
+                ClientServerButton.interactable = false;
+#endif
                 ClientServerButton.onClick.RemoveAllListeners();
                 JoinExistingGame.onClick.RemoveAllListeners();
             }
@@ -93,10 +118,29 @@ namespace Samples.HelloNetcode
 
         public void Update()
         {
+            // When relay is toggled on the hosting button should be disabled when the user enters something in
+            // the join code text field, as it's expected you'd want to join a relay session next
+            if (EnableRelay.isOn)
+            {
+                if (!string.IsNullOrEmpty(Address.text))
+                    ClientServerButton.interactable = false;
+                else
+                    ClientServerButton.interactable = true;
+            }
+            // If relay is toggled off then reset hosting button, unless you're on webgl then it should
+            // remain off as it only supports hosting on relay
+            else if (!ClientServerButton.interactable)
+            {
+#if !UNITY_WEBGL
+                ClientServerButton.interactable = true;
+#endif
+            }
+
             switch (m_State)
             {
                 case ConnectionState.SetupHost:
                 {
+                    m_IsHosting = true;
                     HostServer();
                     m_State = ConnectionState.SetupClient;
                     goto case ConnectionState.SetupClient;
@@ -107,8 +151,11 @@ namespace Samples.HelloNetcode
                     var enteredJoinCode = !string.IsNullOrEmpty(Address.text);
                     if (isServerHostedLocally.GetValueOrDefault())
                     {
-                        SetupClient();
-                        m_HostClientSystem.GetJoinCodeFromHost();
+                        if (m_UseRelayForLocalClient)
+                        {
+                            SetupClient();
+                            m_HostClientSystem.GetJoinCodeFromHost();
+                        }
                         m_State = ConnectionState.JoinLocalGame;
                         goto case ConnectionState.JoinLocalGame;
                     }
@@ -118,6 +165,12 @@ namespace Samples.HelloNetcode
                         JoinAsClient();
                         m_State = ConnectionState.JoinGame;
                         goto case ConnectionState.JoinGame;
+                    }
+
+                    if (!m_IsHosting)
+                    {
+                        ClientConnectionLabel.text = "Join Code field is empty!";
+                        m_State = ConnectionState.Unknown;
                     }
                     break;
                 }
@@ -134,7 +187,7 @@ namespace Samples.HelloNetcode
                 case ConnectionState.JoinLocalGame:
                 {
                     var hasClientConnectedToRelayService = m_HostClientSystem?.RelayClientData.Endpoint.IsValid;
-                    if (hasClientConnectedToRelayService.GetValueOrDefault())
+                    if (!m_UseRelayForLocalClient || hasClientConnectedToRelayService.GetValueOrDefault())
                     {
                         SetupRelayHostedServerAndConnect();
                         m_State = ConnectionState.Unknown;
@@ -142,6 +195,10 @@ namespace Samples.HelloNetcode
                     break;
                 }
                 case ConnectionState.Unknown:
+                {
+                    m_IsHosting = false;
+                    break;
+                }
                 default: return;
             }
         }
@@ -194,12 +251,12 @@ namespace Samples.HelloNetcode
             }
 
             var world = World.All[0];
-            var relayClientData = world.GetExistingSystemManaged<ConnectingPlayer>().RelayClientData;
+            var relayClientData = world.GetExistingSystemManaged<ConnectingPlayer>()?.RelayClientData;
             var relayServerData = world.GetExistingSystemManaged<HostServer>().RelayServerData;
             var joinCode = world.GetExistingSystemManaged<HostServer>().JoinCode;
 
             var oldConstructor = NetworkStreamReceiveSystem.DriverConstructor;
-            NetworkStreamReceiveSystem.DriverConstructor = new RelayDriverConstructor(relayServerData, relayClientData);
+            NetworkStreamReceiveSystem.DriverConstructor = new RelayDriverConstructor(relayServerData, relayClientData.GetValueOrDefault());
             var server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
             var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
             NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
@@ -219,15 +276,21 @@ namespace Samples.HelloNetcode
             var joinCodeEntity = server.EntityManager.CreateEntity(ComponentType.ReadOnly<JoinCode>());
             server.EntityManager.SetComponentData(joinCodeEntity, new JoinCode { Value = joinCode });
 
-            var networkStreamEntity = server.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestListen>());
-            server.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestListen");
-            server.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestListen { Endpoint = NetworkEndpoint.AnyIpv4 });
+            using var serverDriverQuery = server.EntityManager.CreateEntityQuery(typeof(NetworkStreamDriver));
+            var serverDriver = serverDriverQuery.GetSingletonRW<NetworkStreamDriver>();
+            serverDriver.ValueRW.Listen(NetworkEndpoint.AnyIpv4);
+            var ipcLocalEndPoint = serverDriver.ValueRW.DriverStore.GetDriverInstanceRO(1).driver.GetLocalEndpoint();
 
-            networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
-            client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");
-            // For IPC this will not work and give an error in the transport layer. For this sample we force the client to connect through the relay service.
-            // For a locally hosted server, the client would need to connect to NetworkEndpoint.AnyIpv4, and the relayClientData.Endpoint in all other cases.
-            client.EntityManager.SetComponentData(networkStreamEntity, new NetworkStreamRequestConnect { Endpoint = relayClientData.Endpoint });
+            using var clientDriverQuery = client.EntityManager.CreateEntityQuery(typeof(NetworkStreamDriver));
+            var clientDriver = clientDriverQuery.GetSingletonRW<NetworkStreamDriver>();
+            if (relayClientData.HasValue)
+            {
+                clientDriver.ValueRW.Connect(client.EntityManager, relayClientData.Value.Endpoint);
+            }
+            else
+            {
+                clientDriver.ValueRW.Connect(client.EntityManager, ipcLocalEndPoint);
+            }
         }
 
         void ConnectToRelayServer()

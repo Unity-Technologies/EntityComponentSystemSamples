@@ -18,6 +18,7 @@ namespace Samples.HelloNetcode
 
         public void OnUpdate(ref SystemState state)
         {
+            var netDebug = SystemAPI.GetSingleton<NetDebug>();
             var collisionHistory = SystemAPI.GetSingleton<PhysicsWorldHistorySingleton>();
             var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
@@ -90,7 +91,11 @@ namespace Samples.HelloNetcode
 
                     var localToWorld = localToWorldFromEntity[hitEntity].Value;
                     hitPoint = math.mul(math.inverse(localToWorld), new float4(hitPoint, 1)).xyz;
-                    //UnityEngine.Debug.Log($"<color=#FFFFAA>[{state.WorldUnmanaged.Name}] logged HIT on {predictingTick.ToFixedString()} (expected:{expectedTick.ToFixedString()}, actual/returned:{returnedTick.ToFixedString()}) with victim at worldPos:{collWorld.Bodies[closestHit.RigidBodyIndex].WorldFromBody.pos}!</color>");
+
+                    if (netDebug.LogLevel == NetDebug.LogLevelType.Debug)
+                    {
+                        netDebug.DebugLog($"[{state.WorldUnmanaged.Name}] Logged HIT on {predictingTick.ToFixedString()} (expected:{expectedTick.ToFixedString()}, actual/returned:{returnedTick.ToFixedString()}) with victim at worldPos:{collWorld.Bodies[closestHit.RigidBodyIndex].WorldFromBody.pos}!");
+                    }
                 }
 
                 hitComponent.ValueRW.Victim = hitEntity;

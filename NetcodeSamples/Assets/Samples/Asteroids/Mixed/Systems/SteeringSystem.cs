@@ -4,6 +4,7 @@ using Unity.Transforms;
 using Unity.NetCode;
 using Unity.Collections;
 using Unity.Burst;
+using UnityEngine;
 
 namespace Asteroids.Mixed
 {
@@ -28,6 +29,7 @@ namespace Asteroids.Mixed
             public LevelComponent level;
             public EntityCommandBuffer.ParallelWriter commandBuffer;
             public Entity bulletPrefab;
+            public float bulletPrefabScale;
             public float deltaTime;
             public NetworkTick currentTick;
             public byte isFirstFullTick;
@@ -44,51 +46,35 @@ namespace Asteroids.Mixed
                     inputData.shoot = 0;
 
                 state.State = inputData.thrust;
-
                 if (inputData.left == 1)
                 {
-
                     transform.Rotation = math.mul(transform.Rotation,
-
                         quaternion.RotateZ(math.radians(level.shipRotationRate * deltaTime)));
                 }
-
                 if (inputData.right == 1)
                 {
-
                     transform.Rotation = math.mul(transform.Rotation,
-
                         quaternion.RotateZ(math.radians(-level.shipRotationRate * deltaTime)));
                 }
-
                 if (inputData.thrust == 1)
                 {
                     float3 fwd = new float3(0, level.shipForwardForce * deltaTime, 0);
-
                     velocity.Value += math.mul(transform.Rotation, fwd).xy;
-
                 }
-
-
                 transform.Position.xy += velocity.Value * deltaTime;
-
 
                 var canShoot = !state.WeaponCooldown.IsValid || currentTick.IsNewerThan(state.WeaponCooldown);
                 if (inputData.shoot != 0 && canShoot)
                 {
-                    if (bulletPrefab != Entity.Null && isFirstFullTick == 1)
+                    if (isFirstFullTick == 1)
                     {
                         var e = commandBuffer.Instantiate(entityIndexInQuery, bulletPrefab);
 
-
                         var bulletTx = transform;
-                        bulletTx.Scale = 10; //TODO: this should come from the bullet prefab
+                        bulletTx.Scale = bulletPrefabScale;
                         commandBuffer.SetComponent(entityIndexInQuery, e, bulletTx);
-
                         var vel = new Velocity
                             {Value = math.mul(transform.Rotation, new float3(0, level.bulletVelocity, 0)).xy};
-
-
                         commandBuffer.SetComponent(entityIndexInQuery, e,
                             new GhostOwner {NetworkId = ghostOwner.NetworkId});
                         commandBuffer.SetComponent(entityIndexInQuery, e, vel);
@@ -109,11 +95,13 @@ namespace Asteroids.Mixed
         {
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
             m_ShipCommandDataFromEntity.Update(ref state);
+            var bulletPrefab = SystemAPI.GetSingleton<AsteroidsSpawner>().Bullet;
             var steeringJob = new SteeringJob
             {
                 level = SystemAPI.GetSingleton<LevelComponent>(),
-                commandBuffer = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter(),
-                bulletPrefab = SystemAPI.GetSingleton<AsteroidsSpawner>().Bullet,
+                commandBuffer = SystemAPI.GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter(),
+                bulletPrefab = bulletPrefab,
+                bulletPrefabScale = state.EntityManager.GetComponentData<LocalTransform>(bulletPrefab).Scale,
                 deltaTime = SystemAPI.Time.DeltaTime,
                 currentTick = networkTime.ServerTick,
                 isFirstFullTick = (byte) (networkTime.IsFirstTimeFullyPredictingTick ? 1 : 0),

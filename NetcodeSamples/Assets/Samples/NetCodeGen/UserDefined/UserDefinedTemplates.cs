@@ -38,6 +38,17 @@ namespace Unity.NetCode.Generators
 #endif
                     TemplateOverride = "",
                 },
+                new TypeRegistryEntry
+                {
+                    Type = "System.Boolean",
+                    Quantized = false,
+                    Smoothing = SmoothingAction.Clamp,
+                    SupportCommand = true,
+                    Composite = false,
+                    Template = "NetCode.GhostSnapshotValueUInt.cs",
+                    TemplateOverride = "PreserializeBoolTest",
+                    SubType = GhostFieldSubType.BoolTest
+                }
             });
         }
     }

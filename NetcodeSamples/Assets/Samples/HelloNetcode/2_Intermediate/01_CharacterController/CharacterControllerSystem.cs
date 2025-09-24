@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.Profiling;
 using Unity.Collections;
 using Unity.NetCode;
+using Unity.NetCode.HostMigration;
 using Unity.Physics.Systems;
 
 namespace Samples.HelloNetcode
@@ -28,6 +29,8 @@ namespace Samples.HelloNetcode
         [GhostField]
         public NetworkTick JumpStart;
     }
+
+#pragma warning disable CS0618 // Disable Aspects obsolete warnings
     public readonly partial struct CharacterAspect : IAspect
     {
         public readonly Entity Self;
@@ -45,6 +48,7 @@ namespace Samples.HelloNetcode
         public ref Character Character => ref m_Character.ValueRW;
         public ref PhysicsVelocity Velocity => ref m_Velocity.ValueRW;
     }
+#pragma warning restore CS0618
 
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateBefore(typeof(PhysicsInitializeGroup))]
@@ -85,12 +89,30 @@ namespace Samples.HelloNetcode
             }
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
 
+            var isMigratedLookup = SystemAPI.GetComponentLookup<IsMigrated>();
+
+            var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             foreach (var character in SystemAPI.Query<CharacterAspect>().WithAll<Simulate>())
             {
                 if (!character.AutoCommandTarget.Enabled)
                 {
                     character.Velocity.Linear = float3.zero;
-                    return;
+                    continue;
+                }
+
+                if (isMigratedLookup.HasComponent(character.Self))
+                {
+                    var characterPrefabQuery = SystemAPI.QueryBuilder().WithAll<CharacterControllerConfig, Prefab>().Build();
+                    if (characterPrefabQuery.CalculateEntityCount() == 1)
+                    {
+                        UnityEngine.Debug.Log($"Reconnecting character controller config entity was:{character.Character.ControllerConfig} is now:{characterPrefabQuery.GetSingletonEntity()}");
+                        character.Character.ControllerConfig = characterPrefabQuery.GetSingletonEntity();
+                        commandBuffer.RemoveComponent<IsMigrated>(character.Self);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogError($"Failed to reconnect character controller config entity was:{character.Character.ControllerConfig}");
+                    }
                 }
 
                 var controllerConfig = SystemAPI.GetComponent<CharacterControllerConfig>(character.Character.ControllerConfig);
@@ -177,6 +199,7 @@ namespace Samples.HelloNetcode
                 // Set the physics velocity and let physics move the kinematic object based on that
                 character.Velocity.Linear = (ccTransform.pos - character.Transform.ValueRO.Position) / SystemAPI.Time.DeltaTime;
             }
+            commandBuffer.Playback(state.EntityManager);
         }
 
         /// <summary>
