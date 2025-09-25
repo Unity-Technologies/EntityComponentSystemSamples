@@ -14,6 +14,7 @@ namespace Samples.HelloNetcode
         protected override void OnCreate()
         {
             RequireForUpdate<EnableGoInGame>();
+            m_NewConnections = SystemAPI.QueryBuilder().WithAll<NetworkId>().WithNone<NetworkStreamInGame>().Build();
             RequireForUpdate(m_NewConnections);
         }
 
@@ -21,13 +22,14 @@ namespace Samples.HelloNetcode
         {
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             FixedString32Bytes worldName = World.Name;
+
             // Go in game as soon as we have a connection set up (connection network ID has been set)
-            Entities.WithName("NewConnectionsGoInGame").WithStoreEntityQueryInField(ref m_NewConnections).WithNone<NetworkStreamInGame>().ForEach(
-                (Entity ent, in NetworkId id) =>
-                {
-                    UnityEngine.Debug.Log($"[{worldName}] Go in game connection {id.Value}");
-                    commandBuffer.AddComponent<NetworkStreamInGame>(ent);
-                }).Run();
+            foreach (var (id, ent) in SystemAPI.Query<NetworkId>().WithNone<NetworkStreamInGame>().WithEntityAccess())
+            {
+                UnityEngine.Debug.Log($"[{worldName}] Go in game connection {id.Value}");
+                commandBuffer.AddComponent<NetworkStreamInGame>(ent);
+            }
+
             commandBuffer.Playback(EntityManager);
         }
     }

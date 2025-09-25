@@ -17,7 +17,6 @@ namespace Asteroids.Server
     public partial struct LoadLevelSystem : ISystem
     {
         private EntityQuery m_LevelGroup;
-        private PortableFunctionPointer<GhostImportance.ScaleImportanceDelegate> m_ScaleFunctionPointer;
         private PortableFunctionPointer<GhostImportance.BatchScaleImportanceDelegate> m_BatchScaleFunction;
 
         public void OnCreate(ref SystemState state)
@@ -26,40 +25,31 @@ namespace Asteroids.Server
             m_LevelGroup = state.GetEntityQuery(builder);
 
             state.RequireForUpdate<ServerSettings>();
-            m_ScaleFunctionPointer = GhostDistanceImportance.ScaleFunctionPointer;
-            m_BatchScaleFunction = GhostDistanceImportance.BatchScaleFunctionPointer;
+            m_BatchScaleFunction = GhostDistanceImportance.BatchScaleWithRelevancyFunctionPointer;
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var settings = SystemAPI.GetSingleton<ServerSettings>();
-            var hasGhostImportanceScaling = SystemAPI.HasSingleton<GhostImportance>();
+            var hasGhostImportanceScaling = SystemAPI.TryGetSingletonEntity<GhostImportance>(out var ghostImportanceEntity);
             if (settings.levelData.enableGhostImportanceScaling != hasGhostImportanceScaling)
             {
                 if (hasGhostImportanceScaling)
                 {
-                    state.EntityManager.DestroyEntity(SystemAPI.GetSingletonEntity<GhostImportance>());
+                    state.EntityManager.DestroyEntity(ghostImportanceEntity);
                 }
                 else
                 {
-                    // Try to store a bit less than full chunks to avoid fragmenting the data too much
-                    var maxAsteroidsPerTile = 25;
-                    var minTileSize = 256;
-                    float asteroidsPerPx = (float) settings.levelData.numAsteroids / (float) (settings.levelData.levelWidth * settings.levelData.levelHeight);
-                    // We want to make sure that asteroidsPerPx * tileSize * tileSize = maxAsteroidsPerTile
-                    int tileSize = math.max(minTileSize, (int) math.ceil(math.sqrt((float) maxAsteroidsPerTile / asteroidsPerPx)));
-
                     var gridSingleton = state.EntityManager.CreateSingleton(new GhostDistanceData
                     {
-                        TileSize = new int3(tileSize, tileSize, 256),
-                        TileCenter = new int3(0, 0, 128),
-                        TileBorderWidth = new float3(1f, 1f, 1f),
+                        TileSize = new int3(512, 512, 1024),
+                        TileCenter = new int3(0, 0, 0),
+                        TileBorderWidth = new float3(16f, 16f, 16f),
                     });
                     state.EntityManager.AddComponentData(gridSingleton, new GhostImportance
                     {
-                        BatchScaleImportanceFunction = settings.levelData.useBatchScalingFunction ? m_BatchScaleFunction: default,
-                        ScaleImportanceFunction = m_ScaleFunctionPointer,
+                        BatchScaleImportanceFunction = m_BatchScaleFunction,
                         GhostConnectionComponentType = ComponentType.ReadOnly<GhostConnectionPosition>(),
                         GhostImportanceDataType = ComponentType.ReadOnly<GhostDistanceData>(),
                         GhostImportancePerChunkDataType = ComponentType.ReadOnly<GhostDistancePartitionShared>(),

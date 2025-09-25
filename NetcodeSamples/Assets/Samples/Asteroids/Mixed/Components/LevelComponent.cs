@@ -1,5 +1,7 @@
 using System;
 using Unity.Entities;
+using Unity.NetCode;
+using UnityEngine.Serialization;
 
 /// <summary>Serializable attribute ensures the Inspector can expose fields as this struct is a field inside ServerSettings.</summary>
 [Serializable]
@@ -18,30 +20,20 @@ public struct LevelComponent : IComponentData
     public float asteroidVelocity;
     public int numAsteroids;
 
-    [UnityEngine.SerializeField] private byte _asteroidsDamageShips;
-    public bool asteroidsDamageShips => _asteroidsDamageShips != 0;
-
+    public bool asteroidsDamageShips;
     /// <summary>Can ships destroy each other?</summary>
-    [UnityEngine.SerializeField] private byte _shipPvP;
-    public bool shipPvP => _shipPvP != 0;
-
-    [UnityEngine.SerializeField] private byte _asteroidsDestroyedOnShipContact;
-    public bool asteroidsDestroyedOnShipContact => _asteroidsDestroyedOnShipContact != 0;
-
-    [UnityEngine.SerializeField] private byte _bulletsDestroyedOnContact;
-    public bool bulletsDestroyedOnContact => _bulletsDestroyedOnContact != 0;
+    public bool shipPvP;
+    public bool asteroidsDestroyedOnShipContact;
+    public bool bulletsDestroyedOnContact;
 
     /// <summary>When > 0, informs <see cref="Unity.NetCode.GhostRelevancyMode"/>. Optimization.</summary>
+    /// <remarks>
+    /// Note: If <see cref="enableGhostImportanceScaling"/> is checked, the package uses the const defined in
+    /// <see cref="GhostDistanceImportance.BatchScaleWithRelevancyFunctionPointer"/> instead of this field.
+    /// </remarks>
     public int relevancyRadius;
-
-    [UnityEngine.SerializeField] private byte _staticAsteroidOptimization;
-    public bool staticAsteroidOptimization => _staticAsteroidOptimization != 0;
-
-    [UnityEngine.SerializeField] private byte _enableGhostImportanceScaling;
-    public bool enableGhostImportanceScaling => _enableGhostImportanceScaling != 0;
-
-    [UnityEngine.SerializeField] private byte _useBatchScalingFunction;
-    public bool useBatchScalingFunction => _useBatchScalingFunction != 0;
+    public bool staticAsteroidOptimization;
+    public bool enableGhostImportanceScaling;
 
     public static LevelComponent Default = new LevelComponent
     {
@@ -57,12 +49,12 @@ public struct LevelComponent : IComponentData
         asteroidVelocity = 10,
         numAsteroids = 200,
 
-        _asteroidsDamageShips = 1,
-        _shipPvP = 0,
-        _asteroidsDestroyedOnShipContact = 0,
-        _bulletsDestroyedOnContact = 1,
+        asteroidsDamageShips = true,
+        shipPvP = false,
+        asteroidsDestroyedOnShipContact = false,
+        bulletsDestroyedOnContact = true,
 
         relevancyRadius = 0,
-        _staticAsteroidOptimization = 0,
+        staticAsteroidOptimization = false,
     };
 }

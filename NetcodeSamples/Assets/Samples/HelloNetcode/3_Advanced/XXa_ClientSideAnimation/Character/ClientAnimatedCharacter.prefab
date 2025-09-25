@@ -29,13 +29,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2469323487610213414}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2552174147846842480
 MonoBehaviour:
@@ -52,13 +52,16 @@ MonoBehaviour:
   DefaultGhostMode: 2
   SupportedGhostModes: 2
   OptimizationMode: 0
-  Importance: 1
+  Importance: 50
+  MaxSendRate: 30
   prefabId: 3d025fe4613fc424a8fa7a354c169a99
   HasOwner: 1
   SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
+  RollbackPredictedSpawnedGhostState: 0
+  RollbackPredictionOnStructuralChanges: 1
 --- !u!114 &6916574456758741700
 MonoBehaviour:
   m_ObjectHideFlags: 0

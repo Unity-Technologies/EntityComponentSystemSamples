@@ -37,7 +37,7 @@ namespace Unity.NetCode.Generators
                     Template = "Assets/Samples/NetCodeGen/Templates/Rotation2d.NetCodeSourceGenerator.additionalfile",
 #endif
                     TemplateOverride = "",
-                },
+                }
             });
         }
     }

@@ -25,6 +25,9 @@ namespace Samples.HelloNetcode
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<GrenadeSpawner>();
+            state.RequireForUpdate<NetworkTime>();
+            state.RequireForUpdate<GrenadeConfig>();
             state.RequireForUpdate<EnablePredictedSpawning>();
         }
 

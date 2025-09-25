@@ -48,7 +48,8 @@ public partial struct GoInGameClientSystem : ISystem
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 public partial struct GoInGameServerSystem : ISystem
 {
-    private ComponentLookup<NetworkId> networkIdFromEntity;
+    private ComponentLookup<NetworkId> networkIdLookup;
+    private ComponentLookup<NetworkStreamIsReconnected> reconnectedLookup;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -59,7 +60,8 @@ public partial struct GoInGameServerSystem : ISystem
             .WithAll<GoInGameRequest>()
             .WithAll<ReceiveRpcCommandRequest>();
         state.RequireForUpdate(state.GetEntityQuery(builder));
-        networkIdFromEntity = state.GetComponentLookup<NetworkId>(true);
+        networkIdLookup = state.GetComponentLookup<NetworkId>(true);
+        reconnectedLookup = state.GetComponentLookup<NetworkStreamIsReconnected>(true);
     }
 
     [BurstCompile]
@@ -73,13 +75,24 @@ public partial struct GoInGameServerSystem : ISystem
         var worldName = state.WorldUnmanaged.Name;
 
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-        networkIdFromEntity.Update(ref state);
+        networkIdLookup.Update(ref state);
+        reconnectedLookup.Update(ref state);
 
         foreach (var (reqSrc, reqEntity) in SystemAPI.Query<RefRO<ReceiveRpcCommandRequest>>().WithAll<GoInGameRequest>().WithEntityAccess())
         {
-            commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
             // Get the NetworkId for the requesting client
-            var networkId = networkIdFromEntity[reqSrc.ValueRO.SourceConnection];
+            var networkId = networkIdLookup[reqSrc.ValueRO.SourceConnection];
+
+            // If this request is coming from a reconnecting connection we don't need to spawn and configure a player entity
+            // as it has been migrated to the new host and will be reconnected to this client
+            if (reconnectedLookup.HasComponent(reqSrc.ValueRO.SourceConnection))
+            {
+                Debug.Log($"'{worldName}' connection '{networkId.Value}' has reconnected!");
+                commandBuffer.DestroyEntity(reqEntity);
+                continue;
+            }
+
+            commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
 
             // Log information about the connection request that includes the client's assigned NetworkId and the name of the prefab spawned.
             Debug.Log($"'{worldName}' setting connection '{networkId.Value}' to in game, spawning a Ghost '{prefabName}' for them!");

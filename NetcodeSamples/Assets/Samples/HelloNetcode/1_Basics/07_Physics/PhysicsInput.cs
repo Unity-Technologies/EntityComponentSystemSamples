@@ -27,7 +27,7 @@ namespace Samples.HelloNetcode
             // Note the tick the client is currently simulating, this is attached to the
             // command and is sent to the server where it is taken into account when the
             // command is deployed.
-            input.Tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
+            input.Tick = SystemAPI.GetSingleton<NetworkTime>().InputTargetTick;
 
             if (UnityEngine.Input.GetKey("left") || TouchInput.GetKey(TouchInput.KeyCode.Left))
                 input.Horizontal -= 1;
@@ -67,7 +67,8 @@ namespace Samples.HelloNetcode
             // collides with other physical entities. Dependent also on the physics step
             // framerate frequency.
             float speed = 3f;
-            Entities.WithAll<Simulate>().ForEach((DynamicBuffer<PhysicsPlayerInput> inputBuffer, ref PhysicsVelocity vel) =>
+            foreach(var (vel, inputBuffer) in SystemAPI.Query<
+                        RefRW<PhysicsVelocity>, DynamicBuffer<PhysicsPlayerInput>>().WithAll<Simulate>())
             {
                 inputBuffer.GetDataAtTick(tick, out var input);
                 float3 dir = default;
@@ -85,9 +86,9 @@ namespace Samples.HelloNetcode
                     dir *= speed;
                 }
 
-                vel.Linear.x = dir.x;
-                vel.Linear.z = dir.z;
-            }).ScheduleParallel();
+                vel.ValueRW.Linear.x = dir.x;
+                vel.ValueRW.Linear.z = dir.z;
+            }
         }
     }
 }

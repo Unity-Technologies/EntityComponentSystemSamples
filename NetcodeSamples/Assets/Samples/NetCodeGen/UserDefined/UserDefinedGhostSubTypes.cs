@@ -5,5 +5,6 @@ namespace Unity.NetCode
     {
 		public const int Rotation2D = 1;
 		public const int Translation2D = 2;
+        public const int BoolTest = 999999;
     }
 }

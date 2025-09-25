@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
+using Unity.NetCode.HostMigration;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ namespace Samples.HelloNetcode
     /// for a given connection.
     /// </summary>
     public struct PlayerSpawned : IComponentData { }
+
+    public struct PlayerReconnected : IComponentData { }
 
     /// <summary>
     ///     Convenience: This allows us to trivially fetch the connection entity associated with
@@ -27,6 +30,8 @@ namespace Samples.HelloNetcode
     public partial struct SpawnPlayerSystem : ISystem
     {
         private EntityQuery m_NewPlayersQuery;
+        private EntityQuery m_ExistingPlayersQuery;
+        private EntityQuery m_ReconnectedPlayersQuery;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -35,16 +40,51 @@ namespace Samples.HelloNetcode
             // which is most likely instantaneous in this sample (but good to be sure).
             state.RequireForUpdate<Spawner>();
             state.RequireForUpdate(SystemAPI.QueryBuilder().WithAny<EnableSpawnPlayer, EnableRemotePredictedPlayer>().Build());
-            m_NewPlayersQuery = SystemAPI.QueryBuilder().WithAll<NetworkId>().WithNone<PlayerSpawned>().Build();
-            state.RequireForUpdate(m_NewPlayersQuery);
+            state.RequireForUpdate<NetworkStreamInGame>();
+            // Don't run new player flow for connections which are reconnections, they'll be handled in the reconnection query below
+            m_NewPlayersQuery = SystemAPI.QueryBuilder().WithAll<NetworkId>().WithNone<PlayerSpawned>().WithNone<NetworkStreamIsReconnected>().Build();
+            m_ReconnectedPlayersQuery = SystemAPI.QueryBuilder().
+                WithAll<NetworkId, NetworkStreamIsReconnected, PlayerSpawned>().
+                WithNone<PlayerReconnected>().Build();
+            m_ExistingPlayersQuery = SystemAPI.QueryBuilder().WithAll<GhostOwner>().Build();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            if (m_NewPlayersQuery.IsEmptyIgnoreFilter && m_ReconnectedPlayersQuery.IsEmptyIgnoreFilter)
+                return;
+
             var prefab = SystemAPI.GetSingleton<Spawner>().Player;
             state.EntityManager.GetName(prefab, out var prefabName);
             if (prefabName.IsEmpty) prefabName = prefab.ToFixedString();
+
+            // Don't attempt spawning new players while a host migration is being applied on a new server
+            if (SystemAPI.HasSingleton<HostMigrationInProgress>())
+                return;
+
+            var reconnectedPlayers = m_ReconnectedPlayersQuery.ToEntityArray(Allocator.Temp);
+            var reconnectedIds = m_ReconnectedPlayersQuery.ToComponentDataArray<NetworkId>(Allocator.Temp);
+            for (var i = 0; i < reconnectedPlayers.Length; i++)
+            {
+                var networkId = reconnectedIds[i];
+                var connectionEntity = reconnectedPlayers[i];
+                var players = m_ExistingPlayersQuery.ToComponentDataArray<GhostOwner>(Allocator.Temp);
+                var playerEntities = m_ExistingPlayersQuery.ToEntityArray(Allocator.Temp);
+                Debug.Log($"[SpawnPlayerSystem][{state.WorldUnmanaged.Name}] Reconnecting host migrated player for {networkId.ToFixedString()}.");
+                for (var j = 0; j < players.Length; j++)
+                {
+                    var ghostOwner = players[j];
+                    if (ghostOwner.NetworkId == networkId.Value)
+                    {
+                        state.EntityManager.AddComponentData(playerEntities[j], new ConnectionOwner {Entity = connectionEntity});
+                        state.EntityManager.GetBuffer<LinkedEntityGroup>(connectionEntity).Add(new LinkedEntityGroup {Value = playerEntities[j]});
+                        state.EntityManager.SetComponentData(connectionEntity, new CommandTarget {targetEntity = playerEntities[j]});
+                    }
+                }
+                // Ensure we don't process this connection again
+                state.EntityManager.AddComponent<PlayerReconnected>(connectionEntity);
+            }
 
             // Iterate through all connections events raised by netcode,
             // and if they're new joiners, spawn a player character controller for them:

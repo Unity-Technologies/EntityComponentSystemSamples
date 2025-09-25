@@ -13,8 +13,6 @@ public class StaticAsteroidAuthoring : MonoBehaviour
     public float2 InitialVelocity;
     [RegisterBinding(typeof(StaticAsteroid), "InitialAngle")]
     public float InitialAngle;
-    [RegisterBinding(typeof(StaticAsteroid), "SpawnTick")]
-    public Unity.NetCode.NetworkTick SpawnTick;
 
     class Baker : Baker<StaticAsteroidAuthoring>
     {
@@ -24,7 +22,6 @@ public class StaticAsteroidAuthoring : MonoBehaviour
             component.InitialPosition = authoring.InitialPosition;
             component.InitialVelocity = authoring.InitialVelocity;
             component.InitialAngle = authoring.InitialAngle;
-            component.SpawnTick = authoring.SpawnTick;
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, component);
         }

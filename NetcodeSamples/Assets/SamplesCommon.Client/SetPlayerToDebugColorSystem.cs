@@ -16,10 +16,11 @@ namespace Unity.NetCode.Samples.Common
     {
         protected override void OnUpdate()
         {
-            Entities.WithAll<SetPlayerToDebugColor>().WithChangeFilter<MaterialMeshInfo, GhostOwner>().ForEach((ref URPMaterialPropertyBaseColor color, in GhostOwner ghostOwner) =>
+            foreach (var (color, ghostOwner) in SystemAPI.Query<RefRW<URPMaterialPropertyBaseColor>, RefRO<GhostOwner>>()
+                .WithAll<SetPlayerToDebugColor>().WithChangeFilter<MaterialMeshInfo, GhostOwner>())
             {
-                color.Value = NetworkIdDebugColorUtility.Get(ghostOwner.NetworkId);
-            }).Run();
+                color.ValueRW.Value = NetworkIdDebugColorUtility.Get(ghostOwner.ValueRO.NetworkId);
+            }
         }
     }
 }

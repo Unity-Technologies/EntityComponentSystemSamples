@@ -1,8 +1,5 @@
-using System;
-using System.Data.Common;
 using Unity.Entities;
 using Unity.NetCode;
-using Unity.Networking.Transport;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -11,7 +8,6 @@ using Unity.Physics.Extensions;
 using Unity.Transforms;
 using UnityEngine;
 using Unity.Physics.Systems;
-using Random = Unity.Mathematics.Random;
 
 namespace Samples.MultyPhysicsWorld
 {
@@ -47,13 +43,13 @@ namespace Samples.MultyPhysicsWorld
         protected override void OnUpdate()
         {
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-            Entities.WithNone<NetworkStreamInGame>().ForEach((Entity ent, in NetworkId id) =>
+            foreach(var (_, ent) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess())
             {
                 commandBuffer.AddComponent<NetworkStreamInGame>(ent);
                 var req = commandBuffer.CreateEntity();
                 commandBuffer.AddComponent<GoInGameRequest>(req);
                 commandBuffer.AddComponent(req, new SendRpcCommandRequest { TargetConnection = ent });
-            }).Run();
+            };
             commandBuffer.Playback(EntityManager);
         }
     }
@@ -73,27 +69,24 @@ namespace Samples.MultyPhysicsWorld
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             var networkIdFromEntity = GetComponentLookup<NetworkId>(true);
             var spawner = SystemAPI.GetSingleton<PhysicsSpawner>();
-            Entities
-                .WithReadOnly(networkIdFromEntity).ForEach((
-                Entity reqEnt,
-                in GoInGameRequest req,
-                in ReceiveRpcCommandRequest reqSrc) =>
+            foreach(var (reqSrc, reqEnt) in SystemAPI.Query<RefRO<ReceiveRpcCommandRequest>>()
+                        .WithAll<GoInGameRequest, ReceiveRpcCommandRequest>().WithEntityAccess())
             {
-                commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.SourceConnection);
+                commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
                 commandBuffer.DestroyEntity(reqEnt);
 
                 var entity = commandBuffer.Instantiate(spawner.prefab);
                 //Add the entity to the connection linked entity group so when connection is destroyed, ghost are too
-                var linkedEntityGroups = commandBuffer.AddBuffer<LinkedEntityGroup>(reqSrc.SourceConnection);
+                var linkedEntityGroups = commandBuffer.AddBuffer<LinkedEntityGroup>(reqSrc.ValueRO.SourceConnection);
                 linkedEntityGroups.Add(entity);
 
                 commandBuffer.AddBuffer<PlayerInput>(entity);
 
                 commandBuffer.SetComponent(entity, LocalTransform.FromPosition(new float3(0.0f, 1.0f, 0.0f)));
 
-                commandBuffer.SetComponent(entity, new GhostOwner { NetworkId = networkIdFromEntity[reqSrc.SourceConnection].Value });
-                commandBuffer.SetComponent(reqSrc.SourceConnection, new CommandTarget { targetEntity = entity });
-            }).Run();
+                commandBuffer.SetComponent(entity, new GhostOwner { NetworkId = networkIdFromEntity[reqSrc.ValueRO.SourceConnection].Value });
+                commandBuffer.SetComponent(reqSrc.ValueRO.SourceConnection, new CommandTarget { targetEntity = entity });
+            };
             commandBuffer.Playback(EntityManager);
         }
     }
@@ -126,21 +119,21 @@ namespace Samples.MultyPhysicsWorld
                 var localPlayerId = SystemAPI.GetSingleton<NetworkId>().Value;
                 var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
                 var connection = SystemAPI.GetSingletonEntity<CommandTarget>();
-                Entities
-                    .WithNone<PlayerInput>()
-                    .ForEach((Entity ent, in GhostOwner ghostOwner) =>
+                foreach(var (ghostOwner, ent) in SystemAPI.Query<RefRO<GhostOwner>>()
+                            .WithNone<PlayerInput>()
+                            .WithEntityAccess())
                 {
-                    if (ghostOwner.NetworkId == localPlayerId)
+                    if (ghostOwner.ValueRO.NetworkId == localPlayerId)
                     {
                         commandBuffer.AddBuffer<PlayerInput>(ent);
                         commandBuffer.SetComponent(connection, new CommandTarget {targetEntity = ent});
                     }
-                }).Run();
+                }
                 commandBuffer.Playback(EntityManager);
                 return;
             }
             var input = default(PlayerInput);
-            input.Tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
+            input.Tick = SystemAPI.GetSingleton<NetworkTime>().InputTargetTick;
             if (Input.GetKey(KeyCode.LeftArrow))
                 input.horizontal -= 1;
             if (Input.GetKey(KeyCode.RightArrow))
@@ -161,6 +154,36 @@ namespace Samples.MultyPhysicsWorld
     [UpdateBefore(typeof(PhysicsInitializeGroup))]
     public partial class CubeFlySystem : SystemBase
     {
+        [WithAll(typeof(Simulate))]
+        partial struct CubeFlyJob : IJobEntity
+        {
+            public NetworkTick predictTick;
+            public float deltaTime;
+
+            void Execute(ref PhysicsVelocity physicsVelocity,
+                ref LocalTransform transform,
+                in PhysicsMass physicsMass,
+                in DynamicBuffer<PlayerInput> playerInputs)
+            {
+                if(!playerInputs.GetDataAtTick(predictTick, out var input))
+                    return;
+                var force = new float3
+                {
+                    x = input.horizontal,
+                    y = 0f,
+                    z = input.vertical,
+                };
+                force = math.normalizesafe(force);
+                force *= 10.0f;
+                var impulse = force * deltaTime;
+                var angularInpulse = new float3(0f, input.rotation, 0f) * deltaTime;
+                physicsVelocity.ApplyLinearImpulse(physicsMass, impulse);
+                physicsVelocity.ApplyAngularImpulse(physicsMass, angularInpulse);
+                //force the cube to be at 1 mt from the ground
+                //translation.Value.y = 0.7f + 0.1f*math.sin((float)(math.PI * predictTick * 1.0f/60f));
+            }
+        }
+
         protected override void OnCreate()
         {
             RequireForUpdate<PhysicsSpawner>();
@@ -171,35 +194,10 @@ namespace Samples.MultyPhysicsWorld
         {
             var deltaTime = SystemAPI.Time.DeltaTime;
             var predictTick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
-            var isServer = World.IsServer();
-            Entities
-                .WithAll<Simulate>()
-                .ForEach((Entity playerEntity,
-                    ref PhysicsVelocity physicsVelocity,
-
-                    ref LocalTransform transform,
-
-                    in PhysicsMass physicsMass,
-                    in DynamicBuffer<PlayerInput> playerInputs) =>
-                {
-                    if(!playerInputs.GetDataAtTick(predictTick, out var input))
-                        return;
-
-                    var force = new float3
-                    {
-                        x = input.horizontal,
-                        y = 0f,
-                        z = input.vertical,
-                    };
-                    force = math.normalizesafe(force);
-                    force *= 10.0f;
-                    var impulse = force * deltaTime;
-                    var angularInpulse = new float3(0f, input.rotation, 0f) * deltaTime;
-                    physicsVelocity.ApplyLinearImpulse(physicsMass, impulse);
-                    physicsVelocity.ApplyAngularImpulse(physicsMass, angularInpulse);
-                    //force the cube to be at 1 mt from the ground
-                    //translation.Value.y = 0.7f + 0.1f*math.sin((float)(math.PI * predictTick * 1.0f/60f));
-                }).Schedule();
+            new CubeFlyJob() {
+                predictTick = predictTick,
+                deltaTime = deltaTime
+            }.Schedule();
         }
     }
 
@@ -222,25 +220,38 @@ namespace Samples.MultyPhysicsWorld
             RequireForUpdate<ParticleEmitter>();
         }
 
-        protected override void OnUpdate()
+        partial struct UpdateAge : IJobEntity
         {
-            float deltaTime = SystemAPI.Time.DeltaTime;
-            var commandBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter();
-            var elapsedTime = SystemAPI.Time.ElapsedTime;
-            m_TransformLookup.Update(this);
+            void Execute()
+            {
 
-            Entities.ForEach((Entity entity, int nativeThreadIndex, ref ParticleAge age) =>
+            }
+        }
+
+        partial struct UpdateParticles : IJobEntity
+        {
+            public double elapsedTime;
+            public EntityCommandBuffer.ParallelWriter commandBuffer;
+            [NativeSetThreadIndex] public int nativeThreadIndex;
+
+            void Execute(Entity entity, ref ParticleAge age)
             {
                 if (age.deadTime < elapsedTime)
+                {
                     commandBuffer.DestroyEntity(nativeThreadIndex, entity);
-            }).ScheduleParallel();
-            m_Barrier.AddJobHandleForProducer(Dependency);
+                }
+            }
+        }
 
-            var transformLookup = m_TransformLookup;
-            Entities
-                .WithReadOnly(transformLookup)
-                .ForEach((Entity entity, int nativeThreadIndex, ref ParticleEmitter emitter, in LocalTransform transform) =>
+        partial struct EmitParticles : IJobEntity
+        {
+            public float deltaTime;
+            public double elapsedTime;
+            public EntityCommandBuffer.ParallelWriter commandBuffer;
+            [ReadOnly] public ComponentLookup<LocalTransform> transformLookup;
+            [NativeSetThreadIndex] public int nativeThreadIndex;
 
+            void Execute(ref ParticleEmitter emitter, in LocalTransform transform)
             {
                 emitter.accumulator += deltaTime * emitter.emissionRate + 0.5f;
                 int particles = (int) emitter.accumulator;
@@ -262,7 +273,27 @@ namespace Samples.MultyPhysicsWorld
                         pos, transform.Rotation, originalScale.Scale));
 
                 }
-            }).Schedule();
+            }
+        }
+
+        protected override void OnUpdate()
+        {
+            float deltaTime = SystemAPI.Time.DeltaTime;
+            var commandBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter();
+            var elapsedTime = SystemAPI.Time.ElapsedTime;
+            m_TransformLookup.Update(this);
+            new UpdateParticles
+            {
+                elapsedTime = elapsedTime,
+                commandBuffer = commandBuffer,
+            }.ScheduleParallel();
+            new EmitParticles()
+            {
+                deltaTime = deltaTime,
+                elapsedTime = elapsedTime,
+                commandBuffer = commandBuffer,
+                transformLookup = m_TransformLookup
+            }.Schedule();
             m_Barrier.AddJobHandleForProducer(Dependency);
         }
     }

@@ -41,12 +41,13 @@ public partial class NetcodeClientLevelSync : SystemBase
     protected override void OnCreate()
     {
         RequireForUpdate<NetworkId>();
-        EntityManager.CreateEntity(typeof(LevelSyncStateComponent));
+        if (!World.IsHost())
+            EntityManager.CreateEntity(typeof(LevelSyncStateComponent));
     }
 
     protected override void OnUpdate()
     {
-        var connectionEntity = SystemAPI.GetSingletonEntity<NetworkId>();
+        var connectionEntity = SystemAPI.GetSingletonEntity<LocalConnection>(); // getting by NetworkId still works for binary world, but for single world host, now you have multiple network IDs when other players connect
         var levelState = SystemAPI.GetSingleton<LevelSyncStateComponent>();
         if (!SystemAPI.QueryBuilder().WithAll<ClientLoadLevel, ReceiveRpcCommandRequest>().Build().IsEmptyIgnoreFilter)
         {
@@ -107,14 +108,14 @@ public partial class NetcodeServerLevelSync : SystemBase
         var connections = GetComponentLookup<NetworkId>();
         var loadingInProgress = GetComponentLookup<LevelLoadingInProgress>();
         // TODO: Level number not being used for anything atm
-        Entities.ForEach((Entity entity, in ClientReady level, in ReceiveRpcCommandRequest req) =>
+        foreach (var (level, req, entity) in SystemAPI.Query<ClientReady, ReceiveRpcCommandRequest>().WithEntityAccess())
         {
             UnityEngine.Debug.Log($"Client {connections[req.SourceConnection].Value} finished loading {level.LevelIndex}.");
             ecb.AddComponent<LevelLoadingDone>(req.SourceConnection);
             if (!loadingInProgress.HasComponent(req.SourceConnection))
                 UnityEngine.Debug.LogError("Ready client was never marked as starting level loading");
             ecb.DestroyEntity(entity);
-        }).Run();
+        }
         ecb.Playback(EntityManager);
 
         var readyCount = m_ClientsReadyQuery.CalculateEntityCount();
@@ -142,11 +143,11 @@ public partial class NetcodeServerLevelSync : SystemBase
             SystemAPI.SetSingleton(levelState);
             ecb = new EntityCommandBuffer(Allocator.Temp);
             FixedString64Bytes world = World.Name;
-            Entities.WithAll<NetworkId>().ForEach((Entity entity) =>
+            foreach (var (_, entity) in SystemAPI.Query<NetworkId>().WithEntityAccess())
             {
                 ecb.RemoveComponent<LevelLoadingInProgress>(entity);
                 ecb.RemoveComponent<LevelLoadingDone>(entity);
-            }).Run();
+            }
             ecb.Playback(EntityManager);
         }
     }

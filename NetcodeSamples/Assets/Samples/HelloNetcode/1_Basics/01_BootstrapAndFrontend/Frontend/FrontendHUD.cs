@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Entities;
@@ -31,7 +32,11 @@ namespace Samples.HelloNetcode
             }
 
             foreach (var world in clientServerWorlds)
+            {
+                Debug.Log($"Disposing World {world.Name}");
                 world.Dispose();
+            }
+
 
             if (string.IsNullOrEmpty(Frontend.OldFrontendWorldName))
                 Frontend.OldFrontendWorldName = "DefaultWorld";
@@ -51,7 +56,7 @@ namespace Samples.HelloNetcode
 
             // We must always have an event system (DOTS-7177), but some scenes will already have one,
             // so we only enable ours if we can't find someone else's.
-            if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
                 m_EventSystem.gameObject.SetActive(true);
         }
     }
@@ -63,17 +68,23 @@ namespace Samples.HelloNetcode
     {
         public FrontendHUD UIBehaviour;
         string m_PingText;
+        DateTime m_LastDisconnectTime;
 
         protected override void OnUpdate()
         {
             CompleteDependency();
             if (!SystemAPI.TryGetSingletonEntity<NetworkStreamConnection>(out var connectionEntity))
             {
-                UIBehaviour.ConnectionStatus = "Not connected!";
+                if (m_LastDisconnectTime == default)
+                {
+                    m_LastDisconnectTime = DateTime.Now;
+                }
+                UIBehaviour.ConnectionStatus = $"Not connected! [{DateTime.Now.Subtract(m_LastDisconnectTime)}]";
                 m_PingText = default;
             }
             else
             {
+                m_LastDisconnectTime = default;
                 var connection = EntityManager.GetComponentData<NetworkStreamConnection>(connectionEntity);
                 var address = SystemAPI.GetSingletonRW<NetworkStreamDriver>().ValueRO.GetRemoteEndPoint(connection).Address;
                 if (EntityManager.HasComponent<NetworkId>(connectionEntity))

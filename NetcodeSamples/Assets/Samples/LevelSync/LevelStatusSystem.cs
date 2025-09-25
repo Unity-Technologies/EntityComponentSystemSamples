@@ -49,21 +49,21 @@ public partial class LevelStatusSystem : SystemBase
         {
             FixedString512Bytes inGame = "";
             bool syncOn = false;
-            Entities.ForEach((Entity connEntity, in NetworkId netId) =>
+            foreach(var (netId, connEntity) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess())
             {
                 if (SystemAPI.HasComponent<NetworkStreamInGame>(connEntity))
                 {
-                    var appendMe = FixedString.Format("[{0}]:ON", netId.Value);
+                    var appendMe = FixedString.Format("[{0}]:ON", netId.ValueRO.Value);
                     inGame.Append(appendMe);
                     syncOn = true;
                 }
                 else
                 {
-                    var appendMe = FixedString.Format("[{0}]:OFF", netId.Value);
+                    var appendMe = FixedString.Format("[{0}]:OFF", netId.ValueRO.Value);
                     inGame.Append(appendMe);
                     syncOn = false;
                 }
-            }).Run();
+            }
             m_StatusText.text += inGame;
             // Flip toggle to off if it's is on currently but sync is disabled
             if (syncOn)
@@ -88,7 +88,7 @@ public partial class LevelStatusSystem : SystemBase
         m_StatusText.text += ": ";
 
         FixedString512Bytes levels = "";
-        Entities.WithoutBurst().ForEach((Entity sceneEntity, in SceneReference subscene) =>
+        foreach (var (subscene, sceneEntity) in SystemAPI.Query<SceneReference>().WithEntityAccess())
         {
             if (SceneSystem.IsSceneLoaded(World.Unmanaged, sceneEntity))
             {
@@ -99,7 +99,7 @@ public partial class LevelStatusSystem : SystemBase
                     levels.Append(debugName);
                 levels += " ";
             }
-        }).Run();
+        }
         m_StatusText.text += levels;
     }
 }

@@ -104,8 +104,8 @@ namespace Samples.HelloNetcode
                         if (!AuthenticationService.Instance.IsSignedIn)
                         {
                             m_SetupTask = AuthenticationService.Instance.SignInAnonymouslyAsync();
-                            m_ClientStatus = ClientStatus.WaitForSignIn;
                         }
+                        m_ClientStatus = ClientStatus.WaitForSignIn;
                     }
                     return;
                 }
@@ -144,11 +144,15 @@ namespace Samples.HelloNetcode
         {
             // Collect and convert the Relay data from the join response
             var allocation = joinTask.Result;
-
+#if !UNITY_WEBGL
+            var connectionType = "dtls";
+#else
+            var connectionType = "wss";
+#endif
             // Format the server data, based on desired connectionType
             try
             {
-                relayClientData = PlayerRelayData(allocation);
+                relayClientData = PlayerRelayData(allocation, connectionType);
             }
             catch (Exception e)
             {
@@ -182,19 +186,11 @@ namespace Samples.HelloNetcode
                 throw new Exception($"endpoint for connectionType {connectionType} not found");
             }
 
-            // Prepare the server endpoint using the Relay server IP and port
-            var serverEndpoint = NetworkEndpoint.Parse(endpoint.Host, (ushort)endpoint.Port);
-
-            // UTP uses pointers instead of managed arrays for performance reasons, so we use these helper functions to convert them
-            var allocationIdBytes = RelayAllocationId.FromByteArray(allocation.AllocationIdBytes);
-            var connectionData = RelayConnectionData.FromByteArray(allocation.ConnectionData);
-            var hostConnectionData = RelayConnectionData.FromByteArray(allocation.HostConnectionData);
-            var key = RelayHMACKey.FromByteArray(allocation.Key);
-
             // Prepare the Relay server data and compute the nonce values
             // A player joining the host passes its own connectionData as well as the host's
-            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationIdBytes, ref connectionData,
-                ref hostConnectionData, ref key, connectionType == "dtls");
+            var relayServerData = new RelayServerData(endpoint.Host, (ushort)endpoint.Port,
+                allocation.AllocationIdBytes, allocation.ConnectionData, allocation.HostConnectionData, allocation.Key,
+                endpoint.Secure, connectionType == "wss");
 
             return relayServerData;
         }

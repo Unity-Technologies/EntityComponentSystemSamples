@@ -11,15 +11,23 @@ public partial class CubeSystem : SystemBase
         RequireForUpdate<NetworkStreamInGame>();
     }
 
-    protected override void OnUpdate()
+    [WithAll(typeof(CubeTagComponent))]
+    partial struct CubeJob : IJobEntity
     {
-        var deltaTime = SystemAPI.Time.DeltaTime;
-
-        Entities.WithAll<CubeTagComponent>().ForEach((Entity entity, ref LocalTransform transform) =>
+        public float deltaTime;
+        public void Execute(Entity entity, ref LocalTransform transform)
         {
             transform.Rotation = math.mul(transform.Rotation, quaternion.RotateZ(math.radians(100 * deltaTime)));
 
+        }
+    }
 
-        }).Schedule();
+    protected override void OnUpdate()
+    {
+        float deltaTime = SystemAPI.Time.DeltaTime;
+        Dependency = new CubeJob()
+        {
+            deltaTime = deltaTime,
+        }.Schedule(Dependency);
     }
 }
