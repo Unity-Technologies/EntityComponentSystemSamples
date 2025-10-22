@@ -113,8 +113,8 @@ namespace Asteroids.Server
                 if (m_AsteroidPrefab == Entity.Null || m_ShipPrefab == Entity.Null)
                     return;
 
-                m_AsteroidRadius = state.EntityManager.GetComponentData<CollisionSphereComponent>(m_AsteroidPrefab).radius;
-                m_ShipRadius = state.EntityManager.GetComponentData<CollisionSphereComponent>(m_ShipPrefab).radius;
+                m_AsteroidRadius = settings.levelData.asteroidCollisionRadius;
+                m_ShipRadius = settings.levelData.shipCollisionRadius;
             }
 
             var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
@@ -125,34 +125,37 @@ namespace Asteroids.Server
             networkIdFromEntity.Update(ref state);
             localTransformLookup.Update(ref state);
 
-            var dynamicAsteroidEntities = m_DynamicAsteroidsQuery.ToEntityListAsync(state.WorldUpdateAllocator,
-                out var asteroidEntitiesHandle);
-            var dynamicAsteroidTransforms = m_DynamicAsteroidsQuery.ToComponentDataListAsync<LocalTransform>(state.WorldUpdateAllocator,
-                out var asteroidTranslationsHandle);
+            // Optimization: Prevent gathering hundreds of thousands of asteroids, which kills the main thread.
+            // Note: This will cause the ship to potentially spawn inside asteroids, but the bigger map size
+            // should make this a low repro event.
+            // TODO - We could destroy all asteroids chunks within your spawn tile instead?
+            int currentAsteroidsCount = m_DynamicAsteroidsQuery.CalculateEntityCountWithoutFiltering() + m_StaticAsteroidsQuery.CalculateEntityCountWithoutFiltering();
+            NativeList<Entity> dynamicAsteroidEntities = default;
+            NativeList<LocalTransform> dynamicAsteroidTransforms = default;
+            NativeList<StaticAsteroid> staticAsteroids = default;
+            NativeList<Entity> staticAsteroidEntities = default;
+            var tooManyEntitiesToGather = currentAsteroidsCount > 10_000;
+            if (tooManyEntitiesToGather)
+            {
+                dynamicAsteroidEntities = new(0, state.WorldUpdateAllocator);
+                dynamicAsteroidTransforms = new(0, state.WorldUpdateAllocator);
+                staticAsteroids = new(0, state.WorldUpdateAllocator);
+                staticAsteroidEntities = dynamicAsteroidEntities;
+            }
+            else
+            {
+                dynamicAsteroidEntities = m_DynamicAsteroidsQuery.ToEntityListAsync(state.WorldUpdateAllocator, out var asteroidEntitiesHandle);
+                dynamicAsteroidTransforms = m_DynamicAsteroidsQuery.ToComponentDataListAsync<LocalTransform>(state.WorldUpdateAllocator, out var asteroidTranslationsHandle);
+                staticAsteroids = m_StaticAsteroidsQuery.ToComponentDataListAsync<StaticAsteroid>(state.WorldUpdateAllocator, out var staticAsteroidsHandle);
+                staticAsteroidEntities = m_StaticAsteroidsQuery.ToEntityListAsync(state.WorldUpdateAllocator, out var staticAsteroidEntitiesHandle);
+                state.Dependency = JobHandle.CombineDependencies(asteroidEntitiesHandle, asteroidTranslationsHandle,
+                    JobHandle.CombineDependencies(staticAsteroidsHandle, staticAsteroidEntitiesHandle, state.Dependency));
+            }
 
-            var staticAsteroids = m_StaticAsteroidsQuery.ToComponentDataListAsync<StaticAsteroid>(state.WorldUpdateAllocator,
-                out var staticAsteroidsHandle);
-            var staticAsteroidEntities = m_StaticAsteroidsQuery.ToEntityListAsync(state.WorldUpdateAllocator,
-                out var staticAsteroidEntitiesHandle);
-            var shipTransforms = m_ShipQuery.ToComponentDataListAsync<LocalTransform>(state.WorldUpdateAllocator,
-                out var shipTranslationsHandle);
+            var shipTransforms = m_ShipQuery.ToComponentDataListAsync<LocalTransform>(state.WorldUpdateAllocator, out var shipTranslationsHandle);
+            var level = m_LevelQuery.ToComponentDataListAsync<LevelComponent>(state.WorldUpdateAllocator, out var levelHandle);
 
-            var level = m_LevelQuery.ToComponentDataListAsync<LevelComponent>(state.WorldUpdateAllocator,
-                out var levelHandle);
-
-            var jobHandleIt = 0;
-            var jobHandles = new NativeArray<JobHandle>(6, Allocator.Temp);
-            jobHandles[jobHandleIt++] = asteroidEntitiesHandle;
-            jobHandles[jobHandleIt++] = asteroidTranslationsHandle;
-            jobHandles[jobHandleIt++] = staticAsteroidsHandle;
-            jobHandles[jobHandleIt++] = staticAsteroidEntitiesHandle;
-            jobHandles[jobHandleIt++] = shipTranslationsHandle;
-            jobHandles[jobHandleIt] = levelHandle;
-
-            var combinedDependencies = JobHandle.CombineDependencies(jobHandles);
-            jobHandles.Dispose();
-
-            state.Dependency = JobHandle.CombineDependencies(state.Dependency, combinedDependencies);
+            state.Dependency = JobHandle.CombineDependencies(shipTranslationsHandle, levelHandle, state.Dependency);
 
             var tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
 
@@ -200,9 +203,7 @@ namespace Asteroids.Server
             var spawnAsteroids = new SpawnAllAsteroids
             {
                 ecb = ecb,
-                dynamicAsteroidEntities = dynamicAsteroidEntities,
-                staticAsteroidEntities = staticAsteroidEntities,
-                shipTransformsList = shipTransformsList,
+                shipTransforms = shipTransformsList.AsDeferredJobArray(),
                 localTransformLookup = localTransformLookup,
                 level = level,
                 random = randomReference,
@@ -210,6 +211,7 @@ namespace Asteroids.Server
                 asteroidPrefab = m_AsteroidPrefab,
                 asteroidLevelPadding = asteroidLevelPadding,
                 minShipAsteroidSpawnDistance = minShipAsteroidSpawnDistance,
+                currentAsteroidsCount = currentAsteroidsCount,
                 numAsteroids = settings.levelData.numAsteroids,
                 asteroidVelocity = settings.levelData.asteroidVelocity,
                 staticAsteroidOptimization = settings.levelData.staticAsteroidOptimization ? 1: 0
@@ -312,9 +314,7 @@ namespace Asteroids.Server
         struct SpawnAllAsteroids : IJob
         {
             public EntityCommandBuffer ecb;
-            [ReadOnly] public NativeList<Entity> dynamicAsteroidEntities;
-            [ReadOnly] public NativeList<Entity> staticAsteroidEntities;
-            [ReadOnly] public NativeList<LocalTransform> shipTransformsList;
+            [ReadOnly] public NativeArray<LocalTransform> shipTransforms;
             [ReadOnly] public ComponentLookup<LocalTransform> localTransformLookup;
             [ReadOnly] public NativeList<LevelComponent> level;
 
@@ -323,20 +323,20 @@ namespace Asteroids.Server
             public Entity asteroidPrefab;
             public float asteroidLevelPadding;
             public float minShipAsteroidSpawnDistance;
+            public int currentAsteroidsCount;
             public int numAsteroids;
             public float asteroidVelocity;
             public int staticAsteroidOptimization;
 
             public void Execute()
             {
-                var currentNumAsteroids = staticAsteroidEntities.Length + dynamicAsteroidEntities.Length;
                 var rand = random.Value;
-                for (int i = currentNumAsteroids; i < numAsteroids; ++i)
+                for (int i = currentAsteroidsCount; i < numAsteroids; ++i)
                 {
                     // Spawn asteroid at random pos, assuming we can find a valid one that isn't under a ship.
                     // Don't treat this as an error (because it may happen occasionally by chance, or if the map is packed with ships).
                     // Instead, just stop attempting to spawn any more this frame.
-                    if (!TryFindSpawnPos(ref rand, shipTransformsList.AsArray(), level[0], asteroidLevelPadding, minShipAsteroidSpawnDistance, out var validAsteroidPos))
+                    if (!TryFindSpawnPos(ref rand, shipTransforms, level[0], asteroidLevelPadding, minShipAsteroidSpawnDistance, out var validAsteroidPos))
                         break;
 
                     var angle = rand.NextFloat(-0.0f, 359.0f);
@@ -386,6 +386,7 @@ namespace Asteroids.Server
                 }
                 if(isValidLocation)
                     return true;
+                minSpawnDistanceSqr *= 0.8f; // Reduce size & retry.
             }
             return false;
         }

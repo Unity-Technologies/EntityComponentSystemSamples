@@ -1,5 +1,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode.HostMigration;
 using Unity.Transforms;
 
 namespace Samples.HelloNetcode
@@ -30,6 +31,13 @@ namespace Samples.HelloNetcode
 
         protected override void OnUpdate()
         {
+            // No need to spawn anything if this is running during a host migration
+            if (SystemAPI.HasSingleton<HostMigrationInProgress>())
+            {
+                Enabled = false;
+                return;
+            }
+
             EntityCommandBuffer ecb = m_CommandBuffer.CreateCommandBuffer();
             BarrelSetup setup = SystemAPI.GetSingleton<BarrelSetup>();
 

@@ -1,7 +1,9 @@
 using System;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
-using UnityEngine.Serialization;
+using UnityEngine;
 
 /// <summary>Serializable attribute ensures the Inspector can expose fields as this struct is a field inside ServerSettings.</summary>
 [Serializable]
@@ -12,12 +14,15 @@ public struct LevelComponent : IComponentData
 
     public float shipForwardForce;
     public float shipRotationRate;
+    public float shipCollisionRadius;
 
     public float bulletVelocity;
+    public float bulletCollisionRadius;
     /// <summary>Value of 0 implies one bullet per simulation tick. ROF cannot go higher than that.</summary>
     public uint bulletRofCooldownTicks;
 
     public float asteroidVelocity;
+    public float asteroidCollisionRadius;
     public int numAsteroids;
 
     public bool asteroidsDamageShips;
@@ -33,7 +38,13 @@ public struct LevelComponent : IComponentData
     /// </remarks>
     public int relevancyRadius;
     public bool staticAsteroidOptimization;
+
     public bool enableGhostImportanceScaling;
+    public GhostDistanceData distanceImportanceTileConfig;
+
+    /// <summary>Distributes the CollisionSystem work over N ticks (1 = OFF).</summary>
+    [Min(1)]
+    public uint collisionSystemRoundRobinSegments;
 
     public static LevelComponent Default = new LevelComponent
     {
@@ -41,20 +52,31 @@ public struct LevelComponent : IComponentData
         levelHeight = 2048,
 
         shipForwardForce = 50,
-        shipRotationRate = 100,
+        shipRotationRate = 140,
+        shipCollisionRadius = 10,
 
         bulletVelocity = 500,
-        bulletRofCooldownTicks = 10,
+        bulletCollisionRadius = 5,
+        bulletRofCooldownTicks = 3,
 
         asteroidVelocity = 10,
-        numAsteroids = 200,
+        asteroidCollisionRadius = 15,
+        numAsteroids = 800,
 
         asteroidsDamageShips = true,
-        shipPvP = false,
-        asteroidsDestroyedOnShipContact = false,
+        shipPvP = true,
+        asteroidsDestroyedOnShipContact = true,
         bulletsDestroyedOnContact = true,
 
-        relevancyRadius = 0,
+        enableGhostImportanceScaling = true,
+        distanceImportanceTileConfig = new GhostDistanceData
+        {
+            TileSize = new int3(512, 512, 10240),
+            TileCenter = new int3(0, 0, 0),
+            TileBorderWidth = new float3(1f),
+        },
+        relevancyRadius = 1400,
         staticAsteroidOptimization = false,
+        collisionSystemRoundRobinSegments = 1,
     };
 }

@@ -157,17 +157,34 @@ MonoBehaviour:
     levelHeight: 2048
     shipForwardForce: 50
     shipRotationRate: 140
+    shipCollisionRadius: 10
     bulletVelocity: 500
+    bulletCollisionRadius: 5
     bulletRofCooldownTicks: 3
     asteroidVelocity: 10
+    asteroidCollisionRadius: 15
     numAsteroids: 800
     asteroidsDamageShips: 1
     shipPvP: 1
     asteroidsDestroyedOnShipContact: 1
     bulletsDestroyedOnContact: 1
-    relevancyRadius: 1200
+    relevancyRadius: 1400
     staticAsteroidOptimization: 1
     enableGhostImportanceScaling: 1
+    distanceImportanceTileConfig:
+      TileSize:
+        x: 512
+        y: 512
+        z: 10240
+      TileCenter:
+        x: 0
+        y: 0
+        z: 0
+      TileBorderWidth:
+        x: 1
+        y: 1
+        z: 1
+    collisionSystemRoundRobinSegments: 1
 --- !u!4 &83804743
 Transform:
   m_ObjectHideFlags: 0

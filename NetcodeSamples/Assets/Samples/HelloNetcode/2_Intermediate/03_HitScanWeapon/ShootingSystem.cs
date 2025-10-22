@@ -30,7 +30,8 @@ namespace Samples.HelloNetcode
             if (!networkTime.IsFirstTimeFullyPredictingTick)
                 return;
 
-            foreach (var (character, interpolationDelay, hitComponent) in SystemAPI.Query<CharacterAspect, RefRO<CommandDataInterpolationDelay>, RefRW<Hit>>().WithAll<Simulate>())
+            foreach (var (character, interpolationDelay, hitComponent)
+                     in SystemAPI.Query<CharacterAspect, RefRO<CommandDataInterpolationDelay>, RefRW<Hit>>().WithAll<Simulate>())
             {
                 if (character.Input.SecondaryFire.IsSet)
                 {

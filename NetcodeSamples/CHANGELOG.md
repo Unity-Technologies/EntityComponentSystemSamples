@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.9.1] - 2025-10-11
+
+### Fixed
+- Issue in host migration sample where the migration update data didn't update/compress properly when hosting a game, leaving and then re-hosting.
+- Issue in connection approval sample when going through relay.
+
 ## [1.9.0] - 2025-09-13
 
 ### Added
@@ -15,6 +21,9 @@
 
 #### Fixed
 - Issue where reconnected player were not detected properly and got duplicate spawns in the `PlayerSpawn` sample and those who derive from it.
+- Issue with double amount of barrels spawning in `Importance` sample after a migration.
+- Possible crash when waiting for the relay join code to arrive (server world can disappear).
+- Issue with UTC time being used in lobby migration data but not in local time
 
 ## [1.8.0] - 2025-08-17
 

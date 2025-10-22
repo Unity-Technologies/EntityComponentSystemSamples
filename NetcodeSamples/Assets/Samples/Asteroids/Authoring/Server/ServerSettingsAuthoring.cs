@@ -5,7 +5,7 @@ using UnityEngine;
 public class ServerSettingsAuthoring : MonoBehaviour
 {
     [RegisterBinding(typeof(ServerSettings), "levelData")]
-    public LevelComponent levelData;
+    public LevelComponent levelData = LevelComponent.Default;
 
     class Baker : Baker<ServerSettingsAuthoring>
     {

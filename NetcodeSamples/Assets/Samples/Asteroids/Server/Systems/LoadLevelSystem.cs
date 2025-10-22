@@ -41,12 +41,7 @@ namespace Asteroids.Server
                 }
                 else
                 {
-                    var gridSingleton = state.EntityManager.CreateSingleton(new GhostDistanceData
-                    {
-                        TileSize = new int3(512, 512, 1024),
-                        TileCenter = new int3(0, 0, 0),
-                        TileBorderWidth = new float3(16f, 16f, 16f),
-                    });
+                    var gridSingleton = state.EntityManager.CreateSingleton(settings.levelData.distanceImportanceTileConfig);
                     state.EntityManager.AddComponentData(gridSingleton, new GhostImportance
                     {
                         BatchScaleImportanceFunction = m_BatchScaleFunction,

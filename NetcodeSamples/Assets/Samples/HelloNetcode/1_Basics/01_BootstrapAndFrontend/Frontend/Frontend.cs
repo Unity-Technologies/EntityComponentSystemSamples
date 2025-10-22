@@ -28,6 +28,12 @@ namespace Samples.HelloNetcode
         /// </summary>
         internal static string OldFrontendWorldName = string.Empty;
 
+        /// <summary>
+        /// This is set to true by <see cref="GetAndSaveSceneSelection"/> when the ConnectionApproval scene is loaded. Can
+        /// then be set on the network driver before calling <see cref="NetworkDriver.Listen"/> to enable the feature as appropriate.
+        /// </summary>
+        protected bool m_RequireConnectionApproval;
+
         static string LastPlayedSampleScene
         {
             get => PlayerPrefs.GetString(k_LastPlayedSampleSceneKey, null);
@@ -77,6 +83,7 @@ namespace Samples.HelloNetcode
             NetworkEndpoint ep = NetworkEndpoint.AnyIpv4.WithPort(port);
             {
                 using var drvQuery = server.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
+                drvQuery.GetSingletonRW<NetworkStreamDriver>().ValueRW.RequireConnectionApproval = m_RequireConnectionApproval;
                 drvQuery.GetSingletonRW<NetworkStreamDriver>().ValueRW.Listen(ep);
             }
 
@@ -97,6 +104,9 @@ namespace Samples.HelloNetcode
             // Check whether Samples(0) or HelloNetcodeSamples(1) are selected in the sample picker
             LastSamplePickerDropdownValue = SamplePicker.value;
             string sceneName = Sample.options[Sample.value].text;
+            m_RequireConnectionApproval = sceneName.Contains("ConnectionApproval", StringComparison.OrdinalIgnoreCase);
+            if (m_RequireConnectionApproval)
+                Debug.Log($"[Frontend] Enabling connection approval");
             LastPlayedSampleScene = sceneName;
             PlayerPrefs.Save();
             return sceneName;

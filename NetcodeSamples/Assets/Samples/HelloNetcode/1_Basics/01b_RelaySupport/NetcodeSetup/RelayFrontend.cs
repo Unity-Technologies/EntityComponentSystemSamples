@@ -278,6 +278,7 @@ namespace Samples.HelloNetcode
 
             using var serverDriverQuery = server.EntityManager.CreateEntityQuery(typeof(NetworkStreamDriver));
             var serverDriver = serverDriverQuery.GetSingletonRW<NetworkStreamDriver>();
+            serverDriver.ValueRW.RequireConnectionApproval = m_RequireConnectionApproval;
             serverDriver.ValueRW.Listen(NetworkEndpoint.AnyIpv4);
             var ipcLocalEndPoint = serverDriver.ValueRW.DriverStore.GetDriverInstanceRO(1).driver.GetLocalEndpoint();
 
