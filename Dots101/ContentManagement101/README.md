@@ -16,6 +16,7 @@ This sample project demonstrates the basic APIs for Weak References you need for
 
 
 For more detailed information, refer to the Entities documentation on [Content management](https://docs.unity3d.com/Packages/com.unity.entities@latest/index.html?subfolder=/manual/content-management.html).
+
 ---
 
 | Section | Description |
@@ -76,7 +77,7 @@ The Content Management API allows you to reference assets that are not included 
 ## Weakly referencing an object
 
 The *WeakObjectLoading* scene demonstrates how to load objects through weak references. When you play the scene, a system loads the weakly referenced meshes and materials from local path.<br>
-This is done by calling `RuntimeContentSystem.LoadContentCatalog(null, null, null, true)` ([see WeakObjectLoadingSystem.cs](/Assets/1.%20WeakObjectLoading/WeakObjectLoadingSystem.cs)), which downloads all asset references from the `StreamingAssets` folder at runtime and creates rendered entities after loading completes.
+This is done by calling `RuntimeContentSystem.LoadContentCatalog(null, null, null, true)` ([see WeakObjectLoadingSystem.cs](Assets/1.%20WeakObjectLoading/WeakObjectLoadingSystem.cs)), which downloads all asset references from the `StreamingAssets` folder at runtime and creates rendered entities after loading completes.
 
 To weakly reference objects like meshes and materials, we need either:
 
@@ -85,7 +86,7 @@ To weakly reference objects like meshes and materials, we need either:
 
 In general, `WeakObjectReference<T>` is preferred except in cases where we need a weak reference that can vary the type of referenced object. This sample demonstrates use of both.
 
-In the `WeakObjectLoading.unity` scene, a tree GameObject and house GameObject both have the [WeakRenderedObjectAuthoring](/Assets/1.%20WeakObjectLoading/WeakRenderedObjectAuthoring.cs) component. If the authoring component's `UseUntypedId` flag is set, its baker adds:
+In the `WeakObjectLoading.unity` scene, a tree GameObject and house GameObject both have the [WeakRenderedObjectAuthoring](Assets/1.%20WeakObjectLoading/WeakRenderedObjectAuthoring.cs) component. If the authoring component's `UseUntypedId` flag is set, its baker adds:
 
 - `WeakMeshUntyped`, an `IComponentData` storing a `UntypedWeakReferenceId` for a mesh
 - `WeakMaterialUntyped`, an `IBufferElementData` storing a `UntypedWeakReferenceId` for a material
@@ -97,7 +98,7 @@ If the `UseUntypedId` flag is unset, the baker instead adds:
 
 > NOTE: The materials are stored in a dynamic buffer because a single rendered mesh may have multiple materials, as is the case for the tree and house in this example.
 
-The [WeakObjectLoadingSystem](/Assets/1.%20WeakObjectLoading/WeakObjectLoadingSystem.cs) system looks for these weak reference components, loads the weakly referenced assets, and then adds the components that make the entity renderable. <br>
+The [WeakObjectLoadingSystem](Assets/1.%20WeakObjectLoading/WeakObjectLoadingSystem.cs) system looks for these weak reference components, loads the weakly referenced assets, and then adds the components that make the entity renderable. <br>
 In the system's `OnUpdate`, here's the code that processes the typed weak references, please review `WeakObjectReference` and `UntypedWeakReferenceId` regions in the system to validate the different uses.
 
 ### WeakObjectReference
@@ -157,13 +158,13 @@ Additionally, there are two paths to accomplish this:
    ```csharp
    RuntimeContentSystem.LoadContentCatalog(null, null, null, true);
    ```  
-   In the project, the script [`/Assets/2. WeakSceneLoading/WeakSceneLoadingLocalCatalogSystem.cs`] automatically does this once there is an entity with a `LocalContent` component attached.  
+   In the project, the script [`Assets/2. WeakSceneLoading/WeakSceneLoadingLocalCatalogSystem.cs`] automatically does this once there is an entity with a `LocalContent` component attached.  
 
 ---
 
 ### Behavior in the Unity Editor
 
-When you play the sample scene, a low-fidelity version of the environment scene `/Assets/2. WeakSceneLoading/Subscenes/LowFidelitySubscene.unity`  is loaded by the `WeakSceneLoadingSystem` once the `WeakSceneLoadingLocalCatalogSystem` has set the catalog source to **local** and created the `ContentReady` entity.<br>  Pressing **Enter** toggles between the low-fidelity version and a high-fidelity version of the scene: `/Assets/2. WeakSceneLoading/Subscenes/HighFidelitySubscene.unity`
+When you play the sample scene, a low-fidelity version of the environment scene `Assets/2. WeakSceneLoading/Subscenes/LowFidelitySubscene.unity`  is loaded by the `WeakSceneLoadingSystem` once the `WeakSceneLoadingLocalCatalogSystem` has set the catalog source to **local** and created the `ContentReady` entity.<br>  Pressing **Enter** toggles between the low-fidelity version and a high-fidelity version of the scene: `Assets/2. WeakSceneLoading/Subscenes/HighFidelitySubscene.unity`
 
 > **Note:** Both the low- and high-fidelity scenes are baked entity subscenes. However, the solution presented here also works for regular GameObject scenes that are weakly referenced.
 
@@ -179,7 +180,7 @@ To weakly reference a scene, you can use either:
 Generally, `WeakObjectSceneReference` is preferred unless a weak reference of varying object types is needed.  
 This sample demonstrates the use of both `UntypedWeakReferenceId` and `WeakObjectSceneReference`.
 
-In [`WeakSceneAuthoring.cs`](/Assets/1.%20WeakScene/WeakSceneAuthoring.cs), the baker adds an `IComponentData` named `HighLowWeakScene`, which stores:
+In [`WeakSceneAuthoring.cs`](Assets/1.%20WeakScene/WeakSceneAuthoring.cs), the baker adds an `IComponentData` named `HighLowWeakScene`, which stores:
 
 - The high-fidelity scene in an `UntypedWeakReferenceId`
 - The low-fidelity scene in a `WeakObjectSceneReference`
@@ -197,7 +198,7 @@ During the build process, Unity includes these references and packs them into th
 
 <img src="Images/build-profile.png" desc="The scene contains needed subscenes to be built in the player." width="600"/>
 
-## Steps to Load Remote Subscenes  (Option 2)
+### Steps to Load Remote Subscenes (Option 2)
 
 Before loading remote subscenes, perform the following steps:
 
@@ -216,7 +217,7 @@ Before loading remote subscenes, perform the following steps:
 
 ### Build content catalog
 Since the Content Management API depends on subscenes, you can create content and references directly from them.  
-Please review the [`ContentBuilder`](/Assets/2.%20WeakSceneLoading/Content%20Settings/Editor/ContentBuilder.cs) script to see how the content build process above works.
+Please review the [`ContentBuilder`](Assets/2.%20WeakSceneLoading/Content%20Settings/Editor/ContentBuilder.cs) script to see how the content build process above works.
 
 The content can be generated by filling the following function parameters as needed:
 
@@ -241,7 +242,7 @@ RemoteContentCatalogBuildUtility.PublishContent(
 
 ### Weak Scene References
 
-The [WeakSceneLoadingSystem](/Assets/1.%20WeakScene/WeakSceneLoadingSystem.cs) system will initially load the low-fidelity scene:
+The [WeakSceneLoadingSystem](Assets/1.%20WeakScene/WeakSceneLoadingSystem.cs) system will initially load the low-fidelity scene:
 
 ```csharp
 var weakScene = SystemAPI.GetSingletonRW<WeakSceneRefs>();
@@ -361,7 +362,7 @@ This document outlines where Unity places the **`StreamingAssets`** folder for e
     ```
 
 ---
->Note:Please review the  [Postprocessing build script](/Assets/2.%20WeakSceneLoading/Content%20Settings/Editor/BuildPostProcessing.cs)(`\Assets\2. WeakSceneLoading\Content Settings\Editor\BuildPostProcessing.cs`). 
+>Note:Please review the  [Postprocessing build script](Assets/2.%20WeakSceneLoading/Content%20Settings/Editor/BuildPostProcessing.cs)(`Assets\2. WeakSceneLoading\Content Settings\Editor\BuildPostProcessing.cs`). 
 >It includes a simple example of how to filter and remove duplicate dependencies based on Catalog and StreamingAsset folders. 
 
 ### Serving a catalog from a web server
