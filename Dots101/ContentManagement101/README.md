@@ -180,7 +180,7 @@ To weakly reference a scene, you can use either:
 Generally, `WeakObjectSceneReference` is preferred unless a weak reference of varying object types is needed.  
 This sample demonstrates the use of both `UntypedWeakReferenceId` and `WeakObjectSceneReference`.
 
-In [`WeakSceneAuthoring.cs`](Assets/1.%20WeakScene/WeakSceneAuthoring.cs), the baker adds an `IComponentData` named `HighLowWeakScene`, which stores:
+In [`WeakSceneAuthoring.cs`](Assets/2.%20WeakSceneLoading/WeakSceneAuthoring.cs), the baker adds an `IComponentData` named `HighLowWeakScene`, which stores:
 
 - The high-fidelity scene in an `UntypedWeakReferenceId`
 - The low-fidelity scene in a `WeakObjectSceneReference`
@@ -242,7 +242,7 @@ RemoteContentCatalogBuildUtility.PublishContent(
 
 ### Weak Scene References
 
-The [WeakSceneLoadingSystem](Assets/1.%20WeakScene/WeakSceneLoadingSystem.cs) system will initially load the low-fidelity scene:
+The [WeakSceneLoadingSystem](Assets/2.%20WeakSceneLoading/WeakSceneLoadingSystem.cs) system will initially load the low-fidelity scene:
 
 ```csharp
 var weakScene = SystemAPI.GetSingletonRW<WeakSceneRefs>();
