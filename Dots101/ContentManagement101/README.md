@@ -18,9 +18,10 @@ This sample project demonstrates the basic APIs for Weak References you need for
 For more detailed information, refer to the Entities documentation on [Content management](https://docs.unity3d.com/Packages/com.unity.entities@latest/index.html?subfolder=/manual/content-management.html).
 
 ## Getting Started
-> See [ProjectVersion.txt](./ProjectSettings/ProjectVersion.txt) for the minimum supported Unity version.
-This project currently targets [Unity 6](https://unity.com/releases/editor/whats-new/6000.2.6#installs).
-- Open `1. WeakObjectLoading/WeakObjectLoading.scene` to start exploring this project.
+- See [ProjectVersion.txt](./ProjectSettings/ProjectVersion.txt) for the minimum supported Unity version.<br>
+    This project currently targets [Unity 6](https://unity.com/releases/editor/whats-new/6000.2.6#installs).
+- Open the 1. WeakObjectLoading/WeakObjectLoading.scene file to begin exploring the project.
+- Navigate to **File > Build Profiles**, or press **Ctrl + Shift + B / Cmd + Shift + B**, to **activate** the [Platform] WeakObjectLoading or [Platform] WeakSceneLoading build profile.
 ---
 
 | Section | Description |
