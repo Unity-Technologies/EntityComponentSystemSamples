@@ -11,14 +11,16 @@ namespace ContentManagement.Sample
     //  
     //  A WeakObjectReference is basically a typed wrapper around an UntypedWeakReferenceId that is slightly more convenient to use.
     //  Generally, using WeakObjectReference is preferred unless you need a reference whose asset type isn't fixed at compile time,
-    //  in which case you'll need an UntypedWeakReferenceId. 
+    //  in which case you'll need an UntypedWeakReferenceId.
+    //  Furthermore, the LocalContent component is assigned to the resulting entity,
+    //  enabling the LoadingLocalCatalogSystem to load the files directly from disk.
     public class WeakRenderedObjectAuthoring : MonoBehaviour
     {
         public bool UseUntypedId;
 
         public Mesh Mesh;
         public Material[] Materials;  // an array because a single mesh can have multiple materials 
-        
+
         class Baker : Baker<WeakRenderedObjectAuthoring>
         {
             public override void Bake(WeakRenderedObjectAuthoring authoring)
@@ -27,6 +29,10 @@ namespace ContentManagement.Sample
 
                 var mesh = authoring.Mesh;
                 var materials = authoring.Materials;
+
+                // This allows the [LoadingLocalCatalogSystem] to runs and load the content,
+                // then the system [WeakObjectLoadingSystem] can run and connect the references.
+                AddComponent<LocalContent>(entity);
 
                 if (authoring.UseUntypedId)
                 {
@@ -63,9 +69,8 @@ namespace ContentManagement.Sample
             }
         }
     }
-#endif  
-    
-    
+#endif
+
     public struct WeakMeshUntyped : IComponentData
     {
         public UntypedWeakReferenceId Value;

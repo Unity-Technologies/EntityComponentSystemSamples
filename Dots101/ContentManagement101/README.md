@@ -17,6 +17,10 @@ This sample project demonstrates the basic APIs for Weak References you need for
 
 For more detailed information, refer to the Entities documentation on [Content management](https://docs.unity3d.com/Packages/com.unity.entities@latest/index.html?subfolder=/manual/content-management.html).
 
+## Getting Started
+> See [ProjectVersion.txt](./ProjectSettings/ProjectVersion.txt) for the minimum supported Unity version.
+This project currently targets [Unity 6](https://unity.com/releases/editor/whats-new/6000.2.6#installs).
+- Open `1. WeakObjectLoading/WeakObjectLoading.scene` to start exploring this project.
 ---
 
 | Section | Description |
@@ -158,13 +162,13 @@ Additionally, there are two paths to accomplish this:
    ```csharp
    RuntimeContentSystem.LoadContentCatalog(null, null, null, true);
    ```  
-   In the project, the script [`Assets/2. WeakSceneLoading/WeakSceneLoadingLocalCatalogSystem.cs`] automatically does this once there is an entity with a `LocalContent` component attached.  
+   In the project, the script [`Assets/1. WeakObjectLoading/LoadingLocalCatalogSystem.cs`] automatically does this once there is an entity with a `LocalContent` component attached.  
 
 ---
 
 ### Behavior in the Unity Editor
 
-When you play the sample scene, a low-fidelity version of the environment scene `Assets/2. WeakSceneLoading/Subscenes/LowFidelitySubscene.unity`  is loaded by the `WeakSceneLoadingSystem` once the `WeakSceneLoadingLocalCatalogSystem` has set the catalog source to **local** and created the `ContentReady` entity.<br>  Pressing **Enter** toggles between the low-fidelity version and a high-fidelity version of the scene: `Assets/2. WeakSceneLoading/Subscenes/HighFidelitySubscene.unity`
+When you play the sample scene, a low-fidelity version of the environment scene `Assets/2. WeakSceneLoading/Subscenes/LowFidelitySubscene.unity`  is loaded by the `WeakSceneLoadingSystem` once the `LoadingLocalCatalogSystem` has set the catalog source to **local** and created the `ContentReady` entity.<br>  Pressing **Enter** toggles between the low-fidelity version and a high-fidelity version of the scene: `Assets/2. WeakSceneLoading/Subscenes/HighFidelitySubscene.unity`
 
 > **Note:** Both the low- and high-fidelity scenes are baked entity subscenes. However, the solution presented here also works for regular GameObject scenes that are weakly referenced.
 
@@ -212,6 +216,10 @@ Before loading remote subscenes, perform the following steps:
    Add the desired subscenes and set their `Content Source` parameter to **Remote**, keeping it selected in the Editor.
 3. **Build content catalog:**  
    Open the menu `Assets > Publish > Publish Catalog from a WeakSceneListScriptableObject` and build the content.
+
+4. **Target the remote content catalog:**  
+   In the project, the script [`Assets/2. WeakSceneLoading/LoadingRemoteCatalogSystem.cs`] initializes the content according to the parameters.<br>
+   Please review it carefully [LoadingRemoteCatalogSystem](Assets/2.%20WeakSceneLoading/LoadingRemoteCatalogSystem.cs) to check how to use it.
 
 ---
 

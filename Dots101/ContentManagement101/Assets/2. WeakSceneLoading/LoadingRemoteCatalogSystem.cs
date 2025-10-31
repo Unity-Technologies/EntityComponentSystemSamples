@@ -5,8 +5,12 @@ using UnityEngine;
 
 namespace ContentManagement.Sample
 {
+    /// <summary>
+    /// Enables the Content Management API to retrieve content from a remote source,
+    /// load it into memory, and then connect all references.
+    /// </summary>
     [UpdateBefore(typeof(WeakSceneLoadingSystem))]
-    public partial struct WeakSceneLoadingRemoteCatalogSystem : ISystem
+    public partial struct LoadingRemoteCatalogSystem : ISystem
     {
         private bool initialized;
         

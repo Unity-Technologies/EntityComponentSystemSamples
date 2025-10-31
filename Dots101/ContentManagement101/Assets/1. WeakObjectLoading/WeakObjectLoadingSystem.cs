@@ -27,13 +27,6 @@ namespace ContentManagement.Sample
             // The system should update only if entities exist which still need to be made renderable.
             var query = SystemAPI.QueryBuilder().WithAny<WeakMesh, WeakMeshUntyped>().WithNone<RenderBounds>().Build();
             state.RequireForUpdate(query);
-            
-            // When scriptable define ENABLE_CONTENT_DELIVERY is set,  
-            // we must initialize the content catalog before loading assets.
-            // We pass nulls in this case because the WeakObject sample doesn't use any remote catalog, 
-            // instead RuntimeContentSystem will automatically use the content from StreamingAssets folder packed in the 
-            // Binary build. (e.g. ContentManagementSample_Data/StreamingAssets/ for windows Standalone)
-            RuntimeContentSystem.LoadContentCatalog(null, null, null, true);
         }
 
         public void OnUpdate(ref SystemState state)

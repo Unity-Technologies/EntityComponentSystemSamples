@@ -5,7 +5,7 @@ using Unity.Entities.Serialization;
 
 namespace ContentManagement.Sample
 {
-#if UNITY_EDITOR
+#if UNITY_EDITOR 
     public class WeakSceneAuthoring : MonoBehaviour
     {
         public WeakSceneListScriptableObject Settings;
@@ -15,7 +15,7 @@ namespace ContentManagement.Sample
         // Alternatively, we could use SceneAsset and then create a WeakObjectSceneReference in the baker with this code:
         // new WeakObjectSceneReference { Id = UntypedWeakReferenceId.CreateFromObjectInstance(authoring.LowFidelityScene) };
         public WeakObjectSceneReference LowFidelityScene;
-        
+       
         class Baker : Baker<WeakSceneAuthoring>
         {
             public override void Bake(WeakSceneAuthoring authoring)
@@ -35,9 +35,10 @@ namespace ContentManagement.Sample
                     AddComponent<RemoteContent>(entity);
             }
         }
+
     }
 #endif
-    
+
     public struct HighLowWeakScene : IComponentData
     {
         public UntypedWeakReferenceId HighSceneRef;
