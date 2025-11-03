@@ -17,10 +17,7 @@ namespace HelloCube
             {
                 // The entity will be moved
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponent(entity, new RotationSpeed
-                {
-                    RadiansPerSecond = math.radians(authoring.DegreesPerSecond)
-                });
+                AddComponent(entity, new RotationSpeed { RadiansPerSecond = math.radians(authoring.DegreesPerSecond) });
             }
         }
     }

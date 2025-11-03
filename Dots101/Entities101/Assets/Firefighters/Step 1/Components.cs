@@ -17,17 +17,15 @@ namespace Tutorials.Firefighters
     }
 
     // used as a flag to signal that the team needs to be repositioned
-    public struct RepositionLine : IComponentData, IEnableableComponent
-    {
-    }
+    public struct RepositionLine : IComponentData, IEnableableComponent { }
 
     public struct Heat : IBufferElementData
     {
         public float Value;
     }
-    
+
     public class BotAnimation : IComponentData
     {
-        public GameObject AnimatedGO;   // the GO that is rendered and animated
+        public GameObject AnimatedGO; // the GO that is rendered and animated
     }
 }
