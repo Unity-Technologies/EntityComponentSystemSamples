@@ -7,11 +7,9 @@ namespace Boids
     [RequireMatchingQueriesForUpdate]
     public partial class SampledAnimationClipPlaybackSystem : SystemBase
     {
-        protected override void OnUpdate()
+        partial struct UpdateTRSJob : IJobEntity
         {
-            var deltaTime = math.min(0.05f, SystemAPI.Time.DeltaTime);
-
-            Entities.ForEach((ref LocalTransform transform, in SampledAnimationClip sampledAnimationClip) =>
+            void Execute(ref LocalTransform transform, in SampledAnimationClip sampledAnimationClip)
             {
                 var frameIndex = sampledAnimationClip.FrameIndex;
                 var timeOffset = sampledAnimationClip.TimeOffset;
@@ -24,9 +22,14 @@ namespace Boids
 
                 transform.Position = math.lerp(prevTranslation, nextTranslation, timeOffset);
                 transform.Rotation = math.slerp(prevRotation, nextRotation, timeOffset);
-            }).ScheduleParallel();
+            }
+        }
 
-            Entities.ForEach((ref SampledAnimationClip sampledAnimationClip) =>
+        partial struct UpdateTimeJob : IJobEntity
+        {
+            public float deltaTime;
+
+            void Execute(ref SampledAnimationClip sampledAnimationClip)
             {
                 var currentTime = sampledAnimationClip.CurrentTime + deltaTime;
                 var sampleRate = sampledAnimationClip.SampleRate;
@@ -47,7 +50,16 @@ namespace Boids
                 sampledAnimationClip.CurrentTime = currentTime;
                 sampledAnimationClip.FrameIndex = frameIndex;
                 sampledAnimationClip.TimeOffset = timeOffset;
-            }).ScheduleParallel();
+            }
+        }
+
+        protected override void OnUpdate()
+        {
+            new UpdateTRSJob().ScheduleParallel();
+
+            var deltaTime = math.min(0.05f, SystemAPI.Time.DeltaTime);
+
+            new UpdateTimeJob() { deltaTime = math.min(0.05f, SystemAPI.Time.DeltaTime) }.ScheduleParallel();
         }
     }
 }
