@@ -10,7 +10,7 @@ namespace Unity.DotsUISample
         public QuestData quest;
         public CollectablesData collectables;
         
-        private class Baker : Baker<GameDataAuthoring>
+        class Baker : Baker<GameDataAuthoring>
         {
             public override void Bake(GameDataAuthoring authoring)
             {
@@ -19,10 +19,10 @@ namespace Unity.DotsUISample
                 // to avoid mutating the original scriptable objects, we make copies
                 AddComponent(entity, new GameData
                 {
-                    StartDialogue = ScriptableObject.Instantiate(authoring.startDialogue),
-                    EndDialogue = ScriptableObject.Instantiate(authoring.endDialogue),
-                    Quest = ScriptableObject.Instantiate(authoring.quest),  
-                    Collectables = ScriptableObject.Instantiate(authoring.collectables),
+                    StartDialogue = Instantiate(authoring.startDialogue),
+                    EndDialogue = Instantiate(authoring.endDialogue),
+                    Quest = Instantiate(authoring.quest),  
+                    Collectables = Instantiate(authoring.collectables),
                     State = GameState.Init,
                     InterfaceState = InterfaceState.Questing,
                 });

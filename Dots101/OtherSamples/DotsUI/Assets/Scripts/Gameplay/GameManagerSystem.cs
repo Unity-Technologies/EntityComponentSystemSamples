@@ -23,7 +23,7 @@ namespace Unity.DotsUISample
             {
                 GameInput.Initialize();
                 
-                var doc = GameObject.FindFirstObjectByType<UIDocument>();
+                var doc = Object.FindFirstObjectByType<UIDocument>();
                 VisualElement root = doc.rootVisualElement;
                 
                 game.ValueRW.State = GameState.SplashScreen;
@@ -37,7 +37,7 @@ namespace Unity.DotsUISample
                     InventoryScreen = InventoryScreen.Instantiate(root.Q<VisualElement>("inventory__container")),
                     DialogueScreen = DialogueScreen.Instantiate(root.Q<VisualElement>("dialogue__container")),
                     HintScreen = HintScreen.Instantiate(root.Q<VisualElement>("hud__action-helper")),
-                    Camera = GameObject.FindFirstObjectByType<Camera>(),
+                    Camera = Object.FindFirstObjectByType<Camera>(),
                 };
                 
                 screens.SplashScreen.Value.Show();
