@@ -58,43 +58,26 @@ public partial class MaterialChangerSystem : SystemBase
         var hybridRenderer = World.GetOrCreateSystemManaged<EntitiesGraphicsSystem>();
         m_MaterialMapping = new Dictionary<Material, BatchMaterialID>();
 
-        Entities
-            .WithoutBurst()
-            .ForEach((in MaterialChanger changer) =>
-            {
-                RegisterMaterial(hybridRenderer, changer.material0);
-                RegisterMaterial(hybridRenderer, changer.material1);
-            }).Run();
-    }
-
-    private void UnregisterMaterials()
-    {
-        // Can't call this from OnDestroy(), so we can't do this on teardown
-        var hybridRenderer = World.GetExistingSystemManaged<EntitiesGraphicsSystem>();
-        if (hybridRenderer == null)
-            return;
-
-        foreach (var kv in m_MaterialMapping)
-            hybridRenderer.UnregisterMaterial(kv.Value);
+        foreach (var changer in SystemAPI.Query<MaterialChanger>())
+        {
+            RegisterMaterial(hybridRenderer, changer.material0);
+            RegisterMaterial(hybridRenderer, changer.material1);
+        }
     }
 
     protected override void OnUpdate()
     {
-        EntityManager entityManager = EntityManager;
+        foreach (var (changer, mmi) in SystemAPI.Query<MaterialChanger, RefRW<MaterialMeshInfo>>())
+        {
+            changer.frame = changer.frame + 1;
 
-        Entities
-            .WithoutBurst()
-            .ForEach((MaterialChanger changer, ref MaterialMeshInfo mmi) =>
+            if (changer.frame >= changer.frequency)
             {
-                changer.frame = changer.frame + 1;
-
-                if (changer.frame >= changer.frequency)
-                {
-                    changer.frame = 0;
-                    changer.active = changer.active == 0 ? 1u : 0u;
-                    var material = changer.active == 0 ? changer.material0 : changer.material1;
-                    mmi.MaterialID = m_MaterialMapping[material];
-                }
-            }).Run();
+                changer.frame = 0;
+                changer.active = changer.active == 0 ? 1u : 0u;
+                var material = changer.active == 0 ? changer.material0 : changer.material1;
+                mmi.ValueRW.MaterialID = m_MaterialMapping[material];
+            }
+        }
     }
 }
