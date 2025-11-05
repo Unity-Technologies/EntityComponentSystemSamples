@@ -19,11 +19,17 @@ namespace Unity.Physics.Tests
         }
 
         [Serializable]
+        class LogMessage
+        {
+            public string LogType;
+            public string Message;
+        }
+
+        [Serializable]
         class Entry
         {
-            public string Scene;
-            public string Logtype;
-            public string Message;
+            public string[] Scenes;
+            public LogMessage[] Messages;
         }
 
         /// <summary>
@@ -103,15 +109,15 @@ namespace Unity.Physics.Tests
         /// </summary>
         static readonly Regex WorkerMessage = new Regex("\\[Worker[0-9]\\] ", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        static Entries ParseAllWhitelistedLogMessage()
+        static Entries ParseAllAllowListedLogMessages()
         {
-            var whiteListPath = Path.Combine("Assets", "Tests", "SamplesTest", "sceneLogWhitelist.json");
-            return JsonUtility.FromJson<Entries>(File.ReadAllText(whiteListPath));
+            var allowListPath = Path.Combine("Assets", "Tests", "SamplesTest", "sceneLogAllowList.json");
+            return JsonUtility.FromJson<Entries>(File.ReadAllText(allowListPath));
         }
 
-        static IEnumerable<Entry> GetWhiteListedMessagesForScene(string scenePath)
+        static IEnumerable<Entry> GetAllowListedMessagesForScene(string scenePath)
         {
-            return ParseAllWhitelistedLogMessage().Array.Where(x => x.Scene == scenePath);
+            return ParseAllAllowListedLogMessages().Array.Where(x => x.Scenes.Any(sceneEntry => new Regex(sceneEntry).IsMatch(scenePath)));
         }
 
         [Conditional("UNITY_EDITOR")]
@@ -125,8 +131,8 @@ namespace Unity.Physics.Tests
         }
 
         /// <summary>
-        /// Iterate through console entries and verify that warnings and errors have been whitelisted.
-        /// If a message is not whitelisted the test fails immediately.
+        /// Iterate through console entries and verify that warnings and errors have been allowListed.
+        /// If a message is not allowListed the test fails immediately.
         ///
         /// We do not have access through public APIs to get the specific Console log entries.
         /// We use reflection (I'm sorry) to access the proper APIs. This may be prone to break.
@@ -147,7 +153,7 @@ namespace Unity.Physics.Tests
 
             try
             {
-                IEnumerable<Entry> expected = GetWhiteListedMessagesForScene(scenePath);
+                IEnumerable<Entry> expected = GetAllowListedMessagesForScene(scenePath);
                 logEntries.GetMethod("StartGettingEntries").Invoke(null, null);
                 for (int i = 0; i < logCount; i++)
                 {
@@ -155,31 +161,34 @@ namespace Unity.Physics.Tests
                     var message = WorkerMessage.Replace(entryType.GetField("message").GetValue(entry).ToString(), string.Empty);
                     var mode = (int)entryType.GetField("mode").GetValue(entry);
 
-                    if (LogMessageFlagsExtensions.IsInfo(mode))
+                    foreach (var expectedMessages in expected)
                     {
-                        // skip info messages
-                    }
-                    else if (LogMessageFlagsExtensions.IsWarning(mode))
-                    {
-                        var warningMessage = message.Split("UnityEngine.Debug:LogWarning (object)")[0];
-                        if (expected.Where(x => x.Logtype.ToLowerInvariant() == "warning")
-                            .All(x => !Regex.IsMatch(warningMessage, Regex.Escape(x.Message).Replace("__any__", ".*"))))
+                        if (LogMessageFlagsExtensions.IsInfo(mode))
                         {
-                            Assert.Fail($"{LogType.Warning}: was unexpected with message: {warningMessage}");
+                            // skip info messages
                         }
-                    }
-                    else if (LogMessageFlagsExtensions.IsError(mode))
-                    {
-                        var errorMessage = message.Split("UnityEngine.Debug:LogError (object)")[0];
-                        if (expected.Where(x => x.Logtype.ToLowerInvariant() == "error")
-                            .All(x => !Regex.IsMatch(errorMessage, Regex.Escape(x.Message).Replace("__any__", ".*"))))
+                        else if (LogMessageFlagsExtensions.IsWarning(mode))
                         {
-                            Assert.Fail($"{LogType.Error}: was unexpected with message: {errorMessage}");
+                            var warningMessage = message.Split("UnityEngine.Debug:LogWarning (object)")[0];
+                            if (expectedMessages.Messages.Where(x => x.LogType.ToLowerInvariant() == "warning")
+                                .All(x => !Regex.IsMatch(warningMessage, Regex.Escape(x.Message).Replace("__any__", ".*"))))
+                            {
+                                Assert.Fail($"{LogType.Warning}: was unexpected with message: {warningMessage}");
+                            }
                         }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"{Enum.Parse<LogMessageFlags>(mode.ToString())}: mode was not expected for message: {message}");
+                        else if (LogMessageFlagsExtensions.IsError(mode))
+                        {
+                            var errorMessage = message.Split("UnityEngine.Debug:LogError (object)")[0];
+                            if (expectedMessages.Messages.Where(x => x.LogType.ToLowerInvariant() == "error")
+                                .All(x => !Regex.IsMatch(errorMessage, Regex.Escape(x.Message).Replace("__any__", ".*"))))
+                            {
+                                Assert.Fail($"{LogType.Error}: was unexpected with message: {errorMessage}");
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"{Enum.Parse<LogMessageFlags>(mode.ToString())}: mode was not expected for message: {message}");
+                        }
                     }
                 }
             }

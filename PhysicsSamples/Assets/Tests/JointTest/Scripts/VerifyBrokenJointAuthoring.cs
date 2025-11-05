@@ -64,9 +64,9 @@ public partial struct VerifyBrokenJointSystem : ISystem
             Assert.IsTrue(numBreakableJoints > 0, "Found zero breakable joints!");
         }
 
-        // After a while, check if breakable joints are broken.
-        // They get destroyed by DestroyBrokenJointsSystem
-        if (m_FrameCount == 20)
+        // After a while, check if breakable joints are broken. Note that some joints need to hit the floor to break
+        // They get destroyed by DestroyBrokenJointsSystem (which checks for ImpulseEventJobs)
+        if (m_FrameCount == 30)
         {
             NativeArray<PhysicsJoint> joints = m_PhysicsJointQuery.ToComponentDataArray<PhysicsJoint>(Unity.Collections.Allocator.Temp);
 
@@ -86,7 +86,8 @@ public partial struct VerifyBrokenJointSystem : ISystem
         for (int i = 0; i < constraints.Length; i++)
         {
             var constraint = constraints[i];
-            if (((constraint.Type == ConstraintType.Linear) || (constraint.Type == ConstraintType.Angular)) && math.any(math.abs(constraint.MaxImpulse) < 1.0f))
+            if (((constraint.Type == ConstraintType.Linear) || (constraint.Type == ConstraintType.Angular)) &&
+                math.any(math.abs(constraint.MaxImpulse) < 1.0f))
             {
                 return true;
             }

@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -133,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1191054677816456, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_Name
-      value: KinematicCubeInTheAir1 (1)
+      value: KinematicCubeInTheAir1
       objectReference: {fileID: 0}
     - target: {fileID: 4442955371177768, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_RootOrder
@@ -236,10 +235,16 @@ MonoBehaviour:
     x: -0
     y: -9.81
     z: -0
+  m_SubstepCount: 1
   m_SolverIterationCount: 4
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
+  m_CollisionTolerance: 0.01
   m_SynchronizeCollisionWorld: 0
+  m_IncrementalDynamicBroadphase: 0
+  m_IncrementalStaticBroadphase: 0
+  m_MaxDynamicDepenetrationVelocity: 3
+  m_MaxStaticDepenetrationVelocity: Infinity
 --- !u!114 &121541977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,6 +275,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IgnoreTriggers: 1
   IgnoreStatic: 1
+  DeleteEntityOnClick: 0
 --- !u!114 &121541979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,12 +291,15 @@ MonoBehaviour:
   DrawColliders: 0
   DrawColliderEdges: 1
   DrawColliderAabbs: 0
-  DrawBroadphase: 0
   DrawMassProperties: 0
+  DrawBroadphase: 0
   DrawContacts: 0
   DrawCollisionEvents: 0
   DrawTriggerEvents: 0
   DrawJoints: 0
+  ColliderDisplayMode: 0
+  ColliderEdgesDisplayMode: 0
+  ColliderAabbDisplayMode: 0
 --- !u!4 &121541980
 Transform:
   m_ObjectHideFlags: 0
@@ -298,13 +307,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 121541974}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &241617576
 PrefabInstance:
@@ -316,7 +325,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1191054677816456, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_Name
-      value: KinematicCubeInTheAir2
+      value: PenetratingKinematicCubeInTheAir2
       objectReference: {fileID: 0}
     - target: {fileID: 4442955371177768, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_RootOrder
@@ -458,7 +467,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1191054677816456, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_Name
-      value: KinematicCubeInTheAir2 (1)
+      value: KinematicCubeInTheAir2
       objectReference: {fileID: 0}
     - target: {fileID: 4442955371177768, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_RootOrder
@@ -703,7 +712,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1191054677816456, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_Name
-      value: KinematicCubeInTheAir1
+      value: PenetratingKinematicCubeInTheAir1
       objectReference: {fileID: 0}
     - target: {fileID: 4442955371177768, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
       propertyPath: m_RootOrder
@@ -870,13 +879,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1722645710}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1722645712
 MonoBehaviour:
@@ -967,3 +976,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 72ed9871ccf992c4fbcb7250c50b8805, type: 3}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 357846578}
+  - {fileID: 1873783010}
+  - {fileID: 807717508}
+  - {fileID: 1458401087}
+  - {fileID: 907750641}
+  - {fileID: 241617576}
+  - {fileID: 1722645711}
+  - {fileID: 75703564}
+  - {fileID: 425035243}
+  - {fileID: 121541980}
+  - {fileID: 745302473}

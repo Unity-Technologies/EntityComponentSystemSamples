@@ -130,6 +130,9 @@ EditorBuildSettings:
       - Bouncy Boxes.unity
     guid: 50a301ea8f7601e4ea369bcfb199bd5e
   - enabled: 1
+    path: Assets/9. Modify/Modify - Runtime Collider/Modify Runtime - Collider Geometry.unity
+    guid: 56c9adaa5ee730c44805372a66683394
+  - enabled: 1
     path: Assets/9. Modify/Modify - Runtime Collider/Modify Runtime - Unique Collider
       Blob Sharing.unity
     guid: 3402f4f5e0f58bb45abe59c0f1d5a06b
@@ -155,17 +158,17 @@ EditorBuildSettings:
     path: Assets/9. Modify/Modify - Narrowphase Contacts.unity
     guid: 16e5456d708ebf04181b16566d928156
   - enabled: 1
-    path: Assets/Demos/6. Use Cases/6a. Character Controller/6a. Character Controller.unity
-    guid: ccf48332ac110044097437b3e415f8b1
-  - enabled: 1
-    path: Assets/Demos/6. Use Cases/6b. Immediate Mode/6b. Pool.unity
+    path: Assets/10. Immediate Mode/Pool.unity
     guid: cf2afbef741d6b647aa4c9327aed4d94
   - enabled: 1
-    path: Assets/Demos/6. Use Cases/6c. Planet Gravity/6c. Planet Gravity.unity
+    path: Assets/11. Planet Gravity/Planet Gravity.unity
     guid: 88bcbef748dbd464ca253805fdbe6acf
   - enabled: 1
-    path: Assets/Demos/6. Use Cases/6d. Raycast Car/6d. Raycast Car.unity
+    path: Assets/12. Raycast Car/Raycast Car.unity
     guid: 9f45049bdc7f68d4fa2c1170d7bd2550
+  - enabled: 1
+    path: Assets/13. Character Controller/Character Controller.unity
+    guid: ccf48332ac110044097437b3e415f8b1
   - enabled: 1
     path: Assets/Tests/AddRemove/AddRemove.unity
     guid: e9c09f36907a8e14190f322770cea95b
@@ -175,18 +178,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Tests/BehaviorUnitTests/Activation/ChangeGroundFilterChangeCollider.unity
     guid: d65c5600acf64024e97fcf3c4be89dae
-  - enabled: 1
-    path: Assets/Tests/JointTest/Hinge.unity
-    guid: 1b66c83dd2ded0a44a80462c42d4eb01
-  - enabled: 1
-    path: Assets/Tests/JointTest/InvalidJoint.unity
-    guid: 815fa2fc1a0eeb747a5838fa9cb51da2
-  - enabled: 1
-    path: Assets/Tests/JointTest/Prismatic.unity
-    guid: dc01c0eb8d7ef4941969cad192adcd5a
-  - enabled: 1
-    path: Assets/Tests/LargeMesh/LargeMesh.unity
-    guid: 5211f6293288d59408a79b01a5bcdb0a
   - enabled: 1
     path: Assets/Tests/BehaviorUnitTests/Activation/ChangeGroundFilterRemove.unity
     guid: f9f350e451e88194885d326e7e5a34be
@@ -202,6 +193,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Tests/BehaviorUnitTests/Events/CollisionEventsUT.unity
     guid: 1bcdea0e31ca97440a9f4c806162ad54
+  - enabled: 1
+    path: Assets/Tests/BehaviorUnitTests/Events/RestitutionCollisionEventDataUT.unity
+    guid: 4d984413dec2a4a7d94552b0750addab
   - enabled: 1
     path: Assets/Tests/BehaviorUnitTests/Events/TriggerEventDataUT.unity
     guid: bf6edd97bcc39194eaf6f2d1470d15c4
@@ -251,6 +245,15 @@ EditorBuildSettings:
     path: Assets/Tests/CollisionResponse/CollisionResponse.None.unity
     guid: b3de4f8ab2d375843916ac983d165596
   - enabled: 1
+    path: Assets/Tests/Collisions/DepenetrationVelocity.unity
+    guid: 089a7aaf01e04ac4ba3fc26f8cbb54f6
+  - enabled: 1
+    path: Assets/Tests/Collisions/FlatConvex.unity
+    guid: 2ea222e2f3acf244db5cd37f54d8d708
+  - enabled: 1
+    path: Assets/Tests/Collisions/ThinBoxes.unity
+    guid: 1a0d2222534abe544a725dc09544b552
+  - enabled: 1
     path: Assets/Tests/Compound/ChangeCompoundFilter.unity
     guid: 1cf942cdcb049254ca95172f502c3b89
   - enabled: 1
@@ -266,14 +269,26 @@ EditorBuildSettings:
     path: Assets/Tests/JointTest/BreakableJoints.unity
     guid: 01ee64c366461e8479e7115b73e462d5
   - enabled: 1
+    path: Assets/Tests/JointTest/ConfigurableJointConversionZoo.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
     path: Assets/Tests/JointTest/FixedAngleGrid.unity
     guid: d0bacb4b4fb344a4f8d3aaa69436be83
+  - enabled: 1
+    path: Assets/Tests/JointTest/Hinge.unity
+    guid: 1b66c83dd2ded0a44a80462c42d4eb01
+  - enabled: 1
+    path: Assets/Tests/JointTest/InvalidJoint.unity
+    guid: 815fa2fc1a0eeb747a5838fa9cb51da2
   - enabled: 1
     path: Assets/Tests/JointTest/Joint Conversion.unity
     guid: f8050e0bb41bdcb468d94b336f30ae53
   - enabled: 1
     path: Assets/Tests/JointTest/LimitedHinge.unity
     guid: 5c4808b9180492a438ea49463e65777b
+  - enabled: 1
+    path: Assets/Tests/JointTest/Joint Collision Disabled.unity
+    guid: f1b667dd95e6e364a81487f6f75a766f
   - enabled: 1
     path: Assets/Tests/JointTest/RagdollGrid.unity
     guid: fe5c6b01d949e714eae90002b17145eb
@@ -283,6 +298,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Tests/JointTest/Stiff Limits.unity
     guid: 2d169b05c624f9d4c85988d5767ee690
+  - enabled: 1
+    path: Assets/Tests/JointTest/Prismatic.unity
+    guid: dc01c0eb8d7ef4941969cad192adcd5a
+  - enabled: 1
+    path: Assets/Tests/JointTest/Built-in Prefab Joint Conversion.unity
+    guid: 0834d7ace787542bf9f2e141c1c58ad9
+  - enabled: 1
+    path: Assets/Tests/LargeMesh/LargeMesh.unity
+    guid: 5211f6293288d59408a79b01a5bcdb0a
   - enabled: 1
     path: Assets/Tests/MultipleWorlds/Animation/Animation.unity
     guid: ba31bb9cb6720be4fb3cc2a2bd20faea
@@ -325,6 +349,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Tests/Scale/BakedNonUniformScaleComparison.unity
     guid: 803b594e638424d1ca28ea3bbefdbd7e
+  - enabled: 1
+    path: Assets/Tests/Scale/ColliderBakeTransform.unity
+    guid: 429d9036a8e78134da879b7923987aa4
   - enabled: 1
     path: Assets/Tests/Scale/StaticBodyHierarchy.unity
     guid: dda323cbb79b94d03944dbb87def8e5e
@@ -390,6 +417,9 @@ EditorBuildSettings:
     path: Assets/Tests/Welding/VehicleOverTerrain.unity
     guid: f7b494ea6852abb45a44ef428a9662ec
   - enabled: 1
+    path: Assets/Tests/Performance/ChainTestWithMassPerformanceTest.unity
+    guid: cae2c81b711534f719ba3281035a1812
+  - enabled: 1
     path: Assets/Tests/Performance/SphereCollisionPerformanceTest.unity
     guid: 3cc4192055d9cf047bfd3889a14205d3
   - enabled: 1
@@ -405,9 +435,12 @@ EditorBuildSettings:
     path: Assets/Tests/Performance/TreeLifetimePerformanceTest.unity
     guid: cb60fb93e6c954294913071e7b433cda
   - enabled: 1
-    path: Assets/Tests/Scale/ColliderBakeTransform.unity
-    guid: 429d9036a8e78134da879b7923987aa4
+    path: Assets/Tests/Performance/DetailedStaticMeshCollisionPerformanceTest.unity
+    guid: 80071e5401d0d4395851eeb022b04a0b
   - enabled: 1
-    path: Assets/9. Modify/Modify - Runtime Collider/Modify Runtime - Collider Geometry.unity
-    guid: 56c9adaa5ee730c44805372a66683394
-  m_configObjects: {}
+    path: Assets/Tests/Performance/DetailedStaticMeshCollisionDisablePerformanceTest.unity
+    guid: d804d8f5434324fcbb1540d6867ab45d
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: a0fee8afe76d9412db4cb291a8fbb925,
+      type: 3}
+  m_UseUCBPForAssetBundles: 0

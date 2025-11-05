@@ -7,6 +7,7 @@ namespace Unity.Physics.Tests.Authoring
 {
     class PrefabConversionTestsCustom : PrefabConversionTestsBase
     {
+        [Ignore("Failing in Packageworks, https://jira.unity3d.com/browse/DOTS-10120")]
         [Test]
         public void PrefabConversionCustom_ChildCollider_ForceUnique([Values] bool forceUniqueCollider)
         {

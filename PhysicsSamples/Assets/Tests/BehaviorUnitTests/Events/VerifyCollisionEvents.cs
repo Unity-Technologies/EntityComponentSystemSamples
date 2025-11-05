@@ -1,3 +1,9 @@
+// Is checking if the number of collision events is correct. There should be 4 collision events:
+// 1) DynamicCube & Floor
+// 2) KinematicCube & DynamicCubeOnKinematic
+// 3) PenetratingKinematicCube & Floor
+// 4) PenetratingKinematicCubeInTheAir1 & PenetratingKinematicCubeInTheAir2
+// Note that there is a 0.01 gap between KinematicCubeInTheAir1 and KinematicCubeInTheAir2: no collision event here.
 using System;
 using Unity.Collections;
 using Unity.Entities;

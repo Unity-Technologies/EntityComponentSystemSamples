@@ -5,7 +5,7 @@ using UnityEditor.Build;
 
 class TestsMenu : EditorWindow
 {
-    const string kE2ETestsMenuItem = "Physics Tests/Enable End To End Determinism Tests";
+    const string kE2ETestsMenuItem = "Tools/Unity Physics/Enable End To End Determinism Tests";
     const string kE2EDefine = "UNITY_PHYSICS_INCLUDE_END2END_TESTS";
 
     [MenuItem(kE2ETestsMenuItem, false)]

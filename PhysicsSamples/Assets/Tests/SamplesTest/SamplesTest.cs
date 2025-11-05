@@ -21,9 +21,13 @@ namespace Unity.Physics.Tests
     partial class SimulationConfigurationSystem : SystemBase
     {
         public SimulationType SimulationType;
+        public int NumSubsteps;
+        public int NumSolverIterations;
         public bool MultiThreaded;
         public bool IncrementalDynamicBroadphase;
         public bool IncrementalStaticBroadphase;
+        public bool SubstepOverride;
+        public bool SolverIterationOverride;
 
         protected override void OnUpdate()
         {
@@ -34,6 +38,8 @@ namespace Unity.Physics.Tests
                 component.ValueRW.MultiThreaded = (byte)(MultiThreaded ? 1 : 0);
                 component.ValueRW.IncrementalDynamicBroadphase = IncrementalDynamicBroadphase;
                 component.ValueRW.IncrementalStaticBroadphase = IncrementalStaticBroadphase;
+                if (SubstepOverride) component.ValueRW.SubstepCount = NumSubsteps;
+                if (SolverIterationOverride) component.ValueRW.SolverIterationCount = NumSolverIterations;
             }
             else
             {
@@ -55,8 +61,10 @@ namespace Unity.Physics.Tests
             {
                 var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
                 if (scenePath.Contains("InitTestScene")
-                    // in order to circumvent API breakages that do not affect physics, some packages are removed from the project on CI
-                    // any scenes referencing asset types in com.unity.inputsystem must be guarded behind UNITY_INPUT_SYSTEM_EXISTS
+                    || scenePath.Contains("Built-in Prefab Joint Conversion")
+                    || scenePath.Contains("ChainTestWithMass") // Test runs for 26s. Only want for performance testing
+                                                               // in order to circumvent API breakages that do not affect physics, some packages are removed from the project on CI
+                                                               // any scenes referencing asset types in com.unity.inputsystem must be guarded behind UNITY_INPUT_SYSTEM_EXISTS
 #if !UNITY_INPUT_SYSTEM_EXISTS
                     || scenePath.Contains("LoaderScene")
 #endif
@@ -120,12 +128,75 @@ namespace Unity.Physics.Tests
                     continue;
 #endif
 
-#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-                // [DOTS-10612] TreeLifetimePerformanceTest frequently crashes in standalone tests for Windows and macOS
-                if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
+#if UNITY_STANDALONE_LINUX 
+             // Tests we're skipping due to failure in Ubuntu for 1.4 release
+             if (scenePath.Contains("/VehicleOverTerrain.unity"))
+             {
+                 continue;
+             }
+#endif                   
+
+                scenes.Add(scenePath);
+            }
+            scenes.Sort();
+            return scenes;
+        }
+
+        // Adds the specified scenes to the list of scenes to be tested rather than skipping the named scenes.
+        protected static IEnumerable GetScenesForSubstepTesting()
+        {
+            var sceneCount = SceneManager.sceneCountInBuildSettings;
+            var scenes = new List<string>();
+            for (int sceneIndex = 0; sceneIndex < sceneCount; ++sceneIndex)
+            {
+                var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
+
+#if UNITY_IOS
+                // Disabled due to iOS device specific crash on 2023.3.0a17: DOTS-9820
+                if (scenePath.Contains("/Pyramids.unity"))
                     continue;
 #endif
-                scenes.Add(scenePath);
+                // A selection of Demos & Tests where substepping should be tested. Did not select tests that are
+                // conditionally skipped on some platforms (except for Pyramids on iOS)
+                // Note: simulation validation fails for: Motion Properties - Mass.unity, BasicStacks.unity
+                if (scenePath.Contains("/HelloWorld.unity") ||
+                    scenePath.Contains("/GravityWell.unity") ||
+                    scenePath.Contains("/Collider Parade - Basic.unity") ||
+                    scenePath.Contains("/Motion Properties - Gravity Factor.unity") ||
+                    scenePath.Contains("/Motion Properties - Velocity.unity") ||
+                    scenePath.Contains("/Material Properties - Friction.unity") ||
+                    scenePath.Contains("/Material Properties - Restitution.unity") ||
+                    scenePath.Contains("/Events - Contacts.unity") ||
+                    scenePath.Contains("/Events - Triggers - Gravity Factor.unity") ||
+                    scenePath.Contains("/Joints - Parade.unity") ||
+                    scenePath.Contains("/Motors - Parade.unity") ||
+                    scenePath.Contains("/Joints - Single Ragdoll.unity") ||
+                    scenePath.Contains("/Modify - Apply Impulse.unity") ||
+                    scenePath.Contains("/Modify - Velocity.unity") ||
+                    scenePath.Contains("/Modify - Kinematic Motion.unity") ||
+                    scenePath.Contains("/Modify - Narrowphase Contacts.unity") ||
+                    scenePath.Contains("/Modify - Surface Velocity.unity") ||
+                    scenePath.Contains("/Pool.unity") ||
+
+                    // A selection of Test scenes where substepping should be tested
+                    scenePath.Contains("/CollisionUT.unity") ||
+                    scenePath.Contains("/CollisionEventDataUT.unity") ||
+                    scenePath.Contains("/CollisionEventsUT.unity") ||
+                    scenePath.Contains("/RestitutionCollisionEventDataUT.unity") ||
+                    scenePath.Contains("/TriggerEventDataUT.unity") ||
+                    scenePath.Contains("/TriggerEventsUT.unity") ||
+                    scenePath.Contains("/FrictionUT.unity") ||
+                    scenePath.Contains("/RestitutionUT.unity") ||
+                    scenePath.Contains("/ContactModifiersUT.unity") ||
+                    scenePath.Contains("/JacobianModifiersUT.unity") ||
+                    scenePath.Contains("/GravityFactorUT.unity") ||
+                    scenePath.Contains("/ThinBoxes.unity") ||
+                    scenePath.Contains("/Stiff Limits.unity") ||
+                    scenePath.Contains("/Pyramids.unity") ||
+                    scenePath.Contains("/SimpleStacking.unity"))
+                {
+                    scenes.Add(scenePath);
+                }
             }
             scenes.Sort();
             return scenes;
@@ -141,6 +212,18 @@ namespace Unity.Physics.Tests
         {
             VerifyConsoleMessages.ClearMessagesInConsole();
 
+            yield return LoadScene(scenePath);
+
+            yield return Simulate();
+
+            ResetDefaultWorld();
+            yield return new WaitForFixedUpdate();
+
+            VerifyConsoleMessages.VerifyPrintedMessages(scenePath);
+        }
+
+        protected IEnumerator LoadScene(string scenePath)
+        {
             SceneManager.LoadScene(scenePath);
             // Skip a frame in order to trigger loading so that the Sub Scene loading process is started and we can find
             // the corresponding scene entities below.
@@ -173,7 +256,10 @@ namespace Unity.Physics.Tests
                     while (loading);
                 }
             }
+        }
 
+        protected IEnumerator Simulate()
+        {
             // Find Simulation Validation in the loaded scene and enable validation if present.
             // Then run the simulation until the end period specified in the Simulation Validation Settings, unless
             // it's set to "infinity" (value < 0, see SimulationValidationAuthoring).
@@ -203,11 +289,6 @@ namespace Unity.Physics.Tests
             }
 
             yield return new WaitForSeconds(simulationTime);
-
-            ResetDefaultWorld();
-            yield return new WaitForFixedUpdate();
-
-            VerifyConsoleMessages.VerifyPrintedMessages(scenePath);
         }
 
         protected static void ResetDefaultWorld()
@@ -226,7 +307,8 @@ namespace Unity.Physics.Tests
         }
 
         protected static void ConfigureSimulation(in World world, in SimulationType simulationType, in bool multiThreaded = true,
-            in bool incrementalDynamicBroadphase = false, in bool incrementalStaticBroadphase = false)
+            in bool incrementalDynamicBroadphase = false, in bool incrementalStaticBroadphase = false,
+            in int numSubsteps = 1, in int numSolverIterations = 4, in bool substepOverride = false, in bool solverIterationOverride = false)
         {
             var configSystem = world.GetExistingSystemManaged<SimulationConfigurationSystem>();
 
@@ -238,7 +320,11 @@ namespace Unity.Physics.Tests
                 SimulationType = simulationType,
                 MultiThreaded = multiThreaded,
                 IncrementalDynamicBroadphase = incrementalDynamicBroadphase,
-                IncrementalStaticBroadphase = incrementalStaticBroadphase
+                IncrementalStaticBroadphase = incrementalStaticBroadphase,
+                NumSubsteps = numSubsteps,
+                NumSolverIterations = numSolverIterations,
+                SubstepOverride = substepOverride,
+                SolverIterationOverride = solverIterationOverride
             };
             world.AddSystemManaged(configSystem);
             world.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().AddSystemToUpdateList(configSystem);
@@ -257,7 +343,7 @@ namespace Unity.Physics.Tests
             LogAssert.Expect(LogType.Log, "Loading " + scenePath);
 
             // Enable multi threaded Unity Physics simulation
-            ConfigureSimulation(DefaultWorld, SimulationType.UnityPhysics, true);
+            ConfigureSimulation(DefaultWorld, SimulationType.UnityPhysics);
 
             yield return LoadSceneAndSimulate(scenePath);
         }
@@ -276,6 +362,54 @@ namespace Unity.Physics.Tests
 
             // Enable single threaded Unity Physics simulation
             ConfigureSimulation(DefaultWorld, SimulationType.UnityPhysics, false);
+
+            yield return LoadSceneAndSimulate(scenePath);
+        }
+    }
+
+    class UnityPhysicsSamplesTestST_Substep4_Solve2 : UnityPhysicsSamplesTest
+    {
+        [UnityTest]
+        [Timeout(240000)]
+        public IEnumerator LoadScenes([ValueSource(nameof(GetScenesForSubstepTesting))] string scenePath)
+        {
+            // Log scene name in case Unity crashes and test results aren't written out.
+            Debug.Log("Loading " + scenePath);
+            LogAssert.Expect(LogType.Log, "Loading " + scenePath);
+
+            var numSolverIterations = 2;
+            if (scenePath.Contains("/ThinBoxes.unity"))
+            {
+                numSolverIterations = 4;
+            }
+
+            // Enable single threaded Unity Physics simulation
+            ConfigureSimulation(DefaultWorld, SimulationType.UnityPhysics, false,
+                false, false, 4, numSolverIterations, true, true);
+
+            yield return LoadSceneAndSimulate(scenePath);
+        }
+    }
+
+    class UnityPhysicsSamplesTestMT_Substep4_Solve2 : UnityPhysicsSamplesTest
+    {
+        [UnityTest]
+        [Timeout(240000)]
+        public IEnumerator LoadScenes([ValueSource(nameof(GetScenesForSubstepTesting))] string scenePath)
+        {
+            // Log scene name in case Unity crashes and test results aren't written out.
+            Debug.Log("Loading " + scenePath);
+            LogAssert.Expect(LogType.Log, "Loading " + scenePath);
+
+            var numSolverIterations = 2;
+            if (scenePath.Contains("/ThinBoxes.unity"))
+            {
+                numSolverIterations = 4;
+            }
+
+            // Enable single threaded Unity Physics simulation
+            ConfigureSimulation(DefaultWorld, SimulationType.UnityPhysics, true,
+                false, false, 4, numSolverIterations, true, true);
 
             yield return LoadSceneAndSimulate(scenePath);
         }

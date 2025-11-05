@@ -40,7 +40,7 @@ namespace Unity.Physics.Tests
 
         public void OnUpdate(ref SystemState state)
         {
-            var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
+            var entities = m_VerificationGroup.ToEntityArray(Allocator.Temp);
             foreach (var entity in entities)
             {
                 var localTransform = state.EntityManager.GetComponentData<LocalTransform>(entity);

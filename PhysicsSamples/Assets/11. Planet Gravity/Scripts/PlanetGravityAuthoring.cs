@@ -80,7 +80,7 @@ public partial struct PlanetGravitySystem : ISystem
         {
             float mass = math.rcp(bodyMass.InverseMass);
 
-
+            
             float3 dir = (gravity.GravitationalCenter - localTransform.Position);
 
             float dist = math.length(dir);
