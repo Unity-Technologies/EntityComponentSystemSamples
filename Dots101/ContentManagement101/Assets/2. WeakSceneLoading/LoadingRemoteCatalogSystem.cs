@@ -35,10 +35,9 @@ namespace ContentManagement.Sample
         {
             if (!initialized)
             {
+                var settings = SystemAPI.GetSingleton<RemoteContent>();
                 initialized = true;
-                var contentPath = Path.Combine(
-                    WeakSceneListScriptableObject.RemoteURL,
-                    WeakSceneListScriptableObject.ContentDir) + "/";
+                var contentPath = Path.Combine( settings.URL.ToString(), WeakSceneListScriptableObject.ContentDir) + "/";
 
                 Debug.Log($"<color=green>Loading Content Delivery From Remote source:</color>{contentPath}");
                 // When the ENABLE_CONTENT_DELIVERY scriptable define is set (https://docs.unity3d.com/6000.2/Documentation/Manual/custom-scripting-symbols.html),

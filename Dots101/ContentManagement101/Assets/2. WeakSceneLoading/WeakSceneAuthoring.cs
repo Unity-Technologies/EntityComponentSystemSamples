@@ -1,3 +1,4 @@
+using Unity.Collections;
 using UnityEngine;
 using Unity.Entities;
 using Unity.Entities.Content;
@@ -32,7 +33,7 @@ namespace ContentManagement.Sample
                     AddComponent<LocalContent>(entity);
 
                 if ((authoring.Settings.ContentSource & ContentSourcePath.Remote) != 0)
-                    AddComponent<RemoteContent>(entity);
+                    AddComponent(entity, new RemoteContent { URL = authoring.Settings.RemoteURL });
             }
         }
 
@@ -54,6 +55,7 @@ namespace ContentManagement.Sample
 
     public struct RemoteContent : IComponentData
     {
+        public FixedString512Bytes URL;
     }
 
     public struct LocalContent : IComponentData

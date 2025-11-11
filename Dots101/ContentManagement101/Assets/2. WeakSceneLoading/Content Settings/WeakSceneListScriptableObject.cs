@@ -42,8 +42,11 @@ namespace ContentManagement.Sample
         //   This allows the content manager to download (assets, catalog, dependencies) from a server.
         //
         // Switching the RemoteURL effectively changes the source location for managed content.
-        public static readonly string RemoteURL = "file:///C:/git/content-management-sample/";
-
+#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+        public string RemoteURL = "file:///Users/<your-username>/git/EntityComponentSystemSamples/Dots101/ContentManagement101";
+#else
+        public string RemoteURL = "file:///C:/git/EntityComponentSystemSamples/Dots101/ContentManagement101/";
+#endif
         // the player will store downloaded objects from content catalogs in this cache
         public static string CachePath = Path.GetFullPath(Path.Combine(RootPath, "Cache"));
     }
