@@ -61,7 +61,7 @@ namespace ContentManagement.Sample.Editor
             // copies from tempPath to the target folder and renames the assets to their content hashes.  
             var contentPath = WeakSceneListScriptableObject.ContentPath;
             var contentSetName = WeakSceneListScriptableObject.ContentSetName;
-            if (RemoteContentCatalogBuildUtility.PublishContent(tempPath, contentPath, f => new string[] { contentSetName } ));
+            if (RemoteContentCatalogBuildUtility.PublishContent(tempPath, contentPath, f => new string[] { contentSetName } ))
             {
                 Debug.Log($"<color=green>Content catalog published</color>");
                 Directory.Delete(tempPath, true);

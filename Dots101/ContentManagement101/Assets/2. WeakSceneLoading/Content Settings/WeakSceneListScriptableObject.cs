@@ -47,7 +47,7 @@ namespace ContentManagement.Sample
         private string remoteURLMac = "file:///Users/<your-username>/git/EntityComponentSystemSamples/Dots101/ContentManagement101";
 #else
         [SerializeField]
-        private string remoteDefaultURL = "file:///C:/git/EntityComponentSystemSamples/Dots101/ContentManagement101/";
+        private string remoteURL = "file:///C:/git/EntityComponentSystemSamples/Dots101/ContentManagement101/";
 #endif
         // the player will store downloaded objects from content catalogs in this cache
         public static string CachePath = Path.GetFullPath(Path.Combine(RootPath, "Cache"));
@@ -59,7 +59,7 @@ namespace ContentManagement.Sample
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
                 return remoteURLMac;
 #else
-                return RemoteDefaultURL;    
+                return remoteURL;    
 #endif
             }
         }
