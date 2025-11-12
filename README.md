@@ -52,6 +52,7 @@ Additional Entities material on Unity Learn:
 
 - [Sample project: DOTS UI](./Dots101/OtherSamples/DotsUI/Assets/README.md): Demonstrates the use of UI Toolkit in an ECS context.
 - [Video: DOTS UI (walkthrough)](https://youtu.be/72EaJ1OW9Nw)
+- [Sample project: Content Management 101](./Dots101/ContentManagement101/README.md): A starter example of how to use the Content Management API.
 - [Sample project: ECS Network Racing](https://github.com/Unity-Technologies/ECS-Network-Racing-Sample): A small DOTS game using Netcode for Entities and Unity Physics.
 
 ## Additional material 
