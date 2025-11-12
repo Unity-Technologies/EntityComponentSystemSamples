@@ -24,12 +24,12 @@ namespace ContentManagement.Sample
         public WeakObjectSceneReference[] LocalScenes;
         public WeakObjectSceneReference[] RemoteScenes;
 
-        public static string RootPath = Directory.GetParent(Application.dataPath).FullName;
+        private static readonly string RootPath = Directory.GetParent(Application.dataPath)?.FullName;
 
         // a 'set' is a unit of downloadable content within a catalog
-        public static string ContentSetName = "remote";
-        public static string ContentDir = "Catalog";
-        public static string ContentPath = Path.Combine(RootPath, ContentDir) + Path.DirectorySeparatorChar;
+        public static readonly string ContentSetName = "remote";
+        public static readonly string ContentDir = "Catalog";
+        public static readonly string ContentPath = Path.Combine(RootPath, ContentDir) + Path.DirectorySeparatorChar;
 
         // The RemoteURL can be set to either a local file path or a cloud URL.
         //
@@ -43,11 +43,25 @@ namespace ContentManagement.Sample
         //
         // Switching the RemoteURL effectively changes the source location for managed content.
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
-        public string RemoteURL = "file:///Users/<your-username>/git/EntityComponentSystemSamples/Dots101/ContentManagement101";
+        [SerializeField]
+        private string remoteURLMac = "file:///Users/<your-username>/git/EntityComponentSystemSamples/Dots101/ContentManagement101";
 #else
-        public string RemoteURL = "file:///C:/git/EntityComponentSystemSamples/Dots101/ContentManagement101/";
+        [SerializeField]
+        private string remoteDefaultURL = "file:///C:/git/EntityComponentSystemSamples/Dots101/ContentManagement101/";
 #endif
         // the player will store downloaded objects from content catalogs in this cache
         public static string CachePath = Path.GetFullPath(Path.Combine(RootPath, "Cache"));
+
+        public string RemoteURL
+        {
+            get
+            {
+#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+                return remoteURLMac;
+#else
+                return RemoteDefaultURL;    
+#endif
+            }
+        }
     }
 }
