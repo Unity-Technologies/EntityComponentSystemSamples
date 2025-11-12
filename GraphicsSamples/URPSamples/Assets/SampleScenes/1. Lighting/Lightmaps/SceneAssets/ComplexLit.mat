@@ -19,7 +19,8 @@ Material:
   m_CustomRenderQueue: 2000
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -122,6 +123,7 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _WorkflowMode: 1
+    - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 1}
@@ -142,4 +144,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 9
+  version: 10

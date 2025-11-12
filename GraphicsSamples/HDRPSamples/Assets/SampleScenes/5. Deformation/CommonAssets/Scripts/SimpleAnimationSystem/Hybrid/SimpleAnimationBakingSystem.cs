@@ -70,25 +70,23 @@ public partial class ComputeSkinMatricesBakingSystem : SystemBase
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
 
         // This is only executed if we have a valid skinning setup
-        Entities
-            .WithAll<DeformationSampleColor>()
-            .ForEach((Entity entity, in RootEntity rootEntity, in DynamicBuffer<BoneEntity> bones) =>
+        foreach (var (rootEntity, bones) in SystemAPI.Query<RefRO<RootEntity>, DynamicBuffer<BoneEntity>>()
+                     .WithAll<DeformationSampleColor>()
+                     .WithOptions(EntityQueryOptions.IncludeDisabledEntities))
+        {
+            ecb.AddComponent<LocalToWorld>(rootEntity.ValueRO.Value);
+            ecb.AddComponent<RootTag>(rootEntity.ValueRO.Value);
+
+            for (int boneIndex = 0; boneIndex < bones.Length; ++boneIndex)
             {
-                // World to local is required for root space conversion of the SkinMatrices
-                ecb.AddComponent<LocalToWorld>(rootEntity.Value);
-                ecb.AddComponent<RootTag>(rootEntity.Value);
+                var boneEntity = bones[boneIndex].Value;
+                ecb.AddComponent(boneEntity, new BoneTag());
+            }
+        }
 
-                // Add tags to the bones so we can find them later
-                // when computing the SkinMatrices
-                for (int boneIndex = 0; boneIndex < bones.Length; ++boneIndex)
-                {
-                    var boneEntity = bones[boneIndex].Value;
-                    ecb.AddComponent(boneEntity, new BoneTag());
-                }
-            }).WithEntityQueryOptions(EntityQueryOptions.IncludeDisabledEntities).WithoutBurst().WithStructuralChanges().Run();
-
-
-        Entities.ForEach((Entity entity, in DeformationSampleColor deformColor, in DynamicBuffer<AdditionalEntitiesBakingData> additionalEntities) =>
+        foreach (var (deformColor, additionalEntities) in
+                 SystemAPI.Query<DeformationSampleColor, DynamicBuffer<AdditionalEntitiesBakingData>>()
+                     .WithOptions(EntityQueryOptions.IncludeDisabledEntities))
         {
             // Override the material color of the deformation materials
             foreach (var rendererEntity in additionalEntities.AsNativeArray())
@@ -98,7 +96,7 @@ public partial class ComputeSkinMatricesBakingSystem : SystemBase
                     ecb.AddComponent(rendererEntity.Value, new HDRPMaterialPropertyBaseColor { Value = deformColor.Value });
                 }
             }
-        }).WithEntityQueryOptions(EntityQueryOptions.IncludeDisabledEntities).WithoutBurst().WithStructuralChanges().Run();
+        }
 
         ecb.Playback(EntityManager);
         ecb.Dispose();

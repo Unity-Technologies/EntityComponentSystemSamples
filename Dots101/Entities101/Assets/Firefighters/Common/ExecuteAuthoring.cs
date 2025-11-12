@@ -11,7 +11,7 @@ namespace Tutorials.Firefighters
         public bool ExecuteTeamSystem;
         public bool ExecuteUISystem;
         public bool ExecuteAnimationSystem;
-        
+
         class Baker : Baker<ExecuteAuthoring>
         {
             public override void Bake(ExecuteAuthoring authoring)
@@ -36,12 +36,12 @@ namespace Tutorials.Firefighters
                 {
                     AddComponent<ExecuteTeam>(entity);
                 }
-                
+
                 if (authoring.ExecuteUISystem)
                 {
                     AddComponent<ExecuteUI>(entity);
                 }
-                
+
                 if (authoring.ExecuteAnimationSystem)
                 {
                     AddComponent<ExecuteAnimation>(entity);
@@ -50,27 +50,15 @@ namespace Tutorials.Firefighters
         }
     }
 
-    public struct ExecuteHeat : IComponentData
-    {
-    }
+    public struct ExecuteHeat : IComponentData { }
 
-    public struct ExecuteBot : IComponentData
-    {
-    }
+    public struct ExecuteBot : IComponentData { }
 
-    public struct ExecuteBucket : IComponentData
-    {
-    }
+    public struct ExecuteBucket : IComponentData { }
 
-    public struct ExecuteTeam : IComponentData
-    {
-    }
-    
-    public struct ExecuteUI : IComponentData
-    {
-    }
-    
-    public struct ExecuteAnimation : IComponentData
-    {
-    }
+    public struct ExecuteTeam : IComponentData { }
+
+    public struct ExecuteUI : IComponentData { }
+
+    public struct ExecuteAnimation : IComponentData { }
 }

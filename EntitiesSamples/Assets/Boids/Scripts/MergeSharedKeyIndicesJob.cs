@@ -96,10 +96,7 @@ namespace Boids
             {
                 while (true)
                 {
-                    int begin;
-                    int end;
-
-                    if (!JobsUtility.GetWorkStealingRange(ref ranges, jobIndex, out begin, out end))
+                    if (!JobsUtility.GetWorkStealingRange(ref ranges, jobIndex, out int begin, out int end))
                     {
                         return;
                     }
@@ -118,10 +115,8 @@ namespace Boids
                         {
                             var key = UnsafeUtility.ReadArrayElement<int>(keys, entryIndex);
                             var value = UnsafeUtility.ReadArrayElement<int>(values, entryIndex);
-                            int firstValue;
 
-                            NativeParallelMultiHashMapIterator<int> it;
-                            jobWrapper.HashMap.TryGetFirstValue(key, out firstValue, out it);
+                            jobWrapper.HashMap.TryGetFirstValue(key, out int firstValue, out NativeParallelMultiHashMapIterator<int> it);
 
                             // [macton] Didn't expect a usecase for this with multiple same values
                             // (since it's intended use was for unique indices.)

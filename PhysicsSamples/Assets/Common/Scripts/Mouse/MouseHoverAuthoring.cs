@@ -45,7 +45,7 @@ namespace Unity.Physics.Extensions
                 CurrentEntity = Entity.Null,
                 IgnoreTriggers = authoring.IgnoreTriggers,
                 IgnoreStatic = authoring.IgnoreStatic,
-                HoverEntity = GetEntity(authoring.HoverPrefab, TransformUsageFlags.Dynamic),
+                HoverEntity = GetEntity(authoring.HoverPrefab, TransformUsageFlags.None),
             });
         }
     }
@@ -269,6 +269,10 @@ namespace Unity.Physics.Extensions
             };
 
             var mouseHover = SystemAPI.ManagedAPI.GetSingleton<MouseHover>();
+
+            // gracefully handle the case where no hover entity is provided for swapping out the render material
+            if (mouseHover.HoverEntity == Entity.Null)
+                return;
 
             RaycastHit hit;
             using (var raycastHitRef = new NativeReference<RaycastHit>(Allocator.TempJob))

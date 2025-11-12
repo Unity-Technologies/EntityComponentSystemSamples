@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Animator = UnityEngine.Animator;
 using Random = Unity.Mathematics.Random;
+[assembly: RegisterUnityEngineComponentType(typeof(Animator))]
 
 namespace Graphical.AnimationWithGameObjects
 {

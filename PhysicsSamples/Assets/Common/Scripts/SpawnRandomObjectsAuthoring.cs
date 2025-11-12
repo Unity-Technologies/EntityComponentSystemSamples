@@ -104,7 +104,7 @@ abstract partial class SpawnRandomObjectsSystemBase<T> : SystemBase where T : un
     protected override void OnUpdate()
     {
         // Entities.ForEach in generic system types are not supported
-        using (var entities = GetEntityQuery(new ComponentType[] { typeof(T) }).ToEntityArray(Allocator.TempJob))
+        using (var entities = GetEntityQuery(new ComponentType[] { typeof(T) }).ToEntityArray(Allocator.Temp))
         {
             for (int j = 0; j < entities.Length; j++)
             {

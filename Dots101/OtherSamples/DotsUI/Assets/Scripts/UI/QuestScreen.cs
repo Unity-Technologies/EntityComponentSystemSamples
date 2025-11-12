@@ -7,20 +7,20 @@ namespace Unity.DotsUISample
     //  Shows the quest title and the collectables required to complete the quest
     public class QuestScreen : UIScreen
     {
-        private QuestData questData;
-        private VisualElement checklistPanel;
-        private Label[] collectableLabels;
+        QuestData m_QuestData;
+        VisualElement m_ChecklistPanel;
+        Label[] m_CollectableLabels;
 
-        private const string k_QuestTitleUssClassName = "quest-title";
-        private const string k_QuestCollectableUssClassName = "quest-collectable";
-        private const string k_QuestCollectableCompletedUssClassName = "quest-collectable-completed";
+        const string k_QuestTitleUssClassName = "quest-title";
+        const string k_QuestCollectableUssClassName = "quest-collectable";
+        const string k_QuestCollectableCompletedUssClassName = "quest-collectable-completed";
         
         public static QuestScreen Instantiate(VisualElement parentElement)
         {
             var screen = ScriptableObject.CreateInstance<QuestScreen>();
             screen.RootElement = parentElement;
             
-            screen.checklistPanel = screen.RootElement.Q<VisualElement>("quest__checklist-panel");
+            screen.m_ChecklistPanel = screen.RootElement.Q<VisualElement>("quest__checklist-panel");
             
             screen.Hide();
             return screen;
@@ -28,16 +28,16 @@ namespace Unity.DotsUISample
         
         public void SetQuestData(QuestData questData, DynamicBuffer<CollectableCount> buf, CollectablesData collectables)
         {
-            this.questData = questData;
-            Label titleLabel = new Label(this.questData.Title.ToUpper());
+            m_QuestData = questData;
+            Label titleLabel = new Label(this.m_QuestData.Title.ToUpper());
             titleLabel.AddToClassList(k_QuestTitleUssClassName);
-            checklistPanel.Add(titleLabel);
-            collectableLabels = new Label[this.questData.Items.Length];
-            for (int i = 0; i < this.questData.Items.Length; i++)
+            m_ChecklistPanel.Add(titleLabel);
+            m_CollectableLabels = new Label[this.m_QuestData.Items.Length];
+            for (int i = 0; i < this.m_QuestData.Items.Length; i++)
             {
-                collectableLabels[i] = new Label();
-                collectableLabels[i].AddToClassList(k_QuestCollectableUssClassName);
-                checklistPanel.Add(collectableLabels[i]);
+                m_CollectableLabels[i] = new Label();
+                m_CollectableLabels[i].AddToClassList(k_QuestCollectableUssClassName);
+                m_ChecklistPanel.Add(m_CollectableLabels[i]);
             }
             
             UpdateMessage(buf, collectables, false);
@@ -50,27 +50,27 @@ namespace Unity.DotsUISample
         {
             if (hasAllItems)
             {
-                collectableLabels[0].text = questData.CompletionText.ToUpper();
-                collectableLabels[0].RemoveFromClassList(k_QuestCollectableCompletedUssClassName);
-                for (int i = 1; i < collectableLabels.Length; i++)
+                m_CollectableLabels[0].text = m_QuestData.CompletionText.ToUpper();
+                m_CollectableLabels[0].RemoveFromClassList(k_QuestCollectableCompletedUssClassName);
+                for (int i = 1; i < m_CollectableLabels.Length; i++)
                 {
-                    collectableLabels[i].text = "";
+                    m_CollectableLabels[i].text = "";
                 }
 
                 return;
             }
             
-            for (int i = 0; i < questData.Items.Length; i++)
+            for (int i = 0; i < m_QuestData.Items.Length; i++)
             {
-                var name = collectables.Collectables[i].Name.ToUpper();   
+                var collectableName = collectables.Collectables[i].Name.ToUpper();   
                 var currentCount = buf[i].Count;
-                var targetCount = questData.Items[i].GoalCount;
+                var targetCount = m_QuestData.Items[i].GoalCount;
                 
-                collectableLabels[i].text = $"{name}  ({currentCount}/{targetCount})";
+                m_CollectableLabels[i].text = $"{collectableName}  ({currentCount}/{targetCount})";
                 
                 if (currentCount >= targetCount)
                 {
-                    collectableLabels[i].AddToClassList(k_QuestCollectableCompletedUssClassName);
+                    m_CollectableLabels[i].AddToClassList(k_QuestCollectableCompletedUssClassName);
                 }
             }
         }

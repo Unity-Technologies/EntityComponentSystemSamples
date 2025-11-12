@@ -82,7 +82,7 @@ namespace Unity.Physics.Tests
         public void OnUpdate(ref SystemState state)
         {
             m_FrameCount++;
-            var entities = m_VerificationGroup.ToEntityArray(Allocator.TempJob);
+            var entities = m_VerificationGroup.ToEntityArray(Allocator.Temp);
             foreach (var entity in entities)
             {
                 VerifyBodyPosVelData data = state.EntityManager.GetComponentData<VerifyBodyPosVelData>(entity);

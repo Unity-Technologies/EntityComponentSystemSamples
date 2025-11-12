@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 61
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d570576a55f2355408c5108ee3631081, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CodeStage.Maintainer.Editor::CodeStage.Maintainer.Settings.ProjectSettings
+  issuesFinderSettings:
+    includeScenesInBuild: 1
+    includeOnlyEnabledScenesInBuild: 1
+    sceneIncludes: []
+    pathIgnores: []
+    pathIncludes: []
+    componentIgnores: []
+    sceneIncludesFilters: []
+    pathIgnoresFilters: []
+    pathIncludesFilters: []
+    componentIgnoresFilters: []
+    lookInScenes: 1
+    lookInAssets: 1
+    lookInProjectSettings: 1
+    scenesSelection: 0
+    scanGameObjects: 1
+    touchInactiveGameObjects: 1
+    touchDisabledComponents: 1
+    detectors:
+    - id: MissingReferenceDetector
+      group: 0
+      enabled: 1
+    - id: ShaderErrorDetector
+      group: 0
+      enabled: 1
+    - id: MissingComponentDetector
+      group: 0
+      enabled: 1
+    - id: MissingPrefabDetector
+      group: 0
+      enabled: 1
+    - id: DuplicateComponentDetector
+      group: 0
+      enabled: 1
+    - id: InconsistentTerrainDataDetector
+      group: 0
+      enabled: 1
+    - id: InvalidLayerDetector
+      group: 0
+      enabled: 1
+    - id: HugePositionDetector
+      group: 0
+      enabled: 1
+    - id: DuplicateLayersDetector
+      group: 0
+      enabled: 1
+    - id: InvalidRendererBatchingDetector
+      group: 0
+      enabled: 1
+    - id: InvalidRendererMaterialsDetector
+      group: 0
+      enabled: 1
+    - id: InvalidSortingLayerDetector
+      group: 0
+      enabled: 1
+    missingReferences: 0
+    shadersWithErrors: 0
+    missingComponents: 0
+    missingPrefabs: 0
+    duplicateComponents: 0
+    inconsistentTerrainData: 0
+    unnamedLayers: 0
+    hugePositions: 0
+    duplicateLayers: 0
+  projectCleanerSettings:
+    pathIgnores: []
+    sceneIgnores: []
+    pathIgnoresFilters:
+    - enabled: 1
+      ignoreCase: 1
+      kind: 0
+      value: /Plugins/
+      exactMatch: 0
+    - enabled: 1
+      ignoreCase: 1
+      kind: 3
+      value: .preset
+      exactMatch: 0
+    pathIncludesFilters: []
+    sceneIgnoresFilters: []
+    ignoreScenesInBuild: 1
+    ignoreOnlyEnabledScenesInBuild: 1
+    scenesSelection: 10
+    findUnreferencedAssets: 1
+    findUnreferencedScripts: 0
+    findEmptyFolders: 1
+    findEmptyFoldersAutomatically: 0
+    useTrashBin: 1
+    rescanAfterContextIgnore: 1
+    ignoreEditorAssets: 1
+  referencesFinderSettings:
+    pathIgnoresFilters: []
+    pathIncludesFilters: []
+  version: 2.0.1

@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -207,6 +206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 316855754
   m_ShapeType: 1
   m_PrimitiveCenter:
     x: 0.000000059604645
@@ -245,6 +245,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 254
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -337,7 +341,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!114 &31781849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -503,10 +507,16 @@ MonoBehaviour:
     x: -0
     y: -9.81
     z: -0
+  m_SubstepCount: 1
   m_SolverIterationCount: 4
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
+  m_CollisionTolerance: 0.01
   m_SynchronizeCollisionWorld: 0
+  m_IncrementalDynamicBroadphase: 0
+  m_IncrementalStaticBroadphase: 0
+  m_MaxDynamicDepenetrationVelocity: 3
+  m_MaxStaticDepenetrationVelocity: Infinity
 --- !u!114 &814192807
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -537,6 +547,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IgnoreTriggers: 1
   IgnoreStatic: 1
+  DeleteEntityOnClick: 0
 --- !u!114 &814192809
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -558,6 +569,9 @@ MonoBehaviour:
   DrawCollisionEvents: 0
   DrawTriggerEvents: 0
   DrawJoints: 0
+  ColliderDisplayMode: 0
+  ColliderEdgesDisplayMode: 0
+  ColliderAabbDisplayMode: 0
 --- !u!4 &814192810
 Transform:
   m_ObjectHideFlags: 0
@@ -6062,6 +6076,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1730821923
   m_ShapeType: 31
   m_PrimitiveCenter:
     x: -0.18018913
@@ -6100,6 +6115,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -6192,7 +6211,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!33 &2151099788746873359
 MeshFilter:
   m_ObjectHideFlags: 0

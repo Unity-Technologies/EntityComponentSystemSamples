@@ -14,10 +14,6 @@ The larger cube has a `RotationSpeedAuthoring` MonoBehavior, which adds a `Rotat
 
 This sample is the same as "MainThread", except the `RotationSpeedSystem` now uses a job (an `IJobEntity`) to spin the cubes instead of doing so directly on the main thread. Also, the Y-axis scale of the cube is fluctuated between 1 and -1 by setting the cube's `PostTransformMatrix` component. 
 
-## Aspects sample
-
-This sample is like "MainThread", except the `RotationSpeedSystem` now uses an aspect to move the cube up and down.
-
 ## Prefabs sample
 
 The sample contains a single non-rendered entity with a `Spawner` component that references a cube prefab.

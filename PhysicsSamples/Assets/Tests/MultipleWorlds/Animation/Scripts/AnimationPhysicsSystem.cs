@@ -70,7 +70,8 @@ namespace Unity.Physics.Tests
                     TimeStep = timeStep,
                     Gravity = stepComponent.Gravity,
                     SynchronizeCollisionWorld = false,
-                    NumSolverIterations = 4,
+                    NumSubsteps = stepComponent.SubstepCount,
+                    NumSolverIterations = stepComponent.SolverIterationCount,
                     SolverStabilizationHeuristicSettings = Solver.StabilizationHeuristicSettings.Default,
                     HaveStaticBodiesChanged = PhysicsData.HaveStaticBodiesChanged
                 });

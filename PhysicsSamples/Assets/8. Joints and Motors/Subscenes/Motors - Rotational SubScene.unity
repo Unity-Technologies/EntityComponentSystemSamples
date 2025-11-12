@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 10
+  serializedVersion: 9
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -42,8 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 13
-  m_BakeOnSceneLoad: 0
+  serializedVersion: 12
+  m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -66,6 +66,9 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
+    m_FinalGather: 0
+    m_FinalGatherFiltering: 1
+    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -93,8 +96,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000004, guid: cde4068c79b2b4c4f99a358df8155caa,
-    type: 2}
+  m_LightingDataAsset: {fileID: 0}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -203,6 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1377835787
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -241,6 +244,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -333,7 +340,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &91408977
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -351,9 +358,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -488,9 +492,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -592,9 +593,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -635,13 +633,13 @@ HingeJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 128297417}
-  serializedVersion: 3
   m_ConnectedBody: {fileID: 1267668819}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355353, y: -0.5, z: -0.35355344}
+  serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
     spring: 987
@@ -814,6 +812,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 972272954
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -852,6 +851,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -944,7 +947,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &137606647
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -962,9 +965,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1081,9 +1081,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1124,13 +1121,13 @@ HingeJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 142327668}
-  serializedVersion: 3
   m_ConnectedBody: {fileID: 1948719151}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355324, y: -0.49999982, z: -0.35355374}
+  serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
     spring: 987
@@ -1257,9 +1254,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1440,6 +1434,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 69482972
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -1478,6 +1473,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1570,7 +1569,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &173808507
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1588,9 +1587,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1737,6 +1733,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 333722121
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -1775,6 +1772,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1867,7 +1868,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &193127802
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1885,9 +1886,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1974,6 +1972,7 @@ MonoBehaviour:
     x: -0
     y: -9.81
     z: -0
+  m_SubstepCount: 1
   m_SolverIterationCount: 4
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
@@ -1981,6 +1980,8 @@ MonoBehaviour:
   m_SynchronizeCollisionWorld: 0
   m_IncrementalDynamicBroadphase: 0
   m_IncrementalStaticBroadphase: 0
+  m_MaxDynamicDepenetrationVelocity: 3
+  m_MaxStaticDepenetrationVelocity: Infinity
 --- !u!114 &253524060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2271,9 +2272,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2441,6 +2439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1104057130
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -2479,6 +2478,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2571,7 +2574,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &434286189
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2589,9 +2592,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2738,6 +2738,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1706089511
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -2776,6 +2777,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2868,7 +2873,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &477509794
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2886,9 +2891,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3039,9 +3041,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3082,13 +3081,13 @@ ConfigurableJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 484510469}
-  serializedVersion: 4
   m_ConnectedBody: {fileID: 998310527}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: -1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.3635537, y: -0.49999943, z: -0.34355348}
+  serializedVersion: 3
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
   m_YMotion: 0
@@ -3260,6 +3259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1082117035
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -3298,6 +3298,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -3390,7 +3394,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &516430965
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3408,9 +3412,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3513,9 +3514,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3556,13 +3554,13 @@ HingeJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 518941991}
-  serializedVersion: 3
   m_ConnectedBody: {fileID: 1775414876}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.31355336, y: -0.48999977, z: -0.39355332}
+  serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
     spring: 987
@@ -3737,9 +3735,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3872,6 +3867,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1916392928
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -3910,6 +3906,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -4002,7 +4002,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &636418160
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4020,9 +4020,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4187,9 +4184,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4306,6 +4300,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1205548823
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -4344,6 +4339,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -4436,7 +4435,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &670272993
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4454,9 +4453,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4559,9 +4555,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4602,13 +4595,13 @@ HingeJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 697805109}
-  serializedVersion: 3
   m_ConnectedBody: {fileID: 1108786107}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355324, y: -0.49999982, z: -0.35355374}
+  serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
     spring: 987
@@ -4765,6 +4758,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 619287094
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -4803,6 +4797,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -4895,7 +4893,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &713089902
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4913,9 +4911,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5047,6 +5042,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 452280204
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -5085,6 +5081,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -5177,7 +5177,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &769192635
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5195,9 +5195,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5284,9 +5281,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5455,9 +5449,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5582,6 +5573,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 643733046
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -5620,6 +5612,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -5712,7 +5708,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &871644117
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5730,9 +5726,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5868,9 +5861,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5995,6 +5985,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 950236786
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -6033,6 +6024,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -6125,7 +6120,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &979817053
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6143,9 +6138,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6310,9 +6302,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6399,9 +6388,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6442,13 +6428,13 @@ HingeJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1006827145}
-  serializedVersion: 3
   m_ConnectedBody: {fileID: 1391471875}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355353, y: -0.5, z: -0.35355344}
+  serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
     spring: 987
@@ -6623,9 +6609,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6666,13 +6649,13 @@ ConfigurableJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1008304154}
-  serializedVersion: 4
   m_ConnectedBody: {fileID: 549309579}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: -1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.353553, y: -0.5000008, z: -0.35355344}
+  serializedVersion: 3
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
   m_YMotion: 0
@@ -6862,9 +6845,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6905,13 +6885,13 @@ ConfigurableJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1010634489}
-  serializedVersion: 4
   m_ConnectedBody: {fileID: 1709712230}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355353, y: -0.5, z: -0.35355344}
+  serializedVersion: 3
   m_SecondaryAxis: {x: 1, y: 0, z: 0}
   m_XMotion: 0
   m_YMotion: 0
@@ -7101,9 +7081,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7190,9 +7167,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7327,9 +7301,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7512,9 +7483,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7555,13 +7523,13 @@ ConfigurableJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1273515079}
-  serializedVersion: 4
   m_ConnectedBody: {fileID: 92213311}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355324, y: -0.49999982, z: -0.35355312}
+  serializedVersion: 3
   m_SecondaryAxis: {x: 1, y: 0, z: 0}
   m_XMotion: 0
   m_YMotion: 0
@@ -7790,6 +7758,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1353917303
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -7828,6 +7797,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -7920,7 +7893,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1369167061
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7938,9 +7911,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8057,9 +8027,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8242,9 +8209,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8377,6 +8341,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1661556623
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -8415,6 +8380,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -8507,7 +8476,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1467964899
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8525,9 +8494,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8692,9 +8658,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8735,13 +8698,13 @@ ConfigurableJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1475174339}
-  serializedVersion: 4
   m_ConnectedBody: {fileID: 1106758956}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355324, y: -0.49999982, z: -0.35355374}
+  serializedVersion: 3
   m_SecondaryAxis: {x: 1, y: 0, z: 0}
   m_XMotion: 0
   m_YMotion: 0
@@ -8913,6 +8876,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 825527015
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -8951,6 +8915,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -9043,7 +9011,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1477964292
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9061,9 +9029,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9185,9 +9150,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9314,9 +9276,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9357,13 +9316,13 @@ ConfigurableJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1489402717}
-  serializedVersion: 4
   m_ConnectedBody: {fileID: 656897012}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355353, y: -0.5, z: -0.35355344}
+  serializedVersion: 3
   m_SecondaryAxis: {x: 1, y: 0, z: 0}
   m_XMotion: 0
   m_YMotion: 0
@@ -9535,6 +9494,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 310870692
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -9573,6 +9533,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -9665,7 +9629,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1569110257
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9683,9 +9647,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9788,9 +9749,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9831,13 +9789,13 @@ HingeJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1620182539}
-  serializedVersion: 3
   m_ConnectedBody: {fileID: 861294895}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355324, y: -0.49999982, z: -0.35355312}
+  serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
     spring: 987
@@ -10012,9 +9970,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10101,9 +10056,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10311,9 +10263,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10411,9 +10360,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10540,9 +10486,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10583,13 +10526,13 @@ ConfigurableJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1941568297}
-  serializedVersion: 4
   m_ConnectedBody: {fileID: 1466832187}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: -1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.3535527, y: -0.5000006, z: -0.35355374}
+  serializedVersion: 3
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
   m_YMotion: 0
@@ -10648,7 +10591,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_TargetRotation: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
   m_TargetAngularVelocity: {x: 0, y: 0, z: 0}
-  m_RotationDriveMode: 1
+  m_RotationDriveMode: 0
   m_AngularXDrive:
     serializedVersion: 4
     positionSpring: 987
@@ -10731,9 +10674,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10868,9 +10808,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10911,13 +10848,13 @@ HingeJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2030784344}
-  serializedVersion: 3
   m_ConnectedBody: {fileID: 170173278}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
   m_Axis: {x: 0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0.35355353, y: -0.5, z: -0.35355344}
+  serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
     spring: 987
@@ -11090,6 +11027,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1533455109
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -11128,6 +11066,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -11220,7 +11162,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &2090748532
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -11238,9 +11180,6 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

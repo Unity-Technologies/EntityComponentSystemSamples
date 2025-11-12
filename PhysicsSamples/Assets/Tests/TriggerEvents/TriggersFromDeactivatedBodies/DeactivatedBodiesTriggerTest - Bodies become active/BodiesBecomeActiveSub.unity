@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -146,6 +145,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 36922305}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 21.35, y: 4.438469, z: -33.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -154,7 +154,6 @@ Transform:
   - {fileID: 1788809800}
   - {fileID: 906535480}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &119462478
 PrefabInstance:
@@ -320,6 +319,7 @@ MonoBehaviour:
     y: 1
     z: 1
   count: 10
+  randomSeedOffset: 0
   SpawnRate: 20
   DeathRate: 25
 --- !u!4 &363783876
@@ -329,13 +329,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 363783873}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 4.55, z: 33.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &510621854
 GameObject:
@@ -369,6 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1189511344
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -407,6 +408,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 3
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -499,7 +504,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!114 &510621856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -608,13 +613,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 510621854}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -25.4, y: 0.19, z: -24.9}
   m_LocalScale: {x: 8, y: 4, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &637093591
 GameObject:
@@ -651,6 +656,7 @@ MonoBehaviour:
     y: 1
     z: 1
   count: 10
+  randomSeedOffset: 0
   SpawnRate: 22
   DeathRate: 27
 --- !u!4 &637093594
@@ -660,13 +666,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 637093591}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 4.55, z: 18.85}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &723761529
 GameObject:
@@ -700,6 +706,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 726982465
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -738,6 +745,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 3
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -830,7 +841,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!114 &723761531
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -939,13 +950,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 723761529}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 24.2, y: 0.19, z: -24.9}
   m_LocalScale: {x: 8, y: 4, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &764805408
 GameObject:
@@ -976,6 +987,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764805408}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.0700016, y: -3.918469, z: 6.488888}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -983,7 +995,6 @@ Transform:
   m_Children:
   - {fileID: 1787656059}
   m_Father: {fileID: 1114783842}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &764805410
 MonoBehaviour:
@@ -1078,6 +1089,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 441475688
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -1116,6 +1128,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1208,7 +1224,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &764805415
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1288,6 +1304,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 906535479}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.0700016, y: -3.918469, z: 6.488888}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1295,7 +1312,6 @@ Transform:
   m_Children:
   - {fileID: 1064171872}
   m_Father: {fileID: 36922307}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &906535481
 MonoBehaviour:
@@ -1390,6 +1406,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 1461671469
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -1428,6 +1445,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1520,7 +1541,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &906535486
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1597,13 +1618,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1064171871}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1.64, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 906535480}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1064171873
 MonoBehaviour:
@@ -1617,6 +1638,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 621692813
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -1655,6 +1677,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -1747,7 +1773,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1064171875
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1821,6 +1847,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1114783840}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -27.5, y: 4.438469, z: -33.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1829,7 +1856,6 @@ Transform:
   - {fileID: 1530896601}
   - {fileID: 764805409}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1530896600
 GameObject:
@@ -1860,13 +1886,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1530896600}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 4.6900005, y: -3.918469, z: 6.488888}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1114783842}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1530896602
 MonoBehaviour:
@@ -1961,6 +1987,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 674050741
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -1999,6 +2026,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2091,7 +2122,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1530896607
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2276,10 +2307,16 @@ MonoBehaviour:
     x: -0
     y: -9.81
     z: -0
+  m_SubstepCount: 1
   m_SolverIterationCount: 4
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
+  m_CollisionTolerance: 0.01
   m_SynchronizeCollisionWorld: 0
+  m_IncrementalDynamicBroadphase: 0
+  m_IncrementalStaticBroadphase: 0
+  m_MaxDynamicDepenetrationVelocity: 3
+  m_MaxStaticDepenetrationVelocity: Infinity
 --- !u!114 &1769443156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2310,6 +2347,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IgnoreTriggers: 1
   IgnoreStatic: 1
+  DeleteEntityOnClick: 0
 --- !u!114 &1769443158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2325,12 +2363,15 @@ MonoBehaviour:
   DrawColliders: 0
   DrawColliderEdges: 0
   DrawColliderAabbs: 0
-  DrawBroadphase: 0
   DrawMassProperties: 0
+  DrawBroadphase: 0
   DrawContacts: 0
   DrawCollisionEvents: 0
   DrawTriggerEvents: 0
   DrawJoints: 0
+  ColliderDisplayMode: 0
+  ColliderEdgesDisplayMode: 0
+  ColliderAabbDisplayMode: 0
 --- !u!4 &1769443159
 Transform:
   m_ObjectHideFlags: 0
@@ -2338,13 +2379,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1769443153}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1787656058
 GameObject:
@@ -2372,13 +2413,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1787656058}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1.64, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 764805409}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1787656060
 MonoBehaviour:
@@ -2392,6 +2433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 829894299
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -2430,6 +2472,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2522,7 +2568,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1787656062
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2602,13 +2648,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1788809799}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 4.6900005, y: -3.918469, z: 6.488888}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 36922307}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1788809801
 MonoBehaviour:
@@ -2703,6 +2749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ForceUniqueID: 485789853
   m_ShapeType: 0
   m_PrimitiveCenter:
     x: 0
@@ -2741,6 +2788,10 @@ MonoBehaviour:
     m_CollisionResponse:
       m_Override: 0
       m_Value: 0
+    m_DetailedStaticMeshCollision:
+      m_Override: 0
+      m_Value:
+        Value: 0
     m_Friction:
       m_Override: 0
       m_Value:
@@ -2833,7 +2884,7 @@ MonoBehaviour:
         Tag06: 0
         Tag07: 0
     m_SerializedVersion: 1
-  m_SerializedVersion: 1
+  m_SerializedVersion: 2
 --- !u!23 &1788809806
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2990,3 +3041,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ebfe93b387bf4a54989a6f911bdc11d1, type: 3}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 363783876}
+  - {fileID: 637093594}
+  - {fileID: 723761535}
+  - {fileID: 510621860}
+  - {fileID: 36922307}
+  - {fileID: 1114783842}
+  - {fileID: 1769443159}
+  - {fileID: 1695890552}
+  - {fileID: 1974154770}
+  - {fileID: 119462478}

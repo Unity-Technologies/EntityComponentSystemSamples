@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Unity.Physics.Tests
 {
-#if HAVOK_PHYSICS_EXISTS && (UNITY_EDITOR || UNITY_ANDROID ||  UNITY_IOS || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_PS5 || UNITY_GAMECORE)
+#if HAVOK_PHYSICS_EXISTS && (UNITY_EDITOR || UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_PS5 || UNITY_SWITCH || UNITY_GAMECORE)
 
     [TestFixture]
     class HavokPhysicsSamplesTestMT : UnityPhysicsSamplesTest
@@ -56,14 +56,14 @@ namespace Unity.Physics.Tests
             }
 #endif
 
-#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-            // [DOTS-10612] Tests we're skipping with HavokPhysics due to a player crash
-            if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
-            {
-                Debug.Log("Skipping " + scenePath);
-                LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
-                yield break;
-            }
+#if UNITY_STANDALONE_LINUX
+             // Tests we're skipping with HavokPhysics
+             if (scenePath.Contains("/VehicleOverTerrain.unity"))
+             {
+                 Debug.Log("Skipping " + scenePath);
+                 LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
+                 yield break;
+             }
 #endif
 
             // Don't create log messages about the number of trial days remaining
@@ -128,15 +128,16 @@ namespace Unity.Physics.Tests
             }
 #endif
 
-#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-            // [DOTS-10612] Tests we're skipping with HavokPhysics due to a player crash
-            if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
-            {
-                Debug.Log("Skipping " + scenePath);
-                LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
-                yield break;
-            }
+#if UNITY_STANDALONE_LINUX
+             // Tests we're skipping with HavokPhysics
+             if (scenePath.Contains("/VehicleOverTerrain.unity"))
+             {
+                 Debug.Log("Skipping " + scenePath);
+                 LogAssert.Expect(LogType.Log, "Skipping " + scenePath);
+                 yield break;
+             }
 #endif
+
             // Don't create log messages about the number of trial days remaining
             PlayerPrefs.SetInt("Havok.Auth.SuppressDialogs", 1);
 

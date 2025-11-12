@@ -84,7 +84,7 @@ namespace Unity.Physics.Tests.Collision.Colliders
                 if (DummyRun)
                     return;
 
-                MeshCollider.Create(Vertices, Triangles);
+                using var mesh = MeshCollider.Create(Vertices, Triangles);
             }
         }
     }

@@ -91,9 +91,10 @@ public class SingleThreadedRagdoll : MonoBehaviour
         {
             World = PhysicsWorld,
             TimeStep = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<FixedStepSimulationSystemGroup>().Timestep,
+            Gravity = PhysicsStep.Default.Gravity,
+            NumSubsteps = PhysicsStep.Default.SubstepCount,
             NumSolverIterations = PhysicsStep.Default.SolverIterationCount,
             SolverStabilizationHeuristicSettings = PhysicsStep.Default.SolverStabilizationHeuristicSettings,
-            Gravity = PhysicsStep.Default.Gravity,
             HaveStaticBodiesChanged = HaveStaticBodiesChanged
         };
 

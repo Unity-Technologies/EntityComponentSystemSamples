@@ -5,7 +5,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine.Profiling;
 
 namespace Boids
 {
@@ -13,10 +12,11 @@ namespace Boids
     [BurstCompile]
     public partial struct BoidSchoolSpawnSystem : ISystem
     {
-        private EntityQuery _boidQuery;
+        EntityQuery m_BoidQuery;
+
         public void OnCreate(ref SystemState state)
         {
-            _boidQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<Boid, LocalTransform>().Build(ref state);
+            m_BoidQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<Boid, LocalTransform>().Build(ref state);
         }
 
         public void OnUpdate(ref SystemState state)
@@ -51,7 +51,7 @@ namespace Boids
             ecb.Playback(state.EntityManager);
             // TODO: all Prefabs are currently forced to TransformUsageFlags.Dynamic by default, which means boids get a LocalTransform
             // they don't need. As a workaround, remove the component at spawn-time.
-            state.EntityManager.RemoveComponent<LocalTransform>(_boidQuery);
+            state.EntityManager.RemoveComponent<LocalTransform>(m_BoidQuery);
         }
     }
 

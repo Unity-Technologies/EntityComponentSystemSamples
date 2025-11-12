@@ -6,12 +6,12 @@ namespace Unity.DotsUISample
     //  displays Wizardo's dialogue
     public class DialogueScreen : UIScreen
     {
-        private Label dialogueLabel;
-        private Button acceptButton;
-        private Button closeButton;
+        Label m_DialogueLabel;
+        Button m_AcceptButton;
+        Button m_CloseButton;
 
-        private DialogueData dialogue;
-        private int dialogueLineIdx;
+        DialogueData m_Dialogue;
+        int m_DialogueLineIdx;
 
         public bool isDone
         {
@@ -24,12 +24,12 @@ namespace Unity.DotsUISample
             var screen = ScriptableObject.CreateInstance<DialogueScreen>();
             screen.RootElement = parentElement;
 
-            screen.dialogueLabel = screen.RootElement.Q<Label>("dialogue__text-label");
-            screen.acceptButton = screen.RootElement.Q<Button>("dialogue__accept-button");
-            screen.closeButton = screen.RootElement.Q<Button>("dialogue__close-button");
+            screen.m_DialogueLabel = screen.RootElement.Q<Label>("dialogue__text-label");
+            screen.m_AcceptButton = screen.RootElement.Q<Button>("dialogue__accept-button");
+            screen.m_CloseButton = screen.RootElement.Q<Button>("dialogue__close-button");
             
-            screen.acceptButton.clicked += screen.NextLine;
-            screen.closeButton.clicked += screen.Close;
+            screen.m_AcceptButton.clicked += screen.NextLine;
+            screen.m_CloseButton.clicked += screen.Close;
             screen.RootElement.style.display = DisplayStyle.None;
             
             return screen;
@@ -37,26 +37,26 @@ namespace Unity.DotsUISample
 
         public void SetDialogueData(DialogueData dialogue)
         {
-            dialogueLineIdx = 0;
+            m_DialogueLineIdx = 0;
             isDone = false;
-            this.dialogue = dialogue;
-            dialogueLabel.text = dialogue.Lines[0];
-            acceptButton.text = (dialogueLineIdx == dialogue.Lines.Length - 1) ? "FINISH" : "NEXT";
+            m_Dialogue = dialogue;
+            m_DialogueLabel.text = dialogue.Lines[0];
+            m_AcceptButton.text = (m_DialogueLineIdx == dialogue.Lines.Length - 1) ? "FINISH" : "NEXT";
         }
 
-        private void NextLine()
+        void NextLine()
         {
-            dialogueLineIdx++;
-            if (dialogueLineIdx == dialogue.Lines.Length)
+            m_DialogueLineIdx++;
+            if (m_DialogueLineIdx == m_Dialogue.Lines.Length)
             {
                 isDone = true;
                 return;
             }
-            acceptButton.text = (dialogueLineIdx == dialogue.Lines.Length - 1) ? "FINISH" : "NEXT";    
-            dialogueLabel.text = dialogue.Lines[dialogueLineIdx];
+            m_AcceptButton.text = (m_DialogueLineIdx == m_Dialogue.Lines.Length - 1) ? "FINISH" : "NEXT";    
+            m_DialogueLabel.text = m_Dialogue.Lines[m_DialogueLineIdx];
         }
 
-        private void Close()
+        void Close()
         {
             isDone = true;
         }

@@ -1,8 +1,6 @@
 using System;
-using Boids;
 using Unity.Entities;
 using UnityEngine;
-
 
 namespace Boids
 {
@@ -15,11 +13,7 @@ namespace Boids
         }
     }
 
-    public struct BoidObstacle : IComponentData
-    {
-    }
+    public struct BoidObstacle : IComponentData { }
 
-    public class BoidObstacleAuthoring : MonoBehaviour
-    {
-    }
+    public class BoidObstacleAuthoring : MonoBehaviour { }
 }

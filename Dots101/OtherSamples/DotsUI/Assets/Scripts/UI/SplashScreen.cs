@@ -7,7 +7,7 @@ namespace Unity.DotsUISample
     {
         public static SplashScreen Instantiate(VisualElement parentElement)
         {
-            var instance = ScriptableObject.CreateInstance<SplashScreen>();
+            var instance = CreateInstance<SplashScreen>();
             instance.RootElement = parentElement;
             instance.RootElement.style.display = DisplayStyle.None;
             return instance;

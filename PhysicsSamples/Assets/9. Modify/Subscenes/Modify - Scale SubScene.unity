@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1268,10 +1267,16 @@ MonoBehaviour:
     x: -0
     y: -9.81
     z: -0
+  m_SubstepCount: 1
   m_SolverIterationCount: 4
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
+  m_CollisionTolerance: 0.01
   m_SynchronizeCollisionWorld: 0
+  m_IncrementalDynamicBroadphase: 0
+  m_IncrementalStaticBroadphase: 0
+  m_MaxDynamicDepenetrationVelocity: 3
+  m_MaxStaticDepenetrationVelocity: Infinity
 --- !u!114 &2011618902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1302,6 +1307,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IgnoreTriggers: 1
   IgnoreStatic: 1
+  DeleteEntityOnClick: 0
 --- !u!114 &2011618904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1317,12 +1323,15 @@ MonoBehaviour:
   DrawColliders: 0
   DrawColliderEdges: 0
   DrawColliderAabbs: 0
-  DrawBroadphase: 0
   DrawMassProperties: 0
+  DrawBroadphase: 0
   DrawContacts: 0
   DrawCollisionEvents: 0
   DrawTriggerEvents: 0
   DrawJoints: 0
+  ColliderDisplayMode: 0
+  ColliderEdgesDisplayMode: 0
+  ColliderAabbDisplayMode: 0
 --- !u!4 &2011618905
 Transform:
   m_ObjectHideFlags: 0
@@ -1330,13 +1339,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2011618899}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2073659223
 PrefabInstance:
@@ -1579,3 +1588,22 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ebfe93b387bf4a54989a6f911bdc11d1, type: 3}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 412779813}
+  - {fileID: 1182374140}
+  - {fileID: 2094544156}
+  - {fileID: 363586807}
+  - {fileID: 2073659223}
+  - {fileID: 1892737179}
+  - {fileID: 354906971}
+  - {fileID: 425966408}
+  - {fileID: 309046662}
+  - {fileID: 2011618905}
+  - {fileID: 2104125838}
+  - {fileID: 1044781087}
+  - {fileID: 1077884306}
+  - {fileID: 745856606}
+  - {fileID: 1327602112}

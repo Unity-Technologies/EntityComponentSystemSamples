@@ -28,41 +28,15 @@ partial class CalculateSkinMatrixSystemBase : SystemBase
             );
     }
 
-    protected override void OnUpdate()
+    partial struct CalculateSkinMatricesJob : IJobEntity
     {
-        var boneCount = m_BoneEntityQuery.CalculateEntityCount();
-        var bonesLocalToWorld = new NativeParallelHashMap<Entity, float4x4>(boneCount, Allocator.TempJob);
-        var bonesLocalToWorldParallel = bonesLocalToWorld.AsParallelWriter();
+        [ReadOnly]
+        public NativeParallelHashMap<Entity, float4x4> bonesLocalToWorld;
+        [ReadOnly]
+        public NativeParallelHashMap<Entity, float4x4> rootWorldToLocal;
 
-        var dependency = Dependency;
-
-        var bone = Entities
-            .WithName("GatherBoneTransforms")
-            .WithAll<BoneTag>()
-            .ForEach((Entity entity, in LocalToWorld localToWorld) =>
-        {
-            bonesLocalToWorldParallel.TryAdd(entity, localToWorld.Value);
-        }).ScheduleParallel(dependency);
-
-        var rootCount = m_RootEntityQuery.CalculateEntityCount();
-        var rootWorldToLocal = new NativeParallelHashMap<Entity, float4x4>(rootCount, Allocator.TempJob);
-        var rootWorldToLocalParallel = rootWorldToLocal.AsParallelWriter();
-
-        var root = Entities
-            .WithName("GatherRootTransforms")
-            .WithAll<RootTag>()
-            .ForEach((Entity entity, in LocalToWorld localToWorld) =>
-        {
-            rootWorldToLocalParallel.TryAdd(entity, math.inverse(localToWorld.Value));
-        }).ScheduleParallel(dependency);
-
-        dependency = JobHandle.CombineDependencies(bone, root);
-
-        dependency = Entities
-            .WithName("CalculateSkinMatrices")
-            .WithReadOnly(bonesLocalToWorld)
-            .WithReadOnly(rootWorldToLocal)
-            .ForEach((ref DynamicBuffer<SkinMatrix> skinMatrices, in DynamicBuffer<BindPose> bindPoses, in DynamicBuffer<BoneEntity> bones, in RootEntity root) =>
+        void Execute(ref DynamicBuffer<SkinMatrix> skinMatrices, in DynamicBuffer<BindPose> bindPoses,
+            in DynamicBuffer<BoneEntity> bones, in RootEntity root)
         {
             // Loop over each bone
             for (int i = 0; i < skinMatrices.Length; ++i)
@@ -91,7 +65,60 @@ partial class CalculateSkinMatrixSystemBase : SystemBase
                     Value = new float3x4(matrix.c0.xyz, matrix.c1.xyz, matrix.c2.xyz, matrix.c3.xyz)
                 };
             }
-        }).ScheduleParallel(dependency);
+        }
+    }
+
+    [WithAll(typeof(BoneTag))]
+    partial struct GatherBoneTransformsBoneJob : IJobEntity
+    {
+        public NativeParallelHashMap<Entity, float4x4>.ParallelWriter bonesLocalToWorldParallel;
+
+        void Execute(Entity entity, in LocalToWorld localToWorld)
+        {
+            bonesLocalToWorldParallel.TryAdd(entity, localToWorld.Value);
+        }
+    }
+
+    [WithAll(typeof(RootTag))]
+    partial struct GatherBoneTransformsRootJob : IJobEntity
+    {
+        public NativeParallelHashMap<Entity, float4x4>.ParallelWriter rootWorldToLocalParallel;
+
+        void Execute(Entity entity, in LocalToWorld localToWorld)
+        {
+            rootWorldToLocalParallel.TryAdd(entity, math.inverse(localToWorld.Value));
+        }
+    }
+
+    protected override void OnUpdate()
+    {
+        var boneCount = m_BoneEntityQuery.CalculateEntityCount();
+        var bonesLocalToWorld = new NativeParallelHashMap<Entity, float4x4>(boneCount, Allocator.TempJob);
+        var bonesLocalToWorldParallel = bonesLocalToWorld.AsParallelWriter();
+
+        var dependency = Dependency;
+
+        var bone = new GatherBoneTransformsBoneJob
+        {
+            bonesLocalToWorldParallel = bonesLocalToWorldParallel
+        }.ScheduleParallel(dependency);
+
+        var rootCount = m_RootEntityQuery.CalculateEntityCount();
+        var rootWorldToLocal = new NativeParallelHashMap<Entity, float4x4>(rootCount, Allocator.TempJob);
+        var rootWorldToLocalParallel = rootWorldToLocal.AsParallelWriter();
+
+        var root = new GatherBoneTransformsRootJob
+        {
+            rootWorldToLocalParallel = rootWorldToLocalParallel
+        }.ScheduleParallel(dependency);
+
+        dependency = JobHandle.CombineDependencies(bone, root);
+
+        dependency = new CalculateSkinMatricesJob
+        {
+            bonesLocalToWorld = bonesLocalToWorld,
+            rootWorldToLocal = rootWorldToLocal,
+        }.ScheduleParallel(dependency);
 
         Dependency = JobHandle.CombineDependencies(bonesLocalToWorld.Dispose(dependency), rootWorldToLocal.Dispose(dependency));
     }

@@ -473,9 +473,10 @@ public partial class SingleThreadedPhysicsSystem : SystemBase
             {
                 World = PhysicsWorld,
                 TimeStep = SystemAPI.Time.DeltaTime,
-                SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
-                NumSolverIterations = stepComponent.SolverIterationCount,
                 Gravity = stepComponent.Gravity,
+                NumSubsteps = stepComponent.SubstepCount,
+                NumSolverIterations = stepComponent.SolverIterationCount,
+                SolverStabilizationHeuristicSettings = stepComponent.SolverStabilizationHeuristicSettings,
                 HaveStaticBodiesChanged = HaveStaticBodiesChanged
             };
 

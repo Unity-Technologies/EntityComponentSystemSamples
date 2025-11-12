@@ -38,12 +38,11 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -94,16 +93,18 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 4fcc45bdaef84c142a7aa2a902873c77,
+    type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_BuildSettings:
-    serializedVersion: 2
+    serializedVersion: 3
     agentTypeID: 0
     agentRadius: 0.5
     agentHeight: 2
@@ -116,7 +117,9 @@ NavMeshSettings:
     cellSize: 0.16666667
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 0
+    buildHeightMesh: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -125,12 +128,13 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 1563806337}
     m_Modifications:
-    - target: {fileID: 7815050059990202975, guid: 2356c344c70793c4d9b771eb07e460c9,
+    - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
         type: 3}
-      propertyPath: m_Name
-      value: L4_City_46080
+      propertyPath: m_RootOrder
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
         type: 3}
@@ -149,6 +153,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
         type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
+        type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
@@ -160,16 +169,6 @@ PrefabInstance:
     - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
-        type: 3}
-      propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7815050059990202968, guid: 2356c344c70793c4d9b771eb07e460c9,
@@ -187,7 +186,19 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7815050059990202975, guid: 2356c344c70793c4d9b771eb07e460c9,
+        type: 3}
+      propertyPath: m_Name
+      value: L4_City_46080
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7815050059990202975, guid: 2356c344c70793c4d9b771eb07e460c9,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1288189981}
   m_SourcePrefab: {fileID: 100100000, guid: 2356c344c70793c4d9b771eb07e460c9, type: 3}
 --- !u!4 &1288189979 stripped
 Transform:
@@ -214,6 +225,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_MotionType: 2
+  m_Smoothing: 0
   m_Mass: 1
   m_LinearDamping: 0.01
   m_AngularDamping: 0.05
@@ -241,6 +253,7 @@ MonoBehaviour:
     x: 0.4
     y: 0.4
     z: 0.4
+  m_WorldIndex: 0
   m_CustomTags:
     Tag00: 0
     Tag01: 0
@@ -273,11 +286,17 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1563806336}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1288189979}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 1563806337}

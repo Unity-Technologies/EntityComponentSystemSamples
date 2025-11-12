@@ -6,29 +6,29 @@ namespace Unity.DotsUISample
 {
     public class InventoryScreen : UIScreen
     {
-        private Label energyLabel;
-        private Button backButton;
-        private VisualElement slotsContainer;
+        Label m_EnergyLabel;
+        Button m_BackButton;
+        VisualElement m_SlotsContainer;
 
-        private const int k_InitialSlotCount = 16;
-        private InventorySlot[] slots = new InventorySlot[k_InitialSlotCount];
+        const int k_InitialSlotCount = 16;
+        InventorySlot[] m_Slots = new InventorySlot[k_InitialSlotCount];
 
-        private const string k_SlotUssClassName = "inventory-slot";
+        const string k_SlotUssClassName = "inventory-slot";
 
         public struct BackClickedEvent : IComponentData {}
 
         public static InventoryScreen Instantiate(VisualElement parentElement)
         {
-            var screen = ScriptableObject.CreateInstance<InventoryScreen>();
+            var screen = CreateInstance<InventoryScreen>();
             screen.RootElement = parentElement;    
             
-            screen.energyLabel = screen.RootElement.Q<Label>("inventory__energy-label");
-            screen.backButton = screen.RootElement.Q<Button>("inventory__back-button");
-            screen.slotsContainer = screen.RootElement.Q<VisualElement>("inventory__slots-container");
+            screen.m_EnergyLabel = screen.RootElement.Q<Label>("inventory__energy-label");
+            screen.m_BackButton = screen.RootElement.Q<Button>("inventory__back-button");
+            screen.m_SlotsContainer = screen.RootElement.Q<VisualElement>("inventory__slots-container");
 
             screen.InitializeSlots();
 
-            screen.backButton.clicked += screen.OnBackClicked;
+            screen.m_BackButton.clicked += screen.OnBackClicked;
                 
             screen.RootElement.style.display = DisplayStyle.None;
             return screen;
@@ -36,13 +36,13 @@ namespace Unity.DotsUISample
 
         public void UpdateInventory(DynamicBuffer<InventoryItem> itemsBuf, int energyCount, CollectablesData collectablesData)
         {
-            for (int i = 0; i < itemsBuf.Length && i < slots.Length; i++)
+            for (int i = 0; i < itemsBuf.Length && i < m_Slots.Length; i++)
             {
                 var type = itemsBuf[i].Type;
                 var sprite = collectablesData.Collectables[(int)type].Icon;
-                slots[i].SetItem(sprite);
+                m_Slots[i].SetItem(sprite);
             }
-            energyLabel.text = energyCount.ToString();
+            m_EnergyLabel.text = energyCount.ToString();
         }
 
         public void OnBackClicked()
@@ -52,14 +52,14 @@ namespace Unity.DotsUISample
             entityCommandBuffer.AddComponent<Event>(entity);
         }
 
-        private void InitializeSlots()
+        void InitializeSlots()
         {
             for (int i = 0; i < k_InitialSlotCount; i++)
             {
                 var slot = new InventorySlot();
                 slot.AddToClassList(k_SlotUssClassName);
-                slotsContainer.Add(slot);
-                slots[i] = slot;
+                m_SlotsContainer.Add(slot);
+                m_Slots[i] = slot;
             }
         }
     }

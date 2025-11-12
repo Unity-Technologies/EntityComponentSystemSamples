@@ -1,29 +1,26 @@
-using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine.VFX;
 
 [RequireMatchingQueriesForUpdate]
-public partial class JumpingSpherePSSystem : SystemBase
+public partial struct JumpingSpherePSSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        //Make the sphere jumps
         var time = (float)SystemAPI.Time.ElapsedTime;
-        var y = math.abs(math.cos(time*3f));
-        Entities.WithAll<JumpingSphereTag>().ForEach((ref LocalTransform localTransform) =>
+        var y = math.abs(math.cos(time * 3f));
+
+        //Make the sphere jumps
+        foreach (var translation in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<JumpingSphereTag>())
         {
-            localTransform.Position = new float3(0, y, 0);
+            translation.ValueRW.Position = new float3(0, y, 0);
+        }
 
-        }).ScheduleParallel();
-
-        //Play ParticleSystem when the sphere is touching the ground
-        Entities.WithoutBurst().WithAll<JumpingSpherePSTag>().ForEach((UnityEngine.VFX.VisualEffect ps ) =>
+        //Plays the particle system based on variable y
+        foreach (var particleSystem in SystemAPI.Query<SystemAPI.ManagedAPI.UnityEngineComponent<VisualEffect>>().WithAll<JumpingSpherePSTag>())
         {
-            if(y < 0.05f) ps.Play();
-
-        }).Run();
+            if (y < 0.05f) particleSystem.Value.Play();
+        }
     }
 }

@@ -70,6 +70,7 @@ PlayerSettings:
   androidStartInFullscreen: 1
   androidRenderOutsideSafeArea: 0
   androidUseSwappy: 0
+  androidDisplayOptions: 1
   androidBlitType: 1
   androidResizeableActivity: 0
   androidDefaultWindowWidth: 1920
@@ -86,6 +87,7 @@ PlayerSettings:
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
   Force IOS Speakers When Recording: 0
+  audioSpatialExperience: 0
   deferSystemGesturesMode: 0
   hideHomeButton: 0
   submitAnalytics: 0
@@ -132,6 +134,7 @@ PlayerSettings:
   switchNVNMaxPublicSamplerIDCount: 0
   switchMaxWorkerMultiple: 8
   switchNVNGraphicsFirmwareMemory: 32
+  switchGraphicsJobsSyncAfterKick: 1
   vulkanNumSwapchainBuffers: 2
   vulkanEnableSetSRGBWrite: 0
   vulkanEnablePreTransform: 0
@@ -281,6 +284,9 @@ PlayerSettings:
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 1
   AndroidIsGame: 1
+  androidAppCategory: 3
+  useAndroidAppCategory: 1
+  androidAppCategoryOther: 
   AndroidEnableTango: 0
   androidEnableBanner: 1
   androidUseLowAccuracyLocation: 0
@@ -429,13 +435,16 @@ PlayerSettings:
     m_GraphicsJobMode: 0
   m_BuildTargetGraphicsAPIs:
   - m_BuildTarget: MacStandaloneSupport
-    m_APIs: 1100000010000000
-    m_Automatic: 1
+    m_APIs: 10000000
+    m_Automatic: 0
   - m_BuildTarget: iOSSupport
     m_APIs: 10000000
     m_Automatic: 1
   - m_BuildTarget: AndroidPlayer
     m_APIs: 15000000
+    m_Automatic: 0
+  - m_BuildTarget: WindowsStandaloneSupport
+    m_APIs: 0200000012000000
     m_Automatic: 0
   m_BuildTargetVRSettings: []
   m_DefaultShaderChunkSizeInMB: 16
@@ -457,6 +466,16 @@ PlayerSettings:
   - serializedVersion: 2
     m_BuildTarget: PS4
     m_EncodingQuality: 1
+  m_BuildTargetGroupHDRCubemapEncodingQuality:
+  - serializedVersion: 2
+    m_BuildTarget: Standalone
+    m_EncodingQuality: 2
+  - serializedVersion: 2
+    m_BuildTarget: XboxOne
+    m_EncodingQuality: 2
+  - serializedVersion: 2
+    m_BuildTarget: PS4
+    m_EncodingQuality: 2
   m_BuildTargetGroupLightmapSettings: []
   m_BuildTargetGroupLoadStoreDebugModeSettings: []
   m_BuildTargetNormalMapEncoding: []
@@ -720,12 +739,12 @@ PlayerSettings:
   webGLMemoryLinearGrowthStep: 16
   webGLMemoryGeometricGrowthStep: 0.2
   webGLMemoryGeometricGrowthCap: 96
-  webGLEnableWebGPU: 0
   webGLPowerPreference: 2
   webGLWebAssemblyTable: 0
   webGLWebAssemblyBigInt: 0
   webGLCloseOnQuit: 0
   webWasm2023: 0
+  webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
     : UNITY_POST_PROCESSING_STACK_V2;DISABLE_HYBRID_V2_SRP_LOGS
     Android: UNITY_POST_PROCESSING_STACK_V2;DISABLE_HYBRID_V2_SRP_LOGS
@@ -860,3 +879,5 @@ PlayerSettings:
   insecureHttpOption: 0
   androidVulkanDenyFilterList: []
   androidVulkanAllowFilterList: []
+  androidVulkanDeviceFilterListAsset: {fileID: 0}
+  d3d12DeviceFilterListAsset: {fileID: 0}

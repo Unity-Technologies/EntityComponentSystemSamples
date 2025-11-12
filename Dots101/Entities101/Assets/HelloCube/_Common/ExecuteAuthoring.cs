@@ -7,7 +7,6 @@ namespace HelloCube
     {
         public bool MainThread;
         public bool IJobEntity;
-        public bool Aspects;
         public bool Prefabs;
         public bool IJobChunk;
         public bool Reparenting;
@@ -28,7 +27,6 @@ namespace HelloCube
 
                 if (authoring.MainThread) AddComponent<ExecuteMainThread>(entity);
                 if (authoring.IJobEntity) AddComponent<ExecuteIJobEntity>(entity);
-                if (authoring.Aspects) AddComponent<ExecuteAspects>(entity);
                 if (authoring.Prefabs) AddComponent<ExecutePrefabs>(entity);
                 if (authoring.IJobChunk) AddComponent<ExecuteIJobChunk>(entity);
                 if (authoring.GameObjectSync) AddComponent<ExecuteGameObjectSync>(entity);
@@ -44,59 +42,29 @@ namespace HelloCube
         }
     }
 
-    public struct ExecuteMainThread : IComponentData
-    {
-    }
+    public struct ExecuteMainThread : IComponentData { }
 
-    public struct ExecuteIJobEntity : IComponentData
-    {
-    }
+    public struct ExecuteIJobEntity : IComponentData { }
 
-    public struct ExecuteAspects : IComponentData
-    {
-    }
+    public struct ExecutePrefabs : IComponentData { }
 
-    public struct ExecutePrefabs : IComponentData
-    {
-    }
+    public struct ExecuteIJobChunk : IComponentData { }
 
-    public struct ExecuteIJobChunk : IComponentData
-    {
-    }
+    public struct ExecuteGameObjectSync : IComponentData { }
 
-    public struct ExecuteGameObjectSync : IComponentData
-    {
-    }
+    public struct ExecuteReparenting : IComponentData { }
 
-    public struct ExecuteReparenting : IComponentData
-    {
-    }
+    public struct ExecuteEnableableComponents : IComponentData { }
 
-    public struct ExecuteEnableableComponents : IComponentData
-    {
-    }
+    public struct ExecuteCrossQuery : IComponentData { }
 
-    public struct ExecuteCrossQuery : IComponentData
-    {
-    }
+    public struct ExecuteRandomSpawn : IComponentData { }
 
-    public struct ExecuteRandomSpawn : IComponentData
-    {
-    }
+    public struct ExecuteFirstPersonController : IComponentData { }
 
-    public struct ExecuteFirstPersonController : IComponentData
-    {
-    }
+    public struct ExecuteFixedTimestep : IComponentData { }
 
-    public struct ExecuteFixedTimestep : IComponentData
-    {
-    }
+    public struct ExecuteStateChange : IComponentData { }
 
-    public struct ExecuteStateChange : IComponentData
-    {
-    }
-
-    public struct ExecuteClosestTarget : IComponentData
-    {
-    }
+    public struct ExecuteClosestTarget : IComponentData { }
 }

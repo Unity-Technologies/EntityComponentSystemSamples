@@ -8,7 +8,7 @@ namespace Unity.DotsUISample
     {
         public static HintScreen Instantiate(VisualElement root)
         {
-            var screen = ScriptableObject.CreateInstance<HintScreen>();
+            var screen = CreateInstance<HintScreen>();
             screen.RootElement = root;
             screen.RootElement.style.display = DisplayStyle.None;
             return screen;
@@ -19,7 +19,7 @@ namespace Unity.DotsUISample
             Vector3 screenPosition = camera.WorldToScreenPoint(position + Vector3.up * 1.5f);
             screenPosition = RuntimePanelUtils.ScreenToPanel(RootElement.panel,
                 new Vector2(screenPosition.x, Screen.height - screenPosition.y));
-            RootElement.transform.position = new Vector3(screenPosition.x, screenPosition.y, screenPosition.z);
+            RootElement.style.translate = screenPosition;
         }
 
         public void SetMessage(string message)

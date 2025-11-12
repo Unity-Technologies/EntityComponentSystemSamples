@@ -2,7 +2,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Burst;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -152,9 +151,9 @@ namespace Boids
             uniqueBoidTypes.Dispose();
         }
 
-                // In this sample there are 3 total unique boid variants, one for each unique value of the
+        // In this sample there are 3 total unique boid variants, one for each unique value of the
         // Boid SharedComponent (note: this includes the default uninitialized value at
-        // index 0, which isnt actually used in the sample).
+        // index 0, which isn't actually used in the sample).
 
         // This accumulates the `positions` (separations) and `headings` (alignments) of all the boids in each cell to:
         // 1) count the number of boids in each cell
@@ -163,7 +162,7 @@ namespace Boids
         // In this context, the cell represents the hashed bucket of boids that are near one another within cellRadius
         // floored to the nearest int3.
         // Note: `IJobNativeParallelMultiHashMapMergedSharedKeyIndices` is a custom job to iterate safely/efficiently over the
-        // NativeContainer used in this sample (`NativeParallelMultiHashMap`). Currently these kinds of changes or additions of
+        // NativeContainer used in this sample (`NativeParallelMultiHashMap`). Currently, these kinds of changes or additions of
         // custom jobs generally require access to data/fields that aren't available through the `public` API of the
         // containers. This is why the custom job type `IJobNativeParallelMultiHashMapMergedSharedKeyIndicies` is declared in
         // the DOTS package (which can see the `internal` container fields) and not in the Boids sample.

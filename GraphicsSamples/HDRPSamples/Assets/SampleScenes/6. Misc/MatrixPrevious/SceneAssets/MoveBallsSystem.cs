@@ -64,10 +64,14 @@ public partial class MoveBallsSystem : SystemBase
     protected override void OnUpdate()
     {
         EntityCommandBuffer entityOriginsCommandBuffer = new EntityCommandBuffer(Allocator.TempJob, PlaybackPolicy.SinglePlayback );
-        Entities.WithNone<BallOriginalTranslation>().ForEach((Entity entity, in LocalTransform localTransform, in SphereId sphereId) =>
+
+        foreach (var (localTransform, entity) in
+                 SystemAPI.Query<RefRO<LocalTransform>>().WithNone<BallOriginalTranslation>().WithAll<SphereId>()
+                     .WithEntityAccess())
         {
-            entityOriginsCommandBuffer.AddComponent(entity, new BallOriginalTranslation{ Value = localTransform.Position });
-        }).Run();
+            entityOriginsCommandBuffer.AddComponent(entity, new BallOriginalTranslation{ Value = localTransform.ValueRO.Position });
+        }
+
         entityOriginsCommandBuffer.Playback(EntityManager);
         entityOriginsCommandBuffer.Dispose();
 

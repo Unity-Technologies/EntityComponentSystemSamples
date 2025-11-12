@@ -15,9 +15,5 @@ namespace Tutorials.Firefighters
         }
     }
 
-    public struct Pond : IComponentData
-    {
-
-    }
+    public struct Pond : IComponentData { }
 }
-

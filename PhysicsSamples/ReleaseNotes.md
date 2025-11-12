@@ -1,6 +1,12 @@
 # Release Notes
 All notable changes to this project will be documented in this file.
 
+## [Physics Samples Project for post 1.3.0]
+### Changes
+* Changed the Joints - Parade demo such that the BreakJoint1 MaxImpulse was changed from (10,10,10) to (2,2,2).
+
+### Fixes
+
 ## [Physics Samples Project for 1.3.0]
 ### Changes
 * Added demo scene `Modify Collider Geometry.unity` demonstrating runtime collider deformations. In the demo, the geometry of various types of colliders are modified via the new `ColliderBakeTransformAuthoring` component, which lets you create cyclic animations during which a game object's collider and its visuals are deformed over time. This is achieved through use of the `Collider.BakeTransform` function, which applies an affine transformation to a collider, correspondingly rotating, translating, scaling and shearing its geometry in the process. 

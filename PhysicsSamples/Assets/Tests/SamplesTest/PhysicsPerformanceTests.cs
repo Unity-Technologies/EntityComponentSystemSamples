@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -19,6 +20,41 @@ namespace Unity.Physics.Tests.PerformanceTests
     internal class PerformanceTestUtils
     {
         public const int k_PhysicsFrameCount = 800;
+
+        private static string[] s_FilteredOutScenes =
+        {
+#if UNITY_STANDALONE_LINUX
+            // [DOTS-9376] Currently hanging with Unity.Physics.Tests.PerformanceTests.Havok_PerformanceTest_Parallel.LoadScenes
+            "/ConvexCollisionPerformanceTest.unity",
+            "/RagdollPerformanceTest.unity",
+            "/SphereCollisionPerformanceTest.unity",
+            "/CubeCollisionPerformanceTest.unity",
+#endif
+#if UNITY_IOS
+            "/RagdollPerformanceTest.unity",
+#endif
+#if UNITY_PS4 || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_WIN
+            // DOTS-10319 - Crashing on PS4, Linux, and Windows
+            "/TreeLifetimePerformanceTest.unity",
+#endif
+        };
+
+        private static string[] s_UnityPhysicsOnlyFilterIn =
+        {
+            "/DetailedStaticMeshCollision",
+        };
+
+        private static string[] s_SubsteppedFilterInOnly =
+        {
+#if UNITY_STANDALONE_LINUX
+            // [DOTS-9376] Currently hanging with Unity.Physics.Tests.PerformanceTests.Havok_PerformanceTest_Parallel.LoadScenes
+            "/ChainTestWithMassPerformanceTest.unity",
+#else
+            "/SphereCollisionPerformanceTest.unity",
+            "/CubeCollisionPerformanceTest.unity",
+            "/ChainTestWithMassPerformanceTest.unity",
+#endif
+        };
 
         public static IEnumerator RunTest(int frameCount, List<SampleGroup> sampleGroups, List<string> lowLevelMarkers)
         {
@@ -137,8 +173,23 @@ namespace Unity.Physics.Tests.PerformanceTests
         }
 
 #endif
-
         public static IEnumerable GetPerformanceTestData()
+        {
+            var excludeByDefault = s_FilteredOutScenes.Concat(s_UnityPhysicsOnlyFilterIn).ToArray();
+            return GetPerformanceTestByDefault(excludeByDefault, new string[0]);
+        }
+
+        public static IEnumerable GetUnityPhysicsOnlyPerformanceTestData()
+        {
+            return GetPerformanceTestByDefault(new string[0], s_UnityPhysicsOnlyFilterIn);
+        }
+
+        public static IEnumerable GetSubsteppedPerformanceTestData()
+        {
+            return GetPerformanceTestByDefault(new string[0], s_SubsteppedFilterInOnly);
+        }
+
+        public static IEnumerable GetPerformanceTestByDefault(string[] s_FilteredOut, string[] s_FilteredOnly)
         {
             var scenes = new List<TestFixtureData>();
 
@@ -148,30 +199,34 @@ namespace Unity.Physics.Tests.PerformanceTests
                 var scenePath = SceneUtility.GetScenePathByBuildIndex(sceneIndex);
                 if (scenePath.Contains("Tests/Performance"))
                 {
-#if UNITY_STANDALONE_LINUX
-                    // [DOTS-9376] Currently hanging with Unity.Physics.Tests.PerformanceTests.Havok_PerformanceTest_Parallel.LoadScenes
-                    if (scenePath.Contains("/ConvexCollisionPerformanceTest.unity") ||
-                        scenePath.Contains("/RagdollPerformanceTest.unity") ||
-                        scenePath.Contains("/SphereCollisionPerformanceTest.unity") ||
-                        scenePath.Contains("/CubeCollisionPerformanceTest.unity"))
+                    // Skip scenes included in the filter
+                    if (s_FilteredOut.Length > 0 && s_FilteredOut.Any(filter => scenePath.Contains(filter)))
                         continue;
-#endif
-#if UNITY_IOS
-                    if (scenePath.Contains("/RagdollPerformanceTest.unity"))
-                        continue;
-#endif
-#if UNITY_PS4
-                    // DOTS-10401 - Failing on PS4
-                    if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
-                        continue;
-#endif
-                    var sceneName = Path.GetFileName(scenePath);
-                    scenes.Add(new TestFixtureData(sceneName, scenePath));
 
-                    // add another test case with incremental static broadphase enabled for this scene
+                    // Add only scenes included in the filter
+                    if (s_FilteredOnly.Length > 0)
+                    {
+                        if (s_FilteredOnly.Any(filter => scenePath.Contains(filter)))
+                        {
+                            var _sceneName = Path.GetFileName(scenePath);
+                            scenes.Add(new TestFixtureData(_sceneName, scenePath));
+                        }
+
+                        continue;
+                    }
+
+                    // Include any scene that contains the specified path if no filters are applied
+                    var sceneName = Path.GetFileName(scenePath);
+
+                    // Add two test cases for this scene: one with and one without incremental static broadphase enabled.
                     if (scenePath.Contains("/TreeLifetimePerformanceTest.unity"))
                     {
-                        scenes.Add(new TestFixtureData(sceneName, scenePath, Tuple.Create("Incremental Static Broadphase", true)));
+                        scenes.Add(PerformanceTestFixture.CreateIncrementalBroadphaseTestFixtureData(sceneName, scenePath, true));
+                        scenes.Add(PerformanceTestFixture.CreateIncrementalBroadphaseTestFixtureData(sceneName, scenePath, false));
+                    }
+                    else
+                    {
+                        scenes.Add(PerformanceTestFixture.CreateTestFixtureData(sceneName, scenePath));
                     }
                 }
             }
@@ -207,6 +262,16 @@ namespace Unity.Physics.Tests.PerformanceTests
     {
         readonly string m_ScenePath;
         readonly bool m_IncrementalStaticBroadphase;
+
+        public static TestFixtureData CreateTestFixtureData(string sceneName, string scenePath)
+        {
+            return new TestFixtureData(sceneName, scenePath);
+        }
+
+        public static TestFixtureData CreateIncrementalBroadphaseTestFixtureData(string sceneName, string scenePath, bool incrementalStaticBroadphaseEnabled)
+        {
+            return new TestFixtureData(sceneName, scenePath, Tuple.Create("Incremental Static Broadphase", incrementalStaticBroadphaseEnabled));
+        }
 
         public PerformanceTestFixture(string sceneName, string scenePath)
         {
@@ -255,5 +320,59 @@ namespace Unity.Physics.Tests.PerformanceTests
         }
 
 #endif
+    }
+
+    [TestFixtureSource(typeof(PerformanceTestUtils), nameof(PerformanceTestUtils.GetSubsteppedPerformanceTestData))]
+    internal class SubsteppedPerformanceTestFixture : UnityPhysicsSamplesTest
+    {
+        readonly string m_ScenePath;
+
+        public SubsteppedPerformanceTestFixture(string sceneName, string scenePath)
+        {
+            m_ScenePath = scenePath;
+        }
+
+        [UnityTest, Performance]
+        [Timeout(10000000)]
+        public IEnumerator UnityPhysicsTest([Values(2, 4)] int numSubsteps)
+        {
+            ConfigureSimulation(World.DefaultGameObjectInjectionWorld, SimulationType.UnityPhysics,
+                multiThreaded: true, numSubsteps: numSubsteps);
+
+            SceneManager.LoadScene(m_ScenePath);
+
+            var sampleGroups = new List<SampleGroup>();
+            var lowLevelProfilingMarkers = new List<string>();
+            PerformanceTestUtils.GetProfilingRequestInfo(ref sampleGroups, ref lowLevelProfilingMarkers);
+
+            return PerformanceTestUtils.RunTest(PerformanceTestUtils.k_PhysicsFrameCount, sampleGroups, lowLevelProfilingMarkers);
+        }
+    }
+
+    [TestFixtureSource(typeof(PerformanceTestUtils), nameof(PerformanceTestUtils.GetUnityPhysicsOnlyPerformanceTestData))]
+    internal class UnityPhysicsPerformanceTestFixture : UnityPhysicsSamplesTest
+    {
+        readonly string m_ScenePath;
+
+        public UnityPhysicsPerformanceTestFixture(string sceneName, string scenePath)
+        {
+            m_ScenePath = scenePath;
+        }
+
+        [UnityTest, Performance]
+        [Timeout(10000000)]
+        public IEnumerator UnityPhysicsTest()
+        {
+            ConfigureSimulation(World.DefaultGameObjectInjectionWorld, SimulationType.UnityPhysics,
+                multiThreaded: true);
+
+            SceneManager.LoadScene(m_ScenePath);
+
+            var sampleGroups = new List<SampleGroup>();
+            var lowLevelProfilingMarkers = new List<string>();
+            PerformanceTestUtils.GetProfilingRequestInfo(ref sampleGroups, ref lowLevelProfilingMarkers);
+
+            return PerformanceTestUtils.RunTest(PerformanceTestUtils.k_PhysicsFrameCount, sampleGroups, lowLevelProfilingMarkers);
+        }
     }
 }
