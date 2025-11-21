@@ -19,16 +19,6 @@ namespace ContentManagement.Sample
             state.RequireForUpdate<RemoteContent>();
             state.RequireForUpdate<HighLowWeakScene>();
             initialized = false;
-            ContentDeliveryGlobalState.RegisterForContentUpdateCompletion(UpdateStateCallback);
-        }
-        
-        private void UpdateStateCallback(ContentDeliveryGlobalState.ContentUpdateState contentUpdateState)
-        {
-            Debug.Log($"<color=green>Content Delivery Global State:</color> {contentUpdateState}");
-            if (contentUpdateState >= ContentDeliveryGlobalState.ContentUpdateState.ContentReady)
-            {
-                // Track the state of your content and set when your content is ready to use
-            }
         }
 
         public void OnUpdate(ref SystemState state)
