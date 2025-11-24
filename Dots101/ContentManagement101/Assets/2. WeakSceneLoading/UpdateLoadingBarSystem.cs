@@ -49,7 +49,7 @@ namespace ContentManagement.Sample
                             continue;
                                 
                         float progress = (float) downloadService.TotalDownloadedBytes / downloadService.TotalBytes; 
-                        float normalizedProgress = math.max(0f, math.min(1f, progress));
+                        float normalizedProgress = math.clamp(progress, 0f, 1f);
                         m_ProgressBar.value = normalizedProgress;
                         m_ProgressBar.title = $"[{ContentDeliveryGlobalState.CurrentContentUpdateState}]: {downloadService.Name} - {normalizedProgress*100}% ";
                     }    
