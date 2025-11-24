@@ -33,9 +33,9 @@ namespace ContentManagement.Sample
 
             // Displays the loading bar used during the following loading and download steps:
             // - DownloadingCatalogInfo
-            // - DownloadingCatalogs
-            // - DownloadingLocalCatalogs
-            // - DownloadingContentSet
+            // - DownloadingCatalogs (catalog.bin)
+            // - DownloadingLocalCatalogs (catalog.bin from StreamingAssets)
+            // - DownloadingContentSet (artifacts folders/files)
             if (ContentDeliveryGlobalState.CurrentContentUpdateState < ContentDeliveryGlobalState.ContentUpdateState.ContentReady)
             {
                 if (ContentDeliveryGlobalState.DeliveryService != null && ContentDeliveryGlobalState.DeliveryService.DownloadServices != null)
