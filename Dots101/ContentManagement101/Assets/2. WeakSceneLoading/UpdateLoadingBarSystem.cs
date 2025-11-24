@@ -1,8 +1,8 @@
-﻿using Unity.Entities;
-using Unity.Entities.Content;
+﻿using UnityEngine;
+using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using UnityEngine.UIElements;
+using Unity.Entities.Content;
 
 namespace ContentManagement.Sample
 {
@@ -17,28 +17,18 @@ namespace ContentManagement.Sample
             isInitialized = false;
             RequireForUpdate<HighLowWeakScene>();
         }
-        
-        private void UpdateStateCallback(ContentDeliveryGlobalState.ContentUpdateState contentUpdateState)
-        {
-            if (contentUpdateState >= ContentDeliveryGlobalState.ContentUpdateState.ContentReady)
-            {
-                // Track the state of your content and set when your content is ready to use
-                m_ProgressBar.style.display = DisplayStyle.None;
-            }
-        }
 
         protected override void OnUpdate()
         {
-            var progressBarUI = Object.FindAnyObjectByType<LoadingBarUI>();
-            if (progressBarUI == null)
-                return;
-           
             if (!isInitialized)
             {
+                var progressBarUI = Object.FindAnyObjectByType<LoadingBarUI>();
+                if (progressBarUI == null)
+                    return;
+                
                 isInitialized = true;
                 m_ProgressBar = progressBarUI.ProgressBar;
-                m_ProgressBar.style.display = DisplayStyle.Flex;
-                ContentDeliveryGlobalState.RegisterForContentUpdateCompletion(UpdateStateCallback);
+                m_ProgressBar.style.display = DisplayStyle.Flex;    
             }
 
             // Displays the loading bar used during the following loading and download steps:
@@ -61,6 +51,10 @@ namespace ContentManagement.Sample
                         m_ProgressBar.title = $"[{ContentDeliveryGlobalState.CurrentContentUpdateState}]: {downloadService.Name} - {normalizedProgress*100}% ";
                     }    
                 }
+            }
+            else
+            {
+                m_ProgressBar.style.display = DisplayStyle.None;
             }
         }
     }
