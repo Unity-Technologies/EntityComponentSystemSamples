@@ -196,7 +196,12 @@ When a scene is weakly referenced in a build, the original GameObject scene and 
 
 ### Building the Player
 
-When building the player, make sure to include subscene references.  
+For local workflows, please complete the following steps before building:
+- Identify the subscenes whose archives need to be packaged.
+- Add a scene to the **Build Profile** that references each required subscene, if they are not already referenced by another subscene in the Build Profile.
+- Build the player.
+
+> This ensures that all necessary subscene data is included in the final output.<br/>
 In the sample, there is a scene named `ContainerScene` which references both `LowFidelitySubscene` and `HighFidelitySubscene`.  
 
 During the build process, Unity includes these references and packs them into the **StreamingAssets** folder for the player.
