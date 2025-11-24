@@ -20,6 +20,7 @@ namespace ContentManagement.Sample
 
         protected override void OnUpdate()
         {
+#region InitializingUI
             if (!isInitialized)
             {
                 var progressBarUI = Object.FindAnyObjectByType<LoadingBarUI>();
@@ -30,7 +31,9 @@ namespace ContentManagement.Sample
                 m_ProgressBar = progressBarUI.ProgressBar;
                 m_ProgressBar.style.display = DisplayStyle.Flex;    
             }
+#endregion
 
+#region ReadingLoadedBytesFromContentManagementAPI
             // Displays the loading bar used during the following loading and download steps:
             // - DownloadingCatalogInfo
             // - DownloadingCatalogs (catalog.bin)
@@ -44,7 +47,7 @@ namespace ContentManagement.Sample
                     {
                         if(downloadService.TotalBytes <= 0)
                             continue;
-                    
+                                
                         float progress = (float) downloadService.TotalDownloadedBytes / downloadService.TotalBytes; 
                         float normalizedProgress = math.max(0f, math.min(1f, progress));
                         m_ProgressBar.value = normalizedProgress;
@@ -56,6 +59,7 @@ namespace ContentManagement.Sample
             {
                 m_ProgressBar.style.display = DisplayStyle.None;
             }
+#endregion
         }
     }
 }
