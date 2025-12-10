@@ -1,5 +1,5 @@
 
-*The sample projects in this repo use Unity 6.0 and the 1.3 releases of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.*
+*The sample projects in this repo use Unity 6.2 and the 1.4 releases of the `Entities`, `Netcode`, `Physics`, and `Entities.Graphics` packages.*
 
 # DOTS Samples
 
