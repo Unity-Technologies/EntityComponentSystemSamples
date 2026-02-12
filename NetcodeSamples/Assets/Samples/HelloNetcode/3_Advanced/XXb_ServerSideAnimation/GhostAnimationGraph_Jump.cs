@@ -13,13 +13,12 @@ using Unity.NetCode.Hybrid;
 
 namespace Samples.HelloNetcode.Hybrid
 {
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct JumpAnimationData : IComponentData
     {
         [GhostField(Quantization=1000)] public float Phase;
         [GhostField(Quantization=1000)] public float aimPitch;
     }
-
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public class JumpGhostPlayableBehaviour : GhostPlayableBehaviour
     {
         public const float k_JumpDuration = 0.2f;

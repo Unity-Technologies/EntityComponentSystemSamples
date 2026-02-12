@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.12.0] - 2026-02-12
+
+### Changed
+- Update of multiplayer services package to 1.2.0
+- Frontend menu to now support using sessions (Multiplayer SDK), by default when using host migration or relay support it will require using the session method. This is far simpler than implementing these features manually.
+- `01b_RelaySupport` and `01d_HostMigration` samples now include their own frontend implementation and are independent of the default frontend.
+- Updated public sample support for latest Netcode for Entities package
+
 ## [1.9.1] - 2025-10-11
 
 ### Fixed
@@ -13,6 +21,7 @@
 
 ### Fixed
 - Issue in `Asteroids` where the `AsteroidScore` ghost was being stripped out of builds.
+- Issue with `ShipTrackingSystem.ShipTrackingJob` where it iterated over all entities in the game, rather than once.
 
 ### Host Migration (HelloNetcode)
 

@@ -26,7 +26,6 @@ public partial struct CubeMovementSystem : ISystem
     {
         var moveJob = new MoveCubeJob
         {
-            tick = SystemAPI.GetSingleton<NetworkTime>().ServerTick,
             fixedCubeSpeed = SystemAPI.Time.DeltaTime * 4
         };
         state.Dependency = moveJob.ScheduleParallel(state.Dependency);
@@ -36,10 +35,9 @@ public partial struct CubeMovementSystem : ISystem
     [WithAll(typeof(Simulate))]
     partial struct MoveCubeJob : IJobEntity
     {
-        public NetworkTick tick;
         public float fixedCubeSpeed;
 
-        public void Execute(CubeInput playerInput, ref LocalTransform trans)
+        public void Execute(in CubeInput playerInput, ref LocalTransform trans)
         {
             var moveInput = new float2(playerInput.Horizontal, playerInput.Vertical);
             moveInput = math.normalizesafe(moveInput) * fixedCubeSpeed;

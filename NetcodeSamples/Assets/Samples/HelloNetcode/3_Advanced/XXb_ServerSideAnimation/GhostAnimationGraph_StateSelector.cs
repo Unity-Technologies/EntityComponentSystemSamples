@@ -11,11 +11,11 @@ using Unity.NetCode.Hybrid;
 
 namespace Samples.HelloNetcode.Hybrid
 {
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct StateAnimationData : IComponentData
     {
         [GhostField] public int Value;
     }
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public class StateSelectorGhostPlayableBehaviour : GhostPlayableBehaviour
     {
         GhostAnimationController m_controller;

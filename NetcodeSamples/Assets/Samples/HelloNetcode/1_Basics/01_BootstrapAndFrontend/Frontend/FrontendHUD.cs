@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 using Unity.Entities;
 using Unity.NetCode;
 using System.Collections.Generic;
+using Unity.Services.Multiplayer;
+using UnityEngine.UI;
 
 namespace Samples.HelloNetcode
 {
@@ -12,18 +14,32 @@ namespace Samples.HelloNetcode
         [SerializeField]
         UnityEngine.EventSystems.EventSystem m_EventSystem;
 
+        public Text LobbyName;
+
         public string ConnectionStatus
         {
             get { return m_ConnectionLabel.text; }
-            set { m_ConnectionLabel.text = value; }
+            set { if (!m_ConnectionLabel.IsDestroyed()) m_ConnectionLabel.text = value; }
         }
 
         [SerializeField]
-        UnityEngine.UI.Text m_ConnectionLabel;
+        Text m_ConnectionLabel;
 
         public void ReturnToFrontend()
         {
             Debug.Log("[ReturnToFrontend] Called.");
+
+            if (MultiplayerService.Instance != null)
+            {
+                foreach (var session in MultiplayerService.Instance.Sessions)
+                {
+                    Debug.Log($"[ReturnToFrontend] Leaving {session.Value.Id}");
+                    session.Value.LeaveAsync();
+                }
+            }
+
+            // Session destroys the server world but server destruction will also be covered here when not using sessions.
+            // Client world will always need to be destroyed
             var clientServerWorlds = new List<World>();
             foreach (var world in World.All)
             {
@@ -37,11 +53,10 @@ namespace Samples.HelloNetcode
                 world.Dispose();
             }
 
-
             if (string.IsNullOrEmpty(Frontend.OldFrontendWorldName))
                 Frontend.OldFrontendWorldName = "DefaultWorld";
             ClientServerBootstrap.CreateLocalWorld(Frontend.OldFrontendWorldName);
-            SceneManager.LoadScene("Frontend", LoadSceneMode.Single);
+            SceneManager.LoadScene(Frontend.SceneName, LoadSceneMode.Single);
         }
 
         public void Start()

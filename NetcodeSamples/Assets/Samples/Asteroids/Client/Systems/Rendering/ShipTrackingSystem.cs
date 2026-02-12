@@ -33,6 +33,7 @@ namespace Asteroids.Client
     }
 
     [UpdateInGroup(typeof(PresentationSystemGroup))]
+    [BurstCompile]
     public partial class ShipTrackingSystem : SystemBase
     {
         EntityQuery m_LevelGroup;
@@ -54,7 +55,8 @@ namespace Asteroids.Client
             m_RenderOffset.Dispose();
         }
 
-        partial struct ShipTrackingJob : IJobEntity
+        [BurstCompile]
+        partial struct ShipTrackingJob : IJob
         {
             public float deltaTime;
             public int screenHeight;

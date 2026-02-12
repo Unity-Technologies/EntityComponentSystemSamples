@@ -4,7 +4,6 @@ using Unity.NetCode;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -37,14 +36,12 @@ namespace Samples.HelloNetcode
             set => ClientConnectionLabel.text = value;
         }
 
-        public Button JoinExistingGame;
+        public InputField JoinCode;
         public Text HostConnectionLabel;
         public Text ClientConnectionLabel;
         public Toggle UseRelayForLocalConnection;
-        public Toggle EnableRelay;
-        public Toggle EnableHostMigration;
 
-        string m_OldValue;
+        string m_OldAddressValue;
         bool m_UseRelayForLocalClient;
         bool m_IsHosting;
         ConnectionState m_State;
@@ -64,55 +61,41 @@ namespace Samples.HelloNetcode
         public override void Start()
         {
             base.Start();
+            SceneName = "RelayFrontend";
 #if UNITY_WEBGL
             ClientServerButton.interactable = false;
 #endif
         }
+
+        protected override void OnStart() { }
+
         public void OnUseRelayForLocalClient(Toggle value)
         {
             m_UseRelayForLocalClient = value.isOn;
         }
+
         public void OnRelayEnable(Toggle value)
         {
-            TogglePersistentState(!value.isOn);
             if (value.isOn)
             {
                 Port.gameObject.SetActive(false);
-                EnableHostMigration.gameObject.SetActive(false);
                 UseRelayForLocalConnection.interactable = true;
-                m_OldValue = Address.text;
-                Address.text = string.Empty;
-                Address.placeholder.GetComponent<Text>().text = "Join Code for Host Server";
+                m_OldAddressValue = JoinCode.text;
+                JoinCode.text = string.Empty;
+                JoinCode.placeholder.GetComponent<Text>().text = "Enter Join Code...";
                 ClientServerButton.interactable = true;
-                ClientServerButton.onClick.AddListener(() => { m_State = ConnectionState.SetupHost; });
-                JoinExistingGame.onClick.AddListener(() => { m_State = ConnectionState.SetupClient; });
             }
             else
             {
                 Port.gameObject.SetActive(true);
-                EnableHostMigration.gameObject.SetActive(true);
                 UseRelayForLocalConnection.interactable = false;
-                Address.text = m_OldValue;
-                Address.placeholder.GetComponent<Text>().text = string.Empty;
+                JoinCode.text = m_OldAddressValue;
+                if (string.IsNullOrEmpty(JoinCode.text))
+                    JoinCode.text = "127.0.0.1";
+                JoinCode.placeholder.GetComponent<Text>().text = "Enter Address...";
 #if UNITY_WEBGL
                 ClientServerButton.interactable = false;
 #endif
-                ClientServerButton.onClick.RemoveAllListeners();
-                JoinExistingGame.onClick.RemoveAllListeners();
-            }
-        }
-
-        void TogglePersistentState(bool shouldListen)
-        {
-            if (shouldListen)
-            {
-                ClientServerButton.onClick.SetPersistentListenerState(0, UnityEventCallState.RuntimeOnly);
-                JoinExistingGame.onClick.SetPersistentListenerState(0, UnityEventCallState.RuntimeOnly);
-            }
-            else
-            {
-                ClientServerButton.onClick.SetPersistentListenerState(0, UnityEventCallState.Off);
-                JoinExistingGame.onClick.SetPersistentListenerState(0, UnityEventCallState.Off);
             }
         }
 
@@ -122,7 +105,7 @@ namespace Samples.HelloNetcode
             // the join code text field, as it's expected you'd want to join a relay session next
             if (EnableRelay.isOn)
             {
-                if (!string.IsNullOrEmpty(Address.text))
+                if (!string.IsNullOrEmpty(JoinCode.text))
                     ClientServerButton.interactable = false;
                 else
                     ClientServerButton.interactable = true;
@@ -148,7 +131,7 @@ namespace Samples.HelloNetcode
                 case ConnectionState.SetupClient:
                 {
                     var isServerHostedLocally = m_HostServerSystem?.RelayServerData.Endpoint.IsValid;
-                    var enteredJoinCode = !string.IsNullOrEmpty(Address.text);
+                    var enteredJoinCode = !string.IsNullOrEmpty(JoinCode.text);
                     if (isServerHostedLocally.GetValueOrDefault())
                     {
                         if (m_UseRelayForLocalClient)
@@ -203,6 +186,22 @@ namespace Samples.HelloNetcode
             }
         }
 
+        public void StartHostServer()
+        {
+            if (EnableRelay.isOn)
+                m_State = ConnectionState.SetupHost;
+            else
+                StartIpPortClientServer();
+        }
+
+        public void StartSetupClient()
+        {
+            if (EnableRelay.isOn)
+                m_State = ConnectionState.SetupClient;
+            else
+                ConnectToIpPortServer();
+        }
+
         void HostServer()
         {
             var world = World.All[0];
@@ -230,7 +229,7 @@ namespace Samples.HelloNetcode
             var world = World.All[0];
             var enableRelayServerEntity = world.EntityManager.CreateEntity(ComponentType.ReadWrite<EnableRelayServer>());
             world.EntityManager.AddComponent<EnableRelayServer>(enableRelayServerEntity);
-            m_HostClientSystem.JoinUsingCode(Address.text);
+            m_HostClientSystem.JoinUsingCode(JoinCode.text);
         }
 
         /// <summary>
@@ -261,17 +260,8 @@ namespace Samples.HelloNetcode
             var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
             NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
 
-            SceneManager.LoadScene("FrontendHUD");
+            LoadScenes(server);
             SceneManager.LoadScene("RelayHUD", LoadSceneMode.Additive);
-
-            //Destroy the local simulation world to avoid the game scene to be loaded into it
-            //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
-            //and other issues.
-            DestroyLocalSimulationWorld();
-            if (World.DefaultGameObjectInjectionWorld == null)
-                World.DefaultGameObjectInjectionWorld = server;
-
-            SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
 
             var joinCodeEntity = server.EntityManager.CreateEntity(ComponentType.ReadOnly<JoinCode>());
             server.EntityManager.SetComponentData(joinCodeEntity, new JoinCode { Value = joinCode });
@@ -304,16 +294,7 @@ namespace Samples.HelloNetcode
             var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
             NetworkStreamReceiveSystem.DriverConstructor = oldConstructor;
 
-            SceneManager.LoadScene("FrontendHUD");
-
-            //Destroy the local simulation world to avoid the game scene to be loaded into it
-            //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
-            //and other issues.
-            DestroyLocalSimulationWorld();
-            if (World.DefaultGameObjectInjectionWorld == null)
-                World.DefaultGameObjectInjectionWorld = client;
-
-            SceneManager.LoadSceneAsync(GetAndSaveSceneSelection(), LoadSceneMode.Additive);
+            LoadScenes(client);
 
             var networkStreamEntity = client.EntityManager.CreateEntity(ComponentType.ReadWrite<NetworkStreamRequestConnect>());
             client.EntityManager.SetName(networkStreamEntity, "NetworkStreamRequestConnect");

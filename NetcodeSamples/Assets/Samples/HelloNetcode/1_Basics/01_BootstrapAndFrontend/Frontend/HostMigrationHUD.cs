@@ -11,8 +11,6 @@ namespace Samples.HelloNetcode
     public class HostMigrationHUD : MonoBehaviour
     {
         public Text StatsText;
-        public Text LobbyNameText;
-        public HostMigrationController hostMigrationController;
 
 #if !UNITY_SERVER
         void Start()
@@ -29,22 +27,20 @@ namespace Samples.HelloNetcode
             }
         }
 
-        void Update()
+        /// <summary>
+        /// Set up the component for tracking the relay connection status during the host migration, the HUD UI then prints the information
+        /// </summary>
+        public static Entity SetWaitForRelayConnection(WaitForRelayConnection waitComponent)
         {
-            if (!hostMigrationController)
-            {
-                var controller = FindFirstObjectByType<HostMigrationController>();
-                if (controller && controller.CurrentLobby != null)
-                {
-                    LobbyNameText.text = controller.CurrentLobby.Name;
-                    hostMigrationController = controller;
-                }
-            }
-        }
-
-        public void ToggleFailNextMigration(bool shouldFail)
-        {
-            hostMigrationController.FailNextHostMigration = shouldFail;
+            using var relayEntityQuery = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<WaitForRelayConnection>());
+            var relayEntity = Entity.Null;
+            // There could already be a WaitForRelayConnection if we got a host migration event but the host failed and another one was picked
+            if (!relayEntityQuery.IsEmptyIgnoreFilter)
+                relayEntity = relayEntityQuery.ToEntityArray(Allocator.Temp)[0];
+            else
+                relayEntity = ClientServerBootstrap.ClientWorld.EntityManager.CreateEntity(ComponentType.ReadOnly<WaitForRelayConnection>());
+            ClientServerBootstrap.ClientWorld.EntityManager.AddComponentData(relayEntity, waitComponent);
+            return relayEntity;
         }
     }
 
@@ -61,8 +57,8 @@ namespace Samples.HelloNetcode
     public partial class ClientHostMigrationHUDSystem : SystemBase
     {
         public Text StatsText;
-        public HostMigrationController Controller;
         EntityQuery m_RelayQuery;
+        public FixedString32Bytes RelayJoinCode;
 
         protected override void OnCreate()
         {
@@ -87,7 +83,7 @@ namespace Samples.HelloNetcode
                     if (waitData.WaitForJoinCode)
                     {
                         StatsText.text += $"Waiting for new join code ({connectionTime:F2} s)";
-                        if (waitData.OldJoinCode == Controller.RelayJoinCode)
+                        if (waitData.OldJoinCode == RelayJoinCode)
                             return;
                         waitData.WaitForJoinCode = false;
                         waitData.StartTime = UnityEngine.Time.realtimeSinceStartup;
@@ -115,7 +111,7 @@ namespace Samples.HelloNetcode
 
         internal static void CheckRelayStatus(Text statusText, World world, Entity relayEntity, string prefix, double connectionTime)
         {
-            var relayConnectionStatus = HostMigrationController.GetRelayConnectionStatus(world);
+            var relayConnectionStatus = GetRelayConnectionStatus(world);
             switch (relayConnectionStatus)
             {
                 case RelayConnectionStatus.Established:
@@ -136,6 +132,24 @@ namespace Samples.HelloNetcode
                     statusText.text += "Unexpected Relay connection status";
                     break;
             }
+        }
+
+        static RelayConnectionStatus GetRelayConnectionStatus(World world)
+        {
+            using var drvQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<NetworkStreamDriver>());
+            var networkStreamDriver =drvQuery.GetSingleton<NetworkStreamDriver>();
+
+            // Get the server driver with the UDPNetworkInterface and with relay enabled
+            RelayConnectionStatus status = RelayConnectionStatus.NotUsingRelay;
+            for (var i = networkStreamDriver.DriverStore.FirstDriver;
+                 status == RelayConnectionStatus.NotUsingRelay && i < networkStreamDriver.DriverStore.LastDriver;
+                 ++i)
+            {
+                var networkDriver = networkStreamDriver.DriverStore.GetDriverRO(i);
+                world.EntityManager.CompleteAllTrackedJobs();
+                status = networkDriver.GetRelayConnectionStatus();
+            }
+            return status;
         }
     }
 
