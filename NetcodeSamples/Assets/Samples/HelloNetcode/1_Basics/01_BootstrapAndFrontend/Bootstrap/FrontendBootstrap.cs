@@ -49,7 +49,7 @@ namespace Samples.HelloNetcode
             var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             if (!isFromCommandLine) targetScene = activeScene;
 
-            var isFrontend = targetScene == frontendScene;
+            var isFrontend = targetScene.Contains(frontendScene);
 
             // Handle server setup errors:
             if (IsServerPlatform)

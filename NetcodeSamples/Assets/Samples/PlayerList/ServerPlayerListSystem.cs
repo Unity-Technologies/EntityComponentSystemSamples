@@ -41,9 +41,6 @@ namespace Unity.NetCode.Samples.PlayerList
             m_ClientRegisterUsernameRpcQuery = state.GetEntityQuery(ComponentType.ReadOnly<PlayerListEntry.ClientRegisterUsernameRpc>());
 
             state.RequireForUpdate<EnablePlayerListsFeature>();
-            state.RequireForUpdate<NetDebug>();
-            state.RequireForUpdate<NetworkStreamDriver>();
-            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
         }
 
         [BurstCompile]
@@ -188,9 +185,8 @@ namespace Unity.NetCode.Samples.PlayerList
                 {
                     if (evt.State == ConnectionState.State.Disconnected)
                     {
-                        playerListEntryLookup.TryGetRefRW(evt.ConnectionEntity, out var entryRef);
                         // Ignore if it has not had a PlayerListEntry added to it.
-                        if (!entryRef.IsValid) continue;
+                        if (!playerListEntryLookup.TryGetRefRW(evt.ConnectionEntity, out var entryRef)) { continue; }
                         ref var entry = ref entryRef.ValueRW;
 
                         netDbg.DebugLog($"Server: Established player {evt.ConnectionId} disconnected with reason {evt.DisconnectReason}! Notifying other players.");

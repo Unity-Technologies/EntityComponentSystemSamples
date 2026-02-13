@@ -13,13 +13,13 @@ using Unity.NetCode.Hybrid;
 
 namespace Samples.HelloNetcode.Hybrid
 {
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct StandAnimationData : IComponentData
     {
         [GhostField(Quantization=1000)] public float aimPitch;
         [GhostField(Quantization=1000)] public float aimYaw;
         [GhostField(Quantization=1000)] public float remainingTurnAngle;
     }
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public class StandGhostPlayableBehaviour : GhostPlayableBehaviour
     {
         enum LocoMixerPort

@@ -40,6 +40,9 @@ namespace Asteroids.Client
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
+                // This job is not written to support queries with enableable component types.
+                UnityEngine.Assertions.Assert.IsFalse(useEnabledMask);
+
                 // We update the server values infrequently, as we only need the updated
                 // LocalTransform positions for distance importance scaling & relevancy calculations.
                 if (isServer && (chunk.SequenceNumber + tick.TickIndexForValidTick) % roundRobinFrequency >= simulationStepBatchSize) return;

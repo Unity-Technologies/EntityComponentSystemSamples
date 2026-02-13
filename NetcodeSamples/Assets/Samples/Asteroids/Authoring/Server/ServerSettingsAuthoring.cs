@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.NetCode.HostMigration;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -15,6 +16,7 @@ public class ServerSettingsAuthoring : MonoBehaviour
             component.levelData = authoring.levelData;
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, component);
+            AddComponent<IncludeInMigration>(entity);
         }
     }
 }

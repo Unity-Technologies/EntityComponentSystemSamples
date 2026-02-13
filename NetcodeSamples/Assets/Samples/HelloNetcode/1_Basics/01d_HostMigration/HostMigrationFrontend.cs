@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Unity.Entities;
 using Unity.NetCode;
+using Unity.NetCode.HostMigration;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
@@ -9,7 +10,6 @@ using Unity.Services.Core;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -33,75 +33,64 @@ namespace Samples.HelloNetcode
             set => ClientConnectionLabel.text = value;
         }
 
-        public Button JoinExistingGame;
+        public InputField LobbyName;
         public Text HostConnectionLabel;
         public Text ClientConnectionLabel;
-        public Toggle UseRelayForLocalConnection;
-        public Toggle EnableRelay;
 
         // The time, in seconds, we'll wait for a host join code when doing the initial connect
         const int k_InitialHostJoinWaitTimeout = 30;
-        const string k_LobbyName = "TestLobby";
-        string m_PreviousAddressText;
-        string m_OldValue;
         ConnectionState m_State;
 
         public GameObject hostMigrationControllerPrefab;
         public HostMigrationController hostMigrationController;
 
 #if !UNITY_SERVER
+
+        public override void OnEnableHostMigration(Toggle value)
+        {
+            if (value.isOn)
+            {
+                LobbyName.gameObject.SetActive(true);
+                Address.gameObject.SetActive(false);
+                Port.gameObject.SetActive(false);
+                ClientServerButton.interactable = true;
+            }
+            else
+            {
+                LobbyName.gameObject.SetActive(false);
+                Address.gameObject.SetActive(true);
+                Port.gameObject.SetActive(true);
+#if UNITY_WEBGL
+                ClientServerButton.interactable = false;
+#endif
+            }
+        }
+
+        public override void Start()
+        {
+            base.Start();
+            SceneName = "HostMigrationFrontend";
+        }
+
         protected override void OnStart()
         {
             hostMigrationController = FindFirstObjectByType<HostMigrationController>();
             if (hostMigrationController == null)
                 hostMigrationController = Instantiate(hostMigrationControllerPrefab).GetComponent<HostMigrationController>();
-        }
-
-        public void OnEnableHostMigration(Toggle value)
-        {
-            if (hostMigrationController == null)
-                hostMigrationController = FindFirstObjectByType<HostMigrationController>();
-            DontDestroyOnLoad(hostMigrationController);
-            EnableRelay.gameObject.SetActive(!value.isOn);
-            UseRelayForLocalConnection.gameObject.SetActive(!value.isOn);
-            Port.gameObject.SetActive(!value.isOn);
-            TogglePersistentState(!value.isOn);
-            if (value.isOn)
-            {
-                m_PreviousAddressText = Address.text;
-                Address.text = k_LobbyName;
-                ClientServerButton.onClick.AddListener(SetupRelayAndLobbyAsHost);
-                JoinExistingGame.onClick.AddListener(JoinLobbyAndConnectWithRelayAsClient);
-                SceneManager.sceneLoaded += hostMigrationController.OnSceneLoaded;
-            }
-            else
-            {
-                Address.text = m_PreviousAddressText;
-                ClientServerButton.onClick.RemoveAllListeners();
-                JoinExistingGame.onClick.RemoveAllListeners();
-                SceneManager.sceneLoaded -= hostMigrationController.OnSceneLoaded;
-            }
-        }
-
-        void TogglePersistentState(bool shouldListen)
-        {
-            if (shouldListen)
-            {
-                ClientServerButton.onClick.SetPersistentListenerState(0, UnityEventCallState.RuntimeOnly);
-                JoinExistingGame.onClick.SetPersistentListenerState(0, UnityEventCallState.RuntimeOnly);
-            }
-            else
-            {
-                ClientServerButton.onClick.SetPersistentListenerState(0, UnityEventCallState.Off);
-                JoinExistingGame.onClick.SetPersistentListenerState(0, UnityEventCallState.Off);
-            }
+            SceneManager.sceneLoaded += hostMigrationController.OnSceneLoaded;
         }
 
         /// <summary>
         /// Initial setup for the host of the game session.
         /// </summary>
-        async void SetupRelayAndLobbyAsHost()
+        public async void SetupRelayAndLobbyAsHost()
         {
+            if (!EnableHostMigration.isOn)
+            {
+                var sceneName = GetAndSaveSceneSelection();
+                StartIpPortClientServer();
+                return;
+            }
             HostConnectionStatus = "Initializing services";
             await InitializeServices();
             if (!AuthenticationService.Instance.IsSignedIn)
@@ -118,7 +107,7 @@ namespace Samples.HelloNetcode
             Debug.Log($"[HostMigration] Created allocation {allocation.AllocationId} with join code {joinCode}");
 
             SetupRelayHostedServerAndConnect(allocation.ToRelayServerData(hostMigrationController.ConnectionType));
-            Debug.Log($"[HostMigration] Creating lobby with name {Address.text}");
+            Debug.Log($"[HostMigration] Creating lobby with name {LobbyName.text}");
             await hostMigrationController.CreateLobbyAsync(joinCode, allocation.AllocationId.ToString());
             await hostMigrationController.SubscribeToLobbyEvents();
         }
@@ -159,8 +148,14 @@ namespace Samples.HelloNetcode
         /// <summary>
         /// Initial setup for clients joining a game session.
         /// </summary>
-        async void JoinLobbyAndConnectWithRelayAsClient()
+        public async void JoinLobbyAndConnectWithRelayAsClient()
         {
+            if (!EnableHostMigration.isOn)
+            {
+                ConnectToIpPortServer();
+
+                return;
+            }
             ClientConnectionStatus = "Initializing services";
             await InitializeServices();
             if (!AuthenticationService.Instance.IsSignedIn)
@@ -171,7 +166,7 @@ namespace Samples.HelloNetcode
             Debug.Log($"[HostMigration] Signed in as {AuthenticationService.Instance.PlayerId}");
 
             ClientConnectionStatus = "Joining lobby";
-            await hostMigrationController.JoinLobbyByNameAsync(Address.text);
+            await hostMigrationController.JoinLobbyByNameAsync(LobbyName.text);
             await hostMigrationController.SubscribeToLobbyEvents();
 
             if (hostMigrationController.CurrentLobby != null && hostMigrationController.CurrentLobby.Players != null)
@@ -235,10 +230,12 @@ namespace Samples.HelloNetcode
             var oldConstructor = NetworkStreamReceiveSystem.DriverConstructor;
             try
             {
-                var driverConstructor = new HostMigrationDriverConstructor(relayServerData, new RelayServerData());
+                var driverConstructor = new RelayDriverConstructor(relayServerData, new RelayServerData());
                 NetworkStreamReceiveSystem.DriverConstructor = driverConstructor;
                 var server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
                 var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
+
+                server.EntityManager.CreateEntity(ComponentType.ReadOnly<EnableHostMigration>());
 
                 LoadScenes(server);
 
@@ -275,7 +272,7 @@ namespace Samples.HelloNetcode
             var oldConstructor = NetworkStreamReceiveSystem.DriverConstructor;
             try
             {
-                NetworkStreamReceiveSystem.DriverConstructor = new HostMigrationDriverConstructor(new RelayServerData(), relayServerData);
+                NetworkStreamReceiveSystem.DriverConstructor = new RelayDriverConstructor(new RelayServerData(), relayServerData);
                 var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
 
                 LoadScenes(client);
@@ -297,26 +294,6 @@ namespace Samples.HelloNetcode
             }
         }
 
-        /// <summary>
-        /// Load all scenes we'll be using, the normal frontend HUD UI scene, the selected sample scene and the
-        /// host migration HUD UI scene. The local simulation world will be destroyed and the default game object
-        /// injection world replaced with the world parameter.
-        /// </summary>
-        public void LoadScenes(World defaultInjectionWorld)
-        {
-            SceneManager.LoadScene("FrontendHUD");
-
-            //Destroy the local simulation world to avoid the game scene to be loaded into it
-            //This prevent rendering (rendering from multiple world with presentation is not greatly supported)
-            //and other issues.
-            DestroyLocalSimulationWorld();
-            if (World.DefaultGameObjectInjectionWorld == null)
-                World.DefaultGameObjectInjectionWorld = defaultInjectionWorld;
-
-            var sceneName = GetAndSaveSceneSelection();
-            SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
-            SceneManager.LoadScene("HostMigrationHUD", LoadSceneMode.Additive);
-        }
 #endif
     }
 }

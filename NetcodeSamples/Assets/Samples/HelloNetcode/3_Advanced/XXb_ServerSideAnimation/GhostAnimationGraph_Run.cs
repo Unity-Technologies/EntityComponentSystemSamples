@@ -13,34 +13,14 @@ using Unity.NetCode.Hybrid;
 
 namespace Samples.HelloNetcode.Hybrid
 {
+
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct LocomotionAnimationData : IComponentData
     {
         [GhostField(Quantization=1000)] public float2 Direction;
         [GhostField(Quantization=1000)] public float Phase;
         [GhostField(Quantization=1000)] public float aimPitch;
     }
-#if false
-    [UpdateInGroup(typeof(GhostPredictionSystemGroup))]
-    public class LocomotionAnimationSystem : SystemBase
-    {
-        protected override void OnUpdate()
-        {
-            var deltaTime = Time.DeltaTime;
-            Entities.ForEach((Entity entity, ref LocomotionAnimationData locoData) =>
-            {
-                locoData.Direction.x = (locoData.Phase%2) - 1;
-                locoData.Direction.y = 1;
-                locoData.Direction = math.normalizesafe(locoData.Direction);
-
-                // FIXME: the data passed into these is not correct yet, needs to be stored elsewhere
-                var blendedClipLength = RunGhostPlayableBehaviour.CalculateWeights(m_positions, m_clipLengths, m_weights, locoData.Direction);
-                locoData.Phase += deltaTime / blendedClipLength;
-            }).Run();
-        }
-    }
-#endif
-
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public class RunGhostPlayableBehaviour : GhostPlayableBehaviour
     {
         GhostAnimationController m_controller;

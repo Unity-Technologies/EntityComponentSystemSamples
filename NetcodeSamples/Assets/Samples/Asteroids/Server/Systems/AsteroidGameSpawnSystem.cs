@@ -352,14 +352,19 @@ namespace Asteroids.Server
 
                     ecb.SetComponent(e, trans);
                     if (staticAsteroidOptimization == 1)
+                    {
+                        UnityEngine.Debug.Assert(tick.IsValid);
                         ecb.SetComponent(e,
                             new StaticAsteroid
                             {
                                 InitialPosition = trans.Position.xy, InitialVelocity = vel.Value, InitialAngle = angle,
-                                SpawnTick = tick
+                                SpawnTick = tick,
                             });
+                    }
                     else
+                    {
                         ecb.SetComponent(e, vel);
+                    }
                 }
 
                 random.Value = rand;
