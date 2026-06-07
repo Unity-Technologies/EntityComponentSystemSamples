@@ -17,7 +17,7 @@ public partial class LevelStatusSystem : SystemBase
 
     protected override void OnCreate()
     {
-        var levelManager = Object.FindFirstObjectByType<LevelManager>();
+        var levelManager = Object.FindAnyObjectByType<LevelManager>();
         if (levelManager == null)
         {
             Enabled = false;

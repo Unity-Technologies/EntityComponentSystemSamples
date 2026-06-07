@@ -74,7 +74,7 @@ namespace Samples.HelloNetcode
 
         protected override void OnStart()
         {
-            hostMigrationController = FindFirstObjectByType<HostMigrationController>();
+            hostMigrationController = FindAnyObjectByType<HostMigrationController>();
             if (hostMigrationController == null)
                 hostMigrationController = Instantiate(hostMigrationControllerPrefab).GetComponent<HostMigrationController>();
             SceneManager.sceneLoaded += hostMigrationController.OnSceneLoaded;

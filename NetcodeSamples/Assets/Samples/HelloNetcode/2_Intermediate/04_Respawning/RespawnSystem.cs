@@ -6,25 +6,6 @@ using Unity.NetCode;
 
 namespace Samples.HelloNetcode
 {
-#pragma warning disable CS0618 // Disable Aspects obsolete warnings
-    readonly partial struct CharacterWithHealth : IAspect
-    {
-        readonly RefRW<AutoCommandTarget> m_AutoCommandTarget;
-        readonly RefRO<Health> m_Health;
-        readonly RefRO<GhostOwner> m_GhostOwner;
-        readonly RefRO<ConnectionOwner> m_ConnectionOwner;
-
-        public ref AutoCommandTarget AutoCommandTarget => ref m_AutoCommandTarget.ValueRW;
-        public GhostOwner GhostOwner => m_GhostOwner.ValueRO;
-        public ConnectionOwner ConnectionOwner => m_ConnectionOwner.ValueRO;
-
-        public bool IsAlive()
-        {
-            return m_Health.ValueRO.CurrentHitPoints > 0;
-        }
-    }
-#pragma warning restore CS0618
-
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(HelloNetcodePredictedSystemGroup))]
@@ -45,19 +26,20 @@ namespace Samples.HelloNetcode
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var linkedEntityGroupFromEntity = SystemAPI.GetBufferLookup<LinkedEntityGroup>();
 
-            foreach (var (character, localTransform, entity) in SystemAPI.Query<CharacterWithHealth, RefRW<LocalTransform>>().WithEntityAccess())
+            foreach (var (health, autoCommandTarget, ghostOwner, connectionOwner, localTransform, entity) in SystemAPI.Query<RefRO<Health>,RefRW<AutoCommandTarget>,RefRO<GhostOwner>,RefRO<ConnectionOwner>, RefRW<LocalTransform>>().WithEntityAccess())
             {
-                if (character.IsAlive())
+                // Is Alive
+                if (health.ValueRO.CurrentHitPoints > 0)
                 {
                     continue;
                 }
 
-                if (FallingDown(ref character.AutoCommandTarget, ref localTransform.ValueRW.Rotation, SystemAPI.Time.DeltaTime))
+                if (FallingDown(ref autoCommandTarget.ValueRW, ref localTransform.ValueRW.Rotation, SystemAPI.Time.DeltaTime))
                 {
                     continue;
                 }
 
-                DestroyAndRespawnPlayer(ecb, entity, playerPrefab, character.GhostOwner, character.ConnectionOwner, linkedEntityGroupFromEntity);
+                DestroyAndRespawnPlayer(ecb, entity, playerPrefab, ghostOwner.ValueRO, connectionOwner.ValueRO, linkedEntityGroupFromEntity);
             }
 
             ecb.Playback(state.EntityManager);

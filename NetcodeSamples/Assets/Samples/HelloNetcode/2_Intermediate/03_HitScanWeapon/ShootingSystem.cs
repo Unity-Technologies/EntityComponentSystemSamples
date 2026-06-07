@@ -30,16 +30,16 @@ namespace Samples.HelloNetcode
             if (!networkTime.IsFirstTimeFullyPredictingTick)
                 return;
 
-            foreach (var (character, interpolationDelay, hitComponent)
-                     in SystemAPI.Query<CharacterAspect, RefRO<CommandDataInterpolationDelay>, RefRW<Hit>>().WithAll<Simulate>())
+            foreach (var (characterTransform, characterInput, interpolationDelay, hitComponent, characterEntity)
+                     in SystemAPI.Query<RefRW<LocalTransform>, RefRO<CharacterControllerPlayerInput>, RefRO<CommandDataInterpolationDelay>, RefRW<Hit>>().WithAll<Simulate,AutoCommandTarget,Character>().WithAll<PhysicsVelocity, GhostOwner>().WithEntityAccess())
             {
-                if (character.Input.SecondaryFire.IsSet)
+                if (characterInput.ValueRO.SecondaryFire.IsSet)
                 {
-                    hitComponent.ValueRW.Victim = character.Self;
+                    hitComponent.ValueRW.Victim = characterEntity;
                     hitComponent.ValueRW.Tick = predictingTick;
                     continue;
                 }
-                if (!character.Input.PrimaryFire.IsSet)
+                if (!characterInput.ValueRO.PrimaryFire.IsSet)
                 {
                     continue;
                 }
@@ -58,7 +58,7 @@ namespace Samples.HelloNetcode
                 // - On the server, we process this input on ServerTick:100.
                 // - CommandDataInterpolationTick.Delay:-2 = 98 (-2)
                 // - So the server also needs to subtract the rendering delay to be consistent with what the client sees and queries against (97).
-                var delay = lagCompensationEnabledFromEntity.HasComponent(character.Self)
+                var delay = lagCompensationEnabledFromEntity.HasComponent(characterEntity)
                     ? interpolationDelay.ValueRO.Delay + additionalRenderDelay
                     : additionalRenderDelay;
 
@@ -67,9 +67,9 @@ namespace Samples.HelloNetcode
                 if(state.WorldUnmanaged.IsClient()) UnityEngine.Debug.Assert(!didClamp);
 
 
-                var cameraRotation = math.mul(quaternion.RotateY(character.Input.Yaw), quaternion.RotateX(-character.Input.Pitch));
+                var cameraRotation = math.mul(quaternion.RotateY(characterInput.ValueRO.Yaw), quaternion.RotateX(-characterInput.ValueRO.Pitch));
                 var offset = math.rotate(cameraRotation, CharacterControllerCameraSystem.k_CameraOffset);
-                var cameraPosition = character.Transform.ValueRO.Position + offset;
+                var cameraPosition = characterTransform.ValueRO.Position + offset;
                 var forward = math.mul(cameraRotation, math.forward());
                 var rayInput = new RaycastInput
                 {

@@ -30,26 +30,6 @@ namespace Samples.HelloNetcode
         public NetworkTick JumpStart;
     }
 
-#pragma warning disable CS0618 // Disable Aspects obsolete warnings
-    public readonly partial struct CharacterAspect : IAspect
-    {
-        public readonly Entity Self;
-        public readonly RefRW<LocalTransform> Transform;
-
-        readonly RefRO<AutoCommandTarget> m_AutoCommandTarget;
-        readonly RefRW<Character> m_Character;
-        readonly RefRW<PhysicsVelocity> m_Velocity;
-        readonly RefRO<CharacterControllerPlayerInput> m_Input;
-        readonly RefRO<GhostOwner> m_Owner;
-
-        public AutoCommandTarget AutoCommandTarget => m_AutoCommandTarget.ValueRO;
-        public CharacterControllerPlayerInput Input => m_Input.ValueRO;
-        public int OwnerNetworkId => m_Owner.ValueRO.NetworkId;
-        public ref Character Character => ref m_Character.ValueRW;
-        public ref PhysicsVelocity Velocity => ref m_Velocity.ValueRW;
-    }
-#pragma warning restore CS0618
-
     [UpdateInGroup(typeof(PhysicsSystemGroup))]
     [UpdateBefore(typeof(PhysicsInitializeGroup))]
     [BurstCompile]
@@ -92,31 +72,31 @@ namespace Samples.HelloNetcode
             var isMigratedLookup = SystemAPI.GetComponentLookup<IsMigrated>();
 
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-            foreach (var character in SystemAPI.Query<CharacterAspect>().WithAll<Simulate>())
+            foreach (var (characterTransform, characterAutoCommandTarget, character, characterVelocity, characterInput, characterOwner, characterEntity) in SystemAPI.Query<RefRW<LocalTransform>, RefRO<AutoCommandTarget>, RefRW<Character>, RefRW<PhysicsVelocity>, RefRO<CharacterControllerPlayerInput>, RefRO<GhostOwner>>().WithAll<Simulate>().WithEntityAccess())
             {
-                if (!character.AutoCommandTarget.Enabled)
+                if (!characterAutoCommandTarget.ValueRO.Enabled)
                 {
-                    character.Velocity.Linear = float3.zero;
+                    characterVelocity.ValueRW.Linear = float3.zero;
                     continue;
                 }
 
-                if (isMigratedLookup.HasComponent(character.Self))
+                if (isMigratedLookup.HasComponent(characterEntity))
                 {
                     var characterPrefabQuery = SystemAPI.QueryBuilder().WithAll<CharacterControllerConfig, Prefab>().Build();
                     if (characterPrefabQuery.CalculateEntityCount() == 1)
                     {
-                        UnityEngine.Debug.Log($"Reconnecting character controller config entity was:{character.Character.ControllerConfig} is now:{characterPrefabQuery.GetSingletonEntity()}");
-                        character.Character.ControllerConfig = characterPrefabQuery.GetSingletonEntity();
-                        commandBuffer.RemoveComponent<IsMigrated>(character.Self);
+                        UnityEngine.Debug.Log($"Reconnecting character controller config entity was:{character.ValueRO.ControllerConfig} is now:{characterPrefabQuery.GetSingletonEntity()}");
+                        character.ValueRW.ControllerConfig = characterPrefabQuery.GetSingletonEntity();
+                        commandBuffer.RemoveComponent<IsMigrated>(characterEntity);
                     }
                     else
                     {
-                        UnityEngine.Debug.LogError($"Failed to reconnect character controller config entity was:{character.Character.ControllerConfig}");
+                        UnityEngine.Debug.LogError($"Failed to reconnect character controller config entity was:{character.ValueRO.ControllerConfig}");
                     }
                 }
 
-                var controllerConfig = SystemAPI.GetComponent<CharacterControllerConfig>(character.Character.ControllerConfig);
-                var controllerCollider = SystemAPI.GetComponent<PhysicsCollider>(character.Character.ControllerConfig);
+                var controllerConfig = SystemAPI.GetComponent<CharacterControllerConfig>(character.ValueRO.ControllerConfig);
+                var controllerCollider = SystemAPI.GetComponent<PhysicsCollider>(character.ValueRO.ControllerConfig);
 
                 // Character step input
                 CharacterControllerUtilities.CharacterControllerStepInput stepInput = new CharacterControllerUtilities.CharacterControllerStepInput
@@ -131,8 +111,8 @@ namespace Samples.HelloNetcode
                     SkinWidth = k_DefaultSkinWidth,
                     ContactTolerance = k_DefaultContactTolerance,
                     MaxSlope = math.radians(k_DefaultMaxSlope),
-                    RigidBodyIndex = physicsWorldSingleton.PhysicsWorld.GetRigidBodyIndex(character.Self),
-                    CurrentVelocity = character.Character.Velocity,
+                    RigidBodyIndex = physicsWorldSingleton.PhysicsWorld.GetRigidBodyIndex(characterEntity),
+                    CurrentVelocity = character.ValueRO.Velocity,
                     MaxMovementSpeed = k_DefaultMaxMovementSpeed
                 };
 
@@ -141,7 +121,7 @@ namespace Samples.HelloNetcode
                 //the world transform isn't).
                 RigidTransform ccTransform = new RigidTransform()
                 {
-                    pos = character.Transform.ValueRO.Position,
+                    pos = characterTransform.ValueRO.Position,
                     rot = quaternion.identity
                 };
 
@@ -156,48 +136,48 @@ namespace Samples.HelloNetcode
                     out _);
                 m_MarkerGroundCheck.End();
 
-                float2 input = character.Input.Movement;
+                float2 input = characterInput.ValueRO.Movement;
                 float3 wantedMove = new float3(input.x, 0, input.y) * controllerConfig.MoveSpeed * SystemAPI.Time.DeltaTime;
 
-                var characterRotation = quaternion.RotateY(character.Input.Yaw);
+                var characterRotation = quaternion.RotateY(characterInput.ValueRO.Yaw);
                 // The character controllers yaw rotation can always be set, even when in the air:
-                character.Transform.ValueRW.Rotation = characterRotation;
+                characterTransform.ValueRW.Rotation = characterRotation;
 
                 // Wanted movement is relative to camera
                 wantedMove = math.rotate(characterRotation, wantedMove);
 
                 float3 wantedVelocity = wantedMove / SystemAPI.Time.DeltaTime;
-                wantedVelocity.y = character.Character.Velocity.y;
+                wantedVelocity.y = character.ValueRO.Velocity.y;
 
                 if (supportState == CharacterControllerUtilities.CharacterSupportState.Supported)
                 {
-                    character.Character.JumpStart = NetworkTick.Invalid;
-                    character.Character.OnGround = 1;
-                    character.Character.Velocity = wantedVelocity;
+                    character.ValueRW.JumpStart = NetworkTick.Invalid;
+                    character.ValueRW.OnGround = 1;
+                    character.ValueRW.Velocity = wantedVelocity;
                     // Allow jump and stop falling when grounded
-                    if (character.Input.Jump.IsSet)
+                    if (characterInput.ValueRO.Jump.IsSet)
                     {
-                        character.Character.Velocity.y = controllerConfig.JumpSpeed;
-                        character.Character.JumpStart = networkTime.ServerTick;
+                        character.ValueRW.Velocity.y = controllerConfig.JumpSpeed;
+                        character.ValueRW.JumpStart = networkTime.ServerTick;
                     }
                     else
-                        character.Character.Velocity.y = 0;
+                        character.ValueRW.Velocity.y = 0;
                 }
                 else
                 {
-                    character.Character.OnGround = 0;
+                    character.ValueRW.OnGround = 0;
                     // Free fall
-                    character.Character.Velocity.y -= controllerConfig.Gravity * SystemAPI.Time.DeltaTime;
+                    character.ValueRW.Velocity.y -= controllerConfig.Gravity * SystemAPI.Time.DeltaTime;
                 }
 
                 m_MarkerStep.Begin();
                 // Ok because affect bodies is false so no impulses are written
                 NativeStream.Writer deferredImpulseWriter = default;
-                CharacterControllerUtilities.CollideAndIntegrate(stepInput, k_DefaultMass, false, ref controllerCollider, ref ccTransform, ref character.Character.Velocity, ref deferredImpulseWriter);
+                CharacterControllerUtilities.CollideAndIntegrate(stepInput, k_DefaultMass, false, ref controllerCollider, ref ccTransform, ref character.ValueRW.Velocity, ref deferredImpulseWriter);
                 m_MarkerStep.End();
 
                 // Set the physics velocity and let physics move the kinematic object based on that
-                character.Velocity.Linear = (ccTransform.pos - character.Transform.ValueRO.Position) / SystemAPI.Time.DeltaTime;
+                characterVelocity.ValueRW.Linear = (ccTransform.pos - characterTransform.ValueRO.Position) / SystemAPI.Time.DeltaTime;
             }
             commandBuffer.Playback(state.EntityManager);
         }

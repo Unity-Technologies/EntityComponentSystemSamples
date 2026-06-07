@@ -110,7 +110,7 @@ namespace Samples.HelloNetcode
             if (ClientServerBootstrap.RequestedPlayType != ClientServerBootstrap.PlayType.ClientAndServer)
                 Debug.LogError($"[HostMigration] Creating client/server worlds is not allowed if playmode is set to {ClientServerBootstrap.RequestedPlayType}");
             m_MigrationDataBlob = new NativeList<byte>(InitialDataSize, Allocator.Persistent);
-            m_HostMigrationFrontend = FindFirstObjectByType<HostMigrationFrontend>();
+            m_HostMigrationFrontend = FindAnyObjectByType<HostMigrationFrontend>();
             DontDestroyOnLoad(this);
         }
 
@@ -119,7 +119,7 @@ namespace Samples.HelloNetcode
             if (scene.name == Frontend.SceneName)
             {
                 Debug.Log("[HostMigration] Re-entering frontend scene, leaving lobby");
-                m_HostMigrationFrontend = FindFirstObjectByType<HostMigrationFrontend>();
+                m_HostMigrationFrontend = FindAnyObjectByType<HostMigrationFrontend>();
                 StopHeartbeat();
                 LeaveLobby();
                 m_LastUpdateTime = 0;
@@ -130,10 +130,10 @@ namespace Samples.HelloNetcode
         void OnKickedFromLobby()
         {
             Debug.Log("[HostMigration] Left lobby");
-            if (FindFirstObjectByType<HostMigrationFrontend>() == null)
+            if (FindAnyObjectByType<HostMigrationFrontend>() == null)
             {
                 Debug.Log($"[HostMigration] Re-entering frontend scene as we've left the lobby now");
-                var frontendHud = FindFirstObjectByType<FrontendHUD>();
+                var frontendHud = FindAnyObjectByType<FrontendHUD>();
                 frontendHud?.ReturnToFrontend();
             }
         }
@@ -376,7 +376,7 @@ namespace Samples.HelloNetcode
                     ClientServerBootstrap.ClientWorld.EntityManager.DestroyEntity(clientRelayEntity); // cleanup as this is no longer needed
 
                     // Connect the server migration stats HUD
-                    var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
+                    var statsText = FindAnyObjectByType<HostMigrationHUD>().StatsText;
                     ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<ServerHostMigrationHUDSystem>().StatsText = statsText;
 
                     // Disable the client status HUD
@@ -403,7 +403,7 @@ namespace Samples.HelloNetcode
                         HostMigrationHUD.SetWaitForRelayConnection(new WaitForRelayConnection() { WaitForJoinCode = true, OldJoinCode = RelayJoinCode, IsHostMigration = true, StartTime = Time.realtimeSinceStartup});
 
                         // Connect the migration stats HUD
-                        var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
+                        var statsText = FindAnyObjectByType<HostMigrationHUD>().StatsText;
                         var clientMigrationSystem = ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<ClientHostMigrationHUDSystem>();
                         clientMigrationSystem.StatsText = statsText;
                     }

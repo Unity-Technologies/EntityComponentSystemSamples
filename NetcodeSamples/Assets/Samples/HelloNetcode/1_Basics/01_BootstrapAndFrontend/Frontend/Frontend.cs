@@ -190,12 +190,12 @@ namespace Samples.HelloNetcode
 
         async Task SetHudSessionName()
         {
-            var frontendHud = FindFirstObjectByType<FrontendHUD>();
+            var frontendHud = FindAnyObjectByType<FrontendHUD>();
             // HUD scene might not be loaded yet so we'll need to poll for it
             while (frontendHud == null)
             {
                 await Task.Delay(100);
-                frontendHud = FindFirstObjectByType<FrontendHUD>();
+                frontendHud = FindAnyObjectByType<FrontendHUD>();
             }
             frontendHud.LobbyName.text = m_Session.Id;
         }
@@ -220,7 +220,7 @@ namespace Samples.HelloNetcode
             if (m_Session.IsHost)
             {
                 // Connect the server migration stats HUD
-                var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
+                var statsText = FindAnyObjectByType<HostMigrationHUD>().StatsText;
                 ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<ServerHostMigrationHUDSystem>().StatsText = statsText;
 
                 // Disable the client status HUD
