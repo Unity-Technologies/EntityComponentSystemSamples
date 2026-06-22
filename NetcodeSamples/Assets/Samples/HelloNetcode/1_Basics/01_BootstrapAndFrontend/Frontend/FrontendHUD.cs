@@ -71,7 +71,7 @@ namespace Samples.HelloNetcode
 
             // We must always have an event system (DOTS-7177), but some scenes will already have one,
             // so we only enable ours if we can't find someone else's.
-            if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
                 m_EventSystem.gameObject.SetActive(true);
         }
     }

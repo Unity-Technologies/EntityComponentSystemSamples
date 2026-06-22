@@ -23,5 +23,6 @@ public struct ParticleEmitterComponentData : IComponentData
 
     public int active;
 
+    [System.NonSerialized]
     public Entity particlePrefab;
 }

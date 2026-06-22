@@ -1,4 +1,4 @@
-﻿using Unity.Burst;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -35,7 +35,7 @@ namespace Samples.HelloNetcode
         protected override void OnUpdate()
         {
             if (m_ConnectionUI == null)
-                m_ConnectionUI = GameObject.FindFirstObjectByType<ConnectionUI>();
+                m_ConnectionUI = GameObject.FindAnyObjectByType<ConnectionUI>();
 
             var buffer = m_CommandBufferSystem.CreateCommandBuffer();
             foreach (var (_, entity) in SystemAPI.Query<RefRO<NetworkStreamConnection>>().WithEntityAccess().WithNone<ConnectionState>())

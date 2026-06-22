@@ -45,15 +45,15 @@ namespace Samples.HelloNetcode
             state.CompleteDependency();
             var originalGranadeScale = m_TransformLookup[grenadePrefab].Scale;
 
-            foreach (var (character, inputBuffer, anchorPoint) in SystemAPI.Query<CharacterAspect,
-                         DynamicBuffer<InputBufferData<CharacterControllerPlayerInput>>, RefRO<AnchorPoint>>().WithAll<Simulate>())
+            foreach (var (characterInput, characterOwner, inputBuffer, anchorPoint) in SystemAPI.Query<RefRO<CharacterControllerPlayerInput>, RefRO<GhostOwner>,
+                         DynamicBuffer<InputBufferData<CharacterControllerPlayerInput>>, RefRO<AnchorPoint>>().WithAll<Simulate, LocalTransform, AutoCommandTarget>().WithAll<Character,PhysicsVelocity>())
             {
                 // We must fetch the quantity of grenades to spawn from the Count value of the SecondaryFire InputEvent (which stores this exact delta).
                 // Why? Because:
                 // - Users may drop packets, so a users click counter can increment more than once (representing that they've clicked on previous 'not yet acked' ticks).
                 // - Users may be clicking repeatedly in partial ticks. Imagine a SimulationTickRate of 10. It's possible to click faster than once per 100ms, so we must count 2 in one Simulation tick.
                 // - The server may be batching ticks together (due to perf issues).
-                var grenadesToSpawn = character.Input.SecondaryFire.Count;
+                var grenadesToSpawn = characterInput.ValueRO.SecondaryFire.Count;
                 if (grenadesToSpawn <= 0) continue;
 
                 // Get the ABSOLUTE counter value now, as we need it later:
@@ -109,11 +109,11 @@ namespace Samples.HelloNetcode
 
                     // Set the spawn ID for this particular local spawn so it can be used later in the classification system
                     // Needs to include the network ID of the owner since everyone's counters/spawnId starts at 1
-                    grenadeData.SpawnId = (uint) character.OwnerNetworkId << 16 | secondaryFireCount;
+                    grenadeData.SpawnId = (uint) characterOwner.ValueRO.NetworkId << 16 | secondaryFireCount;
                     commandBuffer.SetComponent(grenadeEntity, grenadeData);
 
                     // Set the owner so the prediction will work (important until it's replaced by it's interpolated version)
-                    commandBuffer.SetComponent(grenadeEntity, new GhostOwner {NetworkId = character.OwnerNetworkId});
+                    commandBuffer.SetComponent(grenadeEntity, new GhostOwner {NetworkId = characterOwner.ValueRO.NetworkId});
                 }
             }
             commandBuffer.Playback(state.EntityManager);

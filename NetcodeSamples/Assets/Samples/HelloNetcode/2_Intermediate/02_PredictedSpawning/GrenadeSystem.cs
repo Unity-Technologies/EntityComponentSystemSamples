@@ -135,11 +135,11 @@ namespace Samples.HelloNetcode
         public void OnUpdate(ref SystemState state)
         {
             var commandBuffer = new EntityCommandBuffer(state.WorldUpdateAllocator);
-            foreach (var (character, anchorPoint) in SystemAPI.Query<CharacterAspect, RefRO<AnchorPoint>>().WithAll<Simulate>())
+            foreach (var (characterInput, anchorPoint) in SystemAPI.Query<RefRO<CharacterControllerPlayerInput>, RefRO<AnchorPoint>>().WithAll<Simulate, LocalTransform, AutoCommandTarget>().WithAll<Character,PhysicsVelocity,GhostOwner>())
             {
                 // This is the weapon slot and rotating that will make the launcher move correctly (it's anchored on the end)
                 var grenadeLauncher = anchorPoint.ValueRO.WeaponSlot;
-                var followCameraRotation = quaternion.RotateX(-character.Input.Pitch);
+                var followCameraRotation = quaternion.RotateX(-characterInput.ValueRO.Pitch);
 
                 var transform = state.EntityManager.GetComponentData<LocalTransform>(grenadeLauncher);
                 commandBuffer.SetComponent(grenadeLauncher, transform.WithRotation(followCameraRotation));

@@ -1,13 +1,15 @@
 # Changelog
 
-## [1.12.0] - 2026-02-12
+## [6.5.0] - 2026-02-05
+
+* Netcode package moved to be a build-in editor package from 6000.5 editor version. As such NetcodeSamples are compatible only with given editor version
+
+## [1.12.0] - 2026-02-05
 
 ### Changed
-- Update of multiplayer services package to 1.2.0 and other dependencies updates
+- Update of multiplayer services package to 1.2.0
 - Frontend menu to now support using sessions (Multiplayer SDK), by default when using host migration or relay support it will require using the session method. This is far simpler than implementing these features manually.
 - `01b_RelaySupport` and `01d_HostMigration` samples now include their own frontend implementation and are independent of the default frontend.
-- Updated public sample support for latest Netcode for Entities package (1.12.0)
-- Included new Netcode Profiler by default (it replaces the old network web-based debugger and is more powerful and useful for debugging and optimizing your netcode project)
 
 ## [1.9.1] - 2025-10-11
 

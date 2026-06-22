@@ -45,6 +45,7 @@ namespace Unity.NetCode.Samples
         private EntityQuery m_predictedGhostsNotProcessed;
         private EntityQuery m_predictedPrespawendGhostsNotProcessed;
         private EntityQuery m_destroyedGhostsWithClientOnlyBackup;
+        private EntityQuery m_ghostsWithClientOnlyBackup;
 
         private EntityStorageInfoLookup m_childEntityLookup;
         private BufferTypeHandle<LinkedEntityGroup> m_linkedEntityGroupHandle;
@@ -80,6 +81,9 @@ namespace Unity.NetCode.Samples
             queryBuilder.WithAll<ClientOnlyBackup>();
             queryBuilder.WithNone<PredictedGhost>();
             m_destroyedGhostsWithClientOnlyBackup = state.GetEntityQuery(queryBuilder);
+            queryBuilder.Reset();
+            queryBuilder.WithAll<ClientOnlyBackup>();
+            m_ghostsWithClientOnlyBackup = state.GetEntityQuery(queryBuilder);
 
             m_clientOnlyBackupInfoCollection = new NativeList<ClientOnlyBackupInfo>(Allocator.Persistent);
             m_clientOnlyComponentTypes = new NativeList<ComponentType>(32, Allocator.Persistent);
@@ -110,6 +114,8 @@ namespace Unity.NetCode.Samples
         [BurstCompile]
         public void OnDestroy(ref SystemState state)
         {
+            new DisposeBackupJob().Run(m_ghostsWithClientOnlyBackup);
+            state.EntityManager.RemoveComponent<ClientOnlyBackup>(m_ghostsWithClientOnlyBackup);
             m_clientOnlyComponentTypes.Dispose();
             m_clientOnlyBackupInfoCollection.Dispose();
             m_ghostTypeToPrefabMetadata.Dispose();
