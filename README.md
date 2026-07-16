@@ -3,20 +3,21 @@
 
 # DOTS Samples
 
-This repo contains a focused subset of the DOTS samples, covering core Entities functionality:
+This repo contains a focused subset of the DOTS samples, all in a single [Entities samples project](./EntitiesSamples/README.md):
 
-- [Entities samples](./EntitiesSamples/README.md): the Baking, Boids, and Streaming samples.
-- [Entities 101 sample project](./Dots101/Entities101/): the HelloCube samples.
+- [HelloCube](./EntitiesSamples/Assets/HelloCube/README.md): a series of increasingly complex introductory samples.
+- [Baking](./EntitiesSamples/Assets/Baking/README.md)
+- [Boids](./EntitiesSamples/Assets/Boids/README.md)
+- [Streaming](./EntitiesSamples/Assets/Streaming/README.md)
 
 ## Entities 101
 
 - [Document: Unity Entities 101](https://docs.google.com/document/d/1R6E4IDpfLatwHITlCND0i5TuMVG0CMGsentFL-3RQT0/edit?usp=sharing)
-- [Sample project: Unity Entities 101](./Dots101/Entities101/)
 - [Video: ECS Entities and components](https://youtu.be/jzCEzNoztzM) (10 minutes)
 - [Video: ECS Systems](https://youtu.be/k07I-DpCcvE) (7 minutes)
 - [Video: ECS Baking](https://youtu.be/r337nXZFYeA) (6 minutes)
-- [Video: HelloCube samples](https://youtu.be/32TLgtA9yUM) (30 minutes) ([code](./Dots101/Entities101/Assets/HelloCube/))
-- [Video: StateChange sample](https://youtu.be/KC-EyCh5TrY) (14 minutes) ([code](./Dots101/Entities101/Assets/HelloCube/13.%20StateChange/))
+- [Video: HelloCube samples](https://youtu.be/32TLgtA9yUM) (30 minutes) ([code](./EntitiesSamples/Assets/HelloCube/))
+- [Video: StateChange sample](https://youtu.be/KC-EyCh5TrY) (14 minutes) ([code](./EntitiesSamples/Assets/HelloCube/13.%20StateChange/))
 
 ## Additional material
 
