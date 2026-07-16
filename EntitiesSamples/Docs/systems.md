@@ -2,8 +2,6 @@
 
 A **system** is a unit of code which belongs to a [world]() and which runs on the main thread (usually once per frame). Normally, a system will only access entities of its own world, but this is not an enforced restriction.
 
-&#x1F579; *[See example systems](../Assets/ExampleCode/ComponentsSystems.cs).*
-
 A system is defined as a struct implementing the [`ISystem`](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.ISystem.html) interface, which has three key methods:
 
 | **`ISystemState` method** | **Description** |

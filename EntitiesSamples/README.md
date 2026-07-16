@@ -4,5 +4,4 @@
 
 - [Baking](Assets/Baking/README.md)
 - [Boids](Assets/Boids/README.md)
-- [Graphical](Assets/Graphical/README.md)
 - [Streaming](Assets/Streaming/README.md)

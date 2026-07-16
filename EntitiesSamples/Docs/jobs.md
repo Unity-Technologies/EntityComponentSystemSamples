@@ -40,8 +40,6 @@ When instantiating an unmanaged collection, you must specify an *allocator*. Dif
 
 # C# Jobs and Job Dependencies
 
-&#x1F579;  *[See example jobs](../Assets/ExampleCode/Jobs.cs).*
-
 The C# Jobs system allows us to schedule work to be executed in a pool of worker threads:
 
 - When a worker thread finishes its current work, the thread will pull a waiting job off the queue and invoke the job's `Execute()` method to run the job.

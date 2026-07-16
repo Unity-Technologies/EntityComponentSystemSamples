@@ -1,7 +1,5 @@
 # Baking and entity scenes
 
-&#x1F579;  *[See examples of baking and authoring components](../Assets/ExampleCode/Baking.cs).*
-
 **Baking** is a build-time process that transforms **sub scenes** into **entity scenes** using **bakers** and **baking systems**:
 
 - A **sub scene** is a Unity scene asset that's embedded in another scene by the [SubScene](https://docs.unity3d.com/Packages/com.unity.entities@latest?subfolder=/api/Unity.Entities.SubScene.html) MonoBehaviour.
