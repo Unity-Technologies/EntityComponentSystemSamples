@@ -1,6 +1,6 @@
 
 using System.Collections.Generic;
-namespace Unity.NetCode.Generators
+namespace Unity.Netcode.Generators
 {
     public static partial class UserDefinedTemplates
     {
@@ -16,11 +16,7 @@ namespace Unity.NetCode.Generators
                     Smoothing = SmoothingAction.InterpolateAndExtrapolate,
                     SupportCommand = false,
                     Composite = false,
-#if UNITY_2021_2_OR_NEWER
                     Template = "Custom.Translation2d",
-#else
-                    Template = "Assets/Samples/NetCodeGen/Templates/Translation2d.NetCodeSourceGenerator.additionalfile",
-#endif
                     TemplateOverride = "",
                 },
                 new TypeRegistryEntry
@@ -31,12 +27,19 @@ namespace Unity.NetCode.Generators
                     Smoothing = SmoothingAction.InterpolateAndExtrapolate,
                     SupportCommand = false,
                     Composite = false,
-#if UNITY_2021_2_OR_NEWER
                     Template = "Custom.Rotation2d",
-#else
-                    Template = "Assets/Samples/NetCodeGen/Templates/Rotation2d.NetCodeSourceGenerator.additionalfile",
-#endif
                     TemplateOverride = "",
+                },
+                new TypeRegistryEntry
+                {
+                    Type = "System.Boolean",
+                    Quantized = false,
+                    Smoothing = SmoothingAction.Clamp,
+                    SupportCommand = true,
+                    Composite = false,
+                    Template = "NetCode.GhostSnapshotValueUInt.cs",
+                    TemplateOverride = "PreserializeBoolTest",
+                    SubType = GhostFieldSubType.BoolTest
                 }
             });
         }

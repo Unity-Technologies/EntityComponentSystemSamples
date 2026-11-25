@@ -1,13 +1,13 @@
+using Unity.Netcode;
 using System;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using Unity.NetCode;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode.HostMigration;
+using Unity.Netcode.HostMigration;
 using Unity.Networking.Transport;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
@@ -96,7 +96,16 @@ namespace Samples.HelloNetcode
             SamplePicker.value = LastSamplePickerDropdownValue;
             PopulateSampleDropdown(SamplePicker.value);
             ClientServerButton.gameObject.SetActive(ClientServerBootstrap.RequestedPlayType == ClientServerBootstrap.PlayType.ClientAndServer);
+
+            if (IsHosting())
+                ClientServerButton.GetComponentInChildren<Text>().text = "Start Host";
+
             OnStart();
+        }
+
+        private static bool IsHosting()
+        {
+            return NetcodeConfig.Global?.HostWorldModeSelection == NetcodeConfig.HostWorldMode.SingleWorld;
         }
 
         protected virtual void OnStart()
@@ -136,6 +145,12 @@ namespace Samples.HelloNetcode
                 return;
             }
 
+            if (IsHosting())
+            {
+                Debug.LogError("Creating a session is not supported yet when using Single Host World!");
+                return;
+            }
+
             await InitializeServices();
             if (!AuthenticationService.Instance.IsSignedIn)
                 return;
@@ -172,8 +187,17 @@ namespace Samples.HelloNetcode
 
         protected void StartIpPortClientServer()
         {
-            var server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
-            var client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
+            World server, client;
+            if (IsHosting())
+            {
+                server = ClientServerBootstrap.CreateSingleWorldHost("HostWorld");
+                client = server;
+            }
+            else
+            {
+                server = ClientServerBootstrap.CreateServerWorld("ServerWorld");
+                client = ClientServerBootstrap.CreateClientWorld("ClientWorld");
+            }
 
             LoadScenes(server);
 
@@ -190,12 +214,12 @@ namespace Samples.HelloNetcode
 
         async Task SetHudSessionName()
         {
-            var frontendHud = FindFirstObjectByType<FrontendHUD>();
+            var frontendHud = FindAnyObjectByType<FrontendHUD>();
             // HUD scene might not be loaded yet so we'll need to poll for it
             while (frontendHud == null)
             {
                 await Task.Delay(100);
-                frontendHud = FindFirstObjectByType<FrontendHUD>();
+                frontendHud = FindAnyObjectByType<FrontendHUD>();
             }
             frontendHud.LobbyName.text = m_Session.Id;
         }
@@ -220,7 +244,7 @@ namespace Samples.HelloNetcode
             if (m_Session.IsHost)
             {
                 // Connect the server migration stats HUD
-                var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
+                var statsText = FindAnyObjectByType<HostMigrationHUD>().StatsText;
                 ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<ServerHostMigrationHUDSystem>().StatsText = statsText;
 
                 // Disable the client status HUD
@@ -331,10 +355,14 @@ namespace Samples.HelloNetcode
             // Destroy the local simulation world to avoid the game scene to be loaded into it
             // This prevents rendering (rendering from multiple world with presentation is not greatly supported)
             // and other issues.
+#if UNITY_ENTITIES_WORLD_LIFETIME_CHANGES
+            ScriptBehaviourUpdateOrder.RemoveWorldFromCurrentPlayerLoop(World.DefaultGameObjectInjectionWorld);
+#else
             DestroyLocalSimulationWorld();
 
             if (World.DefaultGameObjectInjectionWorld == null)
                 World.DefaultGameObjectInjectionWorld = world;
+#endif
             var sceneName = GetAndSaveSceneSelection();
             SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         }
@@ -346,6 +374,15 @@ namespace Samples.HelloNetcode
         /// </summary>
         public void PopulateSampleDropdown(int value)
         {
+            void ValidateSceneByIndex(int index, out string sceneName, out bool isExcludedScene, out bool isHelloNetcodeScene)
+            {
+                var scenePathByBuildIndex = SceneUtility.GetScenePathByBuildIndex(index);
+                sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePathByBuildIndex);
+                var isDisableBootstrapScene = scenePathByBuildIndex.Contains("DisableBootstrap");
+                var isGameObjectSampleScene = scenePathByBuildIndex.Contains("GameObjectSample");
+                isExcludedScene = sceneName.StartsWith("Frontend") || sceneName.EndsWith("HUD") || isDisableBootstrapScene || isGameObjectSampleScene;
+                isHelloNetcodeScene = scenePathByBuildIndex.Contains("HelloNetcode");
+            }
             var scenes = SceneManager.sceneCountInBuildSettings;
             Sample.ClearOptions();
             if (value == 0)
@@ -353,12 +390,8 @@ namespace Samples.HelloNetcode
                 var lastPlayed = LastPlayedSampleScene;
                 for (var i = 0; i < scenes; ++i)
                 {
-                    var scenePathByBuildIndex = SceneUtility.GetScenePathByBuildIndex(i);
-
-                    var sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePathByBuildIndex);
-                    var isHelloNetcodeScene = scenePathByBuildIndex.Contains("HelloNetcode");
-                    var isDisableBootstrapScene = scenePathByBuildIndex.Contains("DisableBootstrap");
-                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && !isHelloNetcodeScene && !isDisableBootstrapScene)
+                    ValidateSceneByIndex(i, out var sceneName, out var isExcludedScene, out var isHelloNetcodeScene);
+                    if (!isExcludedScene && !isHelloNetcodeScene)
                     {
                         Sample.options.Add(new Dropdown.OptionData { text = sceneName });
                         if (string.Equals(sceneName, lastPlayed, StringComparison.OrdinalIgnoreCase))
@@ -371,12 +404,8 @@ namespace Samples.HelloNetcode
                 string lastPlayed = LastPlayedSampleScene;
                 for (var i = 0; i < scenes; ++i)
                 {
-                    var scenePathByBuildIndex = SceneUtility.GetScenePathByBuildIndex(i);
-
-                    var sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePathByBuildIndex);
-                    var isHelloNetcodeScene = scenePathByBuildIndex.Contains("HelloNetcode");
-                    var isDisableBootstrapScene = scenePathByBuildIndex.Contains("DisableBootstrap");
-                    if (!sceneName.StartsWith("Frontend") && !sceneName.EndsWith("HUD") && isHelloNetcodeScene && !isDisableBootstrapScene)
+                    ValidateSceneByIndex(i, out var sceneName, out var isExcludedScene, out var isHelloNetcodeScene);
+                    if (!isExcludedScene && isHelloNetcodeScene)
                     {
                         Sample.options.Add(new Dropdown.OptionData { text = sceneName });
                         if (string.Equals(sceneName, lastPlayed, StringComparison.OrdinalIgnoreCase))
@@ -416,6 +445,15 @@ namespace Samples.HelloNetcode
             }
 
             return port;
+        }
+
+        public void ExitApplication()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
     }
 }

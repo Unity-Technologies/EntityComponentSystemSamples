@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Physics;
 using Unity.Physics.Systems;
 
-namespace Unity.NetCode
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// Run the physics step using the Immediate mode. this is usually way faster than running jobs when the number of

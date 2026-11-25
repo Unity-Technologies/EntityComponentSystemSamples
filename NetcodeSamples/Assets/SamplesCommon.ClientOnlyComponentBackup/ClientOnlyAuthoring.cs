@@ -1,9 +1,9 @@
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
+using Unity.Netcode;
 using UnityEngine;
 
-namespace Unity.NetCode.Samples
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// Authoring class used in the tests or in game scene. Add all the client-only components to the ghost prefab.

@@ -1,5 +1,6 @@
+using Unity.Netcode;
 using Unity.Burst;
-using Unity.NetCode;
+
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Collections;

@@ -1,5 +1,6 @@
+using Unity.Netcode;
 using Unity.Collections;
-using Unity.NetCode;
+
 
 [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
 public struct ShipCommandData : ICommandData

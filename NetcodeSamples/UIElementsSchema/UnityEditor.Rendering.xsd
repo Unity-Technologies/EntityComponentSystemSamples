@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Rendering" elementFormDefault="qualified" targetNamespace="UnityEditor.Rendering" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="HeaderFoldoutType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:FoldoutType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="HeaderFoldout" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:Foldout" type="tns:HeaderFoldoutType" />
+  <xs:complexType name="TriangleElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TriangleElement" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:VisualElement" type="tns:TriangleElementType" />
+  <xs:complexType name="ToggleDropdownType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="Toggle Dropdown" name="text" type="xs:string" />
+        <xs:attribute name="options" type="xs:string" />
+        <xs:attribute default="0" name="selected-index" type="xs:int" />
+        <xs:attribute name="selected-indices" type="xs:string" />
+        <xs:attribute default="false" name="value" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ToggleDropdown" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:VisualElement" type="tns:ToggleDropdownType" />
+</xs:schema>

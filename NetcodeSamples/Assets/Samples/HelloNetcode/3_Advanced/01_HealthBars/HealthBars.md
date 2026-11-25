@@ -7,7 +7,6 @@ This samples shows how you can implement a world space health bars.
 The spawn player sample is used to trigger the auto spawning of the player when connection is established. The dynamic physics objects from the physics sample are used.
 Character controller is used for moving the character around. 
 
-* GoInGame
 * SpawnPlayer
 * Physics
 * CharacterController
@@ -24,5 +23,7 @@ The health will respawn at full health together with the character in its new po
 
 ## Note
 
-The `HealthBarSpawnerAuthoring` is creating a IComponent as a class rather than a struct. This is because we need to maintain the reference to the gameobject of the healthbar prefab.
-In the `SpawnHealthBarSystem` we instantiate the gameobject using the regular Object.Instantiate method. 
+`HealthBarSpawner` and `HealthUI` are unmanaged `struct IComponentData` that hold their `GameObject` / `Transform` / `Image` references via `UnityObjectRef<T>`, which is the supported way to point at a `UnityEngine.Object` from an unmanaged component. In `SpawnHealthBarSystem` we dereference the prefab with `.Value` and instantiate it with the regular `Object.Instantiate` method.
+
+Because the spawned health-bar `GameObject` is owned by `HealthUI` and is not managed by netcode, we need to destroy it when the ghost entity goes away. We do that with a mirror `HealthUICleanup : ICleanupComponentData`: when the entity is destroyed, `HealthUI` is removed but `HealthUICleanup` survives, giving `HealthUICleanupSystem` a chance to destroy the GameObject and then remove the cleanup component. `HealthUICleanupSystem.OnDestroy` also sweeps any remaining cleanup components on world teardown, when the per-entity pass would otherwise never run again.
+

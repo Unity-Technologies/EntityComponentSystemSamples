@@ -1,8 +1,8 @@
+using Unity.Netcode;
 using System;
 using System.Threading.Tasks;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.HostMigration;
+using Unity.Netcode.HostMigration;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
@@ -74,7 +74,7 @@ namespace Samples.HelloNetcode
 
         protected override void OnStart()
         {
-            hostMigrationController = FindFirstObjectByType<HostMigrationController>();
+            hostMigrationController = FindAnyObjectByType<HostMigrationController>();
             if (hostMigrationController == null)
                 hostMigrationController = Instantiate(hostMigrationControllerPrefab).GetComponent<HostMigrationController>();
             SceneManager.sceneLoaded += hostMigrationController.OnSceneLoaded;

@@ -14,7 +14,6 @@ See
 
 The spawn player sample is used to trigger the auto spawning of the player when connection is established. This is built on top of the character controller sample and uses the same inputs and character controller prefab.
 
-* GoInGame
 * SpawnPlayer
 * CharacterController
 

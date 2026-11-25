@@ -7,8 +7,6 @@ You can learn more about prediction [here](https://docs.unity3d.com/Packages/com
 
 ## Requirements
 
-Connection needs to be in game already.
-* GoInGame
 * SpawnPlayer
 
 ## Sample description

@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using Unity.Entities;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>
     ///     Stores a sorted list of player join & disconnect events (I.e. Notifications).

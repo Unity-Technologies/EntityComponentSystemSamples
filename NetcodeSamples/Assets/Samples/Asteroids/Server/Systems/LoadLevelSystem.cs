@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Collections;
-using Unity.NetCode;
+
 using Unity.Mathematics;
 
 namespace Asteroids.Server

@@ -1,5 +1,5 @@
 using Unity.Entities;
-using Unity.NetCode.HostMigration;
+using Unity.Netcode.HostMigration;
 using UnityEngine;
 
 [DisallowMultipleComponent]

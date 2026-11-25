@@ -1,10 +1,11 @@
+using Unity.Netcode;
 using System;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Rendering;
 using UnityEngine;
-namespace Unity.NetCode.Samples.Common
+namespace Unity.Samples.Netcode.Common
 {
     /// <summary>
     ///     Every NetworkId has its own unique Debug color. This system sets it.

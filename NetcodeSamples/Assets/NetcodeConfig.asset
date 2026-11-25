@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abd30ee0214cf6a45b2d76765a4615b1, type: 3}
+  m_Name: NetcodeConfig
+  m_EditorClassIdentifier: Unity.NetCode::Unity.Netcode.NetcodeConfig
+  m_Version: 1
+  m_NetcodeVersion: -1
+  m_IsGlobalConfig: 1
+  EnableClientServerBootstrap: 1
+  HostWorldModeSelection: 1
+  PartialTickModeSelection: 1
+  PhysicsRunMode: 2
+  AutomaticStateReplication: 1
+  ClientServerTickRate:
+    SimulationTickRate: 60
+    PredictedFixedStepSimulationTickRatio: 1
+    NetworkTickRate: 0
+    MaxSimulationStepsPerFrame: 1
+    MaxSimulationStepBatchSize: 4
+    TargetFrameRateMode: 0
+    m_SendSnapshotsForCatchUpTicks: 0
+    SnapshotAckMaskCapacity: 4096
+    m_ClampPartialTicksThreshold: 5
+    HandshakeApprovalTimeoutMS: 5000
+  ClientTickRate:
+    InterpolationTimeNetTicks: 2
+    InterpolationTimeMS: 0
+    MaxExtrapolationTimeSimTicks: 20
+    ForcedInputLatencyTicks: 0
+    MaxPredictAheadTimeMS: 500
+    NumAdditionalClientPredictedGhostLifetimeTicks: 0
+    DefaultClassificationAllowableTickPeriod: 5
+    TargetCommandSlack: 2
+    NumAdditionalCommandsToSend: 2
+    MaxPredictionStepBatchSizeRepeatedTick: 0
+    MaxPredictionStepBatchSizeFirstTimeTick: 0
+    AlwaysRollbackAllPredictedGhosts: 1
+    PredictionLoopUpdateMode: 0
+    InterpolationDelayJitterScale: 1.25
+    InterpolationDelayMaxDeltaTicksFraction: 0.1
+    InterpolationDelayCorrectionFraction: 0.1
+    InterpolationTimeScaleMin: 0.85
+    InterpolationTimeScaleMax: 1.1
+    CommandAgeCorrectionFraction: 0.1
+    PredictionTimeScaleMin: 0.9
+    PredictionTimeScaleMax: 1.1
+  GhostSendSystemData:
+    DefaultSnapshotPacketSize: 0
+    PercentReservedForDespawnMessages: 0.33
+    MinSendImportance: 0
+    MinDistanceScaledSendImportance: 0
+    MaxIterateChunks: 0
+    MaxSendChunks: 0
+    MaxSendEntities: 0
+    m_ForceSingleBaseline: 0
+    m_ForcePreSerialize: 0
+    m_KeepSnapshotHistoryOnStructuralChange: 1
+    m_EnablePerComponentProfiling: 0
+    CleanupConnectionStatePerTick: 1
+    m_FirstSendImportanceMultiplier: 1
+    m_IrrelevantImportanceDownScale: 1
+    m_TempStreamSize: 8192
+    m_UseCustomSerializer: 0
+  ConnectTimeoutMS: 1000
+  MaxConnectAttempts: 60
+  DisconnectTimeoutMS: 30000
+  HeartbeatTimeoutMS: 500
+  ReconnectionTimeoutMS: 2000
+  GhostPrefabLoadingTimeout: -1
+  ClientSendQueueCapacity: 64
+  ClientReceiveQueueCapacity: 64
+  ServerSendQueueCapacity: 512
+  ServerReceiveQueueCapacity: 512
+  MaxMessageSize: 1400

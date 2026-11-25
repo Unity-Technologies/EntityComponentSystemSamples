@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
@@ -5,15 +6,12 @@ using Unity.Mathematics;
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode.Hybrid;
 using Unity.Transforms;
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
-using Unity.NetCode.Hybrid;
-#endif
+
 
 namespace Samples.HelloNetcode.Hybrid
 {
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct InAirAnimationData : IComponentData
     {
         [GhostField(Quantization=1000)] public float Phase;
@@ -86,7 +84,7 @@ namespace Samples.HelloNetcode.Hybrid
         }
     }
 
-    [CreateAssetMenu(fileName = "InAir", menuName = "NetCode/Animation/InAir")]
+    [CreateAssetMenu(fileName = "InAir", menuName = "Netcode/Animation/InAir")]
     public class GhostAnimationGraph_InAir : GhostAnimationGraphAsset
     {
         public AnimationClip Clip;
@@ -106,5 +104,4 @@ namespace Samples.HelloNetcode.Hybrid
             register.RegisterPlayableData<InAirAnimationData>();
         }
     }
-#endif
 }

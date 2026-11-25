@@ -3,8 +3,8 @@ using AOT;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.LowLevel.Unsafe;
+using Unity.Netcode;
+using Unity.Netcode.LowLevel.Unsafe;
 using Unity.Transforms;
 using UnityEngine.Assertions;
 
@@ -216,7 +216,7 @@ namespace Samples.CustomChunkSerializer
 
             //ROOT COMPONENTS
             //GENERATE ONLY THIS
-            new Unity_NetCode_Generated_Unity_NetCode.Unity_NetCode_Generated_Unity_NetCode_GhostOwnerGhostComponentSerializer().CopyComponentToSnapshot(chunk, ref context,
+            new Unity_NetCode_Generated_Unity_Netcode.Unity_NetCode_Generated_Unity_Netcode_GhostOwnerGhostComponentSerializer().CopyComponentToSnapshot(chunk, ref context,
                 ghostChunkComponentTypesPtr, indices[0], snapshotPtr, ref snapshotOffset);
             new Unity_NetCode_Generated_Unity_Transforms.Unity_NetCode_Generated_Unity_Transforms_TransformDefaultVariantGhostComponentSerializer().CopyComponentToSnapshot(chunk, ref context,
                 ghostChunkComponentTypesPtr,indices[1], snapshotPtr, ref snapshotOffset);
@@ -306,7 +306,7 @@ namespace Samples.CustomChunkSerializer
         {
             var changeMaskOffset = 0;
             //GENERATE ONLY THIS
-            compBitSize[0*compBitSizeStride] = default(Unity_NetCode_Generated_Unity_NetCode.Unity_NetCode_Generated_Unity_NetCode_GhostOwnerGhostComponentSerializer).SerializeComponentSingleBaseline(snapshotData,baseline0Ptr,changeMaskData,ref changeMaskOffset, ref snapshotOffset, ref writer, compressionModel);
+            compBitSize[0*compBitSizeStride] = default(Unity_NetCode_Generated_Unity_Netcode.Unity_NetCode_Generated_Unity_Netcode_GhostOwnerGhostComponentSerializer).SerializeComponentSingleBaseline(snapshotData,baseline0Ptr,changeMaskData,ref changeMaskOffset, ref snapshotOffset, ref writer, compressionModel);
             compBitSize[1*compBitSizeStride] = default(Unity_NetCode_Generated_Unity_Transforms.Unity_NetCode_Generated_Unity_Transforms_TransformDefaultVariantGhostComponentSerializer).SerializeComponentSingleBaseline(snapshotData,baseline0Ptr,changeMaskData,ref changeMaskOffset, ref snapshotOffset, ref writer, compressionModel);
             compBitSize[2*compBitSizeStride] = default(CustomSerializer_Generated_Samples_CustomChunkSerializer.CustomSerializer_Generated_Samples_CustomChunkSerializer_IntCompo1GhostComponentSerializer).SerializeComponentSingleBaseline(snapshotData,baseline0Ptr,changeMaskData,ref changeMaskOffset, ref snapshotOffset, ref writer, compressionModel);
             compBitSize[3*compBitSizeStride] = default(CustomSerializer_Generated_Samples_CustomChunkSerializer.CustomSerializer_Generated_Samples_CustomChunkSerializer_IntCompo2GhostComponentSerializer).SerializeComponentSingleBaseline(snapshotData,baseline0Ptr,changeMaskData,ref changeMaskOffset, ref snapshotOffset, ref writer, compressionModel);
@@ -343,7 +343,7 @@ namespace Samples.CustomChunkSerializer
             var changeMaskOffset = 0;
 
             //GENERATE ONLY THIS
-            compBitSize[0*compBitSizeStride] = default(Unity_NetCode_Generated_Unity_NetCode.Unity_NetCode_Generated_Unity_NetCode_GhostOwnerGhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,baseline1Ptr, baseline2Ptr, changeMaskData, ref changeMaskOffset, ref snapshotOffset, ref predictor, ref writer, compressionModel);
+            compBitSize[0*compBitSizeStride] = default(Unity_NetCode_Generated_Unity_Netcode.Unity_NetCode_Generated_Unity_Netcode_GhostOwnerGhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,baseline1Ptr, baseline2Ptr, changeMaskData, ref changeMaskOffset, ref snapshotOffset, ref predictor, ref writer, compressionModel);
             compBitSize[1*compBitSizeStride] = default(Unity_NetCode_Generated_Unity_Transforms.Unity_NetCode_Generated_Unity_Transforms_TransformDefaultVariantGhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,baseline1Ptr, baseline2Ptr, changeMaskData, ref changeMaskOffset, ref snapshotOffset, ref predictor, ref writer, compressionModel);
             compBitSize[2*compBitSizeStride] = default(CustomSerializer_Generated_Samples_CustomChunkSerializer.CustomSerializer_Generated_Samples_CustomChunkSerializer_IntCompo1GhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,baseline1Ptr, baseline2Ptr, changeMaskData, ref changeMaskOffset, ref snapshotOffset, ref predictor, ref writer, compressionModel);
             compBitSize[3*compBitSizeStride] = default(CustomSerializer_Generated_Samples_CustomChunkSerializer.CustomSerializer_Generated_Samples_CustomChunkSerializer_IntCompo2GhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,baseline1Ptr, baseline2Ptr, changeMaskData, ref changeMaskOffset, ref snapshotOffset, ref predictor, ref writer, compressionModel);

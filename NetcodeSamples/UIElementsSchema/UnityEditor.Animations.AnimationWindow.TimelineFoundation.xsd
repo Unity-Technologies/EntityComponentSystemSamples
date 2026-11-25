@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Animations.AnimationWindow.TimelineFoundation" elementFormDefault="qualified" targetNamespace="UnityEditor.Animations.AnimationWindow.TimelineFoundation" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="OverlayManagerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="OverlayManager" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:OverlayManagerType" />
+  <xs:complexType name="TimeAreaType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="0" name="display-start-time" type="xs:double" />
+        <xs:attribute default="0" name="display-end-time" type="xs:double" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TimeArea" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:VisualElement" type="tns:TimeAreaType" />
+  <xs:complexType name="TimeFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="false" name="showLabels" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TimeField" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:VisualElement" type="tns:TimeFieldType" />
+  <xs:complexType name="CanvasOverlayManagerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:OverlayManagerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CanvasOverlayManager" substitutionGroup="tns:OverlayManager" type="tns:CanvasOverlayManagerType" />
+</xs:schema>

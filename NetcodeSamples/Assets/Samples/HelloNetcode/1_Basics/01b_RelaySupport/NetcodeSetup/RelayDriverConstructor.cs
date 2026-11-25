@@ -1,5 +1,6 @@
+using Unity.Netcode;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
 using UnityEngine;
@@ -36,7 +37,7 @@ namespace Samples.HelloNetcode
         /// For WebGL, websocket is always preferred for client in the Editor, to closely emulate the player behaviour.
         /// </para>
         /// </summary>
-        public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateClientDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             var settings = DefaultDriverBuilder.GetNetworkClientSettings();
             //if the relay data is not valid, connect via local ipc
@@ -56,7 +57,7 @@ namespace Samples.HelloNetcode
             }
         }
 
-        public void CreateServerDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateServerDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             //The first driver is the IPC for internal client/server connection if necessary.
             var ipcSettings = DefaultDriverBuilder.GetNetworkServerSettings();

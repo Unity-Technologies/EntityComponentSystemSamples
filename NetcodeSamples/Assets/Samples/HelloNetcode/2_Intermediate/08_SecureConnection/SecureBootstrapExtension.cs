@@ -1,6 +1,6 @@
 //#define ENABLE_NETCODE_SAMPLE_SECURE
 
-using Unity.NetCode;
+using Unity.Netcode;
 
 namespace Samples.HelloNetcode
 {

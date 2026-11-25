@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Unity.NetCode;
+
 using Unity.Rendering;
 using Unity.Burst;
 

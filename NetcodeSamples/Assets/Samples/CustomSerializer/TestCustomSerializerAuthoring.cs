@@ -18,7 +18,7 @@ public class TestCustomSerializerAuthoring : MonoBehaviour
     public bool useCustomSerializer;
     public bool usePreserialization;
 
-    private class Baker : Unity.Entities.Baker<TestCustomSerializerAuthoring>
+    private class Baker : Baker<TestCustomSerializerAuthoring>
     {
         public override void Bake(TestCustomSerializerAuthoring customSerializerAuthoring)
         {

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Audio.UIElements" elementFormDefault="qualified" targetNamespace="UnityEditor.Audio.UIElements" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:import schemaLocation="UnityEditor.UIElements.xsd" namespace="UnityEditor.UIElements" />
+  <xs:complexType name="AudioRandomRangeSliderTrackerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AudioRandomRangeSliderTracker" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:AudioRandomRangeSliderTrackerType" />
+  <xs:complexType name="AudioContainerElementClipFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEditor.UIElements" base="q3:ObjectFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AudioContainerElementClipField" xmlns:q4="UnityEditor.UIElements" substitutionGroup="q4:ObjectField" type="tns:AudioContainerElementClipFieldType" />
+  <xs:complexType name="TickmarksType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Tickmarks" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:VisualElement" type="tns:TickmarksType" />
+  <xs:complexType name="AudioLevelMeterType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AudioLevelMeter" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:VisualElement" type="tns:AudioLevelMeterType" />
+</xs:schema>

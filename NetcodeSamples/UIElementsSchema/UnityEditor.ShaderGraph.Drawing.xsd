@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.ShaderGraph.Drawing" elementFormDefault="qualified" targetNamespace="UnityEditor.ShaderGraph.Drawing" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:import schemaLocation="UnityEngine.xsd" namespace="UnityEngine" />
+  <xs:complexType name="ResizableElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ResizableElement" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:ResizableElementType" />
+  <xs:complexType name="IdentifierFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute default="-1" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="q3:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q4="UnityEngine" type="q4:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="IdentifierField" xmlns:q5="UnityEngine.UIElements" substitutionGroup="q5:BindableElement" type="tns:IdentifierFieldType" />
+</xs:schema>

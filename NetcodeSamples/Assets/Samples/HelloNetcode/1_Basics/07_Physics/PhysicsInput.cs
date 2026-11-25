@@ -1,9 +1,11 @@
+using Unity.Netcode;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Netcode.NetcodeTime;
 using Unity.Physics;
 using Unity.Physics.Systems;
-using Unity.NetCode;
-using Unity.NetCode.Samples.Common;
+
+using Unity.Samples.Netcode.Common;
 
 namespace Samples.HelloNetcode
 {

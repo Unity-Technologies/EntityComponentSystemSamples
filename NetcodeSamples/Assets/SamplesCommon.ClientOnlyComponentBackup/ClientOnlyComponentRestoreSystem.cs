@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using System;
 using System.Diagnostics;
 using Unity.Burst;
@@ -5,9 +6,10 @@ using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.NetCode.LowLevel.Unsafe;
+using Unity.Netcode.LowLevel.Unsafe;
+using Unity.Netcode.NetcodeTime;
 
-namespace Unity.NetCode.Samples
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// System used to restore the state of the client-only component present on predicted ghost when a
@@ -168,7 +170,7 @@ namespace Unity.NetCode.Samples
                 {
                     var comp = clientOnlyComponentCollection[compIdx];
                     var typeHandle = typeHandles[comp.ComponentIndex];
-                    Assertions.Assert.IsFalse(comp.ComponentType.IsBuffer);
+                    UnityEngine.Assertions.Assert.IsFalse(comp.ComponentType.IsBuffer);
                     if (!chunk.Has(ref typeHandle))
                     {
                         reader.Skip(comp);
@@ -193,7 +195,7 @@ namespace Unity.NetCode.Samples
                 for (var childCompIdx = compIdx; childCompIdx < metadata.componentEnd; ++childCompIdx)
                 {
                     var comp = clientOnlyComponentCollection[childCompIdx];
-                    Assertions.Assert.IsFalse(comp.ComponentType.IsBuffer);
+                    UnityEngine.Assertions.Assert.IsFalse(comp.ComponentType.IsBuffer);
                     var typeHandle = typeHandles[comp.ComponentIndex];
                     //NOTE: this a safety condition in case the entity group is changed and some child removed.
                     //However, is a necessary but not sufficient condition: it is always possible to

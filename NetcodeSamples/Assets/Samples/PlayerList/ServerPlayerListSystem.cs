@@ -3,9 +3,10 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Netcode;
 using UnityEngine;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>
     ///     Manages the <see cref="PlayerListEntry" /> component and RPCs,
@@ -177,7 +178,7 @@ namespace Unity.NetCode.Samples.PlayerList
             public NetDebug netDbg;
             public EntityCommandBuffer ecb;
             public EntityArchetype rpcArchetype;
-            public NativeArray<NetCodeConnectionEvent>.ReadOnly connectionEventsForTick;
+            public NativeArray<NetcodeConnectionEvent>.ReadOnly connectionEventsForTick;
             public ComponentLookup<PlayerListEntry> playerListEntryLookup;
             public void Execute()
             {

@@ -1,5 +1,5 @@
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode;
 using UnityEngine;
 
 public struct Cube : IComponentData
@@ -13,7 +13,8 @@ public class CubeAuthoring : MonoBehaviour
     {
         public override void Bake(CubeAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            // NonUniformScale bakes a PostTransformMatrix, used by CubeScaleSystem for the 3D scale demo
+            var entity = GetEntity(TransformUsageFlags.Dynamic | TransformUsageFlags.NonUniformScale);
             AddComponent<Cube>(entity);
         }
     }

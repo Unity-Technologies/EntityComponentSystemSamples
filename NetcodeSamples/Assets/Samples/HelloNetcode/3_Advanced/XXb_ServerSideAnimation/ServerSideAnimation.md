@@ -6,7 +6,6 @@ The spawn player sample is used to trigger the auto spawning of the player when 
 The character controller is used to move and rotate the player around using the keyboard and mouse input.
 The character model from client side animation is reused in this sample.
 
-* GoInGame
 * SpawnPlayer
 * CharacterController
 * ClientSideAnimation

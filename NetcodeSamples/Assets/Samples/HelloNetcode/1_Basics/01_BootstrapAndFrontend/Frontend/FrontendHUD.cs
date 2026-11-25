@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Entities;
-using Unity.NetCode;
+
 using System.Collections.Generic;
 using Unity.Services.Multiplayer;
 using UnityEngine.UI;
@@ -53,9 +54,13 @@ namespace Samples.HelloNetcode
                 world.Dispose();
             }
 
+#if UNITY_ENTITIES_WORLD_LIFETIME_CHANGES
+            ScriptBehaviourUpdateOrder.AppendWorldToCurrentPlayerLoop(World.DefaultGameObjectInjectionWorld);
+#else
             if (string.IsNullOrEmpty(Frontend.OldFrontendWorldName))
                 Frontend.OldFrontendWorldName = "DefaultWorld";
             ClientServerBootstrap.CreateLocalWorld(Frontend.OldFrontendWorldName);
+#endif
             SceneManager.LoadScene(Frontend.SceneName, LoadSceneMode.Single);
         }
 
@@ -71,7 +76,7 @@ namespace Samples.HelloNetcode
 
             // We must always have an event system (DOTS-7177), but some scenes will already have one,
             // so we only enable ours if we can't find someone else's.
-            if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
                 m_EventSystem.gameObject.SetActive(true);
         }
     }

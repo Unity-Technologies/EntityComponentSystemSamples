@@ -1,13 +1,17 @@
+using Unity.Netcode;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Core;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Mathematics;
+using Unity.Netcode.NetcodeTime;
 using Unity.Physics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
+
+[assembly: RegisterGenericComponentType(typeof(CompanionComponent<ParticleSystem>))]
 
 namespace Samples.HelloNetcode
 {
@@ -98,7 +102,7 @@ namespace Samples.HelloNetcode
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<EnablePredictedSpawning>();
-            m_ParticleSystemQuery = state.GetEntityQuery(typeof(ParticleSystem), typeof(ExplosionParticleSystem));
+            m_ParticleSystemQuery = state.GetEntityQuery(typeof(CompanionComponent<ParticleSystem>), typeof(ExplosionParticleSystem));
             state.RequireForUpdate(m_ParticleSystemQuery);
         }
 
@@ -110,7 +114,7 @@ namespace Samples.HelloNetcode
             foreach (var entity in particleSystemEntities)
             {
                 // Hack: Only required because ParticleSystem's on Entities don't automatically self-destruct.
-                var ps = state.EntityManager.GetComponentObject<ParticleSystem>(entity);
+                var ps = state.EntityManager.GetCompanion<ParticleSystem>(entity);
                 Debug.Assert(ps.main.stopAction == ParticleSystemStopAction.Destroy);
                 if (ps.time + (time.DeltaTime * 2) > ps.main.duration)
                     state.EntityManager.DestroyEntity(entity);
@@ -135,11 +139,11 @@ namespace Samples.HelloNetcode
         public void OnUpdate(ref SystemState state)
         {
             var commandBuffer = new EntityCommandBuffer(state.WorldUpdateAllocator);
-            foreach (var (character, anchorPoint) in SystemAPI.Query<CharacterAspect, RefRO<AnchorPoint>>().WithAll<Simulate>())
+            foreach (var (characterInput, anchorPoint) in SystemAPI.Query<RefRO<CharacterControllerPlayerInput>, RefRO<AnchorPoint>>().WithAll<Simulate, LocalTransform, AutoCommandTarget>().WithAll<Character,PhysicsVelocity,GhostOwner>())
             {
                 // This is the weapon slot and rotating that will make the launcher move correctly (it's anchored on the end)
                 var grenadeLauncher = anchorPoint.ValueRO.WeaponSlot;
-                var followCameraRotation = quaternion.RotateX(-character.Input.Pitch);
+                var followCameraRotation = quaternion.RotateX(-characterInput.ValueRO.Pitch);
 
                 var transform = state.EntityManager.GetComponentData<LocalTransform>(grenadeLauncher);
                 commandBuffer.SetComponent(grenadeLauncher, transform.WithRotation(followCameraRotation));

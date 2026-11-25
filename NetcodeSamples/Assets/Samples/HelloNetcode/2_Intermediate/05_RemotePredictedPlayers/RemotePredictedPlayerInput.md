@@ -9,9 +9,8 @@ See
 
 ## Requirements
 
-Connection needs to be in game already and scripts from the player spawning sample are re-used.
+The spawn player sample is used to trigger the auto spawning of the player when connection is established.
 
-* GoInGame
 * SpawnPlayer
 
 ## Sample description

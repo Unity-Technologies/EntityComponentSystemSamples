@@ -1,7 +1,9 @@
+﻿using Unity.Netcode;
 ﻿using System;
 using Unity.Collections;
 
-namespace Unity.NetCode.Samples.PlayerList
+
+namespace Unity.Samples.Netcode.PlayerList
 {
     public static class PlayerListDebugUtils
     {

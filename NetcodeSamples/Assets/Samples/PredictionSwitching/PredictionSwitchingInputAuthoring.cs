@@ -1,15 +1,18 @@
 using Unity.Entities;
 using UnityEngine;
 
-[DisallowMultipleComponent]
-public class PredictionSwitchingInputAuthoring : MonoBehaviour
+namespace Samples.PredictionSwitching
 {
-    class PredictionSwitchingInputBaking : Baker<PredictionSwitchingInputAuthoring>
+    [DisallowMultipleComponent]
+    public class PredictionSwitchingInputAuthoring : MonoBehaviour
     {
-        public override void Bake(PredictionSwitchingInputAuthoring authoring)
+        class PredictionSwitchingInputBaking : Baker<PredictionSwitchingInputAuthoring>
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
-            AddBuffer<PredictionSwitchingInput>(entity);
+            public override void Bake(PredictionSwitchingInputAuthoring authoring)
+            {
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddBuffer<PredictionSwitchingInput>(entity);
+            }
         }
     }
 }

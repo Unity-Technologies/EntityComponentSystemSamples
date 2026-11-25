@@ -1,4 +1,5 @@
-using Unity.NetCode;
+using Unity.Netcode;
+
 using Unity.Entities;
 
 public struct PlayerSpawnRequest : IRpcCommand

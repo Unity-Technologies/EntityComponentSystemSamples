@@ -11,14 +11,13 @@ See
 
 ## Requirements
 
-Connection needs to be in game already and re-uses the spawn player sample so you don't need to spawn anything (just set up new inputs)
+This sample re-uses the spawn player sample so you don't need to spawn anything (just set up new inputs).
 
-* GoInGame
 * SpawnPlayer
 
 ## Sample description
 
-This sample shows how to add thin client random input generation to a project when using the [__IInputComponentData__](xref:Unity.NetCode.IInputComponentData) component for input handling.
+This sample shows how to add thin client random input generation to a project when using the [__IInputComponentData__](xref:Unity.Netcode.IInputComponentData) component for input handling.
 
 To implement the input handling of a thin client you need to manually create a dummy player entity to contain the input logic. The dummy entity needs to have the bare minimum functionality for it to work properly, that's the input component/buffer and have the command target and ghost owner components configured for the thin clients own player (`CreateThinClientPlayer` function in the sample).
 

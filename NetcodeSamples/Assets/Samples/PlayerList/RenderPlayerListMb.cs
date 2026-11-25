@@ -1,11 +1,13 @@
+﻿using Unity.Netcode;
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Unity.Collections;
 using Unity.Entities;
+
 using UnityEngine;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>Simple IMGUI example rendering of a player scoreboard with connect/disconnect notifications.</summary>
     public class RenderPlayerListMb : MonoBehaviour

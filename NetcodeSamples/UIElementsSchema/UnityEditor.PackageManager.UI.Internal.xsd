@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.PackageManager.UI.Internal" elementFormDefault="qualified" targetNamespace="UnityEditor.PackageManager.UI.Internal" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="ScopedRegistriesSettingsType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ScopedRegistriesSettings" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:ScopedRegistriesSettingsType" />
+  <xs:complexType name="ExtendableToolbarMenuType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ToolbarWindowMenuType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ToolbarWindowMenuType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:ButtonType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ToolbarWindowMenu" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:Button" type="tns:ToolbarWindowMenuType" />
+  <xs:element name="ExtendableToolbarMenu" substitutionGroup="tns:ToolbarWindowMenu" type="tns:ExtendableToolbarMenuType" />
+  <xs:complexType name="PackageSearchBarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageSearchBar" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:VisualElement" type="tns:PackageSearchBarType" />
+  <xs:complexType name="PackageDetailsTabViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageDetailsTabView" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:VisualElement" type="tns:PackageDetailsTabViewType" />
+  <xs:complexType name="MainContainerOverlayType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="UnityEngine.UIElements" base="q9:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MainContainerOverlay" xmlns:q10="UnityEngine.UIElements" substitutionGroup="q10:VisualElement" type="tns:MainContainerOverlayType" />
+  <xs:complexType name="SidebarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q11="UnityEngine.UIElements" base="q11:ScrollViewType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Sidebar" xmlns:q12="UnityEngine.UIElements" substitutionGroup="q12:ScrollView" type="tns:SidebarType" />
+  <xs:complexType name="PackageDetailsLinksType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q13="UnityEngine.UIElements" base="q13:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageDetailsLinks" xmlns:q14="UnityEngine.UIElements" substitutionGroup="q14:VisualElement" type="tns:PackageDetailsLinksType" />
+  <xs:complexType name="TagLabelListType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q15="UnityEngine.UIElements" base="q15:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TagLabelList" xmlns:q16="UnityEngine.UIElements" substitutionGroup="q16:VisualElement" type="tns:TagLabelListType" />
+  <xs:complexType name="SignInBarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q17="UnityEngine.UIElements" base="q17:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SignInBar" xmlns:q18="UnityEngine.UIElements" substitutionGroup="q18:VisualElement" type="tns:SignInBarType" />
+  <xs:complexType name="SelectableLabelType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q19="UnityEngine.UIElements" base="q19:LabelType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SelectableLabel" xmlns:q20="UnityEngine.UIElements" substitutionGroup="q20:Label" type="tns:SelectableLabelType" />
+  <xs:complexType name="ExtendedHelpBoxType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q21="UnityEngine.UIElements" base="q21:HelpBoxType">
+        <xs:choice />
+        <xs:attribute name="read-more-url" type="xs:string" />
+        <xs:attribute default="Learn More" name="read-more-text" type="xs:string" />
+        <xs:attribute default="None" name="custom-icon" type="tns:IconType" />
+        <xs:attribute name="analytics-id" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="IconType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="InProjectPage" />
+      <xs:enumeration value="UpdatesPage" />
+      <xs:enumeration value="SamplesPage" />
+      <xs:enumeration value="UnityRegistryPage" />
+      <xs:enumeration value="MyAssetsPage" />
+      <xs:enumeration value="BuiltInPage" />
+      <xs:enumeration value="ServicesPage" />
+      <xs:enumeration value="MyRegistriesPage" />
+      <xs:enumeration value="Refresh" />
+      <xs:enumeration value="Folder" />
+      <xs:enumeration value="Installed" />
+      <xs:enumeration value="Download" />
+      <xs:enumeration value="Import" />
+      <xs:enumeration value="Customized" />
+      <xs:enumeration value="Pause" />
+      <xs:enumeration value="Resume" />
+      <xs:enumeration value="Cancel" />
+      <xs:enumeration value="UpdateAvailable" />
+      <xs:enumeration value="Info" />
+      <xs:enumeration value="Error" />
+      <xs:enumeration value="Warning" />
+      <xs:enumeration value="Success" />
+      <xs:enumeration value="Verified" />
+      <xs:enumeration value="PullDown" />
+      <xs:enumeration value="RegistryErrorLarge" />
+      <xs:enumeration value="PackageWarningLarge" />
+      <xs:enumeration value="PackageOptionLarge" />
+      <xs:enumeration value="PackageErrorLarge" />
+      <xs:enumeration value="RestrictedErrorLarge" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ExtendedHelpBox" xmlns:q22="UnityEngine.UIElements" substitutionGroup="q22:HelpBox" type="tns:ExtendedHelpBoxType" />
+  <xs:complexType name="PackageManagerToolbarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q23="UnityEngine.UIElements" base="q23:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageManagerToolbar" xmlns:q24="UnityEngine.UIElements" substitutionGroup="q24:VisualElement" type="tns:PackageManagerToolbarType" />
+  <xs:complexType name="CopyIconButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q25="UnityEngine.UIElements" base="q25:ImageType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CopyIconButton" xmlns:q26="UnityEngine.UIElements" substitutionGroup="q26:Image" type="tns:CopyIconButtonType" />
+  <xs:complexType name="PackageAuthorLabelType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q27="UnityEngine.UIElements" base="q27:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageAuthorLabel" xmlns:q28="UnityEngine.UIElements" substitutionGroup="q28:VisualElement" type="tns:PackageAuthorLabelType" />
+  <xs:complexType name="PackageDetailsBodyType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q29="UnityEngine.UIElements" base="q29:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageDetailsBody" xmlns:q30="UnityEngine.UIElements" substitutionGroup="q30:VisualElement" type="tns:PackageDetailsBodyType" />
+  <xs:complexType name="PackageDetailsHeaderType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q31="UnityEngine.UIElements" base="q31:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageDetailsHeader" xmlns:q32="UnityEngine.UIElements" substitutionGroup="q32:VisualElement" type="tns:PackageDetailsHeaderType" />
+  <xs:complexType name="InProgressViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q33="UnityEngine.UIElements" base="q33:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="InProgressView" xmlns:q34="UnityEngine.UIElements" substitutionGroup="q34:VisualElement" type="tns:InProgressViewType" />
+  <xs:complexType name="ProgressBarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q35="UnityEngine.UIElements" base="q35:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ProgressBar" xmlns:q36="UnityEngine.UIElements" substitutionGroup="q36:VisualElement" type="tns:ProgressBarType" />
+  <xs:complexType name="AlertType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ExtendedHelpBoxType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Alert" substitutionGroup="tns:ExtendedHelpBox" type="tns:AlertType" />
+  <xs:complexType name="DetailsAreaType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q37="UnityEngine.UIElements" base="q37:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DetailsArea" xmlns:q38="UnityEngine.UIElements" substitutionGroup="q38:VisualElement" type="tns:DetailsAreaType" />
+  <xs:complexType name="VersionInfoIconType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q39="UnityEngine.UIElements" base="q39:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="VersionInfoIcon" xmlns:q40="UnityEngine.UIElements" substitutionGroup="q40:VisualElement" type="tns:VersionInfoIconType" />
+  <xs:complexType name="SampleDetailsHeaderType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q41="UnityEngine.UIElements" base="q41:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SampleDetailsHeader" xmlns:q42="UnityEngine.UIElements" substitutionGroup="q42:VisualElement" type="tns:SampleDetailsHeaderType" />
+  <xs:complexType name="PackageStatusBarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q43="UnityEngine.UIElements" base="q43:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageStatusBar" xmlns:q44="UnityEngine.UIElements" substitutionGroup="q44:VisualElement" type="tns:PackageStatusBarType" />
+  <xs:complexType name="LoadingSpinnerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q45="UnityEngine.UIElements" base="q45:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LoadingSpinner" xmlns:q46="UnityEngine.UIElements" substitutionGroup="q46:VisualElement" type="tns:LoadingSpinnerType" />
+  <xs:complexType name="SampleDetailsBodyType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q47="UnityEngine.UIElements" base="q47:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SampleDetailsBody" xmlns:q48="UnityEngine.UIElements" substitutionGroup="q48:VisualElement" type="tns:SampleDetailsBodyType" />
+  <xs:complexType name="ListAreaType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q49="UnityEngine.UIElements" base="q49:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ListArea" xmlns:q50="UnityEngine.UIElements" substitutionGroup="q50:VisualElement" type="tns:ListAreaType" />
+  <xs:complexType name="DropdownButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q51="UnityEngine.UIElements" base="q51:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DropdownButton" xmlns:q52="UnityEngine.UIElements" substitutionGroup="q52:VisualElement" type="tns:DropdownButtonType" />
+  <xs:complexType name="PackageToolbarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q53="UnityEngine.UIElements" base="q53:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackageToolbar" xmlns:q54="UnityEngine.UIElements" substitutionGroup="q54:VisualElement" type="tns:PackageToolbarType" />
+  <xs:complexType name="PackagePlatformListType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q55="UnityEngine.UIElements" base="q55:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PackagePlatformList" xmlns:q56="UnityEngine.UIElements" substitutionGroup="q56:VisualElement" type="tns:PackagePlatformListType" />
+  <xs:complexType name="PartiallyNonCompliantRegistryMessageType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q57="UnityEngine.UIElements" base="q57:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PartiallyNonCompliantRegistryMessage" xmlns:q58="UnityEngine.UIElements" substitutionGroup="q58:VisualElement" type="tns:PartiallyNonCompliantRegistryMessageType" />
+</xs:schema>

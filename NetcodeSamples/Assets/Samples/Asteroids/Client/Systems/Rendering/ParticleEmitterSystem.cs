@@ -1,9 +1,11 @@
+using Unity.Netcode;
+using Unity.Netcode.NetcodeTime;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using Random = UnityEngine.Random;
-using Unity.NetCode;
+
 using Unity.Rendering;
 using Unity.Burst;
 

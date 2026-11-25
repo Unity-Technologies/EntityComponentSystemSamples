@@ -1,0 +1,13 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Label text="Not Connected" name="status" style="-unity-text-align: upper-right; text-overflow: clip; white-space: pre;"/>
+    <ui:VisualElement style="flex-grow: 1; align-items: stretch; justify-content: space-evenly; align-self: center;">
+        <ui:Label text="Main Menu" style="-unity-text-align: lower-center;"/>
+        <ui:Button text="Connect" name="connect"/>
+        <ui:Button text="Host" name="host"/>
+        <ui:Button text="Server Listen" name="serverListen"/>
+        <ui:VisualElement style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: space-between; align-self: stretch; height: auto;">
+            <ui:TextField label="IP" placeholder-text="filler text" name="ip" style="width: 70%; flex-direction: column;"/>
+            <ui:TextField label="Port" placeholder-text="filler text" name="port" style="width: 30%; flex-direction: column;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

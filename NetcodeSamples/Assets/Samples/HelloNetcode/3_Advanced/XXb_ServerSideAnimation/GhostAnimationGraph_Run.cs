@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
@@ -5,16 +6,13 @@ using Unity.Mathematics;
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode.Hybrid;
 using Unity.Transforms;
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
-using Unity.NetCode.Hybrid;
-#endif
+
 
 namespace Samples.HelloNetcode.Hybrid
 {
 
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct LocomotionAnimationData : IComponentData
     {
         [GhostField(Quantization=1000)] public float2 Direction;
@@ -264,7 +262,7 @@ namespace Samples.HelloNetcode.Hybrid
         }
     }
 
-    [CreateAssetMenu(fileName = "Run", menuName = "NetCode/Animation/Run")]
+    [CreateAssetMenu(fileName = "Run", menuName = "Netcode/Animation/Run")]
     public class GhostAnimationGraph_Run : GhostAnimationGraphAsset
     {
         [Serializable]
@@ -290,5 +288,4 @@ namespace Samples.HelloNetcode.Hybrid
             register.RegisterPlayableData<LocomotionAnimationData>();
         }
     }
-#endif
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Inspector" elementFormDefault="qualified" targetNamespace="UnityEditor.Inspector" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="ClippingPlanesType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:BindableElementType">
+        <xs:choice />
+        <xs:attribute default="label" name="label" type="xs:string" />
+        <xs:attribute default="0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ClippingPlanes" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:BindableElement" type="tns:ClippingPlanesType" />
+</xs:schema>

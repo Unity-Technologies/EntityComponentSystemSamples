@@ -11,7 +11,6 @@ See
 
 The spawn player sample is used to trigger the auto spawning of the player when connection is established. The dynamic physics objects from the physics sample are used.
 
-* GoInGame
 * SpawnPlayer
 * Physics
 

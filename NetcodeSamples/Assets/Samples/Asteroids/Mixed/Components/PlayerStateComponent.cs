@@ -1,5 +1,5 @@
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode;
 
 public struct PlayerStateComponentData : IComponentData
 {

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.Services.Deployment.Editor.Interface.UI.Components" elementFormDefault="qualified" targetNamespace="Unity.Services.Deployment.Editor.Interface.UI.Components" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="CheckmarkToggleGroupType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="labelName" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CheckmarkToggleGroup" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:CheckmarkToggleGroupType" />
+  <xs:complexType name="SelectableType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:ToggleType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Selectable" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:Toggle" type="tns:SelectableType" />
+  <xs:complexType name="TreeViewElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:TemplateContainerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TreeViewElement" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:TemplateContainer" type="tns:TreeViewElementType" />
+  <xs:complexType name="MultiSelectType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MultiSelect" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:VisualElement" type="tns:MultiSelectType" />
+  <xs:complexType name="KeyboardShortcutsContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="UnityEngine.UIElements" base="q9:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="KeyboardShortcutsContainer" xmlns:q10="UnityEngine.UIElements" substitutionGroup="q10:VisualElement" type="tns:KeyboardShortcutsContainerType" />
+  <xs:complexType name="CollapseToggleType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q11="UnityEngine.UIElements" base="q11:ToggleType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CollapseToggle" xmlns:q12="UnityEngine.UIElements" substitutionGroup="q12:Toggle" type="tns:CollapseToggleType" />
+  <xs:complexType name="CheckmarkToggleType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q13="UnityEngine.UIElements" base="q13:ToggleType">
+        <xs:choice />
+        <xs:attribute default="false" name="isHeader" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CheckmarkToggle" xmlns:q14="UnityEngine.UIElements" substitutionGroup="q14:Toggle" type="tns:CheckmarkToggleType" />
+  <xs:complexType name="CollapsibleType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q15="UnityEngine.UIElements" base="q15:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="containerClass" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Collapsible" xmlns:q16="UnityEngine.UIElements" substitutionGroup="q16:VisualElement" type="tns:CollapsibleType" />
+</xs:schema>

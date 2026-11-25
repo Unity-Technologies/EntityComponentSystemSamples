@@ -1,12 +1,14 @@
+﻿using Unity.Netcode;
 ﻿using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Unity.NetCode.Samples.PlayerList
+
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>
-    ///     Receives <see cref="Unity.NetCode.Samples.PlayerList.PlayerListEntry" /> RPC's, notifying this client of the UPDATE NOTIFICATIONS to other clients.
+    ///     Receives <see cref="Unity.Samples.Netcode.PlayerList.PlayerListEntry" /> RPC's, notifying this client of the UPDATE NOTIFICATIONS to other clients.
     ///     Raises <see cref="PlayerListNotificationBuffer"/> entries in a singleton buffer.
     /// </summary>
     [BurstCompile]
@@ -71,7 +73,7 @@ namespace Unity.NetCode.Samples.PlayerList
                 var netDebug = SystemAPI.GetSingleton<NetDebug>();
                 foreach (var rpc in m_PlayerListEntryChangedRpc.ToComponentDataArray<PlayerListEntry.ChangedRpc>(Allocator.Temp))
                 {
-                    Assertions.Assert.AreNotEqual(default, playerListsFeature.EventListEntryDurationSeconds);
+                    UnityEngine.Assertions.Assert.AreNotEqual(default, playerListsFeature.EventListEntryDurationSeconds);
                     eventList.Add(new PlayerListNotificationBuffer
                         {
                             Event = rpc,

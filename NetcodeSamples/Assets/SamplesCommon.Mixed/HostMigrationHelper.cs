@@ -1,10 +1,12 @@
+using Unity.Netcode;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode.HostMigration;
+using Unity.Netcode.HostMigration;
+
 using Unity.Networking.Transport;
 using UnityEngine;
 
-namespace Unity.NetCode.Samples.Common
+namespace Unity.Samples.Netcode.Common
 {
     public static class HostMigrationHelper
     {
@@ -57,7 +59,7 @@ namespace Unity.NetCode.Samples.Common
         /// <param name="driverConstructor">The network driver constructor used for creating a new network driver in the client world.</param>
         /// <param name="serverEndpoint">The network endpoint the client will connect to after configuring the network driver.</param>
         /// <returns>Returns true if the connect call succeeds</returns>
-        public static bool ConfigureClientAndConnect(World clientWorld, INetworkStreamDriverConstructor driverConstructor, NetworkEndpoint serverEndpoint)
+        public static bool ConfigureClientAndConnect(NetcodeWorld clientWorld, INetworkStreamDriverConstructor driverConstructor, NetworkEndpoint serverEndpoint)
         {
             if (clientWorld == null || !clientWorld.IsCreated)
             {

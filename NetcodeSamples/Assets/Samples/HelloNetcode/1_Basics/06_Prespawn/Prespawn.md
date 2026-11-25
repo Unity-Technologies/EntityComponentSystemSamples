@@ -8,9 +8,7 @@ See
 
 ## Requirements
 
-The prespawned ghosts are configured when you go in-game so nothing happens until the `NetworkStreamInGame` component appears on the connection. This sample therefore requires:
-
-* `GoInGame`
+The prespawned ghosts are configured when you go in-game so nothing happens until the `NetworkStreamInGame` component appears on the connection. By default this happens automatically as soon as the connection is established. 
 
 ## Sample Description
 

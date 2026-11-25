@@ -1,7 +1,9 @@
+using Unity.Netcode;
 ﻿using System;
 using Unity.Entities;
 
-namespace Unity.NetCode.Samples.Common
+
+namespace Unity.Samples.Netcode.Common
 {
     /// <summary>
     ///     We use a dynamic assembly list so we can build a server with a subset of the assemblies

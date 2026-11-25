@@ -21,7 +21,7 @@ After enabling **Relay Support**, clicking **Start Client & Server** will start 
 A status message can be seen next to the Relay Server checkbox. If any errors are found, during startup and initialization of the relay service, a failed message will appear and the console log will contain the details.
 
 When toggling relay support, the address and port input field is replaced with a single input field. Here you can enter a join code which is the information needed to connect with a hosted server through the relay service.
-Inside the NetCodeSetup/RelayHUD.cs is the entry for the checkbox behaviour. The join code will be visible in the top left corner of the hosted game.
+Inside the NetcodeSetup/RelayHUD.cs is the entry for the checkbox behaviour. The join code will be visible in the top left corner of the hosted game.
 
 > ## Note
 > In play mode you might notice the sample scene taking longer to appear than without the relay support enabled. This delay is caused by the roundtrip time to the relay server.

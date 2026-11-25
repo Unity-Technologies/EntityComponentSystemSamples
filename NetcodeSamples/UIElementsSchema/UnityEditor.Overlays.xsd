@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Overlays" elementFormDefault="qualified" targetNamespace="UnityEditor.Overlays" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="OverlayContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="horizontal" type="xs:boolean" />
+        <xs:attribute name="supported-overlay-layout" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="OverlayContainer" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:OverlayContainerType" />
+  <xs:complexType name="ToolbarOverlayContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:OverlayContainerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ToolbarOverlayContainer" substitutionGroup="tns:OverlayContainer" type="tns:ToolbarOverlayContainerType" />
+  <xs:complexType name="DynamicPanelOverlayContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:OverlayContainerType">
+        <xs:choice />
+        <xs:attribute default="false" name="align-right" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DynamicPanelOverlayContainer" substitutionGroup="tns:OverlayContainer" type="tns:DynamicPanelOverlayContainerType" />
+  <xs:complexType name="AnchoredOverlayContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:OverlayContainerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchoredOverlayContainer" substitutionGroup="tns:OverlayContainer" type="tns:AnchoredOverlayContainerType" />
+  <xs:complexType name="MainToolbarOverlayContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ToolbarOverlayContainerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MainToolbarOverlayContainer" substitutionGroup="tns:ToolbarOverlayContainer" type="tns:MainToolbarOverlayContainerType" />
+</xs:schema>

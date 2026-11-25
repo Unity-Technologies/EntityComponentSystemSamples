@@ -1,6 +1,6 @@
 # HelloNetcode Connection Approval sample
 
-It's possible to validate that a connection is allowed to connect to a server, before treating it as fully connected, to support common scenarios (like backend user authentication, password protected matches etc). The connection will not be assigned a `NetworkId` by the server until the it has been approved by said server, via the 'approval flow' described in this samples code. It's only possible to send `IApprovalRpcCommand` type RPCs during the `Approval` connection phase (see [ConnectionState.State.Approval](https://docs.unity3d.com/Packages/com.unity.netcode@latest?subfolder=/api/Unity.NetCode.ConnectionState.State.html)).
+It's possible to validate that a connection is allowed to connect to a server, before treating it as fully connected, to support common scenarios (like backend user authentication, password protected matches etc). The connection will not be assigned a `NetworkId` by the server until the it has been approved by said server, via the 'approval flow' described in this samples code. It's only possible to send `IApprovalRpcCommand` type RPCs during the `Approval` connection phase (see [ConnectionState.State.Approval](https://docs.unity3d.com/Packages/com.unity.netcode@latest?subfolder=/api/Unity.Netcode.ConnectionState.State.html)).
 
 See
 
@@ -20,4 +20,4 @@ This sample demonstrates how to set up a connection approval system for sending 
 
 With the first method, the client sends a dummy payload (just an "ABC" string) which the server validates, and then uses to approve the client connection. Debug strings are printed to signal each stage of the process (client sends approval RPC, server processes it).
 
-The second methods demonstrates how a player account could be validated before a player is allowed to join a game session, by using the Authenticaion service. It uses the anonymous login method on the client and sends the given player ID and Access Token to the server for validation. It's validated by fetching the player information for the given ID/token pair from the service.
+The second methods demonstrates how a player account could be validated before a player is allowed to join a game session, by using the Authentication service. It uses the anonymous login method on the client and sends the given player ID and Access Token to the server for validation. It's validated by fetching the player information for the given ID/token pair from the service.

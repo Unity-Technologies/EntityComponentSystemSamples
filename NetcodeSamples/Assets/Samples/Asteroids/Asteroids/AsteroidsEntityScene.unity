@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 83804743}
   - component: {fileID: 83804742}
   - component: {fileID: 83804744}
+  - component: {fileID: 83804745}
   m_Layer: 0
   m_Name: GameSettings
   m_TagString: Untagged
@@ -214,6 +215,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   predictionRadius: 400
   predictionRadiusMargin: 50
+--- !u!114 &83804745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83804741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d30974bf68d61043b1572197db94cdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Physics.Hybrid::Unity.Physics.Authoring.PhysicsStepAuthoring
+  m_SimulationType: 0
+  m_Gravity:
+    x: -0
+    y: -9.81
+    z: -0
+  m_EnableGyroscopicTorque: 0
+  m_SubstepCount: 1
+  m_SolverIterationCount: 4
+  m_DirectSolverSettings:
+    m_ContactStiffness: 100000
+    m_ContactDamping: 500
+    m_ContactSlip: 0.001
+    m_MaximumJointStiffness: 100000
+    m_MaximumJointDamping: 10000
+    m_MinimumMotorSlip: 0.0001
+  m_EnableSolverStabilizationHeuristic: 0
+  m_MultiThreaded: 1
+  m_CollisionTolerance: 0.01
+  m_SynchronizeCollisionWorld: 0
+  m_IncrementalDynamicBroadphase: 0
+  m_IncrementalStaticBroadphase: 0
+  m_MaxDynamicDepenetrationVelocity: 3
+  m_MaxStaticDepenetrationVelocity: Infinity
 --- !u!1 &204771218
 GameObject:
   m_ObjectHideFlags: 0

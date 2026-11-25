@@ -2,7 +2,7 @@
 using Unity.Entities;
 using UnityEngine;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>Singleton component enabling the PlayerLists feature, allowing players to query who else is connected to the server.</summary>
     public struct EnablePlayerListsFeature : IComponentData

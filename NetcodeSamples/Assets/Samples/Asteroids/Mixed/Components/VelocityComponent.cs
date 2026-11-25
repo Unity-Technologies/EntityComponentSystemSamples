@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
+
 
 [GhostComponent(PrefabType = GhostPrefabType.AllPredicted, SendTypeOptimization = GhostSendType.OnlyPredictedClients)]
 public struct Velocity : IComponentData

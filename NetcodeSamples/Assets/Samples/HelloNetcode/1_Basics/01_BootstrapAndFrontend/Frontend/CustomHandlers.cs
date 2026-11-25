@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Multiplayer;
 using UnityEngine;
@@ -31,7 +32,7 @@ namespace Samples.HelloNetcode
         public int ServerUdpDriverId { get; private set; } = InvalidDriverId;
         public int ServerWebSocketDriverId { get; private set; } = InvalidDriverId;
 
-        public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateClientDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             var ipcSettings = DefaultDriverBuilder.GetNetworkSettings();
 
@@ -61,7 +62,7 @@ namespace Samples.HelloNetcode
             }
         }
 
-        public void CreateServerDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateServerDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             var ipcSettings = DefaultDriverBuilder.GetNetworkSettings();
 
@@ -96,8 +97,8 @@ namespace Samples.HelloNetcode
         const int ConnectionTimeoutSeconds = 10;
 
         NetworkConfiguration m_Configuration;
-        World m_ClientWorld;
-        World m_ServerWorld;
+        NetcodeWorld m_ClientWorld;
+        NetcodeWorld m_ServerWorld;
 
         NetworkStreamDriver m_ClientDriver;
         NetworkStreamDriver m_ServerDriver;

@@ -1,5 +1,5 @@
 
-namespace Unity.NetCode
+namespace Unity.Netcode
 {
     static public partial class GhostFieldSubType
     {

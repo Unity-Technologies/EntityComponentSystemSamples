@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.Profiling.Editor" elementFormDefault="qualified" targetNamespace="Unity.Profiling.Editor" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="MemoryUsageBreakdownElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+        <xs:attribute name="background-color-class" type="xs:string" />
+        <xs:attribute name="show-used" type="xs:boolean" />
+        <xs:attribute name="used-bytes" type="xs:long" />
+        <xs:attribute name="total-bytes" type="xs:long" />
+        <xs:attribute name="show-selected" type="xs:boolean" />
+        <xs:attribute name="selected-bytes" type="xs:long" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MemoryUsageBreakdownElement" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:MemoryUsageBreakdownElementType" />
+  <xs:complexType name="MemoryUsageBreakdownType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="header-text" type="xs:string" />
+        <xs:attribute name="total-bytes" type="xs:int" />
+        <xs:attribute name="show-unknown" type="xs:boolean" />
+        <xs:attribute name="unknown-name" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MemoryUsageBreakdown" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:VisualElement" type="tns:MemoryUsageBreakdownType" />
+  <xs:complexType name="SelectableLabelType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:TextFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SelectableLabel" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:TextField" type="tns:SelectableLabelType" />
+</xs:schema>

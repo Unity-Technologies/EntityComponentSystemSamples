@@ -1,22 +1,24 @@
+using Unity.Netcode;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.Samples.Common;
+
+using Unity.Samples.Netcode.Common;
 using UnityEngine;
 
 public struct CubeInput : IInputComponentData
 {
     public int Horizontal;
     public int Vertical;
+    public bool Scale;
 
-    public FixedString512Bytes ToFixedString() => $"→{Horizontal} ↑{Vertical}";
+    public FixedString512Bytes ToFixedString() => $"→{Horizontal} ↑{Vertical} scale:{Scale}";
 }
 
 [DisallowMultipleComponent]
 public class CubeInputAuthoring : MonoBehaviour
 {
-    class CubeInputBaking : Unity.Entities.Baker<CubeInputAuthoring>
+    class CubeInputBaking : Baker<CubeInputAuthoring>
     {
         public override void Bake(CubeInputAuthoring authoring)
         {
@@ -48,6 +50,8 @@ public partial struct SampleCubeInput : ISystem
                 playerInput.ValueRW.Vertical -= 1;
             if (Input.GetKey("up") || TouchInput.GetKey(TouchInput.KeyCode.Up))
                 playerInput.ValueRW.Vertical += 1;
+            if (Input.GetKey("t"))
+                playerInput.ValueRW.Scale = true;
         }
     }
 }

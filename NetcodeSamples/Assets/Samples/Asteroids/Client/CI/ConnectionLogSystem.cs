@@ -1,7 +1,7 @@
 #if UNITY_DOTS_SERVER_CI
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode;
 
 namespace Asteroids.CI
 {

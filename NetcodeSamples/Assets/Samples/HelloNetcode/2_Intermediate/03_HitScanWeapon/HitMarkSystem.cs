@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Unity.NetCode;
+
 using UnityEngine;
 
 namespace Samples.HelloNetcode
@@ -33,11 +34,11 @@ namespace Samples.HelloNetcode
         }
         bool FindGameObjects()
         {
-            m_Canvas = Object.FindFirstObjectByType<Canvas>();
+            m_Canvas = Object.FindAnyObjectByType<Canvas>();
             if (m_Canvas == null)
                 return false;
             m_CanvasRect = m_Canvas.GetComponent<RectTransform>();
-            var hitMarkSpawner = Object.FindFirstObjectByType<HitMarkSpawner>();
+            var hitMarkSpawner = Object.FindAnyObjectByType<HitMarkSpawner>();
             if (hitMarkSpawner == null)
                 return false;
             m_ServerHitPrefab = hitMarkSpawner.ServerMarkPrefab;

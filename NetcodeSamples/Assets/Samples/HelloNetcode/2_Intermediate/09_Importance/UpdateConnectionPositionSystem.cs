@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
+
 
 namespace Samples.HelloNetcode
 {

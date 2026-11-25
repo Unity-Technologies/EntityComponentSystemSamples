@@ -1,5 +1,6 @@
+using Unity.Netcode;
 using Unity.Entities;
-using Unity.NetCode;
+
 using UnityEngine;
 
 public struct LevelSync_InitializedConnection : IComponentData
@@ -39,7 +40,7 @@ public partial class LevelSync_ServerConnectionSystem : SystemBase
         {
             commandBuffer = ecb
         };
-        Dependency = job.Schedule(this.Dependency);
+        Dependency = job.Schedule(Dependency);
         m_CommandBuffer.AddJobHandleForProducer(Dependency);
     }
 }

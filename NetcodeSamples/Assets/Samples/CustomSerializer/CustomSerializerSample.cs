@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
+
 using Unity.Transforms;
 using Random = UnityEngine.Random;
 
@@ -111,7 +112,7 @@ namespace Samples.CustomChunkSerializer
             };
             EntityManager.SetName(prefab, prefabConfig.Name);
             GhostPrefabCreation.ConvertToGhostPrefab(EntityManager, prefab, prefabConfig);
-            var hash = (Unity.Entities.Hash128)EntityManager.GetComponentData<GhostType>(prefab);
+            var hash = (Hash128)EntityManager.GetComponentData<GhostType>(prefab);
             var customSerializer = SystemAPI.GetSingletonRW<GhostCollectionCustomSerializers>();
             customSerializer.ValueRW.Serializers.Add(hash, new GhostPrefabCustomSerializer
             {
@@ -128,25 +129,6 @@ namespace Samples.CustomChunkSerializer
                 }
             }
             Enabled = false;
-        }
-    }
-
-    [RequireMatchingQueriesForUpdate]
-    public partial class AutoGoInGame : SystemBase
-    {
-        protected override void OnCreate()
-        {
-            RequireForUpdate<GhostCollection>();
-            RequireForUpdate<TestCustomSerializer>();
-        }
-        protected override void OnUpdate()
-        {
-            var buffer = new EntityCommandBuffer(Allocator.Temp);
-            foreach (var (con,ent) in SystemAPI.Query<RefRO<NetworkId>>().WithNone<NetworkStreamInGame>().WithEntityAccess())
-            {
-                buffer.AddComponent(ent, new NetworkStreamInGame());
-            }
-            buffer.Playback(EntityManager);
         }
     }
 
@@ -172,12 +154,12 @@ namespace Samples.CustomChunkSerializer
             var entityTypeHandle = GetEntityTypeHandle();
             foreach(var c in ghostsChunks)
             {
-                if (UnityEngine.Random.value > testCustomSerializer.percentChunkChange)
+                if (Random.value > testCustomSerializer.percentChunkChange)
                     continue;
                 var entities = c.GetNativeArray(entityTypeHandle);
                 for (var ent = 0; ent < entities.Length; ++ent)
                 {
-                    if (UnityEngine.Random.value > testCustomSerializer.percentEntityChanges)
+                    if (Random.value > testCustomSerializer.percentEntityChanges)
                         continue;
 
                     var entity = entities[ent];

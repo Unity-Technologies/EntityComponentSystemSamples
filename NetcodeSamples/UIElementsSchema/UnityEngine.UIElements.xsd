@@ -1,0 +1,1236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEngine.UIElements" elementFormDefault="qualified" targetNamespace="UnityEngine.UIElements" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="Unity.UIToolkit.Editor.xsd" namespace="Unity.UIToolkit.Editor" />
+  <xs:import schemaLocation="UnityEngine.xsd" namespace="UnityEngine" />
+  <xs:complexType name="VisualElementType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element minOccurs="0" maxOccurs="1" form="unqualified" name="Bindings" type="tns:VisualElementBindingsType" />
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute default="true" name="enabled" type="xs:boolean" />
+    <xs:attribute name="view-data-key" type="xs:string" />
+    <xs:attribute default="Position" name="picking-mode" type="tns:PickingModeType" />
+    <xs:attribute name="tooltip" type="xs:string" />
+    <xs:attribute default="None" name="usage-hints" type="tns:UsageHintsType" />
+    <xs:attribute default="0" name="tabindex" type="xs:int" />
+    <xs:attribute default="false" name="focusable" type="xs:boolean" />
+    <xs:attribute default="Inherit" name="language-direction" type="tns:LanguageDirectionType" />
+    <xs:attribute name="data-source" type="xs:string" />
+    <xs:attribute name="data-source-path" type="xs:string" />
+    <xs:attribute name="data-source-type" type="xs:string" />
+    <xs:attribute name="class" type="xs:string" use="optional" />
+    <xs:attribute name="style" type="xs:string" use="optional" />
+    <xs:attribute name="authoring-id" type="xs:int" use="optional" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:simpleType name="PickingModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Position" />
+      <xs:enumeration value="Ignore" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="UsageHintsType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="DynamicTransform" />
+      <xs:enumeration value="GroupTransform" />
+      <xs:enumeration value="MaskContainer" />
+      <xs:enumeration value="DynamicColor" />
+      <xs:enumeration value="DynamicPostProcessing" />
+      <xs:enumeration value="LargePixelCoverage" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LanguageDirectionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Inherit" />
+      <xs:enumeration value="LTR" />
+      <xs:enumeration value="RTL" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="VisualElementBindingsType">
+    <xs:complexContent mixed="false">
+      <xs:restriction base="xs:anyType">
+        <xs:choice maxOccurs="unbounded">
+          <xs:element xmlns:q1="Unity.UIToolkit.Editor" ref="q1:StylePropertyBinding" />
+          <xs:element ref="tns:DataBinding" />
+        </xs:choice>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="VisualElement" type="tns:VisualElementType" />
+  <xs:complexType name="BindableElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="binding-path" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BindableElement" substitutionGroup="tns:VisualElement" type="tns:BindableElementType" />
+  <xs:simpleType name="ScrollerVisibilityType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Auto" />
+      <xs:enumeration value="AlwaysVisible" />
+      <xs:enumeration value="Hidden" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ToggleType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="false" name="value" type="xs:boolean" />
+        <xs:attribute default="true" name="toggle-on-label-click" type="xs:boolean" />
+        <xs:attribute name="text" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Toggle" substitutionGroup="tns:BindableElement" type="tns:ToggleType" />
+  <xs:complexType name="TemplateContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="template" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TemplateContainer" substitutionGroup="tns:BindableElement" type="tns:TemplateContainerType" />
+  <xs:complexType name="FoldoutType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+        <xs:attribute default="true" name="toggle-on-label-click" type="xs:boolean" />
+        <xs:attribute default="true" name="value" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Foldout" substitutionGroup="tns:BindableElement" type="tns:FoldoutType" />
+  <xs:complexType name="TextFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute default="-1" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute default="*" name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q2="UnityEngine" type="q2:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="false" name="multiline" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TextField" substitutionGroup="tns:BindableElement" type="tns:TextFieldType" />
+  <xs:simpleType name="AxisType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Horizontal" />
+      <xs:enumeration value="Vertical" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BindingUpdateTriggerType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="WhenDirty" />
+      <xs:enumeration value="OnSourceChanged" />
+      <xs:enumeration value="EveryUpdate" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="DropdownFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:int" />
+        <xs:attribute default="-1" name="index" type="xs:int" />
+        <xs:attribute name="choices" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DropdownField" substitutionGroup="tns:BindableElement" type="tns:DropdownFieldType" />
+  <xs:complexType name="ImmediateModeElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ImmediateModeElement" substitutionGroup="tns:VisualElement" type="tns:ImmediateModeElementType" />
+  <xs:complexType name="ButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:TextElementType">
+        <xs:choice />
+        <xs:attribute name="icon-image" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TextElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+        <xs:attribute default="true" name="enable-rich-text" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="parse-escape-sequences" type="xs:boolean" />
+        <xs:attribute default="false" name="selectable" type="xs:boolean" />
+        <xs:attribute default="true" name="double-click-selects-word" type="xs:boolean" />
+        <xs:attribute default="true" name="triple-click-selects-line" type="xs:boolean" />
+        <xs:attribute default="true" name="display-tooltip-when-elided" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TextElement" substitutionGroup="tns:BindableElement" type="tns:TextElementType" />
+  <xs:element name="Button" substitutionGroup="tns:TextElement" type="tns:ButtonType" />
+  <xs:complexType name="ScrollViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="Vertical" name="mode" type="tns:ScrollViewModeType" />
+        <xs:attribute default="Default" name="nested-interaction-kind" type="tns:NestedInteractionKindType" />
+        <xs:attribute default="false" name="show-horizontal-scroller" type="xs:boolean" />
+        <xs:attribute default="false" name="show-vertical-scroller" type="xs:boolean" />
+        <xs:attribute default="Auto" name="horizontal-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="Auto" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="-1" name="horizontal-page-size" type="xs:float" />
+        <xs:attribute default="-1" name="vertical-page-size" type="xs:float" />
+        <xs:attribute default="18" name="mouse-wheel-scroll-size" type="xs:float" />
+        <xs:attribute default="Clamped" name="touch-scroll-type" type="tns:TouchScrollBehaviorType" />
+        <xs:attribute default="0.135" name="scroll-deceleration-rate" type="xs:float" />
+        <xs:attribute default="0.1" name="elasticity" type="xs:float" />
+        <xs:attribute default="16" name="elastic-animation-interval-ms" type="xs:long" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ScrollViewModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Vertical" />
+      <xs:enumeration value="Horizontal" />
+      <xs:enumeration value="VerticalAndHorizontal" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="NestedInteractionKindType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Default" />
+      <xs:enumeration value="StopScrolling" />
+      <xs:enumeration value="ForwardScrolling" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="TouchScrollBehaviorType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Unrestricted" />
+      <xs:enumeration value="Elastic" />
+      <xs:enumeration value="Clamped" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ScrollView" substitutionGroup="tns:VisualElement" type="tns:ScrollViewType" />
+  <xs:complexType name="LabelType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:TextElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Label" substitutionGroup="tns:TextElement" type="tns:LabelType" />
+  <xs:complexType name="HelpBoxType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+        <xs:attribute default="None" name="message-type" type="tns:HelpBoxMessageTypeType" />
+        <xs:attribute name="button-text" type="xs:string" />
+        <xs:attribute name="link-text" type="xs:string" />
+        <xs:attribute name="link-href" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="HelpBoxMessageTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Info" />
+      <xs:enumeration value="Warning" />
+      <xs:enumeration value="Error" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="HelpBox" substitutionGroup="tns:VisualElement" type="tns:HelpBoxType" />
+  <xs:complexType name="MaskFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:int" />
+        <xs:attribute name="choices" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MaskField" substitutionGroup="tns:BindableElement" type="tns:MaskFieldType" />
+  <xs:complexType name="ImageType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="source" type="xs:string" />
+        <xs:attribute default="rgb(255, 255, 255)" name="tint-color" type="xs:string" />
+        <xs:attribute default="ScaleToFit" name="scale-mode" xmlns:q3="UnityEngine" type="q3:ScaleModeType" />
+        <xs:attribute default="0,0,1,1" name="uv" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Image" substitutionGroup="tns:VisualElement" type="tns:ImageType" />
+  <xs:complexType name="ToggleButtonGroupType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0000000000000000000000000000000000000000000000000000000000000000" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-multiple-selection" type="xs:boolean" />
+        <xs:attribute default="false" name="allow-empty-selection" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ToggleButtonGroup" substitutionGroup="tns:BindableElement" type="tns:ToggleButtonGroupType" />
+  <xs:complexType name="ColumnsType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:Column" />
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="primary-column-name" type="xs:string" />
+    <xs:attribute default="GrowAndFill" name="stretch-mode" type="tns:StretchModeType" />
+    <xs:attribute default="true" name="reorderable" type="xs:boolean" />
+    <xs:attribute default="true" name="resizable" type="xs:boolean" />
+    <xs:attribute default="false" name="resize-preview" type="xs:boolean" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:simpleType name="StretchModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Grow" />
+      <xs:enumeration value="GrowAndFill" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Columns" type="tns:ColumnsType" />
+  <xs:complexType name="SortColumnDescriptionType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="column-name" type="xs:string" />
+    <xs:attribute default="-1" name="column-index" type="xs:int" />
+    <xs:attribute default="Ascending" name="direction" type="tns:SortDirectionType" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:simpleType name="SortDirectionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Ascending" />
+      <xs:enumeration value="Descending" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="SortColumnDescription" type="tns:SortColumnDescriptionType" />
+  <xs:complexType name="SortColumnDescriptionsType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:SortColumnDescription" />
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="SortColumnDescriptions" type="tns:SortColumnDescriptionsType" />
+  <xs:complexType name="FloatFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:float" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q4="UnityEngine" type="q4:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FloatField" substitutionGroup="tns:BindableElement" type="tns:FloatFieldType" />
+  <xs:complexType name="LengthFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:string" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q5="UnityEngine" type="q5:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+        <xs:attribute default="true" name="show-unit-as-dropdown" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LengthField" substitutionGroup="tns:BindableElement" type="tns:LengthFieldType" />
+  <xs:complexType name="DataBindingType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="property" type="xs:string" />
+    <xs:attribute default="OnSourceChanged" name="update-trigger" type="tns:BindingUpdateTriggerType" />
+    <xs:attribute name="data-source-path" type="xs:string" />
+    <xs:attribute name="data-source" type="xs:string" />
+    <xs:attribute name="data-source-type" type="xs:string" />
+    <xs:attribute default="TwoWay" name="binding-mode" type="tns:BindingModeType" />
+    <xs:attribute name="source-to-ui-converters" type="xs:string" />
+    <xs:attribute name="ui-to-source-converters" type="xs:string" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:simpleType name="BindingModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TwoWay" />
+      <xs:enumeration value="ToSource" />
+      <xs:enumeration value="ToTarget" />
+      <xs:enumeration value="ToTargetOnce" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="DataBinding" type="tns:DataBindingType" />
+  <xs:complexType name="EnumFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute name="type" type="xs:string" />
+        <xs:attribute default="false" name="include-obsolete-values" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="EnumField" substitutionGroup="tns:BindableElement" type="tns:EnumFieldType" />
+  <xs:complexType name="RectIntFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0,0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="RectIntField" substitutionGroup="tns:BindableElement" type="tns:RectIntFieldType" />
+  <xs:complexType name="AbstractProgressBarType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="low-value" type="xs:float" />
+        <xs:attribute name="high-value" type="xs:float" />
+        <xs:attribute name="value" type="xs:float" />
+        <xs:attribute name="title" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AbstractProgressBar" substitutionGroup="tns:BindableElement" type="tns:AbstractProgressBarType" />
+  <xs:complexType name="DoubleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:double" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q6="UnityEngine" type="q6:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DoubleField" substitutionGroup="tns:BindableElement" type="tns:DoubleFieldType" />
+  <xs:complexType name="Vector3FieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Vector3Field" substitutionGroup="tns:BindableElement" type="tns:Vector3FieldType" />
+  <xs:complexType name="MinMaxSliderType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,10" name="value" type="xs:string" />
+        <xs:attribute default="-3.402823E+38" name="low-limit" type="xs:float" />
+        <xs:attribute default="3.402823E+38" name="high-limit" type="xs:float" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MinMaxSlider" substitutionGroup="tns:BindableElement" type="tns:MinMaxSliderType" />
+  <xs:complexType name="PopupWindowType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:TextElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PopupWindow" substitutionGroup="tns:TextElement" type="tns:PopupWindowType" />
+  <xs:complexType name="BoundsFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0,0,0,0,0" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BoundsField" substitutionGroup="tns:BindableElement" type="tns:BoundsFieldType" />
+  <xs:complexType name="ColumnType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute name="title" type="xs:string" />
+    <xs:attribute default="true" name="visible" type="xs:boolean" />
+    <xs:attribute default="0" name="width" type="xs:string" />
+    <xs:attribute default="35px" name="min-width" type="xs:string" />
+    <xs:attribute default="8388608px" name="max-width" type="xs:string" />
+    <xs:attribute default="false" name="stretchable" type="xs:boolean" />
+    <xs:attribute default="true" name="sortable" type="xs:boolean" />
+    <xs:attribute default="true" name="optional" type="xs:boolean" />
+    <xs:attribute default="true" name="resizable" type="xs:boolean" />
+    <xs:attribute name="header-template" type="xs:string" />
+    <xs:attribute name="cell-template" type="xs:string" />
+    <xs:attribute name="binding-path" type="xs:string" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="Column" type="tns:ColumnType" />
+  <xs:complexType name="ButtonStripFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:int" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ButtonStripField" substitutionGroup="tns:BindableElement" type="tns:ButtonStripFieldType" />
+  <xs:complexType name="Vector2FieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Vector2Field" substitutionGroup="tns:BindableElement" type="tns:Vector2FieldType" />
+  <xs:complexType name="SliderIntType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:int" />
+        <xs:attribute default="0" name="low-value" type="xs:int" />
+        <xs:attribute default="10" name="high-value" type="xs:int" />
+        <xs:attribute default="false" name="fill" type="xs:boolean" />
+        <xs:attribute default="0" name="page-size" type="xs:float" />
+        <xs:attribute default="false" name="show-input-field" type="xs:boolean" />
+        <xs:attribute default="Horizontal" name="direction" type="tns:SliderDirectionType" />
+        <xs:attribute default="false" name="inverted" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="SliderDirectionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Horizontal" />
+      <xs:enumeration value="Vertical" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="SliderInt" substitutionGroup="tns:BindableElement" type="tns:SliderIntType" />
+  <xs:complexType name="BoundsIntFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0,0,0,0,0" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BoundsIntField" substitutionGroup="tns:BindableElement" type="tns:BoundsIntFieldType" />
+  <xs:complexType name="GUIDFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="00000000000000000000000000000000" name="value" type="xs:string" />
+        <xs:attribute default="-1" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q7="UnityEngine" type="q7:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="GUIDField" substitutionGroup="tns:BindableElement" type="tns:GUIDFieldType" />
+  <xs:complexType name="ListViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute default="22" name="fixed-item-height" type="xs:float" />
+        <xs:attribute default="FixedHeight" name="virtualization-method" type="tns:CollectionVirtualizationMethodType" />
+        <xs:attribute default="false" name="show-border" type="xs:boolean" />
+        <xs:attribute default="Single" name="selection-type" type="tns:SelectionTypeType" />
+        <xs:attribute default="None" name="show-alternating-row-backgrounds" type="tns:AlternatingRowBackgroundType" />
+        <xs:attribute default="false" name="reorderable" type="xs:boolean" />
+        <xs:attribute default="false" name="horizontal-scrolling" type="xs:boolean" />
+        <xs:attribute default="false" name="show-foldout-header" type="xs:boolean" />
+        <xs:attribute name="header-title" type="xs:string" />
+        <xs:attribute default="false" name="show-add-remove-footer" type="xs:boolean" />
+        <xs:attribute default="true" name="allow-add" type="xs:boolean" />
+        <xs:attribute default="true" name="allow-remove" type="xs:boolean" />
+        <xs:attribute default="Simple" name="reorder-mode" type="tns:ListViewReorderModeType" />
+        <xs:attribute default="true" name="show-bound-collection-size" type="xs:boolean" />
+        <xs:attribute default="Manual" name="binding-source-selection-mode" type="tns:BindingSourceSelectionModeType" />
+        <xs:attribute name="item-template" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="CollectionVirtualizationMethodType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FixedHeight" />
+      <xs:enumeration value="DynamicHeight" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SelectionTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Single" />
+      <xs:enumeration value="Multiple" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="AlternatingRowBackgroundType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="ContentOnly" />
+      <xs:enumeration value="All" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ListViewReorderModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Simple" />
+      <xs:enumeration value="Animated" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BindingSourceSelectionModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Manual" />
+      <xs:enumeration value="AutoAssign" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ListView" substitutionGroup="tns:BindableElement" type="tns:ListViewType" />
+  <xs:complexType name="TranslateFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TranslateField" substitutionGroup="tns:BindableElement" type="tns:TranslateFieldType" />
+  <xs:complexType name="AngleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:string" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q8="UnityEngine" type="q8:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+        <xs:attribute default="true" name="show-unit-as-dropdown" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AngleField" substitutionGroup="tns:BindableElement" type="tns:AngleFieldType" />
+  <xs:complexType name="TreeViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute default="22" name="fixed-item-height" type="xs:float" />
+        <xs:attribute default="FixedHeight" name="virtualization-method" type="tns:CollectionVirtualizationMethodType" />
+        <xs:attribute default="false" name="show-border" type="xs:boolean" />
+        <xs:attribute default="Single" name="selection-type" type="tns:SelectionTypeType" />
+        <xs:attribute default="None" name="show-alternating-row-backgrounds" type="tns:AlternatingRowBackgroundType" />
+        <xs:attribute default="false" name="reorderable" type="xs:boolean" />
+        <xs:attribute default="false" name="horizontal-scrolling" type="xs:boolean" />
+        <xs:attribute default="false" name="auto-expand" type="xs:boolean" />
+        <xs:attribute name="item-template" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TreeView" substitutionGroup="tns:BindableElement" type="tns:TreeViewType" />
+  <xs:complexType name="Mask64FieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:unsignedLong" />
+        <xs:attribute name="choices" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Mask64Field" substitutionGroup="tns:BindableElement" type="tns:Mask64FieldType" />
+  <xs:complexType name="LongFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:long" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q9="UnityEngine" type="q9:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LongField" substitutionGroup="tns:BindableElement" type="tns:LongFieldType" />
+  <xs:complexType name="ProgressBarType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractProgressBarType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ProgressBar" substitutionGroup="tns:AbstractProgressBar" type="tns:ProgressBarType" />
+  <xs:complexType name="RotateFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="RotateField" substitutionGroup="tns:BindableElement" type="tns:RotateFieldType" />
+  <xs:complexType name="TwoPaneSplitViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="0" name="fixed-pane-index" type="xs:int" />
+        <xs:attribute default="100" name="fixed-pane-initial-dimension" type="xs:float" />
+        <xs:attribute default="Horizontal" name="orientation" type="tns:TwoPaneSplitViewOrientationType" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="TwoPaneSplitViewOrientationType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Horizontal" />
+      <xs:enumeration value="Vertical" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="TwoPaneSplitView" substitutionGroup="tns:VisualElement" type="tns:TwoPaneSplitViewType" />
+  <xs:complexType name="GroupBoxType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="GroupBox" substitutionGroup="tns:BindableElement" type="tns:GroupBoxType" />
+  <xs:complexType name="Vector2IntFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Vector2IntField" substitutionGroup="tns:BindableElement" type="tns:Vector2IntFieldType" />
+  <xs:complexType name="MultiColumnListViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="tns:Columns" />
+          <xs:element ref="tns:SortColumnDescriptions" />
+        </xs:choice>
+        <xs:attribute default="22" name="fixed-item-height" type="xs:float" />
+        <xs:attribute default="FixedHeight" name="virtualization-method" type="tns:CollectionVirtualizationMethodType" />
+        <xs:attribute default="false" name="show-border" type="xs:boolean" />
+        <xs:attribute default="Single" name="selection-type" type="tns:SelectionTypeType" />
+        <xs:attribute default="None" name="show-alternating-row-backgrounds" type="tns:AlternatingRowBackgroundType" />
+        <xs:attribute default="false" name="reorderable" type="xs:boolean" />
+        <xs:attribute default="false" name="horizontal-scrolling" type="xs:boolean" />
+        <xs:attribute default="false" name="show-foldout-header" type="xs:boolean" />
+        <xs:attribute name="header-title" type="xs:string" />
+        <xs:attribute default="false" name="show-add-remove-footer" type="xs:boolean" />
+        <xs:attribute default="true" name="allow-add" type="xs:boolean" />
+        <xs:attribute default="true" name="allow-remove" type="xs:boolean" />
+        <xs:attribute default="Simple" name="reorder-mode" type="tns:ListViewReorderModeType" />
+        <xs:attribute default="true" name="show-bound-collection-size" type="xs:boolean" />
+        <xs:attribute default="Manual" name="binding-source-selection-mode" type="tns:BindingSourceSelectionModeType" />
+        <xs:attribute default="false" name="sorting-enabled" type="xs:boolean" />
+        <xs:attribute default="None" name="sorting-mode" type="tns:ColumnSortingModeType" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ColumnSortingModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Default" />
+      <xs:enumeration value="Custom" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="MultiColumnListView" substitutionGroup="tns:BindableElement" type="tns:MultiColumnListViewType" />
+  <xs:complexType name="TabType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="icon-image" type="xs:string" />
+        <xs:attribute default="false" name="closeable" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Tab" substitutionGroup="tns:VisualElement" type="tns:TabType" />
+  <xs:complexType name="RadioButtonGroupType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="-1" name="value" type="xs:int" />
+        <xs:attribute name="choices" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="RadioButtonGroup" substitutionGroup="tns:BindableElement" type="tns:RadioButtonGroupType" />
+  <xs:complexType name="RadioButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="false" name="value" type="xs:boolean" />
+        <xs:attribute default="true" name="toggle-on-label-click" type="xs:boolean" />
+        <xs:attribute name="text" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="RadioButton" substitutionGroup="tns:BindableElement" type="tns:RadioButtonType" />
+  <xs:complexType name="SliderType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:float" />
+        <xs:attribute default="0" name="low-value" type="xs:float" />
+        <xs:attribute default="10" name="high-value" type="xs:float" />
+        <xs:attribute default="false" name="fill" type="xs:boolean" />
+        <xs:attribute default="0" name="page-size" type="xs:float" />
+        <xs:attribute default="false" name="show-input-field" type="xs:boolean" />
+        <xs:attribute default="Horizontal" name="direction" type="tns:SliderDirectionType" />
+        <xs:attribute default="false" name="inverted" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Slider" substitutionGroup="tns:BindableElement" type="tns:SliderType" />
+  <xs:complexType name="UnsignedIntegerFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:unsignedInt" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q10="UnityEngine" type="q10:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="UnsignedIntegerField" substitutionGroup="tns:BindableElement" type="tns:UnsignedIntegerFieldType" />
+  <xs:complexType name="MultiColumnTreeViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="tns:Columns" />
+          <xs:element ref="tns:SortColumnDescriptions" />
+        </xs:choice>
+        <xs:attribute default="22" name="fixed-item-height" type="xs:float" />
+        <xs:attribute default="FixedHeight" name="virtualization-method" type="tns:CollectionVirtualizationMethodType" />
+        <xs:attribute default="false" name="show-border" type="xs:boolean" />
+        <xs:attribute default="Single" name="selection-type" type="tns:SelectionTypeType" />
+        <xs:attribute default="None" name="show-alternating-row-backgrounds" type="tns:AlternatingRowBackgroundType" />
+        <xs:attribute default="false" name="reorderable" type="xs:boolean" />
+        <xs:attribute default="false" name="horizontal-scrolling" type="xs:boolean" />
+        <xs:attribute default="false" name="auto-expand" type="xs:boolean" />
+        <xs:attribute default="false" name="sorting-enabled" type="xs:boolean" />
+        <xs:attribute default="None" name="sorting-mode" type="tns:ColumnSortingModeType" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MultiColumnTreeView" substitutionGroup="tns:BindableElement" type="tns:MultiColumnTreeViewType" />
+  <xs:complexType name="TabViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="false" name="reorderable" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TabView" substitutionGroup="tns:VisualElement" type="tns:TabViewType" />
+  <xs:complexType name="IMGUIContainerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="IMGUIContainer" substitutionGroup="tns:VisualElement" type="tns:IMGUIContainerType" />
+  <xs:complexType name="Vector4FieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0,0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Vector4Field" substitutionGroup="tns:BindableElement" type="tns:Vector4FieldType" />
+  <xs:complexType name="TransformOriginFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="top left" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TransformOriginField" substitutionGroup="tns:BindableElement" type="tns:TransformOriginFieldType" />
+  <xs:complexType name="IntegerFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:int" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q11="UnityEngine" type="q11:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="IntegerField" substitutionGroup="tns:BindableElement" type="tns:IntegerFieldType" />
+  <xs:complexType name="ScrollerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="0" name="low-value" type="xs:float" />
+        <xs:attribute default="0" name="high-value" type="xs:float" />
+        <xs:attribute default="Vertical" name="direction" type="tns:SliderDirectionType" />
+        <xs:attribute default="0" name="value" type="xs:float" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Scroller" substitutionGroup="tns:VisualElement" type="tns:ScrollerType" />
+  <xs:complexType name="RepeatButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:TextElementType">
+        <xs:choice />
+        <xs:attribute name="delay" type="xs:long" />
+        <xs:attribute name="interval" type="xs:long" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="RepeatButton" substitutionGroup="tns:TextElement" type="tns:RepeatButtonType" />
+  <xs:complexType name="SyntaxType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="property" type="xs:string" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="Syntax" type="tns:SyntaxType" />
+  <xs:complexType name="RectFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0,0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="RectField" substitutionGroup="tns:BindableElement" type="tns:RectFieldType" />
+  <xs:complexType name="Hash128FieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="00000000000000000000000000000000" name="value" type="xs:string" />
+        <xs:attribute default="-1" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q12="UnityEngine" type="q12:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Hash128Field" substitutionGroup="tns:BindableElement" type="tns:Hash128FieldType" />
+  <xs:complexType name="BoxType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Box" substitutionGroup="tns:VisualElement" type="tns:BoxType" />
+  <xs:complexType name="Vector3IntFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0,0,0" name="value" type="xs:string" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Vector3IntField" substitutionGroup="tns:BindableElement" type="tns:Vector3IntFieldType" />
+  <xs:complexType name="ScaleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="1" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ScaleField" substitutionGroup="tns:BindableElement" type="tns:ScaleFieldType" />
+  <xs:complexType name="TimeValueFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0s" name="value" type="xs:string" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q13="UnityEngine" type="q13:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+        <xs:attribute default="true" name="show-unit-as-dropdown" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TimeValueField" substitutionGroup="tns:BindableElement" type="tns:TimeValueFieldType" />
+  <xs:complexType name="UnsignedLongFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:unsignedLong" />
+        <xs:attribute default="1000" name="max-length" type="xs:int" />
+        <xs:attribute default="false" name="password" type="xs:boolean" />
+        <xs:attribute name="mask-character" type="xs:string" />
+        <xs:attribute name="placeholder-text" type="xs:string" />
+        <xs:attribute default="false" name="hide-placeholder-on-focus" type="xs:boolean" />
+        <xs:attribute default="false" name="readonly" type="xs:boolean" />
+        <xs:attribute default="false" name="is-delayed" type="xs:boolean" />
+        <xs:attribute default="Hidden" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="true" name="select-all-on-mouse-up" type="xs:boolean" />
+        <xs:attribute default="true" name="select-all-on-focus" type="xs:boolean" />
+        <xs:attribute default="true" name="select-word-by-double-click" type="xs:boolean" />
+        <xs:attribute default="true" name="select-line-by-triple-click" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-soft-keyboard" type="xs:boolean" />
+        <xs:attribute default="false" name="hide-mobile-input" type="xs:boolean" />
+        <xs:attribute default="Default" name="keyboard-type" xmlns:q14="UnityEngine" type="q14:TouchScreenKeyboardTypeType" />
+        <xs:attribute default="false" name="auto-correction" type="xs:boolean" />
+        <xs:attribute default="true" name="support-expressions" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="UnsignedLongField" substitutionGroup="tns:BindableElement" type="tns:UnsignedLongFieldType" />
+  <xs:complexType name="UXMLType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="class" type="xs:string" />
+    <xs:attribute name="editor-extension-mode" type="xs:boolean" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="UXML" type="tns:UXMLType" />
+  <xs:complexType name="StyleType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute name="path" type="xs:string" />
+    <xs:attribute name="src" type="xs:string" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="Style" type="tns:StyleType" />
+  <xs:complexType name="TemplateType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute name="path" type="xs:string" />
+    <xs:attribute name="src" type="xs:string" />
+    <xs:attribute name="template" type="xs:string" />
+    <xs:attribute name="element-name" type="xs:string" use="required" />
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="Template" type="tns:TemplateType" />
+  <xs:complexType name="InstanceType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="Instance" type="tns:InstanceType" />
+  <xs:complexType name="AttributeOverridesType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="tns:VisualElement" />
+    </xs:choice>
+    <xs:anyAttribute processContents="lax" />
+  </xs:complexType>
+  <xs:element name="AttributeOverrides" type="tns:AttributeOverridesType" />
+</xs:schema>

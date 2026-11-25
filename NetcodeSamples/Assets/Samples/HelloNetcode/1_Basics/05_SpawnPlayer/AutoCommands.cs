@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode.Samples.Common;
+using Unity.Samples.Netcode.Common;
 using Unity.Transforms;
-using Unity.NetCode;
+
 
 namespace Samples.HelloNetcode
 {

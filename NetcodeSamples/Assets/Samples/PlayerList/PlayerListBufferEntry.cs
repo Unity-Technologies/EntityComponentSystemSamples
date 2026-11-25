@@ -1,7 +1,7 @@
 ﻿using System;
 using Unity.Entities;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>
     ///     Similar to <see cref="PlayerListEntry"/>, except a <see cref="IBufferElementData"/>, allowing the client to store this data in a buffer.

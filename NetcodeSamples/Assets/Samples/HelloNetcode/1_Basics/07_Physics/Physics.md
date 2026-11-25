@@ -11,12 +11,11 @@ See
 
 The spawn player sample is used to trigger the auto spawning of the player when connection is established.
 
-* GoInGame
 * SpawnPlayer
 
 ## Sample description
 
-To make it possible to simulate predicted ghosts on both the client and server, and only interpolated ghosts on the server, the _NetCodePhysicsConfig_ component needs to be added to the project. The _Predict physics_ checkbox needs to be checked but the default values will work fine here.
+To make it possible to simulate predicted ghosts on both the client and server, and only interpolated ghosts on the server, the _NetcodePhysicsConfig_ component needs to be added to the project. The _Predict physics_ checkbox needs to be checked but the default values will work fine here.
 
 The physics player prefab has been modified compared to the spawn player sample like so:
 

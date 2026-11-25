@@ -1,5 +1,6 @@
+using Unity.Netcode;
 using Unity.Entities;
-using Unity.NetCode;
+
 
 [GhostComponent(PrefabType = GhostPrefabType.Server)]
 public struct BulletAgeComponent : IComponentData

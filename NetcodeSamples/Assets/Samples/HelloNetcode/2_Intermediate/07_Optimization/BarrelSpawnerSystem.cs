@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode.HostMigration;
+using Unity.Netcode.HostMigration;
 using Unity.Transforms;
 
 namespace Samples.HelloNetcode

@@ -1,6 +1,6 @@
 //#define ENABLE_NETCODE_SAMPLE_SECURE
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode;
 
 namespace Samples.HelloNetcode
 {
@@ -11,7 +11,7 @@ namespace Samples.HelloNetcode
     /// </summary>
     public struct SecureDriverConstructor : INetworkStreamDriverConstructor
     {
-        public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateClientDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             DefaultDriverBuilder.RegisterClientDriver(
                 world, ref driverStore, netDebug,
@@ -19,7 +19,7 @@ namespace Samples.HelloNetcode
                 serverName: ref SecureParameters.ServerCommonName);
         }
 
-        public void CreateServerDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateServerDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             DefaultDriverBuilder.RegisterServerDriver(
                 world, ref driverStore, netDebug,
