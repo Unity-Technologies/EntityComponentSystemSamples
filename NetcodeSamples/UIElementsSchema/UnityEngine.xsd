@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEngine" elementFormDefault="qualified" targetNamespace="UnityEngine" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="TouchScreenKeyboardTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Default" />
+      <xs:enumeration value="ASCIICapable" />
+      <xs:enumeration value="NumbersAndPunctuation" />
+      <xs:enumeration value="URL" />
+      <xs:enumeration value="NumberPad" />
+      <xs:enumeration value="PhonePad" />
+      <xs:enumeration value="NamePhonePad" />
+      <xs:enumeration value="EmailAddress" />
+      <xs:enumeration value="NintendoNetworkAccount" />
+      <xs:enumeration value="Social" />
+      <xs:enumeration value="Search" />
+      <xs:enumeration value="DecimalPad" />
+      <xs:enumeration value="OneTimeCode" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="FontStyleType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Normal" />
+      <xs:enumeration value="Bold" />
+      <xs:enumeration value="Italic" />
+      <xs:enumeration value="BoldAndItalic" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="TextAnchorType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="UpperLeft" />
+      <xs:enumeration value="UpperCenter" />
+      <xs:enumeration value="UpperRight" />
+      <xs:enumeration value="MiddleLeft" />
+      <xs:enumeration value="MiddleCenter" />
+      <xs:enumeration value="MiddleRight" />
+      <xs:enumeration value="LowerLeft" />
+      <xs:enumeration value="LowerCenter" />
+      <xs:enumeration value="LowerRight" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ScaleModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="StretchToFill" />
+      <xs:enumeration value="ScaleAndCrop" />
+      <xs:enumeration value="ScaleToFit" />
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

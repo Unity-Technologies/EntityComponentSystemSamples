@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Toolbars" elementFormDefault="qualified" targetNamespace="UnityEditor.Toolbars" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEditor.UIElements.xsd" namespace="UnityEditor.UIElements" />
+  <xs:complexType name="MainToolbarKebabButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEditor.UIElements" base="q1:ToolbarButtonType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MainToolbarKebabButton" xmlns:q2="UnityEditor.UIElements" substitutionGroup="q2:ToolbarButton" type="tns:MainToolbarKebabButtonType" />
+</xs:schema>

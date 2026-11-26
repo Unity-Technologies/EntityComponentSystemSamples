@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,9 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.HostMigration;
-using Unity.NetCode.Samples.Common;
+using Unity.Netcode.HostMigration;
+using Unity.Samples.Netcode.Common;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
@@ -106,11 +106,11 @@ namespace Samples.HelloNetcode
         void Start()
         {
             if (ClientServerBootstrap.AutoConnectPort != 0)
-                Debug.LogError("Host migration sample can't run via auto connect (play scene directly) but most be loaded via the frontend");
+                Debug.LogError("Host migration sample can't run via auto connect (play scene directly) but must be loaded via the frontend");
             if (ClientServerBootstrap.RequestedPlayType != ClientServerBootstrap.PlayType.ClientAndServer)
                 Debug.LogError($"[HostMigration] Creating client/server worlds is not allowed if playmode is set to {ClientServerBootstrap.RequestedPlayType}");
             m_MigrationDataBlob = new NativeList<byte>(InitialDataSize, Allocator.Persistent);
-            m_HostMigrationFrontend = FindFirstObjectByType<HostMigrationFrontend>();
+            m_HostMigrationFrontend = FindAnyObjectByType<HostMigrationFrontend>();
             DontDestroyOnLoad(this);
         }
 
@@ -119,7 +119,7 @@ namespace Samples.HelloNetcode
             if (scene.name == Frontend.SceneName)
             {
                 Debug.Log("[HostMigration] Re-entering frontend scene, leaving lobby");
-                m_HostMigrationFrontend = FindFirstObjectByType<HostMigrationFrontend>();
+                m_HostMigrationFrontend = FindAnyObjectByType<HostMigrationFrontend>();
                 StopHeartbeat();
                 LeaveLobby();
                 m_LastUpdateTime = 0;
@@ -130,10 +130,10 @@ namespace Samples.HelloNetcode
         void OnKickedFromLobby()
         {
             Debug.Log("[HostMigration] Left lobby");
-            if (FindFirstObjectByType<HostMigrationFrontend>() == null)
+            if (FindAnyObjectByType<HostMigrationFrontend>() == null)
             {
                 Debug.Log($"[HostMigration] Re-entering frontend scene as we've left the lobby now");
-                var frontendHud = FindFirstObjectByType<FrontendHUD>();
+                var frontendHud = FindAnyObjectByType<FrontendHUD>();
                 frontendHud?.ReturnToFrontend();
             }
         }
@@ -376,7 +376,7 @@ namespace Samples.HelloNetcode
                     ClientServerBootstrap.ClientWorld.EntityManager.DestroyEntity(clientRelayEntity); // cleanup as this is no longer needed
 
                     // Connect the server migration stats HUD
-                    var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
+                    var statsText = FindAnyObjectByType<HostMigrationHUD>().StatsText;
                     ClientServerBootstrap.ServerWorld.GetExistingSystemManaged<ServerHostMigrationHUDSystem>().StatsText = statsText;
 
                     // Disable the client status HUD
@@ -403,7 +403,7 @@ namespace Samples.HelloNetcode
                         HostMigrationHUD.SetWaitForRelayConnection(new WaitForRelayConnection() { WaitForJoinCode = true, OldJoinCode = RelayJoinCode, IsHostMigration = true, StartTime = Time.realtimeSinceStartup});
 
                         // Connect the migration stats HUD
-                        var statsText = FindFirstObjectByType<HostMigrationHUD>().StatsText;
+                        var statsText = FindAnyObjectByType<HostMigrationHUD>().StatsText;
                         var clientMigrationSystem = ClientServerBootstrap.ClientWorld.GetExistingSystemManaged<ClientHostMigrationHUDSystem>();
                         clientMigrationSystem.StatsText = statsText;
                     }

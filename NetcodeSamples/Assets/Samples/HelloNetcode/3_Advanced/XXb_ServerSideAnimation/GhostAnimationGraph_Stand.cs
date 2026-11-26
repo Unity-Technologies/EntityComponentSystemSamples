@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
@@ -5,15 +6,12 @@ using Unity.Mathematics;
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode.Hybrid;
 using Unity.Transforms;
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
-using Unity.NetCode.Hybrid;
-#endif
+
 
 namespace Samples.HelloNetcode.Hybrid
 {
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct StandAnimationData : IComponentData
     {
         [GhostField(Quantization=1000)] public float aimPitch;
@@ -248,7 +246,7 @@ namespace Samples.HelloNetcode.Hybrid
         }
     }
 
-    [CreateAssetMenu(fileName = "Stand", menuName = "NetCode/Animation/Stand")]
+    [CreateAssetMenu(fileName = "Stand", menuName = "Netcode/Animation/Stand")]
     public class GhostAnimationGraph_Stand : GhostAnimationGraphAsset
     {
         public AnimationClip IdleClip;
@@ -273,5 +271,4 @@ namespace Samples.HelloNetcode.Hybrid
             register.RegisterPlayableData<StandAnimationData>();
         }
     }
-#endif
 }

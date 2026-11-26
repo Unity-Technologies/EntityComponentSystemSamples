@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Accessibility" elementFormDefault="qualified" targetNamespace="UnityEditor.Accessibility" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:import schemaLocation="UnityEngine.Accessibility.xsd" namespace="UnityEngine.Accessibility" />
+  <xs:complexType name="AccessibilityHierarchyTreeViewItemType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="false" name="is-root" type="xs:boolean" />
+        <xs:attribute default="0" name="id" type="xs:int" />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="None" name="role" xmlns:q2="UnityEngine.Accessibility" type="q2:AccessibilityRoleType" />
+        <xs:attribute default="false" name="is-active" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AccessibilityHierarchyTreeViewItem" xmlns:q3="UnityEngine.UIElements" substitutionGroup="q3:VisualElement" type="tns:AccessibilityHierarchyTreeViewItemType" />
+  <xs:complexType name="AccessibilityHierarchyTreeViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q4="UnityEngine.UIElements" base="q4:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AccessibilityHierarchyTreeView" xmlns:q5="UnityEngine.UIElements" substitutionGroup="q5:VisualElement" type="tns:AccessibilityHierarchyTreeViewType" />
+  <xs:complexType name="SearchableLabelType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q6="UnityEngine.UIElements" base="q6:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SearchableLabel" xmlns:q7="UnityEngine.UIElements" substitutionGroup="q7:VisualElement" type="tns:SearchableLabelType" />
+  <xs:complexType name="TreeViewSearchBarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q8="UnityEngine.UIElements" base="q8:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TreeViewSearchBar" xmlns:q9="UnityEngine.UIElements" substitutionGroup="q9:VisualElement" type="tns:TreeViewSearchBarType" />
+</xs:schema>

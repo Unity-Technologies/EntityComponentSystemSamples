@@ -3,9 +3,9 @@ using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode;
 
-namespace Unity.NetCode.Samples
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// Helper struct to collect and pass to job dynamic type handles.

@@ -49,19 +49,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c79d771cedb4794bf100ce60df5f764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DefaultGhostMode: 2
-  SupportedGhostModes: 2
-  OptimizationMode: 0
-  Importance: 50
-  MaxSendRate: 30
-  prefabId: 3d025fe4613fc424a8fa7a354c169a99
   HasOwner: 1
   SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
+  UseSingleBaseline: 0
   RollbackPredictedSpawnedGhostState: 0
   RollbackPredictionOnStructuralChanges: 1
+  DefaultGhostMode: 2
+  SupportedGhostModes: 2
+  OptimizationMode: 0
+  Importance: 50
+  MaxSendRate: 30
+  SingleWorldHostInterpolationSmoothing: 1
+  prefabId: 3d025fe4613fc424a8fa7a354c169a99
 --- !u!114 &6916574456758741700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,8 +89,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ServerPrefab: {fileID: 0}
-  ClientPrefab: {fileID: 3150670750734201086, guid: 127207974eb1ad84cb3d5273eb53b2af,
-    type: 3}
+  ClientPrefab: {fileID: 3150670750734201086, guid: 127207974eb1ad84cb3d5273eb53b2af, type: 3}
 --- !u!114 &-1279997303415088349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,8 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920cb4e07dd0548aba8058fcdb855536, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControllerConfig: {fileID: 5211109872736098966, guid: 402568579d8874445bcca02afee13eda,
-    type: 3}
+  ControllerConfig: {fileID: 5211109872736098966, guid: 402568579d8874445bcca02afee13eda, type: 3}
 --- !u!114 &7262797898020073897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,7 +120,7 @@ MonoBehaviour:
     EntityIndex: 0
     PrefabType: -1
     SendTypeOptimization: -1
-    VariantHash: 18225908329647095764
+    VariantHash: 6627240348719357748
 --- !u!54 &4312055150579631497
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -128,10 +128,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2469323487610213414}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}

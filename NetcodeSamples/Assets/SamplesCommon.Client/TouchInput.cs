@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Unity.Mathematics;
 
-namespace Unity.NetCode.Samples.Common
+namespace Unity.Samples.Netcode.Common
 {
     public class TouchInput : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
     {

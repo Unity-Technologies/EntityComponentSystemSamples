@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
-using Unity.NetCode;
+
 using Unity.Entities;
 using UnityEngine.Assertions;
 
@@ -25,9 +26,6 @@ public struct RpcLevelLoaded : IComponentData, IRpcCommandSerializer<RpcLevelLoa
     [AOT.MonoPInvokeCallback(typeof(RpcExecutor.ExecuteDelegate))]
     private static void InvokeExecute(ref RpcExecutor.Parameters parameters)
     {
-        var rpcData = default(RpcLevelLoaded);
-        rpcData.Deserialize(ref parameters.Reader, parameters.DeserializerState, ref rpcData);
-
         parameters.CommandBuffer.AddComponent(parameters.JobIndex, parameters.Connection, new PlayerStateComponentData());
         parameters.CommandBuffer.AddComponent(parameters.JobIndex, parameters.Connection, default(NetworkStreamInGame));
         parameters.CommandBuffer.AddComponent(parameters.JobIndex, parameters.Connection, default(GhostConnectionPosition));

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.Profiling.Editor.UI" elementFormDefault="qualified" targetNamespace="Unity.Profiling.Editor.UI" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="ReadOnlyFloatFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ReadOnlyFloatField" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:ReadOnlyFloatFieldType" />
+  <xs:complexType name="BlocksGraphViewRenderType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BlocksGraphViewRender" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:VisualElement" type="tns:BlocksGraphViewRenderType" />
+  <xs:complexType name="PieChartType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PieChart" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:VisualElement" type="tns:PieChartType" />
+  <xs:complexType name="BoxPlotGraphType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BoxPlotGraph" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:VisualElement" type="tns:BoxPlotGraphType" />
+  <xs:complexType name="ActivityIndicatorOverlayType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="UnityEngine.UIElements" base="q9:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ActivityIndicatorOverlay" xmlns:q10="UnityEngine.UIElements" substitutionGroup="q10:VisualElement" type="tns:ActivityIndicatorOverlayType" />
+  <xs:complexType name="BlocksGraphViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BlocksGraphViewRenderType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BlocksGraphView" substitutionGroup="tns:BlocksGraphViewRender" type="tns:BlocksGraphViewType" />
+</xs:schema>

@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Unity.NetCode;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,14 +16,15 @@ namespace Samples.HelloNetcode
     //      - A 'auto-load scene via `-scene XXX` commandline arg.
     // - While starting from any other scene will preserve the existing 'auto-connect' quick-start flow.
 
-    // If you do not need a frontend menu (and just want to always auto connect), it is usually enough to use
-    // a simpler bootstrap, like this:
+    // If you do not need a frontend menu (and just want to always auto connect), the default bootstrap is enough,
+    // as auto connect is enabled by default (AutoConnectPort defaults to 7979). Use a simpler bootstrap like this
+    // only to customize the port:
     // [UnityEngine.Scripting.Preserve]
     // public class NetCodeBootstrap : ClientServerBootstrap
     // {
     //     public override bool Initialize(string defaultWorldName)
     //     {
-    //         AutoConnectPort = 7979; // Enable auto connect
+    //         AutoConnectPort = 7979; // Auto connect port (0 disables auto connect)
     //         return base.Initialize(defaultWorldName); // Use the regular bootstrap
     //     }
     // }
@@ -37,6 +39,7 @@ namespace Samples.HelloNetcode
         {
             const string fallbackGameplayScene = "Asteroids";
             const string frontendScene = "Frontend";
+            const string gameObjectFrontEndScene = "0_MainMenu";
 
             // If the user added an OverrideDefaultNetcodeBootstrap MonoBehaviour to their active scene,
             // or disabled Bootstrapping project-wide, we should respect that here.
@@ -46,10 +49,11 @@ namespace Samples.HelloNetcode
             // We check if the loaded scene is "Frontend", which means we should DISABLE auto-connect flows.
             // We also check to see if the user has any commandline argument directing which scene we should load.
             var isFromCommandLine = TryGetCommandLineScene(out var targetScene);
-            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            var activeScene = SceneManager.GetActiveScene().name;
             if (!isFromCommandLine) targetScene = activeScene;
 
             var isFrontend = targetScene.Contains(frontendScene);
+            isFrontend |= targetScene.Contains(gameObjectFrontEndScene);
 
             // Handle server setup errors:
             if (IsServerPlatform)

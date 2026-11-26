@@ -1,17 +1,16 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.NetCode;
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
-using Unity.NetCode.Hybrid;
-#endif
+using Unity.Netcode.Hybrid;
+
+
 
 namespace Samples.HelloNetcode.Hybrid
 {
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct StateAnimationData : IComponentData
     {
         [GhostField] public int Value;
@@ -107,7 +106,7 @@ namespace Samples.HelloNetcode.Hybrid
         }
     }
 
-    [CreateAssetMenu(fileName = "StateSelector", menuName = "NetCode/Animation/StateSelector")]
+    [CreateAssetMenu(fileName = "StateSelector", menuName = "Netcode/Animation/StateSelector")]
     public class GhostAnimationGraph_StateSelector : GhostAnimationGraphAsset
     {
         public enum CharacterAnimationState
@@ -154,5 +153,4 @@ namespace Samples.HelloNetcode.Hybrid
                 controllers[i].template.RegisterPlayableData(register);
         }
     }
-#endif
 }

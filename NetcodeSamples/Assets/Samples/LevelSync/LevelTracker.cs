@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using System;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Scenes;
 
 public struct LoadNextLevelCommand : IRpcCommand { }

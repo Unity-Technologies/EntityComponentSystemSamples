@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.Animations.AnimationWindow.Widgets" elementFormDefault="qualified" targetNamespace="UnityEditor.Animations.AnimationWindow.Widgets" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="OptionsButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="OptionsButton" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:OptionsButtonType" />
+  <xs:complexType name="AnimationEventTimelineElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnimationEventTimelineElement" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:VisualElement" type="tns:AnimationEventTimelineElementType" />
+  <xs:complexType name="ClipDropdownFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:BindableElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ClipDropdownField" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:BindableElement" type="tns:ClipDropdownFieldType" />
+  <xs:complexType name="ToggleButtonStripType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:ToggleButtonGroupType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ToggleButtonStrip" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:ToggleButtonGroup" type="tns:ToggleButtonStripType" />
+  <xs:complexType name="CurveEditorElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="UnityEngine.UIElements" base="q9:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CurveEditorElement" xmlns:q10="UnityEngine.UIElements" substitutionGroup="q10:VisualElement" type="tns:CurveEditorElementType" />
+  <xs:complexType name="HierarchyElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q11="UnityEngine.UIElements" base="q11:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="HierarchyElement" xmlns:q12="UnityEngine.UIElements" substitutionGroup="q12:VisualElement" type="tns:HierarchyElementType" />
+  <xs:complexType name="MainContentElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q13="UnityEngine.UIElements" base="q13:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MainContentElement" xmlns:q14="UnityEngine.UIElements" substitutionGroup="q14:VisualElement" type="tns:MainContentElementType" />
+  <xs:complexType name="DopeSheetElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q15="UnityEngine.UIElements" base="q15:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DopeSheetElement" xmlns:q16="UnityEngine.UIElements" substitutionGroup="q16:VisualElement" type="tns:DopeSheetElementType" />
+</xs:schema>

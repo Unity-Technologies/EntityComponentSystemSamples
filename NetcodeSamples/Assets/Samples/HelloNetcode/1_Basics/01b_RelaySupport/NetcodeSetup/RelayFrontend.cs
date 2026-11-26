@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using System;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
 using UnityEngine;
@@ -245,7 +246,7 @@ namespace Samples.HelloNetcode
         {
             if (ClientServerBootstrap.RequestedPlayType != ClientServerBootstrap.PlayType.ClientAndServer)
             {
-                UnityEngine.Debug.LogError($"Creating client/server worlds is not allowed if playmode is set to {ClientServerBootstrap.RequestedPlayType}");
+                Debug.LogError($"Creating client/server worlds is not allowed if playmode is set to {ClientServerBootstrap.RequestedPlayType}");
                 return;
             }
 

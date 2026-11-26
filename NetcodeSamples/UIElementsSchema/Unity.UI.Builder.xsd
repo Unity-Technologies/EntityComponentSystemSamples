@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.UI.Builder" elementFormDefault="qualified" targetNamespace="Unity.UI.Builder" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="FontStyleStripType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FontStyleStrip" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:BindableElement" type="tns:FontStyleStripType" />
+  <xs:complexType name="TransitionsListViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:BindableElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TransitionsListView" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:BindableElement" type="tns:TransitionsListViewType" />
+  <xs:complexType name="ImageStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ImageStyleField" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:BindableElement" type="tns:ImageStyleFieldType" />
+  <xs:complexType name="PositionStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:DimensionStyleFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="DimensionStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute default="false" name="show-options" type="xs:boolean" />
+        <xs:attribute default="-3.402823E+38" name="min" type="xs:float" />
+        <xs:attribute default="3.402823E+38" name="max" type="xs:float" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DimensionStyleField" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:BindableElement" type="tns:DimensionStyleFieldType" />
+  <xs:element name="PositionStyleField" substitutionGroup="tns:DimensionStyleField" type="tns:PositionStyleFieldType" />
+  <xs:complexType name="HelpBoxType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="UnityEngine.UIElements" base="q9:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="HelpBox" xmlns:q10="UnityEngine.UIElements" substitutionGroup="q10:BindableElement" type="tns:HelpBoxType" />
+  <xs:complexType name="UnityUIBuilderSelectionMarkerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q11="UnityEngine.UIElements" base="q11:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="UnityUIBuilderSelectionMarker" xmlns:q12="UnityEngine.UIElements" substitutionGroup="q12:VisualElement" type="tns:UnityUIBuilderSelectionMarkerType" />
+  <xs:complexType name="BuilderManipulatorType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BuilderTrackerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="BuilderTrackerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q13="UnityEngine.UIElements" base="q13:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderTracker" xmlns:q14="UnityEngine.UIElements" substitutionGroup="q14:VisualElement" type="tns:BuilderTrackerType" />
+  <xs:element name="BuilderManipulator" substitutionGroup="tns:BuilderTracker" type="tns:BuilderManipulatorType" />
+  <xs:complexType name="BorderBoxModelViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q15="UnityEngine.UIElements" base="q15:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BorderBoxModelView" xmlns:q16="UnityEngine.UIElements" substitutionGroup="q16:VisualElement" type="tns:BorderBoxModelViewType" />
+  <xs:complexType name="FontDefinitionStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q17="UnityEngine.UIElements" base="q17:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FontDefinitionStyleField" xmlns:q18="UnityEngine.UIElements" substitutionGroup="q18:BindableElement" type="tns:FontDefinitionStyleFieldType" />
+  <xs:complexType name="PositionSectionType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q19="UnityEngine.UIElements" base="q19:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PositionSection" xmlns:q20="UnityEngine.UIElements" substitutionGroup="q20:VisualElement" type="tns:PositionSectionType" />
+  <xs:complexType name="SpacingBoxModelViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q21="UnityEngine.UIElements" base="q21:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SpacingBoxModelView" xmlns:q22="UnityEngine.UIElements" substitutionGroup="q22:VisualElement" type="tns:SpacingBoxModelViewType" />
+  <xs:complexType name="FoldoutColorFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:FoldoutFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="FoldoutFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:PersistedFoldoutType">
+        <xs:choice />
+        <xs:attribute name="binding-paths" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="PersistedFoldoutType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q23="UnityEngine.UIElements" base="q23:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+        <xs:attribute default="true" name="value" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PersistedFoldout" xmlns:q24="UnityEngine.UIElements" substitutionGroup="q24:BindableElement" type="tns:PersistedFoldoutType" />
+  <xs:element name="FoldoutField" substitutionGroup="tns:PersistedFoldout" type="tns:FoldoutFieldType" />
+  <xs:element name="FoldoutColorField" substitutionGroup="tns:FoldoutField" type="tns:FoldoutColorFieldType" />
+  <xs:complexType name="TransformOriginStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q25="UnityEngine.UIElements" base="q25:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="top left" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TransformOriginStyleField" xmlns:q26="UnityEngine.UIElements" substitutionGroup="q26:BindableElement" type="tns:TransformOriginStyleFieldType" />
+  <xs:complexType name="FieldStatusIndicatorType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q27="UnityEngine.UIElements" base="q27:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="field-name" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FieldStatusIndicator" xmlns:q28="UnityEngine.UIElements" substitutionGroup="q28:VisualElement" type="tns:FieldStatusIndicatorType" />
+  <xs:complexType name="BuilderSelectionIndicatorType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BuilderTrackerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderSelectionIndicator" substitutionGroup="tns:BuilderTracker" type="tns:BuilderSelectionIndicatorType" />
+  <xs:complexType name="BuilderCanvasStyleControlsType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q29="UnityEngine.UIElements" base="q29:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderCanvasStyleControls" xmlns:q30="UnityEngine.UIElements" substitutionGroup="q30:VisualElement" type="tns:BuilderCanvasStyleControlsType" />
+  <xs:complexType name="BuilderTransformerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BuilderManipulatorType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderTransformer" substitutionGroup="tns:BuilderManipulator" type="tns:BuilderTransformerType" />
+  <xs:complexType name="OverlayPainterHelperElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q31="UnityEngine.UIElements" base="q31:ImmediateModeElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="OverlayPainterHelperElement" xmlns:q32="UnityEngine.UIElements" substitutionGroup="q32:ImmediateModeElement" type="tns:OverlayPainterHelperElementType" />
+  <xs:complexType name="TextShadowStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q33="UnityEngine.UIElements" base="q33:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0px 0px rgba(0, 0, 0, 0)" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TextShadowStyleField" xmlns:q34="UnityEngine.UIElements" substitutionGroup="q34:BindableElement" type="tns:TextShadowStyleFieldType" />
+  <xs:complexType name="BuilderTooltipPreviewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q35="UnityEngine.UIElements" base="q35:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderTooltipPreview" xmlns:q36="UnityEngine.UIElements" substitutionGroup="q36:VisualElement" type="tns:BuilderTooltipPreviewType" />
+  <xs:complexType name="BuilderCanvasType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q37="UnityEngine.UIElements" base="q37:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderCanvas" xmlns:q38="UnityEngine.UIElements" substitutionGroup="q38:VisualElement" type="tns:BuilderCanvasType" />
+  <xs:complexType name="RotateStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q39="UnityEngine.UIElements" base="q39:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="RotateStyleField" xmlns:q40="UnityEngine.UIElements" substitutionGroup="q40:BindableElement" type="tns:RotateStyleFieldType" />
+  <xs:complexType name="BuilderPaneType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q41="UnityEngine.UIElements" base="q41:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="Pane Title" name="title" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderPane" xmlns:q42="UnityEngine.UIElements" substitutionGroup="q42:VisualElement" type="tns:BuilderPaneType" />
+  <xs:complexType name="BuilderStyleRowType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q43="UnityEngine.UIElements" base="q43:BindableElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderStyleRow" xmlns:q44="UnityEngine.UIElements" substitutionGroup="q44:BindableElement" type="tns:BuilderStyleRowType" />
+  <xs:complexType name="BuilderNotificationsType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q45="UnityEngine.UIElements" base="q45:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderNotifications" xmlns:q46="UnityEngine.UIElements" substitutionGroup="q46:VisualElement" type="tns:BuilderNotificationsType" />
+  <xs:complexType name="AngleStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:DimensionStyleFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AngleStyleField" substitutionGroup="tns:DimensionStyleField" type="tns:AngleStyleFieldType" />
+  <xs:complexType name="USSVariablesStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:DimensionStyleFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="USSVariablesStyleField" substitutionGroup="tns:DimensionStyleField" type="tns:USSVariablesStyleFieldType" />
+  <xs:complexType name="BuilderResizerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BuilderTransformerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderResizer" substitutionGroup="tns:BuilderTransformer" type="tns:BuilderResizerType" />
+  <xs:complexType name="BuilderCategoryPersistedFoldoutType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:PersistedFoldoutType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderCategoryPersistedFoldout" substitutionGroup="tns:PersistedFoldout" type="tns:BuilderCategoryPersistedFoldoutType" />
+  <xs:complexType name="TextAlignStripType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q47="UnityEngine.UIElements" base="q47:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TextAlignStrip" xmlns:q48="UnityEngine.UIElements" substitutionGroup="q48:BindableElement" type="tns:TextAlignStripType" />
+  <xs:complexType name="FoldoutTransitionFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:FoldoutFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FoldoutTransitionField" substitutionGroup="tns:FoldoutField" type="tns:FoldoutTransitionFieldType" />
+  <xs:complexType name="ModalPopupType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q49="UnityEngine.UIElements" base="q49:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="title" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ModalPopup" xmlns:q50="UnityEngine.UIElements" substitutionGroup="q50:VisualElement" type="tns:ModalPopupType" />
+  <xs:complexType name="LibraryFoldoutType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:PersistedFoldoutType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LibraryFoldout" substitutionGroup="tns:PersistedFoldout" type="tns:LibraryFoldoutType" />
+  <xs:complexType name="BuilderPlacementIndicatorType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q51="UnityEngine.UIElements" base="q51:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderPlacementIndicator" xmlns:q52="UnityEngine.UIElements" substitutionGroup="q52:VisualElement" type="tns:BuilderPlacementIndicatorType" />
+  <xs:complexType name="FoldoutWithCheckboxType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:PersistedFoldoutType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FoldoutWithCheckbox" substitutionGroup="tns:PersistedFoldout" type="tns:FoldoutWithCheckboxType" />
+  <xs:complexType name="BuilderParentTrackerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BuilderTrackerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderParentTracker" substitutionGroup="tns:BuilderTracker" type="tns:BuilderParentTrackerType" />
+  <xs:complexType name="CheckerboardBackgroundType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q53="UnityEngine.UIElements" base="q53:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CheckerboardBackground" xmlns:q54="UnityEngine.UIElements" substitutionGroup="q54:VisualElement" type="tns:CheckerboardBackgroundType" />
+  <xs:complexType name="CursorStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q55="UnityEngine.UIElements" base="q55:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default=" 0 0" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CursorStyleField" xmlns:q56="UnityEngine.UIElements" substitutionGroup="q56:BindableElement" type="tns:CursorStyleFieldType" />
+  <xs:complexType name="BuilderMoverType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BuilderTransformerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderMover" substitutionGroup="tns:BuilderTransformer" type="tns:BuilderMoverType" />
+  <xs:complexType name="TranslateStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q57="UnityEngine.UIElements" base="q57:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TranslateStyleField" xmlns:q58="UnityEngine.UIElements" substitutionGroup="q58:BindableElement" type="tns:TranslateStyleFieldType" />
+  <xs:complexType name="FoldoutNumberFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:FoldoutFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FoldoutNumberField" substitutionGroup="tns:FoldoutField" type="tns:FoldoutNumberFieldType" />
+  <xs:complexType name="BuilderAnchorerType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BuilderManipulatorType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuilderAnchorer" substitutionGroup="tns:BuilderManipulator" type="tns:BuilderAnchorerType" />
+  <xs:complexType name="IntegerStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q59="UnityEngine.UIElements" base="q59:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute default="false" name="show-options" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="IntegerStyleField" xmlns:q60="UnityEngine.UIElements" substitutionGroup="q60:BindableElement" type="tns:IntegerStyleFieldType" />
+  <xs:complexType name="MaterialDefinitionStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q61="UnityEngine.UIElements" base="q61:BindableElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MaterialDefinitionStyleField" xmlns:q62="UnityEngine.UIElements" substitutionGroup="q62:BindableElement" type="tns:MaterialDefinitionStyleFieldType" />
+  <xs:complexType name="AssetReferenceStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q63="UnityEngine.UIElements" base="q63:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AssetReferenceStyleField" xmlns:q64="UnityEngine.UIElements" substitutionGroup="q64:BindableElement" type="tns:AssetReferenceStyleFieldType" />
+  <xs:complexType name="NumericStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q65="UnityEngine.UIElements" base="q65:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute default="false" name="show-options" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="NumericStyleField" xmlns:q66="UnityEngine.UIElements" substitutionGroup="q66:BindableElement" type="tns:NumericStyleFieldType" />
+  <xs:complexType name="TransformOriginSelectorType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q67="UnityEngine.UIElements" base="q67:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TransformOriginSelector" xmlns:q68="UnityEngine.UIElements" substitutionGroup="q68:VisualElement" type="tns:TransformOriginSelectorType" />
+  <xs:complexType name="BackgroundPositionDimensionStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q69="UnityEngine.UIElements" base="q69:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute default="false" name="show-options" type="xs:boolean" />
+        <xs:attribute name="min" type="xs:float" />
+        <xs:attribute name="max" type="xs:float" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BackgroundPositionDimensionStyleField" xmlns:q70="UnityEngine.UIElements" substitutionGroup="q70:BindableElement" type="tns:BackgroundPositionDimensionStyleFieldType" />
+  <xs:complexType name="ScaleStyleFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q71="UnityEngine.UIElements" base="q71:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="1" name="value" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ScaleStyleField" xmlns:q72="UnityEngine.UIElements" substitutionGroup="q72:BindableElement" type="tns:ScaleStyleFieldType" />
+</xs:schema>

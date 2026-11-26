@@ -1,5 +1,5 @@
 using Unity.Entities;
-using Unity.NetCode.Samples;
+using Unity.Samples.Netcode;
 
 namespace Samples.HelloNetcode
 {

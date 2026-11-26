@@ -1,7 +1,7 @@
 using Unity.Entities;
 using Unity.Physics;
 
-namespace Unity.NetCode
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// Component used to control the predicted physics loop. Let you to configure each frame how the
@@ -25,9 +25,5 @@ namespace Unity.NetCode
         /// <see cref="CollisionWorld.UpdateDynamicTree"/>).
         /// </summary>
         public byte UpdateBroadphaseAndMotion;
-        /// <summary>
-        /// The number of physics update since the first prediction tick.
-        /// </summary>
-        public int CurrentPhysicsStep;
     }
 }

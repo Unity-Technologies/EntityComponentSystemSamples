@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using System;
 using Unity.Collections;
 using Unity.Entities;
@@ -6,7 +7,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using Unity.Burst;
-using Unity.NetCode;
+
 
 namespace Asteroids.Client
 {
@@ -63,7 +64,7 @@ namespace Asteroids.Client
             public NativeList<LevelComponent> level;
             public NativeArray<int> teleport;
             public NativeArray<float2> renderOffset;
-            [ReadOnly] public ComponentLookup<LocalTransform> shipTransform;
+            [ReadOnly] public ComponentLookup<LocalToWorld> shipL2W;
             public int screenWidthHalf;
             public int screenHeightHalf;
             public Entity localPlayerShip;
@@ -76,9 +77,9 @@ namespace Asteroids.Client
                 int mapHeight = level[0].levelHeight;
                 int nextTeleport = 1;
 
-                if (shipTransform.HasComponent(localPlayerShip))
+                if (shipL2W.TryGetComponent(localPlayerShip, out var l2w))
                 {
-                    float3 desiredCamPos = shipTransform[localPlayerShip].Position;
+                    float3 desiredCamPos = l2w.Position;
 
                     desiredCamPos.x = math.clamp(desiredCamPos.x, -mapEdgeCameraPadding + screenWidthHalf, mapWidth + mapEdgeCameraPadding - screenWidthHalf);
                     desiredCamPos.y = math.clamp(desiredCamPos.y, -mapEdgeCameraPadding + screenHeightHalf, mapHeight + mapEdgeCameraPadding - screenHeightHalf);
@@ -124,9 +125,6 @@ namespace Asteroids.Client
                 if (localPlayerShip != Entity.Null) throw new Exception("Sanity check failed!");
                 localPlayerShip = entity;
             }
-            // SystemAPI.TryGetSingletonEntity<ShipCommandData>(out var localPlayerShip); // can't use this with single world host
-
-            var shipTransform = GetComponentLookup<LocalTransform>(true);
 
             var screenHeight = Screen.height;
             var screenWidthHalf = Screen.width/2;
@@ -153,7 +151,7 @@ namespace Asteroids.Client
                 screenHeight = screenHeight,
                 screenHeightHalf = screenHeightHalf,
                 screenWidthHalf = screenWidthHalf,
-                shipTransform = shipTransform,
+                shipL2W = GetComponentLookup<LocalToWorld>(true),
                 teleport = teleport,
             }.Schedule(JobHandle.CombineDependencies(Dependency, levelHandle));
 

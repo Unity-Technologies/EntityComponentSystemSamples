@@ -1,0 +1,115 @@
+using Unity.NetCode;
+using Unity.Networking.Transport;
+using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
+using Button = UnityEngine.UIElements.Button;
+
+namespace GameObjectSample
+{
+    public class MainMenuUI : MonoBehaviour
+    {
+        Button connectButton;
+        Button hostButton;
+        Button serverButton;
+        TextField ipTextField;
+        TextField portTextField;
+        // private Toggle toggle;
+        private VisualElement root;
+        [SerializeField] NetCodeConfig.HostWorldMode m_HostWorldMode; // This is mostly for testing purposes. We only support single world for now.
+
+        // private int clickCount;
+
+        void OnEnable()
+        {
+            if (Netcode.IsServerBuildOnly)
+            {
+                StartServer(NetworkEndpoint.AnyIpv4.WithPort(7979));
+                return;
+            }
+            GetComponent<PanelRenderer>().RegisterUIReloadCallback(OnUIReload);
+        }
+
+        private void OnDisable()
+        {
+            if (Netcode.IsServerBuildOnly)
+                return;
+            GetComponent<PanelRenderer>().UnregisterUIReloadCallback(OnUIReload);
+            if (connectButton != null)
+            {
+                connectButton.UnregisterCallback<ClickEvent>(ConnectButtonAction);
+            }
+        }
+
+        //TODO-next@breakingChange-NetworkStreamInGame test an "in between" menu where only RPCs are enabled. Like a sort of lobby, with some chat messages. Could be in the same scene as the one with replication, but with a "ready" button
+        private void OnUIReload(PanelRenderer panelRenderer, VisualElement rootElement)
+        {
+            root = rootElement;
+            connectButton = (Button)root.Q("connect");
+            hostButton = (Button)root.Q("host");
+            serverButton = (Button)root.Q("serverListen");
+
+            connectButton.RegisterCallback<ClickEvent>(ConnectButtonAction);
+            hostButton.RegisterCallback<ClickEvent>(HostButtonAction);
+            serverButton.RegisterCallback<ClickEvent>(ServerButtonAction);
+
+            ipTextField = (TextField)root.Q("ip");
+            ipTextField.value = "127.0.0.1";
+            ipTextField.RegisterCallback<ChangeEvent<string>>(InputMessage);
+            portTextField = (TextField)root.Q("port");
+            portTextField.value = "7979";
+        }
+
+        void ServerButtonAction(ClickEvent evt)
+        {
+            root.SetEnabled(false);
+            StartServer(NetworkEndpoint.Parse(ipTextField.text, ushort.Parse(portTextField.text)));
+        }
+
+        void StartServer(NetworkEndpoint listenEndpoint)
+        {
+            SceneManager.LoadScene("Game");
+            Netcode.Listen(listenEndpoint);
+        }
+
+        void HostButtonAction(ClickEvent evt)
+        {
+            root.SetEnabled(false);
+            SceneManager.LoadScene("Game");
+            Netcode.StartAsHost(NetworkEndpoint.Parse(ipTextField.text, ushort.Parse(portTextField.text)), m_HostWorldMode);
+        }
+
+        private void ConnectButtonAction(ClickEvent evt)
+        {
+            root.SetEnabled(false);
+            Netcode.OnConnectionEvent += SwitchSceneOnConnect;
+            Netcode.Connect(NetworkEndpoint.Parse(ipTextField.text, ushort.Parse(portTextField.text)));
+        }
+
+        void SwitchSceneOnConnect(Connection connection, NetCodeConnectionEvent connectionEvent)
+        {
+            if (connectionEvent.State <= ConnectionState.State.Disconnected)
+            {
+                root.SetEnabled(true);
+                Debug.LogError("Got error during connection "+connectionEvent.DisconnectReason);
+                return;
+            }
+
+            if (connectionEvent.State != ConnectionState.State.Connected) return;
+            Netcode.OnConnectionEvent -= SwitchSceneOnConnect;
+
+            // await Awaitable.WaitForSecondsAsync(1f); // Simulate long async scene load
+            // await SceneManager.LoadSceneAsync("Game");
+            SceneManager.LoadScene("Game");
+
+            // TODO-next@breakingChange-NetworkStreamInGame is this too much to ask of users, to only call this once the scene is loaded? what about additive scene loading? Maybe it's not that great to have replication enabled by default?
+            connection.EnableGhostReplication(true); // This should only be called after the scene has loaded, to make sure we have all the relevant prefabs loaded
+        }
+
+        public static void InputMessage(ChangeEvent<string> evt)
+        {
+            Debug.Log($"{evt.newValue} -> {evt.target}");
+        }
+    }
+}

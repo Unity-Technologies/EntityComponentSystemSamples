@@ -1,9 +1,11 @@
+﻿using Unity.Netcode;
 ﻿using System;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Unity.NetCode.Samples.PlayerList
+
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>
     ///     Stores <see cref="ChangedRpc.UpdateType"/> for a given "NetworkConnection" entity.

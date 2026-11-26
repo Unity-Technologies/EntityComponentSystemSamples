@@ -1,10 +1,12 @@
+using Unity.Netcode;
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
+
 using Unity.Networking.Transport.Utilities;
 
-namespace Unity.NetCode.Samples
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// Component added to all ghosts to mark they have been pre-processed.
@@ -48,6 +50,7 @@ namespace Unity.NetCode.Samples
         public ClientOnlyBackup(int slotSize, int capacity=32)
         {
             ComponentBackup = new UnsafeList<byte>(capacity*slotSize, Allocator.Persistent);
+            ComponentBackup.Resize(capacity*slotSize);
             for (int i=0;i<ComponentBackup.Length;++i)
             {
                 ComponentBackup.ElementAt(i) = 0x1f;
@@ -144,7 +147,7 @@ namespace Unity.NetCode.Samples
         //Return a slot that can be used to write the backup. Internally advance the ring-buffer head the new position
         public int AcquireBackupSlot()
         {
-            Assertions.Assert.IsTrue(m_backupSlotUsed < m_backupCapacity);
+            UnityEngine.Assertions.Assert.IsTrue(m_backupSlotUsed < m_backupCapacity);
             var current = m_backupWrPtr;
             //Advance the backup pointer to the next position
             m_backupWrPtr = (short)((m_backupWrPtr + 1) % m_backupCapacity);
@@ -187,7 +190,7 @@ namespace Unity.NetCode.Samples
         // return the slot for the predictionStartTick or -1 if not found
         public readonly int GetSlotForTick(NetworkTick predictionStartTick, int backupSize)
         {
-            Assertions.Assert.IsTrue(m_backupSlotUsed > 0);
+            UnityEngine.Assertions.Assert.IsTrue(m_backupSlotUsed > 0);
             unsafe
             {
                 var oldestBackupPtr = ComponentBackup.Ptr + m_backupRdPtr*backupSize;
@@ -218,7 +221,7 @@ namespace Unity.NetCode.Samples
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 tick.SerializedData = *(uint*)(ComponentBackup.Ptr + slotIndex*backupSize);
                 //Tick should be the same
-                Assertions.Assert.IsTrue(tick==predictionStartTick);
+                UnityEngine.Assertions.Assert.IsTrue(tick==predictionStartTick);
 #endif
                 return slotIndex;
             }

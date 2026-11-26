@@ -1,10 +1,11 @@
+using Unity.Netcode;
 #if (!UNITY_SERVER || UNITY_EDITOR)
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Scenes;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,7 +26,7 @@ public class LevelManager : MonoBehaviour
     {
         if (ClientServerBootstrap.ClientWorld == null)
         {
-            UnityEngine.Debug.LogError("No client world found");
+            Debug.LogError("No client world found");
             return;
         }
 
@@ -76,7 +77,7 @@ public class LevelManager : MonoBehaviour
         var cons = conQuery.ToEntityArray(Allocator.Temp);
         if (cons.Length != 1)
         {
-            UnityEngine.Debug.LogError($"First client {ClientServerBootstrap.ClientWorld} goes not have any connection established");
+            Debug.LogError($"First client {ClientServerBootstrap.ClientWorld} goes not have any connection established");
             return;
         }
         if (ClientServerBootstrap.ClientWorld.EntityManager.HasComponent<NetworkStreamInGame>(cons[0]))
@@ -92,7 +93,7 @@ public class LevelManager : MonoBehaviour
             {
                 if (ClientServerBootstrap.ServerWorld.EntityManager.HasComponent<NetworkStreamInGame>(cons[i]))
                 {
-                    UnityEngine.Debug.Log($"[{ClientServerBootstrap.ServerWorld}] Disable sync on {conIds[i].Value}");
+                    Debug.Log($"[{ClientServerBootstrap.ServerWorld}] Disable sync on {conIds[i].Value}");
                     ClientServerBootstrap.ServerWorld.EntityManager.RemoveComponent<NetworkStreamInGame>(cons[i]);
                 }
             }

@@ -2,7 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>
     ///     The PlayerList sample will handle notifying other users of this `DesiredUsername`.

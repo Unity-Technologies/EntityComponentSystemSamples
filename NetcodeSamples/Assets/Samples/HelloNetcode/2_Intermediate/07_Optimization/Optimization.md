@@ -7,7 +7,6 @@ This sample showcases a ghosts optimization mode (`Static` vs `Dynamic`).
 
 ## Requirements
 
-* GoInGame
 * Importance
 
 ## Sample description

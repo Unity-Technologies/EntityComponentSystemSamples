@@ -1,10 +1,10 @@
+using Unity.Netcode;
 using System;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.LowLevel.Unsafe;
+using Unity.Netcode.LowLevel.Unsafe;
 
-namespace Unity.NetCode.Samples
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// Singleton that contains all the registered client-only component types and prefab metadata.
@@ -91,7 +91,7 @@ namespace Unity.NetCode.Samples
                     EntityIndex = entityIndex
                 };
                 BackupInfoCollection.Add(info);
-                Unity.Assertions.Assert.IsFalse(componentType.IsBuffer);
+                UnityEngine.Assertions.Assert.IsFalse(componentType.IsBuffer);
                 backupSize += TypeManager.GetTypeInfo(componentType.TypeIndex).TypeSize;
             }
         }

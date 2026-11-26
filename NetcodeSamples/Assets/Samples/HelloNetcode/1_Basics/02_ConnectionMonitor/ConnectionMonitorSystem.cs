@@ -1,8 +1,9 @@
-﻿using Unity.Burst;
+using Unity.Netcode;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Utilities;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace Samples.HelloNetcode
         protected override void OnUpdate()
         {
             if (m_ConnectionUI == null)
-                m_ConnectionUI = GameObject.FindFirstObjectByType<ConnectionUI>();
+                m_ConnectionUI = GameObject.FindAnyObjectByType<ConnectionUI>();
 
             var buffer = m_CommandBufferSystem.CreateCommandBuffer();
             foreach (var (_, entity) in SystemAPI.Query<RefRO<NetworkStreamConnection>>().WithEntityAccess().WithNone<ConnectionState>())
@@ -53,7 +54,7 @@ namespace Samples.HelloNetcode
             foreach (var (id, entity) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess().WithNone<InitializedConnection>())
             {
                 buffer.AddComponent(entity, new InitializedConnection());
-                UnityEngine.Debug.Log($"[{worldName}] New connection ID:{id.ValueRO.Value}");
+                Debug.Log($"[{worldName}] New connection ID:{id.ValueRO.Value}");
 
                 // Not thread safe, so all UI logic is kept on main thread
                 ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = id.ValueRO.Value, WorldIndex = worldIndex, World = unmanagedWorld});
@@ -62,7 +63,7 @@ namespace Samples.HelloNetcode
             foreach (var (stateRef, entity) in SystemAPI.Query<RefRO<ConnectionState>>().WithEntityAccess().WithNone<NetworkStreamConnection>())
             {
                 var state = stateRef.ValueRO;
-                UnityEngine.Debug.Log($"[{worldName}] Connection disconnected ID:{state.NetworkId} Reason:{state.DisconnectReason.ToFixedString()}");
+                Debug.Log($"[{worldName}] Connection disconnected ID:{state.NetworkId} Reason:{state.DisconnectReason.ToFixedString()}");
 
                 // Not thread safe, so all UI logic is kept on main thread
                 ConnectionMonitorUIData.Connections.Data.Enqueue(new Connection(){Id = state.NetworkId, WorldIndex = worldIndex, World = unmanagedWorld, ConnectionDeleted = true});
@@ -100,7 +101,7 @@ namespace Samples.HelloNetcode
 #endif
         }
 
-        public void CreateClientDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateClientDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
             var driverInstance = new NetworkDriverStore.NetworkDriverInstance();
 #if UNITY_EDITOR || NETCODE_DEBUG
@@ -124,7 +125,7 @@ namespace Samples.HelloNetcode
             driverStore.RegisterDriver(TransportType.Socket, driverInstance);
         }
 
-        public void CreateServerDriver(World world, ref NetworkDriverStore driverStore, NetDebug netDebug)
+        public void CreateServerDriver(NetcodeWorld world, ref NetworkDriverStore driverStore, NetDebug netDebug)
         {
 #if UNITY_EDITOR || !UNITY_WEBGL
             var settings = CreateNetworkSettings();

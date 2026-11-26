@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Systems;
 
-namespace Unity.NetCode
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// A system which builds the physics world based on the entity world. The world will contain a
@@ -17,7 +17,6 @@ namespace Unity.NetCode
     public partial struct CustomBuildPhysicsWorld : ISystem
     {
         private SystemHandle buildPhysicSystemHandle;
-        private int currentPhysicStep;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)

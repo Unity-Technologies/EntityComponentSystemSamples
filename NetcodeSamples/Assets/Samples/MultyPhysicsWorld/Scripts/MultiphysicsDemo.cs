@@ -1,8 +1,10 @@
+using Unity.Netcode;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using Unity.Netcode.NetcodeTime;
 using Unity.Physics;
 using Unity.Physics.Extensions;
 using Unity.Transforms;
@@ -11,8 +13,8 @@ using Unity.Physics.Systems;
 
 namespace Samples.MultyPhysicsWorld
 {
-    // RPC request from client to server for game to go "in game" and send snapshots / inputs
-    public struct GoInGameRequest : IRpcCommand
+    // Tag added to new connections on the server so they'll only be processed once (set up new client)
+    public struct ConnectionInitialized : IComponentData
     {
     }
 
@@ -30,63 +32,36 @@ namespace Samples.MultyPhysicsWorld
         }
     }
 
-    // When client has a connection with network id, go in game and tell server to also go in game
-    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation|WorldSystemFilterFlags.ThinClientSimulation)]
-    public partial class GoInGameClientSystem : SystemBase
-    {
-        protected override void OnCreate()
-        {
-            RequireForUpdate<PhysicsSpawner>();
-            RequireForUpdate(GetEntityQuery(ComponentType.ReadOnly<NetworkId>(), ComponentType.Exclude<NetworkStreamInGame>()));
-        }
-
-        protected override void OnUpdate()
-        {
-            var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-            foreach(var (_, ent) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess())
-            {
-                commandBuffer.AddComponent<NetworkStreamInGame>(ent);
-                var req = commandBuffer.CreateEntity();
-                commandBuffer.AddComponent<GoInGameRequest>(req);
-                commandBuffer.AddComponent(req, new SendRpcCommandRequest { TargetConnection = ent });
-            };
-            commandBuffer.Playback(EntityManager);
-        }
-    }
-
-    // When server receives go in game request, go in game and delete request
+    // Initialize new client connections (assumes they are placed in game automatically)
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-    public partial class GoInGameServerSystem : SystemBase
+    public partial class InitializeConnectionServerSystem : SystemBase
     {
         protected override void OnCreate()
         {
             RequireForUpdate<PhysicsSpawner>();
-            RequireForUpdate(GetEntityQuery(ComponentType.ReadOnly<GoInGameRequest>(), ComponentType.ReadOnly<ReceiveRpcCommandRequest>()));
+            RequireForUpdate(GetEntityQuery(ComponentType.ReadOnly<NetworkId>(), ComponentType.ReadOnly<NetworkStreamInGame>(), ComponentType.Exclude<ConnectionInitialized>()));
         }
 
         protected override void OnUpdate()
         {
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-            var networkIdFromEntity = GetComponentLookup<NetworkId>(true);
             var spawner = SystemAPI.GetSingleton<PhysicsSpawner>();
-            foreach(var (reqSrc, reqEnt) in SystemAPI.Query<RefRO<ReceiveRpcCommandRequest>>()
-                        .WithAll<GoInGameRequest, ReceiveRpcCommandRequest>().WithEntityAccess())
+            foreach (var (networkId, connection) in SystemAPI.Query<RefRO<NetworkId>>()
+                         .WithAll<NetworkStreamInGame>().WithNone<ConnectionInitialized>().WithEntityAccess())
             {
-                commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
-                commandBuffer.DestroyEntity(reqEnt);
+                commandBuffer.AddComponent<ConnectionInitialized>(connection);
 
                 var entity = commandBuffer.Instantiate(spawner.prefab);
                 //Add the entity to the connection linked entity group so when connection is destroyed, ghost are too
-                var linkedEntityGroups = commandBuffer.AddBuffer<LinkedEntityGroup>(reqSrc.ValueRO.SourceConnection);
-                linkedEntityGroups.Add(entity);
+                commandBuffer.AppendToBuffer(connection, new LinkedEntityGroup { Value = entity });
 
                 commandBuffer.AddBuffer<PlayerInput>(entity);
 
                 commandBuffer.SetComponent(entity, LocalTransform.FromPosition(new float3(0.0f, 1.0f, 0.0f)));
 
-                commandBuffer.SetComponent(entity, new GhostOwner { NetworkId = networkIdFromEntity[reqSrc.ValueRO.SourceConnection].Value });
-                commandBuffer.SetComponent(reqSrc.ValueRO.SourceConnection, new CommandTarget { targetEntity = entity });
-            };
+                commandBuffer.SetComponent(entity, new GhostOwner { NetworkId = networkId.ValueRO.Value });
+                commandBuffer.SetComponent(connection, new CommandTarget { targetEntity = entity });
+            }
             commandBuffer.Playback(EntityManager);
         }
     }

@@ -1,7 +1,8 @@
+using Unity.Netcode;
 #if (!UNITY_SERVER || UNITY_EDITOR)
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
+
 using Unity.Scenes;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +18,7 @@ public partial class LevelStatusSystem : SystemBase
 
     protected override void OnCreate()
     {
-        var levelManager = Object.FindFirstObjectByType<LevelManager>();
+        var levelManager = Object.FindAnyObjectByType<LevelManager>();
         if (levelManager == null)
         {
             Enabled = false;

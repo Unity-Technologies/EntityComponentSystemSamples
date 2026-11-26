@@ -4,7 +4,7 @@ using Unity.Physics;
 using UnityEngine;
 using System;
 
-namespace Unity.NetCode
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// Component used to configure how physics rebuild the and step the predicted physic world.
@@ -22,15 +22,6 @@ namespace Unity.NetCode
         /// using jobs in case the number of entities is relatively small.
         /// </summary>
         public byte UseImmediateMode;
-        /// <summary>
-        /// When enable, the physics world (and in particular the broadphase tree) is build from scratch only for the first predicted tick
-        /// (when the prediction start). For all the sub-sequent predicted ticks, the broadphase AABB tree is only
-        /// updated using the calculated physics velocity from the previous physics step and the gravity. This lead to better performance
-        /// than rebuilding from scratch, at the cost of slighlty worse broadphase culling.
-        /// The following conditions must be respected to avoid a full physics world build:
-        /// - No dynamic physics object has been created or destroyed inside the prediction loop
-        /// </summary>
-        public byte BuildPhysicsWorldOnceThenUpdate;
     }
 
     /// <summary>

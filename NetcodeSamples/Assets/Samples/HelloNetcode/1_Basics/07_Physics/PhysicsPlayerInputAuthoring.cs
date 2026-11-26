@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using System;
 using Unity.Entities;
-using Unity.NetCode;
+
 using UnityEngine;
 
 namespace Samples.HelloNetcode

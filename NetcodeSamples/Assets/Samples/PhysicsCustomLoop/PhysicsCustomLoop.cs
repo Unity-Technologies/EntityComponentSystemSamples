@@ -1,11 +1,15 @@
+using Unity.Netcode;
 using System;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Netcode.NetcodeTime;
+using Unity.Physics;
 using Unity.Physics.GraphicsIntegration;
 using Unity.Physics.Systems;
 
-namespace Unity.NetCode
+
+namespace Unity.Samples.Netcode
 {
     //We want this system to no run into any custom physics world. So we don't target directly BeforePhysicsSytemGroup
     //This system is responbile to instrument the CustomBuildPhysicsWorld if rebuild or update the physics world
@@ -99,6 +103,12 @@ namespace Unity.NetCode
             //Setup this once per prediction update, becaue the loopConfig does not change in between prediction steps.
             if (networkTime.IsFirstPredictionTick)
             {
+                // The custom loop's update-only path can't maintain the incremental broadphase's PhysicsTemporalCoherenceInfo.
+                if (!SystemAPI.TryGetSingleton(out PhysicsStep physicsStep))
+                    physicsStep = PhysicsStep.Default;
+                if (physicsStep.IncrementalDynamicBroadphase || physicsStep.IncrementalStaticBroadphase)
+                    throw new NotSupportedException("PhysicsCustomLoop does not support incremental broadphase. Disable IncrementalDynamicBroadphase and IncrementalStaticBroadphase on the PhysicsStep singleton.");
+
                 World.Unmanaged.ResolveSystemStateRef(CustomBuildPhysicsWorldHandle).Enabled = true;
                 World.Unmanaged.ResolveSystemStateRef(ImmediatePhysicsStepHandle).Enabled = loopConfig.StepImmediateMode != 0;
                 //Disable the normal build physics systems. The CustomBuildPhysicsWorldHandle will handle everything

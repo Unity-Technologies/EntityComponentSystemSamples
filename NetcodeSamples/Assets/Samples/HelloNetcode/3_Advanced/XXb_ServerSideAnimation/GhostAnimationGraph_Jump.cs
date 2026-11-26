@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
@@ -5,15 +6,12 @@ using Unity.Mathematics;
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.NetCode;
+using Unity.Netcode.Hybrid;
 using Unity.Transforms;
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
-using Unity.NetCode.Hybrid;
-#endif
+
 
 namespace Samples.HelloNetcode.Hybrid
 {
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
     public struct JumpAnimationData : IComponentData
     {
         [GhostField(Quantization=1000)] public float Phase;
@@ -103,7 +101,7 @@ namespace Samples.HelloNetcode.Hybrid
         }
     }
 
-    [CreateAssetMenu(fileName = "Jump", menuName = "NetCode/Animation/Jump")]
+    [CreateAssetMenu(fileName = "Jump", menuName = "Netcode/Animation/Jump")]
     public class GhostAnimationGraph_Jump : GhostAnimationGraphAsset
     {
         public AnimationClip Clip;
@@ -123,5 +121,4 @@ namespace Samples.HelloNetcode.Hybrid
             register.RegisterPlayableData<JumpAnimationData>();
         }
     }
-#endif
 }

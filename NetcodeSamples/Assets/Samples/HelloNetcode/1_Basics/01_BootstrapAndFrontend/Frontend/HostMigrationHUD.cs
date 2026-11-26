@@ -1,7 +1,7 @@
+using Unity.Netcode;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.HostMigration;
+using Unity.Netcode.HostMigration;
 using Unity.Networking.Transport.Relay;
 using UnityEngine;
 using UnityEngine.UI;

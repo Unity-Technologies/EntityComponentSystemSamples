@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="UnityEditor.UIElements.Debugger" elementFormDefault="qualified" targetNamespace="UnityEditor.UIElements.Debugger" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEditor.UIElements.xsd" namespace="UnityEditor.UIElements" />
+  <xs:complexType name="EventTypeSearchFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEditor.UIElements" base="q1:ToolbarSearchFieldType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="EventTypeSearchField" xmlns:q2="UnityEditor.UIElements" substitutionGroup="q2:ToolbarSearchField" type="tns:EventTypeSearchFieldType" />
+</xs:schema>

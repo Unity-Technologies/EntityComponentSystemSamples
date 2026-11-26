@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
-using Unity.NetCode.Samples.Common;
+using Unity.Netcode.NetcodeTime;
+using Unity.Samples.Netcode.Common;
 using UnityEngine;
 
 namespace Samples.HelloNetcode

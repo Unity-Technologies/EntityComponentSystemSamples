@@ -1,7 +1,8 @@
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
+using Unity.Netcode;
+using Unity.Netcode.Hybrid;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.Hybrid;
+
+
 using Unity.Transforms;
 
 namespace Samples.HelloNetcode
@@ -48,4 +49,3 @@ namespace Samples.HelloNetcode
         }
     }
 }
-#endif

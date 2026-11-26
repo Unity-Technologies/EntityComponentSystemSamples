@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using System;
 using System.Diagnostics;
 using Unity.Burst;
@@ -5,10 +6,10 @@ using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.LowLevel.Unsafe;
+using Unity.Netcode.LowLevel.Unsafe;
+using Unity.Netcode.NetcodeTime;
 
-namespace Unity.NetCode.Samples
+namespace Unity.Samples.Netcode
 {
     /// <summary>
     /// System responsible for:
@@ -45,6 +46,7 @@ namespace Unity.NetCode.Samples
         private EntityQuery m_predictedGhostsNotProcessed;
         private EntityQuery m_predictedPrespawendGhostsNotProcessed;
         private EntityQuery m_destroyedGhostsWithClientOnlyBackup;
+        private EntityQuery m_ghostsWithClientOnlyBackup;
 
         private EntityStorageInfoLookup m_childEntityLookup;
         private BufferTypeHandle<LinkedEntityGroup> m_linkedEntityGroupHandle;
@@ -80,6 +82,9 @@ namespace Unity.NetCode.Samples
             queryBuilder.WithAll<ClientOnlyBackup>();
             queryBuilder.WithNone<PredictedGhost>();
             m_destroyedGhostsWithClientOnlyBackup = state.GetEntityQuery(queryBuilder);
+            queryBuilder.Reset();
+            queryBuilder.WithAll<ClientOnlyBackup>();
+            m_ghostsWithClientOnlyBackup = state.GetEntityQuery(queryBuilder);
 
             m_clientOnlyBackupInfoCollection = new NativeList<ClientOnlyBackupInfo>(Allocator.Persistent);
             m_clientOnlyComponentTypes = new NativeList<ComponentType>(32, Allocator.Persistent);
@@ -110,6 +115,8 @@ namespace Unity.NetCode.Samples
         [BurstCompile]
         public void OnDestroy(ref SystemState state)
         {
+            new DisposeBackupJob().Run(m_ghostsWithClientOnlyBackup);
+            state.EntityManager.RemoveComponent<ClientOnlyBackup>(m_ghostsWithClientOnlyBackup);
             m_clientOnlyComponentTypes.Dispose();
             m_clientOnlyBackupInfoCollection.Dispose();
             m_ghostTypeToPrefabMetadata.Dispose();
@@ -336,7 +343,7 @@ namespace Unity.NetCode.Samples
                 {
                     var comp = clientOnlyComponentCollection[compIdx];
                     //Buffers aren't supported
-                    Unity.Assertions.Assert.IsFalse(comp.ComponentType.IsBuffer);
+                    UnityEngine.Assertions.Assert.IsFalse(comp.ComponentType.IsBuffer);
                     var typeHandle = typeHandles[comp.ComponentIndex];
                     if (!chunk.Has(ref typeHandle))
                     {

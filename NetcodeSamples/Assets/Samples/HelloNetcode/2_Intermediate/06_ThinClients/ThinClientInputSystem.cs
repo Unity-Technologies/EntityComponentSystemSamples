@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using System;
 using System.Diagnostics;
 using Unity.Entities;
-using Unity.NetCode;
+
 
 namespace Samples.HelloNetcode
 {

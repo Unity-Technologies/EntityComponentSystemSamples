@@ -1,9 +1,10 @@
+using Unity.Netcode;
 using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.NetCode;
+
 
 namespace Samples.HelloNetcode
 {
@@ -153,9 +154,9 @@ namespace Samples.HelloNetcode
                 }
                 else
                 {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD // Don't log this in prod, to avoid leaking real auth tokens, and to prevent malicious users causing log-spam.
-                    UnityEngine.Debug.LogError($"[{state.WorldUnmanaged.Name}] Disconnecting {connData.ValueRO.Value.ToFixedString()} on {approvalResult.ConnectionEntity.ToFixedString()} as sent incorrect approval payload '{approvalResult.Payload}'!");
-#endif
+                    // Don't log this in prod, to avoid leaking real auth tokens, and to prevent malicious users causing log-spam.
+                    if (UnityEngine.Debug.isDebugBuild)
+                        UnityEngine.Debug.LogError($"[{state.WorldUnmanaged.Name}] Disconnecting {connData.ValueRO.Value.ToFixedString()} on {approvalResult.ConnectionEntity.ToFixedString()} as sent incorrect approval payload '{approvalResult.Payload}'!");
                     // TODO - Note that this reason is not currently transmitted to the client as part of the close,
                     // but at least the server can query (and log) it.
                     ecb.AddComponent(approvalResult.ConnectionEntity, new NetworkStreamRequestDisconnect

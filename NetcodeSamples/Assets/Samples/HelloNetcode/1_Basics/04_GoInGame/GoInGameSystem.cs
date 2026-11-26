@@ -1,6 +1,6 @@
+using Unity.Netcode;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
 
 namespace Samples.HelloNetcode
 {
@@ -10,16 +10,27 @@ namespace Samples.HelloNetcode
     public partial class GoInGameSystem : SystemBase
     {
         private EntityQuery m_NewConnections;
+        private bool m_AutoReplication;
 
         protected override void OnCreate()
         {
             RequireForUpdate<EnableGoInGame>();
             m_NewConnections = SystemAPI.QueryBuilder().WithAll<NetworkId>().WithNone<NetworkStreamInGame>().Build();
-            RequireForUpdate(m_NewConnections);
+            m_AutoReplication = NetcodeConfig.Global == null || NetcodeConfig.Global.AutomaticStateReplication;
+            if (!m_AutoReplication)
+                RequireForUpdate(m_NewConnections);
         }
 
         protected override void OnUpdate()
         {
+            if (m_AutoReplication)
+            {
+                if (World.IsServer())
+                    UnityEngine.Debug.LogWarning("NetcodeConfig.AutomaticStateReplication is enabled, so connections are already placed in game and this sample does nothing. Disable it in the NetcodeConfig asset to see this sample go in game manually.");
+                Enabled = false;
+                return;
+            }
+
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             FixedString32Bytes worldName = World.Name;
 

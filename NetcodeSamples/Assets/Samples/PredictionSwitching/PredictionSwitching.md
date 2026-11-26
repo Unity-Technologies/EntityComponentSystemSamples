@@ -22,5 +22,5 @@ You should also be able to observe the interpolation being applied (during the t
 See the `PredictionSwitchingSettingsAuthoring` `MonoBehaviour` to modify the settings, and observe how they affect gameplay.
 
 ## Takeaways
-* Generally speaking: As with all things in NetCode, faster moving (and more unpredictable) entities are significantly harder to compensate for.
+* Generally speaking: As with all things in Netcode, faster moving (and more unpredictable) entities are significantly harder to compensate for.
 * "Prediction Switching" allows you to selectively opt-into Predicting a ghost, giving you a decent tradeoff between client performance (via Interpolation) and gameplay responsiveness (via Client Prediction), while maintaining server authority.

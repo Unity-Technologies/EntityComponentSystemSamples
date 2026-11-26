@@ -1,9 +1,11 @@
+﻿using Unity.Netcode;
 ﻿using System;
 using Unity.Collections;
 using Unity.Entities;
+
 using Random = UnityEngine.Random;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <inheritdoc cref="SanitizeUsername" />
     public static class UsernameSanitizer

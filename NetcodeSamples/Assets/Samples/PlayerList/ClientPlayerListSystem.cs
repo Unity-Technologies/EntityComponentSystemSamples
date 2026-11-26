@@ -1,11 +1,13 @@
+﻿using Unity.Netcode;
 ﻿using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
+
 using UnityEngine;
 
-namespace Unity.NetCode.Samples.PlayerList
+namespace Unity.Samples.Netcode.PlayerList
 {
     /// <summary>
     ///     Receives <see cref="PlayerListEntry" /> RPC's, notifying this client of the PRESENCE of other clients.

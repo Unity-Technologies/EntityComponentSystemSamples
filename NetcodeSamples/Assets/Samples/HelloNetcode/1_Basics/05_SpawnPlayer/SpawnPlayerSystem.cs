@@ -1,8 +1,8 @@
+using Unity.Netcode;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
-using Unity.NetCode.HostMigration;
+using Unity.Netcode.HostMigration;
 using Unity.Transforms;
 using UnityEngine;
 

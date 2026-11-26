@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Unity.NetCode.Samples.Common
+namespace Unity.Samples.Netcode.Common
 {
     public class MouseLock : MonoBehaviour
     {

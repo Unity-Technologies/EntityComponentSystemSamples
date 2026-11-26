@@ -1,4 +1,3 @@
-#if !UNITY_DISABLE_MANAGED_COMPONENTS
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -232,4 +231,3 @@ namespace Samples.HelloNetcode
         }
     }
 }
-#endif

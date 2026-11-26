@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.Entities.Editor" elementFormDefault="qualified" targetNamespace="Unity.Entities.Editor" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="TabContentType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TabContent" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:TabContentType" />
+  <xs:complexType name="TabViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:BindableElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TabView" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:BindableElement" type="tns:TabViewType" />
+  <xs:complexType name="FoldoutFieldType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="FoldoutField" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:VisualElement" type="tns:FoldoutFieldType" />
+  <xs:complexType name="HierarchyNameElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="HierarchyNameElement" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:VisualElement" type="tns:HierarchyNameElementType" />
+  <xs:complexType name="CenteredMessageElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="UnityEngine.UIElements" base="q9:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="title" type="xs:string" />
+        <xs:attribute name="message" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CenteredMessageElement" xmlns:q10="UnityEngine.UIElements" substitutionGroup="q10:VisualElement" type="tns:CenteredMessageElementType" />
+  <xs:complexType name="SpinnerElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q11="UnityEngine.UIElements" base="q11:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SpinnerElement" xmlns:q12="UnityEngine.UIElements" substitutionGroup="q12:VisualElement" type="tns:SpinnerElementType" />
+  <xs:complexType name="SearchElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q13="UnityEngine.UIElements" base="q13:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="200" name="search-delay" type="xs:long" />
+        <xs:attribute default="OrdinalIgnoreCase" name="global-string-comparison" type="xs:string" />
+        <xs:attribute name="search-data" type="xs:string" />
+        <xs:attribute name="search-filters" type="xs:string" />
+        <xs:attribute name="source-data" type="xs:string" />
+        <xs:attribute name="filtered-data" type="xs:string" />
+        <xs:attribute default="sync" name="handler-type" type="xs:string" />
+        <xs:attribute default="33" name="max-frame-time" type="xs:int" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SearchElement" xmlns:q14="UnityEngine.UIElements" substitutionGroup="q14:VisualElement" type="tns:SearchElementType" />
+</xs:schema>

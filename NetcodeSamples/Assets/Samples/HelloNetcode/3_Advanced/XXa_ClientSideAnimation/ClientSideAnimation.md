@@ -5,7 +5,6 @@
 The spawn player sample is used to trigger the auto spawning of the player when establishing connection.
 The character controller is used to move and rotate the player around using the keyboard and mouse input.
 
-* GoInGame
 * SpawnPlayer
 * CharacterController
 

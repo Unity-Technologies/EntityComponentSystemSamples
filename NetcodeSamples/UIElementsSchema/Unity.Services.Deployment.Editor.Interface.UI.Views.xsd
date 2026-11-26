@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.Services.Deployment.Editor.Interface.UI.Views" elementFormDefault="qualified" targetNamespace="Unity.Services.Deployment.Editor.Interface.UI.Views" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="NoConnectionViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="NoConnectionView" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:VisualElement" type="tns:NoConnectionViewType" />
+  <xs:complexType name="NoPackagesInstalledViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="NoPackagesInstalledView" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:VisualElement" type="tns:NoPackagesInstalledViewType" />
+  <xs:complexType name="UnlinkedProjectViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="UnityEngine.UIElements" base="q5:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="UnlinkedProjectView" xmlns:q6="UnityEngine.UIElements" substitutionGroup="q6:VisualElement" type="tns:UnlinkedProjectViewType" />
+  <xs:complexType name="MultipleDefinitionsViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="UnityEngine.UIElements" base="q7:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MultipleDefinitionsView" xmlns:q8="UnityEngine.UIElements" substitutionGroup="q8:VisualElement" type="tns:MultipleDefinitionsViewType" />
+  <xs:complexType name="NotSignedInViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="UnityEngine.UIElements" base="q9:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="NotSignedInView" xmlns:q10="UnityEngine.UIElements" substitutionGroup="q10:VisualElement" type="tns:NotSignedInViewType" />
+  <xs:complexType name="DeploymentItemViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q11="UnityEngine.UIElements" base="q11:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DeploymentItemView" xmlns:q12="UnityEngine.UIElements" substitutionGroup="q12:VisualElement" type="tns:DeploymentItemViewType" />
+  <xs:complexType name="DeploymentDefinitionViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q13="UnityEngine.UIElements" base="q13:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DeploymentDefinitionView" xmlns:q14="UnityEngine.UIElements" substitutionGroup="q14:VisualElement" type="tns:DeploymentDefinitionViewType" />
+  <xs:complexType name="EnvironmentNotSetViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q15="UnityEngine.UIElements" base="q15:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="EnvironmentNotSetView" xmlns:q16="UnityEngine.UIElements" substitutionGroup="q16:VisualElement" type="tns:EnvironmentNotSetViewType" />
+  <xs:complexType name="DeploymentToolbarType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q17="UnityEngine.UIElements" base="q17:TemplateContainerType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DeploymentToolbar" xmlns:q18="UnityEngine.UIElements" substitutionGroup="q18:TemplateContainer" type="tns:DeploymentToolbarType" />
+  <xs:complexType name="DeploymentViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q19="UnityEngine.UIElements" base="q19:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="DeploymentView" xmlns:q20="UnityEngine.UIElements" substitutionGroup="q20:VisualElement" type="tns:DeploymentViewType" />
+</xs:schema>

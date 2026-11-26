@@ -1,8 +1,10 @@
+using Unity.Netcode;
 ﻿using System;
 using Unity.Entities;
+
 using UnityEngine;
 
-namespace Unity.NetCode.Samples.Common
+namespace Unity.Samples.Netcode.Common
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateInGroup(typeof(PresentationSystemGroup))]

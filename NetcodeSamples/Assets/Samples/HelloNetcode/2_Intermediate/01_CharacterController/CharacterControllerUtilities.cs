@@ -189,7 +189,7 @@ namespace Samples.HelloNetcode
             surfaceVelocity = float3.zero;
 
             // Up direction must be normalized
-            Assert.IsTrue(Unity.Physics.Math.IsNormalized(stepInput.Up));
+            Assert.IsTrue(Math.IsNormalized(stepInput.Up));
 
             // Query the world
             NativeList<ColliderCastHit> castHits = new NativeList<ColliderCastHit>(k_DefaultQueryHitsCapacity, Allocator.Temp);
@@ -455,7 +455,7 @@ namespace Samples.HelloNetcode
             bool bodyIsDynamic = 0 <= rigidBodyIndex && rigidBodyIndex < world.NumDynamicBodies;
             constraint = new SurfaceConstraintInfo()
             {
-                Plane = new Unity.Physics.Plane
+                Plane = new Plane
                 {
                     Normal = normal,
                     Distance = distance - skinWidth,

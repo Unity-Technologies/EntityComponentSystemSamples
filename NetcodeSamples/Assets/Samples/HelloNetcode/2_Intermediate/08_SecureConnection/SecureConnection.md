@@ -1,6 +1,6 @@
 # HelloNetcode Secure Connection sample
 
-The NetCode package provides a way to create client and server worlds and securely connect them together (client connects to server) by using a custom bootstrapper.
+The Netcode package provides a way to create client and server worlds and securely connect them together (client connects to server) by using a custom bootstrapper.
 
 See
 

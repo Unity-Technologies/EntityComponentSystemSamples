@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
+
 using UnityEngine;
 
 /// <summary>Serializable attribute ensures the Inspector can expose fields as this struct is a field inside ServerSettings.</summary>
@@ -31,7 +32,7 @@ public struct LevelComponent : IComponentData
     public bool asteroidsDestroyedOnShipContact;
     public bool bulletsDestroyedOnContact;
 
-    /// <summary>When > 0, informs <see cref="Unity.NetCode.GhostRelevancyMode"/>. Optimization.</summary>
+    /// <summary>When > 0, informs <see cref="GhostRelevancyMode"/>. Optimization.</summary>
     /// <remarks>
     /// Note: If <see cref="enableGhostImportanceScaling"/> is checked, the package uses the const defined in
     /// <see cref="GhostDistanceImportance.BatchScaleWithRelevancyFunctionPointer"/> instead of this field.

@@ -2,7 +2,7 @@
 using Unity.Entities;
 using Unity.Rendering;
 
-namespace Unity.NetCode.Samples.Common
+namespace Unity.Samples.Netcode.Common
 {
     /// <summary>Denotes that a ghost will be set to the debug color specified in <see cref="NetworkIdDebugColorUtility"/>.</summary>
     public struct SetPlayerToDebugColor : IComponentData

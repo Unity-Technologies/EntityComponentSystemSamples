@@ -9,7 +9,6 @@ See
 
 ## Requirements
 
-* GoInGame
 * Optimization, for barrel spiral spawning logic
 
 ## Sample description

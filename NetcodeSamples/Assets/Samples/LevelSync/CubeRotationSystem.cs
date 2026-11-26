@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
+
 using Unity.Transforms;
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]

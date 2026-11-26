@@ -123,9 +123,9 @@ You just need to implement the `CustomChunkSerializer.CopyComponentsToSnapshot` 
 
 ```csharp
 
-new Unity.NetCode.Generated.GhostOwnerGhostComponentSerializer().CopyComponentToSnapshot(chunk, ref context,
+new Unity.Netcode.Generated.GhostOwnerGhostComponentSerializer().CopyComponentToSnapshot(chunk, ref context,
     ghostChunkComponentTypesPtr, indices[0], snapshotPtr, ref snapshotOffset);
-new Unity.NetCode.Generated.TransformDefaultVariantGhostComponentSerializer().CopyComponentToSnapshot(chunk, ref context,
+new Unity.Netcode.Generated.TransformDefaultVariantGhostComponentSerializer().CopyComponentToSnapshot(chunk, ref context,
     ghostChunkComponentTypesPtr,indices[1], snapshotPtr, ref snapshotOffset);
 CustomGhostSerializerHelpers.CopyEnableBits(chunk, context.startIndex, context.endIndex, context.snapshotStride,
     ref ghostChunkComponentTypesPtr[indices[2].ComponentIndex], enableBits, ref maskOffset);
@@ -152,11 +152,11 @@ See the `CustomChunkSerializer.cs` for an example how to use them. But as a shor
 ```csharp
 
 //With a single baseline
-compBitSize[0*compBitSizeStride] = default(Unity.NetCode.Generated.GhostOwnerGhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,
+compBitSize[0*compBitSizeStride] = default(Unity.Netcode.Generated.GhostOwnerGhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,
     baseline1Ptr, baseline2Ptr, changeMaskData, ref changeMaskOffset, ref snapshotOffset, ref predictor, ref writer, compressionModel);
 
 //With three baseline
-compBitSize[0*compBitSizeStride] = default(Unity.NetCode.Generated.GhostOwnerGhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,
+compBitSize[0*compBitSizeStride] = default(Unity.Netcode.Generated.GhostOwnerGhostComponentSerializer).SerializeComponentThreeBaseline(snapshotData,baseline0Ptr,
     baseline1Ptr, baseline2Ptr, changeMaskData, ref changeMaskOffset, ref snapshotOffset, ref predictor, ref writer, compressionModel);    
 ```
 

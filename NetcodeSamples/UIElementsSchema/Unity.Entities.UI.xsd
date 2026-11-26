@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.Entities.UI" elementFormDefault="qualified" targetNamespace="Unity.Entities.UI" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:complexType name="InspectorElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEngine.UIElements" base="q1:BindableElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="InspectorElement" xmlns:q2="UnityEngine.UIElements" substitutionGroup="q2:BindableElement" type="tns:InspectorElementType" />
+  <xs:complexType name="PropertyElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:BindableElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="PropertyElement" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:BindableElement" type="tns:PropertyElementType" />
+</xs:schema>
